@@ -11,7 +11,7 @@ import { computeEdit } from './lib/apply-edit.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
-import { insideProject } from './lib/project.mjs';
+import { insideProject, checkoutRoot } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const DIR = join(ROOT, '.claude', 'checks');
@@ -81,7 +81,7 @@ function main() {
   }
   const input = payload.tool_input ?? {};
   if (!input.file_path || !insideProject(input.file_path)) return 0;
-  const rel = relative(ROOT, input.file_path);
+  const rel = relative(checkoutRoot(input.file_path), input.file_path);
   const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []));
   if (relevant.length === 0) return 0;
 

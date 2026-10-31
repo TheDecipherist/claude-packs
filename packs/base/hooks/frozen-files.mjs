@@ -6,7 +6,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
-import { insideProject } from './lib/project.mjs';
+import { insideProject, checkoutRoot } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const STATE = join(ROOT, '.claude', 'state', 'frozen.json');
@@ -23,7 +23,7 @@ function main() {
   }
   const file = payload.tool_input?.file_path;
   if (!file || !insideProject(file) || !Array.isArray(state.files) || state.files.length === 0) return 0;
-  const rel = relative(ROOT, file);
+  const rel = relative(checkoutRoot(file), file);
   if (rel !== '.claude/state/frozen.json' && !matchesAny(rel, state.files)) return 0;
   process.stderr.write(
     `BLOCKED by frozen-files: ${rel} is frozen (${state.reason ?? 'a fix is in progress'}).\n` +

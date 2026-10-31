@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { extname, relative } from 'node:path';
 import { computeEdit } from './lib/apply-edit.mjs';
 import { matchesAny } from './lib/glob.mjs';
+import { checkoutRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -29,11 +30,12 @@ function main() {
   try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
   const input = payload.tool_input ?? {};
   if (!input.file_path) return 0;
-  const rel = relative(ROOT, input.file_path);
-  if (rel.startsWith('..')) return 0;
+  if (relative(ROOT, input.file_path).startsWith('..')) return 0;
+  const root = checkoutRoot(input.file_path);
+  const rel = relative(root, input.file_path);
   const result = computeEdit(payload.tool_name, input);
   if (!result) return 0;
-  const msg = verdict(rel, result.before, result.after, readLayout(ROOT).maxFileLines ?? 300);
+  const msg = verdict(rel, result.before, result.after, readLayout(root).maxFileLines ?? 300);
   if (!msg) return 0;
   process.stderr.write(msg);
   return 2;
