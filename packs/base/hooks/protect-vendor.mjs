@@ -5,6 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
+import { checkoutRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -19,9 +20,10 @@ function main() {
   }
   const file = payload.tool_input?.file_path;
   if (!file) return 0;
-  const rel = relative(ROOT, file);
+  const root = checkoutRoot(file);
+  const rel = relative(root, file);
   if (rel.startsWith('..')) return 0;
-  const globs = [...DEFAULT_GLOBS, ...(readLayout(ROOT).protected ?? [])];
+  const globs = [...DEFAULT_GLOBS, ...(readLayout(root).protected ?? [])];
   if (!matchesAny(rel, globs)) return 0;
   process.stderr.write(
     `BLOCKED by protect-vendor: ${rel} is vendored/generated code and is read-only.\n` +

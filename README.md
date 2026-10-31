@@ -47,7 +47,7 @@ npx claude-packs list               show the packs
 2. Bring project.md back. The packs' layout, concepts, rules and skill triggers get tuned to it.
 
 ## Install from the tarball
-`npm i -D ./thedecipherist-claude-packs-0.1.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
+`npm i -D ./thedecipherist-claude-packs-0.4.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
 
 ## The one global piece: latest-versions
 
@@ -114,3 +114,18 @@ Rules fire by path, so the structure is what makes them fire. Three layers keep 
 A tailored project (the Stellix profile) carries its own `kinds`. Edit `kinds` and `folders` in `layout.json`, then `update`.
 
 **New projects:** the global `new-project` skill (installed by `claude-packs global add`) lays the structure down before the first file: synthkit's `new_synth.py` for a unit, then `claude-packs init`, `latest-versions`, `doctor`, and `doctor --strict` once it builds.
+
+## Lessons from the Stellix build (0.4.0)
+
+| Kind | Name | What it does | From |
+|---|---|---|---|
+| fix | every hook | judges a file against its own checkout (`checkoutRoot`), so worktree files are measured from the worktree, not the main checkout | Stellix WB-41, WB-55: folder-law refused every new file in an agent worktree, and agents routed new code into unrelated files |
+| test | `worktrees.test.mjs` | folder-law and file-size-guard inside a real git worktree; fails on 0.3.0 | same |
+| CLAUDE.md | constraints | a blocking hook is a red check: stop, report, fix the hook first; a refused command fails the step; never route around a block; cite anchors, never line numbers | WB-55, WB-60, the silent refused write, GUARD_OK |
+| rule | `house-control-behaviours` | double click to default, fine drag, wheel, value readout, no focus, one undo step, in the shared piece | B-163 |
+| rule | `ui-matches-reference-look` | analyse and gate the look (glow, surfaces, control parts, spacing, overlap, contrast), identical repeated components, the user's picture stop | B-161 |
+| rule | `references-use-anchors` | cite `{#anchor}` or symbol names, never line numbers | 189 seed references moved by one spec line |
+| skill | `new-panel-control` | the one procedure for adding a control | |
+| skill | `analyse-reference-look` | measure a reference picture into numbers before building | B-161 |
+
+The cross-project project guard Stellix carried (WB-64) is not in this package and never should be: README "Working across projects".

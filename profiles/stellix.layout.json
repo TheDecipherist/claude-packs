@@ -1,5 +1,5 @@
 {
-  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A.",
+  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A. 0.4.0: the SOUND and MIXER layers (lib/app/src/layer*, cards, controls) are UI, so the control and look rules load there; confirm against the re-survey.",
   "complete": true,
   "folders": {
     "app": {
@@ -102,7 +102,10 @@
     "ui": [
       "lib/app/src/editor*.h",
       "lib/app/src/live.*",
-      "lib/painter/src/view.*"
+      "lib/painter/src/view.*",
+      "lib/app/src/layer*",
+      "lib/app/src/*card*",
+      "lib/app/src/*control*"
     ],
     "app": [
       "lib/app/**"

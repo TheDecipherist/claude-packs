@@ -9,7 +9,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
-import { commandLeavesProject, insideProject } from './lib/project.mjs';
+import { commandLeavesProject, insideProject, checkoutRoot } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const STATE = join(ROOT, '.claude', 'spec-lock.json');
@@ -62,7 +62,7 @@ function hook() {
   }
 
   if (!insideProject(input.file_path)) return 0;
-  const rel = relative(ROOT, input.file_path ?? '');
+  const rel = relative(checkoutRoot(input.file_path), input.file_path ?? '');
   if (rel === join('.claude', 'spec-lock.json')) return block(`the lock file can't be edited. ${howTo}`);
   if (state.locked && matchesAny(rel, state.globs)) return block(`${rel} is locked since ${state.since} (${state.reason}). ${howTo}`);
   return 0;
