@@ -1,0 +1,16 @@
+{
+  "id": "one-seeded-random",
+  "why": "Stellix rule 4: formulas by default; the only randomness is the world's one seeded generator (RANDOM, 6.6). No other random call may exist in the engine, the world or the drawing.",
+  "rule": ".claude/rules/stellix-deterministic-world.md",
+  "concepts": [
+    "cpp"
+  ],
+  "exclude": [
+    "@seeded_random",
+    "**/tests/**"
+  ],
+  "pattern": "\\bstd::(rand|srand|random_device|mt19937(_64)?|minstd_rand0?|default_random_engine|ranlux\\w*|knuth_b)\\b|\\b(rand|srand|random|arc4random\\w*|drand48)\\s*\\(|\\bjuce::Random\\b|\\bRandom::getSystemRandom\\b",
+  "code": true,
+  "bad": "float jitter = juce::Random::getSystemRandom().nextFloat();",
+  "good": "float jitter = world.seeded().next01();"
+}

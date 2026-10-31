@@ -1,0 +1,60 @@
+{
+  "description": "GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows).",
+  "folders": {
+    "painter": {
+      "path": "src/painter",
+      "purpose": "the GPU renderer: Dawn device, surfaces, passes, the snapshot reader"
+    },
+    "shaders": {
+      "path": "src/painter/shaders",
+      "purpose": "WGSL shaders"
+    },
+    "ui": {
+      "path": "src/ui",
+      "purpose": "input, gestures, camera, picking, undo (no drawing code)"
+    }
+  },
+  "concepts": {
+    "painter": [
+      "painter"
+    ],
+    "shaders": [
+      "shaders",
+      "**/*.wgsl"
+    ],
+    "ui": [
+      "ui"
+    ]
+  },
+  "skillsIn": "painter",
+  "hooks": {},
+  "name": "gpu-painter",
+  "files": {
+    "render_thread": "src/painter/render_thread.cpp"
+  },
+  "kinds": {
+    "gpu-code": {
+      "what": "anything that calls Dawn/WebGPU: device, surface, passes, the render thread",
+      "in": "painter",
+      "concepts": [
+        "painter",
+        "tests"
+      ],
+      "content": "\\b(wgpu::|wgpu[A-Z]\\w*\\s*\\(|WGPU[A-Z]\\w+)"
+    },
+    "shader": {
+      "what": "WGSL shaders",
+      "in": "shaders",
+      "concepts": [
+        "painter"
+      ],
+      "files": [
+        "**/*.wgsl"
+      ]
+    },
+    "ui-input": {
+      "what": "input, gestures, camera, picking and undo (no drawing code)",
+      "in": "ui"
+    }
+  }
+}

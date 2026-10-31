@@ -1,0 +1,12 @@
+{
+  "id": "keep-werror",
+  "mode": "require",
+  "why": "Warnings stay errors on our own targets; removing -Werror lets real bugs through as warnings.",
+  "rule": ".claude/rules/build-flags-safe.md",
+  "concepts": [
+    "build"
+  ],
+  "pattern": "-Werror\\b",
+  "bad": "target_compile_options(Synth PRIVATE -Wall -Wextra)",
+  "good": "target_compile_options(Synth PRIVATE -Wall -Wextra -Wpedantic -Werror)"
+}

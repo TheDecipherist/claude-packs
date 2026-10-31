@@ -1,0 +1,165 @@
+{
+  "description": "Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance.",
+  "folders": {
+    "app": {
+      "path": "src/app",
+      "purpose": "plugin and standalone entry, processor shell, editor shell"
+    },
+    "audio": {
+      "path": "src/audio",
+      "purpose": "audio-thread code: block processing, voices, note ledger, parameter snapshot"
+    },
+    "engines": {
+      "path": "src/engines",
+      "purpose": "sound engines (one folder per oscillator kind)"
+    },
+    "dsp": {
+      "path": "src/dsp",
+      "purpose": "filters, effects, dynamics and shared DSP blocks"
+    },
+    "params": {
+      "path": "src/params",
+      "purpose": "parameter definitions, IDs, patches, presets, state load and save"
+    },
+    "bench": {
+      "path": "bench",
+      "purpose": "benchmarks (release build, worst block)"
+    },
+    "data": {
+      "path": "data",
+      "purpose": "factory bank (factory.csv), params.csv, records and derived tables"
+    },
+    "panel": {
+      "path": "panel",
+      "purpose": "panel.json, bindings.json and the theme (rendered by synthpanel-creator)"
+    }
+  },
+  "concepts": {
+    "audio": [
+      "audio",
+      "app"
+    ],
+    "dsp": [
+      "dsp",
+      "engines"
+    ],
+    "params": [
+      "params"
+    ],
+    "ui": [
+      "app"
+    ],
+    "bench": [
+      "bench"
+    ],
+    "presets": [
+      "data/factory.csv",
+      "data/params.csv",
+      "presets/**",
+      "banks/**"
+    ],
+    "panel-spec": [
+      "panel",
+      "**/bindings.json"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/realtime-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/param-id-lock.mjs\"",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  },
+  "name": "audio-core",
+  "kinds": {
+    "audio-entry": {
+      "what": "processBlock, voices, voice allocation, the note ledger, the parameter snapshot",
+      "in": "audio",
+      "concepts": [
+        "audio",
+        "dsp",
+        "tests"
+      ],
+      "content": "\\b(processBlock|renderNextBlock|getNextAudioBlock)\\s*\\("
+    },
+    "dsp-block": {
+      "what": "a filter, effect, dynamics stage or shared DSP block (one folder per block)",
+      "in": "dsp"
+    },
+    "engine": {
+      "what": "an oscillator or sound engine (one folder per kind)",
+      "in": "engines"
+    },
+    "params": {
+      "what": "parameter IDs and layout, patch and state load/save",
+      "in": "params",
+      "concepts": [
+        "params"
+      ],
+      "files": [
+        "**/*ParameterIDs.*",
+        "**/*Params.h",
+        "**/*Params.cpp",
+        "**/*Parameters.h",
+        "**/*Parameters.cpp"
+      ]
+    },
+    "editor": {
+      "what": "the plugin and standalone entry, processor shell, editor and UI components",
+      "in": "app",
+      "concepts": [
+        "ui",
+        "painter",
+        "app",
+        "tests"
+      ],
+      "content": "\\bvoid\\s+paint\\s*\\(\\s*(juce::)?Graphics\\b"
+    },
+    "bank": {
+      "what": "the factory bank and the parameter table",
+      "in": "data",
+      "concepts": [
+        "presets"
+      ],
+      "files": [
+        "**/factory.csv",
+        "**/params.csv"
+      ]
+    },
+    "panel": {
+      "what": "the panel spec, bindings and theme",
+      "in": "panel",
+      "concepts": [
+        "panel-spec"
+      ],
+      "files": [
+        "**/panel.json",
+        "**/bindings.json"
+      ]
+    },
+    "bench": {
+      "what": "benchmarks (Release, worst block)",
+      "in": "bench"
+    }
+  }
+}

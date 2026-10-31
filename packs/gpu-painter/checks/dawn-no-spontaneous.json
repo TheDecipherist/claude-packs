@@ -1,0 +1,10 @@
+{
+  "id": "dawn-no-spontaneous",
+  "why": "AllowSpontaneous callbacks fire on any thread and re-entering the API from them is undefined; use AllowProcessEvents or WaitAnyOnly and pump events on the render thread.",
+  "rule": ".claude/rules/dawn-device-and-render-thread.md",
+  "concepts": ["painter", "ui", "app"],
+  "pattern": "CallbackMode::AllowSpontaneous|WGPUCallbackMode_AllowSpontaneous",
+  "code": true,
+  "bad": "instance.RequestAdapter (&opts, wgpu::CallbackMode::AllowSpontaneous, onAdapter);",
+  "good": "instance.RequestAdapter (&opts, wgpu::CallbackMode::AllowProcessEvents, onAdapter);"
+}

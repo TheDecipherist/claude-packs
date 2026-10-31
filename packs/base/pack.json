@@ -1,0 +1,151 @@
+{
+  "description": "Hook framework every project gets: lesson checks, spec lock, vendor protection, folder law.",
+  "folders": {
+    "docs": {
+      "path": "docs",
+      "purpose": "spec, laws, licences, work orders, decisions"
+    },
+    "src": {
+      "path": "src",
+      "purpose": "all source code, only inside the subfolders below"
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "unit tests, gates with planted faults, golden files"
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": "scripts and research tooling (not shipped)"
+    }
+  },
+  "concepts": {
+    "cpp": [
+      "src/**/*.cpp",
+      "src/**/*.h",
+      "src/**/*.hpp",
+      "src/**/*.mm",
+      "tests/**/*.cpp",
+      "tests/**/*.h"
+    ],
+    "tests": [
+      "tests"
+    ],
+    "build": [
+      "**/CMakeLists.txt",
+      "**/*.cmake",
+      "CMakePresets.json"
+    ],
+    "claude": [
+      ".claude/skills/**",
+      "**/.claude/skills/**",
+      ".claude/agents/**",
+      ".claude/rules/**"
+    ],
+    "notes": [
+      "bugs.md",
+      "workflow-bugs.md",
+      "**/known-issues*.md",
+      "docs/**/*.md"
+    ],
+    "docs-folder": [
+      "docs"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lesson-checks.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/file-size-guard.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/frozen-files.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/placement-law.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spec-lock.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/folder-law.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stage-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "name": "base",
+  "kinds": {
+    "tests": {
+      "what": "tests, gates with planted faults, golden renders",
+      "in": "tests",
+      "concepts": [
+        "tests"
+      ],
+      "files": [
+        "**/*_test.*",
+        "**/*Test.cpp",
+        "**/*Tests.cpp",
+        "**/test_*.*",
+        "**/*.test.*"
+      ]
+    },
+    "docs": {
+      "what": "the spec, laws.md, decisions, research, work orders",
+      "in": "docs",
+      "concepts": [
+        "docs-folder"
+      ],
+      "files": [
+        "**/laws.md",
+        "**/*-spec.md"
+      ]
+    },
+    "tools": {
+      "what": "scripts and research tools that never ship",
+      "in": "tools"
+    }
+  }
+}

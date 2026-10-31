@@ -1,0 +1,12 @@
+{
+  "id": "juce-snap-to-zero-off",
+  "mode": "require",
+  "why": "juce::dsp filters/oversampler only snap tiny values to zero on Intel builds (JUCE_SNAP_TO_ZERO is a no-op on Arm), so output depends on block size on x86 but not on Apple Silicon. With ScopedNoDenormals in place, define JUCE_DSP_ENABLE_SNAP_TO_ZERO=0 so every platform behaves the same.",
+  "rule": ".claude/rules/scoped-no-denormals.md",
+  "globs": [
+    "CMakeLists.txt"
+  ],
+  "pattern": "JUCE_DSP_ENABLE_SNAP_TO_ZERO=0",
+  "bad": "target_compile_definitions(Synth PUBLIC JUCE_WEB_BROWSER=0)",
+  "good": "target_compile_definitions(Synth PUBLIC JUCE_WEB_BROWSER=0 JUCE_DSP_ENABLE_SNAP_TO_ZERO=0)"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "no-march-native",
+  "why": "-march=native/-mcpu=native tunes for the build machine; the shipped plugin can crash with illegal instructions on users' CPUs.",
+  "rule": ".claude/rules/per-sample-code-inlinable.md",
+  "globs": [
+    "**/CMakeLists.txt",
+    "**/*.cmake",
+    "**/CMakePresets.json",
+    "**/*.xcconfig"
+  ],
+  "pattern": "-m(arch|cpu|tune)=native",
+  "bad": "target_compile_options(Synth PRIVATE -O3 -march=native)",
+  "good": "target_compile_options(Synth PRIVATE -O3)"
+}

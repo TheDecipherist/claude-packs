@@ -1,0 +1,14 @@
+{
+  "id": "no-fast-math",
+  "why": "Fast-math and FMA contraction let the compiler assume no NaN/Inf and reorder or fuse operations: isfinite guards vanish and results differ between Mac and Windows.",
+  "rule": ".claude/rules/build-flags-safe.md",
+  "globs": [
+    "**/CMakeLists.txt",
+    "**/*.cmake",
+    "**/CMakePresets.json",
+    "**/*.xcconfig"
+  ],
+  "pattern": "-ffast-math|-Ofast\\b|/fp:fast|/fp:contract|-ffp-contract=(fast|on)|-funsafe-math-optimizations|-ffinite-math-only|-fassociative-math",
+  "bad": "target_compile_options(Synth PRIVATE -O3 -ffp-contract=fast)",
+  "good": "target_compile_options(Synth PRIVATE -O3)"
+}

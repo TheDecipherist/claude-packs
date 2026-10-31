@@ -1,0 +1,259 @@
+{
+  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A.",
+  "complete": true,
+  "folders": {
+    "app": {
+      "path": "lib/app",
+      "purpose": "the standalone, processor, editor, player, demo and the one launch function (launch.cpp)"
+    },
+    "snapshot": {
+      "path": "lib/snapshot",
+      "purpose": "the one shared snapshot header the painter reads (header-only)"
+    },
+    "world": {
+      "path": "lib/world",
+      "purpose": "the world: travellers, strikes, rebounds, PULL, walls, the snapshot ring, State and the seeded RandomSource"
+    },
+    "engines": {
+      "path": "lib/engines",
+      "purpose": "SlotSound and Tabula 1's voice, copied and proved (src/tabula is read-only)"
+    },
+    "dsp": {
+      "path": "lib/effects",
+      "purpose": "effects and dynamics: delay, EQ, compressor, limiter (S11a-S11d)"
+    },
+    "painter": {
+      "path": "lib/painter",
+      "purpose": "everything drawn: scene, camera, card, GPU layer, shaders, the Painter facade"
+    },
+    "records": {
+      "path": "data",
+      "purpose": "data/records (fixed ids, moons) and data/bank (factory patches)"
+    },
+    "probes": {
+      "path": "probes",
+      "purpose": "probe executables, each with --selftest, and the shot program (pictures, benches)"
+    },
+    "plants": {
+      "path": "tools/plants",
+      "purpose": "planted-fault sources run by tools/plants.sh"
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "spec, delay spec, laws, licences, research, work order (plan and logs at the root: build.md, bugs.md, workflow-bugs.md)"
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": "build.sh, step.py, gates/, hooks/, plants.sh and plants.d/, copy and compare tools"
+    }
+  },
+  "concepts": {
+    "cpp": [
+      "lib/**/*.cpp",
+      "lib/**/*.h",
+      "lib/**/*.mm",
+      "probes/**/*.cpp",
+      "probes/**/*.h",
+      "tools/plants/**/*.cpp"
+    ],
+    "audio": [
+      "lib/app/src/processor.h",
+      "lib/app/src/processor.cpp",
+      "lib/app/src/sound.h",
+      "lib/app/src/mixer.h",
+      "lib/engines/include/**",
+      "lib/engines/src/*.cpp",
+      "lib/effects/**"
+    ],
+    "dsp": [
+      "lib/effects/**",
+      "lib/engines/include/**",
+      "lib/engines/src/*.cpp"
+    ],
+    "params": [
+      "lib/app/src/controls.h",
+      "lib/app/src/params.h",
+      "lib/app/src/moonparams.h",
+      "lib/app/src/host_params.h",
+      "lib/app/src/processor.h",
+      "data/records/**",
+      "data/bank/**"
+    ],
+    "records": [
+      "data/records/**",
+      "data/bank/**",
+      "lib/world/include/stellix/world/state.h"
+    ],
+    "world": [
+      "lib/world/**",
+      "lib/snapshot/**",
+      "lib/app/src/launch.*",
+      "lib/app/src/demo.cpp"
+    ],
+    "painter": [
+      "lib/painter/**"
+    ],
+    "shaders": [
+      "lib/painter/src/card/*_glsl.h",
+      "lib/painter/src/card/ui2d_*.h",
+      "lib/painter/src/gl/glsl.h",
+      "**/*.wgsl"
+    ],
+    "ui": [
+      "lib/app/src/editor*.h",
+      "lib/app/src/live.*",
+      "lib/painter/src/view.*"
+    ],
+    "app": [
+      "lib/app/**"
+    ],
+    "tests": [
+      "probes/**",
+      "lib/*/tests/**",
+      "tools/gates/**",
+      "tools/plants/**",
+      "tools/plants.d/**"
+    ],
+    "bench": [
+      "probes/shot/cpugate.cpp",
+      "probes/shot/simbench.cpp",
+      "probes/shot/shot.cpp",
+      "probes/machine/**"
+    ],
+    "build": [
+      "CMakeLists.txt",
+      "**/CMakeLists.txt",
+      "cmake/**"
+    ],
+    "claude": [
+      ".claude/skills/**",
+      "**/.claude/skills/**",
+      ".claude/agents/**",
+      ".claude/rules/**"
+    ],
+    "notes": [
+      "build.md",
+      "bugs.md",
+      "workflow-bugs.md",
+      "docs/**/*.md"
+    ],
+    "docs-folder": [
+      "docs"
+    ]
+  },
+  "files": {
+    "seeded_random": "lib/world/include/stellix/world/random_source.h",
+    "world_math": "lib/world/src/sim_fly.h",
+    "snapshot": "lib/world/src/sim.h",
+    "render_thread": "lib/app/src/editor.h"
+  },
+  "protected": [
+    "lib/engines/src/tabula/**",
+    "design/reference/**",
+    "build/evidence/**"
+  ],
+  "disable": [
+    "hooks/no-shipped-images.mjs",
+    "checks/one-seeded-random.json",
+    "hooks/stage-guard.mjs"
+  ],
+  "commands": {
+    "build": "bash tools/build.sh build",
+    "test": "bash tools/build.sh test",
+    "test-one": "bash tools/build.sh test -R <name>",
+    "plants": "bash tools/plants.sh",
+    "run": "bash tools/build.sh run",
+    "step": "python3 tools/step.py status",
+    "cpu-gate": "bash tools/build.sh test -R stellix.cpu_gate",
+    "frame-bench": "stellix_shot --bench (built by `bash tools/build.sh build`)",
+    "picture-gates": "bash tools/build.sh test -R '_gate'"
+  },
+  "siblings": [
+    "../"
+  ],
+  "kinds": {
+    "audio-entry": {
+      "what": "processBlock and the processor, voices, sound and mixer",
+      "in": "lib/app/src/processor.* (audio files) or lib/engines",
+      "concepts": [
+        "audio",
+        "dsp",
+        "tests"
+      ],
+      "content": "\\b(processBlock|renderNextBlock|getNextAudioBlock)\\s*\\("
+    },
+    "world": {
+      "what": "travellers, strikes, rebounds, PULL, walls, the world step, the snapshot ring, seeded random",
+      "in": "world"
+    },
+    "snapshot": {
+      "what": "the one plain-data snapshot type the painter reads",
+      "in": "snapshot"
+    },
+    "engine": {
+      "what": "SlotSound and the copied Tabula voice (src/tabula is read-only)",
+      "in": "engines"
+    },
+    "dsp-block": {
+      "what": "effects and dynamics: delay, EQ, compressor, limiter",
+      "in": "dsp"
+    },
+    "gpu-code": {
+      "what": "anything that calls Dawn/WebGPU, the scene, camera, card, Painter facade",
+      "in": "painter",
+      "concepts": [
+        "painter",
+        "tests"
+      ],
+      "content": "\\b(wgpu::|wgpu[A-Z]\\w*\\s*\\(|WGPU[A-Z]\\w+)"
+    },
+    "shader": {
+      "what": "WGSL shaders",
+      "in": "painter",
+      "concepts": [
+        "painter"
+      ],
+      "files": [
+        "**/*.wgsl"
+      ]
+    },
+    "editor": {
+      "what": "the editor, live view and UI wiring",
+      "in": "app",
+      "concepts": [
+        "ui",
+        "painter",
+        "app",
+        "tests"
+      ],
+      "content": "\\bvoid\\s+paint\\s*\\(\\s*(juce::)?Graphics\\b"
+    },
+    "records": {
+      "what": "fixed-id records, moons, factory patches",
+      "in": "records"
+    },
+    "probe": {
+      "what": "a probe executable with --selftest, the shot program",
+      "in": "probes"
+    },
+    "plant": {
+      "what": "a planted-fault source for tools/plants.sh",
+      "in": "plants"
+    },
+    "docs": {
+      "what": "spec, laws, licences, research, work orders",
+      "in": "docs",
+      "concepts": [
+        "docs-folder"
+      ],
+      "files": [
+        "**/laws.md",
+        "**/*-spec.md"
+      ]
+    },
+    "tools": {
+      "what": "build.sh, step.py, gates, hooks, copy and compare tools",
+      "in": "tools"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "description": "Stellix spec laws: the world, determinism, generated reset, no shipped images.",
+  "folders": {
+    "world": {
+      "path": "src/world",
+      "purpose": "the world: coordinates, travellers, hits, pushes, the snapshot writer, the seeded generator, world maths"
+    },
+    "records": {
+      "path": "records",
+      "purpose": "layout and state records: every piece of state declared once with its starting value"
+    }
+  },
+  "concepts": {
+    "world": [
+      "world"
+    ],
+    "records": [
+      "records"
+    ],
+    "params": [
+      "records"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-shipped-images.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "name": "stellix",
+  "files": {
+    "seeded_random": "src/world/seeded_random.h",
+    "world_math": "src/world/world_math.h",
+    "snapshot": "src/world/snapshot.h"
+  }
+}
