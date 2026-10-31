@@ -7,9 +7,9 @@
 // As a PreToolUse hook (Write|Edit|MultiEdit|Bash) it blocks edits to locked files, edits to the
 // lock file itself, and Claude running "unlock".
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
-import { commandLeavesProject, insideProject, checkoutRoot } from './lib/project.mjs';
+import { commandLeavesProject, insideProject, checkoutRoot, relInCheckout } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const STATE = join(ROOT, '.claude', 'spec-lock.json');
@@ -52,11 +52,16 @@ function hook() {
     if (/spec-lock/.test(cmd) && /\bunlock\b/.test(cmd)) return block(`Claude may not unlock the spec. ${howTo}`);
     if (/spec-lock\.json/.test(cmd) && WRITE_CMD.test(cmd)) return block(`the lock file can't be edited. ${howTo}`);
     if (!state.locked || commandLeavesProject(cmd)) return 0;
+    // Each word as a path in its own checkout, so a worktree's spec/ is the spec too.
+    const base = payload.cwd ?? ROOT;
     const toRel = (t) => {
-      const p = t.replace(/^['"]|['"]$/g, '');
-      return p.startsWith('/') ? relative(ROOT, p) : p;
+      const abs = resolve(base, t.replace(/^['"]|['"]$/g, ''));
+      return insideProject(abs) ? relInCheckout(abs) : null;
     };
-    const touched = cmd.split(/\s+/).filter((t) => matchesAny(toRel(t), state.globs));
+    const touched = cmd.split(/\s+/).filter((t) => {
+      const rel = t && toRel(t);
+      return rel && matchesAny(rel, state.globs);
+    });
     if (touched.length && WRITE_CMD.test(cmd)) return block(`${touched.join(', ')} locked (${state.reason}). ${howTo}`);
     return 0;
   }

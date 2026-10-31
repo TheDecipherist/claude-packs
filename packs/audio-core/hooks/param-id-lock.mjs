@@ -2,34 +2,38 @@
 // Locks parameter IDs: once seen, an ID may never disappear from the source.
 //   node param-id-lock.mjs --init   create .claude/param-ids.lock.json from the current repo
 //   (as PostToolUse hook)           fail (exit 2) if a locked ID is gone; add new IDs to the lock
+// Where IDs are read: .claude/param-ids.config.json, else layout.json "paramIds", else JUCE
+// ParameterID / AudioParameter* string literals. Both forms: { "extensions": "<regex>", "patterns": ["<regex with one group>"] }.
+// A file is judged in its own checkout: an agent worktree is scanned, and keeps its lock, on its own.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { insideProject } from './lib/project.mjs';
+import { readLayout } from './lib/layout.mjs';
+import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-const LOCK = join(ROOT, '.claude', 'param-ids.lock.json');
-const CONFIG = join(ROOT, '.claude', 'param-ids.config.json');
-const SKIP_DIRS = /(^|\/)(build|Builds|JuceLibraryCode|JUCE|node_modules|\.git|cmake-build[^/]*)(\/|$)/;
+// .claude is skipped so the worktrees under .claude/worktrees/ never stand in for this checkout's code.
+const SKIP_DIRS = /(^|\/)(build|Builds|JuceLibraryCode|JUCE|node_modules|\.git|\.claude|cmake-build[^/]*)(\/|$)/;
 
 const DEFAULT_PATTERNS = [
   'ParameterID\\s*(?:[A-Za-z_]\\w*\\s*)?[({]\\s*"([^"]+)"',
   'AudioParameter(?:Float|Int|Bool|Choice)\\s*>?\\s*\\(\\s*"([^"]+)"',
 ];
 
-function loadConfig() {
-  const cfg = existsSync(CONFIG) ? JSON.parse(readFileSync(CONFIG, 'utf8')) : {};
+function loadConfig(root) {
+  const file = join(root, '.claude', 'param-ids.config.json');
+  const cfg = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : readLayout(root).paramIds ?? {};
   return {
     extensions: new RegExp(cfg.extensions ?? '\\.(cpp|h|hpp|cc|mm)$'),
     patterns: (cfg.patterns ?? DEFAULT_PATTERNS).map((p) => new RegExp(p, 'g')),
   };
 }
 
-function collectIds({ extensions, patterns }) {
+function collectIds(root, { extensions, patterns }) {
   const ids = new Set();
-  for (const entry of readdirSync(ROOT, { recursive: true })) {
+  for (const entry of readdirSync(root, { recursive: true })) {
     const rel = String(entry);
     if (SKIP_DIRS.test(rel) || !extensions.test(rel)) continue;
-    const text = readFileSync(join(ROOT, rel), 'utf8');
+    const text = readFileSync(join(root, rel), 'utf8');
     for (const re of patterns) {
       re.lastIndex = 0;
       let m;
@@ -39,13 +43,14 @@ function collectIds({ extensions, patterns }) {
   return ids;
 }
 
-const save = (ids) => writeFileSync(LOCK, JSON.stringify([...ids].sort(), null, 2) + '\n');
+const lockFile = (root) => join(root, '.claude', 'param-ids.lock.json');
+const save = (root, ids) => writeFileSync(lockFile(root), JSON.stringify([...ids].sort(), null, 2) + '\n');
 
 function main() {
   if (process.argv.includes('--init')) {
-    const ids = collectIds(loadConfig());
-    save(ids);
-    console.log(`Locked ${ids.size} parameter IDs in ${relative(ROOT, LOCK)}`);
+    const ids = collectIds(ROOT, loadConfig(ROOT));
+    save(ROOT, ids);
+    console.log(`Locked ${ids.size} parameter IDs in ${relative(ROOT, lockFile(ROOT))}`);
     return 0;
   }
 
@@ -57,10 +62,12 @@ function main() {
   }
   const file = payload.tool_input?.file_path;
   if (file && !insideProject(file)) return 0; // another project's edit: not ours to rescan
-  const current = collectIds(loadConfig());
-  if (!existsSync(LOCK)) return 0;
+  // The checkout's own lock only: main's lock may hold ids a worktree branch never had.
+  const root = file ? checkoutRoot(file) : ROOT;
+  if (!existsSync(lockFile(root))) return 0;
+  const current = collectIds(root, loadConfig(file ? claudeRoot(file) : ROOT));
 
-  const locked = new Set(JSON.parse(readFileSync(LOCK, 'utf8')));
+  const locked = new Set(JSON.parse(readFileSync(lockFile(root), 'utf8')));
   const missing = [...locked].filter((id) => !current.has(id));
   if (missing.length > 0) {
     process.stderr.write(
@@ -73,7 +80,7 @@ function main() {
   }
 
   const added = [...current].filter((id) => !locked.has(id));
-  if (added.length > 0) save(new Set([...locked, ...added]));
+  if (added.length > 0) save(root, new Set([...locked, ...added]));
   return 0;
 }
 

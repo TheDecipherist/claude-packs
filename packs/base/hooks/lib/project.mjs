@@ -31,10 +31,19 @@ export function checkoutRoot(file) {
   dir = existsSync(dir) && !dir.endsWith('/') ? dirname(dir) : dirname(dir);
   for (;;) {
     if (existsSync(resolve(dir, '.git'))) return dir;
+    if (dir === ROOT) return ROOT; // a project that is not a git repo is never judged from a parent repo
     const up = dirname(dir);
     if (up === dir) return ROOT;
     dir = up;
   }
+}
+
+// The folder whose .claude/ (layout.json, checks, locks) governs a file: its own checkout when that
+// checkout carries a layout.json, else the main project. A worktree branch that moved a folder or
+// added a check is judged by its own copy; a worktree without one still gets the main laws.
+export function claudeRoot(file) {
+  const root = checkoutRoot(file);
+  return existsSync(resolve(root, '.claude', 'layout.json')) ? root : ROOT;
 }
 
 // A path relative to its own checkout, with forward slashes.

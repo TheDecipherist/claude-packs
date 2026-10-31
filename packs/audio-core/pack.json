@@ -133,7 +133,10 @@
         "app",
         "tests"
       ],
-      "content": "\\bvoid\\s+paint\\s*\\(\\s*(juce::)?Graphics\\b"
+      "content": "\\bvoid\\s+(?:\\w+::)*paint\\s*\\(\\s*(?:juce::)?Graphics\\b",
+      "contentWas": [
+        "\\bvoid\\s+paint\\s*\\(\\s*(juce::)?Graphics\\b"
+      ]
     },
     "bank": {
       "what": "the factory bank and the parameter table",

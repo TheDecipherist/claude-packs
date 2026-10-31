@@ -47,7 +47,7 @@ npx claude-packs list               show the packs
 2. Bring project.md back. The packs' layout, concepts, rules and skill triggers get tuned to it.
 
 ## Install from the tarball
-`npm i -D ./thedecipherist-claude-packs-0.4.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
+`npm i -D ./thedecipherist-claude-packs-0.5.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
 
 ## The one global piece: latest-versions
 
@@ -129,3 +129,19 @@ A tailored project (the Stellix profile) carries its own `kinds`. Edit `kinds` a
 | skill | `analyse-reference-look` | measure a reference picture into numbers before building | B-161 |
 
 The cross-project project guard Stellix carried (WB-64) is not in this package and never should be: README "Working across projects".
+
+## Worktrees for every hook, and the Sub37 profile (0.5.0)
+
+| Kind | Name | What changed |
+|---|---|---|
+| fix | `param-id-lock` | scans and locks the edited file's own checkout and skips `.claude/`, so a worktree's copy can no longer hide an id main dropped, and a worktree's new ids go into its own lock |
+| fix | `lesson-checks` | reads checks and layout from the file's own checkout |
+| fix | `spec-lock` | a shell command that writes a worktree's spec is refused like one that writes main's |
+| fix | `no-shipped-images` | an image written into a worktree's code folders is refused |
+| fix | `version-pin-guard` (global) | reads `docs/versions.md` from the checkout the pin is written in; `CLAUDE_PROJECT_DIR` is only the fallback. Run `npx claude-packs global add` to install it |
+| fix | layout readers | a worktree with its own `layout.json` is judged by it, else by main's (`claudeRoot`) |
+| test | `worktrees.test.mjs` | runs every installed hook in a real git worktree, and fails when a hook is added without a worktree case |
+| test | `structure.test.mjs` | locks in the CLAUDE.md block rules, the control, look and anchor rules, and both skills |
+| profile | `sub37` | `init audio-core --profile sub37`: the synthkit template's tree as it is (docs/project.md answer b). Flat `src/` is the app folder, `src/engine` the audio code, probes stay in `tools/`, `design/reference` is read-only |
+| layout | `paramIds` | `{ "extensions", "patterns" }` tells `param-id-lock` where ids are written when they are not `ParameterID` literals. Sub37 reads its generated header and the binding ids in `panel/bindings.json`. Then run `node .claude/hooks/param-id-lock.mjs --init` once |
+| fix | placement-law `editor` kind | matches the out-of-class form a .cpp uses (`void Panel::paint (juce::Graphics& g)`) as well as `void paint (...)`. An install whose layout.json holds the old pack pattern gets the new one on `update`; a pattern the project wrote is kept |

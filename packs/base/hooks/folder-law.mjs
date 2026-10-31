@@ -4,7 +4,7 @@
 // Existing files can always be edited; moving them is a separate, deliberate job.
 import { existsSync, readFileSync } from 'node:fs';
 import { relative } from 'node:path';
-import { checkoutRoot } from './lib/project.mjs';
+import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -25,7 +25,7 @@ function main() {
   const rel = relative(root, file).replace(/\\/g, '/');
   if (rel.startsWith('..')) return 0;
 
-  const layout = readLayout(root);
+  const layout = readLayout(claudeRoot(file));
   const folders = codeFolders(layout);
   if (folders.length === 0) return 0;
   if (folders.some((f) => rel.startsWith(`${f}/`))) {

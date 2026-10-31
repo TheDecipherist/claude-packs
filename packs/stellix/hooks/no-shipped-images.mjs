@@ -5,21 +5,23 @@
 //   --git-staged: run from a git pre-commit hook; fails if a staged added file is an image.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { relative } from 'node:path';
+import { resolve } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
-import { commandLeavesProject, insideProject } from './lib/project.mjs';
+import { claudeRoot, commandLeavesProject, insideProject, relInCheckout } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const IMAGE = /\.(png|jpe?g|gif|bmp|tiff?|webp|heic|ico|icns|svg|psd|tga|exr|hdr|ktx2?|dds|astc)$/i;
 // Guarded: every code folder in the layout, plus anything that would be bundled as a resource.
-const GUARDED = [...new Set(['src/**', 'Resources/**', 'resources/**', 'assets/**', ...codeFolders(readLayout(ROOT)).map((f) => `${f}/**`)])];
+const guarded = (root) => [...new Set(['src/**', 'Resources/**', 'resources/**', 'assets/**', ...codeFolders(readLayout(root)).map((f) => `${f}/**`)])];
 const ALLOWED = ['tests/**', '**/tests/**', 'goldens/**', '**/goldens/**', 'docs/**', 'captures/**', 'build/**'];
 
-const isBlocked = (p) => {
-  if (!insideProject(p)) return false;
-  const rel = p.startsWith('/') ? relative(ROOT, p) : p.replace(/^\.\//, '');
-  return IMAGE.test(rel) && matchesAny(rel, GUARDED) && !matchesAny(rel, ALLOWED);
+// A path is judged in its own checkout, so an image written into an agent worktree is caught too.
+const isBlocked = (p, base = ROOT) => {
+  const abs = resolve(base, p);
+  if (!IMAGE.test(abs) || !insideProject(abs)) return false;
+  const rel = relInCheckout(abs);
+  return matchesAny(rel, guarded(claudeRoot(abs))) && !matchesAny(rel, ALLOWED);
 };
 
 function fail(files) {
@@ -48,7 +50,7 @@ function hook() {
     if (commandLeavesProject(input.command)) return 0;
     const tokens = (input.command ?? '').split(/\s+/).map((t) => t.replace(/^['"]|['"]$/g, ''));
     const writes = /\b(cp|mv|ln|curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b|>/.test(input.command ?? '');
-    const bad = writes ? tokens.filter(isBlocked) : [];
+    const bad = writes ? tokens.filter((t) => t && isBlocked(t, payload.cwd ?? ROOT)) : [];
     return bad.length ? fail(bad) : 0;
   }
   return input.file_path && isBlocked(input.file_path) ? fail([input.file_path]) : 0;
