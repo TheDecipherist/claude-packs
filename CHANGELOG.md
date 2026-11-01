@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.9.0 (2026-11-01): the shape law
+
+**What this prevents** (KWB-1): a day lost to a hard-coded instance. One spec sentence named "slot 2"; it spread through 9 agent
+briefs and about 50 tests into code that knew slot 2, and the instance checks, scoped to the engine folders, let the world and the
+space code through. From this release whether a thing is ONE or MANY is written down before it is built, every check reads it, and
+no folder list decides what is checked.
+
+- `design/shape.json` per synth: every concept once, `one` (a frozen id) or `many` (N instances of one shape, reached only by its
+  generator or a loop), with its generator, selectors (named rules that pick an instance) and declared constants (a named instance with
+  a reason). `new` and a synth's `init` write an empty one; doctor fails a synth without one, or with a row that breaks the contract.
+- The number rule (`lib/shape.mjs`, one reader for every hook): a literal instance in code, test, doc, brief or making line is an
+  example (a `seen in:` / `example:` line), a selection rule (a selector in the manifest) or a declared constant (read by name);
+  anything else is refused with "example, rule, or constant?". `claude-packs shape scan` lists every finding in a repo.
+- Hook `shape-law` (write-time, every write route, every folder but the manifest's `exclude`): refuses an instance literal, a test that
+  drives one instance, an unlisted selector and an instance type with no manifest row. It replaces the engine-scoped
+  `no-instance-index-literal` and `no-instance-id-literal` checks (retired; `update` removes them). Selftest 31 cases.
+- Hook `brief-guard` (PreToolUse on Agent; writes to docs/ and inbox/): a brief, spec or recipe names an instance only on a `seen in:`
+  or `example:` line; the refusal quotes the manifest row and the fix; refusals counted per concept in .claude/usage.log. Selftest 15.
+- Gate `shape_symmetry`, generated at configure time from the manifest (`claude-packs symmetry gen --cmake|--list`, run by
+  `.claude/tools/shape-symmetry.mjs`): every instance has the same members, every one of the N·(N-1)/2 pairs swaps the same; a many
+  concept with no symmetry commands is red until it has them. Red on a planted missing member and a planted swap difference. It
+  replaces the instances-by-index swap check.
+- Hook `making` (UserPromptSubmit, 62 words; 77 with the echo): what are you making, each concept's shape, a new concept's row first, a
+  brief naming an instance is wrong, a thing used twice is one parameterized function; when the prompt names an instance it echoes
+  "you named X: building for all <shape>, X is the reproduction". doctor prints its cost (about 107 tokens per prompt, estimated).
+- Hook `making-check` (Stop): the concepts written this turn match the `making:` line and have manifest rows, the writes passed
+  once-only, and an override cites a law file line (shape.json, the spec, docs/laws.md) or an overnight Decisions entry; otherwise
+  the turn is sent back, naming what is missing (after three identical send-backs the findings go to the user). Selftest 24.
+- Hook `once-only` (write-time, every write route): a new block that nearly repeats code already in the repo (jscpd 5.4.2; 6 lines or
+  50 tokens; C++, Python, JS) is refused with the existing location and the fix (call it, or extract one function both call). doctor
+  prints the repo's duplicate count; `claude-packs dup scan` lists them. Selftest 17.
+- build-step and subagent-dispatch: a step that introduces a concept adds its shape.json row as its first commit; briefs quote the row.
+- shape-law, brief-guard, once-only, making and making-check are on by default (`onByDefault`); `update` switches them on.
+- `npm run test:changed` (`scripts/test-changed.mjs`): runs only the tests that reach the changed files, with the fresh-tmp preload,
+  printing why each was chosen; the full `npm test` stays the release gate (KWB-2).
+- version-pin-guard (global): reads a `cd`'s target before `npm install`, and no longer reads "npm install" inside a heredoc (KWB-3;
+  takes effect after `claude-packs global add`).
+
 ## 0.8.0 (2026-11-01)
 
 - build-sweep (base, opt-in; SessionStart and SubagentStop): removes the build output of agent worktrees under `.claude/worktrees`

@@ -181,6 +181,12 @@ go in `layout.json` under `"guards"`; every key has a house default.
 | hook | `tims-asks.mjs` | base, **opt-in** | after a compaction, Tim's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |
 | hook | `idle-wake.mjs` | base, **opt-in** | after 15 minutes of silence, wakes the session with its open asks (Stop, asyncRewake) | – |
 | hook | `build-sweep.mjs` | base, **opt-in** | removes the build output (layout `buildOutput`, default `build/**`) of agent worktrees quiet for 2 hours; never sources, never the main checkout's build; warns at session start under 40 GB free (SessionStart, SubagentStop; `--now [--dry-run]` by hand) | – |
+| hook | `shape-law.mjs` | base | the number rule at write time, every folder: an instance of a MANY concept is an example, a selector or a declared constant from design/shape.json | `shape scan` |
+| hook | `brief-guard.mjs` | base | a brief, spec or recipe names an instance only on a `seen in:` / `example:` line (Agent prompts, docs/, inbox/) | – |
+| hook | `once-only.mjs` | base | refuses a near-duplicate of code already in the repo (jscpd), naming where it lives | `dup scan` |
+| hook | `making.mjs` | base | at each prompt: what are you making, each concept's shape; echoes an instance the prompt named | – |
+| hook | `making-check.mjs` | base | at each stop: the making line matches what was written, every concept has a row, overrides cite a law | – |
+| tool | `shape-symmetry.mjs` | base | the generated gate: every instance the same members, every pair swaps the same | `symmetry gen`, `symmetry run` |
 | hook | `protect-vendor.mjs` | base | **merged with Stellix's copy-tree-guard**: a folder of `"kind": "copy"` is read-only like vendored code; only git and the sanctioned copy tools get through | `copy`: `tools` |
 | hook | `browser-guard.py` | gpu-painter | a natively drawn app never starts a browser; judges writes only inside its own project. The one Python hook left: its Node port waits until Stellix runs 0.7.0, because Stellix's installed browser-guard refuses writing a file that holds its selftest's planted launch samples (probed: exit 2 on `browser-guard.mjs`; it exempts only `browser-guard.py`) | `browser`: `pictureCommand` |
 | hook | `no-shipped-images.mjs` | stellix | its scope is now the project's | `images`: `guarded`, `allowed` |
