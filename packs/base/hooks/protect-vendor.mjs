@@ -22,7 +22,10 @@ import * as project from './lib/project.mjs';
 import { editOf, git, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
 
-const DEFAULT_GLOBS = ['JUCE/**', '**/JUCE/modules/**', 'JuceLibraryCode/**', 'libs/**', 'third_party/**', 'external/**', '_deps/**', 'build/**'];
+const DEFAULT_GLOBS = ['JUCE/**', '**/JUCE/modules/**', 'JuceLibraryCode/**', 'libs/**', 'third_party/**', 'external/**', '_deps/**'];
+// The build output; a project whose build lives elsewhere names it in layout.json "buildOutput" (a build in out/, while build/
+// holds the report and the pictures, which agents write). Any nested clone under build/_deps stays vendored either way.
+const buildGlobs = (layout) => [...(layout.buildOutput ?? ['build/**']), 'build/_deps/**'];
 // What makes a write to this file wrong, or null. `p` is the project library (lib/project.mjs).
 function judge(p, file, base) {
   const abs = resolve(base, file);
@@ -31,7 +34,7 @@ function judge(p, file, base) {
   const layout = readLayout(p.claudeRoot(abs));
   const tree = foldersOfKind(layout, 'copy').find((t) => rel === t || rel.startsWith(`${t}/`));
   if (tree) return { rel, tree, layout };
-  if (matchesAny(rel, [...DEFAULT_GLOBS, ...(layout.protected ?? [])])) return { rel, layout };
+  if (matchesAny(rel, [...DEFAULT_GLOBS, ...buildGlobs(layout), ...(layout.protected ?? [])])) return { rel, layout };
   return null;
 }
 
@@ -131,6 +134,19 @@ function selftestRepo() {
     ['a worktree file is judged in the worktree', runHook(hook, dir, editOf(join(wt, 'src/dsp/Svf.cpp'))), 0],
     ['a worktree\'s vendored folder', runHook(hook, dir, editOf(join(wt, 'third_party/lib/lib.h'))), 2],
     ['another project is not ours', runHook(hook, dir, editOf(join(dirname(dir), 'elsewhere/JUCE/x.h'))), 0],
+    ['build/ is the build output by default', e('build/report.md'), 2],
+  ]) | selftestBuildOutput(hook);
+}
+
+// A layout that names its build output as out/ may write build/ (a report, pictures); out/ and build/_deps stay read-only.
+function selftestBuildOutput(hook) {
+  const dir = scratchProject({ 'src/a.cpp': '//\n' }, { folders: {}, concepts: {}, buildOutput: ['out/**'] });
+  git(dir, 'init', '-q');
+  const e = (file) => runHook(hook, dir, editOf(join(dir, file)));
+  return verdicts('protect-vendor buildOutput', [
+    ['build/for-tim.md under buildOutput out/**', e('build/for-tim.md'), 0],
+    ['out/ under buildOutput out/**', e('out/lib/x.o'), 2],
+    ['build/_deps stays vendored', e('build/_deps/juce-src/x.h'), 2],
   ]);
 }
 

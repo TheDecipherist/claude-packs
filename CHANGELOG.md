@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.2 (2026-11-01)
+
+- build-guard: a quoted note or title that names the test runner is not a test run (`step.py save "... ctest ..."`, `--take '...'`,
+  `git commit -m`); quoted text is masked before the width and light-agent checks, keeping its length so `-R '<pattern>'` is still read
+  (Stellix WB-78).
+- protect-vendor: layout.json `buildOutput` names the build output (default `build/**`), so a project whose build lives in `out/` can
+  write its own `build/` (a report, pictures); `build/_deps` stays vendored either way (Stellix WB-79).
+
 ## 0.7.1 (2026-10-31)
 
 - gpu-frame-bench: step 2 reads GPU time from Dawn timestamp queries (the painter is Dawn/WebGPU); it said GL timer queries, left from the OpenGL painter (found in Stellix's install).

@@ -47,6 +47,8 @@ export function stripHeredocs(cmd) {
 }
 
 const blankQuotes = (s) => s.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+// Quoted text (a commit note, a bug title) keeps its length but loses its words, so a note naming the test runner is not a test run
+const maskQuotes = (s) => s.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, (q) => q[0] + ' '.repeat(q.length - 2) + q[q.length - 1]);
 const words = (part) => part.replace(/(^|\s)#.*$/, '').trim().split(/\s+/).filter(Boolean);
 
 export function offending(cmd) {
@@ -83,14 +85,16 @@ export function launchesApp(cmd) {
 // A build of everything, or a test run with no -R or one matching more than 30 tests. null when the scope is named.
 export function tooWide(cmd, cwd = process.cwd(), countTests = ctestCount) {
   const body = stripHeredocs(cmd);
-  if (/(cmake\s+--build|tools\/build\.sh\s+build)\b/.test(body)) {
+  const bare = maskQuotes(body);
+  if (/(cmake\s+--build|tools\/build\.sh\s+build)\b/.test(bare)) {
     if (/--target\s+all\b/.test(body) || (/cmake\s+--build/.test(body) && !body.includes('--target')) || /tools\/build\.sh\s+build\s+\S+\s*($|[;&|])/.test(body)) {
       return 'a build of every target is refused.';
     }
   }
-  const m = body.match(/(?:\bctest\b|tools\/build\.sh\s+test)([^;&|\n]*)/);
+  const m = bare.match(/(?:\bctest\b|tools\/build\.sh\s+test)([^;&|\n]*)/);
   if (m) {
-    const args = m[1];
+    const end = m.index + m[0].length;
+    const args = body.slice(end - m[1].length, end);
     if (args.includes('--full-gate') || args.includes('--changed')) return null;
     const r = args.match(/-R\s+('([^']*)'|"([^"]*)"|(\S+))/);
     if (!r) return 'a test run with no -R pattern runs the whole suite.';
@@ -151,7 +155,7 @@ function main() {
       'run_in_background and you are notified when it ends.');
   }
   // A light agent may RUN an already-built program through the queue (a render), never compile or run a test suite
-  if (aid && /(cmake\s+--build|\bctest\b|\bmake\b|\bninja\b|xcodebuild|tools\/build\.sh\s+(build|test))/.test(stripHeredocs(cmd)) && lightAgent(ev)) {
+  if (aid && /(cmake\s+--build|\bctest\b|\bmake\b|\bninja\b|xcodebuild|tools\/build\.sh\s+(build|test))/.test(maskQuotes(stripHeredocs(cmd))) && lightAgent(ev)) {
     return refuse('this agent was started as KIND: light, and light agents do not build or run tests (at most 3 build agents run at once, ' +
       'Tim 2026-10-11). Do the light part, and say in your report what needs building.');
   }
@@ -199,6 +203,9 @@ function selftest() {
     ['bash tools/build.sh build build SynthFaceProbe Synth_Standalone', false], ['cmake --build build --target SynthBankProbe -j5', false],
     ['bash tools/build.sh test build --output-on-failure', true], ['ctest --test-dir build -j3', true],
     ["bash tools/build.sh test build -R 'record' --output-on-failure", false], ["ctest --test-dir build -R 'gate'", true],
+    // a note or title that names the test runner is not a test run; a real bare run after a quoted note still is
+    ['python3 tools/step.py save "the look gate hung inside ctest"', false], ["python3 tools/next_number.py wb --take 'ctest holds the turn'", false],
+    ['git commit -m "ctest: fix"', false], ['python3 tools/step.py save "note" && bash tools/build.sh test build', true],
     ['bash tools/build.sh test build --full-gate', false], ['bash tools/build.sh test build --changed', false],
   ]);
   for (const b of bad) console.error(`build-guard selftest FAILED: ${b}`);
