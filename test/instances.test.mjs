@@ -56,3 +56,10 @@ test('a brief never names a fixed instance: the subagent rule says so', () => {
   const rule = readFileSync(join(dir, '.claude/rules/subagent-dispatch.md'), 'utf8');
   assert.match(rule, /never name a fixed instance/i);
 });
+
+test('CLAUDE.md names claude-packs as the source of truth: a fix goes into the kit, committed and released', () => {
+  const dir = project();
+  const md = readFileSync(join(dir, 'CLAUDE.md'), 'utf8');
+  assert.match(md, /claude-packs .*is the source of truth for every rule, check, hook and skill/);
+  assert.match(md, /committed, pushed and released as a new version/);
+});
