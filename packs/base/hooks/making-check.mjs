@@ -176,7 +176,9 @@ function guard(event, problems) {
   let st = {};
   try { st = JSON.parse(readFileSync(file, 'utf8')); } catch { /* first */ }
   const hash = createHash('sha1').update(problems.join('\n')).digest('hex');
-  const count = problems.length && st.hash === hash && event.stop_hook_active ? (st.count ?? 0) + 1 : problems.length ? 1 : 0;
+  // consecutive stops with the same findings count whether or not the host marks them as a continuation (stop_hook_active):
+  // a host that delivers each send-back as a new turn reset the count to 1 every time, and the limit was never reached (KWB-7)
+  const count = problems.length && st.hash === hash ? (st.count ?? 0) + 1 : problems.length ? 1 : 0;
   try { writeFileSync(file, JSON.stringify({ hash, count })); } catch { /* the check still runs */ }
   return count > MAX_SENDS;
 }

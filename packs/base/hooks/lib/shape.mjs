@@ -90,9 +90,17 @@ export const isExcluded = (rel, shape) => rel === SHAPE_FILE || matchesAny(rel, 
 export const isTestFile = (rel) => /(^|\/)(test|tests|probes)\//.test(rel) || /test|_probe/i.test(rel.split('/').pop());
 
 // The line opens with "seen in:" or "example:", after comment marks, a bullet, a heading mark or a table bar.
-const EXAMPLE = /^\s*(?:(?:[-*+>|]|\d+[.)]|\/\/+|\/\*+|#+|<!--|--|;+)\s*)*(?:seen in|example)\s*:/i;
-const EXAMPLE_CELL = /^\s*\|.*\|\s*(?:seen in|example)\s*:/i;
-export const isExampleLine = (line) => EXAMPLE.test(line) || EXAMPLE_CELL.test(line);
+// The leading marks are stripped one at a time in a loop, never by one regex with a repeated group of marks that can each be "-"
+// or "--": on a long row of dashes that cannot match, that regex tried every split of the dashes, exponential in the length (KWB-6:
+// a 75-dash comment in a CMakeLists hung shape scan, shape-law and brief-guard).
+const MARK = /^\s*(?:[-*+>|]|\d+[.)]|\/\/+|\/\*+|#+|<!--|;+)/;
+const OPENS = /^\s*(?:seen in|example)\s*:/i;
+const EXAMPLE_CELL = /^\s*\|[^\n]*\|\s*(?:seen in|example)\s*:/i;
+export function isExampleLine(line) {
+  let rest = line;
+  for (let m = rest.match(MARK); m && m[0].length; m = rest.match(MARK)) rest = rest.slice(m[0].length);
+  return OPENS.test(rest) || EXAMPLE_CELL.test(line);
+}
 
 const named = (line, name) => new RegExp(`(?<![\\w])${esc(name)}(?![\\w])`).test(line);
 export function classify(line, concept, shape) {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.3 (2026-11-01)
+
+- The shape reader's "seen in:" / "example:" test is linear: a long row of dashes (a 75-dash comment in a CMakeLists) made its regex
+  backtrack exponentially and hung `shape scan`, shape-law and brief-guard (KWB-6: 202 characters took 109 s). test/example-line.test.mjs.
+- making-check's limit of three identical send-backs holds when the host delivers each send-back as a new turn (KWB-7).
+
 ## 0.9.2 (2026-11-01)
 
 - brief-guard excuses a declared constant read by name (the number rule's third form), as well as a `seen in:` / `example:` line; a

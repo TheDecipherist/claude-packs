@@ -72,6 +72,13 @@ export function selftest(hookUrl) {
       turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s, active: true });
       return turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s, active: true });
     })(), 0],
+    ['the limit holds when each send-back comes as a new turn (no stop_hook_active; KWB-7)', (() => {
+      const s = 'loop-new-turns';
+      turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
+      turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
+      turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
+      return turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
+    })(), 0],
     ['a turn sent back is judged with what it wrote before the feedback', (() => {
       const fb = { type: 'user', isMeta: true, message: { content: 'Stop hook feedback: making-check sent this turn back' } };
       return turn([W('src/slot/gain.cpp', slotCode), [fb], [say('Done.')]], { making: '' });
