@@ -3,7 +3,8 @@
 ## 0.9.1 (2026-11-01)
 
 - layout: `keepWorktrees` (build-sweep's never-swept worktrees, 0.8.0) is project-owned and kept through `update`; the first update after
-  0.8.0 dropped it, as 0.7.2 dropped `buildOutput`. test/layout-owned.test.mjs covers it (red without the fix).
+  0.8.0 dropped it, as 0.7.2 dropped `buildOutput`. test/layout-owned.test.mjs covers it (red without the fix), and a new test fails
+  when any layout key the kit's hooks or tools read is neither written by the layout builder nor project-owned, so a third key cannot be lost.
 
 ## 0.9.0 (2026-11-01): the shape law
 
