@@ -45,7 +45,9 @@ test('not instances: buffer[1], channel == 1, pos[0], a loop to kSlots, a seen-i
   const dir = withShape(project());
   for (const good of ['float s = buffer[1];', 'if (channel == 1) s = 0;', 'float x = pos[0];', 'for (int slot = 0; slot < kSlots; slot++) run(slot);',
     'auto& v = slots[slot];', '// seen in: slot 2 was special once (B-178)', 'if (slots == kSlots) full = true;'])
-    assert.equal(write(dir, 'src/audio/Engine.cpp', `void f() { ${good} }\n`).status, 0, good);
+    assert.equal(write(dir, 'src/audio/Engine.cpp', good.startsWith('//') ? `${good}\nvoid f() {}\n` : `void f() { ${good} }\n`).status, 0, good);
+  // a seen-in after code on the same line is no example: the code itself must be the loop or the generator
+  assert.equal(write(dir, 'src/audio/Engine.cpp', 'void f() { if (slot == 2) g(); } // seen in: slot 2\n').status, 2);
 });
 
 test('an instance ID written in a code string is refused; generated from the index, on a seen-in line or in excluded data, it passes', () => {
