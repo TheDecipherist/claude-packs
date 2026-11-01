@@ -265,7 +265,12 @@ test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable
   const dir = tmp();
   execFileSync('node', [join(kit052, 'bin/claude-packs.mjs'), 'init', 'audio-core', 'gpu-painter', '--dir', dir], { encoding: 'utf8' });
   const before = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
+  // 0.9.0 (KWB-1): an older synth fails doctor until it writes design/shape.json; the shape hooks are the law and switch on
+  assert.throws(() => run(dir, 'update'), (e) => /no design\/shape\.json: a synth writes down/.test(String(e.stdout)));
+  mkdirSync(join(dir, 'design'), { recursive: true });
+  writeFileSync(join(dir, 'design/shape.json'), '{ "concepts": {}, "exclude": [] }\n');
   const out = run(dir, 'update');
+  assert.doesNotMatch(out, /shape-law|brief-guard/, 'switched on by the first update already');
   for (const item of ['hooks/git-guard.mjs', 'hooks/build-guard.mjs', 'hooks/time-guard.mjs', 'hooks/tims-asks.mjs', 'hooks/idle-wake.mjs', 'hooks/browser-guard.py', 'checks/no-opengl.json', 'checks/no-code-after-midline-comment.json']) {
     assert.match(out, new RegExp(`held back, not switched on .*${item.replace(/[./]/g, (c) => `\\${c}`)}`), item);
     assert.ok(!existsSync(join(dir, '.claude', item)), `${item} not installed`);
