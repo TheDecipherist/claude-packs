@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.3 (2026-11-01)
+
+- layout: `buildOutput` is a project-owned key, kept through `update` (0.7.2 dropped it on the first update); test/layout-owned.test.mjs.
+
 ## 0.7.2 (2026-11-01)
 
 - build-guard: a quoted note or title that names the test runner is not a test run (`step.py save "... ctest ..."`, `--take '...'`,
