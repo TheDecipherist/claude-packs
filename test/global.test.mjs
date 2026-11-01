@@ -26,8 +26,8 @@ test('global add keeps existing settings and user files, remove undoes only ours
   const s = JSON.parse(readFileSync(join(home, '.claude', 'settings.json'), 'utf8'));
   assert.equal(s.model, 'opus');
   assert.equal(s.hooks.PreToolUse.length, 3, 'ours added once (version-pin-guard; shell-traps on Bash), theirs kept');
-  assert.equal(s.hooks.PreToolUse.flatMap((g) => g.hooks).filter((h) => /shell-traps\.py/.test(h.command)).length, 1);
-  assert.equal(s.hooks.SessionStart.flatMap((g) => g.hooks).filter((h) => /gnu-shell\.py/.test(h.command)).length, 1);
+  assert.equal(s.hooks.PreToolUse.flatMap((g) => g.hooks).filter((h) => /node "\$HOME\/\.claude\/hooks\/shell-traps\.mjs"/.test(h.command)).length, 1);
+  assert.equal(s.hooks.SessionStart.flatMap((g) => g.hooks).filter((h) => /node "\$HOME\/\.claude\/hooks\/gnu-shell\.mjs"/.test(h.command)).length, 1);
   assert.match(cli(home, 'doctor'), /OK/);
   cli(home, 'remove');
   const after = JSON.parse(readFileSync(join(home, '.claude', 'settings.json'), 'utf8'));
@@ -72,11 +72,12 @@ test('global add installs exactly latest-versions, gnu-shell and shell-traps, an
   const hooks = join(claude, 'hooks');
   mkdirSync(hooks, { recursive: true });
   const pkg = (f) => fileURLToPath(new URL(`../global/hooks/${f}`, import.meta.url));
-  writeFileSync(join(hooks, 'shell-traps.py'), readFileSync(pkg('shell-traps.py')));
+  writeFileSync(join(hooks, 'shell-traps.mjs'), readFileSync(pkg('shell-traps.mjs')));
+  writeFileSync(join(hooks, 'gnu-shell.py'), '# the hand-installed Python forerunner\n');
   writeFileSync(join(hooks, 'build-guard.py'), '# the hand-kept one\n');
   const buildEntry = { matcher: 'Bash', hooks: [{ type: 'command', command: 'python3 "$HOME/.claude/hooks/build-guard.py"' }] };
   writeFileSync(join(claude, 'settings.json'), JSON.stringify({ hooks: {
-    PreToolUse: [buildEntry, { matcher: 'Bash', hooks: [{ type: 'command', command: 'python3 "$HOME/.claude/hooks/shell-traps.py"' }] }],
+    PreToolUse: [buildEntry, { matcher: 'Bash', hooks: [{ type: 'command', command: 'node "$HOME/.claude/hooks/shell-traps.mjs"' }] }],
     SessionStart: [{ hooks: [{ type: 'command', command: 'python3 "$HOME/.claude/hooks/gnu-shell.py"' }] }],
   } }));
   const out = cli(home, 'add');
@@ -84,22 +85,26 @@ test('global add installs exactly latest-versions, gnu-shell and shell-traps, an
   const list = (dir, base = '') => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? list(join(dir, e.name), `${base}${e.name}/`) : [`${base}${e.name}`]));
   assert.deepEqual(list(claude).sort(), [
     'claude-packs-global.json', 'hooks/build-guard.py', 'hooks/claude-packs/lib/shell-writes.mjs', 'hooks/claude-packs/version-pin-guard.mjs',
-    'hooks/gnu-shell.py', 'hooks/shell-traps.py', 'settings.json', 'skills/latest-versions/SKILL.md',
-  ], 'the three pieces, and the hand-kept build-guard untouched');
+    'hooks/gnu-shell.mjs', 'hooks/gnu-shell.py', 'hooks/shell-traps.mjs', 'settings.json', 'skills/latest-versions/SKILL.md',
+  ], 'the three pieces; the hand-kept build-guard and the Python forerunner left as they were');
   assert.deepEqual(Object.keys(JSON.parse(readFileSync(join(claude, 'claude-packs-global.json'), 'utf8')).files).sort(), [
-    'hooks/claude-packs/lib/shell-writes.mjs', 'hooks/claude-packs/version-pin-guard.mjs', 'hooks/gnu-shell.py', 'hooks/shell-traps.py', 'skills/latest-versions/SKILL.md',
+    'hooks/claude-packs/lib/shell-writes.mjs', 'hooks/claude-packs/version-pin-guard.mjs', 'hooks/gnu-shell.mjs', 'hooks/shell-traps.mjs', 'skills/latest-versions/SKILL.md',
   ]);
   assert.equal(readFileSync(join(hooks, 'build-guard.py'), 'utf8'), '# the hand-kept one\n');
   const s = JSON.parse(readFileSync(join(claude, 'settings.json'), 'utf8'));
   const all = Object.values(s.hooks).flat().flatMap((g) => g.hooks).map((h) => h.command);
-  for (const name of ['shell-traps.py', 'gnu-shell.py', 'version-pin-guard.mjs', 'build-guard.py']) assert.equal(all.filter((c) => c.includes(name)).length, 1, name);
-  assert.ok(!existsSync(join(hooks, 'shell-traps.py.pack-new')), 'an identical copy is taken over, not shadowed');
-  const gnu = readFileSync(join(hooks, 'gnu-shell.py'), 'utf8');
+  for (const name of ['shell-traps.mjs', 'gnu-shell.mjs', 'version-pin-guard.mjs', 'build-guard.py']) assert.equal(all.filter((c) => c.includes(name)).length, 1, name);
+  assert.ok(!all.some((c) => c.includes('gnu-shell.py')), 'the forerunner\'s entry is replaced');
+  assert.ok(!existsSync(join(hooks, 'shell-traps.mjs.pack-new')), 'an identical copy is taken over, not shadowed');
+  const gnu = readFileSync(join(hooks, 'gnu-shell.mjs'), 'utf8');
   assert.match(gnu, /\$HOME\/\.claude\/bin/);
   assert.match(gnu, /ZSH_VERSION/);
-  for (const f of ['shell-traps.py', 'gnu-shell.py']) assert.equal(spawnSync('python3', [pkg(f), '--selftest'], { env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } }).status, 0, f);
+  for (const f of ['shell-traps.mjs', 'gnu-shell.mjs']) assert.equal(spawnSync('node', [pkg(f), '--selftest']).status, 0, f);
+  assert.match(cli(home, 'doctor'), /OK/);
   assert.ok(!existsSync(fileURLToPath(new URL('../global/hooks/build-guard.py', import.meta.url))), 'build-guard is not global');
-  assert.ok(existsSync(fileURLToPath(new URL('../packs/base/hooks/build-guard.py', import.meta.url))), 'build-guard is a base-pack hook');
+  assert.ok(existsSync(fileURLToPath(new URL('../packs/base/hooks/build-guard.mjs', import.meta.url))), 'build-guard is a base-pack hook');
+  const kitHooks = (d) => readdirSync(fileURLToPath(new URL(d, import.meta.url))).filter((f) => /\.(py|mjs)$/.test(f));
+  assert.deepEqual(kitHooks('../global/hooks/').filter((f) => f.endsWith('.py')), [], 'every global hook is Node');
   assert.match(readFileSync(fileURLToPath(new URL('../README.md', import.meta.url)), 'utf8'), /Global by design: they fix this machine's shell for Claude, not any project's rules\./);
   cli(home, 'remove');
   const after = JSON.parse(readFileSync(join(claude, 'settings.json'), 'utf8'));

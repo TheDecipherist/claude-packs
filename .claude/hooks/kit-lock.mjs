@@ -10,7 +10,7 @@
 //   node .claude/hooks/kit-lock.mjs take <session> [branch]   take the lock by hand (a session with no hook yet)
 //   node .claude/hooks/kit-lock.mjs --selftest
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writesOf } from '../../packs/base/hooks/lib/writes.mjs';
@@ -81,7 +81,8 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
-if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
+const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
+if (process.argv[1] && real(process.argv[1]) === real(fileURLToPath(import.meta.url))) {
   const [cmd, session, branch] = process.argv.slice(2);
   if (cmd === '--selftest') process.exit(selftest());
   else if (cmd === 'take') { console.log(JSON.stringify(take(resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), session, branch))); process.exit(0); }

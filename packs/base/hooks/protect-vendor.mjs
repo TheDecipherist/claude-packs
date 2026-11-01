@@ -10,14 +10,16 @@
 //    moment its folder is declared with "kind": "copy".
 // One law, read-only paths: the separate copy-tree guard (copy-tree-guard.py) is merged in here.
 // A path in an agent worktree (.claude/worktrees/<name>/...) is judged as the same path in the project.
+// A nested clone under build/_deps is vendored code too (Sub37 WB-2: checkoutRoot counts only this repo's worktrees).
 // `--selftest` plants a write into each kind of read-only path and lets the allowed ones through.
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { matchesAny } from './lib/glob.mjs';
 import { foldersOfKind, readLayout } from './lib/layout.mjs';
 import * as project from './lib/project.mjs';
+import { editOf, git, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
 
 const DEFAULT_GLOBS = ['JUCE/**', '**/JUCE/modules/**', 'JuceLibraryCode/**', 'libs/**', 'third_party/**', 'external/**', '_deps/**', 'build/**'];
@@ -105,8 +107,31 @@ async function selftest() {
   process.chdir(cwd);
   for (const x of bad) console.error(`protect-vendor selftest FAILED on ${JSON.stringify(x.tool_input)}`);
   rmSync(root, { recursive: true, force: true });
-  console.log(`protect-vendor selftest: ${refused.length} writes into read-only paths refused, ${passed.length} others let through: ${bad.length ? 'FAIL' : 'PASS'}`);
+  console.log(`protect-vendor routes: ${refused.length} writes into read-only paths refused, ${passed.length} others let through: ${bad.length ? 'FAIL' : 'PASS'}`);
   return bad.length ? 1 : 0;
 }
 
-process.exit(process.argv.includes('--selftest') ? await selftest() : main());
+// A git project with FetchContent's JUCE clone under build/_deps and an agent worktree.
+function selftestRepo() {
+  const hook = fileURLToPath(import.meta.url);
+  const dir = scratchProject({ 'src/dsp/Svf.cpp': '// svf\n', 'design/ref.md': 'x\n' }, { folders: {}, concepts: {}, protected: ['design/**'] });
+  git(dir, 'init', '-q');
+  git(dir, 'add', 'src', '.claude');
+  git(dir, 'commit', '-qm', 'init');
+  git(dir, 'worktree', 'add', '-q', '.claude/worktrees/agent-x', '-b', 'work/x');
+  put(join(dir, 'build/_deps/juce-src/modules/juce_core/juce_core.h'), '// juce\n');
+  git(join(dir, 'build/_deps/juce-src'), 'init', '-q');
+  const wt = join(dir, '.claude/worktrees/agent-x');
+  const e = (file) => runHook(hook, dir, editOf(join(dir, file)));
+  return verdicts('protect-vendor', [
+    ['our own source', e('src/dsp/Svf.cpp'), 0],
+    ['JUCE modules', e('JUCE/modules/juce_core/juce_core.h'), 2],
+    ['a nested clone under build/_deps (Sub37 WB-2)', e('build/_deps/juce-src/modules/juce_core/juce_core.h'), 2],
+    ['a layout "protected" glob', e('design/ref.md'), 2],
+    ['a worktree file is judged in the worktree', runHook(hook, dir, editOf(join(wt, 'src/dsp/Svf.cpp'))), 0],
+    ['a worktree\'s vendored folder', runHook(hook, dir, editOf(join(wt, 'third_party/lib/lib.h'))), 2],
+    ['another project is not ours', runHook(hook, dir, editOf(join(dirname(dir), 'elsewhere/JUCE/x.h'))), 0],
+  ]);
+}
+
+process.exit(process.argv.includes('--selftest') ? ((await selftest()) | selftestRepo()) : main());

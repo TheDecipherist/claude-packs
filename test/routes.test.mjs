@@ -69,9 +69,12 @@ const RT_BAD = 'void Voice::processBlock (juce::AudioBuffer<float>& b, juce::Mid
 const APVTS = 'void Filter::prepare (juce::AudioProcessorValueTreeState& apvts) { cutoff = apvts.getRawParameterValue ("cutoff"); }';
 const LAUNCH = `const b = await puppeteer.${'launch'}();`;
 
-test('folder-law refuses a new source file outside the layout by every route', () => {
+// folder-law's law is about CREATING a file: the routes that can create one. An Edit, MultiEdit, NotebookEdit or
+// sed -i of a file that is not there fails by itself (Sub37 WB-4's selftest: "an edit is never a new file").
+test('folder-law refuses a new source file outside the layout by every route that creates a file', () => {
   const dir = project();
   const missed = unrefused(dir, 'folder-law.mjs', 'stray/New.cpp', null, 'int x;', {
+    routes: ROUTES.filter((r) => !['Edit', 'MultiEdit', 'NotebookEdit', 'Bash sed -i'].includes(r)),
     before: (t) => { try { execFileSync('rm', ['-f', t]); } catch { /* not there */ } },
   });
   assert.deepEqual(missed, []);

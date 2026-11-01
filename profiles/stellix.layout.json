@@ -278,7 +278,8 @@
     "git": {
       "safeRestore": "python3 tools/safe_restore.py <paths>",
       "branchStart": "python3 tools/step.py start <STEP> \"task\" (work that is not a step: start --work <name> \"task\")",
-      "refuseTrunk": true
+      "refuseTrunk": true,
+      "house": true
     },
     "copy": {
       "tools": [
@@ -305,7 +306,7 @@
     }
   },
   "enable": [
-    "hooks/tims-asks.py",
-    "hooks/idle-wake.py"
+    "hooks/tims-asks.mjs",
+    "hooks/idle-wake.mjs"
   ]
 }

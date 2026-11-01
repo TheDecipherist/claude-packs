@@ -117,12 +117,12 @@
           },
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs\"",
             "timeout": 15
           },
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-guard.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-guard.mjs\"",
             "timeout": 15
           }
         ]
@@ -132,7 +132,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
             "timeout": 15
           }
         ]
@@ -144,7 +144,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
             "timeout": 15
           }
         ]
@@ -155,7 +155,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.mjs\"",
             "asyncRewake": true,
             "timeout": 1000
           }
@@ -168,7 +168,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/tims-asks.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tims-asks.mjs\"",
             "timeout": 15
           }
         ]
@@ -208,7 +208,7 @@
     }
   },
   "optIn": [
-    "hooks/tims-asks.py",
-    "hooks/idle-wake.py"
+    "hooks/tims-asks.mjs",
+    "hooks/idle-wake.mjs"
   ]
 }

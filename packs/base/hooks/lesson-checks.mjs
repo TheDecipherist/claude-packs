@@ -71,7 +71,7 @@ function main() {
     const checks = loadChecks();
     const problems = selftest(checks);
     for (const p of problems) console.error(p);
-    console.log(problems.length ? `${problems.length} problem(s)` : `${checks.length} checks OK`);
+    console.log(problems.length ? `${problems.length} problem(s)` : `lesson-checks selftest: OK (${checks.length} checks)`);
     return problems.length ? 1 : 0;
   }
 
