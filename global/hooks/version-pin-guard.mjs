@@ -4,7 +4,7 @@
 // PreToolUse on Write|Edit|MultiEdit|Bash. Exit 2 blocks; stderr goes back to Claude.
 // `node version-pin-guard.mjs --selftest` proves every extractor and the age check.
 import { existsSync, readFileSync } from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 
 const MAX_AGE = Number(process.env.VERSION_GUARD_DAYS ?? 14);
 const DAY = 86_400_000;
@@ -144,15 +144,22 @@ export function verdict(pins, dates, now = Date.now()) {
   return problems;
 }
 
-function projectRoot(start) {
-  if (process.env.CLAUDE_PROJECT_DIR) return process.env.CLAUDE_PROJECT_DIR;
+// The project the pin is written in: the nearest folder above it with docs/versions.md or .git
+// (a file in a git worktree), so an agent worktree and a sibling project read their own table.
+// CLAUDE_PROJECT_DIR is only the fallback, and for a worktree that carries no versions.md.
+export function projectRoot(start, env = process.env.CLAUDE_PROJECT_DIR) {
   let d = resolve(start);
+  let found = null;
   for (;;) {
-    if (existsSync(join(d, '.git')) || existsSync(join(d, 'docs', 'versions.md'))) return d;
+    if (existsSync(join(d, '.git')) || existsSync(join(d, 'docs', 'versions.md'))) { found = d; break; }
     const up = dirname(d);
-    if (up === d) return resolve(start);
+    if (up === d) break;
     d = up;
   }
+  if (!found) return env ?? resolve(start);
+  const has = (root) => existsSync(join(root, 'docs', 'versions.md'));
+  if (!has(found) && env && has(env) && !relative(resolve(env), found).startsWith('..')) return env;
+  return found;
 }
 
 // ---------- hook ----------

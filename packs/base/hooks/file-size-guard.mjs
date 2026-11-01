@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { extname, relative } from 'node:path';
 import { computeEdit } from './lib/apply-edit.mjs';
 import { matchesAny } from './lib/glob.mjs';
-import { checkoutRoot } from './lib/project.mjs';
+import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -35,7 +35,7 @@ function main() {
   const rel = relative(root, input.file_path);
   const result = computeEdit(payload.tool_name, input);
   if (!result) return 0;
-  const msg = verdict(rel, result.before, result.after, readLayout(root).maxFileLines ?? 300);
+  const msg = verdict(rel, result.before, result.after, readLayout(claudeRoot(input.file_path)).maxFileLines ?? 300);
   if (!msg) return 0;
   process.stderr.write(msg);
   return 2;

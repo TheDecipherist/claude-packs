@@ -8,7 +8,7 @@ import { extname, relative } from 'node:path';
 import { computeEdit } from './lib/apply-edit.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout } from './lib/layout.mjs';
-import { insideProject, checkoutRoot } from './lib/project.mjs';
+import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const CODE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.wgsl', '.metal', '.hlsl']);
@@ -40,7 +40,7 @@ function main() {
   const rel = relative(root, input.file_path).replace(/\\/g, '/');
   const edit = computeEdit(payload.tool_name, input);
   if (!edit) return 0;
-  const hit = misplaced(readLayout(root), rel, edit.before, edit.after);
+  const hit = misplaced(readLayout(claudeRoot(input.file_path)), rel, edit.before, edit.after);
   if (!hit) return 0;
   process.stderr.write(
     `BLOCKED by placement-law: ${rel} holds ${hit.kind.what} (kind "${hit.name}").\n` +

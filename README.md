@@ -47,7 +47,7 @@ npx claude-packs list               show the packs
 2. Bring project.md back. The packs' layout, concepts, rules and skill triggers get tuned to it.
 
 ## Install from the tarball
-`npm i -D ./thedecipherist-claude-packs-0.4.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
+`npm i -D ./thedecipherist-claude-packs-0.6.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
 
 ## The one global piece: latest-versions
 
@@ -75,6 +75,7 @@ Each item does one job and loads only where its paths match.
 |---|---|---|---|
 | hook | `file-size-guard` | mddkit (made blocking) | refuses an edit that would grow a source file past `layout.maxFileLines` (300); shrinking is always allowed |
 | hook | `stage-guard` | MDD v1 bug | refuses `git add -A/./--all`, `commit -a`, and staging `.env`/keys (off in the Stellix profile: house git-guard) |
+| hook | `git-guard` | Sub37 WB-3 (0.6.0) | refuses a git command that would write a token URL into git config (`push -u`, `remote add/set-url`, `clone`, `config`) |
 | hook | `frozen-files` | mddkit test-freeze | refuses edits to files on `.claude/state/frozen.json` |
 | tool | `freeze.mjs on "<why>" <globs>` / `off` | mddkit | freezes the test, golden renders and fingerprints that define "fixed" |
 | tool | `test-verdict.mjs [--red a,b] [-R re] [-- cmd]` | mddkit mdd-test, MDD red gate | runs the tests and prints only the JSON verdict (exit 0 = as required, 1 = real failure, 2 = runner broken); full log in `.claude/state/last-test.log` |
@@ -100,7 +101,7 @@ You often roll a lesson out to many projects from one session. Nothing here may 
 - **This project's hooks judge only this project's files.** Every hook checks `insideProject()` (`hooks/lib/project.mjs`) first, and Bash checks ignore commands that `cd`/`git -C` into another folder. `test/other-projects.test.mjs` fires every hook at edits in a sibling project and requires that none block.
 - **Access to sibling projects.** `layout.siblings` (the Stellix profile sets `["../"]`) is merged into `permissions.additionalDirectories` in `.claude/settings.json`, so reading and editing `../tabula`, `../echofold`… needs no extra prompts. Claude Code applies it after you accept the folder's trust prompt once. Entries you add yourself are never removed.
 - **Roll package updates out everywhere:** `npx claude-packs update-all ~/projects/*` updates and doctors every project that already has claude-packs, and skips the rest. Each project's own edits and `.pack-new` rules apply as usual.
-- **What still applies everywhere, by design:** the global `version-pin-guard` (it reads the *target* project's own `docs/versions.md`), and `stage-guard` (stage by name in any repo).
+- **What still applies everywhere, by design:** the global `version-pin-guard` (it reads the *target* project's own `docs/versions.md`), `stage-guard` (stage by name in any repo), and `git-guard` (a token is never stored in any repo's config).
 - **The other project's own laws** only run when the session is in that project. For real code work there, `/cd ../tabula` (Claude Code 2.1.246+ loads that project's hooks and rules) or open a session there; edits made from here skip its hooks.
 
 ## The firm structure: what goes where (0.3.0)
@@ -129,3 +130,32 @@ A tailored project (the Stellix profile) carries its own `kinds`. Edit `kinds` a
 | skill | `analyse-reference-look` | measure a reference picture into numbers before building | B-161 |
 
 The cross-project project guard Stellix carried (WB-64) is not in this package and never should be: README "Working across projects".
+
+## Worktrees for every hook, and the Sub37 profile (0.5.0)
+
+| Kind | Name | What changed |
+|---|---|---|
+| fix | `param-id-lock` | scans and locks the edited file's own checkout and skips `.claude/`, so a worktree's copy can no longer hide an id main dropped, and a worktree's new ids go into its own lock |
+| fix | `lesson-checks` | reads checks and layout from the file's own checkout |
+| fix | `spec-lock` | a shell command that writes a worktree's spec is refused like one that writes main's |
+| fix | `no-shipped-images` | an image written into a worktree's code folders is refused |
+| fix | `version-pin-guard` (global) | reads `docs/versions.md` from the checkout the pin is written in; `CLAUDE_PROJECT_DIR` is only the fallback. Run `npx claude-packs global add` to install it |
+| fix | layout readers | a worktree with its own `layout.json` is judged by it, else by main's (`claudeRoot`) |
+| test | `worktrees.test.mjs` | runs every installed hook in a real git worktree, and fails when a hook is added without a worktree case |
+| test | `structure.test.mjs` | locks in the CLAUDE.md block rules, the control, look and anchor rules, and both skills |
+| profile | `sub37` | `init audio-core --profile sub37`: the synthkit template's tree as it is (docs/project.md answer b). Flat `src/` is the app folder, `src/engine` the audio code, probes stay in `tools/`, `design/reference` is read-only |
+| layout | `paramIds` | `{ "extensions", "patterns" }` tells `param-id-lock` where ids are written when they are not `ParameterID` literals. Sub37 reads its generated header and the binding ids in `panel/bindings.json`. Then run `node .claude/hooks/param-id-lock.mjs --init` once |
+| fix | placement-law `editor` kind | matches the out-of-class form a .cpp uses (`void Panel::paint (juce::Graphics& g)`) as well as `void paint (...)`. An install whose layout.json holds the old pack pattern gets the new one on `update`; a pattern the project wrote is kept |
+
+## Fixes from Sub37's first install (0.6.0)
+
+Sub37's `workflow-bugs.md` WB-1 to WB-4. Each has a test in `test/sub37-wb.test.mjs` that was seen failing before the fix.
+
+| # | Kind | Name | What changed |
+|---|---|---|---|
+| WB-2 | fix | `checkoutRoot` | a file's checkout is the project itself, or a git worktree of it (a `.git` *file* whose gitdir lies in this repo's `worktrees/`). Any other nested `.git` (FetchContent's `build/_deps/juce-src`, a vendored repo, a submodule) is part of the project, so `protect-vendor` refuses edits inside it again |
+| WB-1 | fix | coverage | walks `.claude/skills`, `.claude/rules` and `.claude/agents` (also nested ones), so rules on the `claude` concept no longer look dead in `doctor --strict`. Worktrees, hooks and state under `.claude/` stay out |
+| WB-3 | hook | `git-guard` | refuses a git command that would store a token URL in git config: `push -u`/`--set-upstream` to a URL with `user:secret@`, `$VAR@` or a bare token, `remote add`/`set-url`, `clone`, `submodule`, `config`. Pushing to a token URL without `-u` stores nothing and is allowed. It judges every git call, in any folder. The refusal masks the token |
+| WB-3 | doctor | token sweep | reads `.git/config` of the project, every nested repo (four levels down) and every repo in `layout.siblings`, and fails on a URL carrying a secret or a bare GitHub token. It names the key and masks the token |
+| WB-4 | selftests | every hook | `folder-law`, `frozen-files`, `protect-vendor`, `spec-lock`, `realtime-guard`, `param-id-lock` and `no-shipped-images` gained `--selftest`. Each builds a throwaway project (`hooks/lib/selftest.mjs`) and runs the hook as Claude Code does, so nobody probes a hook by pasting a payload into a shell command. `doctor` runs every hook's selftest, in parallel, and notes a hook without one |
+| | test | `npm test` | each test process gets its own empty temp folder (`test/fresh-tmp.mjs`), so doctor's sibling sweep never reads the system temp folder |

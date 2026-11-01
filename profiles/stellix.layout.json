@@ -229,7 +229,7 @@
         "app",
         "tests"
       ],
-      "content": "\\bvoid\\s+paint\\s*\\(\\s*(juce::)?Graphics\\b"
+      "content": "\\bvoid\\s+(?:\\w+::)*paint\\s*\\(\\s*(?:juce::)?Graphics\\b"
     },
     "records": {
       "what": "fixed-id records, moons, factory patches",

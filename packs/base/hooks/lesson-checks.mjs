@@ -11,22 +11,23 @@ import { computeEdit } from './lib/apply-edit.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
-import { insideProject, checkoutRoot } from './lib/project.mjs';
+import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-const DIR = join(ROOT, '.claude', 'checks');
 
 // "concepts": [...] resolve through .claude/layout.json, the same map the rules trigger from.
-function loadChecks() {
+// A worktree file is judged by its own checkout's checks and layout (claudeRoot).
+function loadChecks(root = ROOT) {
+  const dir = join(root, '.claude', 'checks');
   let files = [];
   try {
-    files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
+    files = readdirSync(dir).filter((f) => f.endsWith('.json'));
   } catch {
     return [];
   }
-  const layout = readLayout(ROOT);
+  const layout = readLayout(root);
   return files.map((f) => {
-    const c = { file: f, ...JSON.parse(readFileSync(join(DIR, f), 'utf8')) };
+    const c = { file: f, ...JSON.parse(readFileSync(join(dir, f), 'utf8')) };
     const fromConcepts = (c.concepts ?? []).flatMap((k) => conceptGlobs(layout, k) ?? []);
     return { ...c, globs: [...resolveAliases(layout, c.globs ?? []), ...fromConcepts], exclude: resolveAliases(layout, c.exclude ?? []) };
   });
@@ -64,12 +65,11 @@ function selftest(checks) {
 }
 
 function main() {
-  const checks = loadChecks();
-
   if (process.argv.includes('--selftest')) {
+    const checks = loadChecks();
     const problems = selftest(checks);
     for (const p of problems) console.error(p);
-    console.log(problems.length ? `${problems.length} problem(s)` : `${checks.length} checks OK`);
+    console.log(problems.length ? `${problems.length} problem(s)` : `lesson-checks selftest: OK (${checks.length} checks)`);
     return problems.length ? 1 : 0;
   }
 
@@ -81,6 +81,7 @@ function main() {
   }
   const input = payload.tool_input ?? {};
   if (!input.file_path || !insideProject(input.file_path)) return 0;
+  const checks = loadChecks(claudeRoot(input.file_path));
   const rel = relative(checkoutRoot(input.file_path), input.file_path);
   const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []));
   if (relevant.length === 0) return 0;
