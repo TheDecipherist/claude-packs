@@ -4,7 +4,8 @@
 // Slot 2" headings went into nine agent briefs, and every brief got work built and proved on slot 2 alone.
 // Judged: an agent's prompt, and what a write ADDS to docs/** or inbox/** (by every write route, lib/writes.mjs). An
 // instance of a concept in design/shape.json (lib/shape.mjs: a number, an ordinal, a role name before a concept word, a
-// pattern, an array index) is allowed only on a "seen in:" or "example:" line; a selector or a constant does not excuse
+// pattern, an array index) is allowed only on a "seen in:" or "example:" line, or as a declared constant read by name (the
+// number rule's third form; KWB-4); a selector does not excuse
 // it here (a brief says "initSlot", not "slot 1"). The refusal quotes the manifest row and the fix: name the shape and
 // the generator; the instance is the example. Every refusal is counted per concept in .claude/usage.log. `--selftest`.
 import { readFileSync } from 'node:fs';
@@ -16,7 +17,7 @@ import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selfte
 import { writesOf } from './lib/writes.mjs';
 
 const BRIEFS = /^(docs|inbox)\//;
-const find = (shape) => (t) => findInstanceLiterals(t, 'brief.md', shape, { only: 'example' });
+const find = (shape) => (t) => findInstanceLiterals(t, 'brief.md', shape, { only: 'brief' });
 
 function refuse(where, findings, shape) {
   const lines = findings.slice(0, 8).map((f) => `  ${where}:${f.line}: "${f.text.length > 140 ? `${f.text.slice(0, 137)}...` : f.text}" names ${f.concept} instance ${f.instance} (${f.why})`);
@@ -72,7 +73,9 @@ function selftest() {
     ['agent: "drive slot 2"', agent('Build the delay. Drive slot 2 and check it sounds.'), 2],
     ['agent: "the PAD slot"', agent('Give the PAD slot its reverb.'), 2],
     ['agent: "the second slot"', agent('Wire the second slot.'), 2],
-    ['agent: "slot 1 (initSlot)": a constant is no excuse in a brief', agent('Start in slot 1 (initSlot).'), 2],
+    ['agent: a declared constant read by name passes (the number rule\'s third form)', agent('Start in slot 1 (initSlot).'), 0],
+    ['doc: the INIT line naming its declared constant passes', doc('docs/recipes.md', '**INIT** (the declared constant initSlot): one saw in slot 1.\n'), 0],
+    ['agent: a selector is still no excuse in a brief', agent('Use selectedSlot: drive slot 2.'), 2],
     ['agent: "seen in: slot 2, build for all slots"', agent('Fix the missing delay.\nseen in: slot 2, build for all slots'), 0],
     ['agent: quotes the manifest row (its reason names slot 1)', agent(`The slot row: INIT plays one saw in slot 1. Build for every slot with slotId(i, field).`), 0],
     ['agent: names the shape and the generator', agent('Every slot (many(4), slotId(i, field)) gets the delay; loop over all slots.'), 0],

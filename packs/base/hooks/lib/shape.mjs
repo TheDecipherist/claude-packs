@@ -9,6 +9,7 @@
 //   readShape(root) -> shape | null            null: no design/shape.json; shape.error: it does not parse
 //   validateShape(shape) -> [problem]          the rows that break the contract (doctor)
 //   findInstanceLiterals(text, file, shape, { only }) -> [{ line, text, concept, instance, why }]
+//     only: 'example' (just a seen in / example line excuses), 'brief' (that, or a declared constant read by name)
 //   classify(line, concept, shape) -> 'example' | 'selector' | 'constant' | null
 //   conceptOfType(name, shape) -> concept name | null
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
@@ -231,7 +232,8 @@ export function findInstanceLiterals(text, file, shape, { only = null } = {}) {
     if (sw) inSwitch = conceptOfExpr(sw[1].trim(), shape, aliases);
     for (const c of concepts) {
       const cls = classify(line, c, shape);
-      if (cls === 'example' || (cls && only !== 'example')) continue;
+      // only 'brief': an example or a declared constant read by name excuses it (the number rule's third form), a selector does not
+      if (cls === 'example' || (cls === 'constant' && only === 'brief') || (cls && only !== 'example' && only !== 'brief')) continue;
       const once = new Set();
       for (const h of lineHits(line, c, shape, aliases, inSwitch)) {
         if (once.has(h.instance)) continue;

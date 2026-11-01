@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.2 (2026-11-01)
+
+- brief-guard excuses a declared constant read by name (the number rule's third form), as well as a `seen in:` / `example:` line; a
+  selector still does not excuse an instance in a brief (KWB-4). Selftest 17 cases.
+- An install adds `.claude/usage.log` (brief-guard's refusal counter, a local log) to the project's .gitignore, so a step's save never
+  stops on it (KWB-4). test/gitignore.test.mjs.
+
 ## 0.9.1 (2026-11-01)
 
 - layout: `keepWorktrees` (build-sweep's never-swept worktrees, 0.8.0) is project-owned and kept through `update`; the first update after
