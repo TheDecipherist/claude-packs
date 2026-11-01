@@ -7,7 +7,7 @@ description: Use when the space stutters or feels slow, after painter or shader 
 
 ## Steps
 1. Build Release with the shipping flags, then run the project's `frame-bench` command (CLAUDE.md, Project commands) on the reference scenes, at 1x and 2x scale, with audio running at 96 voices.
-2. Read its JSON: p99 GPU ms (GL timer queries), p99 render-thread CPU ms, draw calls per frame, bytes uploaded per frame, and the validity flag of each counter.
+2. Read its JSON: p99 GPU ms (Dawn timestamp queries, opt-in, resolved and read back a frame or two later; the gpu-frame-budget rule), p99 render-thread CPU ms, draw calls per frame, bytes uploaded per frame, and the validity flag of each counter.
 3. Compare against `.claude/rules/gpu-frame-budget.md` (judged on the M1 Pro with 4 copies open; house proposal GPU ≤ 8 ms, painter CPU ≤ 2 ms at p99 until the work order sets numbers) and `gpu-frame-work.md` (≤ 50 draw calls).
 
 ## Report

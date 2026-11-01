@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1 (2026-10-31)
+
+- gpu-frame-bench: step 2 reads GPU time from Dawn timestamp queries (the painter is Dawn/WebGPU); it said GL timer queries, left from the OpenGL painter (found in Stellix's install).
+
 ## 0.7.0 (2026-10-31): the two 0.6.0 lines, merged
 
 Two sessions each released a claude-packs 0.6.0 on 2026-10-31, from different bases: main's line (from 0.5.0) and the
