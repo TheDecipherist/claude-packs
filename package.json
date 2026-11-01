@@ -20,7 +20,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "node --import ./test/fresh-tmp.mjs --test test/*.test.mjs"
+    "test": "node --import ./test/fresh-tmp.mjs --test test/*.test.mjs",
+    "test:changed": "node scripts/test-changed.mjs"
   },
   "license": "UNLICENSED",
   "private": true

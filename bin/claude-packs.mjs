@@ -33,6 +33,9 @@ const HELP = `usage: npx claude-packs <command> [options]
                      with a count, against design/shape.json; exit 1 when any
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
+  symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
+                     design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines)
+  symmetry run <concept>   that gate for one concept: every instance the same members, every pair swaps the same
   global add|remove|doctor
                      the global part, exactly three pieces: latest-versions (skill and
                      version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
@@ -108,6 +111,8 @@ async function main() {
       if (!run) throw new Error('use `global add`, `global remove` or `global doctor`');
       return run({ home, force });
     }
+    case 'symmetry':
+      return (await import('../packs/base/tools/shape-symmetry.mjs')).main([...rest, '--dir', dir]);
     case 'list':
       for (const name of availablePacks()) console.log(`${name.padEnd(12)} ${readPack(name).description}`);
       return 0;
