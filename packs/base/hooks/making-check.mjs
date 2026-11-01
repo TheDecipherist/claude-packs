@@ -123,7 +123,9 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
     const written = new Map();
     for (const w of judged) for (const c of conceptsIn(w.text ?? '', shape)) if (!written.has(c)) written.set(c, rel(w.path));
     const making = makingLines(root).join('\n');
-    if (written.size && !making) problems.push(`build.md's In progress entry for this step has no "making:" line, and this turn wrote ${[...written].map(([c, f]) => `${c} (${f})`).join(', ')}: write the line (what you are making; concepts: each with its shape; reuse: the one function, where it lives)`);
+    const wroteSource = judged.filter((w) => isSource(w.path)).map((w) => rel(w.path));
+    // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
+    if (!making && (written.size || wroteSource.length)) problems.push(`build.md's In progress entry for this step has no "making:" line, and this turn wrote ${written.size ? [...written].map(([c, f]) => `${c} (${f})`).join(', ') : [...new Set(wroteSource)].slice(0, 4).join(', ')}: write the line (what you are making; concepts: each with its shape; reuse: the one function, where it lives)`);
     else if (making) {
       const named = conceptsIn(making, shape);
       for (const [c, f] of written) if (!named.has(c)) problems.push(`the making line does not name ${c}, which this turn wrote (${f}): add it with its shape from design/shape.json, or take the write back`);
