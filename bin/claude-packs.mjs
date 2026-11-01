@@ -9,6 +9,7 @@ import { doctor } from '../lib/doctor.mjs';
 import { globalAdd, globalDoctor, globalRemove } from '../lib/global.mjs';
 import { readLock } from '../lib/manifest.mjs';
 import { newProject } from '../lib/new.mjs';
+import { dupScan } from '../lib/once-only-report.mjs';
 import { availablePacks, readPack } from '../lib/packs.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
@@ -36,6 +37,7 @@ const HELP = `usage: npx claude-packs <command> [options]
   symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
                      design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines)
   symmetry run <concept>   that gate for one concept: every instance the same members, every pair swaps the same
+  dup scan           every duplicated block (jscpd, the once-only hook's detector), listed by file
   global add|remove|doctor
                      the global part, exactly three pieces: latest-versions (skill and
                      version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
@@ -113,6 +115,9 @@ async function main() {
     }
     case 'symmetry':
       return (await import('../packs/base/tools/shape-symmetry.mjs')).main([...rest, '--dir', dir]);
+    case 'dup':
+      if (rest[0] !== 'scan') throw new Error('use `dup scan [--dir <project>]`');
+      return dupScan(dir);
     case 'list':
       for (const name of availablePacks()) console.log(`${name.padEnd(12)} ${readPack(name).description}`);
       return 0;

@@ -73,7 +73,7 @@ test('WB-3: doctor finds a token in any repo\'s .git/config and never prints it'
 function tokenRepo(dir) {
   git(dir, 'init', '-q');
   const doctor = () => spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' });
-  assert.doesNotMatch(doctor().stdout, /token/i);
+  assert.doesNotMatch(doctor().stdout, /PROBLEM.*token/i); // 0.9.0: doctor prints the making hook's model-token cost, never a git token
   git(dir, 'remote', 'add', 'origin', 'https://github.com/a/b.git');
   git(dir, 'config', 'branch.main.remote', 'https://x-access-token:ghp_SECRET1@github.com/a/b.git');
   let r = doctor();

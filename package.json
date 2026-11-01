@@ -16,6 +16,9 @@
     "README.md",
     "CHANGELOG.md"
   ],
+  "optionalDependencies": {
+    "jscpd": "5.4.2"
+  },
   "engines": {
     "node": ">=22"
   },

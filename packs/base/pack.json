@@ -114,6 +114,11 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/brief-guard.mjs\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/once-only.mjs\"",
+            "timeout": 20
           }
         ]
       },
@@ -178,6 +183,11 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.mjs\"",
             "asyncRewake": true,
             "timeout": 1000
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making-check.mjs\"",
+            "timeout": 60
           }
         ]
       }
@@ -210,6 +220,17 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
             "timeout": 15
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making.mjs\"",
+            "timeout": 10
           }
         ]
       }
@@ -249,7 +270,10 @@
   },
   "onByDefault": [
     "hooks/shape-law.mjs",
-    "hooks/brief-guard.mjs"
+    "hooks/brief-guard.mjs",
+    "hooks/once-only.mjs",
+    "hooks/making.mjs",
+    "hooks/making-check.mjs"
   ],
   "optIn": [
     "hooks/tims-asks.mjs",

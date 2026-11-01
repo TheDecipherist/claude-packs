@@ -123,6 +123,16 @@ test('browser-guard refuses code that starts a browser by every route', () => {
   assert.deepEqual(unrefused(project(), 'browser-guard.py', 'tools/shot.mjs', '// shot\nPLACEHOLDER\n', LAUNCH), []);
 });
 
+// once-only (0.9.0): a copy of a function the repo has, one line changed, is refused by every route that writes it.
+const SVF = (name, k = '2.0f') => `float ${name}::process (float x) noexcept\n{\n    const float g = std::tan (kPi * cutoff / sampleRate);\n    const float k = ${k} - 2.0f * resonance;\n` +
+  '    const float a1 = 1.0f / (1.0f + g * (g + k));\n    const float a2 = g * a1;\n    const float a3 = g * a2;\n    const float v3 = x - ic2eq;\n' +
+  '    const float v1 = a1 * ic1eq + a2 * v3;\n    const float v2 = ic2eq + a2 * ic1eq + a3 * v3;\n    ic1eq = 2.0f * v1 - ic1eq;\n    ic2eq = 2.0f * v2 - ic2eq;\n    return v2;\n}';
+test('once-only refuses a near-copy of existing code by every route', () => {
+  const dir = project();
+  put(join(dir, 'src/dsp/Svf.cpp'), `#include "Svf.h"\n\n${SVF('Svf')}\n`);
+  assert.deepEqual(unrefused(dir, 'once-only.mjs', 'src/dsp/Copy.cpp', '// copy\nPLACEHOLDER\n', SVF('Copy', '1.5f')), []);
+});
+
 // PostToolUse: the write has landed; every route that wrote an id file away is refused.
 test('param-id-lock refuses a lost parameter id by every route', () => {
   const dir = project();
