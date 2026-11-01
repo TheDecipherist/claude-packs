@@ -180,6 +180,7 @@ go in `layout.json` under `"guards"`; every key has a house default.
 | hook | `time-guard.mjs` | base | tells the caller when a call, a build, a ctest, a probe, a panel export, a headless Chrome or a wait loop runs long, or an agent's worktree goes unsaved; refuses a pgrep wait loop that can never end (a heredoc body is text, not a loop) | `time`: `probePattern`, `saveCommand` |
 | hook | `tims-asks.mjs` | base, **opt-in** | after a compaction, Tim's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |
 | hook | `idle-wake.mjs` | base, **opt-in** | after 15 minutes of silence, wakes the session with its open asks (Stop, asyncRewake) | – |
+| hook | `build-sweep.mjs` | base, **opt-in** | removes the build output (layout `buildOutput`, default `build/**`) of agent worktrees quiet for 2 hours; never sources, never the main checkout's build; warns at session start under 40 GB free (SessionStart, SubagentStop; `--now [--dry-run]` by hand) | – |
 | hook | `protect-vendor.mjs` | base | **merged with Stellix's copy-tree-guard**: a folder of `"kind": "copy"` is read-only like vendored code; only git and the sanctioned copy tools get through | `copy`: `tools` |
 | hook | `browser-guard.py` | gpu-painter | a natively drawn app never starts a browser; judges writes only inside its own project. The one Python hook left: its Node port waits until Stellix runs 0.7.0, because Stellix's installed browser-guard refuses writing a file that holds its selftest's planted launch samples (probed: exit 2 on `browser-guard.mjs`; it exempts only `browser-guard.py`) | `browser`: `pictureCommand` |
 | hook | `no-shipped-images.mjs` | stellix | its scope is now the project's | `images`: `guarded`, `allowed` |
@@ -192,7 +193,7 @@ go in `layout.json` under `"guards"`; every key has a house default.
 
 ### Nothing new switches on unless the project chose it
 
-- `init` and `add` bring every hook and check of the packs named, except the opt-in ones (`tims-asks`, `idle-wake`).
+- `init` and `add` bring every hook and check of the packs named, except the opt-in ones (`tims-asks`, `idle-wake`, `build-sweep`).
 - `update` brings a hook or check that is NEW to the project (not in its lock, not on disk, not run by its `settings.json`) only when `.claude/layout.json` `"enable"` names it, e.g. `"enable": ["hooks/git-guard.mjs", "hooks/tims-asks.mjs", "checks/no-opengl.json"]`. What the project already had stays on (a Node hook counts as had when the project ran its Python forerunner, e.g. `git-guard.py`).
 - `update` prints both lists before it changes anything: `switching on (new to this project): …` and `held back, not switched on: …`.
 - git-guard's trunk refusal is a setting, `"guards": { "git": { "refuseTrunk": true } }`, off by default.

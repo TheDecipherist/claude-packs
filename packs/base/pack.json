@@ -172,6 +172,26 @@
             "timeout": 15
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
+            "timeout": 15
+          }
+        ]
       }
     ]
   },
@@ -209,6 +229,7 @@
   },
   "optIn": [
     "hooks/tims-asks.mjs",
-    "hooks/idle-wake.mjs"
+    "hooks/idle-wake.mjs",
+    "hooks/build-sweep.mjs"
   ]
 }

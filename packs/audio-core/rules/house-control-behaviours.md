@@ -6,7 +6,9 @@ paths:
 
 # Every control behaves the house way
 
-Taken from Solera and MegaSynth. Stellix shipped without double-click reset (B-163) because no list said what a control must do.
+Taken from Solera and MegaSynth. Stellix shipped without double-click reset (B-163) because no list said what a control must do, and
+later with dropdowns that stepped instead of opening and a page where only one control worked (B-210, B-211), because the gates walked
+INIT and never pressed a dropdown.
 
 <constraints>
 Always do:
@@ -17,7 +19,13 @@ Always do:
   4. Its value is readable while it is moved, in the parameter's own value-to-text.
   5. It never takes keyboard focus, so the computer keyboard keeps playing notes.
   6. One gesture is one undo step.
+- Give every choice control (dropdown, select, menu, any control drawn with a chevron or that holds one of a list of values) a real list:
+  a press opens the list with every choice and the current one marked; choosing one sets it, and Escape or a press outside closes it.
+  It never steps to the next value on a press. The ‹ › arrows beside a list may step, as their own controls.
 - Check a new or changed control against this list with the `new-panel-control` skill, and walk every control through the real window in the behaviour gate.
+- Walk every control of every page in the real window, on a loaded patch and not only on INIT: each one moves its value and the sound or
+  the picture, and each choice control opens its list. The gate is red on a planted control that does nothing and on a planted dropdown
+  that steps instead of opening.
 - When a project's reference synth (Solera, MegaSynth) does a behaviour differently, copy it and write down what was copied.
 
 Never do:

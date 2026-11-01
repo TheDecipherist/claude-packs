@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.8.0 (2026-11-01)
+
+- build-sweep (base, opt-in; SessionStart and SubagentStop): removes the build output of agent worktrees under `.claude/worktrees`
+  that have been quiet for 2 hours (no source change to depth 3, nothing written at the top of the build folder), in the background.
+  Never sources, never a worktree itself, never the main checkout's build. Warns at session start when the disk has under 40 GB free.
+  `node .claude/hooks/build-sweep.mjs --now [--dry-run]` sweeps by hand. Worktree builds had filled a 2 TB disk (283 GB and 642 GB in
+  two projects). Selftest: 9 cases (a quiet worktree's out/ and build-* go, sources and a look-alike folder stay, a worktree edited or
+  building keeps its build, the main checkout keeps its build, a dry run removes nothing).
+- doctor (and so init and update) runs the hooks' selftests 4 at a time with 180 s each (CLAUDE_PACKS_SELFTEST_JOBS, _S), and names a
+  selftest killed for time as timed out (it said "fails its selftest" with no output). Found when the suite failed a different 1 to 5
+  init tests on every release since 0.7.1; the main cause of those was the runs themselves: they called `node --test` directly instead
+  of `npm test`, which skips test/fresh-tmp.mjs, so doctor read the shared system temp folder (other tests' repos, a planted token).
+  Releases are tested with `npm test` from now on. test/doctor-timeout.test.mjs (seen red without the fix).
+- house-control-behaviours and prove-control: a choice control (dropdown, select, menu) opens its list on a press and never steps to
+  the next value; every control of every page is walked in the real window on a loaded patch, not only on INIT (B-210, B-211 in the project that found it).
+- build-sweep never sweeps the newest finished build (the one most likely being played) or a worktree named in layout.json
+  "keepWorktrees" (a sweep had removed the build being played); selftest 11 cases, both kept cases seen red when planted.
+
 ## 0.7.4 (2026-11-01)
 
 - time-guard: an agent's claim on a worktree lapses after 15 quiet minutes as well as when it is known to have stopped. The agent-cap state that said "stopped" is no longer written, so a finished agent kept its worktree for ever and a successor could not reuse its build (Stellix WB-81). Selftest: a successor after 16 quiet minutes takes the worktree; the first agent coming back finds it taken.
