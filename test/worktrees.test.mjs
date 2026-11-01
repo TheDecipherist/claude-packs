@@ -109,6 +109,20 @@ const CASES = {
     assert.equal(fire(here, 'browser-guard.py', join(wt, 'tools/shot.mjs'), launch), 2);
     assert.equal(fire(here, 'browser-guard.py', join(wt, 'src/painter/Draw.cpp'), 'void draw() {}\n'), 0);
   },
+  'shape-law.mjs': ({ here, wt }) => {
+    // the worktree's branch added a concept to its own manifest: its design/shape.json decides, not main's
+    const shape = { concepts: { lane: { shape: 'many', count: 8, generator: 'laneId(i)', words: ['lane', 'lanes'] } }, exclude: [] };
+    put(join(wt, 'design/shape.json'), JSON.stringify(shape));
+    assert.equal(fire(here, 'shape-law.mjs', join(wt, 'src/dsp/Lanes.cpp'), 'if (laneIx == 3) go();\n'), 2);
+    assert.equal(fire(here, 'shape-law.mjs', join(wt, 'src/dsp/Lanes.cpp'), 'for (int lane = 0; lane < kLanes; ++lane) go(lane);\n'), 0);
+    assert.equal(fire(here, 'shape-law.mjs', join(here, 'src/dsp/Lanes.cpp'), 'if (laneIx == 3) go();\n'), 0);
+  },
+  'brief-guard.mjs': ({ here, wt }) => {
+    const shape = { concepts: { lane: { shape: 'many', count: 8, generator: 'laneId(i)', words: ['lane', 'lanes'] } }, exclude: [] };
+    put(join(wt, 'design/shape.json'), JSON.stringify(shape));
+    assert.equal(fire(here, 'brief-guard.mjs', join(wt, 'docs/brief.md'), 'Drive lane 3.\n'), 2);
+    assert.equal(fire(here, 'brief-guard.mjs', join(wt, 'docs/brief.md'), 'seen in: lane 3; build for every lane\n'), 0);
+  },
   'lesson-checks.mjs': ({ here, wt }) => {
     // The worktree's branch moved DSP into src/synth: its own layout.json decides, not main's.
     const layoutFile = join(wt, '.claude/layout.json');

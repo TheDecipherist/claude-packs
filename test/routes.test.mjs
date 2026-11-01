@@ -155,3 +155,19 @@ test('the shell route reader is one file: the global copy is the project copy', 
   const b = readFileSync(fileURLToPath(new URL('../global/hooks/lib/shell-writes.mjs', import.meta.url)), 'utf8');
   assert.equal(a, b);
 });
+
+// 0.9.0 (KWB-1): the shape law judges every folder, by every route.
+const SHAPE = JSON.stringify({ concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'] } }, exclude: [] });
+test('shape-law refuses an instance literal by every route', () => {
+  const dir = project();
+  writeFileSync(join(dir, 'design/shape.json'), SHAPE);
+  assert.deepEqual(unrefused(dir, 'shape-law.mjs', 'src/dsp/Mix.cpp', '// mix\nPLACEHOLDER\n', 'if (slotIx == 1) go();'), []);
+});
+
+test('brief-guard refuses a doc that names an instance by every route, and an agent brief', () => {
+  const dir = project();
+  writeFileSync(join(dir, 'design/shape.json'), SHAPE);
+  assert.deepEqual(unrefused(dir, 'brief-guard.mjs', 'docs/brief.md', '# Brief\nPLACEHOLDER\n', 'Drive slot 2 until it sounds.'), []);
+  const r = spawnSync('node', [join(dir, '.claude/hooks/brief-guard.mjs')], { input: JSON.stringify({ tool_name: 'Agent', tool_input: { prompt: 'Drive slot 2.' } }), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
+  assert.equal(r.status, 2);
+});
