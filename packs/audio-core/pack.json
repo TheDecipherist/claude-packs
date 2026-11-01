@@ -1,4 +1,5 @@
 {
+  "synth": true,
   "description": "Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance.",
   "folders": {
     "app": {

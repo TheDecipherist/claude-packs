@@ -16,7 +16,7 @@ const NOT_FUNCTIONS = new Set(['if', 'for', 'while', 'switch', 'catch', 'return'
 const TRAILER = /^[\s\w:<>,&*\[\]\-]*$/;
 const NOEXCEPT_ARG = /noexcept\s*\([^()]*\)/g;
 
-// keepStrings: blank comments only, so a check can read string literals in code (no-instance-id-literal) but not prose
+// keepStrings: blank comments only, so a check can read string literals in code but not prose
 export function blankCode(src, keepStrings = false) {
   let out = '';
   let i = 0;

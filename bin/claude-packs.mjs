@@ -11,6 +11,7 @@ import { readLock } from '../lib/manifest.mjs';
 import { newProject } from '../lib/new.mjs';
 import { availablePacks, readPack } from '../lib/packs.mjs';
 import { sync } from '../lib/sync.mjs';
+import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
 const HELP = `usage: npx claude-packs <command> [options]
 
@@ -28,6 +29,8 @@ const HELP = `usage: npx claude-packs <command> [options]
                      (e.g. update-all ~/projects/*); folders without it are skipped
   doctor [--strict]  verify the install (paths, folders, hooks, checks' own examples); --strict also fails
                      when a rule matches no file or a source file is covered by no rule
+  shape scan         every instance literal in the repo (code, tests, docs, briefs), by file and concept,
+                     with a count, against design/shape.json; exit 1 when any
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
   global add|remove|doctor
@@ -65,6 +68,7 @@ async function main() {
     case 'init':
       if (rest.length === 0) throw new Error('name at least one pack, e.g. `init audio-core`');
       await sync(dir, rest, { force, mkdirs: true, seedLayout });
+      if (isSynth(rest) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
       return doctor(dir);
     case 'add':
       await sync(dir, [...installed, ...rest], { force, mkdirs: true });
@@ -94,6 +98,8 @@ async function main() {
     }
     case 'doctor':
       return doctor(dir, console.log, { strict });
+    case 'shape':
+      return shapeCommand(rest[0], dir);
     case 'survey':
       process.stdout.write(readFileSync(fileURLToPath(new URL('../prompts/survey.md', import.meta.url)), 'utf8'));
       return 0;

@@ -33,9 +33,13 @@ Never do:
 </constraints>
 
 ## Check
-- `.claude/checks/no-instance-index-literal.json`: an instance index compared with, or an instance array indexed by, a number.
-- `.claude/checks/no-instance-id-literal.json`: an instance ID written out in a code string.
-- Both run only on the code folders, never on data, generated tables or the parameter record. `buffer[1]`, `channel == 1` and `pos[0]`
-  are not instances and never fire.
+- `design/shape.json` says which concepts are MANY (their count, generator, selectors and declared constants); every check reads it.
+- The `shape-law` hook (0.9.0, KWB-1) refuses, at write time, in every folder (only the manifest's `exclude` left out), an instance
+  index compared with or an instance array indexed by a number, an instance ID written out (`"slot2."`), a hand-listed set, a role
+  name for an instance, a test that drives one instance, an unlisted selector and an instance type with no manifest row. It replaces
+  the engine-scoped `no-instance-index-literal` and `no-instance-id-literal` checks, which let the world and the space code through
+  (Stellix B-200). `buffer[1]`, `channel == 1` and `pos[0]` are not instances and never fire.
+- The `brief-guard` hook refuses a brief, spec or recipe that names an instance outside a `seen in:` or `example:` line.
+- `npx claude-packs shape scan` lists every instance literal already in the repo.
 - The project's own tests: the generated IDs equal the frozen lock for every instance; every instance's record has the same fields;
   the swap test for each container type.

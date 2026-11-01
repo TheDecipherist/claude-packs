@@ -104,6 +104,26 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/folder-law.mjs\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/shape-law.mjs\"",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/brief-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/brief-guard.mjs\"",
+            "timeout": 10
           }
         ]
       },
@@ -227,6 +247,10 @@
       "in": "tools"
     }
   },
+  "onByDefault": [
+    "hooks/shape-law.mjs",
+    "hooks/brief-guard.mjs"
+  ],
   "optIn": [
     "hooks/tims-asks.mjs",
     "hooks/idle-wake.mjs",
