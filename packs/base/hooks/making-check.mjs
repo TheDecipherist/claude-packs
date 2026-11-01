@@ -109,27 +109,38 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   const text = `${turn.text}\n${event.last_assistant_message ?? ''}`;
   const writes = writesOfTurn(turn, cwd).filter((w) => insideProject(w.path));
   const problems = [];
-  const root = checkoutRoot(join(cwd, 'x'));
-  const layout = readLayout(root);
-  const shape = readShape(root) ?? readShape(ROOT);
   const rel = (p) => relative(checkoutRoot(p), p).replace(/\\/g, '/');
-  const judged = writes.filter((w) => !matchesAny(rel(w.path), [...PLAN, ...excludeGlobs(layout, shape)]));
+  // Each write is judged against its own checkout (a worktree's own build.md, manifest and layout), never the session's folder:
+  // a lead in the main checkout writing in a worktree has its making line in that worktree's build.md (Stellix WB-86).
+  const byRoot = new Map();
+  for (const w of writes) { const r = checkoutRoot(w.path); if (!byRoot.has(r)) byRoot.set(r, []); byRoot.get(r).push(w); }
+  if (!byRoot.size) byRoot.set(checkoutRoot(join(cwd, 'x')), []);
+  const judged = [];
+  let shape = null, root = null, layout = null;
+  for (const [r, ws] of byRoot) {
+    const lay = readLayout(r);
+    const sh = readShape(r) ?? readShape(ROOT);
+    const mine = ws.filter((w) => !matchesAny(rel(w.path), [...PLAN, ...excludeGlobs(lay, sh)]));
+    // once-only (below) judges the checkout the source went to: the first checkout that holds a judged source
+    if (!root || (mine.some((w) => isSource(w.path)) && !judged.some((w) => isSource(w.path)))) { root = r; layout = lay; shape = sh; }
+    judged.push(...mine);
 
-  // 1. the concepts written, the making line, the manifest
-  if (!shape && judged.some((w) => isSource(w.path))) {
-    problems.push(`no design/shape.json, and this turn wrote source (${[...new Set(judged.filter((w) => isSource(w.path)).map((w) => rel(w.path)))].slice(0, 4).join(', ')}): write the manifest first, every concept one or many, its generator, its selectors`);
-  }
-  if (shape && !shape.error && judged.length) {
-    const written = new Map();
-    for (const w of judged) for (const c of conceptsIn(w.text ?? '', shape)) if (!written.has(c)) written.set(c, rel(w.path));
-    const making = makingLines(root).join('\n');
-    const wroteSource = judged.filter((w) => isSource(w.path)).map((w) => rel(w.path));
-    // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
-    if (!making && (written.size || wroteSource.length)) problems.push(`build.md's In progress entry for this step has no "making:" line, and this turn wrote ${written.size ? [...written].map(([c, f]) => `${c} (${f})`).join(', ') : [...new Set(wroteSource)].slice(0, 4).join(', ')}: write the line (what you are making; concepts: each with its shape; reuse: the one function, where it lives)`);
-    else if (making) {
-      const named = conceptsIn(making, shape);
-      for (const [c, f] of written) if (!named.has(c)) problems.push(`the making line does not name ${c}, which this turn wrote (${f}): add it with its shape from design/shape.json, or take the write back`);
-      for (const u of unknownConcepts(making, shape)) problems.push(`the making line names "${u}", which has no row in design/shape.json: add the row first (one or many, its generator, its selectors)`);
+    // 1. the concepts written, the making line, the manifest
+    if (!sh && mine.some((w) => isSource(w.path))) {
+      problems.push(`no design/shape.json, and this turn wrote source (${[...new Set(mine.filter((w) => isSource(w.path)).map((w) => rel(w.path)))].slice(0, 4).join(', ')}): write the manifest first, every concept one or many, its generator, its selectors`);
+    }
+    if (sh && !sh.error && mine.length) {
+      const written = new Map();
+      for (const w of mine) for (const c of conceptsIn(w.text ?? '', sh)) if (!written.has(c)) written.set(c, rel(w.path));
+      const making = makingLines(r).join('\n');
+      const wroteSource = mine.filter((w) => isSource(w.path)).map((w) => rel(w.path));
+      // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
+      if (!making && (written.size || wroteSource.length)) problems.push(`build.md's In progress entry for this step has no "making:" line, and this turn wrote ${written.size ? [...written].map(([c, f]) => `${c} (${f})`).join(', ') : [...new Set(wroteSource)].slice(0, 4).join(', ')}: write the line (what you are making; concepts: each with its shape; reuse: the one function, where it lives)`);
+      else if (making) {
+        const named = conceptsIn(making, sh);
+        for (const [c, f] of written) if (!named.has(c)) problems.push(`the making line does not name ${c}, which this turn wrote (${f}): add it with its shape from design/shape.json, or take the write back`);
+        for (const u of unknownConcepts(making, sh)) problems.push(`the making line names "${u}", which has no row in design/shape.json: add the row first (one or many, its generator, its selectors)`);
+      }
     }
   }
 

@@ -199,14 +199,16 @@ const CASES = {
   'making-check.mjs': ({ here, wt }) => {
     put(join(wt, 'design/shape.json'), JSON.stringify(SHAPE));
     put(join(wt, 'build.md'), '# x\n\n## In progress\n\n| when | work/x | the gain; making: one gain per slot; concepts: slot (many, 4); reuse: slotGain in src/dsp/Gain.cpp | started |\n\n## Steps\n');
-    const stop = (cwd) => {
+    const stop = (cwd, into = cwd) => {
       const t = join(cwd, 'transcript.jsonl');
-      const use = { type: 'assistant', cwd, message: { content: [{ type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: join(cwd, 'src/dsp/Gain.cpp'), content: 'float slotGain (int slot) { return gains[slot]; }\n' } }] } };
+      const use = { type: 'assistant', cwd, message: { content: [{ type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: join(into, 'src/dsp/Gain.cpp'), content: 'float slotGain (int slot) { return gains[slot]; }\n' } }] } };
       writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, use].map((e) => JSON.stringify(e)).join('\n'));
       return fireAs(here, 'making-check.mjs', { hook_event_name: 'Stop', transcript_path: t, cwd, session_id: `wt-${cwd.length}` }).status;
     };
     assert.equal(stop(wt), 0, 'the worktree has its manifest and its making line');
     assert.equal(stop(here), 2, 'main has neither');
+    // Stellix WB-86: a session sitting in the main checkout that writes into a worktree is judged by the worktree's build.md
+    assert.equal(stop(here, wt), 0, 'a write into the worktree, from the main checkout, is judged by the worktree');
   },
   'no-shipped-images.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'src/painter/logo.png')), 2);

@@ -6,6 +6,8 @@
   selector still does not excuse an instance in a brief (KWB-4). Selftest 17 cases.
 - An install adds `.claude/usage.log` (brief-guard's refusal counter, a local log) to the project's .gitignore, so a step's save never
   stops on it (KWB-4). test/gitignore.test.mjs.
+- making-check judges each write against its own checkout's build.md, manifest and layout, not the session's working folder: a lead
+  in the main checkout writing in a worktree was sent back for a making line that was there (KWB-5). test/worktrees covers it.
 
 ## 0.9.1 (2026-11-01)
 
