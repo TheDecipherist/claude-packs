@@ -47,6 +47,21 @@ commits and pushes the branch. Nothing is committed straight onto the trunk; `gi
 Read the step's "done when" now and decide how it will be measured. If it cannot be measured or seen in the opened app,
 say so before building.
 
+### The shape comes first (KWB-1)
+
+Before any code, name every concept the step touches and find its row in `design/shape.json` (ONE with its frozen id, or
+MANY with its count, generator, selectors and declared constants).
+
+- **A concept the step introduces gets its row first, as the step's first commit** (`step.py save "shape: <concept> row"`
+  with only `design/shape.json` in it), before any code that uses it. `shape-law` refuses an instance type with no row.
+- Build for the shape: one loop over every instance, or the generator. An instance a bug was seen in goes on a `seen in:`
+  line; a rule that picks one is a selector listed in the row; a fixed one is a named constant there. Anything else is
+  refused with "example, rule, or constant?".
+- **Every subagent brief quotes the manifest row of every concept it touches, word for word**, and names the shape and
+  the generator, never an instance (`brief-guard` refuses "drive slot 2"; "seen in: slot 2, build for all slots" passes).
+- `npx claude-packs shape scan` lists what the repo already names by instance; a step that touches such a file fixes its
+  lines or leaves them as they were, never adds to them.
+
 ## 3. While working: save often
 
 ```
