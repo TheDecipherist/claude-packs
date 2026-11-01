@@ -104,6 +104,11 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/folder-law.mjs\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/once-only.mjs\"",
+            "timeout": 20
           }
         ]
       },
@@ -158,6 +163,22 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.mjs\"",
             "asyncRewake": true,
             "timeout": 1000
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making-check.mjs\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making.mjs\"",
+            "timeout": 10
           }
         ]
       }
@@ -227,6 +248,11 @@
       "in": "tools"
     }
   },
+  "onByDefault": [
+    "hooks/once-only.mjs",
+    "hooks/making.mjs",
+    "hooks/making-check.mjs"
+  ],
   "optIn": [
     "hooks/tims-asks.mjs",
     "hooks/idle-wake.mjs",

@@ -9,6 +9,7 @@ import { doctor } from '../lib/doctor.mjs';
 import { globalAdd, globalDoctor, globalRemove } from '../lib/global.mjs';
 import { readLock } from '../lib/manifest.mjs';
 import { newProject } from '../lib/new.mjs';
+import { dupScan } from '../lib/once-only-report.mjs';
 import { availablePacks, readPack } from '../lib/packs.mjs';
 import { sync } from '../lib/sync.mjs';
 
@@ -30,6 +31,7 @@ const HELP = `usage: npx claude-packs <command> [options]
                      when a rule matches no file or a source file is covered by no rule
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
+  dup scan           every duplicated block (jscpd, the once-only hook's detector), listed by file
   global add|remove|doctor
                      the global part, exactly three pieces: latest-versions (skill and
                      version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
@@ -102,6 +104,9 @@ async function main() {
       if (!run) throw new Error('use `global add`, `global remove` or `global doctor`');
       return run({ home, force });
     }
+    case 'dup':
+      if (rest[0] !== 'scan') throw new Error('use `dup scan [--dir <project>]`');
+      return dupScan(dir);
     case 'list':
       for (const name of availablePacks()) console.log(`${name.padEnd(12)} ${readPack(name).description}`);
       return 0;

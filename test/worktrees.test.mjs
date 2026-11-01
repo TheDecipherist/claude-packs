@@ -56,6 +56,12 @@ const PARAMS = (...ids) => ids.map((id) => `auto p_${id} = juce::ParameterID { "
 const APVTS = 'void Filter::prepare (juce::AudioProcessorValueTreeState& apvts) { cutoff = apvts.getRawParameterValue ("cutoff"); }\n';
 const RT_BAD = 'void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m) { auto* x = new float[64]; }\n';
 
+// once-only, making, making-check (0.9.0): a function to copy, and a manifest with one many concept.
+const SVF = (name, k = '2.0f') => `float ${name}::process (float x) noexcept\n{\n    const float g = std::tan (kPi * cutoff / sampleRate);\n    const float k = ${k} - 2.0f * resonance;\n` +
+  '    const float a1 = 1.0f / (1.0f + g * (g + k));\n    const float a2 = g * a1;\n    const float a3 = g * a2;\n    const float v3 = x - ic2eq;\n' +
+  '    const float v1 = a1 * ic1eq + a2 * v3;\n    const float v2 = ic2eq + a2 * ic1eq + a3 * v3;\n    ic1eq = 2.0f * v1 - ic1eq;\n    ic2eq = 2.0f * v2 - ic2eq;\n    return v2;\n}';
+const SHAPE = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'] } }, exclude: [] };
+
 // One case per installed hook: the worktree file it must allow and the one it must refuse, judged
 // from the worktree's own checkout. A hook added to the packs without a case here fails the test.
 const CASES = {
@@ -162,6 +168,31 @@ const CASES = {
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff'));
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
+  },
+  'once-only.mjs': ({ here, wt }) => {
+    // the function lives only in the worktree: a near-copy is refused there, and judged against main's tree in main
+    put(join(wt, 'src/dsp/Svf.cpp'), `#include "Svf.h"\n\n${SVF('Svf')}\n`);
+    assert.equal(fire(here, 'once-only.mjs', join(wt, 'src/dsp/Copy.cpp'), SVF('Copy', '1.5f')), 2);
+    assert.equal(fire(here, 'once-only.mjs', join(wt, 'src/dsp/Voice.cpp'), 'float Voice::render (float x) noexcept { return svf.process (x); }\n'), 0);
+    assert.equal(fire(here, 'once-only.mjs', join(here, 'src/dsp/Copy.cpp'), SVF('Copy', '1.5f')), 0);
+  },
+  'making.mjs': ({ here, wt }) => {
+    put(join(wt, 'design/shape.json'), JSON.stringify(SHAPE));
+    const said = (cwd) => fireAs(here, 'making.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'drive slot 2 louder', cwd }).stdout;
+    assert.match(said(wt), /you named slot 2: building for all slots/);
+    assert.doesNotMatch(said(here), /you named/, 'main has no manifest yet');
+  },
+  'making-check.mjs': ({ here, wt }) => {
+    put(join(wt, 'design/shape.json'), JSON.stringify(SHAPE));
+    put(join(wt, 'build.md'), '# x\n\n## In progress\n\n| when | work/x | the gain; making: one gain per slot; concepts: slot (many, 4); reuse: slotGain in src/dsp/Gain.cpp | started |\n\n## Steps\n');
+    const stop = (cwd) => {
+      const t = join(cwd, 'transcript.jsonl');
+      const use = { type: 'assistant', cwd, message: { content: [{ type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: join(cwd, 'src/dsp/Gain.cpp'), content: 'float slotGain (int slot) { return gains[slot]; }\n' } }] } };
+      writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, use].map((e) => JSON.stringify(e)).join('\n'));
+      return fireAs(here, 'making-check.mjs', { hook_event_name: 'Stop', transcript_path: t, cwd, session_id: `wt-${cwd.length}` }).status;
+    };
+    assert.equal(stop(wt), 0, 'the worktree has its manifest and its making line');
+    assert.equal(stop(here), 2, 'main has neither');
   },
   'no-shipped-images.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'src/painter/logo.png')), 2);

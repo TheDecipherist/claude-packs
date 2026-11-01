@@ -1,0 +1,3 @@
+| name | latest stable | checked | source | used | decision |
+|---|---|---|---|---|---|
+| jscpd | 5.4.2 | 2026-11-01 | https://registry.npmjs.org/jscpd (`npm view jscpd version`: 5.4.2, published 2026-10-20) | 5.4.2 | optionalDependency: the once-only hook's copy-paste detector (a Rust binary; 0.3 s for a whole synth repo of 580 sources, measured) |
