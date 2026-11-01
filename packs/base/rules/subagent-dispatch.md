@@ -13,8 +13,11 @@ Always do:
 - Require the agent to end with exactly one status line, `DONE`, `DONE_WITH_CONCERNS`, `BLOCKED` or `NEEDS_CONTEXT`, plus the path of its report.
 - Give read-only agents read-only tools, and give writing agents the exact list of files they may write.
 - Review an agent's work as unverified claims: read the diff, re-run the verdict. A stated reason never lowers a finding's severity.
+- Pass the instance under test as a parameter and ask for the proof on every instance (the swap test, `prove-instances-identical`).
 
 Never do:
 - Let a worker agent spawn its own reviewer. It doubles the cost and its approval counts for nothing.
 - Start an agent for something one script call or one Read can answer.
+- Never name a fixed instance in a brief ("drive slot 2", "the PAD slot"): a brief that names one instance gets work proved on that
+  instance only (Stellix B-178: every step proved on slot 2, the other three slots left behind).
 </constraints>

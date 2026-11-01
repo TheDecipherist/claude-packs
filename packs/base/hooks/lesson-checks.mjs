@@ -4,6 +4,7 @@
 //   { "id", "why", "rule", "globs": [...], "exclude": [...], "pattern": "<regex>", "flags": "",
 //     "code": true,            // match against code with comments/strings blanked (C/C++/JS)
 //     "bad": "<snippet the check must catch>", "good": "<fixed snippet it must pass>" }
+//   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals)
 // PreToolUse (Write|Edit|MultiEdit): blocks edits that ADD a match.  --selftest: proves every check.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -34,7 +35,7 @@ function loadChecks(root = ROOT) {
 }
 
 function matches(check, text) {
-  const subject = check.code ? blankCode(text) : text;
+  const subject = check.code ? blankCode(text) : check.strings ? blankCode(text, true) : text;   // strings: comments blanked, strings kept
   const re = new RegExp(check.pattern, `${(check.flags ?? '').replace('g', '')}g`);
   const lines = text.split('\n');
   const found = [];
