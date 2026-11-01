@@ -100,6 +100,8 @@ function listWorktrees() {
 }
 
 // Is this agent still running, by the cap hook's count? Unknown state counts as running (the safe side).
+const CLAIM_LAPSE_MIN = 15;
+
 function agentRunning(aid) {
   let st;
   try { st = JSON.parse(readFileSync(join(homedir(), '.claude/agent-cap-state.json'), 'utf8')); } catch { return true; }
@@ -143,12 +145,15 @@ export function run(event, { now = Date.now() / 1000, rows = null, commitMin = n
   }
   // 3. each agent's own worktree, learned from the commands it runs (.claude/worktrees/<name>)
   const who = event.agent_id ?? 'main';
+  if (who !== 'main') (st.seen ??= {})[who] = now; // when each agent last ran anything: a finished agent's claim lapses (below)
   const text = `${input.command ?? ''} ${input.file_path ?? ''}`;
   for (const m of text.matchAll(/(\/[^\s'"]*?\/\.claude\/worktrees\/([\w.-]+))/g)) {
     if (who === 'main') continue;
     st.owner ??= {};
     let prev = st.owner[m[2]];
-    if (prev && prev !== who && !agentRunning(prev)) prev = null; // a claim lapses with its agent
+    // a claim lapses with its agent: known stopped, or quiet for CLAIM_LAPSE_MIN (the agent-cap state that said "stopped" is no
+    // longer written, so without the quiet rule a finished agent kept its worktree for ever and no successor could reuse its build)
+    if (prev && prev !== who && (!agentRunning(prev) || now - (st.seen?.[prev] ?? 0) > CLAIM_LAPSE_MIN * 60)) prev = null;
     if (prev && prev !== who) {
       const s = sayOnce(`shared-${m[2]}`, `the worktree .claude/worktrees/${m[2]} is already used by another agent (${prev}). Each agent works only in its own: ` +
         'make yours (git worktree add --detach .claude/worktrees/<yours> main) and move your files there', now, st);
@@ -223,6 +228,10 @@ function selftest() {
   const s3 = {};
   run(A('cd /x/.claude/worktrees/onechrome && ls', 'main-ish'), { now: 5000, state: s3, rows: [], commitMin: 1 });
   expect('a second agent in the same worktree', run(A('cd /x/.claude/worktrees/onechrome && vi', 'a2'), { now: 5001, state: s3, rows: [], commitMin: 1 }), true);
+  const s4 = {};
+  run(A('cd /x/.claude/worktrees/handed && ls', 'first'), { now: 5000, state: s4, rows: [], commitMin: 1 });
+  expect('a successor after the first agent has been quiet 16 min takes the worktree', run(A('cd /x/.claude/worktrees/handed && ls', 'next'), { now: 5000 + 16 * 60, state: s4, rows: [], commitMin: 1 }), false);
+  expect('and the first agent coming back finds it taken', run(A('cd /x/.claude/worktrees/handed && ls', 'first'), { now: 5000 + 17 * 60, state: s4, rows: [], commitMin: 1 }), true);
   expect('the controller told of a worktree unsaved for 45 min', run(post(), at([], { worktrees: { '/x/.claude/worktrees/guide': 45 } })), true);
   expect('the controller, nothing unsaved', run(post(), at([], { worktrees: { '/x/.claude/worktrees/guide': 5 } })), false);
   const pre = (command) => run({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }, { now: 5000, state: {} });

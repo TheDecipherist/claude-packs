@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.4 (2026-11-01)
+
+- time-guard: an agent's claim on a worktree lapses after 15 quiet minutes as well as when it is known to have stopped. The agent-cap state that said "stopped" is no longer written, so a finished agent kept its worktree for ever and a successor could not reuse its build (Stellix WB-81). Selftest: a successor after 16 quiet minutes takes the worktree; the first agent coming back finds it taken.
+
 ## 0.7.3 (2026-11-01)
 
 - layout: `buildOutput` is a project-owned key, kept through `update` (0.7.2 dropped it on the first update); test/layout-owned.test.mjs.
