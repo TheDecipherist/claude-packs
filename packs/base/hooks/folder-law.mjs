@@ -1,13 +1,16 @@
 #!/usr/bin/env node
-// PreToolUse (Write): a NEW source file may only be created inside a layout folder.
+// PreToolUse (Write|Edit|MultiEdit|NotebookEdit|Bash): a NEW source file may only be created inside a layout folder,
+// by any route that creates a file: the Write tool, or the shell (>, >>, tee, cp, mv, touch, a heredoc into a file;
+// lib/writes.mjs). An Edit, MultiEdit, NotebookEdit or sed -i never creates a file, so it is never judged here.
 // The layout lives in .claude/layout.json and is summarised in CLAUDE.md; this makes it structural.
 // Existing files can always be edited; moving them is a separate, deliberate job. `--selftest` proves it.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { checkoutRoot, claudeRoot } from './lib/project.mjs';
-import { codeFolders, readLayout } from './lib/layout.mjs';
 import { fileURLToPath } from 'node:url';
-import { editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
+import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
+import { codeFolders, readLayout } from './lib/layout.mjs';
+import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
+import { writesOf } from './lib/writes.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|mm|m|wgsl|metal|glsl|hlsl|slang)$/i;
@@ -19,9 +22,15 @@ function main() {
   } catch {
     return 0;
   }
-  if (payload.tool_name !== 'Write') return 0;
-  const file = payload.tool_input?.file_path;
-  if (!file || existsSync(file) || !SOURCE.test(file)) return 0;
+  for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
+    if (w.op === 'delete' || w.op === 'edit' || existsSync(w.path) || !SOURCE.test(w.path) || !insideProject(w.path)) continue;
+    const code = judge(w.path);
+    if (code) return code;
+  }
+  return 0;
+}
+
+function judge(file) {
   if (relative(ROOT, file).startsWith('..')) return 0;
   const root = checkoutRoot(file);
   const rel = relative(root, file).replace(/\\/g, '/');
@@ -48,8 +57,9 @@ function main() {
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);
-  const dir = scratchProject({ 'stray/Old.cpp': '// old\n' }, { folders: { dsp: { path: 'src/dsp', purpose: 'DSP' }, docs: { path: 'docs', purpose: 'docs' } }, concepts: {} });
+  const dir = scratchProject({ 'stray/Old.cpp': '// old\n', 'x.txt': 'int x;\n' }, { folders: { dsp: { path: 'src/dsp', purpose: 'DSP' }, docs: { path: 'docs', purpose: 'docs' } }, concepts: {} });
   const w = (file) => runHook(hook, dir, writeOf(join(dir, file)));
+  const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir));
   return verdicts('folder-law', [
     ['a new file in a layout folder', w('src/dsp/Svf.cpp'), 0],
     ['a new file outside the layout', w('stray/New.cpp'), 2],
@@ -58,6 +68,10 @@ function selftest() {
     ['an edit is never a new file', runHook(hook, dir, editOf(join(dir, 'stray/New.cpp'))), 0],
     ['a doc is not source', w('stray/notes.md'), 0],
     ['another project is not ours', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/x.cpp'))), 0],
+    ['a heredoc into a new file outside the layout', sh("cat > stray/B.cpp <<'EOF'\nint b;\nEOF"), 2],
+    ['a copy into a layout folder', sh('cp x.txt src/dsp/C.cpp'), 0],
+    ['a move outside the layout', sh('mv x.txt stray/D.cpp'), 2],
+    ['words about a file are no write', sh("echo 'cat > stray/E.cpp'"), 0],
   ]);
 }
 

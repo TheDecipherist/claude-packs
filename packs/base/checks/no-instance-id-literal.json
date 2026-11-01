@@ -1,0 +1,19 @@
+{
+  "id": "no-instance-id-literal",
+  "why": "An instance's ID is generated from its index (slotId(i, \"reverb.mix\") gives the frozen string); writing \"slot2.reverb.mix\" in code ties the logic to one instance (Stellix bank.h wrote a patch's REVERB mix to slot 2 only).",
+  "rule": ".claude/rules/instances-by-index-identities-by-id.md",
+  "concepts": [
+    "cpp"
+  ],
+  "exclude": [
+    "data/**",
+    "**/generated/**",
+    "**/*_data.h",
+    "**/*.json",
+    "**/tests/**"
+  ],
+  "pattern": "\\\"[^\\\"\\n]*\\b(?:slot|osc|voice|layer|lane|band)[_ ]?\\d+[._][^\\\"\\n]*\\\"",
+  "strings": true,
+  "bad": "param::setRaw(s, \"slot2.reverb.mix\", v);",
+  "good": "param::setRaw(s, slotId(slot, \"reverb.mix\"), v); // the old \"slot2.reverb.mix\" comes out of slotId(1, ...)\nfloat s = buffer[1]; if (channel == 1) s = pos[0];"
+}

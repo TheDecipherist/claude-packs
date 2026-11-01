@@ -12,17 +12,23 @@ export function readLayout(root) {
   }
 }
 
-// A concept entry is a folder name (expands to "<path>/**") or a raw glob.
+// A concept entry is a folder name (expands to "<path>/**"), "kind:<k>" (every folder whose
+// "kind" is k, e.g. "kind:copy" for the copy trees; none is no glob), or a raw glob.
 export function conceptGlobs(layout, concept) {
   const entries = layout.concepts?.[concept];
   if (!entries) return null;
   const out = [];
   for (const e of entries) {
     const folder = layout.folders?.[e];
-    const glob = folder ? `${folder.path}/**` : e;
-    if (!out.includes(glob)) out.push(glob);
+    const globs = folder ? [`${folder.path}/**`] : e.startsWith('kind:') ? foldersOfKind(layout, e.slice(5)).map((p) => `${p}/**`) : [e];
+    for (const glob of globs) if (!out.includes(glob)) out.push(glob);
   }
   return out;
+}
+
+// The paths of every layout folder of one kind ("copy": read-only copies of another project's code).
+export function foldersOfKind(layout, kind) {
+  return Object.values(layout.folders ?? {}).filter((f) => f.kind === kind).map((f) => f.path.replace(/\/+$/, ''));
 }
 
 // Concepts from packs that aren't installed (e.g. "world" in a project without the stellix pack)

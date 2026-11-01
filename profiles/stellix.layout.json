@@ -1,10 +1,15 @@
 {
-  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A. 0.4.0: the SOUND and MIXER layers (lib/app/src/layer*, cards, controls) are UI, so the control and look rules load there; confirm against the re-survey.",
+  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A. 0.4.0: the SOUND and MIXER layers (lib/app/src/layer*, cards, controls) are UI, so the control and look rules load there; confirm against the re-survey. 0.6.0: the copy trees are folders of kind copy (protect-vendor guards them; copy-tree-guard.py is merged into it), and guards carries Stellix's values for the house guards. enable: the opt-in hooks Stellix runs (tims-asks, idle-wake); guards.git.refuseTrunk: Stellix works on a branch per step.",
   "complete": true,
   "folders": {
     "app": {
       "path": "lib/app",
       "purpose": "the standalone, processor, editor, player, demo and the one launch function (launch.cpp)"
+    },
+    "app_copy": {
+      "path": "lib/app/tabula",
+      "kind": "copy",
+      "purpose": "a COPY TREE (kind copy): Tabula 1's PIANO loader, bridge and prebuild tool, copied unchanged by tools/copy_tabula.py; read-only as every copy tree"
     },
     "snapshot": {
       "path": "lib/snapshot",
@@ -17,6 +22,16 @@
     "engines": {
       "path": "lib/engines",
       "purpose": "SlotSound and Tabula 1's voice, copied and proved (src/tabula is read-only)"
+    },
+    "engines_copy": {
+      "path": "lib/engines/src/tabula",
+      "kind": "copy",
+      "purpose": "a COPY TREE (kind copy): Tabula 1's voice, effects and dspblocks files, copied unchanged by tools/copy_tabula.py; read-only (L8), each file with its origin line"
+    },
+    "engines_own": {
+      "path": "lib/engines/src/own",
+      "kind": "own",
+      "purpose": "PROMOTED files (kind own): copied files that measured identical, moved out of the copy tree by tools/copy_promote.py with their .origin record; these may be changed"
     },
     "dsp": {
       "path": "lib/effects",
@@ -258,5 +273,40 @@
       "what": "build.sh, step.py, gates, hooks, copy and compare tools",
       "in": "tools"
     }
-  }
+  },
+  "guards": {
+    "git": {
+      "safeRestore": "python3 tools/safe_restore.py <paths>",
+      "branchStart": "python3 tools/step.py start <STEP> \"task\" (work that is not a step: start --work <name> \"task\")",
+      "refuseTrunk": true,
+      "house": true
+    },
+    "copy": {
+      "tools": [
+        "tools/copy_tabula.py",
+        "tools/copy_reimport.py",
+        "tools/copy_promote.py"
+      ]
+    },
+    "time": {
+      "saveCommand": "add new files by path, then python3 tools/step.py save \"<note>\""
+    },
+    "browser": {
+      "pictureCommand": "the shot program (stellix_shot --render)"
+    },
+    "images": {
+      "guarded": [
+        "**"
+      ],
+      "allowed": [
+        "design/reference/**",
+        "build/pictures/**",
+        "out/**"
+      ]
+    }
+  },
+  "enable": [
+    "hooks/tims-asks.mjs",
+    "hooks/idle-wake.mjs"
+  ]
 }

@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // version-pin-guard: refuses a new or changed version pin unless docs/versions.md has a row
 // for that dependency checked within MAX_AGE days. Pairs with the latest-versions skill.
-// PreToolUse on Write|Edit|MultiEdit|Bash. Exit 2 blocks; stderr goes back to Claude.
+// PreToolUse on Write|Edit|MultiEdit|Bash. Exit 2 blocks; stderr goes back to Claude. Every route that writes a
+// dependency file is judged (WB-69): the Write tool, an Edit or MultiEdit (its new_string taken literally), an install
+// command, and the shell writing the file (>, >>, tee, sed -i, cp, mv, a heredoc; lib/shell-writes.mjs).
 // `node version-pin-guard.mjs --selftest` proves every extractor and the age check.
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
+import { afterText, shellWrites } from './lib/shell-writes.mjs';
 
 const MAX_AGE = Number(process.env.VERSION_GUARD_DAYS ?? 14);
 const DAY = 86_400_000;
@@ -97,11 +100,15 @@ export function changedPins(extract, before, after) {
   return [...extract(after)].filter(([n, v]) => old.get(n) !== v).map(([n, v]) => ({ name: n, version: v }));
 }
 
+// A shell redirection is never a package: `2>&1`, `&>log`, `>/dev/null`, `> out.txt`, `< in`, and a
+// trailing `&` (0.5.x read `2>&1` as a package named "2" at version "&1" and refused the command).
+const REDIRECT = /(?:^|\s)(?:\d*|&)(?:>>?|<)(?:&\d+|&-|\s*[^\s&|;<>]+)?|\s&(?=\s|$)/g;
+
 // Package names added by an install command.
 export function pinsFromCommand(cmd) {
   const found = [];
   for (const seg of cmd.split(/&&|\|\||;|\|/)) {
-    const words = seg.trim().split(/\s+/);
+    const words = seg.replace(REDIRECT, ' ').trim().split(/\s+/);
     const at = words.findIndex((w, i) => (/^(npm|pnpm|yarn|bun)$/.test(w) && /^(i|install|add)$/.test(words[i + 1] ?? '')) || (/^(pip|pip3|uv|poetry)$/.test(w) && /^(install|add)$/.test(words[i + 1] ?? '')) || (w === 'cargo' && words[i + 1] === 'add') || (w === 'go' && words[i + 1] === 'get'));
     if (at === -1) continue;
     for (const w of words.slice(at + 2)) {
@@ -167,7 +174,8 @@ function newText(input, current) {
   if (typeof input.content === 'string') return input.content;
   const edits = input.edits ?? (input.old_string !== undefined ? [input] : []);
   let text = current;
-  for (const e of edits) text = e.replace_all ? text.split(e.old_string).join(e.new_string) : text.replace(e.old_string, e.new_string);
+  // literally: a new_string holding `$&` or `$1` was read as a replacement pattern (the Edit gap, WB-69)
+  for (const e of edits) text = e.replace_all ? text.split(e.old_string).join(e.new_string ?? '') : text.replace(e.old_string, () => e.new_string ?? '');
   return text;
 }
 
@@ -178,6 +186,13 @@ function main(payload) {
   if (payload.tool_name === 'Bash') {
     pins = pinsFromCommand(input.command ?? '');
     where = payload.cwd ?? process.cwd();
+    for (const w of shellWrites(input.command ?? '', where)) {
+      const extract = extractorFor(w.path);
+      if (!extract) continue;
+      const { before, after } = afterText(w);
+      if (after !== null) pins.push(...changedPins(extract, before, after));
+      where = dirname(w.path);
+    }
   } else {
     const file = input.file_path;
     const extract = file && extractorFor(file);
@@ -211,13 +226,17 @@ function selftest() {
   eq(names(pinsFromCommand('cd x && npm install -D typescript@5.9.3 zod')), ['typescript', 'zod'], 'npm install');
   eq(names(pinsFromCommand('pip install --break-system-packages requests==2.32.5')), ['requests'], 'pip install');
   eq(pinsFromCommand('npm install'), [], 'bare npm install');
+  eq(names(pinsFromCommand('npm install fastify 2>&1 | tail -5')), ['fastify'], 'install with 2>&1');
+  eq(names(pinsFromCommand('npm i zod > /tmp/npm.log 2>&1')), ['zod'], 'install with > log 2>&1');
+  eq(names(pinsFromCommand('pip install requests==2.32.5 &>/dev/null &')), ['requests'], 'install with &>/dev/null &');
+  eq(pinsFromCommand('npm install 2>&1'), [], 'bare install with 2>&1');
   const now = Date.parse('2026-10-26');
   const dates = checkedDates('| name | latest |\n|---|---|\n| fastify | 5.6.1 | 2026-10-20 | https://github.com/fastify/fastify/releases | 5.6.1 | use |\n| `JUCE` | 9.0.4 | 2026-09-01 | url | 8.0.4 | F4 |\n');
   eq(verdict([{ name: 'fastify', version: '5.6.1' }], dates, now), [], 'fresh row passes');
   eq(verdict([{ name: 'JUCE', version: '9.0.4' }], dates, now).length, 1, 'stale row blocks');
   eq(verdict([{ name: 'zod', version: '4' }], dates, now).length, 1, 'missing row blocks');
   eq(verdict([{ name: 'github.com/fastify', version: 'v1' }], dates, now), [], 'last path segment matches');
-  console.log('version-pin-guard selftest: OK (17 cases)');
+  console.log('version-pin-guard selftest: OK (21 cases)');
   return 0;
 }
 

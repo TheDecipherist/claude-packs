@@ -16,7 +16,8 @@ const NOT_FUNCTIONS = new Set(['if', 'for', 'while', 'switch', 'catch', 'return'
 const TRAILER = /^[\s\w:<>,&*\[\]\-]*$/;
 const NOEXCEPT_ARG = /noexcept\s*\([^()]*\)/g;
 
-export function blankCode(src) {
+// keepStrings: blank comments only, so a check can read string literals in code (no-instance-id-literal) but not prose
+export function blankCode(src, keepStrings = false) {
   let out = '';
   let i = 0;
   const blank = (s) => s.replace(/[^\n]/g, ' ');
@@ -32,7 +33,7 @@ export function blankCode(src) {
       const stop = end === -1 ? src.length : end + 2;
       out += blank(src.slice(i, stop));
       i = stop;
-    } else if (src[i] === '"' || src[i] === "'") {
+    } else if (!keepStrings && (src[i] === '"' || src[i] === "'")) {
       const q = src[i];
       let j = i + 1;
       while (j < src.length && src[j] !== q && src[j] !== '\n') j += src[j] === '\\' ? 2 : 1;

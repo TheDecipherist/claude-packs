@@ -1,0 +1,19 @@
+{
+  "id": "no-instance-index-literal",
+  "why": "Identical containers (slots, oscillators, voices, layers, lanes, bands) share one code path and are addressed by an index variable; comparing that index with a number, or indexing an instance array with one, makes one instance special (Stellix B-178: slot 2 had its own effects, voices and controls).",
+  "rule": ".claude/rules/instances-by-index-identities-by-id.md",
+  "concepts": [
+    "cpp"
+  ],
+  "exclude": [
+    "data/**",
+    "**/generated/**",
+    "**/*_data.h",
+    "**/*.json",
+    "**/tests/**"
+  ],
+  "pattern": "\\b(?:slot|osc|voice|layer|lane|band)(?:s|Ix|Idx|Index|No|Num)?\\s*[!=]=\\s*\\d+\\b|\\b\\d+\\s*[!=]=\\s*(?:slot|osc|voice|layer|lane|band)(?:s|Ix|Idx|Index|No|Num)?\\b|\\b(?:slot|osc|voice|layer|lane|band)s\\w*\\s*\\[\\s*\\d+\\s*\\]",
+  "code": true,
+  "bad": "if (slotIx == 1) startCrew();\nauto& v = voices[3];\nif (osc != 0) mix += osc;",
+  "good": "if (slot == selected) startCrew();\nauto& v = voices[voice];\nfloat s = buffer[1]; if (channel == 1) s = pos[0];\nfor (int slot = 0; slot < kSlots; slot++) run(slot);"
+}

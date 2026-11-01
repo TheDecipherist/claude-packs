@@ -4,10 +4,12 @@
 //   { "id", "why", "rule", "globs": [...], "exclude": [...], "pattern": "<regex>", "flags": "",
 //     "code": true,            // match against code with comments/strings blanked (C/C++/JS)
 //     "bad": "<snippet the check must catch>", "good": "<fixed snippet it must pass>" }
-// PreToolUse (Write|Edit|MultiEdit): blocks edits that ADD a match.  --selftest: proves every check.
+//   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals)
+// PreToolUse (Write|Edit|MultiEdit|NotebookEdit|Bash): blocks a write that ADDS a match, by any route (a tool,
+// or the shell's >, >>, tee, sed -i, cp, mv, a heredoc; lib/writes.mjs).  --selftest: proves every check.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { computeEdit } from './lib/apply-edit.mjs';
+import { writesOf } from './lib/writes.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
@@ -34,7 +36,7 @@ function loadChecks(root = ROOT) {
 }
 
 function matches(check, text) {
-  const subject = check.code ? blankCode(text) : text;
+  const subject = check.code ? blankCode(text) : check.strings ? blankCode(text, true) : text;   // strings: comments blanked, strings kept
   const re = new RegExp(check.pattern, `${(check.flags ?? '').replace('g', '')}g`);
   const lines = text.split('\n');
   const found = [];
@@ -79,15 +81,19 @@ function main() {
   } catch {
     return 0;
   }
-  const input = payload.tool_input ?? {};
-  if (!input.file_path || !insideProject(input.file_path)) return 0;
-  const checks = loadChecks(claudeRoot(input.file_path));
-  const rel = relative(checkoutRoot(input.file_path), input.file_path);
+  for (const w of writesOf(payload)) {
+    if (w.after === null || !insideProject(w.path)) continue;
+    const code = judge(w.path, { before: w.before, after: w.after });
+    if (code) return code;
+  }
+  return 0;
+}
+
+function judge(file, result) {
+  const checks = loadChecks(claudeRoot(file));
+  const rel = relative(checkoutRoot(file), file);
   const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []));
   if (relevant.length === 0) return 0;
-
-  const result = computeEdit(payload.tool_name, input);
-  if (!result) return 0;
 
   const hits = [];
   for (const c of relevant) {

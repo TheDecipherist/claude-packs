@@ -1,7 +1,11 @@
 #!/usr/bin/env node
-// Stellix rule 2: nothing is ever pre-rendered. No image file may be added to the source or
+// Nothing is ever pre-rendered (Stellix spec 0.2). No image file may be added to the source or
 // resources (fonts are allowed: data, not pictures). Test output and goldens live outside them.
-//   PreToolUse (Write|Bash): blocks writing, copying or moving an image into a guarded folder.
+// A project sets its own scope in .claude/layout.json "guards": { "images": { "guarded": [globs],
+// "allowed": [globs] } }: "guarded" replaces the code folders (["**"]: anywhere in the repo), "allowed"
+// replaces the default allowed folders (Stellix: design/reference/** and build/pictures/** only).
+//   PreToolUse (Write|Edit|MultiEdit|NotebookEdit|Bash): blocks writing, copying or moving an image into a guarded
+//   folder by any route (lib/writes.mjs), and a download or conversion that names one (curl, convert, sips ...).
 //   --git-staged: run from a git pre-commit hook; fails if a staged added file is an image.
 //   --selftest: proves it.
 import { execFileSync } from 'node:child_process';
@@ -11,26 +15,29 @@ import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
 import { claudeRoot, commandLeavesProject, insideProject, relInCheckout } from './lib/project.mjs';
+import { writesOf } from './lib/writes.mjs';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const IMAGE = /\.(png|jpe?g|gif|bmp|tiff?|webp|heic|ico|icns|svg|psd|tga|exr|hdr|ktx2?|dds|astc)$/i;
 // Guarded: every code folder in the layout, plus anything that would be bundled as a resource.
-const guarded = (root) => [...new Set(['src/**', 'Resources/**', 'resources/**', 'assets/**', ...codeFolders(readLayout(root)).map((f) => `${f}/**`)])];
+const guarded = (root) => readLayout(root).guards?.images?.guarded ?? [...new Set(['src/**', 'Resources/**', 'resources/**', 'assets/**', ...codeFolders(readLayout(root)).map((f) => `${f}/**`)])];
 const ALLOWED = ['tests/**', '**/tests/**', 'goldens/**', '**/goldens/**', 'docs/**', 'captures/**', 'build/**'];
+const allowed = (root) => readLayout(root).guards?.images?.allowed ?? ALLOWED;
 
 // A path is judged in its own checkout, so an image written into an agent worktree is caught too.
 const isBlocked = (p, base = ROOT) => {
   const abs = resolve(base, p);
   if (!IMAGE.test(abs) || !insideProject(abs)) return false;
-  const rel = relInCheckout(abs);
-  return matchesAny(rel, guarded(claudeRoot(abs))) && !matchesAny(rel, ALLOWED);
+  const rel = relInCheckout(abs).replace(/^\.claude\/worktrees\/[^/]+\//, '');
+  const root = claudeRoot(abs);
+  return !rel.startsWith('.claude/') && matchesAny(rel, guarded(root)) && !matchesAny(rel, allowed(root));
 };
 
 function fail(files) {
   process.stderr.write(
     `BLOCKED by no-shipped-images: ${files.join(', ')}\n` +
-      'Stellix rule 2: nothing is pre-rendered. Draw it in code from the records; picture checks render off-screen into tests/goldens.\n',
+      'Nothing is pre-rendered: draw it in code; a picture check renders off-screen, from the app itself, into an allowed folder (guards.images.allowed in .claude/layout.json).\n',
   );
   return 2;
 }
@@ -49,14 +56,12 @@ function hook() {
     return 0;
   }
   const input = payload.tool_input ?? {};
-  if (payload.tool_name === 'Bash') {
-    if (commandLeavesProject(input.command)) return 0;
+  const bad = writesOf(payload, payload.cwd ?? ROOT).filter((w) => w.op !== 'delete' && isBlocked(w.path)).map((w) => w.path);
+  if (payload.tool_name === 'Bash' && !commandLeavesProject(input.command)) {
     const tokens = (input.command ?? '').split(/\s+/).map((t) => t.replace(/^['"]|['"]$/g, ''));
-    const writes = /\b(cp|mv|ln|curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b|>/.test(input.command ?? '');
-    const bad = writes ? tokens.filter((t) => t && isBlocked(t, payload.cwd ?? ROOT)) : [];
-    return bad.length ? fail(bad) : 0;
+    if (/\b(curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b/.test(input.command ?? '')) bad.push(...tokens.filter((t) => t && isBlocked(t, payload.cwd ?? ROOT)));
   }
-  return input.file_path && isBlocked(input.file_path) ? fail([input.file_path]) : 0;
+  return bad.length ? fail([...new Set(bad)]) : 0;
 }
 
 function selftest() {

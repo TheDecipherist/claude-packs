@@ -32,8 +32,9 @@ const stellix = () => project(['audio-core', 'gpu-painter', 'stellix', '--profil
 });
 
 // Hooks run the way Claude Code runs them: the main checkout's copy, CLAUDE_PROJECT_DIR = main.
-const fireAs = (here, hook, payload) =>
-  spawnSync('node', [join(here, '.claude/hooks', hook)], { input: JSON.stringify(payload), env: { ...process.env, CLAUDE_PROJECT_DIR: here }, encoding: 'utf8' });
+// node runs a .mjs hook, python3 a .py one, as the settings entries do.
+const fireAs = (here, hook, payload, env = {}) =>
+  spawnSync(hook.endsWith('.py') ? 'python3' : 'node', [join(here, '.claude/hooks', hook)], { input: JSON.stringify(payload), env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: here, ...env }, encoding: 'utf8' });
 const fire = (here, hook, file, content = '// new\n') => fireAs(here, hook, { tool_name: 'Write', tool_input: { file_path: file, content } }).status;
 const bash = (here, hook, command) => fireAs(here, hook, { tool_name: 'Bash', tool_input: { command } }).status;
 
@@ -73,6 +74,40 @@ const CASES = {
   'protect-vendor.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'protect-vendor.mjs', join(wt, 'src/dsp/Svf.cpp')), 0);
     assert.equal(fire(here, 'protect-vendor.mjs', join(wt, 'third_party/lib/lib.h')), 2);
+    // the copy tree (a layout folder of kind "copy"), by a tool and by the shell; its sanctioned tool gets through
+    assert.equal(fire(here, 'protect-vendor.mjs', join(wt, 'src/engines/copied/Voice.h')), 2);
+    assert.equal(bash(here, 'protect-vendor.mjs', `sed -i '' s/a/b/ ${join(wt, 'src/engines/copied/Voice.h')}`), 2);
+    assert.equal(bash(here, 'protect-vendor.mjs', `python3 tools/copy_in.py ${join(wt, 'src/engines/copied/Voice.h')}`), 0);
+    assert.equal(bash(here, 'protect-vendor.mjs', `sed -i '' s/a/b/ ${join(wt, 'src/engines/Own.h')}`), 0);
+  },
+  'build-guard.mjs': ({ here, wt }) => {
+    assert.equal(bash(here, 'build-guard.mjs', `cd ${wt} && cmake --build build -j8`), 2, 'a build outside the queue');
+    assert.equal(bash(here, 'build-guard.mjs', `cd ${wt} && buildq cmake --build build -j8`), 0);
+  },
+  'time-guard.mjs': ({ here, wt }) => {
+    const pre = (command) => fireAs(here, 'time-guard.mjs', { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }).status;
+    const loop = (pattern) => ['until', '!', 'pgrep', '-f', pattern, '>/dev/null;', 'do', 'sleep', '5;', 'done'].join(' ');
+    assert.equal(pre(`cd ${wt} && ${loop('"cmake --build"')}`), 2);
+    assert.equal(pre(`cd ${wt} && ${loop("'[c]make --build'")}`), 0);
+  },
+  'tims-asks.mjs': ({ here, wt }) => {
+    const t = join(wt, 'transcript.jsonl');
+    writeFileSync(t, `${JSON.stringify({ type: 'user', timestamp: new Date().toISOString(), message: { content: 'make the bank louder' } })}\n`);
+    const r = fireAs(here, 'tims-asks.mjs', { hook_event_name: 'SessionStart', source: 'compact', transcript_path: t }, { TIMS_ASKS_LEDGER: join(wt, 'ledger.json') });
+    assert.equal(r.status, 0);
+    assert.match(r.stdout, /make the bank louder/);
+  },
+  'idle-wake.mjs': ({ here, wt }) => {
+    const t = join(wt, 'transcript.jsonl');
+    writeFileSync(t, '{}\n');
+    const env = { IDLE_WAKE_MIN: '0.0005', IDLE_WAKE_LOOK_S: '0.01', TIMS_ASKS_LEDGER: join(wt, 'ledger.json') };
+    assert.equal(fireAs(here, 'idle-wake.mjs', { hook_event_name: 'Stop', transcript_path: t, last_assistant_message: 'Next I would build P4.' }, env).status, 2);
+    assert.equal(fireAs(here, 'idle-wake.mjs', { hook_event_name: 'Stop', transcript_path: t, last_assistant_message: 'All done. NOTHING OPEN' }, env).status, 0);
+  },
+  'browser-guard.py': ({ here, wt }) => {
+    const launch = `import puppeteer from 'puppeteer';\nconst b = await puppeteer.${'launch'}();\n`;
+    assert.equal(fire(here, 'browser-guard.py', join(wt, 'tools/shot.mjs'), launch), 2);
+    assert.equal(fire(here, 'browser-guard.py', join(wt, 'src/painter/Draw.cpp'), 'void draw() {}\n'), 0);
   },
   'lesson-checks.mjs': ({ here, wt }) => {
     // The worktree's branch moved DSP into src/synth: its own layout.json decides, not main's.
@@ -137,10 +172,17 @@ const CASES = {
 
 test('every hook judges a worktree file against the worktree, inside a real git worktree', () => {
   const p = project(['audio-core', 'gpu-painter', 'stellix'], (dir) => {
+    const lf = join(dir, '.claude/layout.json');
+    const layout = JSON.parse(readFileSync(lf, 'utf8'));
+    layout.folders.engines_copy = { path: 'src/engines/copied', kind: 'copy', purpose: 'a copy tree' };
+    layout.guards = { copy: { tools: ['tools/copy_in.py'] }, git: { refuseTrunk: true } };
+    layout.enable = ['hooks/tims-asks.mjs', 'hooks/idle-wake.mjs']; // the opt-in hooks too, so every hook is tried
+    writeFileSync(lf, JSON.stringify(layout, null, 2));
+    execFileSync('node', [CLI, 'update', '--dir', dir], { stdio: 'ignore' });
     put(join(dir, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
     execFileSync('node', [join(dir, '.claude/hooks/param-id-lock.mjs'), '--init'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, stdio: 'ignore' });
   });
-  const installed = readdirSync(join(p.here, '.claude/hooks')).filter((f) => f.endsWith('.mjs')).sort();
+  const installed = readdirSync(join(p.here, '.claude/hooks')).filter((f) => /\.(mjs|py)$/.test(f)).sort();
   assert.deepEqual(installed, Object.keys(CASES).sort(), 'every installed hook needs a worktree case here');
   const failed = [];
   for (const [hook, check] of Object.entries(CASES)) {

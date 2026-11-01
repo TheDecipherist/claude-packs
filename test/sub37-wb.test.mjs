@@ -2,7 +2,7 @@
 // a test here that was seen failing before the fix.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -91,7 +91,13 @@ function tokenRepo(dir) {
 
 test('WB-4: every hook in every pack has a passing --selftest, and doctor runs them all', () => {
   // Pack hooks import the shared lib/ that base installs beside them, so they run from an install.
+  // 0.7.0: the opt-in hooks (tims-asks, idle-wake) install only when enabled, so this install enables them.
   const dir = init('audio-core', 'gpu-painter', 'stellix');
+  const lf = join(dir, '.claude/layout.json');
+  const layout = JSON.parse(readFileSync(lf, 'utf8'));
+  layout.enable = JSON.parse(readFileSync(join(PKG, 'packs/base/pack.json'), 'utf8')).optIn;
+  writeFileSync(lf, JSON.stringify(layout, null, 2));
+  execFileSync('node', [CLI, 'update', '--dir', dir], { encoding: 'utf8' });
   const shipped = ['packs/base', 'packs/audio-core', 'packs/gpu-painter', 'packs/stellix']
     .flatMap((p) => { try { return readdirSync(join(PKG, p, 'hooks')).filter((f) => f.endsWith('.mjs')); } catch { return []; } }).sort();
   const installed = readdirSync(join(dir, '.claude/hooks')).filter((f) => f.endsWith('.mjs')).sort();
