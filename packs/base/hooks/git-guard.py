@@ -10,14 +10,16 @@ A Claude Code PreToolUse hook on Bash. It reads the command about to run and exi
   4. Every `gh` names the token: GH_TOKEN=$<tokenVar>. A repo is created as <owner>/<name> --private.
   5. A token is never written into a remote URL or a config file, and never pasted literally.
   6. Nothing under a never-staged folder (~/firmware) is staged.
-  7. No commit straight onto a trunk (main, master): work lives on a branch (guards.git.branchStart says how).
+  7. No commit straight onto a trunk (main, master): work lives on a branch (guards.git.branchStart says how). OFF unless the
+     project switches it on (guards.git.refuseTrunk: true): a project whose history is on main moves to the branch flow
+     first (a work/ branch per step), then enables it.
   8. No branch is deleted; nothing is rebased or amended; no hook is skipped (--no-verify).
 Only a real git or gh call is judged: heredoc bodies and quoted text are blanked, and a part counts only when its first
 word is git or gh. A `cd` or `git -C` moves the folder the dirty-tree and trunk checks look at. The laws hold in every
 repo a command reaches, the project's siblings too.
 
 The project's values come from .claude/layout.json "guards": { "git": { "owner", "tokenVar", "trunks", "neverStage",
-"safeRestore", "branchStart", "accountNote" } }; unset keys take the defaults below.
+"safeRestore", "branchStart", "accountNote", "refuseTrunk" } }; unset keys take the defaults below.
 
     python3 .claude/hooks/git-guard.py --selftest
 """
@@ -35,6 +37,7 @@ DEFAULTS = {
     "safeRestore": None,
     "branchStart": "git switch -c work/<name>",
     "accountNote": "The default account on this machine is the MongoDB one.",
+    "refuseTrunk": False,
 }
 
 
@@ -110,7 +113,7 @@ def check(cmd, cwd=".", dirty_fn=dirty, branch_fn=cur_branch, has_head_fn=has_he
             return ("Never --no-verify (or -n): the pre-commit hook is the gate. When it refuses, fix what it names; if a commit "
                     "must hold something that fails the gates (a planted fault for a test), do not commit it: work on an "
                     "uncommitted copy.")
-        if re.search(r"\bgit\b.*\bcommit\b", p) and branch_fn(here) in (c["trunks"] or []) and has_head_fn(here):
+        if c["refuseTrunk"] and re.search(r"\bgit\b.*\bcommit\b", p) and branch_fn(here) in (c["trunks"] or []) and has_head_fn(here):
             return f"This is the trunk. Every task is built on its own branch and merged when complete: {c['branchStart']}."
         if re.search(r"\bgit\b.*\bpush\b", p):
             if re.search(r"\s(-f|--force|--force-with-lease)\b", p):
@@ -169,23 +172,25 @@ def selftest():
         ("python3 - <<'EOF'\nprint('git add -A')\nEOF", is_dirty),
     ]
     on_step = lambda cwd: "step/C1-the-ribbon"; on_trunk = lambda cwd: "main"; yes = lambda cwd: True
+    TRUNK = {"refuseTrunk": True}
     bad = 0; n_block = len(must_block)
     for cmd, fn in must_block:
         if check(cmd, ".", fn, on_step, yes) is None: bad += 1; print("NOT BLOCKED:", cmd)
     for cmd in ("git commit -m 'x' -- a.h", "GUARD_OK=1 git commit -m 'x' -- a.h"):
         n_block += 1
-        if check(cmd, ".", clean, on_trunk, yes) is None: bad += 1; print("NOT BLOCKED on trunk:", cmd)
-    if check("git commit -m 'first' -- a.h", ".", clean, on_trunk, lambda c: False) is not None: bad += 1; print("WRONGLY BLOCKED: first commit")
+        if check(cmd, ".", clean, on_trunk, yes, TRUNK) is None: bad += 1; print("NOT BLOCKED on trunk:", cmd)
+    if check("git commit -m 'x' -- a.h", ".", clean, on_trunk, yes) is not None: bad += 1; print("WRONGLY BLOCKED: a commit on main with the trunk refusal off (the default)")
+    if check("git commit -m 'first' -- a.h", ".", clean, on_trunk, lambda c: False, TRUNK) is not None: bad += 1; print("WRONGLY BLOCKED: first commit")
     by_dir = lambda c: "work/x" if c.endswith("wt") else "main"
-    if check("cd /r/wt && git commit --no-edit", "/r", clean, by_dir, yes) is not None: bad += 1; print("WRONGLY BLOCKED: commit after cd into a worktree on a branch")
-    if check("git -C /r/wt commit --no-edit", "/r", clean, by_dir, yes) is not None: bad += 1; print("WRONGLY BLOCKED: git -C a worktree on a branch")
-    if check("cd /r && git commit --no-edit", "/r/wt", clean, by_dir, yes) is None: bad += 1; print("NOT BLOCKED: cd onto the trunk then commit")
+    if check("cd /r/wt && git commit --no-edit", "/r", clean, by_dir, yes, TRUNK) is not None: bad += 1; print("WRONGLY BLOCKED: commit after cd into a worktree on a branch")
+    if check("git -C /r/wt commit --no-edit", "/r", clean, by_dir, yes, TRUNK) is not None: bad += 1; print("WRONGLY BLOCKED: git -C a worktree on a branch")
+    if check("cd /r && git commit --no-edit", "/r/wt", clean, by_dir, yes, TRUNK) is None: bad += 1; print("NOT BLOCKED: cd onto the trunk then commit")
     for cmd, fn in must_pass:
         r = check(cmd, ".", fn, on_step, yes)
         if r is not None: bad += 1; print("WRONGLY BLOCKED:", cmd, "->", r)
     # a project's own values (layout.json guards.git): another owner, token and trunk, its safe-restore and branch command
     other = {"owner": "Acme", "tokenVar": "ACME_TOKEN", "trunks": ["trunk"], "safeRestore": "python3 tools/safe_restore.py <paths>",
-             "branchStart": "python3 tools/step.py start <STEP> \"task\""}
+             "branchStart": "python3 tools/step.py start <STEP> \"task\"", "refuseTrunk": True}
     acme = "git push https://x-access-token:$ACME_TOKEN@github.com/Acme/app.git b"
     for cmd, fn, br, want in [(acme, clean, on_step, None), (push, clean, on_step, "Acme"), ("git commit -m x -- a", clean, lambda c: "trunk", "tools/step.py"),
                               ("git commit -m x -- a", clean, on_trunk, None), ("git stash", is_dirty, on_step, "safe_restore.py")]:

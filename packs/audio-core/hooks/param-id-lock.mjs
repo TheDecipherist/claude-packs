@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Locks parameter IDs: once seen, an ID may never disappear from the source.
 //   node param-id-lock.mjs --init   create .claude/param-ids.lock.json from the current repo
-//   (as PostToolUse hook)           fail (exit 2) if a locked ID is gone; add new IDs to the lock
+//   (as PostToolUse hook)           fail (exit 2) if a locked ID is gone; add new IDs to the lock. Every route that
+//                                   writes is judged (Write, Edit, MultiEdit, NotebookEdit, and the shell's >, >>, tee,
+//                                   sed -i, cp, mv, rm, a heredoc; lib/writes.mjs): an id deleted by `sed -i` is gone too.
 // Where IDs are read: .claude/param-ids.config.json, else layout.json "paramIds", else JUCE
 // ParameterID / AudioParameter* string literals. Both forms: { "extensions": "<regex>", "patterns": ["<regex with one group>"] }.
 // A file is judged in its own checkout: an agent worktree is scanned, and keeps its lock, on its own.
@@ -9,6 +11,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
+import { writesOf } from './lib/writes.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 // .claude is skipped so the worktrees under .claude/worktrees/ never stand in for this checkout's code.
@@ -60,12 +63,25 @@ function main() {
   } catch {
     // run by hand without stdin
   }
-  const file = payload.tool_input?.file_path;
-  if (file && !insideProject(file)) return 0; // another project's edit: not ours to rescan
-  // The checkout's own lock only: main's lock may hold ids a worktree branch never had.
-  const root = file ? checkoutRoot(file) : ROOT;
+  // Run by hand (no tool): the main checkout. Otherwise every checkout a write of an id file landed in.
+  const files = payload.tool_name ? writesOf(payload).map((w) => w.path).filter((f) => insideProject(f)) : [null];
+  const seen = new Set();
+  for (const file of files) {
+    const root = file ? checkoutRoot(file) : ROOT;
+    if (seen.has(root)) continue;
+    const config = loadConfig(file ? claudeRoot(file) : ROOT);
+    if (file && !config.extensions.test(file)) continue; // not a file ids are written in
+    seen.add(root);
+    const code = judge(root, config);
+    if (code) return code;
+  }
+  return 0;
+}
+
+// The checkout's own lock only: main's lock may hold ids a worktree branch never had.
+function judge(root, config) {
   if (!existsSync(lockFile(root))) return 0;
-  const current = collectIds(root, loadConfig(file ? claudeRoot(file) : ROOT));
+  const current = collectIds(root, config);
 
   const locked = new Set(JSON.parse(readFileSync(lockFile(root), 'utf8')));
   const missing = [...locked].filter((id) => !current.has(id));

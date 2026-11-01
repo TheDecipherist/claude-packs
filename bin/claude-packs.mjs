@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // claude-packs: per-project Claude Code rules, checks, hooks and skills for The Decipherist's synths.
 // Everything installs into the project's own .claude/ (and nested skill folders).
-// The one exception is `global`: the latest-versions skill and its hook, which apply to every project.
+// The one exception is `global`: latest-versions (skill and hook), gnu-shell and shell-traps.
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,8 +27,9 @@ const HELP = `usage: npx claude-packs <command> [options]
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
   global add|remove|doctor
-                     the one global install: the latest-versions skill and version-pin-guard
-                     hook in ~/.claude (never overwrites; --home <dir> to target another home)
+                     the global part, exactly three pieces: latest-versions (skill and
+                     version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
+                     overwrites; --home <dir> to target another home)
 
 options: --dir <project> (default: current folder)   --force (replace files you edited)`;
 

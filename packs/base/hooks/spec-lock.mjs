@@ -4,12 +4,14 @@
 //   node spec-lock.mjs lock "<reason>" [glob ...]   lock (Claude may do this when a build starts)
 //   node spec-lock.mjs unlock                       unlock (the USER runs this, e.g. `! node ...`)
 //   node spec-lock.mjs status
-// As a PreToolUse hook (Write|Edit|MultiEdit|Bash) it blocks edits to locked files, edits to the
-// lock file itself, and Claude running "unlock".
+// As a PreToolUse hook (Write|Edit|MultiEdit|NotebookEdit|Bash) it blocks writes to locked files by any route
+// (lib/writes.mjs: a tool, or the shell's >, >>, tee, sed -i, cp, mv, a heredoc), writes to the lock file itself,
+// and Claude running "unlock". Words inside a heredoc body or quotes are text, never the unlock command.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
 import { commandLeavesProject, insideProject, checkoutRoot, relInCheckout } from './lib/project.mjs';
+import { writesOf } from './lib/writes.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const STATE = join(ROOT, '.claude', 'spec-lock.json');
@@ -49,8 +51,11 @@ function hook() {
 
   if (payload.tool_name === 'Bash') {
     const cmd = input.command ?? '';
-    if (/spec-lock/.test(cmd) && /\bunlock\b/.test(cmd)) return block(`Claude may not unlock the spec. ${howTo}`);
-    if (/spec-lock\.json/.test(cmd) && WRITE_CMD.test(cmd)) return block(`the lock file can't be edited. ${howTo}`);
+    const bare = cmd.replace(/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?\n\s*\2\s*(?:\n|$)/g, '\n').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+    if (/spec-lock/.test(bare) && /\bunlock\b/.test(bare)) return block(`Claude may not unlock the spec. ${howTo}`);
+    if (/spec-lock\.json/.test(bare) && WRITE_CMD.test(bare)) return block(`the lock file can't be edited. ${howTo}`);
+    const routed = judgeWrites(payload, state, howTo);
+    if (routed) return routed;
     if (!state.locked || commandLeavesProject(cmd)) return 0;
     // Each word as a path in its own checkout, so a worktree's spec/ is the spec too.
     const base = payload.cwd ?? ROOT;
@@ -66,10 +71,17 @@ function hook() {
     return 0;
   }
 
-  if (!insideProject(input.file_path)) return 0;
-  const rel = relative(checkoutRoot(input.file_path), input.file_path ?? '');
-  if (rel === join('.claude', 'spec-lock.json')) return block(`the lock file can't be edited. ${howTo}`);
-  if (state.locked && matchesAny(rel, state.globs)) return block(`${rel} is locked since ${state.since} (${state.reason}). ${howTo}`);
+  return judgeWrites(payload, state, howTo);
+}
+
+// Every file the call writes, whichever tool: the lock file never, a locked spec file not while locked.
+function judgeWrites(payload, state, howTo) {
+  for (const w of writesOf(payload)) {
+    if (!insideProject(w.path)) continue;
+    const rel = relative(checkoutRoot(w.path), w.path);
+    if (rel === join('.claude', 'spec-lock.json')) return block(`the lock file can't be edited. ${howTo}`);
+    if (state.locked && matchesAny(rel, state.globs)) return block(`${rel} is locked since ${state.since} (${state.reason}). ${howTo}`);
+  }
   return 0;
 }
 

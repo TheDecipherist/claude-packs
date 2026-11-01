@@ -86,6 +86,10 @@ const CASES = {
     assert.equal(bash(here, 'git-guard.py', `cd ${wt} && git add -A`), 2);
     assert.equal(bash(here, 'git-guard.py', `cd ${wt} && git add src/dsp/Svf.cpp`), 0);
   },
+  'build-guard.py': ({ here, wt }) => {
+    assert.equal(bash(here, 'build-guard.py', `cd ${wt} && cmake --build build -j8`), 2, 'a build outside the queue');
+    assert.equal(bash(here, 'build-guard.py', `cd ${wt} && buildq cmake --build build -j8`), 0);
+  },
   'time-guard.py': ({ here, wt }) => {
     const pre = (command) => fireAs(here, 'time-guard.py', { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }).status;
     const loop = (pattern) => ['until', '!', 'pgrep', '-f', pattern, '>/dev/null;', 'do', 'sleep', '5;', 'done'].join(' ');
@@ -173,8 +177,10 @@ test('every hook judges a worktree file against the worktree, inside a real git 
     const lf = join(dir, '.claude/layout.json');
     const layout = JSON.parse(readFileSync(lf, 'utf8'));
     layout.folders.engines_copy = { path: 'src/engines/copied', kind: 'copy', purpose: 'a copy tree' };
-    layout.guards = { copy: { tools: ['tools/copy_in.py'] } };
+    layout.guards = { copy: { tools: ['tools/copy_in.py'] }, git: { refuseTrunk: true } };
+    layout.enable = ['hooks/tims-asks.py', 'hooks/idle-wake.py']; // the opt-in hooks too, so every hook is tried
     writeFileSync(lf, JSON.stringify(layout, null, 2));
+    execFileSync('node', [CLI, 'update', '--dir', dir], { stdio: 'ignore' });
     put(join(dir, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
     execFileSync('node', [join(dir, '.claude/hooks/param-id-lock.mjs'), '--init'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, stdio: 'ignore' });
   });

@@ -36,6 +36,18 @@ def guard(name, defaults, root=None):
     return {**defaults, **got}
 
 
+def shell_writes(command, cwd):
+    """The files a shell command writes, with their text before and after: [{path, op, before, after}] (after None when it
+    cannot be known). One reader of the shell for every hook: lib/shell-writes.mjs, run by node (WB-69)."""
+    import subprocess
+    lib = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shell-writes.mjs")
+    try:
+        r = subprocess.run(["node", lib, "--json"], input=json.dumps({"command": command, "cwd": cwd}), capture_output=True, text=True, timeout=15)
+        return json.loads(r.stdout) if r.returncode == 0 and r.stdout.strip() else []
+    except Exception:
+        return []
+
+
 def folders_of_kind(lay, kind):
     """The paths of every layout folder of one kind ("copy": a read-only copy of another project's code)."""
     return [f["path"].rstrip("/") for f in (lay.get("folders") or {}).values() if isinstance(f, dict) and f.get("kind") == kind]

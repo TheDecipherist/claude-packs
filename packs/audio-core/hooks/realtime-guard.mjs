@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// PreToolUse hook (Write|Edit|MultiEdit): blocks edits that ADD realtime-unsafe code to
+// PreToolUse hook (Write|Edit|MultiEdit|NotebookEdit|Bash, every route: lib/writes.mjs): blocks writes that ADD realtime-unsafe code to
 // audio-thread functions in C++ files. Exit 2 = block, stderr goes back to Claude.
 import { readFileSync } from 'node:fs';
-import { computeEdit } from './lib/apply-edit.mjs';
+import { writesOf } from './lib/writes.mjs';
 import { findViolations, violationKey } from './lib/realtime-checks.mjs';
 import { insideProject } from './lib/project.mjs';
 
@@ -15,11 +15,16 @@ function main() {
   } catch {
     return 0;
   }
-  const input = payload.tool_input ?? {};
-  if (!CPP.test(input.file_path ?? '') || !insideProject(input.file_path)) return 0;
+  for (const w of writesOf(payload)) {
+    if (w.after === null || !CPP.test(w.path) || !insideProject(w.path)) continue;
+    const code = judge(w.path, w);
+    if (code) return code;
+  }
+  return 0;
+}
 
-  const result = computeEdit(payload.tool_name, input);
-  if (!result) return 0;
+function judge(file, result) {
+  const input = { file_path: file };
 
   const existing = new Set(findViolations(result.before).map(violationKey));
   const added = findViolations(result.after).filter((v) => !existing.has(violationKey(v)));

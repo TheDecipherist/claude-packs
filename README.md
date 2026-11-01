@@ -1,17 +1,17 @@
 # @thedecipherist/claude-packs
 
-Per-project Claude Code rules, lesson checks, hooks and skills for The Decipherist's JUCE synths. Everything installs into the project's own `.claude/` (and nested skill folders). Nothing ever goes into `~/.claude`.
+Per-project Claude Code rules, lesson checks, hooks and skills for The Decipherist's JUCE synths. Everything installs into the project's own `.claude/` (and nested skill folders). The only things that go into `~/.claude` are the three global pieces (`global add`, below).
 
 ## Packs
 
 | Pack | For | Rules | Checks | Hooks | Skills |
 |---|---|---|---|---|---|
-| `base` | every project (always installed) | 11 | 3 | lesson-checks, folder-law, placement-law, spec-lock, protect-vendor (vendored code and copy trees), file-size-guard, frozen-files, stage-guard, git-guard, time-guard, tims-asks, idle-wake | add-lesson-check, pressure-test-skill, prove-instances-identical, build-step |
+| `base` | every project (always installed) | 11 | 3 | lesson-checks, folder-law, placement-law, spec-lock, protect-vendor (vendored code and copy trees), file-size-guard, frozen-files, stage-guard, git-guard, build-guard, time-guard; opt-in: tims-asks, idle-wake | add-lesson-check, pressure-test-skill, prove-instances-identical, build-step |
 | `audio-core` | any JUCE synth or effect | 40 | 8 | realtime-guard, param-id-lock | juce-realtime-audit, measure-tone, copy-and-prove, … (+ tone-report tool, `.clang-tidy`) |
 | `gpu-painter` | GPU-drawn UI on Dawn (Metal / D3D12) | 14 | 6 | browser-guard | gpu-frame-bench, gpu-golden-check, gpu-golden-update, gpu-lifecycle-stress, gpu-capture |
 | `stellix` | the Stellix spec laws | 5 | 5 | no-shipped-images | – |
 
-Tabula: `init audio-core`. Stellix: `init audio-core gpu-painter stellix`.
+The projects on the kit: Stellix (`init audio-core gpu-painter stellix --profile stellix`) and Sub37 (`init audio-core --profile sub37`).
 
 ## Commands
 
@@ -49,16 +49,24 @@ npx claude-packs list               show the packs
 ## Install from the tarball
 `npm i -D ./thedecipherist-claude-packs-0.5.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
 
-## The one global piece: latest-versions and the machine-wide shell hooks
+## The global part: exactly three pieces
 
 ```
-npx claude-packs global add      # ~/.claude/skills/latest-versions, new-project, hooks/claude-packs/version-pin-guard.mjs,
-                                 # hooks/build-guard.py, hooks/shell-traps.py, hooks/gnu-shell.py
+npx claude-packs global add      # ~/.claude/skills/latest-versions, hooks/claude-packs/version-pin-guard.mjs (+ lib/shell-writes.mjs),
+                                 # hooks/gnu-shell.py, hooks/shell-traps.py
 npx claude-packs global doctor
 npx claude-packs global remove   # removes only what it installed and you did not edit
 ```
 
-Everything else in this package is per project. This is the exception, because "look up the newest release before you pin anything" applies to every project, including new ones that have no packs yet.
+Everything else in this package is per project (Tim, 2026-10-31). The global part is exactly three pieces, and `global add` installs nothing else:
+
+1. **latest-versions** (the skill and its `version-pin-guard` hook), because "look up the newest release before you pin anything" applies to every project, including new ones that have no packs yet.
+2. **gnu-shell** (SessionStart: bash 5 and the GNU tools first on the Bash tool's PATH, `~/.claude/bin` first, a warning on every command in a zsh session) and
+3. **shell-traps** (PreToolUse on Bash: the BSD flags, unsplit zsh words and `;`-chained destructive steps that cost time on this Mac).
+
+Global by design: they fix this machine's shell for Claude, not any project's rules.
+
+`build-guard` (every compile and test run through the machine-wide build queue) is a base-pack project hook, not global. The `new-project` skill is held out of `global add` for now; a copy already in `~/.claude/skills/new-project` is left as it is.
 
 - **Skill `latest-versions`**: before Claude chooses, adds, pins or upgrades any dependency, tool, SDK, Action or base image, it fetches the current stable release from a primary source. It records the result in the project's `docs/versions.md`, one row per dependency: name, latest stable, date checked, source URL, version used and decision.
 - **Hook `version-pin-guard`** (PreToolUse on Write/Edit/MultiEdit/Bash): it refuses a new or changed pin unless that dependency's row was checked within 14 days (`VERSION_GUARD_DAYS` overrides the 14).
@@ -66,7 +74,7 @@ Everything else in this package is per project. This is the exception, because "
   - It also catches `npm/pnpm/yarn/bun add|install`, `pip/uv/poetry install|add`, `cargo add` and `go get`.
   - `node ~/.claude/hooks/claude-packs/version-pin-guard.mjs --selftest` proves it.
 
-It never overwrites: an existing `~/.claude/skills/latest-versions/SKILL.md` that you wrote is kept, and the package copy goes beside it as `.pack-new`. Your `settings.json` keeps everything that isn't this hook.
+It never overwrites: an existing `~/.claude/skills/latest-versions/SKILL.md` that you wrote is kept, and the package copy goes beside it as `.pack-new`. Your `settings.json` keeps everything that isn't one of these three. A hook already there that is byte for byte the package's is taken over, and its settings entry is never doubled.
 
 ## Micro rules, skills and hooks harvested from MDD, mddkit and superpowers (0.2.0)
 
@@ -99,10 +107,10 @@ Each item does one job and loads only where its paths match.
 You often roll a lesson out to many projects from one session. Nothing here may get in the way:
 
 - **This project's hooks judge only this project's files.** Every hook checks `insideProject()` (`hooks/lib/project.mjs`) first, and Bash checks ignore commands that `cd`/`git -C` into another folder. `test/other-projects.test.mjs` fires every hook at edits in a sibling project and requires that none block.
-- **Access to sibling projects.** `layout.siblings` (the Stellix profile sets `["../"]`) is merged into `permissions.additionalDirectories` in `.claude/settings.json`, so reading and editing `../tabula`, `../echofold`… needs no extra prompts. Claude Code applies it after you accept the folder's trust prompt once. Entries you add yourself are never removed.
+- **Access to sibling projects.** `layout.siblings` (the Stellix profile sets `["../"]`) is merged into `permissions.additionalDirectories` in `.claude/settings.json`, so reading and editing `../sub37`, `../echofold`… needs no extra prompts. Claude Code applies it after you accept the folder's trust prompt once. Entries you add yourself are never removed.
 - **Roll package updates out everywhere:** `npx claude-packs update-all ~/projects/*` updates and doctors every project that already has claude-packs, and skips the rest. Each project's own edits and `.pack-new` rules apply as usual.
 - **What still applies everywhere, by design:** the global `version-pin-guard` (it reads the *target* project's own `docs/versions.md`), and `stage-guard` (stage by name in any repo).
-- **The other project's own laws** only run when the session is in that project. For real code work there, `/cd ../tabula` (Claude Code 2.1.246+ loads that project's hooks and rules) or open a session there; edits made from here skip its hooks.
+- **The other project's own laws** only run when the session is in that project. For real code work there, `/cd ../sub37` (Claude Code 2.1.246+ loads that project's hooks and rules) or open a session there; edits made from here skip its hooks.
 
 ## The firm structure: what goes where (0.3.0)
 
@@ -114,7 +122,7 @@ Rules fire by path, so the structure is what makes them fire. Three layers keep 
 
 A tailored project (the Stellix profile) carries its own `kinds`. Edit `kinds` and `folders` in `layout.json`, then `update`.
 
-**New projects:** the global `new-project` skill (installed by `claude-packs global add`) lays the structure down before the first file: synthkit's `new_synth.py` for a unit, then `claude-packs init`, `latest-versions`, `doctor`, and `doctor --strict` once it builds.
+**New projects:** the `new-project` skill (held out of `global add` for now, see the global part) lays the structure down before the first file: synthkit's `new_synth.py` for a unit, then `claude-packs init`, `latest-versions`, `doctor`, and `doctor --strict` once it builds.
 
 ## Lessons from the Stellix build (0.4.0)
 
@@ -155,11 +163,12 @@ go in `layout.json` under `"guards"`; every key has a house default.
 
 | Kind | Name | Pack | What it does | Project values (`guards.<name>`) |
 |---|---|---|---|---|
-| hook | `git-guard.py` | base | the house git laws: no `add -A`/`commit -a`, no commit on a trunk, no undo over a dirty tree, no rebase/amend/force/`--no-verify`/branch delete, a push names the owner's repo and the token variable, every `gh` names the token, no token stored or pasted, nothing under `~/firmware` staged | `git`: `owner` (TheDecipherist), `tokenVar` (PERSONAL_GITHUB_TOKEN), `trunks`, `neverStage`, `safeRestore`, `branchStart`, `accountNote` |
+| hook | `git-guard.py` | base | the house git laws: no `add -A`/`commit -a`, no undo over a dirty tree, no rebase/amend/force/`--no-verify`/branch delete, a push names the owner's repo and the token variable, every `gh` names the token, no token stored or pasted, nothing under `~/firmware` staged; the trunk refusal (no commit on main/master) only when `refuseTrunk` is true | `git`: `owner` (TheDecipherist), `tokenVar` (PERSONAL_GITHUB_TOKEN), `trunks`, `refuseTrunk` (false), `neverStage`, `safeRestore`, `branchStart`, `accountNote` |
+| hook | `build-guard.py` | base | every compile and test run through the machine-wide build queue (`buildq` or the project's wrapper); no polling loops; agents build only what their change needs | – |
 | hook | `time-guard.py` | base | tells the caller when a call, a build, a ctest, a probe, a panel export, a headless Chrome or a wait loop runs long, or an agent's worktree goes unsaved; refuses a pgrep wait loop that can never end (a heredoc body is text, not a loop) | `time`: `probePattern`, `saveCommand` |
-| hook | `tims-asks.py` | base | after a compaction, Tim's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |
-| hook | `idle-wake.py` | base | after 15 minutes of silence, wakes the session with its open asks (Stop, asyncRewake) | – |
-| hook | `protect-vendor.mjs` | base | **merged with Stellix's copy-tree-guard**: a folder of `"kind": "copy"` is read-only to tools and to shell writes; only git and the sanctioned copy tools get through | `copy`: `tools` |
+| hook | `tims-asks.py` | base, **opt-in** | after a compaction, Tim's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |
+| hook | `idle-wake.py` | base, **opt-in** | after 15 minutes of silence, wakes the session with its open asks (Stop, asyncRewake) | – |
+| hook | `protect-vendor.mjs` | base | **merged with Stellix's copy-tree-guard**: a folder of `"kind": "copy"` is read-only like vendored code; only git and the sanctioned copy tools get through | `copy`: `tools` |
 | hook | `browser-guard.py` | gpu-painter | a natively drawn app never starts a browser; judges writes only inside its own project | `browser`: `pictureCommand` |
 | hook | `no-shipped-images.mjs` | stellix | its scope is now the project's | `images`: `guarded`, `allowed` |
 | hook | `file-size-guard.mjs` | base | also counts shell scripts, CMake and GLSL (Stellix's source rule did) | `maxFileLines` |
@@ -168,13 +177,38 @@ go in `layout.json` under `"guards"`; every key has a house default.
 | check | `one-seeded-random` | stellix | now also catches `mt19937` without `std::`, the distributions, `Random` objects, `SecRandomCopyBytes`, `RAND_bytes` | – |
 | rule | `hooks-and-gates`, `plan-and-logs`, `copy-trees-read-only` | base | selftests run from plants, faults logged first; the plan and logs never rewritten; copy trees by kind | – |
 | skill | `build-step` (base), `copy-and-prove` (audio-core) | | one step on its own branch; copy, prove identical, then change | – |
-| global | `build-guard.py`, `shell-traps.py`, `gnu-shell.py` | global | the machine-wide hooks the house installed by hand; `global add` takes over an identical copy and its settings entry. gnu-shell is the newer global one (`~/.claude/bin` first on PATH, a zsh warning on every command) | – |
 
-- **Python hooks** are managed like the node ones: a settings entry that runs a script some pack ships is the package's;
-  every other entry is the project's own and stays. Entries for `copy-tree-guard.py`, `build-guard.py`, `shell-traps.py` and
-  `gnu-shell.py` in a project are retired (merged, or machine-wide now). The hooks share `hooks/lib/house.py`.
+### Nothing new switches on unless the project chose it
+
+- `init` and `add` bring every hook and check of the packs named, except the opt-in ones (`tims-asks`, `idle-wake`).
+- `update` brings a hook or check that is NEW to the project (not in its lock, not on disk, not run by its `settings.json`) only when `.claude/layout.json` `"enable"` names it, e.g. `"enable": ["hooks/git-guard.py", "hooks/tims-asks.py", "checks/no-opengl.json"]`. What the project already had stays on.
+- `update` prints both lists before it changes anything: `switching on (new to this project): …` and `held back, not switched on: …`.
+- git-guard's trunk refusal is a setting, `"guards": { "git": { "refuseTrunk": true } }`, off by default.
+
+### Every write guard covers every route (WB-69)
+
+A guard that refuses a write refuses it by every tool that can write: Write, Edit, MultiEdit, NotebookEdit, and the shell
+(`>`, `>>`, `tee`, `sed -i`, `cp`, `mv`, `rm`, a heredoc into a file, …). They all judge `hooks/lib/writes.mjs`, which reads
+the shell through `hooks/lib/shell-writes.mjs` (a `sed -i` is run for real on a copy, in GNU sed's `--sandbox`, so its result
+is exact). This covers folder-law, placement-law, protect-vendor (vendored code and copy trees), frozen-files, spec-lock,
+file-size-guard, lesson-checks, realtime-guard, no-shipped-images, param-id-lock, browser-guard and, globally,
+version-pin-guard. `test/routes.test.mjs` tries every route against each one. One consequence: a shell redirect into a
+read-only path is refused like a tool write (`> build/log.txt` in a project whose `build/` is vendored output).
+
+### Upgrade notes
+
+- **A project whose history is on main** (Sub37 today) does not take git-guard's trunk refusal until it works on branches.
+  The order: first move to the house branch flow (`tools/step.py` or the kit's `build-step` skill, a `work/` branch per step),
+  then enable git-guard (`"enable": ["hooks/git-guard.py"]`) and the trunk refusal (`"guards": { "git": { "refuseTrunk": true } }`).
+- A project that carried these hooks by hand: delete its own copies first, or name them in `"enable"`. An identical copy is
+  taken over; a different one gets the package's version beside it as `.pack-new`.
+- Settings entries for `copy-tree-guard.py` (merged into protect-vendor), `shell-traps.py` and `gnu-shell.py` (global by
+  design) are retired from a project's `settings.json`, and `update` says so.
+- Python hooks are managed like the node ones: a settings entry that runs a script some pack ships is the package's; every
+  other entry is the project's own and stays. They share `hooks/lib/house.py`.
 - A concept entry `"kind:copy"` expands to every folder of that kind.
-- **Fixes:** `version-pin-guard` no longer reads `2>&1` (or any redirection) as a package; `update` takes over an installed
-  file that is byte for byte the pack's version (a taken `.pack-new`, a project's identical hand copy) and records it in the
-  lock instead of writing `.pack-new` again; `doctor --strict` skips git-ignored files (build output such as `out/**`) and
-  counts the project's `.claude/` files for rules that fire there; `doctor` runs every hook's selftest.
+- **Fixes:** `version-pin-guard` no longer reads `2>&1` (or any redirection) as a package, and takes an Edit's `new_string`
+  literally; `update` takes over an installed file that is byte for byte the pack's version (a taken `.pack-new`, a
+  project's identical hand copy) and records it in the lock instead of writing `.pack-new` again; `doctor --strict` skips
+  git-ignored files (build output such as `out/**`) and counts the project's `.claude/` files for rules that fire there;
+  `doctor` runs every hook's selftest.

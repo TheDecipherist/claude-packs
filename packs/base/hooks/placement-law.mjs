@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// PreToolUse (Write|Edit|MultiEdit): every kind of thing goes in its one place, so the rules for
+// PreToolUse (Write|Edit|MultiEdit|NotebookEdit|Bash; every route, lib/writes.mjs): every kind of thing goes in its one place, so the rules for
 // it load. layout.kinds says what goes where; a kind may name file patterns ("**/*.wgsl") and a
 // content pattern (processBlock, wgpu calls, paint(Graphics)). A file of that kind, or an edit that
 // ADDS that content, outside the kind's concept folders is refused. `--selftest` proves it.
 import { readFileSync } from 'node:fs';
 import { extname, relative } from 'node:path';
-import { computeEdit } from './lib/apply-edit.mjs';
+import { writesOf } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
@@ -34,14 +34,17 @@ export function misplaced(layout, rel, before, after) {
 function main() {
   let payload;
   try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
-  const input = payload.tool_input ?? {};
-  if (!input.file_path || !insideProject(input.file_path)) return 0;
-  const root = checkoutRoot(input.file_path);
-  const rel = relative(root, input.file_path).replace(/\\/g, '/');
-  const edit = computeEdit(payload.tool_name, input);
-  if (!edit) return 0;
-  const hit = misplaced(readLayout(claudeRoot(input.file_path)), rel, edit.before, edit.after);
-  if (!hit) return 0;
+  for (const w of writesOf(payload)) {
+    if (w.op === 'delete' || !insideProject(w.path)) continue;
+    const rel = relative(checkoutRoot(w.path), w.path).replace(/\\/g, '/');
+    // an unknown result (a program's output) is judged by name only
+    const hit = misplaced(readLayout(claudeRoot(w.path)), rel, w.before, w.after ?? w.before);
+    if (hit) return refuse(rel, hit);
+  }
+  return 0;
+}
+
+function refuse(rel, hit) {
   process.stderr.write(
     `BLOCKED by placement-law: ${rel} holds ${hit.kind.what} (kind "${hit.name}").\n` +
       `That goes in ${hit.where}/, where its rules load (${hit.globs.join(', ')}).\n` +

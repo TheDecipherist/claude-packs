@@ -106,9 +106,25 @@ def inside(path, root):
     p = house.main_root(os.path.abspath(os.path.join(root, str(path))))
     return p == root or p.startswith(root.rstrip("/") + "/")
 
+def added_text(before, after):
+    """The lines a write adds (all of them for a new file), so code that was already there is not judged again."""
+    old = set((before or "").splitlines())
+    return "\n".join(l for l in (after or "").splitlines() if l not in old)
+
 def check(event, root=None):
     tool, inp = event.get("tool_name", ""), event.get("tool_input", {}) or {}
-    if tool == "Bash": return check_bash(inp.get("command", ""))
+    if tool == "Bash":
+        cmd = inp.get("command", "")
+        r = check_bash(cmd)
+        if r: return r
+        # every file the shell writes, by any route (>, >>, tee, sed -i, cp, mv, a heredoc into a file; WB-69)
+        for w in house.shell_writes(cmd, event.get("cwd") or root or os.getcwd()) if re.search(r"[>|]|\b(cp|mv|sed|tee|install|rsync)\b", cmd) else []:
+            if w.get("after") is not None and inside(w["path"], root):
+                r = check_code(w["path"], added_text(w.get("before"), w["after"]))
+                if r: return r
+        return None
+    if tool == "NotebookEdit":
+        return check_code(inp.get("notebook_path", ""), inp.get("new_source", "")) if inside(inp.get("notebook_path", ""), root) else None
     if not inside(inp.get("file_path", ""), root): return None
     if tool == "Write": return check_code(inp.get("file_path", ""), inp.get("content", ""))
     if tool == "Edit": return check_code(inp.get("file_path", ""), inp.get("new_string", ""))
@@ -146,6 +162,8 @@ def selftest():
     blocked.append(("Bash", {"command": "node - <<'EOF'\nconst { chromium } = require('playwright'); await chromium.launch();\nEOF"}))   # WB-20: a heredoc node runs still counts
     blocked.append(("Write", {"file_path": "/x/.claude/worktrees/agent-a/tools/e.mjs", "content": "await puppeteer.launch();"}))   # a worktree is the project
     allowed.append(("Write", {"file_path": "/elsewhere/scratch/patch.py", "content": "s = 'await puppeteer.launch();'"}))     # another project's file
+    blocked.append(("Bash", {"command": "cat > /x/tools/s.mjs <<'EOF'\nconst b = await puppeteer.launch();\nEOF"}))           # WB-69: a heredoc into a file
+    blocked.append(("NotebookEdit", {"notebook_path": "/x/tools/n.ipynb", "new_source": "await chromium.launch()"}))
     bad = 0
     for tool, inp in blocked:
         r = check({"tool_name": tool, "tool_input": inp}, "/x")

@@ -8,7 +8,7 @@ refuses (exit 2) a heavy command started any other way, and refuses any build fr
 (at most 3 build agents run, raised from 2 on 2026-10-11; ~/.claude/hooks/agent-cap.py keeps the kinds).
 
 Allowed: a command run as `buildq <cmd>` (or `~/.claude/bin/buildq <cmd>`), or through a project's own wrapper that calls
-buildq (Tabula: `bash tools/build.sh ...`). Configuring (`cmake -B build`) is light and allowed. Text that only MENTIONS a
+buildq (for example `bash tools/build.sh ...`, the `build` and `test` commands in .claude/layout.json). Configuring (`cmake -B build`) is light and allowed. Text that only MENTIONS a
 command (inside a heredoc, a quoted string, a commit message) is never read as running it.
 
     build-guard.py --selftest
@@ -22,7 +22,7 @@ def heavy(w):
     # A PROGRAM RUN STRAIGHT FROM A BUILD FOLDER (a probe, a prototype, a test binary): measured 2026-10-11, one bank
     # render took ~8 cores by itself and six probes outside the queue filled all 18 (Tim: "the machine is literally
     # stalling itself using all cores at 100%")
-    if re.search(r"(^|/)(build[^/]*|[^/]*_artefacts)/", w[0]) or re.match(r"^Tabula\w*(Probe|Proto|Tests?)$", exe): return True
+    if re.search(r"(^|/)(build[^/]*|[^/]*_artefacts)/", w[0]) or re.match(r"^[A-Z]\w*(Probe|Proto|Tests?)$", exe): return True
     if exe == "cmake": return "--build" in w
     if exe == "ninja" and any(x in ("-t", "--version", "-n") or x.startswith("-t") for x in w[1:]): return False   # WB-36: a question to the build graph (or a dry run), not a build
     if exe == "ctest" and any(x in ("--version", "-N", "--show-only") or x.startswith("--show-only") for x in w[1:]): return False   # WB-36: listing tests, not running them
@@ -108,7 +108,7 @@ def main():
     if sys.argv[1:] == ["--selftest"]: return selftest()
     try: ev = json.load(sys.stdin)
     except Exception: return 0
-    if os.path.exists(os.path.join(os.environ.get("CLAUDE_PROJECT_DIR") or ev.get("cwd") or "", ".claude", "hooks", "pre.js")): return 0   # a project's own PreToolUse dispatcher wins (apprack2 b-c026dd3d, Tim 2026-10-18)
+    if os.path.exists(os.path.join(os.environ.get("CLAUDE_PROJECT_DIR") or ev.get("cwd") or "", ".claude", "hooks", "pre.js")): return 0   # a project's own PreToolUse dispatcher wins (Tim, 2026-10-18)
     if ev.get("tool_name") != "Bash": return 0
     cmd = str((ev.get("tool_input") or {}).get("command", ""))
     aid = ev.get("agent_id")
@@ -121,7 +121,7 @@ def main():
     # TIM'S YES FOR ONE RUN: the controller writes ~/.claude/app-ok/<agent id> after asking him; it lasts 15 minutes
     okf = os.path.expanduser(f"~/.claude/app-ok/{aid}") if aid else ""
     app_ok = bool(aid) and os.path.exists(okf) and (__import__("time").time() - os.path.getmtime(okf)) < 900
-    if False and aid and launches_app(cmd) and not app_ok:   # OFF (Tim, 2026-10-11: "you shouldnt stop agents from opening Tabula. why would we do that?"): the fault was one agent opening it on repeat through his speakers, not opening it. The rule is in the agent-jobs skill: mute it, once, not in a loop
+    if False and aid and launches_app(cmd) and not app_ok:   # OFF (Tim, 2026-10-11: agents may open the app): the fault was one agent opening it on repeat through his speakers, not opening it. The rule is in the agent-jobs skill: mute it, once, not in a loop
         print("build-guard: an agent may not open a real app: it plays through Tim's speakers and pops windows while he works "
               "(Tim, 2026-10-11). Do the check in a probe, offscreen and offline. If the real app is truly needed for one final "
               "proof, message the controller and wait: it warns Tim first.", file=sys.stderr)
@@ -157,7 +157,7 @@ def main():
     print(f"build-guard: `{what}` straight from the shell is refused. Nothing may take the whole machine (Tim, 2026-10-11). "
           "Run it through the machine-wide build queue, which runs two at a time and waits for a free slot by itself:\n"
           f"    buildq {what} ...        (~/.claude/bin/buildq; buildq --status shows the slots)\n"
-          "or the project's own wrapper if it has one (Tabula: bash tools/build.sh build|test ...). Do not wrap it in a loop.", file=sys.stderr)
+          "or the project's own wrapper if it has one (the build and test commands in .claude/layout.json). Do not wrap it in a loop.", file=sys.stderr)
     return 2
 
 def selftest():
@@ -166,23 +166,23 @@ def selftest():
              ("make -j8", True), ("ninja -C out", True), ("cargo build --release", True), ("xcodebuild -scheme A", True),
              ("(cd w && ctest -j6)", True), ("FOO=1 time make", True),
              ("buildq cmake --build build -j18", False), ("~/.claude/bin/buildq ctest --test-dir b", False),
-             ("bash tools/build.sh build build Tabula_Standalone", False), ("cmake -B build -DX=1", False),
-             ("./build/TabulaBankProbe_artefacts/RelWithDebInfo/TabulaBankProbe --starter", True),
-             ("cd w && build/TabulaFaceProbe_artefacts/RelWithDebInfo/TabulaFaceProbe --pad", True),
-             ("buildq ./build/TabulaBankProbe_artefacts/RelWithDebInfo/TabulaBankProbe --starter", False),
+             ("bash tools/build.sh build build Synth_Standalone", False), ("cmake -B build -DX=1", False),
+             ("./build/SynthBankProbe_artefacts/RelWithDebInfo/SynthBankProbe --starter", True),
+             ("cd w && build/SynthFaceProbe_artefacts/RelWithDebInfo/SynthFaceProbe --pad", True),
+             ("buildq ./build/SynthBankProbe_artefacts/RelWithDebInfo/SynthBankProbe --starter", False),
              ("ls build/", False), ("command -v ninja", False), ("ninja -C build -t inputs X", False), ("/opt/homebrew/bin/ninja --version", False), ("ninja -C build X", True), ("ctest --test-dir build -N", False), ("ctest --test-dir build --show-only=json-v1", False), ("ctest --version", False), ("which ninja", False), ("cargo fmt", False), ("go vet ./...", False), ("grep -n 'cmake --build' f.md", False), ("git commit -m 'make it'", False),
              ("cat > f.py <<'EOF'\ncases = [(\"cmake --build b\", True)]\nmake -j8\nEOF\npython3 f.py", False),
              ("python3 - <<EOF\nctest --test-dir b\nEOF", False), ('echo "run ctest later"', False)]
     polls = [("until grep -qE 'done' log; do sleep 10; done", True), ("for i in $(seq 1 55); do grep -q x f && break; sleep 20; done", True),
              ("while true; do\n  sleep 15\ndone", True), ("sleep 180", True), ("sleep 2 && ls", False), ("echo sleep 60", False),
              ("cat > f.sh <<'EOF'\nwhile true; do sleep 9; done\nEOF", False), ("grep -n 'sleep 30' x.sh", False)]
-    for cmd, want in [("open build/Tabula_artefacts/RelWithDebInfo/Standalone/Tabula.app", True), ("open -a Tabula", True),
-                      ("python3 tools/record_app_probe.py build/x/Tabula.app/Contents/MacOS/Tabula", True),
-                      ("cd w && build/T.app/Contents/MacOS/Tabula --record /tmp/x.mov &", True),
-                      ("ls build/Tabula_artefacts", False), ("open docs/report.md", False), ("echo 'open X.app'", False)]:
+    for cmd, want in [("open build/Synth_artefacts/RelWithDebInfo/Standalone/Synth.app", True), ("open -a Synth", True),
+                      ("python3 tools/record_app_probe.py build/x/Synth.app/Contents/MacOS/Synth", True),
+                      ("cd w && build/T.app/Contents/MacOS/Synth --record /tmp/x.mov &", True),
+                      ("ls build/Synth_artefacts", False), ("open docs/report.md", False), ("echo 'open X.app'", False)]:
         got = launches_app(cmd); print(("PASS " if got == want else "FAIL ") + ("refused app: " if want else "allowed: ") + cmd); ok &= got == want
     for cmd, want in [("cmake --build build --target all -j6", True), ("cd w && cmake --build build -j6", True), ("bash tools/build.sh build build", True),
-                      ("bash tools/build.sh build build TabulaFaceProbe Tabula_Standalone", False), ("cmake --build build --target TabulaBankProbe -j5", False),
+                      ("bash tools/build.sh build build SynthFaceProbe Synth_Standalone", False), ("cmake --build build --target SynthBankProbe -j5", False),
                       ("bash tools/build.sh test build --output-on-failure", True), ("ctest --test-dir build -j3", True),
                       ("bash tools/build.sh test build -R 'record' --output-on-failure", False), ("bash tools/build.sh test build --full-gate", False), ("bash tools/build.sh test build --changed", False)]:
         got = too_wide(cmd) is not None; print(("PASS " if got == want else "FAIL ") + ("refused wide: " if want else "allowed: ") + cmd); ok &= got == want

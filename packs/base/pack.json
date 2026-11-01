@@ -68,7 +68,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
         "hooks": [
           {
             "type": "command",
@@ -89,32 +89,17 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/placement-law.mjs\"",
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit|Bash",
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spec-lock.mjs\"",
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/folder-law.mjs\"",
@@ -133,6 +118,11 @@
           {
             "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.py\"",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-guard.py\"",
             "timeout": 15
           }
         ]
@@ -216,5 +206,9 @@
       "what": "scripts and research tools that never ship",
       "in": "tools"
     }
-  }
+  },
+  "optIn": [
+    "hooks/tims-asks.py",
+    "hooks/idle-wake.py"
+  ]
 }

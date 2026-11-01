@@ -1,5 +1,5 @@
 {
-  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A. 0.4.0: the SOUND and MIXER layers (lib/app/src/layer*, cards, controls) are UI, so the control and look rules load there; confirm against the re-survey. 0.6.0: the copy trees are folders of kind copy (protect-vendor guards them; copy-tree-guard.py is merged into it), and guards carries Stellix's values for the house guards.",
+  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A. 0.4.0: the SOUND and MIXER layers (lib/app/src/layer*, cards, controls) are UI, so the control and look rules load there; confirm against the re-survey. 0.6.0: the copy trees are folders of kind copy (protect-vendor guards them; copy-tree-guard.py is merged into it), and guards carries Stellix's values for the house guards. enable: the opt-in hooks Stellix runs (tims-asks, idle-wake); guards.git.refuseTrunk: Stellix works on a branch per step.",
   "complete": true,
   "folders": {
     "app": {
@@ -277,7 +277,8 @@
   "guards": {
     "git": {
       "safeRestore": "python3 tools/safe_restore.py <paths>",
-      "branchStart": "python3 tools/step.py start <STEP> \"task\" (work that is not a step: start --work <name> \"task\")"
+      "branchStart": "python3 tools/step.py start <STEP> \"task\" (work that is not a step: start --work <name> \"task\")",
+      "refuseTrunk": true
     },
     "copy": {
       "tools": [
@@ -302,5 +303,9 @@
         "out/**"
       ]
     }
-  }
+  },
+  "enable": [
+    "hooks/tims-asks.py",
+    "hooks/idle-wake.py"
+  ]
 }

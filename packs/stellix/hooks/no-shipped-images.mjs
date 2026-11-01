@@ -4,7 +4,8 @@
 // A project sets its own scope in .claude/layout.json "guards": { "images": { "guarded": [globs],
 // "allowed": [globs] } }: "guarded" replaces the code folders (["**"]: anywhere in the repo), "allowed"
 // replaces the default allowed folders (Stellix: design/reference/** and build/pictures/** only).
-//   PreToolUse (Write|Bash): blocks writing, copying or moving an image into a guarded folder.
+//   PreToolUse (Write|Edit|MultiEdit|NotebookEdit|Bash): blocks writing, copying or moving an image into a guarded
+//   folder by any route (lib/writes.mjs), and a download or conversion that names one (curl, convert, sips ...).
 //   --git-staged: run from a git pre-commit hook; fails if a staged added file is an image.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -12,6 +13,7 @@ import { resolve } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
 import { claudeRoot, commandLeavesProject, insideProject, relInCheckout } from './lib/project.mjs';
+import { writesOf } from './lib/writes.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const IMAGE = /\.(png|jpe?g|gif|bmp|tiff?|webp|heic|ico|icns|svg|psd|tga|exr|hdr|ktx2?|dds|astc)$/i;
@@ -51,14 +53,12 @@ function hook() {
     return 0;
   }
   const input = payload.tool_input ?? {};
-  if (payload.tool_name === 'Bash') {
-    if (commandLeavesProject(input.command)) return 0;
+  const bad = writesOf(payload, payload.cwd ?? ROOT).filter((w) => w.op !== 'delete' && isBlocked(w.path)).map((w) => w.path);
+  if (payload.tool_name === 'Bash' && !commandLeavesProject(input.command)) {
     const tokens = (input.command ?? '').split(/\s+/).map((t) => t.replace(/^['"]|['"]$/g, ''));
-    const writes = /\b(cp|mv|ln|curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b|>/.test(input.command ?? '');
-    const bad = writes ? tokens.filter((t) => t && isBlocked(t, payload.cwd ?? ROOT)) : [];
-    return bad.length ? fail(bad) : 0;
+    if (/\b(curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b/.test(input.command ?? '')) bad.push(...tokens.filter((t) => t && isBlocked(t, payload.cwd ?? ROOT)));
   }
-  return input.file_path && isBlocked(input.file_path) ? fail([input.file_path]) : 0;
+  return bad.length ? fail([...new Set(bad)]) : 0;
 }
 
 process.exit(process.argv.includes('--git-staged') ? gitStaged() : hook());

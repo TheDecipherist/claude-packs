@@ -26,9 +26,13 @@ const setLayout = (dir, change) => {
 
 test('the house hooks install where they belong, project-neutral, and pass their selftests', () => {
   const dir = tmp();
-  run(dir, 'init', 'audio-core', 'gpu-painter');
+  const out = run(dir, 'init', 'audio-core', 'gpu-painter');
+  assert.match(out, /held back, not switched on .*hooks\/idle-wake\.py, hooks\/tims-asks\.py/, 'the opt-in hooks wait for "enable"');
+  assert.ok(!existsSync(join(dir, '.claude/hooks/tims-asks.py')) && !existsSync(join(dir, '.claude/hooks/idle-wake.py')));
+  setLayout(dir, (l) => { l.enable = ['hooks/tims-asks.py', 'hooks/idle-wake.py']; });
+  assert.match(run(dir, 'update'), /switching on \(new to this project\): hooks\/idle-wake\.py, hooks\/tims-asks\.py/);
   const hooks = readdirSync(join(dir, '.claude/hooks'));
-  for (const h of ['git-guard.py', 'time-guard.py', 'tims-asks.py', 'idle-wake.py', 'browser-guard.py', 'protect-vendor.mjs']) {
+  for (const h of ['git-guard.py', 'build-guard.py', 'time-guard.py', 'tims-asks.py', 'idle-wake.py', 'browser-guard.py', 'protect-vendor.mjs']) {
     assert.ok(hooks.includes(h), h);
     const r = spawnSync(h.endsWith('.py') ? 'python3' : 'node', [join(dir, '.claude/hooks', h), '--selftest'], { env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' });
     assert.equal(r.status, 0, `${h}: ${r.stdout}${r.stderr}`);
@@ -39,7 +43,7 @@ test('the house hooks install where they belong, project-neutral, and pass their
   run(audioOnly, 'init', 'audio-core');
   assert.ok(!existsSync(join(audioOnly, '.claude/hooks/browser-guard.py')), 'browser-guard comes with gpu-painter');
   const s = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
-  for (const h of ['git-guard.py', 'time-guard.py', 'idle-wake.py', 'tims-asks.py', 'browser-guard.py']) assert.match(s, new RegExp(`python3 \\\\"\\$CLAUDE_PROJECT_DIR/\\.claude/hooks/${h.replace('.', '\\.')}`));
+  for (const h of ['git-guard.py', 'build-guard.py', 'time-guard.py', 'idle-wake.py', 'tims-asks.py', 'browser-guard.py']) assert.match(s, new RegExp(`python3 \\\\"\\$CLAUDE_PROJECT_DIR/\\.claude/hooks/${h.replace('.', '\\.')}`));
   const settings = JSON.parse(s);
   assert.equal(settings.hooks.Stop[0].hooks[0].asyncRewake, true);
   assert.equal(settings.hooks.SessionStart[0].matcher, 'compact');
@@ -53,7 +57,12 @@ test('the house hooks install where they belong, project-neutral, and pass their
 test('git-guard takes the project\'s owner, token, trunk and commands from layout.json', () => {
   const dir = tmp();
   run(dir, 'init', 'audio-core');
+  execFileSync('git', ['init', '-q', '-b', 'main'], { cwd: dir });
+  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x'], { cwd: dir });
   const bash = (command) => fire(dir, 'git-guard.py', { tool_name: 'Bash', tool_input: { command }, cwd: dir });
+  assert.equal(bash('git commit -m x -- a.h').status, 0, 'the trunk refusal is off by default');
+  setLayout(dir, (l) => { l.guards = { git: { refuseTrunk: true } }; });
+  assert.equal(bash('git commit -m x -- a.h').status, 2, 'and on when the project enables it');
   const house = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/synth.git work/x';
   assert.equal(bash(house).status, 0, 'the default owner is the house');
   assert.equal(bash('git add -A').status, 2);
@@ -118,14 +127,15 @@ test('a project\'s own hook entries stay; a kit hook already registered by hand 
     { matcher: 'Write|Edit|MultiEdit', hooks: [mine('source-guard.py')] }, { matcher: 'Bash', hooks: [mine('git-guard.py'), mine('build-guard.py'), mine('shell-traps.py')] },
     { matcher: 'Bash|Write|Edit|MultiEdit|NotebookEdit', hooks: [mine('copy-tree-guard.py')] },
   ], SessionStart: [{ hooks: [mine('gnu-shell.py')] }] } }));
-  run(dir, 'init', 'audio-core');
+  assert.match(run(dir, 'init', 'audio-core'), /retired settings entries .*copy-tree-guard\.py/);
   run(dir, 'update');
   const hooks = JSON.parse(readFileSync(join(dir, '.claude/settings.json'), 'utf8')).hooks;
   const all = Object.values(hooks).flat().flatMap((g) => g.hooks).map((h) => h.command);
   assert.equal(all.filter((c) => c.includes('source-guard.py')).length, 1, 'the project\'s own python hook is kept');
   assert.equal(all.filter((c) => c.includes('git-guard.py')).length, 1, 'the kit\'s git-guard once');
-  for (const retired of ['copy-tree-guard.py', 'build-guard.py', 'shell-traps.py', 'gnu-shell.py']) {
-    assert.ok(!all.some((c) => c.includes(retired)), `${retired}: merged into protect-vendor, or machine-wide`);
+  assert.equal(all.filter((c) => c.includes('build-guard.py')).length, 1, 'build-guard is the base pack\'s, once');
+  for (const retired of ['copy-tree-guard.py', 'shell-traps.py', 'gnu-shell.py']) {
+    assert.ok(!all.some((c) => c.includes(retired)), `${retired}: merged into protect-vendor, or global by design`);
   }
 });
 
@@ -193,4 +203,35 @@ test('doctor fails when a python hook fails its selftest', () => {
   const r = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' });
   assert.equal(r.status, 1);
   assert.match(r.stdout, /git-guard\.py fails its selftest/);
+});
+
+// A project installed at 0.5.x and updated: every hook and check 0.6.0 added stays off until the project's layout
+// enables it, update prints what it holds back, and an enabled git-guard still leaves main alone until refuseTrunk.
+test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable, and update prints the list', () => {
+  const kit052 = tmp();
+  execFileSync('sh', ['-c', `git -C '${fileURLToPath(new URL('..', import.meta.url))}' archive c671865 | tar -x -C '${kit052}'`]);
+  const dir = tmp();
+  execFileSync('node', [join(kit052, 'bin/claude-packs.mjs'), 'init', 'audio-core', 'gpu-painter', '--dir', dir], { encoding: 'utf8' });
+  const before = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
+  const out = run(dir, 'update');
+  for (const item of ['hooks/git-guard.py', 'hooks/build-guard.py', 'hooks/time-guard.py', 'hooks/tims-asks.py', 'hooks/idle-wake.py', 'hooks/browser-guard.py', 'checks/no-opengl.json', 'checks/no-code-after-midline-comment.json']) {
+    assert.match(out, new RegExp(`held back, not switched on .*${item.replace(/[./]/g, (c) => `\\${c}`)}`), item);
+    assert.ok(!existsSync(join(dir, '.claude', item)), `${item} not installed`);
+  }
+  assert.ok(out.indexOf('held back') < out.indexOf('Packs:'), 'the list comes before the work');
+  const settings = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
+  for (const h of ['git-guard', 'build-guard', 'time-guard', 'tims-asks', 'idle-wake', 'browser-guard']) assert.doesNotMatch(settings, new RegExp(`hooks/${h}\\.py`), h);
+  assert.match(before, /protect-vendor/);
+  assert.match(settings, /protect-vendor/, 'what it had stays on');
+  assert.match(run(dir, 'doctor'), /OK:/);
+
+  setLayout(dir, (l) => { l.enable = ['hooks/git-guard.py']; });
+  assert.match(run(dir, 'update'), /switching on \(new to this project\): hooks\/git-guard\.py/);
+  assert.ok(existsSync(join(dir, '.claude/hooks/git-guard.py')));
+  assert.ok(!existsSync(join(dir, '.claude/hooks/tims-asks.py')));
+  execFileSync('git', ['init', '-q', '-b', 'main'], { cwd: dir });
+  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x'], { cwd: dir });
+  const commit = fire(dir, 'git-guard.py', { tool_name: 'Bash', tool_input: { command: 'git commit -m x -- a.h' }, cwd: dir });
+  assert.equal(commit.status, 0, 'no trunk refusal unless refuseTrunk');
+  assert.doesNotMatch(run(dir, 'update'), /switching on/, 'nothing new the second time');
 });

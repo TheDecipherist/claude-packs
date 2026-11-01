@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // version-pin-guard: refuses a new or changed version pin unless docs/versions.md has a row
 // for that dependency checked within MAX_AGE days. Pairs with the latest-versions skill.
-// PreToolUse on Write|Edit|MultiEdit|Bash. Exit 2 blocks; stderr goes back to Claude.
+// PreToolUse on Write|Edit|MultiEdit|Bash. Exit 2 blocks; stderr goes back to Claude. Every route that writes a
+// dependency file is judged (WB-69): the Write tool, an Edit or MultiEdit (its new_string taken literally), an install
+// command, and the shell writing the file (>, >>, tee, sed -i, cp, mv, a heredoc; lib/shell-writes.mjs).
 // `node version-pin-guard.mjs --selftest` proves every extractor and the age check.
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
+import { afterText, shellWrites } from './lib/shell-writes.mjs';
 
 const MAX_AGE = Number(process.env.VERSION_GUARD_DAYS ?? 14);
 const DAY = 86_400_000;
@@ -171,7 +174,8 @@ function newText(input, current) {
   if (typeof input.content === 'string') return input.content;
   const edits = input.edits ?? (input.old_string !== undefined ? [input] : []);
   let text = current;
-  for (const e of edits) text = e.replace_all ? text.split(e.old_string).join(e.new_string) : text.replace(e.old_string, e.new_string);
+  // literally: a new_string holding `$&` or `$1` was read as a replacement pattern (the Edit gap, WB-69)
+  for (const e of edits) text = e.replace_all ? text.split(e.old_string).join(e.new_string ?? '') : text.replace(e.old_string, () => e.new_string ?? '');
   return text;
 }
 
@@ -182,6 +186,13 @@ function main(payload) {
   if (payload.tool_name === 'Bash') {
     pins = pinsFromCommand(input.command ?? '');
     where = payload.cwd ?? process.cwd();
+    for (const w of shellWrites(input.command ?? '', where)) {
+      const extract = extractorFor(w.path);
+      if (!extract) continue;
+      const { before, after } = afterText(w);
+      if (after !== null) pins.push(...changedPins(extract, before, after));
+      where = dirname(w.path);
+    }
   } else {
     const file = input.file_path;
     const extract = file && extractorFor(file);
