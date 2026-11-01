@@ -31,7 +31,11 @@ export function selftest(hookUrl) {
       { type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: id, is_error: refused, content: refused ? 'BLOCKED' : 'ok' }] } }];
   };
   const say = (text) => ({ type: 'assistant', message: { content: [{ type: 'text', text }] } });
+  // every selftest run names its own sessions: the send-back counter lives in the temp folder, and a second run with the same names
+  // added to the first run's counts (0.9.3, KWB-7: the counter no longer resets between turns)
+  const run = `${process.pid}-${Date.now()}`;
   const turn = (entries, { making = good, last = '', active = false, session = `s${n += 1}` } = {}) => {
+    session = `${run}-${session}`;
     writeFileSync(join(dir, 'build.md'), BUILD(making));
     writeFileSync(T, [user('build the slot filter'), ...entries.flat()].map((e) => JSON.stringify(e)).join('\n'));
     return runHook(hook, dir, { hook_event_name: 'Stop', transcript_path: T, cwd: dir, session_id: session, stop_hook_active: active, last_assistant_message: last });
