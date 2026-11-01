@@ -105,6 +105,10 @@ const CASES = {
     assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add -A`), 2);
     assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add src/dsp/Svf.cpp`), 0);
   },
+  'git-guard.mjs': ({ here, wt }) => {
+    assert.equal(bash(here, 'git-guard.mjs', `git -C ${wt} push -u https://x-access-token:abc@github.com/a/b.git work/x`), 2);
+    assert.equal(bash(here, 'git-guard.mjs', `git -C ${wt} push -u origin work/x`), 0);
+  },
   'realtime-guard.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'realtime-guard.mjs', join(wt, 'src/audio/Voice.cpp'), RT_BAD), 2);
     assert.equal(fire(here, 'realtime-guard.mjs', join(wt, 'src/audio/Voice.cpp'), 'void Voice::processBlock (B& b, M& m) { juce::ScopedNoDenormals noDenormals; b.clear(); }\n'), 0);

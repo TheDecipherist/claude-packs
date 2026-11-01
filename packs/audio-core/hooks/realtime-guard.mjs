@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // PreToolUse hook (Write|Edit|MultiEdit): blocks edits that ADD realtime-unsafe code to
-// audio-thread functions in C++ files. Exit 2 = block, stderr goes back to Claude.
+// audio-thread functions in C++ files. Exit 2 = block, stderr goes back to Claude. `--selftest` proves it.
 import { readFileSync } from 'node:fs';
 import { computeEdit } from './lib/apply-edit.mjs';
 import { findViolations, violationKey } from './lib/realtime-checks.mjs';
 import { insideProject } from './lib/project.mjs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 
 const CPP = /\.(cpp|cc|cxx|h|hh|hpp|mm)$/;
 
@@ -37,4 +40,21 @@ function main() {
   return 2;
 }
 
-process.exit(main());
+function selftest() {
+  const hook = fileURLToPath(import.meta.url);
+  const block = (body) => `void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m)\n{\n    juce::ScopedNoDenormals nd;\n${body}\n}\n`;
+  const old = block('    auto* x = new float[64]; // legacy');
+  const dir = scratchProject({ 'src/audio/Old.cpp': old });
+  const w = (file, body) => runHook(hook, dir, writeOf(join(dir, file), block(body)));
+  return verdicts('realtime-guard', [
+    ['new in processBlock', w('src/audio/Voice.cpp', '    auto* x = new float[64];'), 2],
+    ['a lock in processBlock', w('src/audio/Voice.cpp', '    const juce::ScopedLock sl (lock);'), 2],
+    ['plain arithmetic', w('src/audio/Voice.cpp', '    b.applyGain (0.5f);'), 0],
+    ['an rt-ok exception', w('src/audio/Voice.cpp', '    auto* x = new float[64]; // rt-ok: test only'), 0],
+    ['a fault already there is not added', runHook(hook, dir, editOf(join(dir, 'src/audio/Old.cpp'), 'ScopedNoDenormals nd;', 'ScopedNoDenormals noDenormals;')), 0],
+    ['not C++', runHook(hook, dir, writeOf(join(dir, 'tools/x.py'), 'x = [1]\n')), 0],
+    ['another project is not ours', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/Voice.cpp'), block('    auto* x = new float[64];'))), 0],
+  ]);
+}
+
+process.exit(process.argv.includes('--selftest') ? selftest() : main());
