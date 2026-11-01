@@ -1,5 +1,5 @@
 {
-  "description": "GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows).",
+  "description": "GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows), drawn natively: no OpenGL, no browser.",
   "folders": {
     "painter": {
       "path": "src/painter",
@@ -27,7 +27,20 @@
     ]
   },
   "skillsIn": "painter",
-  "hooks": {},
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/browser-guard.py\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
   "name": "gpu-painter",
   "files": {
     "render_thread": "src/painter/render_thread.cpp"

@@ -6,9 +6,9 @@ Per-project Claude Code rules, lesson checks, hooks and skills for The Decipheri
 
 | Pack | For | Rules | Checks | Hooks | Skills |
 |---|---|---|---|---|---|
-| `base` | every project (always installed) | – | – | lesson-checks, folder-law, spec-lock, protect-vendor | add-lesson-check |
-| `audio-core` | any JUCE synth or effect | 35 | 8 | realtime-guard, param-id-lock | juce-realtime-audit, measure-tone (+ tone-report tool, `.clang-tidy`) |
-| `gpu-painter` | GPU-drawn UI on Dawn (Metal / D3D12) | 14 | 4 | – | gpu-frame-bench, gpu-golden-check, gpu-golden-update, gpu-lifecycle-stress, gpu-capture |
+| `base` | every project (always installed) | 11 | 3 | lesson-checks, folder-law, placement-law, spec-lock, protect-vendor (vendored code and copy trees), file-size-guard, frozen-files, stage-guard, git-guard, time-guard, tims-asks, idle-wake | add-lesson-check, pressure-test-skill, prove-instances-identical, build-step |
+| `audio-core` | any JUCE synth or effect | 40 | 8 | realtime-guard, param-id-lock | juce-realtime-audit, measure-tone, copy-and-prove, … (+ tone-report tool, `.clang-tidy`) |
+| `gpu-painter` | GPU-drawn UI on Dawn (Metal / D3D12) | 14 | 6 | browser-guard | gpu-frame-bench, gpu-golden-check, gpu-golden-update, gpu-lifecycle-stress, gpu-capture |
 | `stellix` | the Stellix spec laws | 5 | 5 | no-shipped-images | – |
 
 Tabula: `init audio-core`. Stellix: `init audio-core gpu-painter stellix`.
@@ -49,10 +49,11 @@ npx claude-packs list               show the packs
 ## Install from the tarball
 `npm i -D ./thedecipherist-claude-packs-0.5.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
 
-## The one global piece: latest-versions
+## The one global piece: latest-versions and the machine-wide shell hooks
 
 ```
-npx claude-packs global add      # ~/.claude/skills/latest-versions + hooks/claude-packs/version-pin-guard.mjs
+npx claude-packs global add      # ~/.claude/skills/latest-versions, new-project, hooks/claude-packs/version-pin-guard.mjs,
+                                 # hooks/build-guard.py, hooks/shell-traps.py, hooks/gnu-shell.py
 npx claude-packs global doctor
 npx claude-packs global remove   # removes only what it installed and you did not edit
 ```
@@ -145,3 +146,35 @@ The cross-project project guard Stellix carried (WB-64) is not in this package a
 | profile | `sub37` | `init audio-core --profile sub37`: the synthkit template's tree as it is (docs/project.md answer b). Flat `src/` is the app folder, `src/engine` the audio code, probes stay in `tools/`, `design/reference` is read-only |
 | layout | `paramIds` | `{ "extensions", "patterns" }` tells `param-id-lock` where ids are written when they are not `ParameterID` literals. Sub37 reads its generated header and the binding ids in `panel/bindings.json`. Then run `node .claude/hooks/param-id-lock.mjs --init` once |
 | fix | placement-law `editor` kind | matches the out-of-class form a .cpp uses (`void Panel::paint (juce::Graphics& g)`) as well as `void paint (...)`. An install whose layout.json holds the old pack pattern gets the new one on `update`; a pattern the project wrote is kept |
+
+## The house hooks, skills and rules move into the kit (0.6.0)
+
+claude-packs is the source of truth for every rule, check, hook and skill used to build synths (Tim, 2026-10-31). What
+Stellix carried by hand that is not about Stellix alone now ships here, each made project-neutral. A project's own values
+go in `layout.json` under `"guards"`; every key has a house default.
+
+| Kind | Name | Pack | What it does | Project values (`guards.<name>`) |
+|---|---|---|---|---|
+| hook | `git-guard.py` | base | the house git laws: no `add -A`/`commit -a`, no commit on a trunk, no undo over a dirty tree, no rebase/amend/force/`--no-verify`/branch delete, a push names the owner's repo and the token variable, every `gh` names the token, no token stored or pasted, nothing under `~/firmware` staged | `git`: `owner` (TheDecipherist), `tokenVar` (PERSONAL_GITHUB_TOKEN), `trunks`, `neverStage`, `safeRestore`, `branchStart`, `accountNote` |
+| hook | `time-guard.py` | base | tells the caller when a call, a build, a ctest, a probe, a panel export, a headless Chrome or a wait loop runs long, or an agent's worktree goes unsaved; refuses a pgrep wait loop that can never end (a heredoc body is text, not a loop) | `time`: `probePattern`, `saveCommand` |
+| hook | `tims-asks.py` | base | after a compaction, Tim's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |
+| hook | `idle-wake.py` | base | after 15 minutes of silence, wakes the session with its open asks (Stop, asyncRewake) | – |
+| hook | `protect-vendor.mjs` | base | **merged with Stellix's copy-tree-guard**: a folder of `"kind": "copy"` is read-only to tools and to shell writes; only git and the sanctioned copy tools get through | `copy`: `tools` |
+| hook | `browser-guard.py` | gpu-painter | a natively drawn app never starts a browser; judges writes only inside its own project | `browser`: `pictureCommand` |
+| hook | `no-shipped-images.mjs` | stellix | its scope is now the project's | `images`: `guarded`, `allowed` |
+| hook | `file-size-guard.mjs` | base | also counts shell scripts, CMake and GLSL (Stellix's source rule did) | `maxFileLines` |
+| check | `no-opengl`, `no-opengl-link` | gpu-painter | no GL call, header, JUCE OpenGL module or framework link | – |
+| check | `no-code-after-midline-comment` | base | a `//` mid-line that swallows the statements after it (Stellix WB-25) | – |
+| check | `one-seeded-random` | stellix | now also catches `mt19937` without `std::`, the distributions, `Random` objects, `SecRandomCopyBytes`, `RAND_bytes` | – |
+| rule | `hooks-and-gates`, `plan-and-logs`, `copy-trees-read-only` | base | selftests run from plants, faults logged first; the plan and logs never rewritten; copy trees by kind | – |
+| skill | `build-step` (base), `copy-and-prove` (audio-core) | | one step on its own branch; copy, prove identical, then change | – |
+| global | `build-guard.py`, `shell-traps.py`, `gnu-shell.py` | global | the machine-wide hooks the house installed by hand; `global add` takes over an identical copy and its settings entry. gnu-shell is the newer global one (`~/.claude/bin` first on PATH, a zsh warning on every command) | – |
+
+- **Python hooks** are managed like the node ones: a settings entry that runs a script some pack ships is the package's;
+  every other entry is the project's own and stays. Entries for `copy-tree-guard.py`, `build-guard.py`, `shell-traps.py` and
+  `gnu-shell.py` in a project are retired (merged, or machine-wide now). The hooks share `hooks/lib/house.py`.
+- A concept entry `"kind:copy"` expands to every folder of that kind.
+- **Fixes:** `version-pin-guard` no longer reads `2>&1` (or any redirection) as a package; `update` takes over an installed
+  file that is byte for byte the pack's version (a taken `.pack-new`, a project's identical hand copy) and records it in the
+  lock instead of writing `.pack-new` again; `doctor --strict` skips git-ignored files (build output such as `out/**`) and
+  counts the project's `.claude/` files for rules that fire there; `doctor` runs every hook's selftest.

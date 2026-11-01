@@ -1,5 +1,5 @@
 {
-  "description": "Hook framework every project gets: lesson checks, spec lock, vendor protection, folder law.",
+  "description": "Hook framework every project gets: lesson checks, spec lock, read-only vendor and copy trees, folder law, the house git laws, the time and idle watches.",
   "folders": {
     "docs": {
       "path": "docs",
@@ -49,6 +49,19 @@
     ],
     "docs-folder": [
       "docs"
+    ],
+    "tooling": [
+      "tools/**",
+      ".claude/hooks/**",
+      ".claude/settings.json"
+    ],
+    "plan": [
+      "build.md",
+      "**/build.md"
+    ],
+    "copy-trees": [
+      "kind:copy",
+      ".claude/layout.json"
     ]
   },
   "skillsIn": null,
@@ -64,11 +77,6 @@
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/file-size-guard.mjs\"",
             "timeout": 10
           },
@@ -80,6 +88,16 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/placement-law.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
             "timeout": 10
           }
         ]
@@ -111,6 +129,57 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stage-guard.mjs\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.py\"",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.py\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.py\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.py\"",
+            "asyncRewake": true,
+            "timeout": 1000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/tims-asks.py\"",
+            "timeout": 15
           }
         ]
       }

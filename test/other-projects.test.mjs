@@ -29,16 +29,19 @@ test('no hook of this project blocks an edit in another project', () => {
 
   const nasty = `${'y\n'.repeat(330)}void processBlock() { new int[3]; std::mutex m; std::rand(); }\n#include <cmath>\nstd::unordered_map<int,int> u; sin(1.0);\n`;
   const targets = ['src/dsp/Big.cpp', 'src/dsp/New.cpp', 'lib/world/src/sim.cpp', 'lib/engines/src/tabula/Voice.h', 'docs/stellix-spec.md', 'Resources/logo.png', 'CMakeLists.txt'];
-  const hooks = readdirSync(join(here, '.claude/hooks')).filter((f) => f.endsWith('.mjs'));
+  // Every hook, node and python, as a PreToolUse call (time-guard's PostToolUse reports on the machine, not on a file).
+  const hooks = readdirSync(join(here, '.claude/hooks')).filter((f) => /\.(mjs|py)$/.test(f));
+  assert.ok(hooks.includes('git-guard.py') && hooks.includes('browser-guard.py'), 'the python hooks are installed and fired too');
+  const fire = (h, payload) => spawnSync(h.endsWith('.py') ? 'python3' : 'node', [join(here, '.claude/hooks', h)], { input: JSON.stringify({ hook_event_name: 'PreToolUse', ...payload }), env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: here } });
   const blocked = [];
   for (const h of hooks) {
-    for (const t of targets) {
-      const payload = { tool_name: 'Write', tool_input: { file_path: join(other, t), content: nasty } };
-      const r = spawnSync('node', [join(here, '.claude/hooks', h)], { input: JSON.stringify(payload), env: { ...process.env, CLAUDE_PROJECT_DIR: here } });
+    for (const t of [...targets, 'tools/shot.mjs']) {
+      const payload = { tool_name: 'Write', tool_input: { file_path: join(other, t), content: `${nasty}const b = await puppeteer.${'launch'}();\n` } };
+      const r = fire(h, payload);
       if (r.status !== 0) blocked.push(`${h} on ${t}: ${String(r.stderr).split('\n')[0]}`);
     }
-    const bash = { tool_name: 'Bash', tool_input: { command: `cd ${other} && cp a.png Resources/logo.png && sed -i s/a/b/ docs/stellix-spec.md` } };
-    const r = spawnSync('node', [join(here, '.claude/hooks', h)], { input: JSON.stringify(bash), env: { ...process.env, CLAUDE_PROJECT_DIR: here } });
+    const bash = { tool_name: 'Bash', tool_input: { command: `cd ${other} && cp a.png Resources/logo.png && sed -i s/a/b/ docs/stellix-spec.md && sed -i s/a/b/ lib/engines/src/tabula/Voice.h` } };
+    const r = fire(h, bash);
     if (r.status !== 0) blocked.push(`${h} on bash: ${String(r.stderr).split('\n')[0]}`);
   }
   assert.deepEqual(blocked, []);

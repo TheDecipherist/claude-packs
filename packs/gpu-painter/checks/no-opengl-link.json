@@ -1,0 +1,11 @@
+{
+  "id": "no-opengl-link",
+  "why": "No target of a Dawn-painted app links JUCE's OpenGL module or the OpenGL framework (no-opengl.json holds the sources; Stellix work order F, F7.6).",
+  "rule": ".claude/rules/gpu-frame-work.md",
+  "concepts": [
+    "build"
+  ],
+  "pattern": "juce_opengl|-framework\\s+OpenGL\\b|OpenGL\\.framework|find_package\\s*\\(\\s*OpenGL\\b|OpenGL::",
+  "bad": "target_link_libraries (app_juce INTERFACE \"-framework OpenGL\" juce::juce_opengl)",
+  "good": "target_link_libraries (app_juce INTERFACE \"-framework QuartzCore\")"
+}

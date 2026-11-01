@@ -12,13 +12,15 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-const SOURCE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.wgsl', '.metal', '.hlsl', '.glsl']);
+// Code, scripts, shaders and CMake files (Stellix's source rule counted scripts and CMake too); docs and data are not code.
+const SOURCE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.wgsl', '.metal', '.hlsl', '.glsl', '.vert', '.frag', '.sh', '.bash', '.cmake']);
+const isSource = (rel) => SOURCE.has(extname(rel)) || /(^|\/)CMakeLists\.txt$/.test(rel);
 const EXEMPT = ['**/*.generated.*', '**/generated/**', 'build/**', '_deps/**'];
 
 const lines = (text) => (text === '' ? 0 : text.split('\n').length - (text.endsWith('\n') ? 1 : 0));
 
 export function verdict(rel, before, after, limit) {
-  if (!SOURCE.has(extname(rel)) || matchesAny(rel, EXEMPT)) return null;
+  if (!isSource(rel) || matchesAny(rel, EXEMPT)) return null;
   const n = lines(after);
   if (n <= limit || n <= lines(before)) return null;
   return `BLOCKED by file-size-guard: ${rel} would be ${n} lines (limit ${limit}).\n` +
@@ -49,6 +51,8 @@ function selftest() {
     ['shrinking a long file is allowed', verdict('src/dsp/Old.cpp', 'x\n'.repeat(500), 'x\n'.repeat(400), 300) === null],
     ['docs are not source', verdict('docs/spec.md', '', 'x\n'.repeat(900), 300) === null],
     ['generated code is exempt', verdict('src/gen/Tables.generated.h', '', 'x\n'.repeat(900), 300) === null],
+    ['a shell script is code', verdict('tools/plants.sh', '', 'x\n'.repeat(301), 300) !== null],
+    ['a CMakeLists.txt is code', verdict('lib/app/CMakeLists.txt', '', 'x\n'.repeat(301), 300) !== null],
   ];
   const bad = cases.filter(([, ok]) => !ok);
   for (const [name] of bad) console.error(`file-size-guard selftest FAILED: ${name}`);

@@ -9,8 +9,8 @@
     "@seeded_random",
     "**/tests/**"
   ],
-  "pattern": "\\bstd::(rand|srand|random_device|mt19937(_64)?|minstd_rand0?|default_random_engine|ranlux\\w*|knuth_b)\\b|\\b(rand|srand|random|arc4random\\w*|drand48)\\s*\\(|\\bjuce::Random\\b|\\bRandom::getSystemRandom\\b",
+  "pattern": "(?<![\\w.])(?:std::)?(?:s?rand|random|drand48|lrand48|arc4random(?:_uniform)?)\\s*\\(|\\b(?:random_device|mt19937(?:_64)?|minstd_rand0?|default_random_engine|ranlux\\w+|knuth_b)\\b|\\b\\w+_distribution\\b|\\bjuce::Random\\b|(?<![\\w:])Random\\s*(?:::|\\w+\\s*[;({=])|\\bgetSystemRandom\\b|\\bSecRandomCopyBytes\\b|\\bRAND_bytes\\b",
   "code": true,
-  "bad": "float jitter = juce::Random::getSystemRandom().nextFloat();",
-  "good": "float jitter = world.seeded().next01();"
+  "bad": "float jitter = juce::Random::getSystemRandom().nextFloat();\nstd::mt19937 g (42);\nstd::uniform_real_distribution<float> d (0, 1);\nuint32_t v = arc4random_uniform (8);",
+  "good": "float jitter = world.seeded().next01();\nauto n = randomSource.next(); int operand (int); bool israndom;\ninline float hash (int i) { return std::sin (float (i) * 12.98f) * 43758.5f; }"
 }

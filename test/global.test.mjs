@@ -25,7 +25,9 @@ test('global add keeps existing settings and user files, remove undoes only ours
   assert.ok(existsSync(join(home, '.claude', 'skills', 'latest-versions', 'SKILL.md.pack-new')));
   const s = JSON.parse(readFileSync(join(home, '.claude', 'settings.json'), 'utf8'));
   assert.equal(s.model, 'opus');
-  assert.equal(s.hooks.PreToolUse.length, 2, 'ours added once, theirs kept');
+  assert.equal(s.hooks.PreToolUse.length, 3, 'ours added once (version-pin-guard; build-guard and shell-traps on Bash), theirs kept');
+  assert.equal(s.hooks.PreToolUse.flatMap((g) => g.hooks).filter((h) => /build-guard\.py/.test(h.command)).length, 1);
+  assert.equal(s.hooks.SessionStart.flatMap((g) => g.hooks).filter((h) => /gnu-shell\.py/.test(h.command)).length, 1);
   assert.match(cli(home, 'doctor'), /OK/);
   cli(home, 'remove');
   const after = JSON.parse(readFileSync(join(home, '.claude', 'settings.json'), 'utf8'));
@@ -59,4 +61,45 @@ test('the guard blocks an unchecked pin and passes once versions.md has a fresh 
   assert.equal(guard(dir, { tool_name: 'Edit', tool_input: { file_path: cmake, old_string: 'FetchContent', new_string: 'FetchContent' } }).status, 0, 'no pin change, no check');
   assert.equal(guard(dir, { tool_name: 'Bash', tool_input: { command: 'npm install fastify' } }).status, 2);
   assert.equal(guard(dir, { tool_name: 'Write', tool_input: { file_path: join(dir, 'src.cpp'), content: 'x' } }).status, 0);
+});
+
+// The house's machine-wide hooks were hand-installed in ~/.claude/hooks with their own settings entries.
+// global add takes over a copy that is byte for byte the package's, never doubles its entry, keeps an
+// edited one, and the package's gnu-shell is the newer one (bash 5 warning on every command, ~/.claude/bin).
+test('global add takes over the hand-installed house hooks without doubling them', () => {
+  const home = tmp();
+  const hooks = join(home, '.claude', 'hooks');
+  mkdirSync(hooks, { recursive: true });
+  const pkg = (f) => fileURLToPath(new URL(`../global/hooks/${f}`, import.meta.url));
+  writeFileSync(join(hooks, 'build-guard.py'), readFileSync(pkg('build-guard.py')));
+  writeFileSync(join(hooks, 'shell-traps.py'), '# my own traps\n');
+  writeFileSync(join(home, '.claude', 'settings.json'), JSON.stringify({ hooks: {
+    PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: 'python3 "$HOME/.claude/hooks/build-guard.py"' }] }, { matcher: 'Bash', hooks: [{ type: 'command', command: 'python3 "$HOME/.claude/hooks/shell-traps.py"' }] }],
+    SessionStart: [{ hooks: [{ type: 'command', command: 'python3 "$HOME/.claude/hooks/gnu-shell.py"' }] }],
+  } }));
+  cli(home, 'add');
+  const s = JSON.parse(readFileSync(join(home, '.claude', 'settings.json'), 'utf8'));
+  const all = Object.values(s.hooks).flat().flatMap((g) => g.hooks).map((h) => h.command);
+  for (const name of ['build-guard.py', 'shell-traps.py', 'gnu-shell.py', 'version-pin-guard.mjs']) assert.equal(all.filter((c) => c.includes(name)).length, 1, name);
+  assert.ok(!existsSync(join(hooks, 'build-guard.py.pack-new')), 'an identical copy is taken over, not shadowed');
+  assert.equal(readFileSync(join(hooks, 'shell-traps.py'), 'utf8'), '# my own traps\n');
+  assert.ok(existsSync(join(hooks, 'shell-traps.py.pack-new')));
+  const gnu = readFileSync(join(hooks, 'gnu-shell.py'), 'utf8');
+  assert.match(gnu, /\$HOME\/\.claude\/bin/);
+  assert.match(gnu, /ZSH_VERSION/);
+  for (const f of ['build-guard.py', 'shell-traps.py', 'gnu-shell.py']) assert.equal(spawnSync('python3', [pkg(f), '--selftest'], { env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } }).status, 0, f);
+});
+
+test('version-pin-guard never reads a shell redirection as a package', () => {
+  const dir = tmp();
+  writeFileSync(join(dir, 'docs.md'), '');
+  const bash = (command) => guard(dir, { tool_name: 'Bash', tool_input: { command } });
+  for (const command of ['npm install 2>&1 | tail -3', 'npm ci > /tmp/npm.log 2>&1', 'pip install -r requirements.txt 2>&1 &']) {
+    const r = bash(command);
+    assert.equal(r.status, 0, `${command}: ${r.stderr}`);
+  }
+  const r = bash('npm install fastify 2>&1 | tail -3');
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /fastify \(unpinned\): no row/);
+  assert.doesNotMatch(r.stderr, /2 &1|&1/);
 });
