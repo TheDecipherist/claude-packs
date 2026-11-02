@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.4 (2026-11-01)
+
+- The write hooks judge an inline program that writes files (python3 -c / a heredoc, node -e, perl -e/-i, ruby -e/-i): its open-for-write,
+  write_text, shutil, fs.writeFileSync and the like are writes to their paths, with the new content where the program states it (KWB-8:
+  agents had made whole fixes through Python and the hooks never saw them). Script files and `-m` modules are not judged as writes.
+- The no-code-after-midline-comment check stays on one line; a line-end comment followed by a `return` or a call is no longer refused (KWB-9).
+- design/shape.json `"values"`: plain value types the new-type check skips (KWB-10).
+- design/shape.json `"names"` on a concept: its instances' identity names (a planet's kind: the DELAY planet); the role-name check allows a
+  listed name and still refuses an unlisted one (KWB-12: different things by ID).
+- The release steps fast-forward the local main as well as the remote (KWB-11).
+
 ## 0.9.3 (2026-11-01)
 
 - The shape reader's "seen in:" / "example:" test is linear: a long row of dashes (a 75-dash comment in a CMakeLists) made its regex
