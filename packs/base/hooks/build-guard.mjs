@@ -15,8 +15,8 @@
 //
 //   node build-guard.mjs --selftest
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
 import { isAbsolute, join } from 'node:path';
 
 const WRAPPERS = ['buildq', 'build.sh'];
@@ -86,8 +86,13 @@ export function launchesApp(cmd) {
 export function tooWide(cmd, cwd = process.cwd(), countTests = ctestCount) {
   const body = stripHeredocs(cmd);
   const bare = maskQuotes(body);
+  const cd = body.match(/cd\s+(\S+)\s*&&/)?.[1];
+  const from = cd ? cd.replace(/^~(?=\/|$)/, homedir()) : cwd;
   if (/(cmake\s+--build|tools\/build\.sh\s+build)\b/.test(bare)) {
-    if (/--target\s+all\b/.test(body) || (/cmake\s+--build/.test(body) && !body.includes('--target')) || /tools\/build\.sh\s+build\s+\S+\s*($|[;&|])/.test(body)) {
+    // `build.sh build <one word>`: a build folder (`build.sh build <dir> [target ...]`) builds everything; a target name
+    // (`build.sh build [target ...]`) builds one (WB-90/95 in Stellix: one target was read as a folder)
+    const one = body.match(/tools\/build\.sh\s+build\s+(\S+)\s*($|[;&|])/)?.[1];
+    if (/--target\s+all\b/.test(body) || (/cmake\s+--build/.test(body) && !body.includes('--target')) || (one && isFolder(one, from))) {
       return 'a build of every target is refused.';
     }
   }
@@ -100,12 +105,15 @@ export function tooWide(cmd, cwd = process.cwd(), countTests = ctestCount) {
     if (!r) return 'a test run with no -R pattern runs the whole suite.';
     const pat = r[2] ?? r[3] ?? r[4] ?? '';
     const tdir = args.match(/--test-dir\s+(\S+)/)?.[1] ?? 'build';
-    const cd = body.match(/cd\s+(\S+)\s*&&/)?.[1];
-    const from = cd ? cd.replace(/^~(?=\/|$)/, homedir()) : cwd;
     const n = countTests(isAbsolute(tdir) ? tdir : join(from, tdir), pat);
     if (n > 30) return `the -R pattern '${pat}' matches ${n} tests.`;
   }
   return null;
+}
+
+function isFolder(word, from) {
+  const p = word.replace(/^~(?=\/|$)/, homedir());
+  try { return word.includes('/') || statSync(isAbsolute(p) ? p : join(from, p)).isDirectory(); } catch { return false; }
 }
 
 function ctestCount(dir, pat) {
@@ -197,9 +205,14 @@ function selftest() {
     ['cd w && build/T.app/Contents/MacOS/Synth --record /tmp/x.mov &', true],
     ['ls build/Synth_artefacts', false], ['open docs/report.md', false], ["echo 'open X.app'", false],
   ]);
-  const wide = (cmd) => tooWide(cmd, '/tmp', (_, pat) => (pat === 'record' ? 4 : 99));
+  const dir = mkdtempSync(join(process.env.TMPDIR ?? tmpdir(), 'build-guard-'));
+  mkdirSync(join(dir, 'build'));
+  const wide = (cmd) => tooWide(cmd, dir, (_, pat) => (pat === 'record' ? 4 : 99));
   check('tooWide', wide, [
     ['cmake --build build --target all -j6', true], ['cd w && cmake --build build -j6', true], ['bash tools/build.sh build build', true],
+    // one word after build: a folder that exists (or a path) builds everything; a target name builds one (WB-90/95)
+    ['bash tools/build.sh build stellix_block_probe', false], ['bash tools/build.sh build out/', true],
+    ['bash tools/build.sh build stellix_slots_probe && echo ok', false],
     ['bash tools/build.sh build build SynthFaceProbe Synth_Standalone', false], ['cmake --build build --target SynthBankProbe -j5', false],
     ['bash tools/build.sh test build --output-on-failure', true], ['ctest --test-dir build -j3', true],
     ["bash tools/build.sh test build -R 'record' --output-on-failure", false], ["ctest --test-dir build -R 'gate'", true],
@@ -208,6 +221,7 @@ function selftest() {
     ['git commit -m "ctest: fix"', false], ['python3 tools/step.py save "note" && bash tools/build.sh test build', true],
     ['bash tools/build.sh test build --full-gate', false], ['bash tools/build.sh test build --changed', false],
   ]);
+  rmSync(dir, { recursive: true, force: true });
   for (const b of bad) console.error(`build-guard selftest FAILED: ${b}`);
   if (!bad.length) console.log('build-guard selftest: OK');
   return bad.length ? 1 : 0;

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.5 (2026-11-02)
+
+- build-guard takes `build.sh build <one target>`: the single word is read as a build folder only when it is a path or a folder that
+  exists; a target name builds that target (KWB-14; Stellix WB-90, WB-95).
+
 ## 0.9.4 (2026-11-01)
 
 - The write hooks judge an inline program that writes files (python3 -c / a heredoc, node -e, perl -e/-i, ruby -e/-i): its open-for-write,
