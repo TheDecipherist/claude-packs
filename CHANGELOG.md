@@ -4,6 +4,7 @@
 
 - build-guard takes `build.sh build <one target>`: the single word is read as a build folder only when it is a path or a folder that
   exists; a target name builds that target (KWB-14; Stellix WB-90, WB-95).
+- shape-law's role-name check leaves a gate's verdict word before a concept word alone ("FAIL slot 2"; KWB-15).
 
 ## 0.9.4 (2026-11-01)
 

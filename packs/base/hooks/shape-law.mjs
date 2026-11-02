@@ -105,6 +105,7 @@ function selftest() {
     // the allowed forms
     ['allowed: the generator in a loop', w('src/engines/Bank.cpp', loop), 0],
     ['allowed: a test that loops over every slot', w('tests/slot_test.cpp', `TEST(Slots, Plays) {\n  ${loop}}\n`), 0],
+    ['allowed: a gate verdict before the word ("FAIL slot", KWB-15)', w('tools/gates/look.sh', 'for i in 0 1 2 3; do run "$i" || echo "FAIL slot $i"; done\n'), 0],
     ['allowed: a seen in: line (doc)', w('docs/notes.md', 'seen in: slot 2, build for all slots\n'), 0],
     ['allowed: a seen in: comment (code)', w('src/world/Space.cpp', '// seen in: slot 3 had no delay (B-1); every slot gets one\nfor (int s = 0; s < kSlots; ++s) addDelay(s);\n'), 0],
     ['allowed: a listed selector', w('src/world/Pick.cpp', 'int selectedSlot() const {\n  return open;\n}\nif (selectedSlot == 1) x();\n'), 0],
