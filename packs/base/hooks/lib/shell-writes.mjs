@@ -4,18 +4,21 @@
 //
 //   shellWrites(command, cwd) -> [{ path, op, content, from?, sed? }]
 //     op: write (>, >|, &>, tee), append (>>, &>>, tee -a), copy (cp, install, rsync), move (mv; its source
-//         is a delete), link (ln), edit (sed -i, perl -i), truncate, touch, delete (rm, unlink, shred, mv's source)
+//         is a delete), link (ln), edit (sed -i, perl -i, ruby -i), truncate, touch, delete (rm, unlink, shred, mv's source)
+//     and an inline program's own writes (python -c / python - <<EOF, node -e, perl -e, ruby -e: program-writes.mjs,
+//         KWB-8); a script file run by an interpreter (python3 tools/x.py) is the project's own tool, not a write.
 //     content: the text written (an echo or printf, a heredoc or here-string, a cat of known files, what a pipe
 //         carries into tee, the source of a cp or mv), or null when it cannot be known.
 //   afterText(write) -> { before, after }   after is null when it cannot be known; sed -i is run for real on a
 //         copy of the text, in GNU sed's --sandbox (no e, r or w commands), so its result is exact.
 //   `node shell-writes.mjs --json` reads { command, cwd } on stdin and prints the writes with before and after
-//   (the python hooks use this, so there is one reader of the shell).
+//   (the python hooks use this, so there is one reader of the shell). `--selftest`: each route and program form.
 // Text inside quotes, and a heredoc's body, is never read as a command.
 import { spawnSync } from 'node:child_process';
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { programOf, programWrites } from './program-writes.mjs';
 
 const HOME = process.env.HOME ?? '';
 const expand = (p) => p.replace(/^(~|\$HOME|\$\{HOME\})(?=\/|$)/, HOME);
@@ -185,14 +188,16 @@ function judge(cmd, cwd, stdin, writes, bodies) {
     }
     for (const f of files) add(at(f), 'edit', null, { sed: scripts.includes(null) ? null : { flags: keep, scripts } });
   }
-  if (exe === 'perl' && args.some((a) => /^-\w*i/.test(a))) {
+  if ((exe === 'perl' || exe === 'ruby') && args.some((a) => /^-\w*i/.test(a))) {
     const files = [];
     for (let k = 0; k < args.length; k += 1) {
-      if (args[k] === '-e' || args[k] === '-E') { k += 1; continue; }
+      if (/^-\w*[eE]$/.test(args[k])) { k += 1; continue; } // -e, -pe, -ne: the next word is the program
       if (!args[k].startsWith('-')) files.push(args[k]);
     }
     for (const f of files) add(at(f), 'edit', null);
   }
+  const program = programOf(exe, args, input);
+  if (program) for (const w of programWrites(program, at, readText)) add(w.path, w.op, w.content, w.from ? { from: w.from } : {});
   if (exe === 'dd') for (const a of args) if (a.startsWith('of=')) add(at(a.slice(3)), 'write', null);
   if (exe === 'truncate') {
     const k = args.findIndex((a) => a === '-s' || a.startsWith('--size'));
@@ -263,6 +268,8 @@ export function afterText(w) {
   }
 }
 
+const direct = process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+if (direct && process.argv.includes('--selftest')) import('./shell-writes-selftest.mjs').then((m) => { process.exitCode = m.selftest(); });
 if (process.argv[1] && process.argv.includes('--json') && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   let raw = '';
   process.stdin.on('data', (c) => { raw += c; });

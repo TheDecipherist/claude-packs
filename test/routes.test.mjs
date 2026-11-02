@@ -14,7 +14,7 @@ const PIN_GUARD = fileURLToPath(new URL('../global/hooks/version-pin-guard.mjs',
 const put = (file, text) => { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, text); };
 const sedSafe = (s) => s.replace(/[\\|&]/g, (c) => `\\${c}`).replace(/\n/g, '\\n');
 
-const ROUTES = ['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Bash >', 'Bash >>', 'Bash tee', 'Bash sed -i', 'Bash cp', 'Bash mv', 'Bash heredoc'];
+const ROUTES = ['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Bash >', 'Bash >>', 'Bash tee', 'Bash sed -i', 'Bash cp', 'Bash mv', 'Bash heredoc', 'Bash program'];
 
 // The payload of one route. The target holds `existing` (with the word PLACEHOLDER in it); a route that replaces
 // the file writes `full` (existing with PLACEHOLDER replaced by `bad`), one that edits or appends adds `bad`.
@@ -35,6 +35,8 @@ function payload(route, target, existing, bad, scratch) {
     case 'Bash cp': return bash(`cp '${src}' '${target}'`);
     case 'Bash mv': return bash(`mv '${src}' '${target}'`);
     case 'Bash heredoc': return bash(`cat > '${target}' <<'EOF'\n${full}${full.endsWith('\n') ? '' : '\n'}EOF`);
+    // KWB-8: an inline program that writes the file (a JSON string is a python string literal)
+    case 'Bash program': return bash(`python3 - <<'EOF'\nopen(${JSON.stringify(target)}, 'w').write(${JSON.stringify(full)})\nEOF`);
     default: throw new Error(route);
   }
 }
@@ -161,9 +163,17 @@ test('version-pin-guard refuses an unchecked pin by every route that can write a
 });
 
 test('the shell route reader is one file: the global copy is the project copy', () => {
-  const a = readFileSync(fileURLToPath(new URL('../packs/base/hooks/lib/shell-writes.mjs', import.meta.url)), 'utf8');
-  const b = readFileSync(fileURLToPath(new URL('../global/hooks/lib/shell-writes.mjs', import.meta.url)), 'utf8');
-  assert.equal(a, b);
+  for (const f of ['shell-writes.mjs', 'program-writes.mjs', 'program-read.mjs']) {
+    const a = readFileSync(fileURLToPath(new URL(`../packs/base/hooks/lib/${f}`, import.meta.url)), 'utf8');
+    const b = readFileSync(fileURLToPath(new URL(`../global/hooks/lib/${f}`, import.meta.url)), 'utf8');
+    assert.equal(a, b, f);
+  }
+});
+
+test('the shell route reader proves each route and program form (KWB-8)', () => {
+  const r = spawnSync('node', [fileURLToPath(new URL('../packs/base/hooks/lib/shell-writes.mjs', import.meta.url)), '--selftest'], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /shell-writes selftest: OK/);
 });
 
 // 0.9.0 (KWB-1): the shape law judges every folder, by every route.
