@@ -90,7 +90,7 @@ export function tooWide(cmd, cwd = process.cwd(), countTests = ctestCount) {
   const from = cd ? cd.replace(/^~(?=\/|$)/, homedir()) : cwd;
   if (/(cmake\s+--build|tools\/build\.sh\s+build)\b/.test(bare)) {
     // `build.sh build <one word>`: a build folder (`build.sh build <dir> [target ...]`) builds everything; a target name
-    // (`build.sh build [target ...]`) builds one (WB-90/95 in Stellix: one target was read as a folder)
+    // (`build.sh build [target ...]`) builds one (KWB-14: one target was read as a folder)
     const one = body.match(/tools\/build\.sh\s+build\s+(\S+)\s*($|[;&|])/)?.[1];
     if (/--target\s+all\b/.test(body) || (/cmake\s+--build/.test(body) && !body.includes('--target')) || (one && isFolder(one, from))) {
       return 'a build of every target is refused.';
@@ -211,8 +211,8 @@ function selftest() {
   check('tooWide', wide, [
     ['cmake --build build --target all -j6', true], ['cd w && cmake --build build -j6', true], ['bash tools/build.sh build build', true],
     // one word after build: a folder that exists (or a path) builds everything; a target name builds one (WB-90/95)
-    ['bash tools/build.sh build stellix_block_probe', false], ['bash tools/build.sh build out/', true],
-    ['bash tools/build.sh build stellix_slots_probe && echo ok', false],
+    ['bash tools/build.sh build synth_block_probe', false], ['bash tools/build.sh build out/', true],
+    ['bash tools/build.sh build synth_slots_probe && echo ok', false],
     ['bash tools/build.sh build build SynthFaceProbe Synth_Standalone', false], ['cmake --build build --target SynthBankProbe -j5', false],
     ['bash tools/build.sh test build --output-on-failure', true], ['ctest --test-dir build -j3', true],
     ["bash tools/build.sh test build -R 'record' --output-on-failure", false], ["ctest --test-dir build -R 'gate'", true],
