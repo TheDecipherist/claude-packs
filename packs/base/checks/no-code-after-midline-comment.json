@@ -1,12 +1,12 @@
 {
   "id": "no-code-after-midline-comment",
-  "why": "A // put in the middle of a line swallows every statement after it, and it still compiles (Stellix WB-25: five times in one step). A comment goes at the end of the line, after the code.",
+  "why": "A // put in the middle of a line swallows every statement after it, and it still compiles (Stellix WB-25: five times in one step). A comment goes at the end of the line, after the code. The pattern stays within one line: a line ending in a comment, followed by a line of code, is fine (KWB-9).",
   "concepts": [
     "cpp",
     "shaders"
   ],
-  "pattern": "^(?!.*https?://)\\s*[^\\s/][^\\n]*?[^\"\\n]//[^\\n]*?(?:^|[;{}:,]|\\)|\\s)\\s*(?:[A-Za-z_]\\w*(?:\\.\\w+|->\\w+|\\[[^\\]]*\\])*\\s*[-+*/|&]?=\\s*[^=\\s][^;\\n]*|return\\b[^;\\n]*|[A-Za-z_]\\w*(?:::\\w+)*\\([^;\\n]*\\))\\s*;\\s*}?\\s*$",
+  "pattern": "^(?!.*https?://)[ \\t]*[^\\s/][^\\n]*?[^\"\\n]//[^\\n]*?(?:[;{}:,]|\\)|[ \\t])[ \\t]*(?:[A-Za-z_]\\w*(?:\\.\\w+|->\\w+|\\[[^\\]\\n]*\\])*[ \\t]*[-+*/|&]?=[ \\t]*[^=\\s][^;\\n]*|return\\b[^;\\n]*|[A-Za-z_]\\w*(?:::\\w+)*\\([^;\\n]*\\))[ \\t]*;[ \\t]*}?[ \\t]*$",
   "flags": "m",
   "bad": "    c.power = p;   // its share c.pitch = t.pitch; c.energy = e;\n    const size_t i = d.trav;   // kicked after if (d.trav < 0 || !live) return;",
-  "good": "    c.power = p;   // its share: a = b in the text, never code\n    open(url);   // see https://x.y/a?b=c;\n// a = b; whole-line comments are prose\nlaunchNote(w, L, from, set); // fire( in a comment"
+  "good": "    c.power = p;   // its share: a = b in the text, never code\n    open(url);   // see https://x.y/a?b=c;\n// a = b; whole-line comments are prose\nlaunchNote(w, L, from, set); // fire( in a comment\n    x = f();   // the note\n    return y;\n    a();   // the note\n    go(x);"
 }
