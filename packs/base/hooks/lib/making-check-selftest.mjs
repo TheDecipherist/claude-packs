@@ -87,6 +87,7 @@ export function selftest(hookUrl) {
       const fb = { type: 'user', isMeta: true, message: { content: 'Stop hook feedback: making-check sent this turn back' } };
       return turn([W('src/slot/gain.cpp', slotCode), [fb], [say('Done.')]], { making: '' });
     })(), 2],
+    ['a ";" inside the brackets of a shape ("slot (many, 4; slotId(i, field))", KWB-17)', turn([W('src/slot/gain.cpp', slotCode)], { making: 'making: one filter per slot; concepts: slot (many, 4; slotId(i, field)), mixer (one); reuse: slotFilter in src/slot/filter.cpp' }), 0],
     ['mixer code with a making line naming the mixer', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: the mixer level; concepts: mixer (one); reuse: none' }), 0],
   ];
   return verdicts('making-check', cases);

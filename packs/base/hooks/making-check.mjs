@@ -66,8 +66,11 @@ export function conceptsIn(text, shape) {
 export function unknownConcepts(making, shape) {
   const known = new Set(Object.entries(shape?.concepts ?? {}).flatMap(([n, c]) => wordsOf(n, c)));
   const out = [];
-  for (const m of making.matchAll(/\bconcepts?\s*:\s*([^;|]+)/gi)) {
-    for (const item of m[1].replace(/\([^)]*\)/g, ' ').split(',')) {
+  // bracketed text goes first, nested brackets too, so a ";" inside a shape ("slot (many, 4; slotId(i, field))") does not end the list (KWB-17)
+  let flat = making;
+  for (let prev; prev !== flat;) { prev = flat; flat = flat.replace(/\([^()]*\)/g, ' '); }
+  for (const m of flat.matchAll(/\bconcepts?\s*:\s*([^;|]+)/gi)) {
+    for (const item of m[1].split(',')) {
       const w = item.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, '');
       if (w && !['none', 'no', '-', 'n/a'].includes(w) && !known.has(w)) out.push(w);
     }

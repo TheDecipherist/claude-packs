@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6 (2026-11-02)
+
+- making-check reads a making line's concepts with bracketed text stripped first, nested brackets too, so a ";" inside a shape
+  ("slot (many, 4; slotId(i, field))") no longer ends the list and turns "4" into an unknown concept (KWB-17).
+
 ## 0.9.5 (2026-11-02)
 
 - build-guard takes `build.sh build <one target>`: the single word is read as a build folder only when it is a path or a folder that
