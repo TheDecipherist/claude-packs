@@ -64,6 +64,7 @@ const SELFTEST_SHAPE = {
     mixer: { shape: 'one', id: 'mixer', words: ['mixer'] },
   },
   exclude: ['build/**', 'third_party/**'],
+  values: ['Cell'],
 };
 
 function selftest() {
@@ -89,6 +90,7 @@ function selftest() {
     ['ui: kSlotNames[2]', w('src/ui/Panel.cpp', 'draw(kSlotNames[2]);\n'), 2],
     ['world: a selector not in the manifest', w('src/world/Pick.cpp', 'int pickSlot(int pad) {\n  return pad % 4;\n}\n'), 2],
     ['world: a new instance type with no row', w('src/world/Lane.h', 'struct Lane { int index; float gain; };\n'), 2],
+    ['world: a value-like type not in "values" (KWB-10)', w('src/world/Tex.h', 'struct Tex { int index; float u; };\n'), 2],
     // planted: a test
     ['test: drives slot 2 only', w('tests/slot_test.cpp', 'TEST(Slots, Plays) { Engine e; e.playSlot(2); EXPECT_TRUE(e.sounding()); }\n'), 2],
     ['test: named for one instance', w('tests/play_test.cpp', 'TEST(Play, Slot2Sounds) { run(); }\n'), 2],
@@ -105,6 +107,7 @@ function selftest() {
     ['allowed: a seen in: comment (code)', w('src/world/Space.cpp', '// seen in: slot 3 had no delay (B-1); every slot gets one\nfor (int s = 0; s < kSlots; ++s) addDelay(s);\n'), 0],
     ['allowed: a listed selector', w('src/world/Pick.cpp', 'int selectedSlot() const {\n  return open;\n}\nif (selectedSlot == 1) x();\n'), 0],
     ['allowed: a declared constant', w('src/engines/Init.cpp', 'play(slotId(initSlot, "osc.wave")); // INIT: slot 1\n'), 0],
+    ['allowed: a type listed in "values" (KWB-10)', w('src/world/Cell.h', 'struct Cell { int index; float x; };\n'), 0],
     ['allowed: a type of a known concept', w('src/world/Card.h', 'struct SlotCard { int index; };\n'), 0],
     ['allowed: not instances (buffer[1], channel == 1)', w('src/engines/Mix.cpp', 'float s = buffer[1]; if (channel == 1) s = pos[0];\nif (slots == kSlots) full = true;\n'), 0],
     ['allowed: the whole range "slots 1-4"', w('docs/notes.md', 'Slots 1-4 all play every note.\n'), 0],

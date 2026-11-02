@@ -12,6 +12,9 @@
 //     only: 'example' (just a seen in / example line excuses), 'brief' (that, or a declared constant read by name)
 //   classify(line, concept, shape) -> 'example' | 'selector' | 'constant' | null
 //   conceptOfType(name, shape) -> concept name | null
+// The manifest: { "concepts": { name: row }, "exclude": [globs], "values": [type names] }. "values" (optional, KWB-10) lists
+// plain value types (a cell, a texture, a landing) that hold an index member or sit in an array of N but are values, not
+// instances of a concept: shape-law's new-type check skips them (shape.values, a Set). doctor: a list of strings.
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { matchesAny } from './glob.mjs';
@@ -51,7 +54,8 @@ export function normaliseShape(json) {
   const concepts = {};
   const raw = json && typeof json.concepts === 'object' && !Array.isArray(json.concepts) ? json.concepts : {};
   for (const [name, row] of Object.entries(raw)) concepts[name] = compile(name, row ?? {});
-  return { concepts, exclude: Array.isArray(json?.exclude) ? json.exclude : [], json };
+  const values = new Set(Array.isArray(json?.values) ? json.values.filter((v) => typeof v === 'string') : []);
+  return { concepts, exclude: Array.isArray(json?.exclude) ? json.exclude : [], values, json };
 }
 
 export function readShape(root) {
@@ -67,6 +71,7 @@ export function validateShape(shape) {
   const j = shape.json ?? {};
   if (!j.concepts || typeof j.concepts !== 'object' || Array.isArray(j.concepts)) out.push(`${SHAPE_FILE}: "concepts" must be an object`);
   if (!Array.isArray(j.exclude)) out.push(`${SHAPE_FILE}: "exclude" must be a list of globs`);
+  if (j.values !== undefined && !(Array.isArray(j.values) && j.values.every((v) => typeof v === 'string' && v.trim()))) out.push(`${SHAPE_FILE}: "values" must be a list of type names (strings)`);
   for (const c of Object.values(shape.concepts)) {
     const at = `${SHAPE_FILE} "${c.name}"`;
     if (c.shape !== 'one' && c.shape !== 'many') out.push(`${at}: shape must be "one" or "many" (is ${JSON.stringify(c.shape)})`);

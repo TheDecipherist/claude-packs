@@ -39,7 +39,11 @@ test('doctor fails a synth with no manifest, one that does not parse, and rows t
   assert.match(r.stdout, /"slot": a many concept needs its generator/);
   assert.match(r.stdout, /"slot": constant initSlot has no reason/);
   assert.match(r.stdout, /"mixer": shape must be "one" or "many"/);
-  writeFileSync(file, JSON.stringify({ concepts: { slot: SLOT, mixer: { shape: 'one', id: 'mixer' } }, exclude: [] }));
+  writeFileSync(file, JSON.stringify({ concepts: { slot: SLOT }, exclude: [], values: 'Cell' }));
+  assert.match(cli('doctor', '--dir', dir).stdout, /"values" must be a list of type names/, 'KWB-10: values is a list');
+  writeFileSync(file, JSON.stringify({ concepts: { slot: SLOT }, exclude: [], values: ['Cell', 3] }));
+  assert.match(cli('doctor', '--dir', dir).stdout, /"values" must be a list of type names/);
+  writeFileSync(file, JSON.stringify({ concepts: { slot: SLOT, mixer: { shape: 'one', id: 'mixer' } }, exclude: [], values: ['Cell', 'Tex'] }));
   r = cli('doctor', '--dir', dir);
   assert.doesNotMatch(r.stdout, /shape\.json/, r.stdout);
 });

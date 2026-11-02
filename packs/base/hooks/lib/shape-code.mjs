@@ -4,7 +4,7 @@
 //     selector (or the generator, or a constant) of that concept in design/shape.json
 //   findUnknownTypes(text, file, shape) -> [{ line, text, concept: null, name, why, kind: 'type' }]
 //     a new class/struct/enum whose name holds no concept's word and that looks like an instance container (an index
-//     member, or it is made N times in an array): its concept has no row yet
+//     member, or it is made N times in an array): its concept has no row yet; a type in the manifest's "values" is skipped
 import { conceptOfName, parts, SHAPE_FILE } from './shape.mjs';
 
 export const CODE = /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|inl|mm|m|js|mjs|cjs|ts|tsx|jsx|py|swift|rs|go|java|kt|cs)$/i;
@@ -110,7 +110,7 @@ export function findUnknownTypes(text, file, shape) {
     const m = python ? l.match(/^\s*class\s+([A-Za-z_]\w*)/) : l.match(/\b(?:class|struct|enum(?:\s+class|\s+struct)?)\s+(?:\[\[\w+\]\]\s+)?(?:alignas\([^)]*\)\s+)?([A-Za-z_]\w*)\s*(?:final\s*)?(?:extends\s+[\w.]+\s*)?(?::[^;{]*)?(?:\{|$)/);
     if (!m || /^\s*(?:\/\/|\*|#)/.test(l) || /\bfriend\b|\btemplate\s*<\s*class\b/.test(l)) return;
     const name = m[1];
-    if (conceptOfName(name, shape)) return;
+    if (conceptOfName(name, shape) || shape.values?.has(name)) return; // a listed value type is not a container (KWB-10)
     const body = bodyOf(lines, i, python);
     const inArray = madeN(text, name, shape);
     if (!INDEX_MEMBER.some((re) => re.test(body)) && !inArray) return;
