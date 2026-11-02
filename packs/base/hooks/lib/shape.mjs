@@ -15,6 +15,9 @@
 // The manifest: { "concepts": { name: row }, "exclude": [globs], "values": [type names] }. "values" (optional, KWB-10) lists
 // plain value types (a cell, a texture, a landing) that hold an index member or sit in an array of N but are values, not
 // instances of a concept: shape-law's new-type check skips them (shape.values, a Set). doctor: a list of strings.
+// A row's "names" (optional, KWB-12) lists the identity names of a many concept's instances when each is a different KIND
+// (planet: DELAY, FILTER, REVERB): frozen IDs, not instance numbers. The role-name check ("the PAD slot") allows a listed
+// name before the concept word ("the DELAY planet"); an unlisted uppercase word is still a role. doctor: a list of strings.
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { matchesAny } from './glob.mjs';
@@ -44,6 +47,7 @@ function compile(name, row) {
     name, row, shape: row.shape, count: Number.isInteger(row.count) ? row.count : null, id: row.id ?? null,
     words, plural, single: single.length ? single : words, patterns, badPatterns: bad,
     arrays: Array.isArray(row.arrays) ? row.arrays : [], generatorName,
+    names: new Set((Array.isArray(row.names) ? row.names : []).filter((n) => typeof n === 'string').map((n) => n.toUpperCase())),
     selectors: Object.keys(row.selectors ?? {}), constants: Object.keys(row.constants ?? {}),
     // manifest prose (a constant's reason, a selector's description) quoted in a brief is never an instance literal
     quotes: [...Object.values(row.constants ?? {}).map((c) => c?.reason), ...Object.values(row.selectors ?? {})].filter((q) => typeof q === 'string' && q.length > 3),
@@ -87,6 +91,7 @@ export function validateShape(shape) {
     }
     if (c.row.words !== undefined && !Array.isArray(c.row.words)) out.push(`${at}: words must be a list`);
     if (c.row.arrays !== undefined && !Array.isArray(c.row.arrays)) out.push(`${at}: arrays must be a list`);
+    if (c.row.names !== undefined && !(Array.isArray(c.row.names) && c.row.names.every((n) => typeof n === 'string' && n.trim()))) out.push(`${at}: names must be a list of identity names (strings)`);
   }
   return out;
 }
@@ -181,7 +186,7 @@ function lineHits(line, c, shape, aliases, inSwitch) {
   }
   if (c.shape === 'many') {
     const role = new RegExp(`(?<![A-Za-z0-9_])([A-Z][A-Z0-9]+)\\s+(${c.single.flatMap((w) => [esc(w), esc(cap(w))]).join('|')})(?![A-Za-z0-9_])`, 'g');
-    for (const m of line.matchAll(role)) if (!NOT_ROLES.has(m[1]) && !c.words.includes(m[1].toLowerCase())) add(m[1], `names it by a role ("${m[0]}"): the instance is a sound or a job, not a ${c.name}`);
+    for (const m of line.matchAll(role)) if (!NOT_ROLES.has(m[1]) && !c.words.includes(m[1].toLowerCase()) && !c.names.has(m[1])) add(m[1], `names it by a role ("${m[0]}"): the instance is a sound or a job, not a ${c.name}`);
   }
   for (const m of line.matchAll(/([A-Za-z_]\w*)\s*(?:\[\s*(\d+)\s*\]|\.at\(\s*(\d+)\s*\))/g)) {
     const lead = line.slice(0, m.index).trimEnd();

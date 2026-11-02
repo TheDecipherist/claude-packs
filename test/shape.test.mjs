@@ -43,6 +43,8 @@ test('doctor fails a synth with no manifest, one that does not parse, and rows t
   assert.match(cli('doctor', '--dir', dir).stdout, /"values" must be a list of type names/, 'KWB-10: values is a list');
   writeFileSync(file, JSON.stringify({ concepts: { slot: SLOT }, exclude: [], values: ['Cell', 3] }));
   assert.match(cli('doctor', '--dir', dir).stdout, /"values" must be a list of type names/);
+  writeFileSync(file, JSON.stringify({ concepts: { slot: { ...SLOT, names: 'DELAY' } }, exclude: [] }));
+  assert.match(cli('doctor', '--dir', dir).stdout, /"slot": names must be a list of identity names/, 'KWB-12: names is a list');
   writeFileSync(file, JSON.stringify({ concepts: { slot: SLOT, mixer: { shape: 'one', id: 'mixer' } }, exclude: [], values: ['Cell', 'Tex'] }));
   r = cli('doctor', '--dir', dir);
   assert.doesNotMatch(r.stdout, /shape\.json/, r.stdout);
