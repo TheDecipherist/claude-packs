@@ -179,7 +179,7 @@ export function run(event, { now = Date.now() / 1000, rows = null, commitMin = n
       if (s) said.push(s);
     }
   }
-  // 4. the controller sees every worktree: a git status in each runs in its own process, never in the hook (KWB-24: Stellix's
+  // 4. the controller sees every worktree: a git status in each runs in its own process, never in the hook (KWB-24: a synth's
   // 125 worktrees took over a minute, the hook was killed at its timeout before it saved `scanned`, so every call scanned again)
   const scan = worktrees ?? (rows !== null ? {} : null);
   const tell = (list) => list.length && said.push(`worktrees holding work unsaved for more than ${SAVE_MIN} min: ${list.join(', ')}. Ask their agents to save (${CFG.saveCommand}), or find why they stall`);

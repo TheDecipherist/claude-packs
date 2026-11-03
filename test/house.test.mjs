@@ -167,7 +167,7 @@ test('a Node hook is on in a project that ran its Python forerunner, and the for
   assert.match(out, /held back, not switched on .*hooks\/time-guard\.mjs/);
   assert.match(out, /retired settings entries .*git-guard\.py/);
   const all = readFileSync(sf, 'utf8');
-  assert.match(all, /node \\"\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/git-guard\.mjs/);
+  assert.match(all, /run-hooks\.mjs\\"[^"]* \.claude\/hooks\/git-guard\.mjs/, 'the Node hook runs (through run-hooks.mjs, KWB-24)');
   assert.doesNotMatch(all, /git-guard\.py|tims-asks\.py/);
 });
 
