@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.8 (2026-11-03)
+
+- protect-vendor reads a layout key `writeOnce` (globs): evidence a command leaves. A new file there may be written by any route;
+  an existing one is never overwritten, edited, appended to, moved or deleted (KWB-21). A project that listed its evidence folder
+  under `protected` (every write refused, so no evidence could be added) moves it to `writeOnce`.
+
 ## 0.9.7 (2026-11-02)
 
 - The shell reader (every hook that judges a shell write) reads a path through the variables the command set earlier

@@ -8,11 +8,12 @@ import { buildLayout } from '../lib/layout.mjs';
 
 test('an update keeps buildOutput, and adds none where the project set none', () => {
   const dir = mkdtempSync(join(tmpdir(), 'layout-owned-'));
-  writeFileSync(join(dir, 'layout.json'), JSON.stringify({ folders: {}, concepts: {}, buildOutput: ['out/**'], keepWorktrees: ['night'], protected: ['design/**'] }));
+  writeFileSync(join(dir, 'layout.json'), JSON.stringify({ folders: {}, concepts: {}, buildOutput: ['out/**'], keepWorktrees: ['night'], protected: ['design/**'], writeOnce: ['build/evidence/**'] }));
   const kept = buildLayout(dir, []);
   assert.deepEqual(kept.buildOutput, ['out/**']);
   assert.deepEqual(kept.protected, ['design/**']);
   assert.deepEqual(kept.keepWorktrees, ['night']);   // 0.9.1: build-sweep's kept worktrees survive an update
+  assert.deepEqual(kept.writeOnce, ['build/evidence/**']);   // 0.9.8 (KWB-21)
   const bare = mkdtempSync(join(tmpdir(), 'layout-owned-'));
   writeFileSync(join(bare, 'layout.json'), JSON.stringify({ folders: {}, concepts: {} }));
   assert.equal(buildLayout(bare, []).buildOutput, undefined);

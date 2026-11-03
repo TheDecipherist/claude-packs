@@ -12,7 +12,7 @@
 // A path in an agent worktree (.claude/worktrees/<name>/...) is judged as the same path in the project.
 // A nested clone under build/_deps is vendored code too (Sub37 WB-2: checkoutRoot counts only this repo's worktrees).
 // `--selftest` plants a write into each kind of read-only path and lets the allowed ones through.
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -27,7 +27,9 @@ const DEFAULT_GLOBS = ['JUCE/**', '**/JUCE/modules/**', 'JuceLibraryCode/**', 'l
 // holds the report and the pictures, which agents write). Any nested clone under build/_deps stays vendored either way.
 const buildGlobs = (layout) => [...(layout.buildOutput ?? ['build/**']), 'build/_deps/**'];
 // What makes a write to this file wrong, or null. `p` is the project library (lib/project.mjs).
-function judge(p, file, base) {
+// layout.json "writeOnce" globs (KWB-21): evidence a command leaves; a new file may be added, an existing one is never changed,
+// moved or deleted, so what a gate recorded stays what it recorded.
+function judge(p, file, base, op = 'write') {
   const abs = resolve(base, file);
   if (!p.insideProject(abs)) return null;
   const rel = p.relInCheckout(abs).replace(/^\.claude\/worktrees\/[^/]+\//, '');
@@ -35,6 +37,7 @@ function judge(p, file, base) {
   const tree = foldersOfKind(layout, 'copy').find((t) => rel === t || rel.startsWith(`${t}/`));
   if (tree) return { rel, tree, layout };
   if (matchesAny(rel, [...DEFAULT_GLOBS, ...buildGlobs(layout), ...(layout.protected ?? [])])) return { rel, layout };
+  if (matchesAny(rel, layout.writeOnce ?? []) && (op === 'delete' || existsSync(abs))) return { rel, layout, once: true };
   return null;
 }
 
@@ -42,13 +45,17 @@ function judge(p, file, base) {
 // shell's >, >>, tee, sed -i, perl -i, cp, mv (its source too), ln, rm, truncate, touch, dd of=, a heredoc.
 export function verdict(payload, p = project) {
   for (const w of writesOf(payload, payload.cwd ?? p.ROOT)) {
-    const hit = judge(p, w.path, p.ROOT);
+    const hit = judge(p, w.path, p.ROOT, w.op);
     if (hit) return { ...hit, why: payload.tool_name === 'Bash' ? `the command writes ${hit.rel}` : hit.rel };
   }
   return null;
 }
 
-function message({ why, tree, layout }) {
+function message({ why, tree, layout, once }) {
+  if (once) {
+    return `BLOCKED by protect-vendor: ${why}, which already exists under a "writeOnce" path of .claude/layout.json: evidence is\n` +
+      'written once and never changed, moved or deleted. Write the new run to a new file name beside it.\n';
+  }
   if (!tree) {
     return `BLOCKED by protect-vendor: ${why} is vendored/generated code and is read-only.\n` +
       'Fix our own code, wrap the library, or ask the user if the library itself must change.\n';
@@ -140,13 +147,25 @@ function selftestRepo() {
 
 // A layout that names its build output as out/ may write build/ (a report, pictures); out/ and build/_deps stay read-only.
 function selftestBuildOutput(hook) {
-  const dir = scratchProject({ 'src/a.cpp': '//\n' }, { folders: {}, concepts: {}, buildOutput: ['out/**'] });
+  const dir = scratchProject({ 'src/a.cpp': '//\n', 'build/evidence/s1/run.txt': 'measured\n' },
+    { folders: {}, concepts: {}, buildOutput: ['out/**'], writeOnce: ['build/evidence/**'] });
   git(dir, 'init', '-q');
   const e = (file) => runHook(hook, dir, editOf(join(dir, file)));
+  const w = (file) => runHook(hook, dir, { tool_name: 'Write', tool_input: { file_path: join(dir, file), content: 'x\n' } });
+  const b = (command) => runHook(hook, dir, { tool_name: 'Bash', tool_input: { command }, cwd: dir });
   return verdicts('protect-vendor buildOutput', [
     ['build/for-tim.md under buildOutput out/**', e('build/for-tim.md'), 0],
     ['out/ under buildOutput out/**', e('out/lib/x.o'), 2],
     ['build/_deps stays vendored', e('build/_deps/juce-src/x.h'), 2],
+    // KWB-21: evidence is written once
+    ['a new evidence file by Write', w('build/evidence/s2/new.txt'), 0],
+    ['a new evidence file by cp (KWB-21)', b('cp /tmp/sweep.txt build/evidence/s2/sweep.txt'), 0],
+    ['a probe writing new evidence', b('probe --bank > build/evidence/s2/bank.txt'), 0],
+    ['an existing evidence file overwritten', w('build/evidence/s1/run.txt'), 2],
+    ['an existing evidence file edited', e('build/evidence/s1/run.txt'), 2],
+    ['an existing evidence file appended', b('echo x >> build/evidence/s1/run.txt'), 2],
+    ['an evidence file deleted', b('rm build/evidence/s1/run.txt'), 2],
+    ['an evidence file moved away', b('mv build/evidence/s1/run.txt /tmp/'), 2],
   ]);
 }
 
