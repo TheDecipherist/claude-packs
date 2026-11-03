@@ -119,6 +119,8 @@ function selftest() {
     ['allowed: a multi-word caps label before the word ("a NOTES MONO slot", KWB-22)', w('src/engines/Voice.cpp', '// a NOTES MONO slot sounds only in the newest voice\n'), 0],
     ['allowed: a number past the count is a value ("slot 40 ms", KWB-22)', w('docs/notes.md', 'Each slot 40 ms later than the last.\n'), 0],
     ['allowed: the whole range "slots 1-4"', w('docs/notes.md', 'Slots 1-4 all play every note.\n'), 0],
+    ['allowed: a line already there, edited and moved (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), 'void f() { if (slot == 2) g(); }\n// PLACE', '// PLACE\nvoid f() { if (slot == 2) g(); } // closed: B-1')), 0],
+    ['an edit adding a second copy of a literal already there (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', 'void h() { if (slot == 2) g(); }')), 2],
     ['allowed: a literal already there, untouched', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', '// nothing')), 0],
     ['allowed: excluded (build/)', w('build/gen/Table.cpp', 'auto& s = slots[1];\n'), 0],
     ['allowed: no design/shape.json', w('src/engines/Voice.cpp', 'if (slotIx == 1) go();\n', bare), 0],

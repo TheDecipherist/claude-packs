@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.10 (2026-11-03)
+
+- shape-law and brief-guard judge what a write adds by what each finding names (concept, instance, reason), not by its line's
+  text: a line that was there, then edited or moved (a bug row closed and moved to Fixed with its cause), names nothing new; a
+  second copy of a literal is still refused (KWB-23).
+
 ## 0.9.9 (2026-11-03)
 
 - shape-law reads a multi-word all-caps label as a control's name, not an instance: "AIM EFFECTS 100" (a value) and "a NOTES MONO
