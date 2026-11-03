@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.9 (2026-11-03)
+
+- shape-law reads a multi-word all-caps label as a control's name, not an instance: "AIM EFFECTS 100" (a value) and "a NOTES MONO
+  oscillator" (a setting) are let through; a single role word ("the PAD slot") and "SLOTS 2" are still refused. A number past a
+  concept's count is a value, not an instance ("slot 40 ms") (KWB-22).
+
 ## 0.9.8 (2026-11-03)
 
 - protect-vendor reads a layout key `writeOnce` (globs): evidence a command leaves. A new file there may be written by any route;

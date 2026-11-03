@@ -170,7 +170,11 @@ function lineHits(line, c, shape, aliases, inSwitch) {
   for (const re of c.patterns) for (const m of line.matchAll(re)) add(m[1] ?? m[0], `matches the pattern ${re.source}`);
   const W = c.words.map(esc).sort((a, b) => b.length - a.length).join('|');
   const num = new RegExp(`(?<![A-Za-z0-9])(${W})(?:[ _#-]|\\s+(?:no\\.?|number|#)\\s*)?(\\d+)(?!\\d)((?:\\s*(?:-|–|\\.\\.|to|through)\\s*)(\\d+))?`, 'gi');
+  // A multi-word all-caps label ("AIM EFFECTS", "NOTES MONO") names a control, not an instance (KWB-22): the caps word before it.
+  const labelBefore = (at) => { const w = /([A-Z][A-Z0-9]+)\s+$/.exec(line.slice(0, at)); return w !== null && !NOT_ROLES.has(w[1]); };
   for (const m of line.matchAll(num)) {
+    if (c.count !== null && !m[3] && Number(m[2]) > c.count) continue; // past the count: a value, not an instance (KWB-22)
+    if (m[1] === m[1].toUpperCase() && labelBefore(m.index)) continue; // AIM EFFECTS 100: a control's value
     if (m[3] && c.count !== null) {
       const [a, b] = [Number(m[2]), Number(m[4])];
       if ((a === 0 && b === c.count - 1) || (a === 1 && b === c.count)) continue; // the whole range: every instance
@@ -187,7 +191,7 @@ function lineHits(line, c, shape, aliases, inSwitch) {
   }
   if (c.shape === 'many') {
     const role = new RegExp(`(?<![A-Za-z0-9_])([A-Z][A-Z0-9]+)\\s+(${c.single.flatMap((w) => [esc(w), esc(cap(w))]).join('|')})(?![A-Za-z0-9_])`, 'g');
-    for (const m of line.matchAll(role)) if (!NOT_ROLES.has(m[1]) && !c.words.includes(m[1].toLowerCase()) && !c.names.has(m[1])) add(m[1], `names it by a role ("${m[0]}"): the instance is a sound or a job, not a ${c.name}`);
+    for (const m of line.matchAll(role)) if (!NOT_ROLES.has(m[1]) && !c.words.includes(m[1].toLowerCase()) && !c.names.has(m[1]) && !labelBefore(m.index)) add(m[1], `names it by a role ("${m[0]}"): the instance is a sound or a job, not a ${c.name}`);
   }
   for (const m of line.matchAll(/([A-Za-z_]\w*)\s*(?:\[\s*(\d+)\s*\]|\.at\(\s*(\d+)\s*\))/g)) {
     const lead = line.slice(0, m.index).trimEnd();
