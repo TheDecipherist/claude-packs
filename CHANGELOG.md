@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.9.13 (2026-11-03)
+
+- The kit is a project like any other (KWB-26): its own `.claude/` carries the base pack (`.claude/layout.json` names the kit's
+  folders, the house git laws and the trunk refusal on), so every base hook judges work on the kit, kit-lock beside them, and
+  `doctor --strict` passes on it.
+- git-guard, two house laws (KWB-26): a `git commit` is refused while the branch has commits that are on no GitHub branch (the
+  first commit of a new branch passes, the next waits for its push; a push earlier in the same command counts), naming the
+  commits and the push with the token named; the end of a session (Stop) is refused while any local branch is ahead of GitHub or
+  missing there, listing them with one push command and never offering a delete (three identical refusals end the session, the
+  list going to the user). GitHub's heads come from `git ls-remote` (protocol v0, one request; the token from the environment or
+  ~/.env as a header in the child's environment, never on the command line or stored). The last look is kept in the git dir and
+  only ever lets work through: anything it would refuse is looked up live, so a push seconds ago counts at once and a commit or
+  Stop the last look clears makes no network call. GitHub out of reach (offline, no token): a warning, and the work goes ahead.
+  git-guard is registered on Stop in the base pack.
+- settings: the runner folds in only a hook that exports `hook(text)`; any other node hook keeps its own entry (the kit's
+  kit-lock was folded in and failed as exit 1, so it never refused). An update unfolds a runner command into one entry per hook
+  before it rebuilds the kit's entries, so a project's own hook in it is kept (it was dropped). kit-lock exports `hook`.
+- Every doc, hook message, rule, skill and command text names the kit as `npx --no-install @thedecipherist/claude-packs ...`
+  (KWB-27: a bare `npx claude-packs` in a project without node_modules downloaded and ran an unrelated public package).
+- Tests: test/kit-guards.test.mjs (own hooks through init and two updates; the kit's own install and doctor --strict; no kit
+  command, hook, skill or doc deletes a branch), test/npx-name.test.mjs (no bare `npx claude-packs` anywhere in the kit).
+
 ## 0.9.12 (2026-11-03)
 
 - Hook timing (KWB-24): every installed hook writes one line per call to `.claude/hooks.log` (ISO time, event, hook, ms, exit
