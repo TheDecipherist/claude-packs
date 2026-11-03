@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.7 (2026-11-02)
+
+- The shell reader (every hook that judges a shell write) reads a path through the variables the command set earlier
+  (`S=/tmp/x; cat > $S/a.md`), so a write outside the project is no longer judged as `<project>/$S/a.md` (KWB-18).
+- Several shell writes to one file in one command (`sed -i A f && sed -i B f`) are judged as one change: once-only no longer
+  reads them as two copies of the file (KWB-13).
+- making-check judges the concepts of code writes only: docs, briefs, build/, inbox/ and notes are not judged (KWB-19).
+
 ## 0.9.6 (2026-11-02)
 
 - making-check reads a making line's concepts with bracketed text stripped first, nested brackets too, so a ";" inside a shape

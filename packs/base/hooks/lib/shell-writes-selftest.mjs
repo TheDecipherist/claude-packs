@@ -10,6 +10,8 @@ const CASES = [
   // the shell's own routes
   ['cat heredoc into a file', "cat > s.cpp <<'EOF'\nint a;\nEOF", [['s.cpp', 'write', 'int a;\n']]],
   ['echo >>', 'echo hi >> a.txt', [['a.txt', 'append', 'hi\n']]],
+  ['a variable set earlier names its folder (KWB-18)', "S=d; cat > $S/v.md <<'EOF'\nx\nEOF", [['d/v.md', 'write', 'x\n']]],
+  ['${VAR} too, set from another variable', 'A=d; B=$A/e; echo hi > ${B}.txt', [['d/e.txt', 'write', 'hi\n']]],
   // python, each form
   ['python heredoc: open(p, "w").write', H('python3', "open('x.cpp', 'w').write('int a;\\n')"), [['x.cpp', 'write', 'int a;\n']]],
   ['python -c: open(p, "a")', 'python3 -c "open(\'x.cpp\', \'a\').write(\'more\')"', [['x.cpp', 'append', 'more']]],

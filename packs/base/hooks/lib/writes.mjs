@@ -30,7 +30,16 @@ export function writesOf(payload, base = process.cwd()) {
     return [{ path, op: 'edit', before, after }];
   }
   if (tool === 'Bash') {
-    return shellWrites(input.command ?? '', payload.cwd ?? base).map((w) => ({ path: w.path, op: w.op, ...afterText(w) }));
+    // several writes to one file in one command (`sed -i A f && sed -i B f`) are one change: each reads what the one before it left,
+    // and the file is judged once, from what it was to what the last one leaves (KWB-13: each was read against the file on disk, and
+    // the two different results were judged as two copies of the file)
+    const byPath = new Map();
+    for (const w of shellWrites(input.command ?? '', payload.cwd ?? base)) {
+      const prev = byPath.get(w.path);
+      const r = prev ? (prev.after === null ? { after: null } : afterText(w, prev.after)) : afterText(w);
+      byPath.set(w.path, prev ? { ...prev, op: w.op === 'delete' ? 'delete' : prev.op, after: r.after } : { path: w.path, op: w.op, ...r });
+    }
+    return [...byPath.values()];
   }
   return [];
 }

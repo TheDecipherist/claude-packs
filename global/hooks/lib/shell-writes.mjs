@@ -216,7 +216,18 @@ export function shellWrites(command = '', cwd = process.cwd()) {
   let cmd = { words: [], redirs: [] };
   let pipeIn = null;
   const tokens = lex(text);
+  // a variable set earlier in the command ("S=/tmp/x; cat > $S/a.md") names that folder, not "<cwd>/$S" (KWB-18); one never set
+  // stays as written
+  const vars = {};
+  const sub = (w) => w.replace(/\$(?:\{(\w+)\}|(\w+))/g, (m, a, b) => vars[a ?? b] ?? m);
   const flush = () => {
+    if (cmd.words.length && !cmd.redirs.length && cmd.words.every((w) => /^[A-Za-z_]\w*=/.test(w))) {
+      for (const w of cmd.words) { const i = w.indexOf('='); vars[w.slice(0, i)] = sub(w.slice(i + 1)); }
+      cmd = { words: [], redirs: [] };
+      pipeIn = null;
+      return;
+    }
+    cmd = { words: cmd.words.map(sub), redirs: cmd.redirs.map((r) => (r.target === undefined ? r : { ...r, target: sub(r.target) })) };
     if (cmd.words.length || cmd.redirs.length) {
       const r = judge(cmd, here, pipeIn, writes, bodies);
       if (r.cd) here = r.cd;
@@ -252,8 +263,7 @@ function findGnuSed() {
   return (gnuSed = null);
 }
 
-export function afterText(w) {
-  const before = readText(w.path) ?? '';
+export function afterText(w, before = readText(w.path) ?? '') {
   switch (w.op) {
     case 'write': case 'copy': case 'move': case 'truncate': return { before, after: w.content };
     case 'append': return { before, after: w.content === null ? null : before + w.content };

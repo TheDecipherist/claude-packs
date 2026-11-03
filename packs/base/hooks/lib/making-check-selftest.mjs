@@ -58,7 +58,7 @@ export function selftest(hookUrl) {
     ['slot written by a shell heredoc, no making line', turn([use('Bash', { command: `cat > src/slot/gain.cpp <<'EOF'\n${slotCode}EOF` })], { making: '' }), 2],
     ['slot written by sed -i, no making line', turn([use('Bash', { command: 'sed -i s/gain/slotGain/ src/slot/filter.cpp' })], { making: '' }), 2],
     ['a refused write is not counted', turn([use('Write', { file_path: at('src/slot/gain.cpp'), content: slotCode }, true)], { making: '' }), 0],
-    ['a doc naming the mixer, no making line', turn([W('docs/mixer.md', 'The mixer sums the four buses.\n')], { making: '' }), 2],
+    ['a doc naming the mixer, no making line: docs are not judged (KWB-19)', turn([W('docs/mixer.md', 'The mixer sums the four buses.\n')], { making: '' }), 0],
     ['plan and log files are not concepts written', turn([W('bugs.md', '| B-1 | slot 2 silent |\n')], { making: '' }), 0],
     ['a turn that wrote nothing and claims nothing', turn([say('All green.')]), 0],
     ['a write in another project is not judged', turn([use('Write', { file_path: join(tmpdir(), 'other-project-y', 'slot.cpp'), content: slotCode })], { making: '' }), 0],
@@ -88,6 +88,9 @@ export function selftest(hookUrl) {
       return turn([W('src/slot/gain.cpp', slotCode), [fb], [say('Done.')]], { making: '' });
     })(), 2],
     ['a ";" inside the brackets of a shape ("slot (many, 4; slotId(i, field))", KWB-17)', turn([W('src/slot/gain.cpp', slotCode)], { making: 'making: one filter per slot; concepts: slot (many, 4; slotId(i, field)), mixer (one); reuse: slotFilter in src/slot/filter.cpp' }), 0],
+    ['a note naming a concept the making line does not name (KWB-19)', turn([W('docs/notes.md', 'The mixer meter and its Status line.\n')]), 0],
+    ['a brief in a notes folder naming a concept (KWB-19)', turn([W('notes/brief.md', '# Brief: the mixer, every slot\n')]), 0],
+    ['source using a concept the making line does not name (KWB-19)', turn([W('src/mix/level.cpp', mixerCode)]), 2],
     ['mixer code with a making line naming the mixer', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: the mixer level; concepts: mixer (one); reuse: none' }), 0],
   ];
   return verdicts('making-check', cases);

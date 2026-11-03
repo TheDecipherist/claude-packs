@@ -26,6 +26,17 @@ import { readShape } from './lib/shape.mjs';
 import { lastTurn, writesOfTurn } from './lib/turn.mjs';
 
 const MAX_SENDS = 3;
+// the folder kinds a layout marks as code; a layout that marks none: any source file outside its docs folders
+const CODE_KINDS = new Set(['code', 'engine', 'ui', 'params', 'tests']);
+const NOT_CODE = ['build/**', 'inbox/**', 'docs/**', '**/*.md', '**/*.txt', '**/*.json'];
+function isCode(relPath, layout) {
+  if (!(isSource(relPath) || /\.ipynb$/i.test(relPath)) || matchesAny(relPath, NOT_CODE)) return false;
+  const folders = Object.values(layout?.folders ?? {});
+  const docs = folders.filter((f) => f.kind === 'docs' || /^docs?\b/i.test(f.purpose ?? '')).map((f) => `${f.path}/**`);
+  if (matchesAny(relPath, docs)) return false;
+  const code = folders.filter((f) => CODE_KINDS.has(f.kind)).map((f) => `${f.path}/**`);
+  return !code.length || matchesAny(relPath, code);
+}
 const PLAN = ['build.md', '**/build.md', 'bugs.md', 'workflow-bugs.md', 'CHANGELOG.md', 'design/shape.json', '.claude/**'];
 const LAW = /(?:design\/)?shape\.json|(?:docs\/)?[\w.-]*-spec\.md|(?:docs\/)?laws\.md/g;
 const LOCATOR = /:\d+\b|#[\w-]+|\{#[\w-]+\}|§\s*\d[\d.]*|\bL-?\d+\b|\b(?:section|line|row|rule|law)\s+["'`]?[\w.-]+|"[\w -]{2,40}"\s+row/i;
@@ -134,7 +145,9 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
     }
     if (sh && !sh.error && mine.length) {
       const written = new Map();
-      for (const w of mine) for (const c of conceptsIn(w.text ?? '', sh)) if (!written.has(c)) written.set(c, rel(w.path));
+      // only code is judged for its concepts: a note, a brief, a doc or a log names concepts in words ("Status line"), and that is no
+      // undeclared use (KWB-19)
+      for (const w of mine) if (isCode(rel(w.path), lay)) for (const c of conceptsIn(w.text ?? '', sh)) if (!written.has(c)) written.set(c, rel(w.path));
       const making = makingLines(r).join('\n');
       const wroteSource = mine.filter((w) => isSource(w.path)).map((w) => rel(w.path));
       // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
