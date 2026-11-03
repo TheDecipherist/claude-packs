@@ -14,24 +14,12 @@ import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writesOf } from '../../packs/base/hooks/lib/writes.mjs';
+// the lock's one format, read in both forms (lib/kit-lock.mjs; `claude-packs lock status|release`, KWB-25)
+import { checkouts, LOCK, readLock, takeLock as take } from '../../lib/kit-lock.mjs';
 
-export const LOCK = '.claude-packs-lock';
-const git = (cwd, ...a) => { try { return execFileSync('git', a, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
-
-// Every checkout of the repo the project is in: the main one and each worktree.
-export function checkouts(root) {
-  const out = git(root, 'worktree', 'list', '--porcelain').split('\n').filter((l) => l.startsWith('worktree ')).map((l) => l.slice(9));
-  return out.length ? out : [root];
-}
+export { checkouts, LOCK, take };
 
 const inside = (dir, path) => { const r = relative(dir, path); return r === '' || (!r.startsWith('..') && !isAbsolute(r)); };
-const readLock = (dir) => { try { return JSON.parse(readFileSync(join(dir, LOCK), 'utf8')); } catch { return null; } };
-
-export function take(root, session, branch = git(root, 'rev-parse', '--abbrev-ref', 'HEAD')) {
-  const lock = { session, branch, time: new Date().toISOString() };
-  writeFileSync(join(root, LOCK), `${JSON.stringify(lock, null, 2)}\n`);
-  return lock;
-}
 
 // null when the call may go ahead; else the other session's lock and where it is.
 export function verdict(payload, root) {
@@ -54,9 +42,9 @@ function main() {
   const v = verdict(payload, root);
   if (!v) return 0;
   process.stderr.write(
-    `BLOCKED by kit-lock: another session is changing claude-packs (session ${v.lock.session}, branch ${v.lock.branch}, since ${v.lock.time}; ` +
+    `BLOCKED by kit-lock: another session is changing claude-packs (session ${v.lock.session}, branch ${v.lock.branch}, since ${v.lock.startedAt}; ` +
       `lock in ${join(v.where, LOCK)}).\nOne session changes the kit at a time. Wait for its release merge (which removes the lock), ` +
-      'or ask the user; never delete another session\'s lock.\n',
+      'or ask the user; never delete another session\'s lock. A lock whose session is gone: `npx claude-packs lock release` (KWB-25).\n',
   );
   return 2;
 }

@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { doctor } from '../lib/doctor.mjs';
 import { globalAdd, globalDoctor, globalRemove } from '../lib/global.mjs';
+import { lockCommand } from '../lib/kit-lock.mjs';
 import { readLock } from '../lib/manifest.mjs';
 import { newProject } from '../lib/new.mjs';
 import { dupScan } from '../lib/once-only-report.mjs';
@@ -38,6 +39,9 @@ const HELP = `usage: npx claude-packs <command> [options]
                      design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines)
   symmetry run <concept>   that gate for one concept: every instance the same members, every pair swaps the same
   dup scan           every duplicated block (jscpd, the once-only hook's detector), listed by file
+  lock status|release [--force]
+                     the claude-packs repo's kit lock in each checkout: who holds it, live or not; release takes
+                     away your own lock or a gone session's, never another live session's without --force
   global add|remove|doctor
                      the global part, exactly three pieces: latest-versions (skill and
                      version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
@@ -118,6 +122,8 @@ async function main() {
     case 'dup':
       if (rest[0] !== 'scan') throw new Error('use `dup scan [--dir <project>]`');
       return dupScan(dir);
+    case 'lock':
+      return lockCommand(rest[0], dir, { force });
     case 'list':
       for (const name of availablePacks()) console.log(`${name.padEnd(12)} ${readPack(name).description}`);
       return 0;
