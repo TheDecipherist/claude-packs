@@ -25,6 +25,7 @@ import { homedir } from 'node:os';
 import { join, normalize, resolve } from 'node:path';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -136,9 +137,9 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
   return null;
 }
 
-function main() {
+function main(text) {
   let payload;
-  try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { payload = JSON.parse(text); } catch { return 0; }
   const command = payload.tool_input?.command ?? '';
   const why = problem(command);
   if (why) {
@@ -235,4 +236,5 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('git-guard', main));

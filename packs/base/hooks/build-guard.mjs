@@ -18,6 +18,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { isAbsolute, join } from 'node:path';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const WRAPPERS = ['buildq', 'build.sh'];
 const base = (p) => p.split('/').pop();
@@ -139,9 +140,9 @@ function refuse(msg) {
   return 2;
 }
 
-function main() {
+function main(text) {
   let ev;
-  try { ev = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { ev = JSON.parse(text); } catch { return 0; }
   const project = process.env.CLAUDE_PROJECT_DIR ?? ev.cwd ?? '';
   if (project && existsSync(join(project, '.claude', 'hooks', 'pre.js'))) return 0; // a project's own dispatcher wins (Tim, 2026-10-18)
   if (ev.tool_name !== 'Bash') return 0;
@@ -227,4 +228,5 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('build-guard', main));

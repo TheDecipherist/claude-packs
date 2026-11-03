@@ -1,6 +1,6 @@
 // making-check's planted faults: each a transcript of one turn in a throwaway git project, judged as Claude Code runs the
 // Stop hook. Kept beside the hook so the hook itself stays short.
-import { rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,6 +64,17 @@ export function selftest(hookUrl) {
     ['a write in another project is not judged', turn([use('Write', { file_path: join(tmpdir(), 'other-project-y', 'slot.cpp'), content: slotCode })], { making: '' }), 0],
     ['source with no design/shape.json', (() => { rmSync(at('design/shape.json')); try { return turn([W('src/slot/gain.cpp', slotCode)]); } finally { put(at('design/shape.json'), JSON.stringify(SHAPE)); } })(), 2],
     ['the turn wrote a copy of slotFilter with one line changed (once-only)', landed('src/slot/filter_b.cpp', copy, () => turn([W('src/slot/filter_b.cpp', copy)])), 2],
+    // a tracked file the turn added a copy to: its added lines come from one git diff of the checkout (KWB-24), the old lines
+    // never match themselves; the same file edited in place is no copy
+    ['the turn added a copy of slotFilter to a tracked file (Edit; git diff)', (() => {
+      const before = readFileSync(at('src/slot/filter.cpp'), 'utf8');
+      const add = `${before}\n${FN('slotFilterC', '1.25f')}`;
+      try { put(at('src/slot/filter.cpp'), add); return turn([use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: 'x', new_string: FN('slotFilterC', '1.25f') })]); } finally { put(at('src/slot/filter.cpp'), before); }
+    })(), 2],
+    ['the turn changed one value of a tracked file in place', (() => {
+      const before = readFileSync(at('src/slot/filter.cpp'), 'utf8');
+      try { put(at('src/slot/filter.cpp'), before.replace('2.0f - 2.0f', '1.9f - 2.0f')); return turn([use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: '2.0f', new_string: '1.9f' })]); } finally { put(at('src/slot/filter.cpp'), before); }
+    })(), 0],
     ['the turn wrote code that calls slotFilter', landed('src/slot/voice.cpp', 'float voice (float x, int slot) { return slotFilter (x, slot); }\n', () => turn([W('src/slot/voice.cpp', 'float voice (float x, int slot) { return slotFilter (x, slot); }\n')])), 0],
     ['an override with no citation', turn([W('src/slot/gain.cpp', slotCode)], { last: 'The brief said to drive slot 2, but I built it for every slot instead.' }), 2],
     ['an override citing docs/laws.md and logging the brief as the bug', turn([W('src/slot/gain.cpp', slotCode), W('bugs.md', '| B-9 | the brief named slot 2 |\n')], { last: 'The brief said to drive slot 2, but docs/laws.md L8 says every slot is one shape, so I built it for all; B-9 logs the brief.' }), 0],

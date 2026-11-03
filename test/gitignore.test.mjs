@@ -8,8 +8,10 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
-test('an install ignores .claude/usage.log', () => {
+// 0.9.12: the hooks' timing log (.claude/hooks.log, KWB-24) is local too.
+test('an install ignores .claude/usage.log and .claude/hooks.log', () => {
   const dir = mkdtempSync(join(tmpdir(), 'cp-ignore-'));
   execFileSync('node', [CLI, 'init', 'audio-core', '--dir', dir], { encoding: 'utf8' });
-  assert.ok(readFileSync(join(dir, '.gitignore'), 'utf8').split('\n').includes('.claude/usage.log'));
+  const lines = readFileSync(join(dir, '.gitignore'), 'utf8').split('\n');
+  for (const f of ['.claude/usage.log', '.claude/hooks.log']) assert.ok(lines.includes(f), f);
 });

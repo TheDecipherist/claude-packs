@@ -20,6 +20,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const QUIET_MIN = Number(process.env.BUILD_SWEEP_QUIET_MIN ?? 120);
 const LOW_GB = Number(process.env.BUILD_SWEEP_LOW_GB ?? 40);
@@ -96,7 +97,7 @@ function freeGb(root) {
   try { const s = statfsSync(root); return (s.bavail * s.bsize) / 1e9; } catch { return Infinity; }
 }
 
-function main() {
+function main(text) {
   const root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
   if (process.argv.includes('--now')) {
     const dry = process.argv.includes('--dry-run');
@@ -106,7 +107,7 @@ function main() {
     return 0;
   }
   let event = {};
-  try { event = JSON.parse(readFileSync(0, 'utf8') || '{}'); } catch { /* no event */ }
+  try { event = JSON.parse(text || '{}'); } catch { /* no event */ }
   // the sweep runs on its own, so a session's start or an agent's stop never waits on a large delete
   const child = spawn(process.execPath, [fileURLToPath(import.meta.url), '--now'], { cwd: root, detached: true, stdio: 'ignore', env: process.env });
   child.unref();
@@ -161,4 +162,5 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : process.argv.includes('--now') ? main('') : await asHook('build-sweep', main));

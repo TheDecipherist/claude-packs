@@ -19,6 +19,7 @@ import { addedFindings, findInstanceLiterals, formatFinding, isExcluded, isTestF
 import { addedDefs, findSelectorDefs, findUnknownTypes } from './lib/shape-code.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const TEST_NOTE = 'a test that drives one instance proves that instance only: loop over every instance, or take the instance as a parameter';
 
@@ -34,9 +35,9 @@ function judgeText(rel, before, after, shape) {
   return { out, concepts };
 }
 
-function main() {
+function main(text) {
   let payload;
-  try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
     if (w.after === null || w.op === 'delete' || !insideProject(w.path) || w.after.includes('\0')) continue;
     const root = checkoutRoot(w.path);
@@ -128,4 +129,5 @@ function selftest() {
   ]);
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('shape-law', main));

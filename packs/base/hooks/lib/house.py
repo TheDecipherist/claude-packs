@@ -8,7 +8,10 @@ A hook imports it with its own folder's lib/ on sys.path and byte-code writing o
 A project's values for a guard live in layout.json under "guards": { "<guard>": { ... } }; a key it does not set takes the
 hook's default, so a project with no "guards" gets the house defaults.
 """
-import json, os, re
+import json, os, re, time
+
+LOG = os.path.join(".claude", "hooks.log")
+LOG_MAX_BYTES = 256 * 1024
 
 
 def project_root():
@@ -51,3 +54,25 @@ def shell_writes(command, cwd):
 def folders_of_kind(lay, kind):
     """The paths of every layout folder of one kind ("copy": a read-only copy of another project's code)."""
     return [f["path"].rstrip("/") for f in (lay.get("folders") or {}).values() if isinstance(f, dict) and f.get("kind") == kind]
+
+
+def log_hook(hook, event, ms, code, tool="-", root=None):
+    """One timing line per call in <project>/.claude/hooks.log, the same line lib/hook-log.mjs writes (KWB-24): ISO time,
+    event, hook, ms, exit code, tool, tab-separated; past LOG_MAX_BYTES cut to its newest half at a line. Never raises,
+    never creates .claude. ms is from the hook's own start (python's start-up before it is not counted)."""
+    try:
+        base = root or project_root()
+        if not os.path.isdir(os.path.join(base, ".claude")):
+            return
+        path = os.path.join(base, LOG)
+        clean = lambda v: (str(v if v is not None else "-").replace("\t", " ").replace("\n", " ") or "-")
+        now = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".%03dZ" % int((time.time() % 1) * 1000)
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(f"{now}\t{clean(event)}\t{clean(hook)}\t{round(ms)}\t{code}\t{clean(tool)}\n")
+        if os.path.getsize(path) > LOG_MAX_BYTES:
+            with open(path, encoding="utf-8") as f:
+                keep = f.read()[-(LOG_MAX_BYTES // 2):]
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(keep[keep.find("\n") + 1:])
+    except Exception:
+        pass

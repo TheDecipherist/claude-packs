@@ -12,7 +12,8 @@ The refusal names the project's own picture command: .claude/layout.json "guards
 
 Run `browser-guard.py --selftest` to see every rule fire on a planted call and every allowed call pass.
 """
-import json, os, re, sys
+import json, os, re, sys, time
+T0 = time.perf_counter()
 
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -174,13 +175,22 @@ def selftest():
     print(f"browser-guard selftest: {len(blocked)} launches blocked, {len(allowed)} other calls passed: {'PASS' if not bad else f'{bad} wrong'}")
     return 1 if bad else 0
 
-if __name__ == "__main__":
-    if "--selftest" in sys.argv: sys.exit(selftest())
-    try: event = json.load(sys.stdin)
-    except Exception: sys.exit(0)
+def main(event):
+    global WAY
     WAY = way(house.guard("browser", DEFAULTS))
     reason = check(event, house.main_root(house.project_root()))
     if reason:
         print(reason, file=sys.stderr)
-        sys.exit(2)
-    sys.exit(0)
+        return 2
+    return 0
+
+if __name__ == "__main__":
+    if "--selftest" in sys.argv: sys.exit(selftest())
+    try: event = json.load(sys.stdin)
+    except Exception: sys.exit(0)
+    code = 1
+    try:
+        code = main(event)
+    finally:   # one timing line per call (KWB-24), through the shared helper
+        house.log_hook("browser-guard", event.get("hook_event_name"), (time.perf_counter() - T0) * 1000, code, event.get("tool_name"))
+    sys.exit(code)

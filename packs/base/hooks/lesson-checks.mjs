@@ -14,6 +14,7 @@ import { blankCode } from './lib/cpp-scan.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 
@@ -66,18 +67,18 @@ function selftest(checks) {
   return problems;
 }
 
-function main() {
-  if (process.argv.includes('--selftest')) {
-    const checks = loadChecks();
-    const problems = selftest(checks);
-    for (const p of problems) console.error(p);
-    console.log(problems.length ? `${problems.length} problem(s)` : `lesson-checks selftest: OK (${checks.length} checks)`);
-    return problems.length ? 1 : 0;
-  }
+function selftestMain() {
+  const checks = loadChecks();
+  const problems = selftest(checks);
+  for (const p of problems) console.error(p);
+  console.log(problems.length ? `${problems.length} problem(s)` : `lesson-checks selftest: OK (${checks.length} checks)`);
+  return problems.length ? 1 : 0;
+}
 
+function main(text) {
   let payload;
   try {
-    payload = JSON.parse(readFileSync(0, 'utf8'));
+    payload = JSON.parse(text);
   } catch {
     return 0;
   }
@@ -114,4 +115,5 @@ function judge(file, result) {
   return 2;
 }
 
-process.exit(main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftestMain() : await asHook('lesson-checks', main));

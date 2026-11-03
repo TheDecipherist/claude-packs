@@ -9,6 +9,7 @@ import { writesOf } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const CODE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.wgsl', '.metal', '.hlsl']);
@@ -31,9 +32,9 @@ export function misplaced(layout, rel, before, after) {
   return null;
 }
 
-function main() {
+function main(text) {
   let payload;
-  try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload)) {
     if (w.op === 'delete' || !insideProject(w.path)) continue;
     const rel = relative(checkoutRoot(w.path), w.path).replace(/\\/g, '/');
@@ -76,4 +77,5 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('placement-law', main));

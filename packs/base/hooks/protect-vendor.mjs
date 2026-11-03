@@ -21,6 +21,7 @@ import { foldersOfKind, readLayout } from './lib/layout.mjs';
 import * as project from './lib/project.mjs';
 import { editOf, git, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const DEFAULT_GLOBS = ['JUCE/**', '**/JUCE/modules/**', 'JuceLibraryCode/**', 'libs/**', 'third_party/**', 'external/**', '_deps/**'];
 // The build output; a project whose build lives elsewhere names it in layout.json "buildOutput" (a build in out/, while build/
@@ -66,10 +67,10 @@ function message({ why, tree, layout, once }) {
     'Fix the code that uses the copy. If the copy itself must change, that is the user\'s to say, then a pinned change under null tests (.claude/rules/copy-trees-read-only.md).\n';
 }
 
-function main() {
+function main(text) {
   let payload;
   try {
-    payload = JSON.parse(readFileSync(0, 'utf8'));
+    payload = JSON.parse(text);
   } catch {
     return 0;
   }
@@ -169,4 +170,5 @@ function selftestBuildOutput(hook) {
   ]);
 }
 
-process.exit(process.argv.includes('--selftest') ? ((await selftest()) | selftestRepo()) : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? ((await selftest()) | selftestRepo()) : await asHook('protect-vendor', main));

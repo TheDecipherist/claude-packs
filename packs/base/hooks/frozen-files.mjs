@@ -12,16 +12,17 @@ import { insideProject, checkoutRoot } from './lib/project.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { fileURLToPath } from 'node:url';
 import { bashOf, editOf, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const STATE = join(ROOT, '.claude', 'state', 'frozen.json');
 
-function main() {
+function main(text) {
   if (!existsSync(STATE)) return 0;
   let payload;
   let state;
   try {
-    payload = JSON.parse(readFileSync(0, 'utf8'));
+    payload = JSON.parse(text);
     state = JSON.parse(readFileSync(STATE, 'utf8'));
   } catch {
     return 0;
@@ -58,4 +59,5 @@ function selftest() {
   ]);
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('frozen-files', main));

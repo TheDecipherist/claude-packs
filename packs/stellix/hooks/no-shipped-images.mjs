@@ -17,6 +17,7 @@ import { codeFolders, readLayout } from './lib/layout.mjs';
 import { claudeRoot, commandLeavesProject, insideProject, relInCheckout } from './lib/project.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const IMAGE = /\.(png|jpe?g|gif|bmp|tiff?|webp|heic|ico|icns|svg|psd|tga|exr|hdr|ktx2?|dds|astc)$/i;
@@ -48,10 +49,10 @@ function gitStaged() {
   return bad.length ? (fail(bad), 1) : 0;
 }
 
-function hook() {
+function main(text) {
   let payload;
   try {
-    payload = JSON.parse(readFileSync(0, 'utf8'));
+    payload = JSON.parse(text);
   } catch {
     return 0;
   }
@@ -80,5 +81,8 @@ function selftest() {
   ]);
 }
 
-const arg = process.argv.slice(2);
-process.exit(arg.includes('--selftest') ? selftest() : arg.includes('--git-staged') ? gitStaged() : hook());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) {
+  const arg = process.argv.slice(2);
+  process.exit(arg.includes('--selftest') ? selftest() : arg.includes('--git-staged') ? gitStaged() : await asHook('no-shipped-images', main));
+}

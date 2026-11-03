@@ -15,6 +15,7 @@ import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { put, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 // .claude is skipped so the worktrees under .claude/worktrees/ never stand in for this checkout's code.
@@ -52,7 +53,7 @@ function collectIds(root, { extensions, patterns }) {
 const lockFile = (root) => join(root, '.claude', 'param-ids.lock.json');
 const save = (root, ids) => writeFileSync(lockFile(root), JSON.stringify([...ids].sort(), null, 2) + '\n');
 
-function main() {
+function main(text) {
   if (process.argv.includes('--init')) {
     const ids = collectIds(ROOT, loadConfig(ROOT));
     save(ROOT, ids);
@@ -62,7 +63,7 @@ function main() {
 
   let payload = {};
   try {
-    payload = JSON.parse(readFileSync(0, 'utf8') || '{}');
+    payload = JSON.parse(text || '{}');
   } catch {
     // run by hand without stdin
   }
@@ -124,4 +125,5 @@ function selftest() {
   return verdicts('param-id-lock', cases);
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : process.argv.includes('--init') ? main('') : await asHook('param-id-lock', main));

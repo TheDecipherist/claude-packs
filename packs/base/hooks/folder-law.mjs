@@ -11,14 +11,15 @@ import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|mm|m|wgsl|metal|glsl|hlsl|slang)$/i;
 
-function main() {
+function main(text) {
   let payload;
   try {
-    payload = JSON.parse(readFileSync(0, 'utf8'));
+    payload = JSON.parse(text);
   } catch {
     return 0;
   }
@@ -75,4 +76,5 @@ function selftest() {
   ]);
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('folder-law', main));

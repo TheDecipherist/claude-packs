@@ -18,6 +18,7 @@ import { mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSyn
 import { homedir, tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 export const HOURS = Number(process.env.TIMS_ASKS_HOURS ?? 24);
 const STATUSES = new Set(['done', 'answered', 'planned', 'needs-tim', 'not-an-ask', 'open']);
@@ -147,13 +148,18 @@ function main(argv) {
     return 0;
   }
   // A HOOK (SessionStart on compact): what it prints is added to the session's context
+  return asHook('tims-asks', hookMain);
+}
+
+function hookMain(input) {
   let event;
-  try { event = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { event = JSON.parse(input); } catch { return 0; }
   const text = render(asks(event.transcript_path ?? ''));
   if (text) console.log(text);
   return 0;
 }
+export const hook = hookMain; // run-hooks.mjs calls it with the event's text (KWB-24)
 
 // Run as a hook or a command (not imported by idle-wake). Real paths: /var and /private/var are one folder on a Mac.
 const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
-if (process.argv[1] && real(process.argv[1]) === real(fileURLToPath(import.meta.url))) process.exit(main(process.argv.slice(2)));
+if (process.argv[1] && real(process.argv[1]) === real(fileURLToPath(import.meta.url))) process.exit(await main(process.argv.slice(2)));

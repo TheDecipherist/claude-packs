@@ -44,7 +44,9 @@ test('the house hooks install where they belong, project-neutral, and pass their
   run(audioOnly, 'init', 'audio-core');
   assert.ok(!existsSync(join(audioOnly, '.claude/hooks/browser-guard.py')), 'browser-guard comes with gpu-painter');
   const s = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
-  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'idle-wake.mjs', 'tims-asks.mjs']) assert.match(s, new RegExp(`node \\\\"\\$CLAUDE_PROJECT_DIR/\\.claude/hooks/${h.replace('.', '\\.')}`));
+  // run by node itself (idle-wake: async) or named in a run-hooks.mjs command, one node process per settings entry (KWB-24)
+  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'idle-wake.mjs', 'tims-asks.mjs']) assert.match(s, new RegExp(`(?:node \\\\"\\$CLAUDE_PROJECT_DIR/|run-hooks\\.mjs\\\\"[^"]* )\\.claude/hooks/${h.replace('.', '\\.')}`));
+  assert.match(s, /node \\"\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/idle-wake\.mjs/, 'an async hook keeps its own entry');
   assert.match(s, /python3 \\"\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/browser-guard\.py/);
   const settings = JSON.parse(s);
   assert.equal(settings.hooks.Stop[0].hooks[0].asyncRewake, true);

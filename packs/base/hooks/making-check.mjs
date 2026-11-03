@@ -17,13 +17,15 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
-import { clonesOf, copyGlobs, excludeGlobs, FIX, isGenerated, isSource, real, scan } from './lib/dup.mjs';
+import { join, relative, resolve } from 'node:path';
+import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, real } from './lib/dup.mjs';
+import { judgeWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, insideProject, ROOT } from './lib/project.mjs';
 import { readShape } from './lib/shape.mjs';
 import { lastTurn, writesOfTurn } from './lib/turn.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const MAX_SENDS = 3;
 // the folder kinds a layout marks as code; a layout that marks none: any source file outside its docs folders
@@ -89,7 +91,17 @@ export function unknownConcepts(making, shape) {
   return out;
 }
 
-const branchOf = (root) => spawnSync('git', ['-C', root, 'rev-parse', '--abbrev-ref', 'HEAD'], { encoding: 'utf8' }).stdout?.trim() ?? '';
+// The checkout's branch from its HEAD file (a worktree's .git file names its git dir): no git process (KWB-24: on a loaded
+// machine each one took half a second)
+function branchOf(root) {
+  try {
+    let dir = join(root, '.git');
+    const dotGit = readFileSync(dir, 'utf8').match(/^gitdir:\s*(.+)$/m); // a worktree; a folder throws and is read below
+    if (dotGit) dir = resolve(root, dotGit[1].trim());
+    return headBranch(dir);
+  } catch { return headBranch(join(root, '.git')); }
+}
+const headBranch = (gitDir) => { try { return readFileSync(join(gitDir, 'HEAD'), 'utf8').match(/^ref:\s*refs\/heads\/(.+)$/m)?.[1].trim() ?? 'HEAD'; } catch { return ''; } };
 
 // The making lines of build.md's In progress section: those on this branch's entry, else every one there.
 export function makingLines(root) {
@@ -107,14 +119,22 @@ export function makingLines(root) {
   return mine.length ? mine : lines;
 }
 
-// Added line ranges of a file against HEAD (the whole file when it is new or there is no git).
-function addedRanges(root, file) {
-  const rel = relative(root, file);
-  const lines = (() => { try { return readFileSync(file, 'utf8').split('\n').length; } catch { return 0; } })();
-  const tracked = spawnSync('git', ['-C', root, 'ls-files', '--error-unmatch', '--', rel], { encoding: 'utf8' }).status === 0;
-  if (!tracked) return lines ? [[1, lines]] : [];
-  const d = spawnSync('git', ['-C', root, 'diff', '-U0', 'HEAD', '--', rel], { encoding: 'utf8' }).stdout ?? '';
-  return [...d.matchAll(/^@@ -\S+ \+(\d+)(?:,(\d+))? @@/gm)].map((m) => [Number(m[1]), Number(m[1]) + Number(m[2] ?? 1) - 1]).filter(([a, b]) => b >= a);
+// Added line ranges of each file against HEAD (the whole file when it is new or there is no git): two git processes for all
+// the files of a checkout, not two per file. -> Map(file -> [[lo, hi]])
+function addedRanges(root, files) {
+  const rels = files.map((f) => relative(root, f));
+  const out = new Map();
+  const tracked = new Set((spawnSync('git', ['-C', root, 'ls-files', '--', ...rels], { encoding: 'utf8' }).stdout ?? '').split('\n').filter(Boolean));
+  const diff = tracked.size ? spawnSync('git', ['-C', root, 'diff', '--relative', '-U0', 'HEAD', '--', ...rels.filter((r) => tracked.has(r))], { encoding: 'utf8' }).stdout ?? '' : '';
+  let cur = null;
+  for (const line of diff.split('\n')) {
+    const f = line.match(/^\+\+\+ b\/(.+)$/);
+    if (f) { cur = f[1]; continue; }
+    const h = line.match(/^@@ -\S+ \+(\d+)(?:,(\d+))? @@/);
+    if (h && cur) { const r = [Number(h[1]), Number(h[1]) + Number(h[2] ?? 1) - 1]; if (r[1] >= r[0]) out.set(cur, [...(out.get(cur) ?? []), r]); }
+  }
+  const lines = (f) => { try { return readFileSync(f, 'utf8').split('\n').length; } catch { return 0; } };
+  return new Map(files.map((f, i) => [f, tracked.has(rels[i]) ? out.get(rels[i]) ?? [] : lines(f) ? [[1, lines(f)]] : []]));
 }
 
 export function check(event, cwd = event.cwd ?? process.cwd()) {
@@ -164,12 +184,15 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path)).map((w) => w.path))]
     .filter((p) => !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
   if (sources.length) {
-    const r = scan(root, { layout, shape });
+    // once-only's index finds the candidates, jscpd confirms on those files alone (lib/dup-index.mjs; KWB-24: no whole-repo scan)
+    const added = addedRanges(root, sources);
+    const writes = sources.map((p) => ({ path: p, after: readFileSync(p, 'utf8'), ranges: added.get(p) })).filter((w) => w.ranges.length);
+    const r = writes.length ? judgeWrites(root, writes, { layout, shape }) : { clones: [] };
     if (r.error) problems.push(`once-only could not judge this turn's writes: ${r.error}`);
     const base = real(root);
     const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
     const found = new Set();
-    for (const p of sources) for (const range of addedRanges(root, p)) for (const c of clonesOf(r.clones, p, range)) found.add(`${show(c.at)} repeats ${show(c.other)} (${c.lines} lines)`);
+    for (const c of r.clones) found.add(`${show(c.at)} repeats ${show(c.other)} (${c.lines} lines)`);
     if (found.size) problems.push(`this turn's writes did not pass once-only: ${[...found].slice(0, 5).join('; ')}. ${FIX}`);
   }
 
@@ -199,10 +222,9 @@ function guard(event, problems) {
   return count > MAX_SENDS;
 }
 
-async function main() {
-  if (process.argv.includes('--selftest')) return (await import('./lib/making-check-selftest.mjs')).selftest(import.meta.url);
+async function main(text) {
   let event;
-  try { event = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { event = JSON.parse(text); } catch { return 0; }
   if (event.hook_event_name && !['Stop', 'SubagentStop'].includes(event.hook_event_name)) return 0;
   const problems = check(event);
   if (!problems.length) { guard(event, []); return 0; }
@@ -214,4 +236,7 @@ async function main() {
   return 2;
 }
 
-process.exit(await main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) {
+  process.exit(process.argv.includes('--selftest') ? await (await import('./lib/making-check-selftest.mjs')).selftest(import.meta.url) : await asHook('making-check', main));
+}

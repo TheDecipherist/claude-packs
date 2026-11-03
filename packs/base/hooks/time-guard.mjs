@@ -15,11 +15,13 @@
 // command line (a heredoc body is text, not a loop). A finding is said again only after REPEAT_MIN minutes.
 // Project values: .claude/layout.json "guards": { "time": { "probePattern", "saveCommand" } }.
 //   node time-guard.mjs --selftest
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readLayout } from './lib/layout.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 export const DEFAULTS = {
   probePattern: '\\S*/\\w*(?:Probe|_probe)\\b', // the probe binary itself, never a shell that names one
@@ -116,7 +118,7 @@ function sayOnce(key, msg, now, st) {
   return msg;
 }
 
-export function run(event, { now = Date.now() / 1000, rows = null, commitMin = null, state = null, worktrees = null } = {}) {
+export function run(event, { now = Date.now() / 1000, rows = null, commitMin = null, state = null, worktrees = null, late = null } = {}) {
   const st = state ?? loadState();
   const said = [];
   const tid = event.tool_use_id ?? '';
@@ -164,7 +166,9 @@ export function run(event, { now = Date.now() / 1000, rows = null, commitMin = n
     }
   }
   const mine = who !== 'main' ? st.wt?.[who] : null;
-  if (mine) {
+  // its git status at most once a minute (KWB-24: two git commands on every call of every agent)
+  if (mine && (rows !== null || now - (st.checked?.[mine] ?? 0) >= LOOK_EVERY_S)) {
+    if (rows === null) (st.checked ??= {})[mine] = now;
     const u = rows === null ? unsavedMin(mine) : null; // a selftest case: never git on a made-up path
     const cmn = commitMin ?? lastCommitMin(mine);
     if (u !== null && u > SAVE_MIN) {
@@ -175,20 +179,30 @@ export function run(event, { now = Date.now() / 1000, rows = null, commitMin = n
       if (s) said.push(s);
     }
   }
-  // 4. the controller sees every worktree
+  // 4. the controller sees every worktree: a git status in each runs in its own process, never in the hook (KWB-24: Stellix's
+  // 125 worktrees took over a minute, the hook was killed at its timeout before it saved `scanned`, so every call scanned again)
   const scan = worktrees ?? (rows !== null ? {} : null);
+  const tell = (list) => list.length && said.push(`worktrees holding work unsaved for more than ${SAVE_MIN} min: ${list.join(', ')}. Ask their agents to save (${CFG.saveCommand}), or find why they stall`);
   if (who === 'main' && (now - (st.scanned ?? 0) >= SCAN_MIN * 60 || scan !== null)) {
     st.scanned = now;
-    const late = [];
-    for (const wt of scan ? Object.keys(scan) : listWorktrees()) {
-      const u = scan ? scan[wt] : unsavedMin(wt);
-      if (u !== null && u > SAVE_MIN) late.push(`${wt.split('/').pop()} (${u.toFixed(0)} min)`);
-    }
-    if (late.length) said.push(`worktrees holding work unsaved for more than ${SAVE_MIN} min: ${late.join(', ')}. Ask their agents to save (${CFG.saveCommand}), or find why they stall`);
+    if (scan) tell(lateOf(scan));
+    else { saveState(st); scanLater(); }
   }
+  const found = late ?? (rows === null ? readLate() : null);
+  if (who === 'main' && found && found.at > (st.lateTold ?? 0)) { st.lateTold = found.at; tell(found.list); }
   st.starts = Object.fromEntries(Object.entries(st.starts ?? {}).filter(([, v]) => now - v < 86400));
   if (!state) saveState(st);
   return said;
+}
+
+const lateOf = (unsaved) => Object.entries(unsaved).filter(([, u]) => u !== null && u > SAVE_MIN).map(([wt, u]) => `${wt.split('/').pop()} (${u.toFixed(0)} min)`);
+const LATE = join(STATE, 'late.json');
+function readLate() { try { return JSON.parse(readFileSync(LATE, 'utf8')); } catch { return null; } }
+function scanLater() { try { spawn(process.execPath, [fileURLToPath(import.meta.url), '--scan-worktrees'], { cwd: projectRoot, detached: true, stdio: 'ignore', env: process.env }).unref(); } catch { /* next time */ } }
+function scanNow() {
+  const list = lateOf(Object.fromEntries(listWorktrees().map((wt) => [wt, unsavedMin(wt)])));
+  try { mkdirSync(STATE, { recursive: true }); writeFileSync(`${LATE}.${process.pid}`, JSON.stringify({ at: Date.now() / 1000, list })); renameSync(`${LATE}.${process.pid}`, LATE); } catch { /* next time */ }
+  return 0;
 }
 
 function loadState() { try { return JSON.parse(readFileSync(join(STATE, 'state.json'), 'utf8')); } catch { return {}; } }
@@ -234,6 +248,10 @@ function selftest() {
   expect('and the first agent coming back finds it taken', run(A('cd /x/.claude/worktrees/handed && ls', 'first'), { now: 5000 + 17 * 60, state: s4, rows: [], commitMin: 1 }), true);
   expect('the controller told of a worktree unsaved for 45 min', run(post(), at([], { worktrees: { '/x/.claude/worktrees/guide': 45 } })), true);
   expect('the controller, nothing unsaved', run(post(), at([], { worktrees: { '/x/.claude/worktrees/guide': 5 } })), false);
+  const told = {};
+  const found = { at: 4000, list: ['guide (45 min)'] };
+  expect('the background scan\'s finding is told', run(post(), at([], { state: told, late: found })), true);
+  expect('and told once', run(post(), { ...at([], { state: told, late: found }), now: 5100 }), false);
   const pre = (command) => run({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }, { now: 5000, state: {} });
   const loop = ['until', '!', 'pgrep', '-f', '"cmake --build"', '>/dev/null;', 'do', 'sleep', '5;', 'done'].join(' ');
   expect('the endless wait loop inside a heredoc (text for a program) passes', pre(`python3 - <<'EOF'\nprint('${loop}')\nEOF\necho ok`), false);
@@ -259,9 +277,9 @@ function selftest() {
   return bad ? 1 : 0;
 }
 
-function main() {
+function main(text) {
   let event;
-  try { event = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { event = JSON.parse(text); } catch { return 0; }
   Object.assign(CFG, DEFAULTS, readLayout(projectRoot).guards?.time ?? {});
   let said;
   try { said = run(event); } catch { return 0; } // the guard never stops work by failing itself
@@ -270,4 +288,5 @@ function main() {
   return 2;
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : process.argv.includes('--scan-worktrees') ? scanNow() : await asHook('time-guard', main));

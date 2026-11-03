@@ -15,6 +15,7 @@ import { checkoutRoot, insideProject, relInCheckout, ROOT } from './lib/project.
 import { addedFindings, ASK, findInstanceLiterals, isExcluded, logRefusal, quoteRow, readShape } from './lib/shape.mjs';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const BRIEFS = /^(docs|inbox)\//;
 const find = (shape) => (t) => findInstanceLiterals(t, 'brief.md', shape, { only: 'brief' });
@@ -31,9 +32,9 @@ function refuse(where, findings, shape) {
   return 2;
 }
 
-function main() {
+function main(text) {
   let payload;
-  try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { payload = JSON.parse(text); } catch { return 0; }
   const tool = payload.tool_name;
   if (tool === 'Agent' || tool === 'Task') {
     const shape = readShape(ROOT);
@@ -91,4 +92,5 @@ function selftest() {
   return verdicts('brief-guard', cases);
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('brief-guard', main));

@@ -65,6 +65,16 @@ const SHAPE = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(
 // One case per installed hook: the worktree file it must allow and the one it must refuse, judged
 // from the worktree's own checkout. A hook added to the packs without a case here fails the test.
 const CASES = {
+  // the runner as settings.json runs it (KWB-24): the hooks it names judge a worktree file against the worktree, and the
+  // timing lines go to the main checkout's log (CLAUDE_PROJECT_DIR)
+  'run-hooks.mjs': ({ here, wt }) => {
+    const via = (file, content = '// new\n') => spawnSync('node', [join(here, '.claude/hooks/run-hooks.mjs'), '.claude/hooks/folder-law.mjs', '.claude/hooks/file-size-guard.mjs'],
+      { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: file, content } }), env: { ...process.env, CLAUDE_PROJECT_DIR: here }, encoding: 'utf8' });
+    assert.equal(via(join(wt, 'src/dsp/Svf.cpp')).status, 0);
+    assert.equal(via(join(wt, 'stray/Svf.cpp')).status, 2);
+    assert.equal(via(join(wt, 'src/dsp/Huge.cpp'), 'x\n'.repeat(400)).status, 2);
+    assert.match(readFileSync(join(here, '.claude/hooks.log'), 'utf8'), /\tfolder-law\t\d+\t2\tWrite/);
+  },
   'folder-law.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'folder-law.mjs', join(wt, 'src/dsp/Svf.cpp')), 0);
     assert.equal(fire(here, 'folder-law.mjs', join(wt, 'stray/Svf.cpp')), 2);

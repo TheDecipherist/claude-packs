@@ -11,6 +11,7 @@ import { writesOf } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 // Code, scripts, shaders and CMake files (Stellix's source rule counted scripts and CMake too); docs and data are not code.
@@ -28,9 +29,9 @@ export function verdict(rel, before, after, limit) {
     'Split it before adding more: move a cohesive part (a class, a group of pure functions, a table) into its own file in the same folder, then make this edit.\n';
 }
 
-function main() {
+function main(text) {
   let payload;
-  try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload)) {
     if (w.after === null || relative(ROOT, w.path).startsWith('..')) continue;
     const rel = relative(checkoutRoot(w.path), w.path);
@@ -57,4 +58,5 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('file-size-guard', main));

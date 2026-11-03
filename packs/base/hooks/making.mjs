@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { checkoutRoot, ROOT } from './lib/project.mjs';
 import { scratchProject } from './lib/selftest.mjs';
 import { findInstanceLiterals, readShape } from './lib/shape.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 export const TEXT = "making: before the first write, answer in build.md's In progress entry for this step, one line: " +
   '`making: <what you are making>; concepts: <each you touch, its shape from design/shape.json>; reuse: <function, where it lives>`. ' +
@@ -87,11 +88,9 @@ function selftest() {
   return bad ? 1 : 0;
 }
 
-function main() {
-  if (process.argv.includes('--selftest')) return selftest();
-  if (process.argv.includes('--cost')) { console.log(cost()); return 0; }
+function main(text) {
   let event = {};
-  try { event = JSON.parse(readFileSync(0, 'utf8') || '{}'); } catch { /* the text still goes */ }
+  try { event = JSON.parse(text || '{}'); } catch { /* the text still goes */ }
   if (event.hook_event_name && event.hook_event_name !== 'UserPromptSubmit') return 0;
   const root = event.cwd ? checkoutRoot(join(event.cwd, 'prompt')) : ROOT;
   let shape = null;
@@ -100,4 +99,8 @@ function main() {
   return 0;
 }
 
-process.exit(main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) {
+  if (process.argv.includes('--cost')) { console.log(cost()); process.exit(0); }
+  process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('making', main));
+}

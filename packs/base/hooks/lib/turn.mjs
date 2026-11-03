@@ -6,7 +6,7 @@
 //       when it cannot be known, e.g. a sed -i), by the shared write reader for the shell.
 // A prompt starts a turn; tool results, hook feedback, task notifications and the system's own lines do not, so a turn
 // sent back by a Stop hook is judged again with everything it wrote before.
-import { readFileSync } from 'node:fs';
+import { closeSync, fstatSync, openSync, readSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { shellWrites } from './shell-writes.mjs';
 
@@ -21,16 +21,35 @@ function promptText(e) {
   return t || null;
 }
 
-export function lastTurn(path) {
-  let lines = [];
-  try { lines = readFileSync(path, 'utf8').split('\n'); } catch { return { text: '', uses: [] }; }
-  const entries = [];
-  for (const l of lines) { if (!l.trim()) continue; try { entries.push(JSON.parse(l)); } catch { /* a torn last line */ } }
-  let start = 0;
-  for (let i = entries.length - 1; i >= 0; i -= 1) {
-    const t = promptText(entries[i]);
-    if (t !== null && !NOT_A_PROMPT.test(t)) { start = i + 1; break; }
+// The transcript's last entries, read from its end: the last TAIL bytes, doubled until they hold the turn's prompt (KWB-24: a
+// long session's transcript is hundreds of MB, and reading all of it at every Stop took seconds). -> { entries, start }
+const TAIL = 1 << 20;
+function tailEntries(path) {
+  let fd;
+  try { fd = openSync(path, 'r'); } catch { return { entries: [], start: 0 }; }
+  try {
+    const size = fstatSync(fd).size;
+    for (let want = TAIL; ; want *= 4) {
+      const from = Math.max(0, size - want);
+      const buf = Buffer.alloc(size - from);
+      readSync(fd, buf, 0, buf.length, from);
+      const lines = buf.toString('utf8').split('\n');
+      if (from > 0) lines.shift(); // a line cut by the start of the window
+      const entries = [];
+      for (const l of lines) { if (!l.trim()) continue; try { entries.push(JSON.parse(l)); } catch { /* a torn last line */ } }
+      for (let i = entries.length - 1; i >= 0; i -= 1) {
+        const t = promptText(entries[i]);
+        if (t !== null && !NOT_A_PROMPT.test(t)) return { entries, start: i + 1 };
+      }
+      if (from === 0) return { entries, start: 0 };
+    }
+  } finally {
+    closeSync(fd);
   }
+}
+
+export function lastTurn(path) {
+  const { entries, start } = tailEntries(path);
   const refused = new Set();
   const uses = [];
   const text = [];

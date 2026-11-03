@@ -3,6 +3,7 @@
 // `git add -A`, `git add .`, `git add --all` and `git commit -a` sweep build output, renders,
 // scratch files and keys into history. Exit 2 refuses the command. `--selftest` proves it.
 import { readFileSync } from 'node:fs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const SECRET = /(^|[\s/])(\.env(\.[\w.-]+)?|[\w.-]+\.(pem|key|p12|pfx)|id_(rsa|ed25519)|credentials\.json)(\s|$)/;
 const SAFE_ENV = /\.env\.(example|sample|template)(\s|$)/;
@@ -25,9 +26,9 @@ export function problem(command) {
   return null;
 }
 
-function main() {
+function main(text) {
   let payload;
-  try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { payload = JSON.parse(text); } catch { return 0; }
   const why = problem(payload.tool_input?.command ?? '');
   if (!why) return 0;
   process.stderr.write(`BLOCKED by stage-guard: ${why}.\nRun \`git status --short\` and add each intended file explicitly.\n`);
@@ -47,4 +48,5 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
-process.exit(process.argv.includes('--selftest') ? selftest() : main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('stage-guard', main));

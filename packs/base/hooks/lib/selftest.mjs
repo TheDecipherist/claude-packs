@@ -3,9 +3,10 @@
 // law this way, so nobody probes a hook by pasting payloads into a shell command, where a guard
 // that judges command text can refuse the probe itself (Sub37 WB-4). doctor runs every selftest.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const made = [];
 
@@ -21,8 +22,11 @@ export function scratchProject(files = {}, layout = null) {
   return dir;
 }
 
+// A hook event goes through run-hooks.mjs, the way settings.json runs every kit hook (KWB-24), so each selftest proves the
+// hook inside the runner; a by-hand mode (args, e.g. --init) runs the hook file itself.
+const RUNNER = fileURLToPath(new URL('../run-hooks.mjs', import.meta.url));
 export const runHook = (hook, dir, payload, args = []) =>
-  spawnSync(process.execPath, [hook, ...args], {
+  spawnSync(process.execPath, args.length || !existsSync(RUNNER) ? [hook, ...args] : [RUNNER, hook], {
     cwd: dir, input: payload ? JSON.stringify(payload) : '', encoding: 'utf8',
     env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
   }).status;

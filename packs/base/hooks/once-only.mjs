@@ -1,24 +1,28 @@
 #!/usr/bin/env node
 // once-only: code that exists once is called, never copied (Tim, claude-packs 0.9.0 item 9; KWB-1). Before a source write
-// lands (C++, Python, JS), the lines it adds are compared with the whole repo by jscpd (lib/dup.mjs: 50 tokens and 6
-// lines, a gap of up to 2 lines, so a copy with one line changed is still a copy). A near-duplicate is refused with the
+// lands (C++, Python, JS), the lines it adds are compared with the whole repo through an index kept between calls
+// (lib/dup-index.mjs, KWB-24: jscpd's whole-repo scan on every write was too slow; only files that changed are read again),
+// at jscpd's thresholds (lib/dup.mjs: 50 tokens and 6 lines, a gap of up to 2 lines, so a copy with one line changed is
+// still a copy). doctor's count and `claude-packs dup scan` still run jscpd over the whole repo. A near-duplicate is refused with the
 // existing location and the fix: call it, or extract one function that both call, parameterized over what differs.
 // Generated files, resources, vendored and built code, copy trees and design/shape.json "exclude" are never judged.
 // Every write route (lib/writes.mjs): Write, Edit, MultiEdit, NotebookEdit and the shell's >, >>, tee, sed -i, cp, mv,
 // a heredoc. The file is judged as it would be after the write, its old text left out, so editing a file never
 // matches its own old lines.
 //   node once-only.mjs --selftest
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, join, relative } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { changedLines, clonesOf, copyGlobs, excludeGlobs, FIX, findJscpd, isGenerated, isSource, real, scan } from './lib/dup.mjs';
+import { changedLines, copyGlobs, excludeGlobs, FIX, findJscpd, isGenerated, isSource, real } from './lib/dup.mjs';
+import { judgeWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { readShape } from './lib/shape.mjs';
 import { readPayload, writesOf } from './lib/writes.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const HOW = `Code that exists once is called, never copied: ${FIX}. A function written for a many concept takes the instance as a parameter.\n` +
   'Moving or extracting code: take the old copy out in the same write (one Write or MultiEdit), or take it out first.';
@@ -45,25 +49,16 @@ function judged(payload) {
 export function judge(payload) {
   const { list, gone } = judged(payload);
   if (!list.length) return { code: 0 };
-  const tmp = mkdtempSync(join(process.env.TMPDIR ?? tmpdir(), 'once-only-new-'));
   const found = [];
-  try {
-    for (const root of new Set(list.map((j) => j.root))) {
-      const mine = list.filter((j) => j.root === root);
-      const extra = mine.map((j, i) => {
-        const path = join(tmp, String(i), basename(j.w.path));
-        mkdirSync(join(tmp, String(i)), { recursive: true });
-        writeFileSync(path, j.w.after);
-        return { path, as: j.w.path };
-      });
-      const r = scan(root, { extra, ignore: gone, layout: mine[0].layout, shape: mine[0].shape });
-      if (r.error) return { code: 0, note: `once-only could not judge: ${r.error}` }; // doctor shows a missing detector
-      const base = real(root);
-      const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
-      for (const j of mine) for (const c of clonesOf(r.clones, j.w.path, j.range)) found.push(`${show(c.at)} repeats ${show(c.other)} (${c.lines} lines, ${c.tokens} tokens)`);
-    }
-  } finally {
-    rmSync(tmp, { recursive: true, force: true });
+  // each checkout written to: its index finds the candidates (built once, then only changed files are read again), jscpd
+  // confirms on those files alone (lib/dup-index.mjs judgeWrites)
+  for (const root of new Set(list.map((j) => j.root))) {
+    const mine = list.filter((j) => j.root === root);
+    const r = judgeWrites(root, mine.map((j) => ({ path: j.w.path, after: j.w.after, range: j.range })), { layout: mine[0].layout, shape: mine[0].shape, ignore: gone });
+    if (r.error) return { code: 0, note: `once-only could not judge: ${r.error}` }; // doctor shows a missing detector
+    const base = real(root);
+    const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
+    for (const c of r.clones) found.push(`${show(c.at)} repeats ${show(c.other)} (${c.lines} lines, ${c.tokens} tokens)`);
   }
   if (!found.length) return { code: 0 };
   const listed = [...new Set(found)];
@@ -142,13 +137,13 @@ function selftest() {
   ]);
 }
 
-function main() {
-  if (process.argv.includes('--selftest')) return selftest();
-  const payload = readPayload(readFileSync(0, 'utf8'));
+function main(text) {
+  const payload = readPayload(text);
   if (!payload) return 0;
   const r = judge(payload);
   if (r.code === 2) process.stderr.write(`${r.message}\n`);
   return r.code;
 }
 
-process.exit(main());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('once-only', main));

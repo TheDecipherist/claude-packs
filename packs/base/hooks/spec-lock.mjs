@@ -15,6 +15,7 @@ import { commandLeavesProject, insideProject, checkoutRoot, relInCheckout } from
 import { writesOf } from './lib/writes.mjs';
 import { fileURLToPath } from 'node:url';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
+import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const STATE = join(ROOT, '.claude', 'spec-lock.json');
@@ -41,10 +42,10 @@ function block(msg) {
   return 2;
 }
 
-function hook() {
+function main(text) {
   let payload;
   try {
-    payload = JSON.parse(readFileSync(0, 'utf8'));
+    payload = JSON.parse(text);
   } catch {
     return 0;
   }
@@ -109,5 +110,8 @@ function selftest() {
   ]);
 }
 
-const args = process.argv.slice(2);
-process.exit(args.includes('--selftest') ? selftest() : args.length ? cli(args) : hook());
+export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
+if (isMain(import.meta.url)) {
+  const args = process.argv.slice(2);
+  process.exit(args.includes('--selftest') ? selftest() : args.length ? cli(args) : await asHook('spec-lock', main));
+}

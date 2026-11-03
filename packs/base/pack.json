@@ -273,7 +273,8 @@
     "hooks/brief-guard.mjs",
     "hooks/once-only.mjs",
     "hooks/making.mjs",
-    "hooks/making-check.mjs"
+    "hooks/making-check.mjs",
+    "hooks/run-hooks.mjs"
   ],
   "optIn": [
     "hooks/tims-asks.mjs",

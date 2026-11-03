@@ -6,7 +6,7 @@
 // Python and JS sources: 0.3 s for the whole tree, so it runs at write time; a planted copy of a function with one line
 // changed is found as one near-miss clone (--max-gap-lines). Threshold: 50 tokens and 6 lines, a gap of up to 2 lines.
 //   findJscpd(starts) -> path | null       CLAUDE_PACKS_JSCPD, then node_modules/.bin/jscpd above each start, then PATH
-//   scan(root, { extra, layout, shape }) -> { clones, ms, error }
+//   scan(root, { extra, layout, shape, paths }) -> { clones, ms, error }   paths: only these files (once-only's confirmation), else the tree
 //       extra: [{ path, as }] files outside the tree judged as if they were `as` (the text a write would leave), `as`
 //       itself left out of the scan; ignore: more paths left out (a file a move takes away). Clone sides are
 //       { file, start, end }, `file` the real path in the repo (`as` for extra).
@@ -80,14 +80,14 @@ export function changedLines(before, after) {
 // Real paths: /var and /private/var are one folder on a Mac, and jscpd prints the real one.
 export const real = (p) => { try { return realpathSync(p); } catch { const d = dirname(resolve(p)); return d === resolve(p) ? d : join(real(d), resolve(p).slice(d.length + 1)); } };
 
-export function scan(root, { extra = [], ignore: alsoIgnore = [], layout = {}, shape = null, jscpd = null, timeoutMs = 8000 } = {}) {
+export function scan(root, { extra = [], ignore: alsoIgnore = [], layout = {}, shape = null, jscpd = null, timeoutMs = 8000, paths = null } = {}) {
   const bin = jscpd ?? findJscpd([root]);
   if (!bin) return { clones: [], error: 'jscpd not found (it is an optional dependency of @thedecipherist/claude-packs: npm install in the project, or set CLAUDE_PACKS_JSCPD)' };
   const out = mkdtempSync(join(process.env.TMPDIR ?? tmpdir(), 'once-only-'));
   const abs = real(root);
   const ignore = [...excludeGlobs(layout, shape).map((g) => `${abs}/${g}`), ...extra.map((x) => real(x.as)), ...alsoIgnore.map(real)];
   const args = ['-a', '-s', '-k', String(LIMITS.tokens), '-l', String(LIMITS.lines), '--max-gap-lines', String(LIMITS.gap), '--exit-code', '0',
-    '-f', FORMATS, '--cross-formats', CROSS, '-r', 'json', '-o', out, '-i', ignore.join(','), abs, ...extra.map((x) => x.path)];
+    '-f', FORMATS, '-r', 'json', '-o', out, '--cross-formats', CROSS, '-i', ignore.join(','), ...(paths ?? [abs]), ...extra.map((x) => x.path)];
   const t0 = Date.now();
   const r = spawnSync(bin, args, { encoding: 'utf8', timeout: timeoutMs, cwd: abs });
   const ms = Date.now() - t0;
