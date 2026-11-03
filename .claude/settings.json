@@ -6,8 +6,72 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/kit-lock.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/kit-lock.mjs .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/frozen-files.mjs .claude/hooks/placement-law.mjs .claude/hooks/protect-vendor.mjs .claude/hooks/spec-lock.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/brief-guard.mjs",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/stage-guard.mjs .claude/hooks/git-guard.mjs .claude/hooks/build-guard.mjs",
+            "timeout": 40
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/time-guard.mjs",
             "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/time-guard.mjs",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/making-check.mjs .claude/hooks/git-guard.mjs",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/making.mjs",
+            "timeout": 10
           }
         ]
       }

@@ -1,0 +1,125 @@
+{
+  "_comment": "Where everything lives. folders = the folders; kinds = what goes where (CLAUDE.md shows it, placement-law enforces it); concepts = which rules fire where. Edit here, then run `npx --no-install @thedecipherist/claude-packs update`.",
+  "folders": {
+    "bin": {
+      "path": "bin",
+      "purpose": "the claude-packs command (bin/claude-packs.mjs)"
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "the command's library: sync, settings, layout, doctor, the kit lock"
+    },
+    "packs": {
+      "path": "packs",
+      "purpose": "the packs a project installs: rules, checks, hooks, skills, tools (base, audio-core, gpu-painter, stellix)"
+    },
+    "global": {
+      "path": "global",
+      "purpose": "the global part: latest-versions, gnu-shell, shell-traps (global add)"
+    },
+    "profiles": {
+      "path": "profiles",
+      "purpose": "tailored seed layouts shipped in the package (stellix, sub37)"
+    },
+    "prompts": {
+      "path": "prompts",
+      "purpose": "prompts the command prints (survey.md)"
+    },
+    "test": {
+      "path": "test",
+      "purpose": "the kit's tests (npm test: node --test test/*.test.mjs)"
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "the kit's own development scripts (test-changed.mjs); never shipped"
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "versions and notes (the logs are at the root: CHANGELOG.md, workflow-bugs.md)"
+    }
+  },
+  "concepts": {
+    "tests": [
+      "test"
+    ],
+    "docs-folder": [
+      "docs"
+    ],
+    "cpp": [
+      "src/**/*.cpp",
+      "src/**/*.h",
+      "src/**/*.hpp",
+      "src/**/*.mm",
+      "tests/**/*.cpp",
+      "tests/**/*.h"
+    ],
+    "build": [
+      "**/CMakeLists.txt",
+      "**/*.cmake",
+      "CMakePresets.json"
+    ],
+    "claude": [
+      ".claude/skills/**",
+      "**/.claude/skills/**",
+      ".claude/agents/**",
+      ".claude/rules/**"
+    ],
+    "notes": [
+      "bugs.md",
+      "workflow-bugs.md",
+      "**/known-issues*.md",
+      "docs/**/*.md"
+    ],
+    "tooling": [
+      "tools/**",
+      ".claude/hooks/**",
+      ".claude/settings.json"
+    ],
+    "plan": [
+      "build.md",
+      "**/build.md"
+    ],
+    "copy-trees": [
+      "kind:copy",
+      ".claude/layout.json"
+    ]
+  },
+  "kinds": {
+    "tests": {
+      "what": "the kit's tests",
+      "in": "test",
+      "concepts": [
+        "tests"
+      ],
+      "files": [
+        "**/*.test.*"
+      ]
+    },
+    "docs": {
+      "what": "versions and notes",
+      "in": "docs",
+      "concepts": [
+        "docs-folder"
+      ]
+    }
+  },
+  "files": {},
+  "protected": [],
+  "disable": [],
+  "enable": [],
+  "commands": {
+    "test": "npm test",
+    "test-one": "node --import ./test/fresh-tmp.mjs --test test/<name>.test.mjs",
+    "test-changed": "npm run test:changed",
+    "doctor": "node bin/claude-packs.mjs doctor --strict"
+  },
+  "siblings": [],
+  "guards": {
+    "git": {
+      "house": true,
+      "refuseTrunk": true,
+      "branchStart": "git switch -c work/<version>-<name> main"
+    }
+  },
+  "complete": true
+}

@@ -3,3 +3,7 @@ node_modules/
 .DS_Store
 .claude/statusbar-activity.json
 .claude/worktrees/
+.claude/.claude-packs-backup/
+.claude/state/
+.claude/usage.log
+.claude/hooks.log
