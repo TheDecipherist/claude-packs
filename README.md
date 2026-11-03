@@ -23,7 +23,16 @@ npx claude-packs update             re-sync installed packs from this version
 npx claude-packs doctor             verify paths, folders, hooks, checks
 npx claude-packs survey             print the prompt that writes docs/project.md
 npx claude-packs list               show the packs
+npx claude-packs lock status|release [--force]   the kit repo's lock: who holds it, live or not; release a gone session's
 ```
+
+## Hooks are timed, and run in one process per entry (0.9.12)
+- Every hook writes one line per call to `.claude/hooks.log` (time, event, hook, ms, exit code, tool; git-ignored, kept under
+  256 KB). `doctor` prints each hook's median and worst over its last 100 calls; a median over 500 ms is a red check.
+- settings.json runs the kit's node hooks of one entry through `.claude/hooks/run-hooks.mjs`, one node process for all of them
+  (`node ".../run-hooks.mjs" .claude/hooks/a.mjs .claude/hooks/b.mjs`). Each hook still runs on its own (`node .claude/hooks/a.mjs`).
+- once-only judges a write against an index of the repo kept between calls (only changed files are read again); jscpd confirms
+  only a write the index flags.
 
 ## How it decides where things apply
 - **`.claude/layout.json` is the one source of truth.** It names every folder (`src/audio`, `src/world`, `src/painter`…) and every concept (audio, dsp, world, painter, shaders, ui, params, records, tests, bench, build).

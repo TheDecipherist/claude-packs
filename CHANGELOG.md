@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.9.12 (2026-11-03)
+
+- Hook timing (KWB-24): every installed hook writes one line per call to `.claude/hooks.log` (ISO time, event, hook, ms, exit
+  code, tool), through one helper per language (`hooks/lib/hook-log.mjs`, `hooks/lib/house.py` `log_hook`); the log is cut to
+  its newest half past 256 KB and is git-ignored. `doctor` prints each hook's median and worst over its last 100 calls, and a
+  hook whose MEDIAN is over 500 ms is a red check (the median is what every call pays; the worst is printed, never judged: one
+  call on a loaded machine is a spike, not the hook's cost).
+- One node process per settings entry: `hooks/run-hooks.mjs` runs every kit node hook of an entry in turn (each hook exports
+  `hook(text)`; its stdout and stderr are caught, its timing line written; the runner exits 2 when any hook refused). settings.json
+  names the runner and its hooks (`node ".../run-hooks.mjs" .claude/hooks/a.mjs ...`); an async hook (idle-wake) and the Python
+  hook keep their own entries. Every hook still runs on its own, and every selftest's hook calls go through the runner. Measured
+  on a copy of Stellix (load 14 to 25): the 15 hooks on a Bash rm, 1676 ms wall and 3468 ms one by one before, 423 ms and 777 ms
+  after; no hook process over 500 ms median.
+- once-only keeps an index (per source file, the hashes of its 20-token windows, in the temp folder, keyed by modification time
+  and size): built once (1.7 s on Stellix's 752 sources), then only files that changed are read again (a walk that stats, about
+  100 ms). The index finds candidates, looser than jscpd so it holds every clone jscpd finds (measured: all 55 files jscpd flags on
+  Stellix); jscpd then confirms on those files alone, so a write is refused when jscpd over the repo would refuse it, and a write
+  with no candidate never starts jscpd. making-check judges the turn's writes the same way, with one git diff for all its files.
+- making-check reads the transcript from its end (1 MB, more only when the turn's prompt is further back): 1.7 s to 4 ms on a
+  277 MB transcript. A transcript over 512 MB could not be read at all before, so making-check judged nothing in those sessions.
+  The branch comes from the HEAD file, not a git process.
+- time-guard: the controller's scan of every worktree (a git status in each: over a minute for Stellix's 125 worktrees, killed at
+  the hook's timeout before it saved, so every call scanned again) runs in its own background process; its finding is told on the
+  next call, once. An agent's own worktree is looked at once a minute, not on every call.
+- `claude-packs lock status` and `lock release [--force]` (KWB-25): each checkout's kit lock, its holder, branch, start and
+  whether the session is live (its pid runs, or its transcript was written in the last 15 min). release takes away the caller's
+  own lock or a gone session's; another live session's lock stays unless --force. The lock's form is extensible
+  (`version`, `holder: { session, pid }`, `branch`, `started_at`, with the old keys beside them); the old form is still read.
+
 ## 0.9.11 (2026-11-03)
 
 - lib/shape.mjs back under 300 lines (0.9.10 took it to 301, past a project's line limit); a test now holds every installed file to 300 lines.
