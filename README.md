@@ -23,7 +23,7 @@ npx --no-install @thedecipherist/claude-packs update             re-sync install
 npx --no-install @thedecipherist/claude-packs doctor             verify paths, folders, hooks, checks
 npx --no-install @thedecipherist/claude-packs survey             print the prompt that writes docs/project.md
 npx --no-install @thedecipherist/claude-packs list               show the packs
-npx --no-install @thedecipherist/claude-packs lock status|release [--force]   the kit repo's lock: who holds it, live or not; release a gone session's
+npx --no-install @thedecipherist/claude-packs lock status|take|release [--force]   the kit repo's lock, a lease: who holds it, since when, last seen, live or stale (30 min without renewal); take it, or release your own or a stale one; a live lease only with --force
 ```
 
 ## Hooks are timed, and run in one process per entry (0.9.12)

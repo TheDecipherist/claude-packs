@@ -7,3 +7,5 @@ node_modules/
 .claude/state/
 .claude/usage.log
 .claude/hooks.log
+.claude-packs-lock
+.claude/kit-lock.log

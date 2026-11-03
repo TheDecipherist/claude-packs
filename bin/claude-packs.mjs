@@ -39,9 +39,10 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines)
   symmetry run <concept>   that gate for one concept: every instance the same members, every pair swaps the same
   dup scan           every duplicated block (jscpd, the once-only hook's detector), listed by file
-  lock status|release [--force]
-                     the claude-packs repo's kit lock in each checkout: who holds it, live or not; release takes
-                     away your own lock or a gone session's, never another live session's without --force
+  lock status|take [--branch <b>]|release [--force]
+                     the claude-packs repo's kit lock, a lease, in each checkout: who holds it, since when, last seen,
+                     live or stale (30 min without renewal); take takes it for this session (a stale one is taken over
+                     and logged); release takes away your own lock or a stale one, never a live lease without --force
   global add|remove|doctor
                      the global part, exactly three pieces: latest-versions (skill and
                      version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
@@ -123,7 +124,7 @@ async function main() {
       if (rest[0] !== 'scan') throw new Error('use `dup scan [--dir <project>]`');
       return dupScan(dir);
     case 'lock':
-      return lockCommand(rest[0], dir, { force });
+      return lockCommand(rest[0], dir, { force, branch: rest.includes('--branch') ? rest[rest.indexOf('--branch') + 1] : undefined });
     case 'list':
       for (const name of availablePacks()) console.log(`${name.padEnd(12)} ${readPack(name).description}`);
       return 0;

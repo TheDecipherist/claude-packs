@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.9.15 (2026-11-03)
+
+- The kit lock is a lease (KWB-29): `.claude-packs-lock` carries `started_at` and `last_seen`; the holder's kit-lock hook (now on
+  every tool call) renews `last_seen` at most once a minute, and a holder whose hooks are another project's (a Stellix lead and
+  its agents) renews it by working: its transcript or a subagent's, written later, counts as seen. No renewal for 30 minutes
+  and the lease is stale: the next session that writes or commits takes it over, logged in `.claude/kit-lock.log` (who held it,
+  branch, since, last seen, by whom). A live lease is never taken or deleted; `lock release --force` is the only way, and says
+  so. Nothing prints "since undefined": a lock with no start reads "start unknown". `lock status` prints held since, last seen
+  and live or stale; `lock take [--branch <b>]` takes the lock for a session whose hooks are not the kit's. The lock and its
+  log are runtime state, ignored by git (renewing a committed lock would dirty the tree every minute).
+- kit-lock guards commits, merges and releases only (KWB-30): `git commit`, `merge`, `pull`, `cherry-pick`, `revert`, `am`,
+  `rebase`, `git tag <name>`, `npm version`, `publish`, `pack`, and removing another session's live lease. Editing files and
+  `git push` of commits that exist pass whoever holds the lock (a push in a command that also wrote a log in the repo was
+  refused).
+- Tests: test/lock-release.test.mjs, four new (a lease 31 min old taken over and logged, 29 min held; the holder's activity renews it,
+  throttled; "start unknown", never "undefined"; a push passes and a commit, merge, tag and npm release are refused while
+  another live session holds the lock), each seen red on 0.9.14.
+
 ## 0.9.14 (2026-11-03)
 
 - The kit is a project like any other (KWB-26): its own `.claude/` carries the base pack (`.claude/layout.json` names the kit's

@@ -1,6 +1,6 @@
 {
   "name": "@thedecipherist/claude-packs",
-  "version": "0.9.14",
+  "version": "0.9.15",
   "description": "Per-project Claude Code rules, lesson checks, hooks and skills for JUCE synths: realtime audio, DSP, Dawn GPU painter, Stellix. Installs into the project's own .claude/, never globally.",
   "type": "module",
   "bin": {

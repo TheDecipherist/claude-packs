@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/kit-lock.mjs .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/frozen-files.mjs .claude/hooks/placement-law.mjs .claude/hooks/protect-vendor.mjs .claude/hooks/spec-lock.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/frozen-files.mjs .claude/hooks/placement-law.mjs .claude/hooks/protect-vendor.mjs .claude/hooks/spec-lock.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs",
             "timeout": 60
           }
         ]
@@ -36,8 +36,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/time-guard.mjs",
-            "timeout": 15
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/kit-lock.mjs .claude/hooks/time-guard.mjs",
+            "timeout": 30
           }
         ]
       }
