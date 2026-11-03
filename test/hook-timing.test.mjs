@@ -1,0 +1,109 @@
+// KWB-24: every installed hook writes one timing line per call to .claude/hooks.log (one helper per language), the log
+// stays bounded, and doctor reads it: per hook the median and the worst of its last 100 calls, a median over 500 ms red.
+import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
+import { readPack } from '../lib/packs.mjs';
+
+const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
+const run = (dir, ...args) => spawnSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
+const PACKS = ['base', 'audio-core', 'gpu-painter', 'stellix'];
+
+function stellix() {
+  const dir = mkdtempSync(join(tmpdir(), 'cpt-'));
+  execFileSync('node', [CLI, 'init', 'audio-core', 'gpu-painter', 'stellix', '--profile', 'stellix', '--dir', dir], { encoding: 'utf8' });
+  for (const d of ['lib/app/src', 'lib/world/src']) mkdirSync(join(dir, d), { recursive: true });
+  return dir;
+}
+
+// The hooks the packs register for an event and a tool (or a SessionStart source), async-rewake ones aside.
+function expected(event, target) {
+  const out = new Set();
+  for (const p of PACKS) for (const g of readPack(p).hooks?.[event] ?? []) {
+    if (g.matcher && g.matcher !== '*' && !new RegExp(`^(?:${g.matcher})$`).test(target)) continue;
+    for (const h of g.hooks) if (!h.asyncRewake) out.add(h.command.match(/hooks\/([\w-]+)\.(?:mjs|py)/)[1]);
+  }
+  return [...out];
+}
+
+// Every settings entry of the event that matches, run the way Claude Code runs it.
+function fireEvent(dir, payload) {
+  const settings = JSON.parse(readFileSync(join(dir, '.claude/settings.json'), 'utf8'));
+  const target = payload.tool_name ?? payload.source ?? '';
+  for (const g of settings.hooks[payload.hook_event_name] ?? []) {
+    if (g.matcher && g.matcher !== '*' && !new RegExp(`^(?:${g.matcher})$`).test(target)) continue;
+    for (const h of g.hooks) {
+      if (h.asyncRewake) continue;
+      spawnSync('bash', ['-c', h.command], { input: JSON.stringify(payload), cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir, PYTHONDONTWRITEBYTECODE: '1' }, encoding: 'utf8' });
+    }
+  }
+}
+
+const logged = (dir) => (existsSync(join(dir, '.claude/hooks.log')) ? readFileSync(join(dir, '.claude/hooks.log'), 'utf8') : '')
+  .split('\n').filter(Boolean).map((l) => l.split('\t'));
+
+test('every installed hook writes one timing line per call: time, event, hook, ms, exit code', () => {
+  const dir = stellix();
+  const cases = [
+    [{ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: join(dir, 'lib/world/src/a.h'), content: '// a\n' } }, 'Write'],
+    [{ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'rm lib/world/src/none.h' } }, 'Bash'],
+    [{ hook_event_name: 'PostToolUse', tool_name: 'Edit', tool_input: { file_path: join(dir, 'lib/world/src/a.h'), old_string: 'a', new_string: 'b' } }, 'Edit'],
+    [{ hook_event_name: 'Stop', session_id: 't', transcript_path: join(dir, 'none.jsonl') }, ''],
+  ];
+  for (const [payload, target] of cases) {
+    const before = logged(dir).length;
+    fireEvent(dir, payload);
+    const rows = logged(dir).slice(before);
+    for (const r of rows) {
+      assert.equal(r.length >= 5, true, `a line has time, event, hook, ms, exit: ${r.join(' | ')}`);
+      assert.ok(!Number.isNaN(Date.parse(r[0])), `ISO time: ${r[0]}`);
+      assert.equal(r[1], payload.hook_event_name);
+      assert.match(r[3], /^\d+$/);
+      assert.match(r[4], /^-?\d+$/);
+    }
+    const names = new Set(rows.map((r) => r[2]));
+    for (const h of expected(payload.hook_event_name, target)) assert.ok(names.has(h), `${h} wrote no timing line on ${payload.hook_event_name} ${target}`);
+  }
+});
+
+test('the timing log stays bounded', async () => {
+  const { logHook, LOG_MAX_BYTES } = await import('../packs/base/hooks/lib/hook-log.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'cpt-log-'));
+  mkdirSync(join(dir, '.claude'));
+  for (let i = 0; i < 20000; i += 1) logHook(dir, { event: 'PreToolUse', hook: `h${i % 17}`, ms: i % 900, code: 0 });
+  const size = statSync(join(dir, '.claude/hooks.log')).size;
+  assert.ok(size <= LOG_MAX_BYTES, `${size} bytes, over ${LOG_MAX_BYTES}`);
+  assert.ok(size > LOG_MAX_BYTES / 4, 'recent lines kept');
+  assert.match(readFileSync(join(dir, '.claude/hooks.log'), 'utf8').split('\n').filter(Boolean).at(-1), /\th3\t899\t0/, 'the newest line is the last');
+});
+
+test('the python helper writes the same line', () => {
+  const dir = stellix();
+  const payload = { hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: join(dir, 'lib/world/src/b.h'), content: '// b\n' } };
+  spawnSync('python3', [join(dir, '.claude/hooks/browser-guard.py')], { input: JSON.stringify(payload), env: { ...process.env, CLAUDE_PROJECT_DIR: dir, PYTHONDONTWRITEBYTECODE: '1' } });
+  const row = logged(dir).find((r) => r[2] === 'browser-guard');
+  assert.ok(row, 'browser-guard wrote a line');
+  assert.deepEqual([row[1], row[4]], ['PreToolUse', '0']);
+});
+
+// The planted fault: a hook that sleeps 600 ms on every call makes doctor red; one that does not, does not.
+test('doctor: a hook whose median is over 500 ms is a red check, with its median and worst', () => {
+  const dir = stellix();
+  const fake = (name, ms) => {
+    const file = join(dir, '.claude/hooks', `${name}.mjs`);
+    writeFileSync(file, `import { asHook, isMain } from './lib/hook-log.mjs';\nconst hook = () => { const t = Date.now(); while (Date.now() - t < ${ms}); return 0; };\n` +
+      `if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? 0 : await asHook('${name}', hook));\n`);
+    for (let i = 0; i < 3; i += 1) spawnSync('node', [file], { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash' }), env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
+  };
+  fake('slow-fake', 600);
+  fake('quick-fake', 0);
+  const r = run(dir, 'doctor');
+  assert.match(r.stdout, /PROBLEM: slow-fake: median [0-9]+ ms over its last 3 calls \(worst [0-9]+ ms\), over 500 ms/);
+  assert.doesNotMatch(r.stdout, /PROBLEM: quick-fake/);
+  assert.match(r.stdout, /hook timing/);
+  assert.equal(r.status, 1);
+});
