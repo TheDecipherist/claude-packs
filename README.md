@@ -175,7 +175,7 @@ Two sessions each released a 0.6.0 (CHANGELOG.md has both). 0.7.0 is their merge
 "Fixes from Sub37's first install") and the house tooling from Stellix (this section). Every kit hook is Node now, one
 `git-guard.mjs` holds both lines' git laws, and `claude-packs new <name>` scaffolds a project. One session changes the kit
 at a time: the repo's own `.claude/hooks/kit-lock.mjs` refuses writes while another session's `.claude-packs-lock` is there.
-Since 0.9.13 the kit repo is a project like any other (KWB-26): its `.claude/` carries its own base pack (installed with
+Since 0.9.14 the kit repo is a project like any other (KWB-26): its `.claude/` carries its own base pack (installed with
 `node bin/claude-packs.mjs update`, its folders in `.claude/layout.json`, the house git laws on), so every base hook judges
 work on the kit and `doctor --strict` passes on it; kit-lock stays registered beside them.
 

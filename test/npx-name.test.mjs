@@ -1,4 +1,4 @@
-// KWB-27: in a project with no node_modules, `npx claude-packs doctor` downloaded and ran someone else's public npm package
+// KWB-28: in a project with no node_modules, `npx claude-packs doctor` downloaded and ran someone else's public npm package
 // (claude-packs@1.0.0: "Unknown command: doctor"). Everything the kit prints or installs names the kit itself: the scoped
 // name with --no-install (`npx --no-install @thedecipherist/claude-packs ...`), which never downloads, or the installed path.
 // CHANGELOG.md and workflow-bugs.md are the record of what was, and are left as they were written.

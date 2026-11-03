@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.13 (2026-11-03)
+## 0.9.14 (2026-11-03)
 
 - The kit is a project like any other (KWB-26): its own `.claude/` carries the base pack (`.claude/layout.json` names the kit's
   folders, the house git laws and the trunk refusal on), so every base hook judges work on the kit, kit-lock beside them, and
@@ -18,9 +18,17 @@
   kit-lock was folded in and failed as exit 1, so it never refused). An update unfolds a runner command into one entry per hook
   before it rebuilds the kit's entries, so a project's own hook in it is kept (it was dropped). kit-lock exports `hook`.
 - Every doc, hook message, rule, skill and command text names the kit as `npx --no-install @thedecipherist/claude-packs ...`
-  (KWB-27: a bare `npx claude-packs` in a project without node_modules downloaded and ran an unrelated public package).
+  (KWB-28: a bare `npx claude-packs` in a project without node_modules downloaded and ran an unrelated public package).
 - Tests: test/kit-guards.test.mjs (own hooks through init and two updates; the kit's own install and doctor --strict; no kit
   command, hook, skill or doc deletes a branch), test/npx-name.test.mjs (no bare `npx claude-packs` anywhere in the kit).
+
+## 0.9.13 (2026-11-03)
+
+- gnu-shell works on Linux as well as macOS (KWB-27): on Linux the system tools are GNU already, so no Homebrew is looked for and
+  nothing says the tools are BSD; `~/.claude/bin` still goes first on the Bash tool's PATH, a zsh session is still warned on every
+  command, and the shell is still checked for bash 5 (any bash 5). macOS is unchanged. The selftest fakes each bash version instead
+  of reading the machine's `/bin/bash`, so `global doctor` and `npm test` pass on Linux (they failed there on "Apple's bash 3.2").
+- CLAUDE.md for working on the kit itself.
 
 ## 0.9.12 (2026-11-03)
 
