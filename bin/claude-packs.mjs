@@ -15,7 +15,7 @@ import { availablePacks, readPack } from '../lib/packs.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
-const HELP = `usage: npx claude-packs <command> [options]
+const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [options]
 
   new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
                      workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed

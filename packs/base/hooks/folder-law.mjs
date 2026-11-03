@@ -51,7 +51,7 @@ function judge(file) {
     .join('\n');
   process.stderr.write(
     `BLOCKED by folder-law: ${rel} is outside the project layout.\nNew source files go in one of:\n${list}\n` +
-      'If none fits, ask the user; a new folder is added to .claude/layout.json, then `npx claude-packs update`.\n',
+      'If none fits, ask the user; a new folder is added to .claude/layout.json, then `npx --no-install @thedecipherist/claude-packs update`.\n',
   );
   return 2;
 }

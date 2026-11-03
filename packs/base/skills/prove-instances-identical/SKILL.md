@@ -20,9 +20,9 @@ Always do:
   - `first` (default 0) when instances are counted from 1; `instances` (a command printing N) for a many concept with no fixed count.
 - Generate the tests at configure time, never by hand. CMake:
   `execute_process(COMMAND node ${CMAKE_SOURCE_DIR}/.claude/tools/shape-symmetry.mjs gen --dir ${CMAKE_SOURCE_DIR} --cmake ${CMAKE_BINARY_DIR}/shape_symmetry.cmake COMMAND_ERROR_IS_FATAL ANY)`
-  then `include(${CMAKE_BINARY_DIR}/shape_symmetry.cmake)`. Any other build system: `npx claude-packs symmetry gen --list` prints one
+  then `include(${CMAKE_BINARY_DIR}/shape_symmetry.cmake)`. Any other build system: `npx --no-install @thedecipherist/claude-packs symmetry gen --list` prints one
   `<name><TAB><command>` line per many concept.
-- Run it: `ctest -R shape_symmetry` or `npx claude-packs symmetry run <concept>`. Read every line: it names what instance i has that j
+- Run it: `ctest -R shape_symmetry` or `npx --no-install @thedecipherist/claude-packs symmetry run <concept>`. Read every line: it names what instance i has that j
   lacks, and prints every pair it checked (6 for N = 4).
 - Plant the faults the gate exists for and see it red: one instance missing a member, one pair that swaps differently.
 - Check the IDs: the generator produces exactly the frozen lock's string for every instance and field.

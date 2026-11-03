@@ -16,14 +16,14 @@ The projects on the kit: Stellix (`init audio-core gpu-painter stellix --profile
 ## Commands
 
 ```
-npx claude-packs init <pack...>     install packs, create the layout folders
-npx claude-packs add <pack...>      add packs
-npx claude-packs remove <pack...>   remove packs (files you edited are kept)
-npx claude-packs update             re-sync installed packs from this version
-npx claude-packs doctor             verify paths, folders, hooks, checks
-npx claude-packs survey             print the prompt that writes docs/project.md
-npx claude-packs list               show the packs
-npx claude-packs lock status|release [--force]   the kit repo's lock: who holds it, live or not; release a gone session's
+npx --no-install @thedecipherist/claude-packs init <pack...>     install packs, create the layout folders
+npx --no-install @thedecipherist/claude-packs add <pack...>      add packs
+npx --no-install @thedecipherist/claude-packs remove <pack...>   remove packs (files you edited are kept)
+npx --no-install @thedecipherist/claude-packs update             re-sync installed packs from this version
+npx --no-install @thedecipherist/claude-packs doctor             verify paths, folders, hooks, checks
+npx --no-install @thedecipherist/claude-packs survey             print the prompt that writes docs/project.md
+npx --no-install @thedecipherist/claude-packs list               show the packs
+npx --no-install @thedecipherist/claude-packs lock status|release [--force]   the kit repo's lock: who holds it, live or not; release a gone session's
 ```
 
 ## Hooks are timed, and run in one process per entry (0.9.12)
@@ -52,23 +52,23 @@ npx claude-packs lock status|release [--force]   the kit repo's lock: who holds 
 - Files that leave a pack are removed only if you never edited them.
 
 ## Tailoring to a real repo
-1. In the project, run `npx claude-packs survey` and give the printed prompt to Claude Code. It writes `docs/project.md`: the real folder tree, where every concern lives, how the code is written, the existing Claude setup, and a proposed `layout.json`.
+1. In the project, run `npx --no-install @thedecipherist/claude-packs survey` and give the printed prompt to Claude Code. It writes `docs/project.md`: the real folder tree, where every concern lives, how the code is written, the existing Claude setup, and a proposed `layout.json`.
 2. Bring project.md back. The packs' layout, concepts, rules and skill triggers get tuned to it.
 
 ## Install from the tarball
-`npm i -D ./thedecipherist-claude-packs-0.7.0.tgz`, then `npx claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
+`npm i -D ./thedecipherist-claude-packs-0.7.0.tgz`, then `npx --no-install @thedecipherist/claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
 
-A new project: `npx claude-packs new <name> [--packs audio-core,gpu-painter] [--profile <name>] [--dir <parent>]` makes the
+A new project: `npx --no-install @thedecipherist/claude-packs new <name> [--packs audio-core,gpu-painter] [--profile <name>] [--dir <parent>]` makes the
 folder, the house files (`CLAUDE.md`, `build.md`, `bugs.md`, `workflow-bugs.md`, `docs/versions.md`, `.gitignore`), a git
 repo on a `work/` branch, and installs the kit into it (it was the `new-project` skill; it is a kit command now).
 
 ## The global part: exactly three pieces
 
 ```
-npx claude-packs global add      # ~/.claude/skills/latest-versions, hooks/claude-packs/version-pin-guard.mjs (+ lib/shell-writes.mjs),
+npx --no-install @thedecipherist/claude-packs global add      # ~/.claude/skills/latest-versions, hooks/claude-packs/version-pin-guard.mjs (+ lib/shell-writes.mjs),
                                  # hooks/gnu-shell.mjs, hooks/shell-traps.mjs
-npx claude-packs global doctor
-npx claude-packs global remove   # removes only what it installed and you did not edit
+npx --no-install @thedecipherist/claude-packs global doctor
+npx --no-install @thedecipherist/claude-packs global remove   # removes only what it installed and you did not edit
 ```
 
 Everything else in this package is per project (Tim, 2026-10-31). The global part is exactly three pieces, and `global add` installs nothing else:
@@ -122,7 +122,7 @@ You often roll a lesson out to many projects from one session. Nothing here may 
 
 - **This project's hooks judge only this project's files.** Every hook checks `insideProject()` (`hooks/lib/project.mjs`) first, and Bash checks ignore commands that `cd`/`git -C` into another folder. `test/other-projects.test.mjs` fires every hook at edits in a sibling project and requires that none block.
 - **Access to sibling projects.** `layout.siblings` (the Stellix profile sets `["../"]`) is merged into `permissions.additionalDirectories` in `.claude/settings.json`, so reading and editing `../sub37`, `../echofold`… needs no extra prompts. Claude Code applies it after you accept the folder's trust prompt once. Entries you add yourself are never removed.
-- **Roll package updates out everywhere:** `npx claude-packs update-all ~/projects/*` updates and doctors every project that already has claude-packs, and skips the rest. Each project's own edits and `.pack-new` rules apply as usual.
+- **Roll package updates out everywhere:** `npx --no-install @thedecipherist/claude-packs update-all ~/projects/*` updates and doctors every project that already has claude-packs, and skips the rest. Each project's own edits and `.pack-new` rules apply as usual.
 - **What still applies everywhere, by design:** the global `version-pin-guard` (it reads the *target* project's own `docs/versions.md`), `stage-guard` (stage by name in any repo), and `git-guard` (a token is never stored in any repo's config; the house git laws, where switched on, hold in every repo a command reaches).
 - **The other project's own laws** only run when the session is in that project. For real code work there, `/cd ../sub37` (Claude Code 2.1.246+ loads that project's hooks and rules) or open a session there; edits made from here skip its hooks.
 
@@ -132,11 +132,11 @@ Rules fire by path, so the structure is what makes them fire. Three layers keep 
 
 1. **Stated, every turn.** `layout.json` has `kinds`: each kind of thing (audio entry, DSP block, engine, parameters, editor, bank, panel, GPU code, shader, tests, docs…) with the one folder it goes in. The CLAUDE.md "Project layout" block lists them as `<what> → <folder>`, inside `<constraints>`.
 2. **Enforced, every write.** `folder-law` refuses a new source file outside the layout. `placement-law` refuses a kind in the wrong place: by file name (`*.wgsl`, `factory.csv`, `panel.json`, `*_test.cpp`) or by content an edit adds (`processBlock(`, `wgpu…(`, `paint(Graphics&)`). The message says where it goes and which rules load there.
-3. **Proven, on demand.** `npx claude-packs doctor` notes rules that match no file and source files no rule covers; `doctor --strict` fails on either. Run it once the skeleton builds, and after any move.
+3. **Proven, on demand.** `npx --no-install @thedecipherist/claude-packs doctor` notes rules that match no file and source files no rule covers; `doctor --strict` fails on either. Run it once the skeleton builds, and after any move.
 
 A tailored project (the Stellix profile) carries its own `kinds`. Edit `kinds` and `folders` in `layout.json`, then `update`.
 
-**New projects:** `claude-packs new <name>` lays the structure down before the first file and installs the kit; then `latest-versions` for every pin, `doctor`, and `doctor --strict` once it builds. For a synth unit, synthkit's `new_synth.py` makes the code tree first, and `claude-packs new` (or `init`) follows on it.
+**New projects:** `npx --no-install @thedecipherist/claude-packs new <name>` lays the structure down before the first file and installs the kit; then `latest-versions` for every pin, `doctor`, and `doctor --strict` once it builds. For a synth unit, synthkit's `new_synth.py` makes the code tree first, and `claude-packs new` (or `init`) follows on it.
 
 ## Lessons from the Stellix build (0.4.0)
 
@@ -161,7 +161,7 @@ The cross-project project guard Stellix carried (WB-64) is not in this package a
 | fix | `lesson-checks` | reads checks and layout from the file's own checkout |
 | fix | `spec-lock` | a shell command that writes a worktree's spec is refused like one that writes main's |
 | fix | `no-shipped-images` | an image written into a worktree's code folders is refused |
-| fix | `version-pin-guard` (global) | reads `docs/versions.md` from the checkout the pin is written in; `CLAUDE_PROJECT_DIR` is only the fallback. Run `npx claude-packs global add` to install it |
+| fix | `version-pin-guard` (global) | reads `docs/versions.md` from the checkout the pin is written in; `CLAUDE_PROJECT_DIR` is only the fallback. Run `npx --no-install @thedecipherist/claude-packs global add` to install it |
 | fix | layout readers | a worktree with its own `layout.json` is judged by it, else by main's (`claudeRoot`) |
 | test | `worktrees.test.mjs` | runs every installed hook in a real git worktree, and fails when a hook is added without a worktree case |
 | test | `structure.test.mjs` | locks in the CLAUDE.md block rules, the control, look and anchor rules, and both skills |
@@ -175,6 +175,9 @@ Two sessions each released a 0.6.0 (CHANGELOG.md has both). 0.7.0 is their merge
 "Fixes from Sub37's first install") and the house tooling from Stellix (this section). Every kit hook is Node now, one
 `git-guard.mjs` holds both lines' git laws, and `claude-packs new <name>` scaffolds a project. One session changes the kit
 at a time: the repo's own `.claude/hooks/kit-lock.mjs` refuses writes while another session's `.claude-packs-lock` is there.
+Since 0.9.13 the kit repo is a project like any other (KWB-26): its `.claude/` carries its own base pack (installed with
+`node bin/claude-packs.mjs update`, its folders in `.claude/layout.json`, the house git laws on), so every base hook judges
+work on the kit and `doctor --strict` passes on it; kit-lock stays registered beside them.
 
 ## The house hooks, skills and rules move into the kit (0.6.0, this branch's line)
 
@@ -184,7 +187,7 @@ go in `layout.json` under `"guards"`; every key has a house default.
 
 | Kind | Name | Pack | What it does | Project values (`guards.<name>`) |
 |---|---|---|---|---|
-| hook | `git-guard.mjs` | base | main's token law always (no token stored in git config, Sub37 WB-3); with `house: true` the house git laws: no `add -A`/`commit -a`, no undo over a dirty tree, no rebase/amend/force/`--no-verify`/branch delete, a push names the owner's repo and the token variable, every `gh` names the token, no token pasted, nothing under `~/firmware` staged; the trunk refusal (no commit on main/master) only when `refuseTrunk` is true | `git`: `house` (false), `owner` (TheDecipherist), `tokenVar` (PERSONAL_GITHUB_TOKEN), `trunks`, `refuseTrunk` (false), `neverStage`, `safeRestore`, `branchStart`, `accountNote` |
+| hook | `git-guard.mjs` | base | main's token law always (no token stored in git config, Sub37 WB-3); with `house: true` the house git laws: no `add -A`/`commit -a`, no undo over a dirty tree, no rebase/amend/force/`--no-verify`/branch delete, a push names the owner's repo and the token variable, every `gh` names the token, no token pasted, nothing under `~/firmware` staged, no commit while the branch's earlier commits are not on GitHub and no session end (Stop) while a local branch is ahead of GitHub or missing there (KWB-26: GitHub's heads by `git ls-remote`, the token sent from the environment or ~/.env and never stored; out of reach, a warning and the work goes ahead); the trunk refusal (no commit on main/master) only when `refuseTrunk` is true | `git`: `house` (false), `owner` (TheDecipherist), `tokenVar` (PERSONAL_GITHUB_TOKEN), `trunks`, `refuseTrunk` (false), `neverStage`, `safeRestore`, `branchStart`, `accountNote` |
 | hook | `build-guard.mjs` | base | every compile and test run through the machine-wide build queue (`buildq` or the project's wrapper); no polling loops; agents build only what their change needs | – |
 | hook | `time-guard.mjs` | base | tells the caller when a call, a build, a ctest, a probe, a panel export, a headless Chrome or a wait loop runs long, or an agent's worktree goes unsaved; refuses a pgrep wait loop that can never end (a heredoc body is text, not a loop) | `time`: `probePattern`, `saveCommand` |
 | hook | `tims-asks.mjs` | base, **opt-in** | after a compaction, Tim's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |

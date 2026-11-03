@@ -49,7 +49,7 @@ function refuse(rel, hit) {
   process.stderr.write(
     `BLOCKED by placement-law: ${rel} holds ${hit.kind.what} (kind "${hit.name}").\n` +
       `That goes in ${hit.where}/, where its rules load (${hit.globs.join(', ')}).\n` +
-      'Put it there instead. If it truly belongs elsewhere, ask the user to change .claude/layout.json, then `npx claude-packs update`.\n',
+      'Put it there instead. If it truly belongs elsewhere, ask the user to change .claude/layout.json, then `npx --no-install @thedecipherist/claude-packs update`.\n',
   );
   return 2;
 }

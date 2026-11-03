@@ -10,7 +10,7 @@
 //   node .claude/tools/shape-symmetry.mjs gen --cmake <out.cmake> [--dir <root>]   add_test lines, one per many concept
 //   node .claude/tools/shape-symmetry.mjs gen --list [--dir <root>]        "<name>\t<command>" lines, for any other build system
 //   node .claude/tools/shape-symmetry.mjs --selftest
-// The kit's CLI runs the same: `npx claude-packs symmetry run|gen ...`.
+// The kit's CLI runs the same: `npx --no-install @thedecipherist/claude-packs symmetry run|gen ...`.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

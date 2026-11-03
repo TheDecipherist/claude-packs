@@ -47,8 +47,8 @@ Never do:
   the engine-scoped `no-instance-index-literal` and `no-instance-id-literal` checks, which let the world and the space code through.
   `buffer[1]`, `channel == 1` and `pos[0]` are not instances and never fire.
 - The `brief-guard` hook refuses a brief, spec or recipe that names an instance outside a `seen in:` or `example:` line.
-- `npx claude-packs shape scan` lists every instance literal already in the repo.
-- `shape_symmetry` (generated at configure time by `claude-packs symmetry gen`, run by `.claude/tools/shape-symmetry.mjs`): for each many
+- `npx --no-install @thedecipherist/claude-packs shape scan` lists every instance literal already in the repo.
+- `shape_symmetry` (generated at configure time by `npx --no-install @thedecipherist/claude-packs symmetry gen`, run by `.claude/tools/shape-symmetry.mjs`): for each many
   concept, the members of every instance are the same set, and every one of the N·(N-1)/2 pairs swaps the same. Its selftest plants a
   missing member and a swap difference.
 - The project's own tests: the generated IDs equal the frozen lock for every instance.

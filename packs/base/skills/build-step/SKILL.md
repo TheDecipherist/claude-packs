@@ -59,7 +59,7 @@ MANY with its count, generator, selectors and declared constants).
   refused with "example, rule, or constant?".
 - **Every subagent brief quotes the manifest row of every concept it touches, word for word**, and names the shape and
   the generator, never an instance (`brief-guard` refuses "drive slot 2"; "seen in: slot 2, build for all slots" passes).
-- `npx claude-packs shape scan` lists what the repo already names by instance; a step that touches such a file fixes its
+- `npx --no-install @thedecipherist/claude-packs shape scan` lists what the repo already names by instance; a step that touches such a file fixes its
   lines or leaves them as they were, never adds to them.
 
 ## 3. While working: save often
