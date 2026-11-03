@@ -10,9 +10,11 @@
 //      folder of every GNU formula installed, so sed, date, stat, awk, tar, find, xargs, which are the GNU builds; and a
 //      line that warns on EVERY command while the session runs zsh (WB-41). Tim's own terminal is not touched.
 // It says so at the session's start when it cannot deliver: no Homebrew, a formula missing, the shell not bash 5.
+// On Linux (KWB-27) the system's sed, date, stat and awk are the GNU builds already: no Homebrew is looked for, the PATH line
+// puts only ~/.claude/bin first, and the shell is still checked for bash 5 (any bash 5, not Homebrew's).
 //   node gnu-shell.mjs --selftest
 import { execFileSync } from 'node:child_process';
-import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { appendFileSync, chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 
@@ -30,8 +32,26 @@ function bashMajor(path) {
   try { return Number(execFileSync(path, ['--version'], { encoding: 'utf8', timeout: 5000 }).match(/version (\d+)\./)?.[1] ?? 0); } catch { return 0; }
 }
 
+const shellSaid = (sh, mac) => `gnu-shell: the Bash tool's shell is ${sh || 'unknown'}, not ${mac ? `Homebrew's bash 5 (${BASH})` : 'bash 5'}: ` +
+  '`$VAR` lists do not split (use ${=VAR} or an array) and an unmatched glob is an error. The env block in .claude/settings.json takes effect from the next session.';
+const shellOk = (sh) => basename(sh ?? '') === 'bash' && bashMajor(sh) >= 5;
+const ZSH_WARNING = '[ -n "$ZSH_VERSION" ] && echo "gnu-shell: THIS SESSION RUNS ZSH, not bash 5 (variables are not split into words, an unmatched glob is an error). Restart Claude Code to get bash 5." >&2\n';
+
+// Linux: the tools are GNU already; ~/.claude/bin first, the zsh warning, and the shell checked.
+function runLinux(envFile, shell) {
+  const said = [];
+  if (envFile) {
+    appendFileSync(envFile, 'export PATH="$HOME/.claude/bin:${PATH}"\n');
+    appendFileSync(envFile, ZSH_WARNING);
+  } else said.push('gnu-shell: CLAUDE_ENV_FILE is not set, so ~/.claude/bin could not be put first on the Bash tool\'s PATH.');
+  if (!shellOk(shell)) said.push(shellSaid(shell, false));
+  return said;
+}
+
 // Writes the PATH line; returns what must be said (empty when all is as it should be).
-export function run(envFile, shell, pre = prefix()) {
+export function run(envFile, shell, { platform = process.platform, pre } = {}) {
+  if (platform !== 'darwin') return runLinux(envFile, shell);
+  if (pre === undefined) pre = prefix();
   const said = [];
   if (!pre) {
     return ["gnu-shell: no Homebrew found (/opt/homebrew or /usr/local): this session's sed, date, stat and awk are the macOS (BSD) builds, " +
@@ -41,39 +61,59 @@ export function run(envFile, shell, pre = prefix()) {
   const missing = FORMULAS.filter((f) => !isDir(gnubin(pre, f)));
   if (envFile && have.length) {
     appendFileSync(envFile, `export PATH="$HOME/.claude/bin:${have.join(':')}:\${PATH}"\n`);
-    appendFileSync(envFile, '[ -n "$ZSH_VERSION" ] && echo "gnu-shell: THIS SESSION RUNS ZSH, not bash 5 (variables are not split into words, an unmatched glob is an error). Restart Claude Code to get bash 5." >&2\n');
+    appendFileSync(envFile, ZSH_WARNING);
   }
   if (missing.length) {
     said.push(`gnu-shell: GNU formula(s) not installed: ${missing.join(', ')}; those tools are the macOS (BSD) builds this session. ` +
       `Tim installs them with: brew install ${missing.join(' ')}`);
   }
   if (!envFile) said.push('gnu-shell: CLAUDE_ENV_FILE is not set, so the GNU tools could not be put first on the Bash tool\'s PATH.');
-  const sh = shell ?? '';
-  if (basename(sh) !== 'bash' || bashMajor(sh) < 5) {
-    said.push(`gnu-shell: the Bash tool's shell is ${sh || 'unknown'}, not Homebrew's bash 5 (${BASH}): \`$VAR\` lists do not split ` +
-      '(use ${=VAR} or an array) and an unmatched glob is an error. The env block in .claude/settings.json takes effect from the next session.');
-  }
+  if (!shellOk(shell)) said.push(shellSaid(shell, true));
   return said;
+}
+
+// A fake bash that reports the given version: the selftest never depends on this machine's /bin/bash (KWB-27).
+function fakeBash(dir, version) {
+  const file = join(dir, `bash-${version}`, 'bash');
+  mkdirSync(join(dir, `bash-${version}`), { recursive: true });
+  writeFileSync(file, `#!/bin/sh\necho 'GNU bash, version ${version}(1)-release'\n`);
+  chmodSync(file, 0o755);
+  return file;
 }
 
 function selftest() {
   const bad = [];
   const expect = (name, ok) => { if (!ok) bad.push(name); };
   const d = mkdtempSync(join(tmpdir(), 'gnu-shell-'));
+  const bash5 = fakeBash(d, '5.2.37');
+  const bash32 = fakeBash(d, '3.2.57');
+  const notBash5 = (said) => said.some((s) => s.includes('not ') && s.includes('bash 5'));
+  // macOS
   const pre = join(d, 'brew');
   for (const f of FORMULAS) mkdirSync(gnubin(pre, f), { recursive: true });
-  const envf = join(d, 'env.sh');
-  const said = run(envf, existsSync(BASH) ? BASH : '/bin/bash', pre);
-  const text = readFileSync(envf, 'utf8');
+  const mac = (file, shell) => run(join(d, file), shell, { platform: 'darwin', pre });
+  const said = mac('env.sh', bash5);
+  const text = readFileSync(join(d, 'env.sh'), 'utf8');
   const line = text.split('\n')[0];
-  expect("every formula's gnubin written first on PATH", FORMULAS.every((f) => line.includes(`/opt/${f}/libexec/gnubin`)) && line.endsWith(':${PATH}"'));
-  expect('~/.claude/bin first', line.startsWith('export PATH="$HOME/.claude/bin:'));
-  expect('a zsh session is warned on every command (WB-41)', text.includes('[ -n "$ZSH_VERSION" ]') && text.toUpperCase().includes('RESTART'));
-  if (existsSync(BASH)) expect('bash 5 and every formula: nothing said', said.length === 0);
+  expect("mac: every formula's gnubin written first on PATH", FORMULAS.every((f) => line.includes(`/opt/${f}/libexec/gnubin`)) && line.endsWith(':${PATH}"'));
+  expect('mac: ~/.claude/bin first', line.startsWith('export PATH="$HOME/.claude/bin:'));
+  expect('mac: a zsh session is warned on every command (WB-41)', text.includes('[ -n "$ZSH_VERSION" ]') && text.toUpperCase().includes('RESTART'));
+  expect('mac: bash 5 and every formula: nothing said', said.length === 0);
+  expect('mac: no Homebrew is said', run(join(d, 'e1.sh'), bash5, { platform: 'darwin', pre: null }).some((s) => s.includes('no Homebrew')));
+  expect("mac: zsh as the shell is said", mac('e3.sh', '/bin/zsh').some((s) => s.includes("not Homebrew's bash 5")));
+  expect("mac: Apple's bash 3.2 is said", mac('e4.sh', bash32).some((s) => s.includes("not Homebrew's bash 5")));
   rmSync(gnubin(pre, 'gnu-sed'), { recursive: true });
-  expect('a missing formula is said, by name', run(join(d, 'e2.sh'), BASH, pre).some((s) => s.includes('gnu-sed')));
-  expect('zsh as the shell is said', run(join(d, 'e3.sh'), '/bin/zsh', pre).some((s) => s.includes("not Homebrew's bash 5")));
-  expect("Apple's bash 3.2 is said", run(join(d, 'e4.sh'), '/bin/bash', pre).some((s) => s.includes("not Homebrew's bash 5")));
+  expect('mac: a missing formula is said, by name', mac('e2.sh', bash5).some((s) => s.includes('gnu-sed')));
+  // Linux (KWB-27): the system tools are GNU; no Homebrew is looked for, even when one is there
+  const linux = (file, shell) => run(join(d, file), shell, { platform: 'linux', pre });
+  const lsaid = linux('l1.sh', bash5);
+  const ltext = readFileSync(join(d, 'l1.sh'), 'utf8');
+  expect('linux: bash 5: nothing said (no Homebrew, no BSD tools)', lsaid.length === 0);
+  expect('linux: ~/.claude/bin first, no gnubin', ltext.split('\n')[0] === 'export PATH="$HOME/.claude/bin:${PATH}"');
+  expect('linux: a zsh session is warned on every command', ltext.includes('[ -n "$ZSH_VERSION" ]'));
+  expect('linux: zsh as the shell is said', notBash5(linux('l2.sh', '/usr/bin/zsh')));
+  expect('linux: bash 3.2 is said', notBash5(linux('l3.sh', bash32)));
+  expect('linux: no env file is said', run(undefined, bash5, { platform: 'linux' }).some((s) => s.includes('CLAUDE_ENV_FILE')));
   rmSync(d, { recursive: true, force: true });
   for (const b of bad) console.error(`FAIL  ${b}`);
   console.log(`gnu-shell selftest: ${bad.length ? `${bad.length} wrong` : 'OK'}`);
