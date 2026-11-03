@@ -9,7 +9,7 @@
 // This hook is the claude-packs repo's own (its committed .claude/settings.json), not part of any pack.
 //   node .claude/hooks/kit-lock.mjs take <session> [branch]   take the lock by hand (a session with no hook yet)
 //   node .claude/hooks/kit-lock.mjs --selftest
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,16 +35,16 @@ export function verdict(payload, root) {
   return null;
 }
 
-function main() {
+function main(text) {
   let payload;
-  try { payload = JSON.parse(readFileSync(0, 'utf8')); } catch { return 0; }
+  try { payload = JSON.parse(text); } catch { return 0; }
   const root = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
   const v = verdict(payload, root);
   if (!v) return 0;
   process.stderr.write(
     `BLOCKED by kit-lock: another session is changing claude-packs (session ${v.lock.session}, branch ${v.lock.branch}, since ${v.lock.startedAt}; ` +
       `lock in ${join(v.where, LOCK)}).\nOne session changes the kit at a time. Wait for its release merge (which removes the lock), ` +
-      'or ask the user; never delete another session\'s lock. A lock whose session is gone: `npx claude-packs lock release` (KWB-25).\n',
+      'or ask the user; never delete another session\'s lock. A lock whose session is gone: `node bin/claude-packs.mjs lock release` (KWB-25).\n',
   );
   return 2;
 }
@@ -62,6 +62,11 @@ function selftest() {
   cases.push(['another session\'s lock: refused', verdict(W('me'), root) !== null]);
   cases.push(['a read is no write', verdict({ session_id: 'me', tool_name: 'Bash', tool_input: { command: 'ls; git status' } }, root) === null]);
   cases.push(['outside the repo: not judged', verdict({ session_id: 'me', tool_name: 'Write', tool_input: { file_path: '/elsewhere/a.txt' } }, root) === null]);
+  // settings.json runs kit-lock inside run-hooks.mjs with the base hooks (KWB-26): it must refuse there too, not fail as exit 1
+  const r = spawnSync(process.execPath, [fileURLToPath(new URL('../../packs/base/hooks/run-hooks.mjs', import.meta.url)), fileURLToPath(import.meta.url)], {
+    input: JSON.stringify(W('me')), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: root },
+  });
+  cases.push(['through run-hooks: another session\'s lock refused', r.status === 2 && r.stderr.includes('BLOCKED by kit-lock')]);
   const bad = cases.filter(([, ok]) => !ok);
   for (const [name] of bad) console.error(`kit-lock selftest FAILED: ${name}`);
   execFileSync('rm', ['-rf', root]);
@@ -69,10 +74,12 @@ function selftest() {
   return bad.length ? 1 : 0;
 }
 
+export const hook = main; // settings.json runs it inside run-hooks.mjs with the base hooks (KWB-26)
+
 const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
 if (process.argv[1] && real(process.argv[1]) === real(fileURLToPath(import.meta.url))) {
   const [cmd, session, branch] = process.argv.slice(2);
   if (cmd === '--selftest') process.exit(selftest());
   else if (cmd === 'take') { console.log(JSON.stringify(take(resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), session, branch))); process.exit(0); }
-  else process.exit(main());
+  else { let text = ''; try { text = readFileSync(0, 'utf8'); } catch { /* no stdin */ } process.exit(main(text)); }
 }

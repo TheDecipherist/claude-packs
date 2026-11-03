@@ -16,6 +16,9 @@
 //   6. Nothing under a never-staged folder (~/firmware) is staged.
 //   7. No branch is deleted; nothing is rebased or amended; no hook is skipped (--no-verify).
 //   8. With guards.git.refuseTrunk true: no commit straight onto a trunk (main, master); guards.git.branchStart says how.
+//   9. No commit while the branch's earlier commits are not on GitHub (a new branch's first commit passes; a push earlier
+//      in the same command counts), and at Stop no local branch ahead of GitHub or missing there (KWB-26; lib/pushed.mjs:
+//      GitHub's heads looked up at most once a minute, out of reach means a warning, never a refusal).
 // Only a real git or gh call is judged: heredoc bodies and quoted text are blanked, and a part counts only when its
 // first word (after VAR=value) is git or gh. `cd` and `git -C` move the folder the dirty-tree and trunk checks look at.
 // The laws hold in every repo a command reaches. `--selftest` proves both halves.
@@ -23,9 +26,11 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, normalize, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -72,6 +77,8 @@ const real = {
   branch: (cwd) => (gitOut(cwd, 'rev-parse', '--abbrev-ref', 'HEAD') ?? '').trim(),
   hasHead: (cwd) => gitOut(cwd, 'rev-parse', '-q', '--verify', 'HEAD') !== null,
 };
+// git's subcommand: the first word after git that is not an option (-C <dir> and -c <key=value> take one more)
+const subOf = (w) => { let i = 1; while (i < w.length && w[i].startsWith('-')) i += ['-C', '-c', '--git-dir', '--work-tree'].includes(w[i]) ? 2 : 1; return w[i]; };
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const neverRx = (entry) => (entry.startsWith('~/') ? new RegExp(`(~|\\$HOME|/Users/[^/\\s]+|/home/[^/\\s]+)/${esc(entry.slice(2))}`) : new RegExp(esc(entry.replace(/^\/+/, ''))));
 const expand = (p) => p.replace(/^\$HOME(?=\/|$)/, '~').replace(/^~(?=\/|$)/, homedir());
@@ -82,6 +89,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
   let body = cmd.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '');
   body = body.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
   let here = cwd;
+  let pushedBefore = false;
   for (const part of body.split(/&&|\|\||;|\||\n|\(|\)|`|\$\(/)) {
     let w = part.trim().split(/\s+/).filter(Boolean);
     if (w.length >= 2 && w[0] === 'cd' && w[1] !== "''") { here = normalize(resolve(here, expand(w[1]))); continue; }
@@ -120,12 +128,18 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
     if (c.refuseTrunk && /\bgit\b.*\bcommit\b/.test(p) && (c.trunks ?? []).includes(env.branch(here)) && env.hasHead(here)) {
       return `This is the trunk. Every task is built on its own branch and merged when complete: ${c.branchStart}.`;
     }
+    if (!pushedBefore && env.unpushed && subOf(w) === 'commit') {
+      const u = env.unpushed(here, c);
+      if (u?.error) env.warn?.(`git-guard: GitHub was not checked before this commit (${u.error}); the commit goes ahead unchecked. Push when it is back (KWB-26).`);
+      else if (u?.commits?.length) return unpushedMessage(u, c);
+    }
     if (/\bgit\b.*\bpush\b/.test(p)) {
       if (/\s(-f|--force|--force-with-lease)\b/.test(p)) return 'Never force a push. Nothing pushed is rebased or amended.';
       if (!new RegExp(`github\\.com/${esc(owner)}/[\\w.-]+`).test(p)) {
         return `A push must name the repo: git push https://x-access-token:$${tok}@github.com/${owner}/<repo>.git <branch>. ${c.accountNote}`;
       }
       if (!p.includes(`$${tok}`) && !p.includes(`\${${tok}}`)) return `A push names the token as $${tok}, never a pasted one.`;
+      pushedBefore = true;
     }
     if (/(^|\s)gh\s/.test(p) && !cmd.includes(`GH_TOKEN=$${tok}`)) return `Every \`gh\` names the token: source ~/.env && GH_TOKEN=$${tok} gh ... ${c.accountNote}`;
     if (/\bgh\s+repo\s+create\b/.test(p) && (!p.includes(`${owner}/`) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
@@ -141,6 +155,15 @@ function main(text) {
   let payload;
   try { payload = JSON.parse(text); } catch { return 0; }
   const command = payload.tool_input?.command ?? '';
+  // the project's laws: its own layout (a worktree with its own layout.json is judged by it, else the project's)
+  const cfg = { ...DEFAULTS, ...(readLayout(claudeRoot(join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json'))).guards?.git ?? {}) };
+  if (payload.hook_event_name === 'Stop') {
+    if (!cfg.house) return 0;
+    const v = stopVerdict(resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), cfg, payload.session_id);
+    if (v.stdout) process.stdout.write(v.stdout);
+    if (v.stderr) process.stderr.write(v.stderr);
+    return v.code;
+  }
   const why = problem(command);
   if (why) {
     process.stderr.write(
@@ -151,16 +174,17 @@ function main(text) {
     );
     return 2;
   }
-  // the project's laws: its own layout (a worktree with its own layout.json is judged by it, else the project's)
-  const cfg = { ...DEFAULTS, ...(readLayout(claudeRoot(join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json'))).guards?.git ?? {}) };
   if (!cfg.house || !/git|gh |ghp_|github_pat_/.test(command)) return 0;
-  const reason = house(command, payload.cwd ?? process.cwd(), real, cfg);
+  const warnings = [];
+  const env = { ...real, unpushed: (cwd, c) => unpushed(cwd, real.branch(cwd), c), warn: (m) => warnings.push(m) };
+  const reason = house(command, payload.cwd ?? process.cwd(), env, cfg);
+  if (warnings.length) process.stdout.write(JSON.stringify({ systemMessage: warnings.join('\n') }));
   if (!reason) return 0;
   process.stderr.write(`git-guard: ${reason}\n`);
   return 2;
 }
 
-function selftest() {
+async function selftest() {
   const bad = [];
   // the token law (Sub37 WB-3)
   const tokenCases = [
@@ -231,10 +255,13 @@ function selftest() {
     const r = house(cmd, '.', env, other);
     if ((r === null) !== (want === null) || (want && !r.includes(want))) bad.push(`with a project's own values: ${cmd} -> ${r}`);
   }
+  // the pushed laws (KWB-26), on a real repo and a bare "GitHub" beside it
+  const pushed = (await import('./lib/git-guard-selftest.mjs')).pushedCases(fileURLToPath(import.meta.url));
+  for (const [label, got, want] of pushed) if (got !== want) bad.push(`pushed law: ${label} (got ${got}, wanted ${want})`);
   for (const b of bad) console.error(`git-guard selftest FAILED: ${b}`);
-  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes)`);
+  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases)`);
   return bad.length ? 1 : 0;
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('git-guard', main));
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? await selftest() : await asHook('git-guard', main));
