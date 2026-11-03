@@ -139,7 +139,9 @@ test('a project\'s own hook entries stay; a kit hook already registered by hand 
   const hooks = JSON.parse(readFileSync(join(dir, '.claude/settings.json'), 'utf8')).hooks;
   const all = Object.values(hooks).flat().flatMap((g) => g.hooks).map((h) => h.command);
   assert.equal(all.filter((c) => c.includes('source-guard.py')).length, 1, 'the project\'s own python hook is kept');
-  assert.equal(all.filter((c) => c.includes('git-guard.mjs')).length, 1, 'the kit\'s git-guard once');
+  const on = (event) => hooks[event].flatMap((g) => g.hooks).map((h) => h.command);
+  // once per event: on Bash, and since 0.9.13 at Stop too (KWB-26: no session ends with a branch off GitHub)
+  for (const event of ['PreToolUse', 'Stop']) assert.equal(on(event).filter((c) => c.includes('git-guard.mjs')).length, 1, `the kit's git-guard once on ${event}`);
   assert.equal(all.filter((c) => c.includes('build-guard.mjs')).length, 1, 'build-guard is the base pack\'s, once');
   for (const retired of ['copy-tree-guard.py', 'shell-traps.py', 'gnu-shell.py', 'git-guard.py', 'build-guard.py']) {
     assert.ok(!all.some((c) => c.includes(retired)), `${retired}: merged into protect-vendor, global by design, or Node now`);
