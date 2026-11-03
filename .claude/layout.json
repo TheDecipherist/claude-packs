@@ -13,6 +13,10 @@
       "path": "packs",
       "purpose": "the packs a project installs: rules, checks, hooks, skills, tools (base, audio-core, gpu-painter, stellix)"
     },
+    "configurations": {
+      "path": "configurations",
+      "purpose": "the configurations: one config.json per kind of project (its packs, layout template, hook order, preamble)"
+    },
     "global": {
       "path": "global",
       "purpose": "the global part: latest-versions, gnu-shell, shell-traps (global add)"

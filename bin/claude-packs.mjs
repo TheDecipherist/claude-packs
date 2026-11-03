@@ -12,6 +12,7 @@ import { readLock } from '../lib/manifest.mjs';
 import { newProject } from '../lib/new.mjs';
 import { dupScan } from '../lib/once-only-report.mjs';
 import { availablePacks, readPack } from '../lib/packs.mjs';
+import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
@@ -19,14 +20,19 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
 
   new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
                      workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
-                     --packs <a,b>     the packs (default audio-core); --profile <name> as for init
-  init <pack...>     install packs into this project (base is always included)
+                     --packs <a,b>     the packs (default audio-core); --profile <name>, --config <name> as for init
+  init [pack...]     install packs into this project (base is always included)
                      and create the layout folders
+                     --config <name>   the configuration (configs lists them; stored in layout.json
+                                       "configuration"); with no packs named, the ones it takes by default
                      --profile <name>  start from a tailored layout shipped in the package (e.g. stellix)
                      --layout <file>   start from your own layout.json
   add <pack...>      add packs to an existing install
   remove <pack...>   remove packs (files you edited are kept)
-  update             re-sync installed packs from this package version
+  update             re-sync installed packs from this package version, in the project's configuration
+  configs            list the configurations: what each installs, its packs and its folder template
+  config <name>      switch this project to another configuration; prints what changes first
+                     --dry-run         print what would change and stop
   update-all <dir...>  update every listed project that already has claude-packs
                      (e.g. update-all ~/projects/*); folders without it are skipped
   doctor [--strict]  verify the install (paths, folders, hooks, checks' own examples); --strict also fails
@@ -51,12 +57,14 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
 options: --dir <project> (default: current folder)   --force (replace files you edited)`;
 
 function parse(argv) {
-  const opts = { dir: process.cwd(), force: false, strict: false, rest: [], seed: null, home: undefined, packs: null };
+  const opts = { dir: process.cwd(), force: false, strict: false, rest: [], seed: null, home: undefined, packs: null, config: null, dryRun: false };
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === '--dir') opts.dir = argv[++i];
     else if (argv[i] === '--packs') opts.packs = argv[++i].split(',').map((p) => p.trim()).filter(Boolean);
     else if (argv[i] === '--profile') opts.seed = fileURLToPath(new URL(`../profiles/${argv[++i]}.layout.json`, import.meta.url));
     else if (argv[i] === '--layout') opts.seed = resolve(argv[++i]);
+    else if (argv[i] === '--config') opts.config = argv[++i];
+    else if (argv[i] === '--dry-run') opts.dryRun = true;
     else if (argv[i] === '--force') opts.force = true;
     else if (argv[i] === '--strict') opts.strict = true;
     else if (argv[i] === '--home') opts.home = resolve(argv[++i]);
@@ -68,18 +76,25 @@ function parse(argv) {
 
 async function main() {
   const [command, ...argv] = process.argv.slice(2);
-  const { dir, force, strict, rest, seed, home, packs } = parse(argv);
+  const { dir, force, strict, rest, seed, home, packs, config, dryRun } = parse(argv);
   const seedLayout = seed ? JSON.parse(readFileSync(seed, 'utf8')) : null;
   const installed = readLock(resolve(dir, '.claude')).packs;
 
   switch (command) {
     case 'new':
-      return (await newProject(dir, rest[0], { packs: packs ?? ['audio-core'], seedLayout })).code;
-    case 'init':
-      if (rest.length === 0) throw new Error('name at least one pack, e.g. `init audio-core`');
-      await sync(dir, rest, { force, mkdirs: true, seedLayout });
-      if (isSynth(rest) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
+      return (await newProject(dir, rest[0], { packs: packs ?? (config ? readConfig(config).packs.default : ['audio-core']), seedLayout, config })).code;
+    case 'init': {
+      if (rest.length === 0 && !config) throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');
+      const chosen = rest.length ? rest : readConfig(config).packs.default;
+      await sync(dir, chosen, { force, mkdirs: true, seedLayout, config });
+      if (isSynth(chosen) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
       return doctor(dir);
+    }
+    case 'configs':
+      console.log(describeConfigs(layoutConfiguration(dir)));
+      return 0;
+    case 'config':
+      return switchConfig(dir, rest[0], installed, { force, dryRun });
     case 'add':
       await sync(dir, [...installed, ...rest], { force, mkdirs: true });
       return doctor(dir);

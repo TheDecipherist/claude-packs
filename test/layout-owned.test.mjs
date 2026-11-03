@@ -37,7 +37,7 @@ test('every layout key the kit reads survives an update', () => {
   }
   const builder = readText(join(kit, 'lib/layout.mjs'), 'utf8');
   const owned = JSON.parse(builder.match(/const OWNED = (\[[^\]]*\])/)[1].replace(/'/g, '"'));
-  const built = ['folders', 'concepts', 'kinds', 'complete', '_comment', 'json', 'mjs'];   // written by the builder (json/mjs: file names)
+  const built = ['folders', 'concepts', 'kinds', 'complete', '_comment', 'configuration', 'json', 'mjs'];   // written by the builder (json/mjs: file names; configuration: 0.10.0)
   const lost = [...read].filter((k) => !owned.includes(k) && !built.includes(k));
   assert.deepEqual(lost, [], `layout keys read by the kit but dropped by update: ${lost.join(', ')}`);
 });
