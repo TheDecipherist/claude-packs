@@ -271,8 +271,7 @@ export function findInstanceLiterals(text, file, shape, { only = null } = {}) {
 }
 
 // The findings an edit adds: those in the text after it, beyond the same findings already in the text before it.
-// A finding is keyed by what it names, not by its line's text: a line that was there, edited or moved (a bug row closed and moved
-// to Fixed with its cause added), names nothing new; one more of the same finding is still added (KWB-23).
+// Keyed by what a finding names, not its line's text: an edited or moved line adds nothing; one more copy does (KWB-23).
 export function addedFindings(before, after, find) {
   const key = (f) => `${f.concept}|${f.instance}|${f.why}`;
   const had = new Map();

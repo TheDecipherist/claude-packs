@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.11 (2026-11-03)
+
+- lib/shape.mjs back under 300 lines (0.9.10 took it to 301, past a project's line limit); a test now holds every installed file to 300 lines.
+
 ## 0.9.10 (2026-11-03)
 
 - shape-law and brief-guard judge what a write adds by what each finding names (concept, instance, reason), not by its line's
