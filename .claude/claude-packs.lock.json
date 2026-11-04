@@ -3,7 +3,7 @@
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T18:43:27.722Z",
+  "updated": "2026-11-04T18:49:15.900Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "0c5bd514c0bca703d65f5220f8e95074ab8df9b1b018f148ae0a87528b69df3d",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -30,6 +30,7 @@
     ".claude/checks/no-code-after-midline-comment.json": "6689387457bd48e61e7f6442b3007e53b685ffcf852bc083e533f37bb016edb7",
     ".claude/checks/one-walk-per-template.json": "621f70b0cebf054d8fd67f92e50f7b5cc186720be03cbf17e3caaa4db1e4004a",
     ".claude/hooks/brief-guard.mjs": "14bc35e0fbf6bf0f862024913f9eae3611946effcc5d0b32968402076f956ffd",
+    ".claude/hooks/code-shape.mjs": "e697c7d7b231fc437b93ed295669754f1349c7aac6de09868456b5e6aca754e3",
     ".claude/hooks/dispatch-once.mjs": "9699bc5986636980d937ac887e5a692d4391ade5535da4d9c5306cec6e726326",
     ".claude/hooks/file-size-guard.mjs": "97cb7d4b5e74de70144edf034f53478d0c9a1f3758fa1c42d47ac50017f2502d",
     ".claude/hooks/folder-law.mjs": "b5bb70327aafddce6083b4f8d59668b28c3077b5e0d70f34a27aec0bc2e5a2a6",

@@ -27,7 +27,7 @@ test('the measured data came across: the sub table, the templates and the regist
   const read = (s) => readFileSync(join(KIT, 'packs/writing/skills', s, 'SKILL.md'), 'utf8');
   assert.match(read('pick-subreddit'), /\| ExperiencedDevs \| watercooler \| 71 \| 69 \| 2 \|/);
   assert.match(read('reddit-post'), /\*\*E\. Argument post/);
-  assert.match(read('post-voice'), /Hey guys, yes another token article/);
+  assert.match(read('post-voice'), /Narrates in the order it happened/);
   assert.match(read('reply-moves'), /Hooks are the only thing that can cover you/);
 });
 

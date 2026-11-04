@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { OLD_ASKS } from '../lib/settings.mjs';
 
 const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
 const PACKS = fileURLToPath(new URL('../packs/', import.meta.url));
@@ -161,7 +162,7 @@ test('a Node hook is on in a project that ran its Python forerunner, and the for
   const s = JSON.parse(readFileSync(sf, 'utf8'));
   for (const ev of Object.keys(s.hooks)) s.hooks[ev] = s.hooks[ev].map((g) => ({ ...g, hooks: g.hooks.filter((h) => !/git-guard|time-guard/.test(h.command)) }));
   s.hooks.PreToolUse.push({ matcher: 'Bash', hooks: [{ type: 'command', command: 'python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.py"' }] });
-  s.hooks.SessionStart = [{ matcher: 'compact', hooks: [{ type: 'command', command: 'python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/user-asks.py"' }] }];
+  s.hooks.SessionStart = [{ matcher: 'compact', hooks: [{ type: 'command', command: `python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/${OLD_ASKS.replace('.mjs', '.py')}"` }] }];
   writeFileSync(sf, JSON.stringify(s));
   const out = run(dir, 'update');
   assert.ok(existsSync(join(dir, '.claude/hooks/git-guard.mjs')) && existsSync(join(dir, '.claude/hooks/user-asks.mjs')), 'had under the Python name');
@@ -170,7 +171,7 @@ test('a Node hook is on in a project that ran its Python forerunner, and the for
   assert.match(out, /retired settings entries .*git-guard\.py/);
   const all = readFileSync(sf, 'utf8');
   assert.match(all, /run-hooks\.mjs\\"[^"]* \.claude\/hooks\/git-guard\.mjs/, 'the Node hook runs (through run-hooks.mjs, KWB-24)');
-  assert.doesNotMatch(all, /git-guard\.py|user-asks\.py/);
+  assert.doesNotMatch(all, /git-guard\.py|-asks\.py/);
 });
 
 // The house git laws hold in a real git worktree: a commit there is judged by the worktree's branch, not main's.

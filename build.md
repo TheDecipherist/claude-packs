@@ -86,6 +86,7 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 0.25.0, every language, and repetition caught before it is written (work/0.25.0-every-language), started 2026-11-04 (a python and shell pack; every language has repetition and template things; catch repetition before it is written).
   making: one language table for the statement reader (python, shell, go, rust, java, c#, kotlin, swift, ruby, php, lua), near copies and re-made functions judged at the write, what already exists shown at the prompt, python and shell packs; concepts: none (design/shape.json declares none); reuse: statementsOf and codeShapes (packs/base/hooks/lib/code-shapes.mjs), judgeEvent (lib/writes.mjs), repeatedShapes (lib/repeats.mjs).
   done when: each language has a copy refused and data passed, measured on a real repo of it with misfires read and counted; the whole suite green once, committed; landed.
+  measured: every language in the table has a copy matched and comments ignored; 13 of 13 Python and shell repeats read were real; near copies 0 on the kit; 3 senior reviews made 30 packs and 290 checks, each held to its examples; the suite 255 of 262, the 7 stale expectations fixed and those files run alone, 17 of 17 and 38 of 38 with the rest.
 
 ## Steps
 

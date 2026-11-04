@@ -81,7 +81,7 @@ test('dispatch-once: a second switch on the same kind in another file is refused
 test('raw JSON.parse / JSON.stringify are refused outside lib/json.ts', () => {
   const dir = fresh('cpl-');
   run(dir, 'init', 'js-ts');
-  const logLine = "export function logLine(level: 'info' | 'warn' | 'error', fields: Record<string, unknown>): void {\n  console.log(JSON.stringify({ ts: new Date().toISOString(), level, ...fields }));\n}\n";
+  const logLine = "export function logLine(level: 'info' | 'warn' | 'error', fields: Record<string, unknown>): void {\n  console.log(JSON.stringify(entryOf({ ts: new Date().toISOString(), level, ...fields })));\n}\n";
   const r = write(dir, 'server/log.ts', logLine);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /json-only-through-helper/);
@@ -168,7 +168,7 @@ test('presets install the packs a stack needs; docker, fastify, ai, shell-hooks 
   assert.equal(write(dir, 'src/ui/page.ts', 'const h = `<span style="color:red">x</span>`;\n').status, 2);
   // js-ts additions
   assert.equal(write(dir, 'src/routes/c.ts', 'const Body = z.object({ name: z.string().max(80) });\n').status, 2);
-  assert.equal(write(dir, 'src/x.ts', "import express from 'express';\n").status, 2);
+  assert.equal(write(dir, 'src/x.ts', "import express from 'express';\n").status, 0);   // 0.25.0: one stack's choice, in full-stack
   assert.equal(write(dir, 'src/schemas/user.ts', 'export const User = z.object({ name: z.string() });\n').status, 2);
   assert.equal(write(dir, 'src/schemas/user2.ts', 'export const User = z.object({ name: z.string().max(80), _id: z.string() });\n').status, 0);
 });

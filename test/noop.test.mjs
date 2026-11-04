@@ -11,6 +11,8 @@ import { KIT, assert, cli, copyFileSync, execFileSync, fresh, join, mkdirSync, r
 // 0.11.0: lesson-checks gains the "needs" mode, glob.mjs and git-guard turn their if-chains into tables (lookup-over-if-chains),
 // git-guard and lib/pushed.mjs take a push over SSH (KWB-39)
 const FX = join(KIT, 'test/fixtures/noop');
+// 0.25.0: the person's name out of every file, a // in a string read right, and what the reviews changed.
+const REVIEWED = ['.clang-tidy', '.claude/hooks/build-guard.mjs', '.claude/hooks/idle-wake.mjs', '.claude/hooks/lib/cpp-scan.mjs', '.claude/hooks/lib/hook-log.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/making-check.mjs', '.claude/hooks/run-hooks.mjs', '.claude/hooks/time-guard.mjs', '.claude/hooks/user-asks.mjs', '.claude/rules/clang-tidy-core-guidelines.md', '.claude/rules/hooks-and-gates.md', '.claude/rules/plan-and-logs.md', '.claude/skills/copy-and-prove/SKILL.md'];
 export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mjs', 'git-guard.mjs', 'making.mjs', 'once-only.mjs', 'placement-law.mjs',
   'shape-law.mjs', 'stage-guard.mjs', 'lesson-checks.mjs', 'dispatch-once.mjs', 'lib/glob.mjs', 'lib/pushed.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
   .map((f) => `.claude/hooks/${f}`).concat(['.claude/rules/instances-by-index-identities-by-id.md', '.claude/skills/prove-instances-identical/SKILL.md',
@@ -41,7 +43,7 @@ const V7 = ['.claude/rules/lookup-over-if-chains.md', '.claude/rules/field-map-o
 const TIME = ['.claude/rules/git-right-first-time.md', '.claude/rules/reuse-before-writing.md', '.claude/rules/making-line-first.md', '.claude/rules/split-before-the-limit.md',
   '.claude/skills/pick-tests/SKILL.md', '.claude/skills/build-through-the-queue/SKILL.md'];
 // 0.15.0: the writing pack comes with every configuration. Its rules and skills reach a project with no refusing in them; its checks are held back.
-const ELEMENTS = ['.claude/hooks/lib/elements.mjs', '.claude/hooks/lib/code-shapes.mjs', '.claude/hooks/lib/languages.mjs', '.claude/hooks/lib/near-copies.mjs', '.claude/hooks/lib/repo-index.mjs', '.claude/hooks/lib/function-shapes.mjs', '.claude/skills/make-it-a-template/SKILL.md', '.claude/skills/fix-from-scan/SKILL.md'];   // 0.23.0, 0.24.0: the shared reader and its skill; template-law itself is held back
+const ELEMENTS = ['.claude/hooks/lib/elements.mjs', '.claude/hooks/lib/code-shapes.mjs', '.claude/hooks/lib/languages.mjs', '.claude/hooks/lib/near-copies.mjs', '.claude/hooks/lib/repo-index.mjs', '.claude/hooks/lib/function-shapes.mjs', '.claude/rules/a-control-is-seen-to-fire.md', '.claude/skills/make-it-a-template/SKILL.md', '.claude/skills/fix-from-scan/SKILL.md'];   // 0.23.0, 0.24.0: the shared reader and its skill; template-law itself is held back
 const WRITING = [...['cut-the-padding', 'rhythm-like-talk', 'no-stock-language', 'no-scaffolding', 'no-time-or-date', 'ascii-no-em-dash', 'write-from-your-own-corner', 'direct-voice', 'no-cargo-cult'].map((r) => `.claude/rules/${r}.md`),
   ...['humanize', 'reply-stance', 'should-i-reply', 'reply-moves', 'reddit-post', 'pick-subreddit', 'reddit-title', 'argument-post', 'launch-post', 'post-voice'].map((s) => `.claude/skills/${s}/SKILL.md`), '.claude/hooks/lib/prose.mjs'];
 const LANDING = ['.claude/rules/test-the-template-once.md', '.claude/rules/finished-work-lands.md', '.claude/skills/land-branch/SKILL.md', '.claude/rules/a-refusal-is-exit-2.md', '.claude/skills/prove-a-hook/SKILL.md'];   // 0.17.0: with git-guard, which every project has
@@ -66,7 +68,7 @@ for (const project of ['stellix', 'sub37']) {
     const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
-    assert.deepEqual(changed.filter((f) => !CHANGED.includes(f)), [], 'only the base files changed on purpose differ in content');
+    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED].includes(f)), [], 'only the base files changed on purpose differ in content');
   });
 }
 

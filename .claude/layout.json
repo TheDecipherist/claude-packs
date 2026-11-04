@@ -151,7 +151,8 @@
     "hooks/suite-once.mjs",
     "hooks/template-law.mjs",
     "checks/one-walk-per-template.json",
-    "hooks/reuse-hint.mjs"
+    "hooks/reuse-hint.mjs",
+    "hooks/code-shape.mjs"
   ],
   "commands": {
     "test": "npm test",
@@ -168,6 +169,15 @@
       "ghAuth": "cli"
     },
     "templates": {
+      "exclude": [
+        "global/hooks/**"
+      ]
+    },
+    "codeShape": {
+      "maxLineChars": 260,
+      "maxStatementsPerLine": 6,
+      "maxFunctionStatements": 150,
+      "maxParameters": 8,
       "exclude": [
         "global/hooks/**"
       ]
