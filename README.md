@@ -6,12 +6,46 @@ Per-project Claude Code rules, lesson checks, hooks and skills for The Decipheri
 
 | Pack | For | Rules | Checks | Hooks | Skills |
 |---|---|---|---|---|---|
-| `base` | every project (always installed) | 11 | 3 | lesson-checks, folder-law, placement-law, spec-lock, protect-vendor (vendored code and copy trees), file-size-guard, frozen-files, stage-guard, git-guard, build-guard, time-guard; opt-in: tims-asks, idle-wake | add-lesson-check, pressure-test-skill, prove-instances-identical, build-step |
+| `base` | every project, every configuration (always installed) | 9 | 1 | lesson-checks, file-size-guard, folder-law, placement-law, shape-law, brief-guard, making, making-check, once-only, git-guard, secrets-guard, untrusted-boundary | add-lesson-check, pressure-test-skill, prove-instances-identical |
+| `synth-creator` | the synth-creator configuration's own (always with it) | 4 | 0 | spec-lock, protect-vendor (vendored code and copy trees), frozen-files, stage-guard, build-guard, time-guard; opt-in: tims-asks, idle-wake, build-sweep | build-step |
+| `full-stack` | the full-stack configuration's own (always with it) | 10 | 0 | stack-guard, schemas-only | – |
 | `audio-core` | any JUCE synth or effect | 40 | 8 | realtime-guard, param-id-lock | juce-realtime-audit, measure-tone, copy-and-prove, … (+ tone-report tool, `.clang-tidy`) |
 | `gpu-painter` | GPU-drawn UI on Dawn (Metal / D3D12) | 14 | 6 | browser-guard | gpu-frame-bench, gpu-golden-check, gpu-golden-update, gpu-lifecycle-stress, gpu-capture |
 | `stellix` | the Stellix spec laws | 5 | 5 | no-shipped-images | – |
 
-The projects on the kit: Stellix (`init audio-core gpu-painter stellix --profile stellix`) and Sub37 (`init audio-core --profile sub37`).
+The projects on the kit: Stellix (`init audio-core gpu-painter stellix --profile stellix`) and Sub37 (`init audio-core --profile sub37`), both in the synth-creator configuration.
+
+## Configurations: a kind of project, as data (0.10.0)
+
+A project is one configuration. `configurations/<name>/config.json` holds what that kind of project gets: its packs (`always`,
+`choose`, `default`), its layout template (the folder structure `init` creates), the order its hooks run in (`hookOrder`), what
+doctor counts as source (`sourceFiles`) and the house rules of its CLAUDE.md block (`preamble`). Its rules, hooks, checks and
+skills are its packs'; a configuration's own pack (`synth-creator`, `full-stack`) comes with it and is never listed among the
+chosen packs.
+
+| Configuration | Packs | For |
+|---|---|---|
+| `base` | base | universal engineering only; the kit's own repo |
+| `synth-creator` | base, synth-creator; to choose: audio-core, gpu-painter, stellix | JUCE synths and effects: everything the kit installed before 0.10.0 |
+| `full-stack` | base, full-stack | a Fastify API and a Next.js web app, Zod 4 schemas in one folder, one database gateway |
+
+```
+npx --no-install @thedecipherist/claude-packs configs                 list them: packs, counts, folder template
+npx --no-install @thedecipherist/claude-packs init --config <name>    install one (its default packs, or the ones named)
+npx --no-install @thedecipherist/claude-packs config <name> [--dry-run]   switch; prints what changes first
+npx --no-install @thedecipherist/claude-packs planner-skills [--out <dir>]   one project-layout skill body per configuration
+```
+
+`.claude/layout.json` `"configuration"` names the project's; `update` applies it, and an install from before 0.10.0 gets the
+smallest configuration that takes its packs (Stellix and Sub37: synth-creator; update is otherwise a no-op on both). doctor
+prints the configuration and fails on a pack it does not take.
+
+base now holds only universal engineering: git-guard, file-size-guard, folder-law and placement-law, the shape law (shape-law,
+brief-guard, making, making-check, once-only), lesson-checks, and two new laws, `secrets-guard` (no .env, key file or literal
+secret into git) and `untrusted-boundary` (a model call gets outside text only inside a per-call SHA-256 boundary), each with a
+rule. Everything synth-specific moved to the `synth-creator` pack: build-guard, time-guard, spec-lock, frozen-files,
+protect-vendor, stage-guard, build-sweep, idle-wake, tims-asks, freeze.mjs, the debug-by-measurement, done-means-fresh-evidence,
+hooks-and-gates and copy-trees-read-only rules and the build-step skill. A test refuses a synth word in base.
 
 ## Commands
 

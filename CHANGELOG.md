@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.10.0 (2026-11-03)
+
+Configurations (Tim, STEP 3: "Today the kit is one configuration pretending to be general. Build it as data."; KWB-31).
+
+- `configurations/<name>/config.json`: a kind of project as data: its packs (`always`, `choose`, `default`), its layout template
+  (the folders `init` creates), `hookOrder` (its hooks' order per settings entry), `sourceFiles` (what doctor's coverage counts
+  as source) and the `preamble` (the house rules of the CLAUDE.md block). `init --config <name>` stores it in layout.json
+  `"configuration"`; `update` applies that one (an install that names none gets the smallest configuration that takes its
+  packs, and writes it); `config <name> [--dry-run]` lists what changes (packs, rules, hooks, checks, skills, preamble, template
+  folders), then switches; `configs` lists them; doctor prints the configuration and fails on an unknown one or a pack outside it.
+- Three configurations: `base` (universal engineering only; the kit's own repo is on it), `synth-creator` (everything installed
+  before; Stellix and Sub37) and `full-stack` (Fastify + Next.js).
+- base holds only universal engineering: git-guard, file-size-guard, folder-law, placement-law, the shape law (shape-law,
+  brief-guard, making, making-check, once-only, shape-symmetry), lesson-checks, and two new laws. Everything synth-specific
+  moved, byte for byte, to the new `synth-creator` pack (installed only by that configuration): build-guard, time-guard,
+  spec-lock, frozen-files (+ freeze.mjs), protect-vendor, stage-guard, build-sweep, idle-wake, tims-asks; the rules
+  debug-by-measurement, done-means-fresh-evidence, hooks-and-gates, copy-trees-read-only; the build-step skill.
+  realtime-checks.mjs moved to audio-core beside realtime-guard. The synth examples left in base (src/dsp, Voice.cpp, "sounds",
+  synth.git) were made neutral; test/base-neutral.test.mjs refuses a synth word (sound, panel, patch, voice, DSP, synth) in base.
+- `secrets-guard` (base, KWB-33): no .env, key file or credentials file staged (`git add`, also `-f`, and `-A`/`.` while one is
+  not ignored); no literal GitHub, Anthropic, OpenAI, AWS, Slack or Stripe key, private key block or connection-string password
+  written into a file; no .env written while git does not ignore it. Rule: secrets-never-committed.
+- `untrusted-boundary` (base, KWB-34): a model call (Anthropic, OpenAI, AI SDK) added to a JS, TS or Python file that has no
+  per-call SHA-256 boundary (`wrapUntrusted(...)`) and no `untrusted: none` line is refused. Rule: untrusted-content-boundary.
+- A rule may state one hook's law (`# hook: <file>` in its frontmatter): it is held back, left out or switched on with that hook.
+  Both new laws are on in a new project and held back in one that had base before (name them in `"enable"`).
+- `full-stack` pack: `stack-guard` (no express or vite in a package.json, an import or an install; no zod below 4),
+  `schemas-only` (z.object only in the schemas folder; env.ts excepted), and ten rules per folder: the stack, thin routes,
+  handlers, one database gateway with chain keys first, one error contract, Zod 4 schemas, env.ts shapes only, health and
+  correlation id and remote_ip on every log line with helmet and rate-limit behind isProd, multistage Dockerfile, inject() tests.
+  Layout template: packages/core/src/schemas, api/src/{routes,handlers,adapters,auth}, api/test, channel.
+- doctor's coverage reads what is source from the configuration (`sourceFiles`): TypeScript and JavaScript in full-stack (KWB-32).
+- `planner-skills [--out <dir>]` (KWB-35): one project-layout skill body per configuration, from its layout template, packs and
+  preamble.
+- Stellix and Sub37: update in synth-creator makes what 0.9.15 made, the `"configuration"` key aside: the same settings.json,
+  CLAUDE.md and file set; content changes only in the base files made neutral (test/noop.test.mjs, fixtures from both projects).
+- Tests: configs (8), base-neutral (2), base-laws (2), noop (3), full-stack (3), configurations (5); each seen red on 0.9.15.
+
 ## 0.9.15 (2026-11-03)
 
 - The kit lock is a lease (KWB-29): `.claude-packs-lock` carries `started_at` and `last_seen`; the holder's kit-lock hook (now on

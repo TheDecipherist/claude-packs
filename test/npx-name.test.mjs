@@ -11,7 +11,8 @@ import { fileURLToPath } from 'node:url';
 const KIT = fileURLToPath(new URL('..', import.meta.url));
 // npx (any flags) then the bare name: never the scoped one
 const BARE = /\bnpx(?:\s+-[-\w]+)*\s+claude-packs\b/;
-const SKIP = new Set(['node_modules', '.git', 'worktrees', '.claude-packs-backup', 'CHANGELOG.md', 'workflow-bugs.md', 'npx-name.test.mjs']);
+// test/fixtures: other projects' files as they were (0.10.0, the no-op proof's Sub37 copy names the bare form), a record like the CHANGELOG
+const SKIP = new Set(['node_modules', '.git', 'worktrees', '.claude-packs-backup', 'CHANGELOG.md', 'workflow-bugs.md', 'npx-name.test.mjs', 'fixtures']);
 
 export function bareNpx(root) {
   const hits = [];
