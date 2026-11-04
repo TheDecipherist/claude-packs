@@ -1,0 +1,16 @@
+{
+  "id": "cpp-no-const-cast",
+  "why": "const is a promise to the caller, and the compiler keeps trusting it after the cast has broken it. Take a non-const reference, or mark what really changes mutable.",
+  "rule": ".claude/rules/cpp-numbers-and-casts.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "\\bconst_cast\\s*<",
+  "bad": "auto& rng = const_cast<World&> (w).random();",
+  "good": "World& ww = world;"
+}

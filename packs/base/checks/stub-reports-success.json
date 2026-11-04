@@ -1,0 +1,31 @@
+{
+  "id": "stub-reports-success",
+  "why": "A control that reports success and does nothing is worse than none, because the team stops looking.",
+  "rule": ".claude/rules/a-control-is-seen-to-fire.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.py",
+    "**/*.go",
+    "**/*.cpp",
+    "**/*.h"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "(?://|\\*)\\s*(?:for now|stub|placeholder|would (?:decrypt|connect|send|call))[^\\n]*(?:\\n[^\\n]*){0,2}?\\b(?:success:\\s*true|return\\s+true|connected:\\s*true|ok:\\s*true)",
+  "bad": "// For now, return success\nres.json({ success: true, data: { connected: true } });",
+  "good": "await probe(uri);\nres.json({ success: true, data: { connected: true } });",
+  "flags": "i"
+}

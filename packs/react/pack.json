@@ -1,0 +1,20 @@
+{
+  "name": "react",
+  "version": "1.0.0",
+  "description": "React: a failed request says so, a slow response never overwrites a newer one, effects are not used for derived state, and controls have names.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/react"
+  },
+  "keywords": [
+    "react"
+  ],
+  "engines": {
+    "claude-packs": ">=0.25.0"
+  }
+}

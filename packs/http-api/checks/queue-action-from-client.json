@@ -1,0 +1,26 @@
+{
+  "id": "queue-action-from-client",
+  "why": "The guard belongs on the action, not the route that reaches it: a generic endpoint that takes the action from the body reaches every privileged one.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\baction:\\s*(?:input|body|req\\.body)\\.action\\b",
+  "bad": "const doc = { action: input.action, params: input.params };",
+  "good": "const doc = { action: ALLOWED[input.action].name, params: parsed };",
+  "kind": "security"
+}

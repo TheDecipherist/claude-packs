@@ -11,7 +11,12 @@
     "**/build/**",
     "**/.next/**",
     ".claude/**",
-    "**/.claude/**"
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*_test.*"
   ],
   "code": true,
   "pattern": "new\\s+Promise\\s*(?:<[^>]*>)?\\s*\\(\\s*\\(?\\s*(\\w+)\\s*\\)?\\s*=>\\s*(?:global)?setTimeout\\s*\\(\\s*\\1\\b",

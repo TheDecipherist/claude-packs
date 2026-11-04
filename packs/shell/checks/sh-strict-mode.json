@@ -7,13 +7,14 @@
   ],
   "globs": [],
   "exclude": [
-    "**/lib/**",
-    "**/*.lib.sh",
     "**/node_modules/**"
   ],
-  "pattern": "^\\s*set\\s+-\\w*e",
+  "pattern": "^#![^\\n]*\\b(?:ba|z|da)?sh\\b",
   "flags": "m",
-  "bad": "#!/usr/bin/env bash\nrm old\necho done",
-  "good": "#!/usr/bin/env bash\nset -euo pipefail\nrm old",
-  "mode": "require"
+  "bad": "#!/usr/bin/env bash\nset -u\necho done",
+  "good": "#!/usr/bin/env bash\nset -euo pipefail\necho done\n",
+  "mode": "needs",
+  "needs": [
+    "^\\s*set\\s+-\\w*e\\w*(?:\\s+-o\\s+pipefail|\\w*o\\s+pipefail)"
+  ]
 }

@@ -1,0 +1,23 @@
+{
+  "id": "key-from-index",
+  "why": "An index as a key moves state between rows when one is removed.",
+  "rule": ".claude/rules/accessibility.md",
+  "globs": [
+    "**/*.tsx",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\bkey=\\{\\s*(?:i|idx|index)\\s*\\}",
+  "bad": "rows.map((r, i) => <Row key={i} />)",
+  "good": "rows.map((r) => <Row key={r.id} />)"
+}

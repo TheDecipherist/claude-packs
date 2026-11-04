@@ -1,0 +1,26 @@
+{
+  "id": "one-time-code-compared-raw",
+  "why": "A one-time code is stored hashed and compared in constant time.",
+  "rule": ".claude/rules/credentials-handled-safely.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\.\\w*(?:_code|_otp)\\s*!==?\\s*(?:code|otp|input\\.\\w+|req\\.body\\.\\w+)\\b",
+  "bad": "if (user.reset_code !== code) return deny();",
+  "good": "if (!safeEqual(hash(code), user.reset_code_hash)) return deny();",
+  "kind": "security"
+}

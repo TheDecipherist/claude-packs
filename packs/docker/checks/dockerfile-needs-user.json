@@ -13,5 +13,9 @@
     "^\\s*USER\\s+(?!root\\b)\\S+"
   ],
   "bad": "FROM node:24.11.0-slim\nENTRYPOINT [\"node\", \"dist/index.js\"]",
-  "good": "FROM node:24.11.0-slim\nUSER node\nENTRYPOINT [\"node\", \"dist/index.js\"]"
+  "good": "FROM node:24.11.0-slim\nUSER node\nENTRYPOINT [\"node\", \"dist/index.js\"]",
+  "exclude": [
+    "**/fixtures/**",
+    "**/e2e/**"
+  ]
 }

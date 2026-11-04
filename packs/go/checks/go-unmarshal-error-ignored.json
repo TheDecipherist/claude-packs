@@ -1,0 +1,15 @@
+{
+  "id": "go-unmarshal-error-ignored",
+  "why": "A discarded parse error turns bad input into empty data.",
+  "rule": ".claude/rules/go-errors-are-handled.md",
+  "globs": [
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/*_test.go",
+    "**/vendor/**"
+  ],
+  "pattern": "_\\s*=\\s*json\\.Unmarshal\\(",
+  "bad": "_ = json.Unmarshal(raw, &rows)",
+  "good": "if err := json.Unmarshal(raw, &rows); err != nil { return Fail(err.Error()) }"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "hmac-over-reserialised-body",
+  "why": "A signature covers bytes, and JSON.stringify of the parsed body is not those bytes.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "JSON\\.stringify\\(\\s*req(?:uest)?\\.body\\s*\\)",
+  "bad": "const rawBody = JSON.stringify(req.body);",
+  "good": "const rawBody = req.rawBody;",
+  "kind": "security"
+}

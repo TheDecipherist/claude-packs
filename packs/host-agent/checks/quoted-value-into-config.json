@@ -1,0 +1,24 @@
+{
+  "id": "quoted-value-into-config",
+  "why": "Every output format needs its own escaper, as HTML does: a value with a quote in it rewrites the config around it.",
+  "rule": ".claude/rules/root-on-other-machines.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.mjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "`[^`\\n]*\"\\$\\{(?!esc|quote|validate|sanitize|JSON)[\\w.!\\[\\]]+\\}\"[^`\\n]*;?`",
+  "bad": "lines.push(`add_header ${h.name} \"${h.value}\" always;`);",
+  "good": "lines.push(`add_header ${token(h.name)} ${quoted(h.value)} always;`);",
+  "kind": "security"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "ci-tools-pinned",
+  "why": "A floating tool version changes the build under you, and the Dockerfile that pins it no longer matches.",
+  "rule": ".claude/rules/ci-covers-what-ships.md",
+  "globs": [
+    ".github/workflows/*.yml",
+    ".github/workflows/*.yaml"
+  ],
+  "exclude": [],
+  "pattern": "^\\s*(?:version|node-version|python-version|go-version):\\s*['\\\"]?latest\\b",
+  "flags": "m",
+  "bad": "      - uses: pnpm/action-setup@v4\n        with:\n          version: latest\n",
+  "good": "      - uses: pnpm/action-setup@v4\n        with:\n          version: 9.15.0\n"
+}

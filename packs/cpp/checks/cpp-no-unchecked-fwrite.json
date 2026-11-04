@@ -1,0 +1,17 @@
+{
+  "id": "cpp-no-unchecked-fwrite",
+  "why": "A truncated output file is read later as data, far from the failure. Check what was written.",
+  "rule": ".claude/rules/cpp-absent-and-failed-are-types.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "(?:^|[;{}])[ \\t]*(?:std::)?fwrite\\s*\\(",
+  "bad": "std::fwrite (a.data(), 4, a.size(), f);",
+  "good": "if (std::fwrite (b, 1, n, f) != n) return false;",
+  "flags": "m"
+}

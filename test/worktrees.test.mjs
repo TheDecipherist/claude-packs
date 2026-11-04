@@ -233,6 +233,13 @@ const CASES = {
     assert.equal(fire(here, 'once-only.mjs', join(wt, 'src/dsp/Voice.cpp'), 'float Voice::render (float x) noexcept { return svf.process (x); }\n'), 0);
     assert.equal(fire(here, 'once-only.mjs', join(here, 'src/dsp/Copy.cpp'), SVF('Copy', '1.5f')), 0);
   },
+  'code-shape.mjs': ({ here, wt }) => {
+    // The worktree's layout lifts the limit; main's does not. A file is judged by its own checkout's layout.
+    const packed = 'void f() {\n  a(); b(); c();\n}\n';
+    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards: { codeShape: { maxStatementsPerLine: 9 } } }));
+    assert.equal(fire(here, 'code-shape.mjs', join(wt, 'src/app/one.cpp'), packed), 0);
+    assert.equal(fire(here, 'code-shape.mjs', join(here, 'src/app/one.cpp'), packed), 2);
+  },
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
     put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');

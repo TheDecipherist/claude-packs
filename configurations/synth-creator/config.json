@@ -14,7 +14,8 @@
       "gpu-painter",
       "stellix",
       "python",
-      "shell"
+      "shell",
+      "ci"
     ],
     "default": [
       "cpp",

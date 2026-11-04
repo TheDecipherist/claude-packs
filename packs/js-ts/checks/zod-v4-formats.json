@@ -16,5 +16,8 @@
   "code": true,
   "pattern": "\\bz\\.string\\(\\)\\s*\\.(email|uuid|url|datetime|date|time|ip|ipv4|ipv6|emoji|cuid|ulid|base64)\\s*\\(",
   "bad": "at: z.string().datetime(),\nmail: z.string().email(),",
-  "good": "at: z.iso.datetime(),\nmail: z.email(),"
+  "good": "at: z.iso.datetime(),\nmail: z.email(),",
+  "whenDep": {
+    "zod": 4
+  }
 }

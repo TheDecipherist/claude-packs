@@ -1,6 +1,6 @@
 {
   "id": "field-map-over-if-runs",
-  "why": "Three or more ifs in a row on fields of the same object (if (args.filter?.flag !== undefined) filter.flags = …) grow by one line per field forever. A field table plus one loop keeps every field in one place and makes the next field one table row.",
+  "why": "Three or more ifs in a row on fields of the same object (if (args.filter?.flag !== undefined) filter.flags = \u2026) grow by one line per field forever. A field table plus one loop keeps every field in one place and makes the next field one table row.",
   "rule": ".claude/rules/field-map-over-if-runs.md",
   "concepts": [
     "cpp",
@@ -11,7 +11,12 @@
     "**/node_modules/**",
     "**/dist/**",
     "**/build/**",
-    "**/*.min.js"
+    "**/*.min.js",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*_test.*"
   ],
   "code": true,
   "pattern": "if\\s*\\(\\s*!?\\s*([A-Za-z_$][\\w$]*(?:(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*)*)(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*\\s*(?:(?:!==?|===?)\\s*(?:undefined|null|nullptr)\\s*)?\\)[^\\n]*\\n(?:[^\\n]*\\n){0,3}?\\s*if\\s*\\(\\s*!?\\s*\\1(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*\\s*(?:(?:!==?|===?)\\s*(?:undefined|null|nullptr)\\s*)?\\)[^\\n]*\\n(?:[^\\n]*\\n){0,3}?\\s*if\\s*\\(\\s*!?\\s*\\1(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*\\s*(?:(?:!==?|===?)\\s*(?:undefined|null|nullptr)\\s*)?\\)",

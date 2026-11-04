@@ -1,0 +1,14 @@
+{
+  "id": "compose-image-pinned",
+  "why": "A floating tag changes under a restart.",
+  "rule": ".claude/rules/compose-pinned-and-closed.md",
+  "globs": [
+    "**/*compose*.yml",
+    "**/*compose*.yaml"
+  ],
+  "exclude": [],
+  "pattern": "^\\s*image:\\s*(?:\\S+:latest|[\\w./-]+(?::\\d+)?)\\s*$",
+  "bad": "    image: mongo:8\n",
+  "good": "    image: mongo:8.0.4\n",
+  "flags": "m"
+}

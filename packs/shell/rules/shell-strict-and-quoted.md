@@ -13,6 +13,7 @@ Always do:
 - Use `$(...)`, never backticks.
 - Guard a variable in a delete: `rm -rf "${dir:?}/build"`.
 - Make a temp file with `mktemp`, and remove it with `trap`.
+- Stop what you start: after `child &`, `trap 'kill "$pid" 2>/dev/null' EXIT INT TERM`.
 - Keep a program in its own file: a script that needs Python or Node calls a file, which can be linted and tested.
 - Run `shellcheck` where the project has it.
 

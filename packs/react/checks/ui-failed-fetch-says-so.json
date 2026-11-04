@@ -1,0 +1,23 @@
+{
+  "id": "ui-failed-fetch-says-so",
+  "why": "An empty screen after a failure tells the customer their data is gone, and nobody hears about it.",
+  "rule": ".claude/rules/react-state-and-effects.md",
+  "globs": [
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "strings": true,
+  "pattern": "catch\\s*(?:\\(\\s*\\w*\\s*\\))?\\s*\\{\\s*console\\.\\w+\\([^;{}]*\\);?\\s*\\}",
+  "bad": "try { await load(); } catch (e) { console.error(e); }",
+  "good": "try { await load(); } catch (e) { setError(message(e)); }"
+}

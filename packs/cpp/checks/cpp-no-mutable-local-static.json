@@ -1,0 +1,23 @@
+{
+  "id": "cpp-no-mutable-local-static",
+  "why": "A mutable static is one value for the whole process, shared by every instance and every thread, with nothing to say so. Pass the state in, or make it atomic.",
+  "rule": ".claude/rules/cpp-thread-contracts-are-code.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/gates/**",
+    "**/harness/**",
+    "**/tools/**",
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "^[ \\t]+(?:[^\\n]*[;{][ \\t]*)?static[ \\t]+(?!const\\b|constexpr\\b|constinit\\b|inline\\b|void\\b|assert\\b|std::atomic\\b|std::once_flag\\b|std::mutex\\b)[\\w:<>,*& ]+?[ \\t]+\\w+[ \\t]*(?:\\[[^\\]\\n]*\\][ \\t]*)*(?:=|\\{|;)",
+  "bad": "    static std::vector<int> all; static bool built = false;",
+  "good": "    static const std::vector<int> table = make();\n    static std::atomic<int> count { 0 };\n    static Impl& instance();",
+  "flags": "m"
+}

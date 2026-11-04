@@ -22,7 +22,14 @@
       "ui-craft",
       "python",
       "shell",
-      "cpp"
+      "cpp",
+      "http-api",
+      "react",
+      "multi-tenant",
+      "websocket",
+      "host-agent",
+      "go",
+      "ci"
     ],
     "default": [
       "js-ts"

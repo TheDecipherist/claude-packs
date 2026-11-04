@@ -17,8 +17,8 @@
     "**/test/**",
     "**/tests/**"
   ],
-  "code": true,
-  "pattern": "`[^`]*\\b(bash|sh|node|npm|npx|git)\\s+[^`]*\\$\\{|\\[\\s*['\\\"]-c['\\\"]\\s*,\\s*`[^`]*\\$\\{",
+  "pattern": "\\b(?:exec|execSync|spawn|spawnSync)\\(\\s*`[^`]*\\$\\{|\\[\\s*['\"]-c['\"]\\s*,\\s*`[^`]*\\$\\{",
   "bad": "command: `bash ${join(dir, hook.script)} ${TAG}`,\nspawn('bash', ['-c', `git log ${ref}`]);",
-  "good": "command: ['bash', join(dir, hook.script), TAG],\nexecFile('git', ['log', ref]);"
+  "good": "command: ['bash', join(dir, hook.script), TAG],\nexecFile('git', ['log', ref]);",
+  "strings": true
 }

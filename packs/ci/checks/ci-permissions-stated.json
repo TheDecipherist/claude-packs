@@ -1,0 +1,18 @@
+{
+  "id": "ci-permissions-stated",
+  "why": "With no permissions block a workflow gets the repository default, which can write.",
+  "rule": ".claude/rules/ci-covers-what-ships.md",
+  "globs": [
+    ".github/workflows/*.yml",
+    ".github/workflows/*.yaml"
+  ],
+  "exclude": [],
+  "pattern": "^on:",
+  "flags": "m",
+  "mode": "needs",
+  "needs": [
+    "^permissions:|^\\s+permissions:"
+  ],
+  "bad": "on: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n",
+  "good": "on: push\npermissions:\n  contents: read\njobs:\n  test:\n    runs-on: ubuntu-latest\n"
+}

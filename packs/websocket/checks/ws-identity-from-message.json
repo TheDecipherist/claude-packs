@@ -1,0 +1,26 @@
+{
+  "id": "ws-identity-from-message",
+  "why": "Identity comes from the authenticated connection, and a message can only name what that connection owns.",
+  "rule": ".claude/rules/identity-comes-from-the-connection.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\b\\w+\\(\\s*msg\\.(?:agent_id|user_id|company_id|tenant_id|command_id|session_id)\\b",
+  "bad": "streamManager.updateHeartbeat(msg.agent_id, msg.status);",
+  "good": "streamManager.updateHeartbeat(conn.agentId, msg.status);",
+  "kind": "security"
+}

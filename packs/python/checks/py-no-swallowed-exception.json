@@ -11,8 +11,8 @@
     "**/.venv/**",
     "**/venv/**"
   ],
-  "pattern": "^\\s*except\\b[^\\n]*:\\s*(?:#[^\\n]*)?\\n\\s*pass\\b",
+  "pattern": "^\\s*except\\b[^\\n]*:\\s*(?:#[^\\n]*)?\\n\\s*pass\\b|^\\s*except\\b(?:\\s+\\(?(?:Exception|BaseException)\\b[^\\n:]*)?:[ \\t]*(?:pass|continue|return\\b(?:[ \\t]+(?:None|True|False|0|1|\\[\\]|\\{\\}|\"\"|''))?)[ \\t]*(?:#[^\\n]*)?$",
   "flags": "m",
-  "bad": "try:\n    run()\nexcept ValueError:\n    pass",
-  "good": "try:\n    run()\nexcept ValueError as e:\n    log.warning(e)"
+  "bad": "try:\n    run()\nexcept ValueError:\n    pass\ntry:\n    run()\nexcept Exception: return 0",
+  "good": "try:\n    run()\nexcept ValueError as e:\n    log.warning(e)\ntry:\n    run()\nexcept FileNotFoundError: return None"
 }

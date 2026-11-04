@@ -14,7 +14,11 @@
       "ai",
       "mongo",
       "js-ts",
-      "cpp"
+      "cpp",
+      "http-api",
+      "multi-tenant",
+      "ci",
+      "go"
     ],
     "default": [
       "python"

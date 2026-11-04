@@ -19,7 +19,7 @@ Checks: >
   readability-make-member-function-const,
   misc-definitions-in-headers
 WarningsAsErrors: '*'
-HeaderFilterRegex: '^(.*/)?(Source|src)/.*'
+HeaderFilterRegex: '.*/(Source|src|lib|include)/.*'
 CheckOptions:
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
     value: true

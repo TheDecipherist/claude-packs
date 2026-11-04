@@ -1,0 +1,25 @@
+{
+  "id": "tenant-filter-from-url",
+  "why": "A query that takes its key from the URL and carries no tenant key reads or writes any tenant.",
+  "rule": ".claude/rules/no-role-crosses-a-tenant.md",
+  "globs": [
+    "**/routes/**/*.ts",
+    "**/routes/**/*.js",
+    "**/app/api/**/route.ts"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\b(?:queryOne|updateOne|deleteOne|updateMany|deleteMany|findOne|findOneAndUpdate)(?:<[^(]*?>)?\\(\\s*'[\\w-]+'\\s*,\\s*\\{(?:(?!company_id|tenant_id|org_id|account_id|\\.\\.\\.)[^{}])*(?:req\\.params|\\bslug\\b)(?:(?!company_id|tenant_id|org_id|account_id|\\.\\.\\.)[^{}])*\\}",
+  "bad": "await deleteOne('companies', { slug: req.params.slug });",
+  "good": "await deleteOne('companies', { slug: req.params.slug, company_id: user.company_id });",
+  "kind": "security"
+}

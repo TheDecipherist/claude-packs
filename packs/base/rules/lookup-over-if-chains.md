@@ -14,7 +14,7 @@ Always do:
 - **Inside a hot inner loop only** (an audio callback, a per-pixel loop): one exhaustive `switch` on an `enum class` (no `default:`, so `-Wswitch` under `-Werror` catches a missing case), inside the kind's owner and nowhere else. Never `std::map`, `std::unordered_map` or `std::function` tables there (audio-core: `audio-thread-realtime-safe`).
 
 Never do:
-- Write `if (x == A) … else if (x == B) … else if (x == C) …` on one value.
+- Write `if (x == A) … else if (x == B) … else if (x == C) …` on one value, or the same as a ternary chain.
 - Rebuild the lookup table inside the function on every call.
 
 `if` is still right for:
@@ -46,4 +46,4 @@ return (builders[action] ?? buildDefault)(p);
 ```
 
 ## Check
-`.claude/checks/lookup-over-if-chains.json` refuses an edit that **adds** three `==`/`===` branches on the same value. Existing chains are only judged when an edit touches them. If a chain ever slips through in a new shape, tighten the check rather than fixing the one case.
+`.claude/checks/lookup-over-if-chains.json` refuses an edit that **adds** three `==`/`===` branches on the same value, and `lookup-over-ternary-chains` three `?` in one chain. Existing chains are only judged when an edit touches them. If a chain ever slips through in a new shape, tighten the check rather than fixing the one case.

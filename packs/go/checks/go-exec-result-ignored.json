@@ -1,0 +1,15 @@
+{
+  "id": "go-exec-result-ignored",
+  "why": "A discarded error on a state change reports success for work that failed.",
+  "rule": ".claude/rules/go-errors-are-handled.md",
+  "globs": [
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/*_test.go",
+    "**/vendor/**"
+  ],
+  "pattern": "_,\\s*_(?:,\\s*_)?\\s*=\\s*[\\w.]*(?:Exec\\w*|Run|Shell|\\w*Run|\\w*Shell)\\(",
+  "bad": "_, _, _ = docker.ExecAndCapture(ctx, id, cmd)",
+  "good": "if _, _, err := docker.ExecAndCapture(ctx, id, cmd); err != nil { return Fail(err.Error()) }"
+}

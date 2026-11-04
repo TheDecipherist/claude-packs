@@ -20,7 +20,7 @@
     "**/*.stories.*"
   ],
   "code": false,
-  "pattern": "<(?:div|span|li|td|p)\\b[^>]*\\bon[Cc]lick\\s*=",
+  "pattern": "<(?:div|span|li|td|p)\\b(?![^>]*\\binset-0\\b)[^>]*\\bon[Cc]lick\\s*=",
   "bad": "<div onClick={open}>Open</div>",
   "good": "<button type=\"button\" onClick={open}>Open</button>"
 }

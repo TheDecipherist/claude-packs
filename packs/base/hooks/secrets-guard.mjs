@@ -19,7 +19,7 @@ import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ENV = /^\.env(\..+)?$/;
 const ENV_OK = /\.(example|sample|template|dist)$/;
-const KEY = /\.(pem|key|p12|pfx|jks|keystore)$|^id_(rsa|dsa|ecdsa|ed25519)$|^credentials\.json$/;
+const KEY = /\.(pem|key|private|p12|pfx|jks|keystore)$|^id_(rsa|dsa|ecdsa|ed25519)$|^credentials\.json$/;
 export const isSecretFile = (p) => { const b = basename(p); return (ENV.test(b) && !ENV_OK.test(b)) || KEY.test(b); };
 const isEnv = (p) => ENV.test(basename(p)) && !ENV_OK.test(basename(p));
 
@@ -30,7 +30,8 @@ export const SECRETS = [
   ['an AWS access key', /\bAKIA[0-9A-Z]{16}\b/g],
   ['a Slack token', /\bxox[abprs]-[A-Za-z0-9-]{10,}/g],
   ['a Stripe secret key', /\b[rs]k_live_[A-Za-z0-9]{20,}/g],
-  ['a private key', /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----/g],
+  ['a private key', /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----\s+[A-Za-z0-9+/=\s]{64,}/g],
+  ['a prefixed API key', /\b(?!price_|prod_|pk_|[rs]k_live_|github_pat_|gh[pousr]_)(?=[a-z]{2,8}_)(?=[\w-]*[A-Z])(?=[\w-]*\d)[a-z]{2,8}_[A-Za-z0-9_-]{24,}\b/g],
   ['a connection string with its password', /\b(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqp):\/\/[^\s:@/'"`]+:(?!\$\{|\$[A-Za-z_]|<|\*+@)[^\s@/'"`]{3,}@/g],
 ];
 const count = (text, re) => (text.match(re) ?? []).length;
@@ -89,7 +90,8 @@ function selftest() {
   const run = (d, payload) => runHook(hook, d, payload);
   const cases = [
     ['a GitHub token written into source', run(dir, writeOf(join(dir, 'src/app.ts'), `const t = '${gh}';\n`)), 2],
-    ['a private key written into a doc', run(dir, writeOf(join(dir, 'docs/key.md'), `${pem}\nabc\n`)), 2],
+    ['a private key written into a doc', run(dir, writeOf(join(dir, 'docs/key.md'), `${pem}\n${'MIIEvQIBADANBgkqhkiG9w0BAQEFAASC'.repeat(3)}\n`)), 2],
+    ['a bare header in a doc is a placeholder', run(dir, writeOf(join(dir, 'docs/format.md'), `${pem}\n...\n`)), 0],
     ['a connection string with its password', run(dir, writeOf(join(dir, 'src/db.ts'), "const u = 'mongodb+srv://tim:hunter22@c0.x.net/db';\n")), 2],
     ['a connection string that names its password ($VAR)', run(dir, writeOf(join(dir, 'src/db.ts'), 'const u = `mongodb+srv://tim:${process.env.PW}@c0.x.net/db`;\n')), 0],
     ['code that reads the token by name', run(dir, writeOf(join(dir, 'src/app.ts'), 'const t = process.env.GITHUB_TOKEN;\n')), 0],

@@ -21,7 +21,8 @@
     "**/bin/**",
     "**/scripts/**",
     "**/tools/**",
-    "**/cli.*"
+    "**/cli.*",
+    "**/cli/**"
   ],
   "code": true,
   "pattern": "\\bconsole\\s*\\.\\s*(log|info|warn|error|debug|trace)\\s*\\(",

@@ -1,0 +1,26 @@
+{
+  "id": "short-code-needs-limit",
+  "why": "A six-digit code with no per-account attempt limit is an open door.",
+  "rule": ".claude/rules/credentials-handled-safely.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "randomInt\\(\\s*\\d[\\d_]*\\s*,\\s*\\d[\\d_]*\\s*\\)\\.toString\\(\\)",
+  "bad": "const code = randomInt(100_000, 1_000_000).toString();",
+  "good": "const code = randomBytes(32).toString('base64url');",
+  "kind": "security"
+}

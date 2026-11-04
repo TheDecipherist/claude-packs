@@ -33,11 +33,13 @@ export function blankCode(src, keepStrings = false) {
       const stop = end === -1 ? src.length : end + 2;
       out += blank(src.slice(i, stop));
       i = stop;
-    } else if (!keepStrings && (src[i] === '"' || src[i] === "'")) {
+    } else if (src[i] === '"' || src[i] === "'" || src[i] === '`') {
+      // A string is walked either way, so a // inside one is no comment. A template string can span lines and stays as written.
       const q = src[i];
       let j = i + 1;
-      while (j < src.length && src[j] !== q && src[j] !== '\n') j += src[j] === '\\' ? 2 : 1;
-      out += q + blank(src.slice(i + 1, j)) + (j < src.length ? src[j] : '');
+      while (j < src.length && src[j] !== q && (src[j] !== '\n' || q === '`')) j += src[j] === '\\' ? 2 : 1;
+      const inner = src.slice(i + 1, j);
+      out += q + (keepStrings || q === '`' ? inner : blank(inner)) + (j < src.length ? src[j] : '');
       i = j + 1;
     } else {
       out += src[i];

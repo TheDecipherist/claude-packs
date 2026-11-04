@@ -15,7 +15,7 @@
     "**/*.test.*",
     "**/*.spec.*"
   ],
-  "pattern": "\\buppercase\\b[^\"'`\\n]*\\btracking-(?:wide|wider|widest|\\[)|\\btracking-(?:wide|wider|widest)\\b[^\"'`\\n]*\\buppercase\\b",
-  "bad": "<p className=\"text-xs uppercase tracking-widest\">Features</p>\n",
+  "pattern": "uppercase[^\"'\\n]*tracking-[^>\\n]*>[^<\\n]*</\\w+>\\s*<h[1-3]\\b",
+  "bad": "<p className=\"text-xs uppercase tracking-widest\">Docs</p>\n<h2>Title</h2>",
   "good": "<h2 className=\"text-2xl\">What it does</h2>\n"
 }

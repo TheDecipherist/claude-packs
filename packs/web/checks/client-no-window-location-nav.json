@@ -22,7 +22,7 @@
   ],
   "code": false,
   "flags": "m",
-  "pattern": "^(?!.*allow location nav).*window\\.location\\.(?:href\\s*=|assign\\s*\\(|replace\\s*\\(|reload\\s*\\()",
+  "pattern": "^(?!.*allow location nav).*window\\.location\\.(?:href\\s*=(?!\\s*['\"`]https?://)|assign\\s*\\((?!\\s*['\"`]https?://)|replace\\s*\\((?!\\s*['\"`]https?://)|reload\\s*\\()",
   "bad": "window.location.href = '/admin/tools';",
   "good": "router.push('/admin/tools');\nwindow.location.href = file.downloadUrl; // allow location nav"
 }

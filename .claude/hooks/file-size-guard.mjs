@@ -16,7 +16,7 @@ import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 // Code, scripts, shaders and CMake files (Stellix's source rule counted scripts and CMake too); docs and data are not code.
-const SOURCE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.wgsl', '.metal', '.hlsl', '.glsl', '.vert', '.frag', '.sh', '.bash', '.cmake']);
+const SOURCE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.inc', '.inl', '.ipp', '.tpp', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.wgsl', '.metal', '.hlsl', '.glsl', '.vert', '.frag', '.sh', '.bash', '.cmake']);
 const isSource = (rel) => SOURCE.has(extname(rel)) || /(^|\/)CMakeLists\.txt$/.test(rel);
 const EXEMPT = ['**/*.generated.*', '**/generated/**', 'build/**', '_deps/**'];
 

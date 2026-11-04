@@ -21,7 +21,8 @@
     "**/*.spec.*",
     "**/test/**",
     "**/tests/**",
-    "**/stored-text.*"
+    "**/stored-text.*",
+    "**/scripts/**"
   ],
   "strings": true,
   "pattern": "(?:\\bfrom\\s+|\\bimport\\s+|\\brequire\\(\\s*|\\bimport\\(\\s*)['\"](?:marked|markdown-it|micromark|react-markdown|remark[\\w-]*|rehype[\\w-]*|shiki|highlight\\.js|prismjs|dompurify|isomorphic-dompurify|sanitize-html)(?:/[^'\"]*)?['\"]",

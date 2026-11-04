@@ -11,7 +11,11 @@
     "choose": [
       "stored-text",
       "ui-craft",
-      "shell"
+      "shell",
+      "react",
+      "multi-tenant",
+      "websocket",
+      "ci"
     ],
     "default": [
       "stored-text",

@@ -19,7 +19,7 @@
   ],
   "code": false,
   "mode": "needs",
-  "pattern": "(?:(?<![\\w.])|(?<=child_process\\.)|(?<=\\bcp\\.))(?:spawn|execFile|exec|fork)\\s*\\(",
+  "pattern": "(?:(?<![\\w.])|(?<=child_process\\.)|(?<=\\bcp\\.))(?:spawn|fork)\\s*\\(",
   "needs": [
     "\\.on\\s*\\(\\s*['\\\"]error['\\\"]"
   ],

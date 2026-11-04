@@ -18,7 +18,7 @@
     "**/tests/**",
     "**/stored-text.*"
   ],
-  "pattern": "^(?![^\\n]*plain text:)[^\\n]*(?:>\\s*\\{\\s*[\\w$.?]*(?:\\?\\.|\\.)(?:content|body|markdown|transcript|message|prompt|reply|output|note|summary)\\s*\\}|\\$\\{\\s*(?:(?:esc\\w*|escapeHtml)\\(\\s*)?[\\w$.?]*(?<!\\breq)(?<!\\brequest)(?:\\?\\.|\\.)(?:content|body|markdown|transcript|message|prompt|reply|output|note|summary)\\b[^}\\n]*\\})",
+  "pattern": "^(?![^\\n]*plain text:)[^\\n]*(?:>\\s*\\{\\s*[\\w$.?]*(?:\\?\\.|\\.)(?:content|body|markdown|transcript|prompt|reply|output|summary)\\s*\\}|\\$\\{\\s*(?:(?:esc\\w*|escapeHtml)\\(\\s*)?[\\w$.?]*(?<!\\breq)(?<!\\brequest)(?:\\?\\.|\\.)(?:content|body|markdown|transcript|prompt|reply|output|summary)\\b[^}\\n]*\\})",
   "flags": "m",
   "bad": "<p>{row.body}</p>\nconst h = `<li>${esc(row.note ?? row.tool)}</li>`;\n",
   "good": "<StoredText source={row.body} />\nconst page = html`<div>${raw(renderStored(row.body))}</div>`;\n<td>{row.title}</td>\n<td>{row.content}</td> {/* plain text: a short label from an enum */}\nconst u = `${req.body}`;\n"

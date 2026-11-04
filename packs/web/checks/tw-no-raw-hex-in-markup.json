@@ -21,10 +21,14 @@
     "**/*.stories.*",
     "**/tokens*",
     "**/theme*",
-    "**/components/ui/**"
+    "**/components/ui/**",
+    "**/email/**",
+    "**/emails/**",
+    "**/mail/**"
   ],
   "code": false,
   "pattern": "#[0-9a-fA-F]{6}\\b",
   "bad": "<div className=\"bg-[#1f2937]\">",
-  "good": "<div className=\"bg-surface-2\">"
+  "good": "<div className=\"bg-surface-2\">",
+  "kind": "quality"
 }

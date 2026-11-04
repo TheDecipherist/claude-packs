@@ -1,0 +1,28 @@
+{
+  "id": "dialog-needs-role",
+  "why": "A modal with no role is a blank page to a screen reader.",
+  "rule": ".claude/rules/react-accessible-controls.md",
+  "globs": [
+    "**/*.tsx",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "strings": true,
+  "pattern": "\\bfixed inset-0\\b",
+  "mode": "needs",
+  "needs": [
+    "role=[\\\"'{]+dialog|<dialog\\b|<Dialog\\b"
+  ],
+  "bad": "<div className=\"fixed inset-0 z-50\"><div>x</div></div>",
+  "good": "<div role=\"dialog\" aria-modal=\"true\" className=\"fixed inset-0\"></div>"
+}

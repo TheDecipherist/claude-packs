@@ -1,0 +1,27 @@
+{
+  "id": "integrity-check-optional",
+  "why": "An optional check is no check, and this one guards root on customers' hosts.",
+  "rule": ".claude/rules/root-on-other-machines.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\bif\\s*\\(\\s*expected\\w*\\s*&&\\s*\\w+\\s*!==\\s*expected",
+  "bad": "if (expectedSha256 && actual !== expectedSha256) return fail();",
+  "good": "if (!expectedSha256 || actual !== expectedSha256) return fail();",
+  "kind": "security"
+}

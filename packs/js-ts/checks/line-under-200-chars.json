@@ -22,7 +22,9 @@
     "**/templates/**",
     "**/views/**",
     "**/ui/**",
-    "**/*.view.ts"
+    "**/*.view.ts",
+    "**/*generated*",
+    "**/data/**"
   ],
   "code": false,
   "flags": "m",

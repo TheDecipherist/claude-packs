@@ -1,0 +1,30 @@
+{
+  "id": "webhook-dedupes-event-id",
+  "why": "Every provider delivers at least once, so a handler with no dedupe key eventually bills or downgrades twice.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/webhook*/**",
+    "**/webhook*.ts",
+    "**/webhook*.js"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\.webhooks\\.constructEvent\\(",
+  "mode": "needs",
+  "needs": [
+    "\\bevent\\.id\\b"
+  ],
+  "bad": "stripe.webhooks.constructEvent(b, s, k);",
+  "good": "stripe.webhooks.constructEvent(b, s, k); if (await seen(event.id)) return ok();",
+  "kind": "security"
+}

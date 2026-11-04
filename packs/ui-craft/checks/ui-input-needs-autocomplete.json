@@ -18,5 +18,6 @@
   "pattern": "<input\\b(?![^>]*\\bautocomplete)[^>]*\\btype=[\"'{]*(?:email|password|tel)\\b",
   "bad": "<input type=\"email\" name=\"email\" />\n",
   "good": "<input type=\"email\" name=\"email\" autoComplete=\"email\" />\n",
-  "flags": "i"
+  "flags": "i",
+  "kind": "quality"
 }

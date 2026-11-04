@@ -1,0 +1,27 @@
+{
+  "id": "tmp-path-predictable",
+  "why": "A fixed path in /tmp can be planted or read by another user.",
+  "rule": ".claude/rules/root-on-other-machines.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "['\"`]/tmp/[\\w.${}-]+",
+  "bad": "const keyFile = `/tmp/swk-${id}-key.pem`;",
+  "good": "const dir = await mkdtemp(join(tmpdir(), 'swk-'));\nconst keyFile = join(dir, 'key.pem');",
+  "kind": "security"
+}

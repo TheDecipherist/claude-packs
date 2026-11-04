@@ -1,0 +1,27 @@
+{
+  "id": "ssh-verifies-host-key",
+  "why": "An SSH connection with no host key check trusts whoever answers.",
+  "rule": ".claude/rules/root-on-other-machines.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\.connect\\(\\{\\s*host\\b(?:(?!hostVerifier)[\\s\\S]){0,400}?\\}\\)",
+  "bad": "conn.connect({ host, port, username, password });",
+  "good": "conn.connect({ host, port, username, password, hostVerifier: pinned(host) });",
+  "kind": "security"
+}

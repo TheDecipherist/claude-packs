@@ -1,0 +1,26 @@
+{
+  "id": "system-file-written-in-place",
+  "why": "A crash between two steps must not leave things worse than before: write a temp file, validate, rename.",
+  "rule": ".claude/rules/root-on-other-machines.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "(?:writeFile|writeFileSync)\\(\\s*[`'\"]/etc/|os\\.WriteFile\\(\\s*(?:\"/etc/|filepath\\.Join\\(\"/etc/)",
+  "bad": "await writeFile('/etc/bind/named.conf', conf, 'utf-8');",
+  "good": "await writeFile(tmp, conf);\nawait rename(tmp, '/etc/bind/named.conf');"
+}

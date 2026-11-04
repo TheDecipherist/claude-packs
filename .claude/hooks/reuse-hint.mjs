@@ -16,20 +16,34 @@ const COMMON = new Set(`this that with from have make need want when what where 
 
 const stem = (w) => w.toLowerCase().replace(/(?:ing|ers|er|es|ed|s)$/, '');
 const piecesOf = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/[\s_-]+/).filter((w) => w.length >= 3).map(stem);
-const wordsOf = (prompt) => new Set((prompt.match(/[A-Za-z]{4,}/g) ?? []).filter((w) => !COMMON.has(w.toLowerCase())).map(stem));
+const NEAR = 5;   // the pieces of a name lie within this many words of each other: scattered over a long prompt they are chance
+const LONG = 150; // words: past this a prompt is a document, and any name can be spelled out of it
 
-// A compound name, with at least two of its pieces in the prompt. One word in common says nothing.
+// { word: [its places in the prompt] }.
+function placesOf(prompt) {
+  const places = new Map();
+  (prompt.match(/[A-Za-z]+/g) ?? []).forEach((w, i) => {
+    if (w.length < 4 || COMMON.has(w.toLowerCase())) return;
+    const k = stem(w);
+    places.set(k, [...(places.get(k) ?? []), i]);
+  });
+  return places;
+}
+
+const closeTogether = (pieces, places) => pieces.some((p) => (places.get(p) ?? []).some((at) => pieces.every((q) => (places.get(q) ?? []).some((x) => Math.abs(x - at) <= NEAR))));
+
+// A compound name, with all its pieces in the prompt, close together. One word in common says nothing.
 export function matches(prompt, index) {
-  const words = wordsOf(prompt);
+  if (prompt.split(/\s+/).length > LONG) return [];
+  const places = placesOf(prompt);
   const out = [];
   for (const [file, e] of Object.entries(index)) {
     for (const [name, line] of e.defs ?? []) {
       const pieces = piecesOf(name);
-      const hits = pieces.filter((p) => words.has(p)).length;
-      if (pieces.length >= 2 && hits >= 2) out.push({ name, at: `${file}:${line}`, score: hits / pieces.length });
+      if (pieces.length >= 2 && closeTogether(pieces, places)) out.push({ name, at: `${file}:${line}`, size: pieces.length });
     }
   }
-  return out.sort((a, b) => b.score - a.score).slice(0, SHOWN);
+  return out.sort((a, b) => b.size - a.size).slice(0, SHOWN);
 }
 
 function main(text) {
@@ -51,6 +65,8 @@ function selftest() {
     ['one word in common says nothing', named('the date of the last deploy'), ''],
     ['a one-word name is never matched', named('render the render view'), ''],
     ['an empty prompt', named(''), ''],
+    ['the pieces far apart', named('format the page first, then later on, much further down, show a date and a range'), ''],
+    ['a long document', named(`format the date range ${'and more words here '.repeat(40)}`), ''],
     ['a prompt about nothing here', named('rename the settings page title'), ''],
   ]);
 }

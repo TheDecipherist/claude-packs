@@ -1,0 +1,16 @@
+{
+  "id": "cpp-no-float-loop-counter",
+  "why": "A float counter drifts, so the trip count depends on accumulated rounding. Count integers and compute the value.",
+  "rule": ".claude/rules/cpp-numbers-and-casts.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "\\bfor\\s*\\(\\s*(?:const\\s+)?(?:float|double)\\s+\\w+\\s*=[^;\\n]*;[^;\\n]*;\\s*\\w+\\s*(?:\\+=|-=|\\*=|/=|\\+\\+|--)",
+  "bad": "for (float mag = lo; mag <= hi + 1e-4f; mag += 0.06f) {",
+  "good": "for (int k = 0; k < steps; k++) { const float mag = lo + float (k) * step; }\nfor (float v : values) total += v;"
+}

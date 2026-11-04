@@ -10,24 +10,33 @@ Per-project Claude Code rules, lesson checks, hooks and skills for The Decipheri
 |---|---|---|---|---|
 | `ai` | Code that calls a model | 2 | 4 | 0 |
 | `audio-core` | Any JUCE synth or effect | 40 | 8 | 7 |
-| `base` | Universal engineering every configuration gets | 19 | 4 | 6 |
-| `cpp` | Any C++ project | 3 | 1 | 1 |
-| `docker` | Dockerfiles, Compose and Swarm | 3 | 21 | 1 |
+| `base` | Universal engineering every configuration gets | 20 | 7 | 7 |
+| `ci` | CI workflows | 1 | 2 | 0 |
+| `cpp` | Any C++ project | 9 | 12 | 1 |
+| `docker` | Dockerfiles, Compose and Swarm | 4 | 24 | 1 |
 | `fastify` | Fastify servers | 5 | 15 | 0 |
-| `full-stack` | The full-stack configuration's own laws | 11 | 0 | 1 |
+| `full-stack` | The full-stack configuration's own laws | 12 | 1 | 0 |
+| `go` | Go projects | 1 | 2 | 0 |
 | `gpu-painter` | GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows), drawn nat | 15 | 6 | 6 |
 | `hook-proof` | A hook that should refuse does refuse | 1 | 5 | 1 |
-| `html-ui` | Server-rendered HTML (template strings, views) | 1 | 4 | 0 |
-| `js-ts` | JavaScript and TypeScript | 23 | 25 | 0 |
-| `mongo` | MongoDB with the native driver | 5 | 16 | 0 |
+| `host-agent` | Software that runs as root on machines it does not own | 1 | 7 | 0 |
+| `html-ui` | Server-rendered HTML (template strings, views) | 2 | 5 | 0 |
+| `http-api` | Any HTTP server, in any framework | 3 | 26 | 1 |
+| `js-ts` | JavaScript and TypeScript | 27 | 35 | 0 |
+| `mongo` | MongoDB with the native driver | 6 | 18 | 0 |
+| `multi-tenant` | One system, many customers | 1 | 2 | 1 |
 | `nginx` | NGINX in front of containers | 2 | 7 | 1 |
+| `python` | Python projects | 2 | 11 | 1 |
+| `react` | React | 2 | 6 | 0 |
+| `shell` | Shell scripts | 2 | 9 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 |
 | `stellix` | Stellix spec laws | 5 | 5 | 0 |
 | `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 1 |
 | `synth-creator` | The synth-creator configuration's own laws, installed with it and neve | 5 | 0 | 2 |
 | `tui` | Terminal UIs (Ink + React or raw-mode Node) | 1 | 5 | 1 |
-| `ui-craft` | Application and page design in any web stack | 16 | 24 | 8 |
-| `web` | Web UI (Next | 7 | 20 | 5 |
+| `ui-craft` | Application and page design in any web stack | 16 | 24 | 9 |
+| `web` | Web UI (Next | 8 | 22 | 5 |
+| `websocket` | WebSocket services | 1 | 3 | 0 |
 | `writing` | Text that goes public reads like a person wrote it | 9 | 11 | 10 |
 
 The projects on the kit: Stellix (`init audio-core gpu-painter stellix --profile stellix`) and Sub37 (`init audio-core --profile sub37`), both in the synth-creator configuration.
@@ -44,6 +53,8 @@ chosen packs.
 |---|---|---|
 | `base` | base | universal engineering only; the kit's own repo |
 | `cpp` | base + cpp | any C++ project that is not a synth |
+| `python` | base + python | Python projects |
+| `go` | base + go | Go projects |
 | `synth-creator` | base, synth-creator; to choose: audio-core, gpu-painter, stellix | JUCE synths and effects: everything the kit installed before 0.10.0 |
 | `full-stack` | base, full-stack | a Fastify API and a Next.js web app, Zod 4 schemas in one folder, one database gateway |
 
@@ -158,6 +169,25 @@ The `template-law` hook refuses a second hand-built copy of an element, in HTML,
 ## Anything repeated is one template, in C++ too (0.24.0)
 
 `template-law` compares code with names, numbers and strings stripped, so a copy with other names reads the same: an element, an object set up field by field, a run of statements, or one call repeated as a table written by hand. A refusal names the copies, what differs between them and the template to make; `scan` lists what a project already repeats, the same way. The `cpp` pack (`init cpp`, or `--config cpp`) adds the C++ forms of a template, one shared reader for gates and probes, and the `cpp-extract-template` skill. A tree kept the same as its source on purpose is a folder of kind `copy`, or a glob in `guards.templates.exclude`.
+
+## Start here: suggest, scan, fix (0.25.0)
+
+```
+npx --no-install @thedecipherist/claude-packs suggest      # which packs this project needs, and why
+npx --no-install @thedecipherist/claude-packs init --auto  # install exactly that
+npx --no-install @thedecipherist/claude-packs scan         # everything already wrong, on a copy of the project
+npx --no-install @thedecipherist/claude-packs fix          # the scan as a work order: .claude/fix-plan.md
+```
+
+Then tell Claude to work through `.claude/fix-plan.md`; the `fix-from-scan` skill says how.
+
+## Repetition is stopped before it is written, in every language (0.25.0)
+
+Three layers, earliest first. At the prompt, `reuse-hint` shows what the repo already has when the prompt names it. At the `making:` line, the step says what it reuses. At the write, `template-law` refuses a copy, a near copy or a function made again, before it reaches the disk, and says what to make instead. One table reads C and C++, JS and TS, Python, shell, Go, Rust, Java, C#, Scala, Dart, Kotlin, Swift, Ruby, PHP and Lua; the `cpp`, `python`, `shell` and `js-ts` packs add each language's own forms of a template.
+
+## Reviewed against real code (0.25.0)
+
+Senior reviews of three real repos, a C++ synth and two TypeScript services, set the kit's next laws. The worst faults there had no check, so the packs now cover them: cross-tenant reads, guards that fail open, secrets in logs, unsafe root agents, statements packed onto one line. `code-shape` keeps code small in every direction, not only in lines per file.
 
 ## Commands
 

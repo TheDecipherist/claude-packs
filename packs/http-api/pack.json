@@ -1,0 +1,22 @@
+{
+  "name": "http-api",
+  "version": "1.0.0",
+  "description": "Any HTTP server, in any framework: every route ties a record to its caller, guards fail closed, input is validated, secrets are compared and stored safely, and what a route returns gives nothing away.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/http-api"
+  },
+  "keywords": [
+    "http",
+    "api",
+    "security"
+  ],
+  "engines": {
+    "claude-packs": ">=0.25.0"
+  }
+}

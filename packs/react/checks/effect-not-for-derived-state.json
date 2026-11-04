@@ -1,0 +1,24 @@
+{
+  "id": "effect-not-for-derived-state",
+  "why": "The screen shows data for the filter the user left, with no sign that it is wrong.",
+  "rule": ".claude/rules/react-state-and-effects.md",
+  "globs": [
+    "**/*.tsx",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "useEffect\\(\\s*\\(\\)\\s*=>\\s*\\{?\\s*set[A-Z]\\w*\\([^;\\n]*\\)\\s*;?\\s*\\}?\\s*,\\s*\\[[^\\]]+\\]\\s*\\)",
+  "bad": "useEffect(() => { setPage(1); }, [filter]);",
+  "good": "const onFilter = (f) => { setFilter(f); setPage(1); };"
+}

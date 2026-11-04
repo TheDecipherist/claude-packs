@@ -13,7 +13,8 @@
       "shell-hooks",
       "python",
       "shell",
-      "js-ts"
+      "ci",
+      "go"
     ],
     "default": [
       "cpp"

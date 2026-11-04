@@ -17,7 +17,10 @@
     "**/*.spec.*",
     "**/test/**",
     "**/tests/**",
-    "**/*.stories.*"
+    "**/*.stories.*",
+    "**/app/api/**",
+    "**/route.ts",
+    "**/route.js"
   ],
   "code": false,
   "pattern": "sk-ant-|ANTHROPIC_API_KEY|OPENAI_API_KEY|MONGODB_URI|mongodb(?:\\+srv)?://",

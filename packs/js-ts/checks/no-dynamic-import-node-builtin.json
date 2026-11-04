@@ -11,7 +11,12 @@
     "**/build/**",
     "**/.next/**",
     ".claude/**",
-    "**/.claude/**"
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*_test.*"
   ],
   "code": false,
   "pattern": "\\bimport\\s*\\(\\s*['\\\"]node:",

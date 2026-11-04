@@ -1,0 +1,27 @@
+{
+  "id": "gate-is-not-a-todo",
+  "why": "Temporary access paths are never removed, and an AI writes the comment instead of the check because the comment passes every test.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "(?:TODO|FIXME|XXX|[Ff]or now|[Ii]n production|[Ll]ater)\\b[^\\n]*\\b(?:auth\\w*|admin|role|plan|permission|signature|ownership|access control|tenant)\\b",
+  "bad": "// for now allow any user; in production add admin role check",
+  "good": "// admins only: adminGuard above",
+  "kind": "security"
+}

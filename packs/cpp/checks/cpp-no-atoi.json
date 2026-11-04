@@ -1,0 +1,16 @@
+{
+  "id": "cpp-no-atoi",
+  "why": "atoi cannot report failure, and stoi reports it by throwing, so neither belongs on text the program did not write itself.",
+  "rule": ".claude/rules/cpp-absent-and-failed-are-types.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "(?<![\\w.>])(?:std::)?(?:atoi|atol|atoll|atof)\\s*\\(|\\bstd::sto(?:i|l|ll|ul|ull|f|d|ld)\\s*\\(",
+  "bad": "const int n = std::atoi (argv[1]);",
+  "good": "const auto [p, ec] = std::from_chars (s.data(), s.data() + s.size(), n);"
+}

@@ -18,7 +18,7 @@
     "**/tests/**"
   ],
   "code": true,
-  "pattern": "\\bswitch\\s*\\([^)]*\\)\\s*\\{[\\s\\S]{0,1200}?\\bcase\\b[\\s\\S]{0,1200}?\\bcase\\b[\\s\\S]{0,1200}?\\bcase\\b",
+  "pattern": "\\bswitch\\s*\\([^)]*\\)\\s*\\{\\s*(?:case\\b[^:\\n]*:\\s*(?:return\\b[^;\\n]*;|[\\w.]+\\s*=[^;\\n]*;\\s*break;)\\s*){3,}",
   "bad": "switch (def.type) {\n  case 'string': return s();\n  case 'number': return n();\n  case 'boolean': return b();\n}",
   "good": "const CONVERTERS = { string: s, number: n, boolean: b } satisfies Record<ZodType, Converter>;\nreturn CONVERTERS[def.type](def);"
 }

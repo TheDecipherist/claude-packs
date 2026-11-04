@@ -1,0 +1,27 @@
+{
+  "id": "file-path-from-param",
+  "why": "A path built from a parameter can leave the folder it was meant for.",
+  "rule": ".claude/rules/root-on-other-machines.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "(?:writeFile|readFile|unlink|rm)\\(\\s*`/[^`\\n]*\\$\\{(?!safe|basename)[^}]+\\}",
+  "bad": "await writeFile(`/etc/bind/zones/${zf.name}`, zf.content);",
+  "good": "await writeFile(join(ZONES, safeName(zf.name)), zf.content);",
+  "kind": "security"
+}

@@ -26,6 +26,20 @@ const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 
 // "concepts": [...] resolve through .claude/layout.json, the same map the rules trigger from.
 // A worktree file is judged by its own checkout's checks and layout (claudeRoot).
+// "whenDep": { "zod": 4 }: a check for that major version on. A project that pins an older one is left alone; one that names none is judged.
+function majorsOf(root, dep) {
+  const files = [join(root, 'package.json')];
+  try { for (const p of readdirSync(join(root, 'packages'))) files.push(join(root, 'packages', p, 'package.json')); } catch { /* not a workspace */ }
+  return files.flatMap((f) => {
+    try {
+      const j = JSON.parse(readFileSync(f, 'utf8'));
+      const v = (j.dependencies ?? {})[dep] ?? (j.devDependencies ?? {})[dep];
+      return v ? [Number(String(v).match(/\d+/)?.[0])] : [];
+    } catch { return []; }
+  });
+}
+const appliesTo = (root, c) => Object.entries(c.whenDep ?? {}).every(([dep, major]) => { const found = majorsOf(root, dep); return !found.length || found.some((m) => m >= major); });
+
 export function loadChecks(root = ROOT) {
   const dir = join(root, '.claude', 'checks');
   let files = [];
@@ -35,7 +49,7 @@ export function loadChecks(root = ROOT) {
     return [];
   }
   const layout = readLayout(root);
-  return files.map((f) => {
+  return files.filter((f) => appliesTo(root, JSON.parse(readFileSync(join(dir, f), 'utf8')))).map((f) => {
     const c = { file: f, ...JSON.parse(readFileSync(join(dir, f), 'utf8')) };
     const fromConcepts = (c.concepts ?? []).flatMap((k) => conceptGlobs(layout, k) ?? []);
     return { ...c, globs: [...resolveAliases(layout, c.globs ?? []), ...fromConcepts], exclude: resolveAliases(layout, c.exclude ?? []) };

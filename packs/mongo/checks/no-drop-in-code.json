@@ -17,7 +17,8 @@
     "**/*.test.*",
     "**/*.spec.*",
     "**/test/**",
-    "**/tests/**"
+    "**/tests/**",
+    "**/data/**"
   ],
   "code": true,
   "pattern": "\\.(dropDatabase|dropCollection)\\s*\\(|\\bcollection\\([^)]*\\)\\s*\\.drop\\s*\\(",

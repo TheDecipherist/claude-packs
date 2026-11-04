@@ -7,7 +7,11 @@
       "writing",
       "hook-proof"
     ],
-    "choose": [],
+    "choose": [
+      "shell",
+      "ci",
+      "docker"
+    ],
     "default": []
   },
   "layout": {

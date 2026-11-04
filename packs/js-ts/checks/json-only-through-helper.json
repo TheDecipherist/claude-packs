@@ -23,7 +23,7 @@
     "**/hooks/**"
   ],
   "code": true,
-  "pattern": "\\bJSON\\s*\\.\\s*(parse|stringify)\\s*\\(",
-  "bad": "export function logLine(level: 'info' | 'warn' | 'error', fields: Record<string, unknown>): void {\n  console.log(JSON.stringify({ ts: new Date().toISOString(), level, service: 'admiralmcp-api', ...fields }));\n}",
+  "pattern": "\\bJSON\\s*\\.\\s*parse\\s*\\(|\\bJSON\\s*\\.\\s*stringify\\s*\\((?!\\s*\\{)",
+  "bad": "const data = JSON.parse(raw);\nconst text = JSON.stringify(row);",
   "good": "import { toJson, parseJson } from '../lib/json';\nrequest.log.warn({ jobId, err }, 'job retry');\nconst body = toJson(payload);\nconst cfg = parseJson(text, ConfigSchema);\n// JSON.stringify is only called in lib/json.ts\nconst s = 'JSON.parse(x) in a string is not a call';"
 }

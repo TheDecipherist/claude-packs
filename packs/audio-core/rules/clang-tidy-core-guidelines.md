@@ -8,7 +8,7 @@ paths:
 
 <constraints>
 Always do:
-- Keep the `.clang-tidy` from this pack at the repo root and run it on your own sources in CI and before merging (`run-clang-tidy -p build -header-filter='^(Source|src)/'`). Export `compile_commands.json` from CMake.
+- Keep the `.clang-tidy` from this pack at the repo root and run it on your own sources in CI and before merging (`run-clang-tidy -p build -header-filter='.*/(Source|src|lib|include)/.*'`). Export `compile_commands.json` from CMake.
 - Fix what it reports: C-style casts, narrowing conversions, `NULL`/`0` as a pointer, missing `override`, implicit single-argument constructors, Rule of Zero/Five violations, `using namespace` in headers, copying range-for loops, by-value parameters that should be `const&`, `std::move` that blocks return-value elision.
 - Mark leaf classes `final`.
 
