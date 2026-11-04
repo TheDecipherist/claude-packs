@@ -150,7 +150,14 @@ export function localBranches(cwd, cfg = {}) {
 }
 
 // GitHub's push form, the token named and never stored; the repo is the remote's own name.
+// The owner an SSH GitHub URL names (git@github.com:Owner/repo.git, an ssh config alias git@github-<name>:Owner/..., or
+// ssh://git@github.com/Owner/...), else null. Over SSH the key picks the account, so the URL alone names the repo (KWB-39).
+export function sshOwner(url) {
+  return (url ?? '').match(/^(?:ssh:\/\/)?git@github(?:\.com|-[\w.-]+)[:/]([\w.-]+)\/[\w.-]+?(?:\.git)?\/?$/)?.[1] ?? null;
+}
+
 export function pushCommand(url, branches, { owner = 'TheDecipherist', tokenVar = 'PERSONAL_GITHUB_TOKEN' } = {}) {
+  if (sshOwner(url) === owner) return `git push ${url} ${branches.join(' ')}`;
   const m = (url ?? '').match(/github\.com[:/]([^/]+)\/([^/\s]+?)(?:\.git)?\/?$/);
   const repo = m ? `${m[1]}/${m[2]}` : `${owner}/${(url ?? 'repo').split('/').pop().replace(/\.git$/, '')}`;
   return `source ~/.env && git push https://x-access-token:$${tokenVar}@github.com/${repo}.git ${branches.join(' ')}`;

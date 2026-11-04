@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
-import { stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
+import { sshOwner, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -80,7 +80,10 @@ const real = {
   dirty: (cwd) => (gitOut(cwd, '--no-optional-locks', 'status', '--porcelain') ?? '').split('\n').filter((l) => l.trim()),
   branch: (cwd) => (gitOut(cwd, 'rev-parse', '--abbrev-ref', 'HEAD') ?? '').trim(),
   hasHead: (cwd) => gitOut(cwd, 'rev-parse', '-q', '--verify', 'HEAD') !== null,
+  remoteUrl: (cwd, name) => gitOut(cwd, 'remote', 'get-url', name)?.trim() || null,
 };
+// What a push sends to: the URL in the command, or the URL of the remote it names (null when neither is known).
+const pushTarget = (w, here, env) => { const a = w.slice(w.indexOf('push') + 1).filter((x) => !x.startsWith('-')); return !a.length ? null : /[:/]/.test(a[0]) ? a[0] : env.remoteUrl?.(here, a[0]) ?? null; };
 // git's subcommand: the first word after git that is not an option (-C <dir> and -c <key=value> take one more)
 const subOf = (w) => { let i = 1; while (i < w.length && w[i].startsWith('-')) i += ['-C', '-c', '--git-dir', '--work-tree'].includes(w[i]) ? 2 : 1; return w[i]; };
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -139,10 +142,11 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
     }
     if (/\bgit\b.*\bpush\b/.test(p)) {
       if (/\s(-f|--force|--force-with-lease)\b/.test(p)) return 'Never force a push. Nothing pushed is rebased or amended.';
-      if (!new RegExp(`github\\.com/${esc(owner)}/[\\w.-]+`).test(p)) {
-        return `A push must name the repo: git push https://x-access-token:$${tok}@github.com/${owner}/<repo>.git <branch>. ${c.accountNote}`;
+      const ssh = sshOwner(pushTarget(w, here, env)) === owner; // over SSH the key picks the account; the URL names the repo (KWB-39)
+      if (!ssh && !new RegExp(`github\\.com/${esc(owner)}/[\\w.-]+`).test(p)) {
+        return `A push must name the repo: git push https://x-access-token:$${tok}@github.com/${owner}/<repo>.git <branch>, or a remote whose URL is git@github.com:${owner}/<repo>.git (SSH). ${c.accountNote}`;
       }
-      if (!p.includes(`$${tok}`) && !p.includes(`\${${tok}}`)) return `A push names the token as $${tok}, never a pasted one.`;
+      if (!ssh && !p.includes(`$${tok}`) && !p.includes(`\${${tok}}`)) return `A push names the token as $${tok}, never a pasted one.`;
       pushedBefore = true;
     }
     if (/(^|\s)gh\s/.test(p) && !cmd.includes(`GH_TOKEN=$${tok}`)) return `Every \`gh\` names the token: source ~/.env && GH_TOKEN=$${tok} gh ... ${c.accountNote}`;
@@ -214,6 +218,7 @@ async function selftest() {
   const clean = { ...isDirty, dirty: () => [] };
   const on = (branch, env = clean) => ({ ...env, branch: typeof branch === 'function' ? branch : () => branch });
   const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/app.git main';
+  const remote = (url) => ({ ...clean, remoteUrl: () => url });   // a remote whose URL is url (KWB-39: SSH names the repo)
   const mustBlock = [
     ['git add -A', clean], ['git add .', clean], ["git commit -am 'x'", clean], ['git add ~/firmware/korg/m1.bin', clean],
     ['git -C /Users/someone/projects/other add -A', clean], ['cd ~/projects/other && git add -A', clean],
@@ -230,6 +235,8 @@ async function selftest() {
     ['git branch -D step/C1-x', clean], ['git push origin --delete step/C1-x', clean], ['git rebase main', clean], ['git commit --amend -m x', clean],
     ["git commit -q -m 'bench' --no-verify", clean], ['GUARD_OK=1 git commit --no-verify -m x -- a.h', clean],
     ['git push --no-verify https://x@github.com/TheDecipherist/app.git main', clean],
+    ['git push -u origin work/x', remote('git@github.com:mongodb/app.git')], ['git push origin work/x', remote('https://github.com/TheDecipherist/app.git')],
+    ['git push git@github.com:mongodb/app.git work/x', clean], ['git push -f origin work/x', remote('git@github.com:TheDecipherist/app.git')],
   ];
   const mustPass = [
     ['git add build.md src/Row.h', isDirty], ["git commit -m 'C1: row clock' -- build.md src/Row.h", isDirty],
@@ -240,6 +247,8 @@ async function selftest() {
     ['cmake --build build --target Synth_Standalone -j8', isDirty], ['git log --oneline -6 | sed -n 1,3p', isDirty],
     ["git branch --list 'step/U5*' | tr -d ' *'", isDirty], ["grep -n 'def push' tools/step.py", isDirty], ["echo 'git push origin main'", isDirty],
     ["python3 - <<'EOF'\nprint('git add -A')\nEOF", isDirty],
+    ['git push -u origin work/x', remote('git@github.com:TheDecipherist/app.git')], ['git push origin work/x', remote('git@github-decipherist:TheDecipherist/app.git')],
+    ['git push git@github.com:TheDecipherist/app.git work/x', clean], ['git push ssh://git@github.com/TheDecipherist/app.git work/x', clean],
   ];
   for (const [cmd, env] of mustBlock) if (house(cmd, '.', env) === null) bad.push(`NOT BLOCKED: ${cmd}`);
   for (const [cmd, env] of mustPass) { const r = house(cmd, '.', env); if (r !== null) bad.push(`WRONGLY BLOCKED: ${cmd} -> ${r}`); }
