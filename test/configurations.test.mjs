@@ -5,8 +5,8 @@ import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSy
 const CONFIGS = readdirSync(join(KIT, 'configurations')).sort();
 const config = (name) => JSON.parse(readFileSync(join(KIT, 'configurations', name, 'config.json'), 'utf8'));
 
-test('the kit ships the four configurations', () => {
-  assert.deepEqual(CONFIGS, ['base', 'full-stack', 'node', 'synth-creator']);   // node: 0.11.0, the v7 additions' packs and presets
+test('the kit ships the five configurations', () => {
+  assert.deepEqual(CONFIGS, ['base', 'cpp', 'full-stack', 'node', 'synth-creator']);   // node: 0.11.0, the v7 additions' packs and presets
 });
 
 for (const name of CONFIGS) {

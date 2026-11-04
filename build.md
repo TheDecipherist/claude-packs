@@ -78,6 +78,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a base hook that refuses a hand-built copy of an element by its shape; concepts: none (design/shape.json declares none); reuse: judgeEvent (packs/base/hooks/lib/writes.mjs), blankCode (lib/cpp-scan.mjs), the walk moved from dispatch-once to lib/elements.mjs.
   done when: its selftest each way, seen red; its worktree case; scan lists them; the whole suite green once, committed; landed.
 
+- 0.24.0, C++ templates and the hover gate (work/0.24.0-cpp-templates), started 2026-11-04 (Tim: thoroughly do C++, prove on Stellix; hover gate for ui-craft).
+  making: template-law reads repeated code by statement runs and names the differences (the template's parameters), measured on Stellix; a cpp pack and configuration (rules, the walk check, a skill); gates.hover also for ui-craft; concepts: none (design/shape.json declares none); reuse: gateProblems (lib/hover-gate.mjs), shapesOf (packs/base/hooks/lib/elements.mjs).
+  done when: template-law finds Stellix's repeated components, with its misfires read and counted; doctor is red for web UI with no hover gate; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

@@ -9,11 +9,13 @@
       "hook-proof"
     ],
     "choose": [
+      "cpp",
       "audio-core",
       "gpu-painter",
       "stellix"
     ],
     "default": [
+      "cpp",
       "audio-core"
     ]
   },

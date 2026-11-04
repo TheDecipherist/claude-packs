@@ -149,7 +149,8 @@
     "checks/lookup-over-if-chains.json",
     "checks/field-map-over-if-runs.json",
     "hooks/suite-once.mjs",
-    "hooks/template-law.mjs"
+    "hooks/template-law.mjs",
+    "checks/one-walk-per-template.json"
   ],
   "commands": {
     "test": "npm test",
@@ -164,6 +165,11 @@
       "refuseTrunk": true,
       "branchStart": "git switch -c work/<version>-<name> main",
       "ghAuth": "cli"
+    },
+    "templates": {
+      "exclude": [
+        "global/hooks/**"
+      ]
     }
   },
   "complete": true

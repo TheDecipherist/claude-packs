@@ -11,6 +11,7 @@ import { writesOf } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
+import { verdicts } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -52,10 +53,7 @@ function selftest() {
     ['a shell script is code', verdict('tools/plants.sh', '', 'x\n'.repeat(301), 300) !== null],
     ['a CMakeLists.txt is code', verdict('lib/app/CMakeLists.txt', '', 'x\n'.repeat(301), 300) !== null],
   ];
-  const bad = cases.filter(([, ok]) => !ok);
-  for (const [name] of bad) console.error(`file-size-guard selftest FAILED: ${name}`);
-  if (!bad.length) console.log(`file-size-guard selftest: OK (${cases.length} cases)`);
-  return bad.length ? 1 : 0;
+  return verdicts('file-size-guard', cases.map(([label, ok]) => [label, ok, true]));
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)

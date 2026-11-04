@@ -1,0 +1,85 @@
+{
+  "name": "cpp",
+  "description": "Any C++ project that is not a synth: universal engineering and the cpp pack, with what is repeated made one template.",
+  "packs": {
+    "always": [
+      "base",
+      "writing",
+      "hook-proof"
+    ],
+    "choose": [
+      "cpp",
+      "docker",
+      "shell-hooks"
+    ],
+    "default": [
+      "cpp"
+    ]
+  },
+  "layout": {
+    "folders": {
+      "docs": {
+        "path": "docs",
+        "purpose": "spec, laws, licences, work orders, decisions"
+      },
+      "src": {
+        "path": "src",
+        "purpose": "all source code, only inside the subfolders below"
+      },
+      "tests": {
+        "path": "tests",
+        "purpose": "unit tests, gates with planted faults, golden files"
+      },
+      "tools": {
+        "path": "tools",
+        "purpose": "scripts and research tooling (not shipped)"
+      }
+    },
+    "kinds": {
+      "tests": {
+        "what": "tests, gates with planted faults, golden renders",
+        "in": "tests",
+        "concepts": [
+          "tests"
+        ],
+        "files": [
+          "**/*_test.*",
+          "**/*Test.cpp",
+          "**/*Tests.cpp",
+          "**/test_*.*",
+          "**/*.test.*"
+        ]
+      },
+      "docs": {
+        "what": "the spec, laws.md, decisions, research, work orders",
+        "in": "docs",
+        "concepts": [
+          "docs-folder"
+        ],
+        "files": [
+          "**/laws.md",
+          "**/*-spec.md"
+        ]
+      },
+      "tools": {
+        "what": "scripts and research tools that never ship",
+        "in": "tools"
+      }
+    }
+  },
+  "preamble": {
+    "always": [
+      "Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.",
+      "When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.",
+      "When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.",
+      "claude-packs (`~/projects/claude-packs`) is the source of truth for every rule, check, hook and skill this project's configuration installs. A fix to one of them is made there with its test, committed, pushed and released as a new version, then taken in with `npx --no-install @thedecipherist/claude-packs update`. A project edits its installed copy only to try a fix before it goes into the kit."
+    ],
+    "never": [
+      "Create source files outside these folders, or put a kind of thing anywhere but its place. The folder-law and placement-law hooks refuse both.",
+      "Edit files in `.claude/rules`, `.claude/checks` or `.claude/hooks` to get past a block. Fix the code, or ask the user to change the law.",
+      "Route around a block: no override variables, no writing through the shell after a refusal, no parking files in a scratchpad, no putting new code into an unrelated existing file.",
+      "Point at a document by line number. Cite a fixed anchor (`{#id}`) or a symbol name; lines move."
+    ]
+  },
+  "sourceFiles": "\\.(?:c|cc|cpp|cxx|h|hh|hpp|mm)$"
+}

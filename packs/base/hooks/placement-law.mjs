@@ -10,6 +10,7 @@ import { writesOf } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
+import { verdicts } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -76,10 +77,7 @@ function selftest() {
     ['the driver in the adapters is fine', misplaced(layout, 'api/adapters/db.ts', '', "import { MongoClient } from 'mongodb';") === null],
     ['a kind with extensions leaves other files alone', misplaced(layout, 'api/handlers/notes.md', '', "from 'mongodb'") === null],
   ];
-  const bad = cases.filter(([, ok]) => !ok);
-  for (const [n] of bad) console.error(`placement-law selftest FAILED: ${n}`);
-  if (!bad.length) console.log(`placement-law selftest: OK (${cases.length} cases)`);
-  return bad.length ? 1 : 0;
+  return verdicts('placement-law', cases.map(([label, ok]) => [label, ok, true]));
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)

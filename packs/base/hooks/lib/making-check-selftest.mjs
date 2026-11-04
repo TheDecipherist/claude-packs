@@ -42,6 +42,8 @@ export function selftest(hookUrl) {
   };
   const at = (f) => join(dir, f);
   const W = (f, content) => use('Write', { file_path: at(f), content });
+  // Three more turns of one session, each sent back: the last says what the limit did.
+  const sendBacks = (session, opts = {}) => { let got; for (let i = 0; i < 3; i += 1) got = turn([W('src/slot/gain.cpp', slotCode)], { making: '', session, ...opts }); return got; };
   const slotCode = 'float slotGain (int slot) { return gains[slot]; }\n';
   const mixerCode = 'float mixerLevel() { return mixer.level; }\n';
   const landed = (f, text, fn) => { put(at(f), text); try { return fn(); } finally { rmSync(at(f), { force: true }); } };
@@ -83,16 +85,12 @@ export function selftest(hookUrl) {
     ['the third send-back with the same findings ends the turn', (() => {
       const s = 'loop';
       turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
-      turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s, active: true });
-      turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s, active: true });
-      return turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s, active: true });
+      return sendBacks(s, { active: true });
     })(), 0],
     ['the limit holds when each send-back comes as a new turn (no stop_hook_active; KWB-7)', (() => {
       const s = 'loop-new-turns';
       turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
-      turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
-      turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
-      return turn([W('src/slot/gain.cpp', slotCode)], { making: '', session: s });
+      return sendBacks(s);
     })(), 0],
     ['a turn sent back is judged with what it wrote before the feedback', (() => {
       const fb = { type: 'user', isMeta: true, message: { content: 'Stop hook feedback: making-check sent this turn back' } };

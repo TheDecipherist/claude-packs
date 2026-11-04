@@ -10,7 +10,8 @@ Per-project Claude Code rules, lesson checks, hooks and skills for The Decipheri
 |---|---|---|---|---|
 | `ai` | Code that calls a model | 2 | 4 | 0 |
 | `audio-core` | Any JUCE synth or effect | 40 | 8 | 7 |
-| `base` | Universal engineering every configuration gets | 19 | 3 | 5 |
+| `base` | Universal engineering every configuration gets | 19 | 4 | 6 |
+| `cpp` | Any C++ project | 3 | 1 | 1 |
 | `docker` | Dockerfiles, Compose and Swarm | 3 | 21 | 1 |
 | `fastify` | Fastify servers | 5 | 15 | 0 |
 | `full-stack` | The full-stack configuration's own laws | 11 | 0 | 1 |
@@ -42,6 +43,7 @@ chosen packs.
 | Configuration | Packs | For |
 |---|---|---|
 | `base` | base | universal engineering only; the kit's own repo |
+| `cpp` | base + cpp | any C++ project that is not a synth |
 | `synth-creator` | base, synth-creator; to choose: audio-core, gpu-painter, stellix | JUCE synths and effects: everything the kit installed before 0.10.0 |
 | `full-stack` | base, full-stack | a Fastify API and a Next.js web app, Zod 4 schemas in one folder, one database gateway |
 
@@ -152,6 +154,10 @@ In every project: **one template, changed once, tested once** (`test-the-templat
 ## Anything used twice is one template (0.23.0)
 
 The `template-law` hook refuses a second hand-built copy of an element, in HTML, JSX, Vue, Svelte, template strings and C++, by comparing shapes with names and text stripped. Extract the component and pass the differences in, or mark a real exception on its line: `one-off: <reason>`. `scan` lists what a project already repeats. In an existing project, name `hooks/template-law.mjs` in `"enable"`.
+
+## Anything repeated is one template, in C++ too (0.24.0)
+
+`template-law` compares code with names, numbers and strings stripped, so a copy with other names reads the same: an element, an object set up field by field, a run of statements, or one call repeated as a table written by hand. A refusal names the copies, what differs between them and the template to make; `scan` lists what a project already repeats, the same way. The `cpp` pack (`init cpp`, or `--config cpp`) adds the C++ forms of a template, one shared reader for gates and probes, and the `cpp-extract-template` skill. A tree kept the same as its source on purpose is a folder of kind `copy`, or a glob in `guards.templates.exclude`.
 
 ## Commands
 

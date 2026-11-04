@@ -51,7 +51,7 @@ test('one template: a thousand instances cost one read and a handful of swaps, n
 
 test('no law still asks to walk every instance: one per template, the rest by a read', () => {
   const read = (rel) => readFileSync(join(KIT, 'packs', rel), 'utf8');
-  for (const rel of ['audio-core/rules/house-control-behaviours.md', 'audio-core/skills/prove-control/SKILL.md', 'gpu-painter/skills/hover-state/SKILL.md', 'full-stack/skills/hover-state/SKILL.md']) {
+  for (const rel of ['audio-core/rules/house-control-behaviours.md', 'audio-core/skills/prove-control/SKILL.md', 'gpu-painter/skills/hover-state/SKILL.md', 'ui-craft/skills/hover-state/SKILL.md']) {
     assert.match(read(rel), /one (?:control|item|element) of (?:this|each) (?:template|component)/, rel);
     assert.doesNotMatch(read(rel), /walk every control|for every interactive element|on every slot it appears/, rel);
   }
@@ -67,7 +67,7 @@ test('scan names elements built by hand more than once, html and c++', () => {
   writeFileSync(join(dir, 'src/c.cpp'), `void f() {\n${knob('cutoff')}\n  int gap;\n${knob('drive')}}\n`);
   const r = cli(dir, 'scan');
   const text = readFileSync(r.stdout.match(/Report: (\S+)/)[1], 'utf8');
-  assert.match(text, /2 element\(s\) built by hand more than once/);
-  assert.match(text, /<div>: src\/a\.html:1, src\/b\.html:1/);
-  assert.match(text, /cutoff: src\/c\.cpp:2, src\/c\.cpp:7/);
+  assert.match(text, /2 repeat\(s\) written by hand/);
+  assert.match(text, /2x <div>: src\/a\.html:1, src\/b\.html:1\. Make it one component/);
+  assert.match(text, /2x cutoff: src\/c\.cpp:2, src\/c\.cpp:7\. Make it one factory/);
 });

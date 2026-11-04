@@ -2,17 +2,17 @@
 // code as written, so two controls that differ in their names and text look different to it. Here names and text are stripped, and what is
 // left is the element's shape: copies of one element have one shape.
 //   markup   an element and its children: tags, attribute names, nesting (HTML, JSX, Vue, Svelte, template strings)
-//   setup    one object configured line by line: the members called on it, in order (a C++ control, a widget, a DOM node)
+//   code     setups, runs of statements and tables written as code (lib/code-shapes.mjs)
 // Using a template is never a shape: a capitalised tag (<Knob ... />) is a component, and a list from .map() appears once.
 //   shapesOf(text, ext) -> [{ id, kind, line, what }]     codeFiles(root, skipGlobs) -> [rel]
 import { readdirSync, statSync } from 'node:fs';
 import { extname, join, relative } from 'node:path';
-import { blankCode } from './cpp-scan.mjs';
+import { codeShapes } from './code-shapes.mjs';
 import { matchesAny } from './glob.mjs';
 
 export const CODE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx']);
 export const MARKUP = new Set(['.html', '.htm', '.vue', '.svelte', '.tsx', '.jsx', '.ts', '.js', '.mjs']);
-export const SKIP = /(^|\/)(\.git|node_modules|build|Builds|dist|out|_deps|JUCE|JuceLibraryCode|cmake-build[^/]*|\.claude)(\/|$)/;
+export const SKIP = /(^|\/)(\.git|node_modules|build|Builds|dist|out|_deps|JUCE|JuceLibraryCode|third_party|vendor|cmake-build[^/]*|\.claude)(\/|$)/;
 export const TESTS = ['tests/**', 'test/**', '**/tests/**', '**/test/**', '**/*.test.*', '**/*.spec.*', '**/*_test.*'];
 
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
@@ -52,34 +52,24 @@ function markupShapes(text) {
   return out.filter((s) => !out.some((o) => o !== s && o.id.length > s.id.length && o.id.includes(s.id.slice(2))));
 }
 
-// Runs of statements on one receiver: `cutoff.setRange (...); cutoff.setValue (...); addAndMakeVisible (cutoff);`
-function setupShapes(text) {
-  const out = [];
-  let run = null;
-  const flush = () => {
-    if (run && new Set(run.members).size >= 2 && run.members.length >= 2) out.push({ id: `o:${run.members.join(',')}`, kind: 'setup', line: run.line, what: run.name, nodes: run.members.length });
-    run = null;
-  };
-  blankCode(text).split('\n').forEach((raw, i) => {
-    const on = raw.match(/^\s*([A-Za-z_]\w*)\s*(?:\.|->)\s*([A-Za-z_]\w*)/);
-    const passed = run && raw.match(new RegExp(`^\\s*([A-Za-z_]\\w*)\\s*\\(\\s*&?\\s*${run.name}\\s*\\)`));
-    if (on && run?.name === on[1]) run.members.push(on[2]);
-    else if (passed) run.members.push(`${passed[1]}()`);
-    else {
-      flush();
-      if (on) run = { name: on[1], members: [on[2]], line: i + 1 };
-    }
-  });
-  flush();
-  return out;
-}
-
 export function shapesOf(text, ext) {
-  return [...(MARKUP.has(ext) ? markupShapes(text) : []), ...(CODE.has(ext) ? setupShapes(text) : [])];
+  return [...(MARKUP.has(ext) ? markupShapes(text) : []), ...(CODE.has(ext) ? codeShapes(text) : [])];
 }
 
-// A setup of two members needs a third copy to be a pattern; everything larger is a copy at two.
-export const copiesNeeded = (shape) => (shape.kind === 'setup' && shape.nodes < 3 ? 3 : 2);
+// A short setup needs a third copy to be a pattern (two members; three on one name, the same habit in two files). Rows are a fault on their own.
+export const copiesNeeded = (shape, oneName = false) => (shape.kind === 'rows' ? 1 : shape.kind === 'setup' && (shape.nodes < 3 || (shape.nodes === 3 && oneName)) ? 3 : 2);
+
+// What the law leaves alone: `protected` globs, folders of kind copy (a tree kept the same as its source on purpose) and `guards.templates.exclude`.
+export const skippedBy = (layout) => [...(layout.protected ?? []), ...(layout.guards?.templates?.exclude ?? []),
+  ...Object.values(layout.folders ?? {}).filter((f) => f.kind === 'copy').map((f) => `${f.path}/**`)];
+
+// What each kind of repeat becomes: the refusal and the scan say it, so a repeat is never only named.
+export const TEMPLATE = {
+  markup: 'one component, with the differences passed in',
+  setup: 'one factory function: it builds the object from its arguments',
+  run: 'one function, with the differences as parameters',
+  rows: 'one table of the arguments, and one loop',
+};
 
 export function codeFiles(root, skipGlobs = [], exts = CODE) {
   const out = [];

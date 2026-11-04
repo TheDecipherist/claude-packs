@@ -1,0 +1,12 @@
+{
+  "id": "cpp-find-with-the-library",
+  "why": "A search loop over a list, compared on one member, is short enough to be copied everywhere, and every copy treats a miss its own way. std::ranges::find with a projection says it in one call; a search used twice is one named function.",
+  "rule": ".claude/rules/cpp-find-with-the-library.md",
+  "concepts": ["cpp"],
+  "globs": [],
+  "exclude": ["**/build/**"],
+  "code": true,
+  "pattern": "for\\s*\\(\\s*(?:const\\s+)?auto\\s*&&?\\s*(\\w+)\\s*:\\s*[^;{}\\n]+\\)\\s*\\{?\\s*if\\s*\\(\\s*\\1\\s*(?:\\.|->)\\s*\\w+\\s*==",
+  "bad": "for (const auto& c : shown().controls) if (c.id == id) return &c;",
+  "good": "const auto it = std::ranges::find (controls, id, &Control::id);\nfor (const auto& c : controls) total += c.width;\nfor (const auto& c : controls) if (c.width > limit) wide.push_back (c);"
+}

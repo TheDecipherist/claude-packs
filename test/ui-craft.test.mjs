@@ -33,9 +33,9 @@ test('doctor is red for UI code with no page gate, and green with one or with a 
   assert.equal(red.status, 1);
   assert.match(red.stdout, /no a11y gate declared/);
   assert.match(red.stdout, /prove-page/);
-  set({ a11y: 'none: a throwaway prototype' });
+  set({ a11y: 'none: a throwaway prototype', hover: 'none: a throwaway prototype' });
   assert.equal(cli(dir, 'doctor').status, 0);
-  set({ a11y: 'node tools/page-gate.mjs' });
+  set({ a11y: 'node tools/page-gate.mjs', hover: 'none: a throwaway prototype' });
   assert.match(cli(dir, 'doctor').stdout, /tools\/page-gate\.mjs, which is not there/);
 });
 

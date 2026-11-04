@@ -3,6 +3,7 @@
 // `git add -A`, `git add .`, `git add --all` and `git commit -a` sweep build output, renders,
 // scratch files and keys into history. Exit 2 refuses the command. `--selftest` proves it.
 import { readFileSync } from 'node:fs';
+import { verdicts } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const SECRET = /(^|[\s/])(\.env(\.[\w.-]+)?|[\w.-]+\.(pem|key|p12|pfx)|id_(rsa|ed25519)|credentials\.json)(\s|$)/;
@@ -42,10 +43,7 @@ function selftest() {
     ['git add src/dsp/Svf.cpp tests/svf_test.cpp', false], ['git add .env.example', false],
     ['git commit -m "fix: svf"', false], ['git status', false],
   ];
-  const bad = cases.filter(([cmd, block]) => (problem(cmd) !== null) !== block);
-  for (const [cmd] of bad) console.error(`stage-guard selftest FAILED: ${cmd}`);
-  if (!bad.length) console.log(`stage-guard selftest: OK (${cases.length} cases)`);
-  return bad.length ? 1 : 0;
+  return verdicts('stage-guard', cases.map(([cmd, block]) => [cmd, problem(cmd) !== null, block]));
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)

@@ -31,7 +31,7 @@ test('gpu-painter and full-stack carry the hover rule, scoped to UI code, naming
 });
 
 test('the skill hover-state: "Use when", under 8,000 characters, names the hover walk and the worked example', () => {
-  for (const pack of ['gpu-painter', 'full-stack']) {
+  for (const pack of ['gpu-painter', 'ui-craft']) {
     const text = readFileSync(join(KIT, 'packs', pack, 'skills/hover-state/SKILL.md'), 'utf8');
     assert.match(text, /^---\nname: hover-state\ndescription: Use when /);
     assert.ok(text.length < 8000, `${pack}: ${text.length}`);
@@ -77,6 +77,16 @@ test('doctor: the web app (channel) with a page and no hover gate is a PROBLEM t
   const red = cli(dir, 'doctor');
   assert.equal(red.status, 1, red.stdout);
   assert.match(red.stdout, /PROBLEM: .*hover gate/);
+});
+
+test('doctor: a node web project with UI code and no hover gate is a PROBLEM too (ui-craft)', () => {
+  const dir = init(['next-app'], 'hov-node-');
+  mkdirSync(join(dir, 'src/ui'), { recursive: true });
+  writeFileSync(join(dir, 'src/ui/Page.tsx'), 'export const Page = () => <main />;\n');
+  const red = cli(dir, 'doctor');
+  assert.equal(red.status, 1, red.stdout);
+  assert.match(red.stdout, /PROBLEM: no hover gate declared/);
+  assert.match(red.stdout, /hover-state skill/);
 });
 
 test('the Stellix profile declares its hover gate', () => {

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.24.0 (2026-11-04)
+
+Anything repeated becomes a template, in C++ above all (Tim: "we need to thoroughly do c++", "anything you find that is repeated should have something that makes it reuseable and template like", "maybe make a specific c++ pack"). Measured on Stellix: 523 files, 51,492 lines.
+
+- `template-law` reads statements, not lines (`lib/code-shapes.mjs`). It now sees many statements on one line, and three kinds of repeat in code: an object set up field by field, a run of statements with one shape (a copied helper, whole or in part), and one call repeated with other arguments (a table written as code). Data tables, includes, imports, macros and JS template strings are not statements here. On Stellix it finds 302 repeats, 950 copies, where 0.23.0 found 10 and 68. Of 26 sampled by reading, none was a false match and 3 were borderline. A hook call there takes about 100 ms warm, 520 ms cold.
+- A refusal says what to do: what the repeat should become, what differs between the copies (the template's parameters), and to take the copies out first. `scan` lists every repeat the same way, and in `claude-packs-scan.json`.
+- A copy with the same name in another file now counts: 20 `bd` descriptors were invisible to 0.23.0 because they shared a name. Folders of kind `copy` and `guards.templates.exclude` are left alone.
+- New `cpp` pack and `cpp` configuration: `cpp-repeats-become-templates`, `cpp-gates-share-one-reader`, `cpp-find-with-the-library` (with its check) and the `cpp-extract-template` skill. `synth-creator` offers it by default, the `synth` preset takes it, and `scan` recommends it for C++ sources.
+- New base skill `make-it-a-template`, and the check `one-walk-per-template`: a test or gate that presses, clicks or drags every instance of a template is refused. On Stellix it finds the one such walk, in the press gate. New to a project, so held back until `enable` names it.
+- The hover gate covers `ui-craft`: doctor is red for web UI code with no hover gate. `hover-state` moved from `full-stack` to `ui-craft`, which `full-stack` takes.
+- The kit's own repeats are gone: selftests call `verdicts`, and the making-check limit cases share `sendBacks`.
+
 ## 0.23.0 (2026-11-04)
 
 template-law (Tim: anything "component" used more than once is a template, enforced, in html, c++ and apps).
