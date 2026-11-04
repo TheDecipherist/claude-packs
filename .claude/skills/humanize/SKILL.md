@@ -7,16 +7,16 @@ description: Use when text is about to go public or to someone else, a manual pa
 
 The rules on public text set the cadence (`cut-the-padding`, `rhythm-like-talk`, `no-stock-language`, `no-scaffolding`, `no-time-or-date`, `ascii-no-em-dash`, `write-from-your-own-corner`, `direct-voice`, `no-cargo-cult`). This is the pass over the finished draft. Not for code, commit messages, config or internal specs, logs and briefs: those stay plain.
 
-Why it matters (corrected 2026-08): "getting tagged as AI kills a post" did NOT survive the data; LLM-flagged posts score the same as human ones (median 3 vs 3). The real reasons: differentiation (target subs run 17-23% obvious slop: claudeskills 23%, rag 21%, mcp 17%, mongodb 16%), trust (one "this is AI" comment under a MongoDB-badged account is a brand hit votes don't measure), and mod removals that never show in scraped data.
+Why it matters: readers trust a voice that sounds like a person, generic text sinks in a crowded channel, and moderators remove what reads as slop.
 
 <constraints>
 Always do:
-1. Before publishing anywhere but Reddit (Dev.to, partner channels, LinkedIn, anywhere public), run the review track and approvals in `mongodb-content-policy`. Dev.to article STRUCTURE follows `devto-writing`; cadence and voice stay here.
+1. Before publishing for an employer or a client, run their review track. Cadence and voice stay here.
 2. Run the cadence check:
    - em dashes gone; no "not X but Y"; triads cut; no summary close (end on the ask or the last point); no punchline sentences; no colon drama; no stock connectors or slop words;
    - sentence and paragraph shapes varied, no staccato performance; repeated terms NOT thesaurus-varied;
    - more I/we than you/your unless the medium demands otherwise, and "I" not "we" for the author's own projects;
-   - padding cut: could it be said in half the words; self-contained; ASCII only; no time or date anywhere; nothing that reads as negative about MongoDB.
+   - padding cut: could it be said in half the words; self-contained; ASCII only; no time or date anywhere.
 3. Run the spot tests on any suspect sentence:
    - **Deletion test:** remove it. Paragraph loses nothing: it was filler.
    - **Genericity test:** swap the names, tool and subject for any other. Sentence still reads fine: it says nothing; make it specific or cut.

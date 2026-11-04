@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.25.1 (2026-11-04)
+
+- The README is a front page for everyone: what the kit does, how to start, every pack, configuration, preset, command and base hook. The notes from earlier releases moved to `docs/history.md`. `test/readme.test.mjs` fails when the page falls behind.
+- CLAUDE.md is up to date with the scan, suggest and fix commands, the language table and the invariants the tests hold.
+- The licence holder is TheDecipherist, and the `humanize` skill no longer carries one employer's context.
+
 ## 0.25.0 (2026-11-04)
 
 Every language, and repetition stopped before it is written: AI writes the same thing over and over, in any language.

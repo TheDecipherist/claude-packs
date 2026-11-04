@@ -88,6 +88,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   done when: each language has a copy refused and data passed, measured on a real repo of it with misfires read and counted; the whole suite green once, committed; landed.
   measured: every language in the table has a copy matched and comments ignored; 13 of 13 Python and shell repeats read were real; near copies 0 on the kit; 3 senior reviews made 30 packs and 290 checks, each held to its examples; the suite 255 of 262, the 7 stale expectations fixed and those files run alone, 17 of 17 and 38 of 38 with the rest.
 
+- 0.25.1, the docs and the licence (work/0.25.1-docs-license), started 2026-11-04 (the README and CLAUDE.md brought up to date; the licence holder is TheDecipherist).
+  making: a README that describes the kit as it is, with a test that holds it; concepts: none (design/shape.json declares none); reuse: PRESETS (lib/packs.mjs).
+  done when: test/readme.test.mjs green; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

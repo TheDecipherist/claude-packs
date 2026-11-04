@@ -8,11 +8,11 @@
     },
     "lib": {
       "path": "lib",
-      "purpose": "the command's library: sync, settings, layout, doctor, the kit lock"
+      "purpose": "the command's library: sync, settings, layout, doctor, scan, suggest, fix, the kit lock"
     },
     "packs": {
       "path": "packs",
-      "purpose": "the packs a project installs: rules, checks, hooks, skills, tools (base, audio-core, gpu-painter, stellix)"
+      "purpose": "the packs a project installs: rules, checks, hooks, skills, tools (list shows them)"
     },
     "configurations": {
       "path": "configurations",
@@ -24,11 +24,11 @@
     },
     "profiles": {
       "path": "profiles",
-      "purpose": "tailored seed layouts shipped in the package (stellix, sub37)"
+      "purpose": "tailored seed layouts shipped in the package"
     },
     "prompts": {
       "path": "prompts",
-      "purpose": "prompts the command prints (survey.md)"
+      "purpose": "prompts the command prints (survey.md, scan-review.md)"
     },
     "test": {
       "path": "test",
@@ -40,7 +40,7 @@
     },
     "docs": {
       "path": "docs",
-      "purpose": "versions and notes (the logs are at the root: CHANGELOG.md, workflow-bugs.md)"
+      "purpose": "versions, notes and the history of earlier releases (the logs are at the root: CHANGELOG.md, workflow-bugs.md)"
     }
   },
   "concepts": {

@@ -1,9 +1,9 @@
 {
-  "kit": "0.25.0",
+  "kit": "0.25.1",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T18:49:15.900Z",
+  "updated": "2026-11-04T19:15:12.863Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "0c5bd514c0bca703d65f5220f8e95074ab8df9b1b018f148ae0a87528b69df3d",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -95,7 +95,7 @@
     ".claude/rules/rhythm-like-talk.md": "40bdd0ade291f0a98463efb8227ad852d79ce8d242f7fed34f890dc206517ba8",
     ".claude/rules/write-from-your-own-corner.md": "1be39d8a5d5d93f11edb668228719821527b7b9198631ad3892e11eda55b226a",
     ".claude/skills/argument-post/SKILL.md": "487d322935e4ed887aad3444921839f7cee371b8e7f69d4d18d1089a13f6f2e1",
-    ".claude/skills/humanize/SKILL.md": "4eebf9a31dca8634362149118eff5c93a4f5e6839f52a88b4d1cf0730872c8b6",
+    ".claude/skills/humanize/SKILL.md": "1ab1b6a043f3a9fd78c6d7aeaf77a4dc74356cfd0e57e9d49d14b110053c5516",
     ".claude/skills/launch-post/SKILL.md": "6756cfd800c06119e994324a4835794ca8a30dbe8f79cf6a0061a1645ed8d1f9",
     ".claude/skills/pick-subreddit/SKILL.md": "90e3664c2439f79090e0981fbe3936d5214895d4f70067f8cf665e85be60c7e6",
     ".claude/skills/post-voice/SKILL.md": "4260cf94ffe095cd028064395c6a13e14e9ef0386e119fa57d799b7a0689ff42",

@@ -1,9 +1,9 @@
-// The kit is for everyone: nothing it ships or keeps in its repo names one person. LICENSE holds the copyright line it must hold. lib/settings.mjs
-// keeps one old hook name, so a project that still runs it can be moved on.
+// The kit is for everyone: nothing it ships or keeps in its repo names one person. lib/settings.mjs keeps one old hook name, so a project that
+// still runs it can be moved on.
 import { KIT, assert, execFileSync, join, readFileSync, test } from './kit-cli.mjs';
 
 const NAME = new RegExp(['\\bT' + 'im\\b', 'Clau' + 'sen', 'ti' + 'ms-', 'ti' + 'm-writing', 'tim_' + 'carter'].join('|'));
-const LEFT_OUT = new Set(['LICENSE', 'lib/settings.mjs']);
+const LEFT_OUT = new Set(['lib/settings.mjs']);
 
 test('no file names a person', () => {
   const files = execFileSync('git', ['ls-files', '-co', '--exclude-standard'], { cwd: KIT, encoding: 'utf8' }).split('\n').filter((f) => f && !LEFT_OUT.has(f));
