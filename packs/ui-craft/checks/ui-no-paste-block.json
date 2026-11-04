@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-paste-block",
+  "why": "Blocking paste breaks password managers and punishes careful people.",
+  "rule": ".claude/rules/forms-never-fight.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "onPaste=\\{[^}\\n]*preventDefault|addEventListener\\(\\s*['\"]paste['\"][^\\n]*preventDefault",
+  "bad": "<input onPaste={(e) => e.preventDefault()} />\n",
+  "good": "<input name=\"code\" />\n"
+}

@@ -17,8 +17,9 @@ Always do:
    - **Signature**: the single element this page will be remembered by. Spend the boldness there and keep everything around it quiet.
    - **Risk**: one line on the risk taken.
 3. Critique the plan before building: anything that reads like the generic default for this kind of prompt gets revised, with what changed and why. The three defaults to avoid: warm cream + high-contrast serif + terracotta; near-black + one acid accent; the purple-gradient SaaS page with Inter everywhere and a card for everything.
-4. Write it into the feature doc as `## Design Direction`. The build derives from it; `design-review` checks against it.
-5. Words are design material: controls say what happens ("Save changes", not "Submit"), the name survives the whole flow ("Publish" → "Published"), errors say what went wrong and how to fix it, empty states invite the first action. Sentence case, plain verbs, no filler.
+4. Review the plan against the brief before building: work through a similar prompt, and anything you would have arrived at anyway is a default, not a choice. `no-generated-look` lists them when the `ui-craft` pack is here. The brief's own words and a project's design system always win.
+5. Write it into the feature doc as `## Design Direction`. The build derives from it; `design-review` checks against it.
+6. Words are design material: controls say what happens ("Save changes", not "Submit"), the name survives the whole flow ("Publish" → "Published"), errors say what went wrong and how to fix it, empty states invite the first action. Sentence case, plain verbs, no filler.
 
 Never do:
 - Write UI code before the section exists.

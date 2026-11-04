@@ -88,6 +88,10 @@ npx --no-install @thedecipherist/claude-packs scan --dir <project>
 
 Run it before installing anything. It works on a copy in a temp folder and never writes to the project, its `.git` included. The report says which configuration and packs fit, with the evidence, and lists every check hit by file and line. Hits are candidates, and secrets are shown by file and line only. The worst bugs are the ones no check sees, so the report ends with the review step: `scan --prompt` prints a brief for Claude Code to run on the copy.
 
+## UI craft: application and page design (0.17.0)
+
+Pack `ui-craft` (in the `node-ui` and `next-app` presets, and by default in `full-stack`): small rules for forms, motion, real data, URL state, touch, copy, type and the generated look, twelve checks, and a rendered-page gate (`"gates": { "a11y": "<command>" }`, built by the `prove-page` skill). It is written from Vercel's Web Interface Guidelines, Anthropic's frontend-design, Impeccable and taste-skill; [docs/ui-craft-sources.md](docs/ui-craft-sources.md) says what came from each.
+
 ## Commands
 
 ```

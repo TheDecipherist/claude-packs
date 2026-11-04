@@ -42,6 +42,14 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: claude-packs scan: a copy of the project, the recommended packs installed in it, every check over every file, a report with evidence, and a review prompt for what checks cannot see; concepts: none (design/shape.json declares none); reuse: sync (lib/sync.mjs), coverage (lib/coverage.mjs), the installed lesson-checks and secrets-guard, onceOnlyDoctor (lib/once-only-report.mjs).
   done when: a test proves the scanned project is byte for byte unchanged, .env is never copied and no secret value reaches the report; the recommendation has evidence per pack; no-find-reads catches collection.find(q); the whole suite green once, committed.
 
+- 0.17.0, ui-craft (work/0.17.0-ui-craft, from work/0.16.0-scan), started 2026-11-04 (Tim: build the UI/UX additions from the skills found, with taste-skill, and report what came from each).
+  making: pack ui-craft: small rules, skills and checks for application and page design, written from Vercel's guidelines, Anthropic's frontend-design, Impeccable and taste-skill, with a rendered-page gate; concepts: none (design/shape.json declares none); reuse: the hover gate generalised (lib/hover-gate.mjs), design-direction and design-review (packs/web/skills), PRESETS (lib/packs.mjs), hookRun (test/kit-cli.mjs).
+  done when: each check refuses its bad through the hook in an install; doctor is red for UI code with no page gate; docs/ui-craft-sources.md says what came from each source; the whole suite green once, committed.
+
+- Landing (work/0.17.0-ui-craft), started 2026-11-04 (Tim: whenever a work branch is finished it is merged into main and pushed).
+  making: rule finished-work-lands and skill land-branch in base; concepts: none (design/shape.json declares none); reuse: the git-guard laws (packs/base/hooks/git-guard.mjs), the "# hook:" rule frontmatter.
+  done when: the rule and skill install, and this branch lands by them.
+
 ## Steps
 
 ## Log

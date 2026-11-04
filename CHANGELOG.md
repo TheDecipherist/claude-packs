@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.17.0 (2026-11-04)
+
+ui-craft and landing.
+
+- New pack `ui-craft` (Tim: build the UI/UX additions from the best public skills; docs/ui-craft-sources.md says what came from each): ten rules (forms, motion,
+  real data, URL state, touch, dates and numbers, interface copy, type and space, the generated look, the rendered page), skills `ui-code-review` and
+  `prove-page`, twelve checks. A check blocks only what is objective or what the sources agree on. The `node-ui` and `next-app` presets bring it; node
+  and full-stack take it (full-stack by default); `scan` recommends it for a UI.
+- `layout.json` `"gates": { "a11y": "<command>" }`: doctor is red for UI code with no page gate, as for hover; `"none: <reason>"` declines.
+- `design-direction` reviews the plan against the brief; `design-review` says which findings are law and which taste, and judges the production build.
+- Rule `finished-work-lands` and skill `land-branch` (base; Tim: whenever a work branch is finished it is merged into main and pushed).
+
 ## 0.16.0 (2026-11-04)
 
 Scan (Tim, 2026-11-04: a real install's review found security bugs that could have been very bad in production, so a project owner should get that review before choosing to install anything).

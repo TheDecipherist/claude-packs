@@ -8,10 +8,12 @@
       "writing"
     ],
     "choose": [
-      "stored-text"
+      "stored-text",
+      "ui-craft"
     ],
     "default": [
-      "stored-text"
+      "stored-text",
+      "ui-craft"
     ]
   },
   "layout": {

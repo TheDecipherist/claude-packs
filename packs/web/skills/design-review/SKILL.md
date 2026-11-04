@@ -17,6 +17,8 @@ Always do:
 - Distinctive over default: name the templated patterns (purple gradient, Inter everywhere, a card for everything, centred everything) as findings, not taste notes; usability beats trend when a fashionable pattern costs the user.
 - A surface with zero styling classes, or a list with no designed empty state, is an automatic **blocker**.
 - Compare against `design/` reference images when they exist.
+- Say which findings are law (a standard, a measured number) and which are taste: a taste finding must be defensible to a designer in one sentence.
+- Judge the production build when there is one: minifiers and bundlers change what ships.
 
 Never do:
 - Pass a surface from the DOM or the diff.

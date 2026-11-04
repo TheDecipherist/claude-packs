@@ -1,0 +1,21 @@
+{
+  "id": "ui-intl-for-dates",
+  "why": "A date built from its parts is wrong for most of the world. Use Intl.DateTimeFormat.",
+  "rule": ".claude/rules/dates-and-numbers.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\.getMonth\\(\\)\\s*\\+\\s*1\\b",
+  "bad": "const d = `${t.getMonth() + 1}/${t.getDate()}`;\n",
+  "good": "const d = new Intl.DateTimeFormat(locale).format(t);\n"
+}

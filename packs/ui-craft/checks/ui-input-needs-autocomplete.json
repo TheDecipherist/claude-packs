@@ -1,0 +1,22 @@
+{
+  "id": "ui-input-needs-autocomplete",
+  "why": "An email, password or phone field with no autocomplete makes everyone type it by hand.",
+  "rule": ".claude/rules/forms-never-fight.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "<input\\b(?![^>]*\\bautocomplete)[^>]*\\btype=[\"'{]*(?:email|password|tel)\\b",
+  "bad": "<input type=\"email\" name=\"email\" />\n",
+  "good": "<input type=\"email\" name=\"email\" autoComplete=\"email\" />\n",
+  "flags": "i"
+}

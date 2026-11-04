@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-transition-all",
+  "why": "`transition: all` animates properties you never meant to, and costs layout work. List the properties.",
+  "rule": ".claude/rules/motion-is-rare.md",
+  "concepts": [
+    "ui-markup",
+    "ui-styles"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "transition:\\s*all\\b|\\btransition-all\\b",
+  "bad": ".card { transition: all 0.2s; }\n",
+  "good": ".card { transition: transform 0.2s, opacity 0.2s; }\n"
+}

@@ -17,7 +17,8 @@
       "web",
       "tui",
       "nginx",
-      "stored-text"
+      "stored-text",
+      "ui-craft"
     ],
     "default": [
       "js-ts"
