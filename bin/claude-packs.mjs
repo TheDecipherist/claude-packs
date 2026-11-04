@@ -14,6 +14,7 @@ import { dupScan } from '../lib/once-only-report.mjs';
 import { PRESETS, availablePacks, readPack } from '../lib/packs.mjs';
 import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
 import { plannerSkills } from '../lib/planner.mjs';
+import { scan } from '../lib/scan.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
@@ -43,6 +44,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      when a rule matches no file or a source file is covered by no rule
   shape scan         every instance literal in the repo (code, tests, docs, briefs), by file and concept,
                      with a count, against design/shape.json; exit 1 when any
+  scan [--out <file>]  before installing anything: on a copy of the project, what to install and every issue the checks
+                     find; the project is never touched. scan --prompt prints the review brief for what checks cannot see
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
   symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
@@ -132,6 +135,10 @@ async function main() {
       return doctor(dir, console.log, { strict, fresh });
     case 'shape':
       return shapeCommand(rest[0], dir);
+    case 'scan':
+      if (rest.includes('--prompt')) { process.stdout.write(readFileSync(fileURLToPath(new URL('../prompts/scan-review.md', import.meta.url)), 'utf8')); return 0; }
+      await scan(dir, { out: rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null });
+      return 0;
     case 'survey':
       process.stdout.write(readFileSync(fileURLToPath(new URL('../prompts/survey.md', import.meta.url)), 'utf8'));
       return 0;

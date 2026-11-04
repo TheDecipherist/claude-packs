@@ -80,6 +80,14 @@ Pack `stored-text` (in the `node-ui` and `next-app` presets, and by default in `
 
 The `writing` pack comes with every configuration. Rules load on public text, the `humanize` skill is the last pass on anything that goes out, and nine other one-job skills cover replies and Reddit posts. Checks refuse what a regex can see (em dashes, slop words, dates) in new projects; an existing project names them in `"enable"`. Move the `public-text` concept in `.claude/layout.json` if a project's public text lives elsewhere.
 
+## Scan first: what to install, and what is already wrong (0.16.0)
+
+```
+npx --no-install @thedecipherist/claude-packs scan --dir <project>
+```
+
+Run it before installing anything. It works on a copy in a temp folder and never writes to the project, its `.git` included. The report says which configuration and packs fit, with the evidence, and lists every check hit by file and line. Hits are candidates, and secrets are shown by file and line only. The worst bugs are the ones no check sees, so the report ends with the review step: `scan --prompt` prints a brief for Claude Code to run on the copy.
+
 ## Commands
 
 ```

@@ -1,6 +1,6 @@
 ---
 name: reply-stance
-description: Use before drafting any reply to a comment, a review or a thread, or when asked whether to agree with what someone said.
+description: Use when about to draft any reply to a comment, a review or a thread, or when asked whether to agree with what someone said.
 ---
 
 # Stance before voice: is the position right?

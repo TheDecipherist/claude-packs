@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.16.0 (2026-11-04)
+
+Scan (Tim, 2026-11-04: a real install's review found security bugs that could have been very bad in production, so a project owner should get that review before choosing to install anything).
+
+- `claude-packs scan [--out <file>]`: copies the project (what git tracks or would track; never .env, key files, node_modules or build output) to a temp
+  folder, installs the recommended configuration and packs there, runs every check over every file with the secret patterns, the line limit
+  and coverage, and writes a report and every hit beside the copy. The project, its .git included, is never written to. The recommendation
+  gives its evidence per pack (lib/scan-detect.mjs). A hit is reported as a candidate; a secret by file and line, never its value.
+- `scan --prompt` prints the review brief (prompts/scan-review.md) for what no check can see: reviewers by concern (security, runaway work, work that
+  disappears, platform and operations), read-only, on the copy, every finding marked measured, read in the code, or claim.
+- lesson-checks exports `loadChecks` and `hitsOf`, with line numbers.
+- Fix: `no-find-reads` had `\bollection\b` for `collection`, so `collection.find(q)` got through; found by a real install's review.
+
 ## 0.15.0 (2026-11-04)
 
 Writing (Tim, 2026-11-04: whatever goes public, a manual, a md file, a reply, reads and is formatted properly; split tim-writing into small pieces).

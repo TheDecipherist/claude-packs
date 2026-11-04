@@ -26,7 +26,7 @@ const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 
 // "concepts": [...] resolve through .claude/layout.json, the same map the rules trigger from.
 // A worktree file is judged by its own checkout's checks and layout (claudeRoot).
-function loadChecks(root = ROOT) {
+export function loadChecks(root = ROOT) {
   const dir = join(root, '.claude', 'checks');
   let files = [];
   try {
@@ -46,7 +46,8 @@ function loadChecks(root = ROOT) {
 const BLANKING = { prose: blankProse, code: blankCode, strings: (text) => blankCode(text, true) };
 const subjectOf = (c, text) => { const kind = Object.keys(BLANKING).find((k) => c[k]); return kind ? BLANKING[kind](text) : text; };
 
-function matches(check, text) {
+// Every match: its line number and that line's text.
+function linesOf(check, text) {
   const subject = subjectOf(check, text);
   const re = new RegExp(check.pattern, `${(check.flags ?? '').replace('g', '')}g`);
   const lines = text.split('\n');
@@ -54,11 +55,13 @@ function matches(check, text) {
   let m;
   while ((m = re.exec(subject)) !== null) {
     const line = subject.slice(0, m.index).split('\n').length;
-    found.push(lines[line - 1]?.trim() ?? '');
+    found.push({ line, text: lines[line - 1]?.trim() ?? '' });
     if (m[0].length === 0) re.lastIndex += 1;
   }
   return found;
 }
+
+const matches = (check, text) => linesOf(check, text).map((m) => m.text);
 
 // The needs a text that has the pattern does not meet ([] when the pattern is absent).
 function missing(c, text) {
@@ -85,6 +88,13 @@ const MODES = {
 };
 const modeOf = (c) => MODES[c.mode ?? 'forbid'];
 const violates = (c, text) => modeOf(c).violates(c, text);
+
+// What a whole file breaks, for `claude-packs scan`: forbid's matches, a needs check's gaps. "require" judges a removal, so it has none.
+export function hitsOf(c, text) {
+  if (c.mode === 'require') return [];
+  if (c.mode === 'needs') return missing(c, text).map((n) => ({ line: 1, text: `missing: ${n}` }));
+  return linesOf(c, text);
+}
 
 function selftest(checks) {
   const problems = [];

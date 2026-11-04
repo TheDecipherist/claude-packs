@@ -2,7 +2,7 @@
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T15:22:20.394Z",
+  "updated": "2026-11-04T15:31:12.387Z",
   "files": {
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
     ".claude/rules/bug-fix-starts-red.md": "b10bac915dbfa15465e626cc1aa13b55a9a38ef0cc27e9dbb90de1e51a91a97c",
@@ -29,7 +29,7 @@
     ".claude/hooks/file-size-guard.mjs": "88aa9deeeddd17e4bef732d858692171e06a6202cdc1db355110ac6e3b20e2df",
     ".claude/hooks/folder-law.mjs": "b5bb70327aafddce6083b4f8d59668b28c3077b5e0d70f34a27aec0bc2e5a2a6",
     ".claude/hooks/git-guard.mjs": "265440f2da46fd1b429947da309a349cc4613dc3a3cbd7e706ea8ed16d6c697e",
-    ".claude/hooks/lesson-checks.mjs": "0f944f24c5e25bebf9532655a31b40da54cbad602b1eb2614b0fd37f5a34ef1c",
+    ".claude/hooks/lesson-checks.mjs": "dfb6150b4f78975d58fec6112dd8bc1a6034d9897b1d262694f6b86e5de233ba",
     ".claude/hooks/lib/apply-edit.mjs": "b5ba751ef1b21a32430592091b2dc795f64697afc6ca39443faa1c8b539af9f5",
     ".claude/hooks/lib/cpp-scan.mjs": "ce1cb73ad3ed63669900865a3d0ff634db278f5f7c112f02e49d2f917fc7efe3",
     ".claude/hooks/lib/dup-index.mjs": "86708303de3704cf838cfa988b34fca78523cd84cfbd12db3af5eccf76beba91",
@@ -82,10 +82,10 @@
     ".claude/skills/launch-post/SKILL.md": "f121c2a36cfb99dca21ba0f067a1d746e35983dd2c00ec9e0eba3858777e0cde",
     ".claude/skills/pick-subreddit/SKILL.md": "90e3664c2439f79090e0981fbe3936d5214895d4f70067f8cf665e85be60c7e6",
     ".claude/skills/post-voice/SKILL.md": "3d5297a3ca84ac47b78ce4e035ac084f04479e1af82a5cffa7008bc0d7c8e8ef",
-    ".claude/skills/reddit-post/SKILL.md": "64b9a91eba4a5f13dc8d831e699c043b37dfe10f7d00be0b38a4709e2102773f",
+    ".claude/skills/reddit-post/SKILL.md": "250a594e6e28c8087f2e27b3fc2909a709b074d05ebdfb2ddff13ada7b417838",
     ".claude/skills/reddit-title/SKILL.md": "553461a75528e7c0d04e25f569538781579fa333889ae744621b61f40124f6d6",
     ".claude/skills/reply-moves/SKILL.md": "5c5198c66bc65629ce8e0bacf12d0c36682925cb0c98e67f99a60b48df0743e2",
-    ".claude/skills/reply-stance/SKILL.md": "2b163d11361d0f11da364bfe5e676b62fa8c9dd3af0432f4946f48a2dcfc5dba",
+    ".claude/skills/reply-stance/SKILL.md": "7073a3173374eb890a00e2ec8b9728a320a54640ef613e9e88ed469689b60ddc",
     ".claude/skills/should-i-reply/SKILL.md": "c045369284b02b5ef5f625a020b7af5955e0c81e85a1d4aa0a2d23bc05cdc041"
   }
 }

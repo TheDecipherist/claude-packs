@@ -38,6 +38,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: pack writing: the tim-writing skill split into small rules, one-job skills and lesson checks, with a prose mode in lesson-checks that leaves code and URLs out, in every configuration; concepts: none (design/shape.json declares none); reuse: the lesson-checks hook and its subject blanking (packs/base/hooks/lesson-checks.mjs), a configuration's "always" packs (lib/configs.mjs), hookRun (test/kit-cli.mjs).
   done when: every section of tim-writing has a home; each check refuses its bad and leaves code and URLs alone, through the hook in an install; every skill passes doctor (Use when, under 8,000 characters); the whole suite green once, committed; ./tim-writing removed.
 
+- 0.16.0, scan (work/0.16.0-scan, from work/0.15.0-writing), started 2026-11-04 (Tim: a SCAN a user runs before choosing to install, on a copy, reporting what to install and every issue found).
+  making: claude-packs scan: a copy of the project, the recommended packs installed in it, every check over every file, a report with evidence, and a review prompt for what checks cannot see; concepts: none (design/shape.json declares none); reuse: sync (lib/sync.mjs), coverage (lib/coverage.mjs), the installed lesson-checks and secrets-guard, onceOnlyDoctor (lib/once-only-report.mjs).
+  done when: a test proves the scanned project is byte for byte unchanged, .env is never copied and no secret value reaches the report; the recommendation has evidence per pack; no-find-reads catches collection.find(q); the whole suite green once, committed.
+
 ## Steps
 
 ## Log
