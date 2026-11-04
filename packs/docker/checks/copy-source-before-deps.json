@@ -1,0 +1,13 @@
+{
+  "id": "copy-source-before-deps",
+  "why": "COPY . . before the package-file copy means a one-line code change reinstalls every dependency. Copy package.json + lockfile, install, then copy source.",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s*COPY\\s+(?:--\\S+\\s+)*\\.\\/?\\s+\\.\\/?\\s*$[\\s\\S]*?^\\s*(?:COPY\\s+[^\\n]*package|RUN\\s+[^\\n]*npm\\s+ci)",
+  "bad": "COPY . .\nRUN npm ci",
+  "good": "COPY package.json package-lock.json ./\nRUN npm ci\nCOPY . ."
+}

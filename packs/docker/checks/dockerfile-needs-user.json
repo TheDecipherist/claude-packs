@@ -1,0 +1,17 @@
+{
+  "id": "dockerfile-needs-user",
+  "why": "A container running as root is a root shell one escape away. Add USER node (or another non-root user) before the entrypoint.",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "mode": "needs",
+  "pattern": "^\\s*(CMD|ENTRYPOINT)\\s",
+  "needs": [
+    "^\\s*USER\\s+(?!root\\b)\\S+"
+  ],
+  "bad": "FROM node:24.11.0-slim\nENTRYPOINT [\"node\", \"dist/index.js\"]",
+  "good": "FROM node:24.11.0-slim\nUSER node\nENTRYPOINT [\"node\", \"dist/index.js\"]"
+}

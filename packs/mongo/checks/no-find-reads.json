@@ -1,0 +1,26 @@
+{
+  "id": "no-find-reads",
+  "why": "Reads are aggregation pipelines: shaping happens in the database and the pipeline is composable data. Add '// mongo: allow find' with a reason for a real exception.",
+  "rule": ".claude/rules/reads-aggregate-writes-bulk.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": false,
+  "pattern": "^(?!.*//\\s*mongo:\\s*allow find).*\\bollection\\b[^\\n]*\\.find\\s*\\(|\\.find\\s*\\(\\s*\\{[^\\n]*\\)\\s*\\.(toArray|limit|sort|skip)\\s*\\(",
+  "flags": "m",
+  "bad": "const docs = await collection.find({ a: 1 }).toArray();",
+  "good": "const docs = await col.aggregate([{ $match: { a: 1 } }, { $limit: 50 }]).toArray();\nconst x = items.find((i) => i.id === id);"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "no-console-in-app",
+  "why": "console.* in application code is unstructured, unlevelled and unredacted; it bypasses the logger (pino in Fastify). CLIs and scripts under bin/, scripts/ or tools/ may print.",
+  "rule": ".claude/rules/no-console.md",
+  "concepts": [
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/tests/**",
+    "**/test/**",
+    "**/*.config.*",
+    ".claude/**",
+    "**/.claude/**",
+    "**/bin/**",
+    "**/scripts/**",
+    "**/tools/**",
+    "**/cli.*"
+  ],
+  "code": true,
+  "pattern": "\\bconsole\\s*\\.\\s*(log|info|warn|error|debug|trace)\\s*\\(",
+  "bad": "console.log('user created', user.id);",
+  "good": "request.log.info({ userId: user.id }, 'user created');\n// console.log('in a comment is fine')"
+}

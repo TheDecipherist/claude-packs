@@ -1,0 +1,25 @@
+{
+  "id": "no-swallowed-errors",
+  "why": "An empty catch or a .catch that returns nothing hides the failure: the work silently didn't happen and nobody is told. Handle it, rethrow with context, or let the boundary catch it.",
+  "rule": ".claude/rules/errors-never-swallowed.md",
+  "concepts": [
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/tests/**",
+    "**/test/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": true,
+  "pattern": "catch\\s*(?:\\([^)]*\\))?\\s*\\{\\s*\\}|\\.catch\\s*\\(\\s*(?:\\(\\s*[\\w$]*\\s*\\)|[\\w$]+)?\\s*=>\\s*(?:\\{\\s*\\}|null|undefined|void\\s+0)\\s*\\)|\\.catch\\s*\\(\\s*(?:noop|_\\.noop)\\s*\\)",
+  "bad": "try { await save(x); } catch {}\nawait send(m).catch(() => {});\nconst v = await get(k).catch(() => null);",
+  "good": "try { await save(x); } catch (err: unknown) { throw new Error('save failed', { cause: err }); }\nawait send(m).catch((err: unknown) => log.warn({ err }, 'send failed'));"
+}

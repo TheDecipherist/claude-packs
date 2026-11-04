@@ -1,0 +1,16 @@
+{
+  "name": "html-ui",
+  "description": "Server-rendered HTML (template strings, views): every value escaped, no inline style or script, safe links.",
+  "folders": {},
+  "concepts": {
+    "ui-templates": [
+      "**/ui/**/*.ts",
+      "**/views/**/*.ts",
+      "**/templates/**/*.ts",
+      "**/render*.ts",
+      "**/*.view.ts"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

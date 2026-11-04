@@ -1,5 +1,6 @@
 // Tiny glob matcher (no dependencies): supports **, *, ? and {a,b}. Paths use "/".
 const cache = new Map();
+const ONE_CHAR = { '*': '[^/]*', '?': '[^/]' }; // a lone * stays inside one folder; ? is one character
 
 export function globToRegExp(glob) {
   if (cache.has(glob)) return cache.get(glob);
@@ -10,13 +11,11 @@ export function globToRegExp(glob) {
       const slash = glob[i + 2] === '/';
       re += slash ? '(?:.*/)?' : '.*';
       i += slash ? 2 : 1;
-    } else if (c === '*') re += '[^/]*';
-    else if (c === '?') re += '[^/]';
-    else if (c === '{') {
+    } else if (c === '{') {
       const end = glob.indexOf('}', i);
       re += `(?:${glob.slice(i + 1, end).split(',').map(escape).join('|')})`;
       i = end;
-    } else re += escape(c);
+    } else re += Object.hasOwn(ONE_CHAR, c) ? ONE_CHAR[c] : escape(c);
   }
   const compiled = new RegExp(`^${re}$`);
   cache.set(glob, compiled);

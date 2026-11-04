@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.11.0 (2026-11-04)
+
+The v7 additions (claude-packs-kit-v7-additions.zip, merged by hand: the kit's own files kept wherever the zip's were older).
+
+- Dispatch laws in base, for C++ and JS/TS: rules `lookup-over-if-chains` (three branches on one value are a lookup),
+  `field-map-over-if-runs` (three ifs on one object's fields are a field table and one loop) and `behaviour-lives-with-its-kind`
+  (each kind owns its behaviour in one object, table or class, chosen once). Checks `lookup-over-if-chains` (also catches ifs in a
+  row that each return on the same value, the act-line renderer's shape the zip's version missed) and `field-map-over-if-runs`.
+  Hook `dispatch-once`: a write that adds a `switch` on a kind another code file of the same checkout already switches on is
+  refused; every write route, worktree-aware, through the runner, with a selftest (seen red on a planted fault). The rules' hot-loop
+  exception points at audio-core's `per-sample-code-inlinable`; their examples name no synth word (base-neutral).
+- lesson-checks: `mode: "needs"` (when `pattern` appears, every regex in `needs` must too; a write is refused only for a need it
+  newly leaves missing), ported into the kit's lesson-checks; the modes are one table.
+- Seven new packs: `js-ts` (22 rules, 22 checks), `mongo` (5, 16), `fastify` (3, 8), `ai` (1, 3), `docker` (3, 21, skill
+  `docker-diagnose`), `shell-hooks` (1, 4), `html-ui` (1, 4). Configuration `node` takes them (base always; init takes js-ts).
+- Presets: `init node-api` (js-ts, mongo, fastify, ai, docker), `node-ui` (js-ts, mongo, fastify, html-ui, docker), `mcp-server`
+  (js-ts, mongo, ai, shell-hooks), `node-lib` (js-ts), `synth` (audio-core); `list` shows them. A preset's configuration is the
+  smallest one that takes its packs.
+- docker: `compose-service-needs-init` and `compose-service-needs-healthcheck` judge each service, not the file: a compose file where
+  only one service has `init: true` (or a healthcheck) is refused, naming the service that lacks it.
+- base's `js` concept is scoped like `cpp` (src/, tests/, test/), so doctor's coverage still finds a source file outside the
+  structure; full-stack maps it to its code folders. js-ts's own `js` concept stays repo-wide.
+- The kit's own if-chains are tables: the WAV reader (one reader per encoding, chosen once per file), the glob matcher, freeze.mjs,
+  version-pin-guard's manifest parsers and git-guard's token-storing subcommands. Left as they are: shell-writes.mjs's tokenizer
+  (character and operator dispatch with control flow in each branch; a table would not make it clearer).
+- The kit runs the three new laws on itself (layout `enable`).
+- Not taken from the zip, the kit's being newer: lesson-checks.mjs, lib/packs.mjs, bin/claude-packs.mjs (presets merged in),
+  coverage, project.mjs, placement-law, file-size-guard, version-pin-guard, prove-control, subagent-dispatch and three tests; the
+  synth-creator pieces 0.10.0 moved out of base (frozen-files, stage-guard, freeze, two rules) stay out; the global `new-project`
+  skill stays the `new` command (the global part is three pieces).
+
 ## 0.10.1 (2026-11-03)
 
 The hover law (Tim, 2026-11-03; the kit half of Stellix B-261): "Controls dont have a hover state ... all controls and screens that

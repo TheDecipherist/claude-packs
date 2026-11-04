@@ -1,0 +1,24 @@
+{
+  "id": "no-cast-at-route-boundary",
+  "why": "`req.body as {\u2026}` and String(body.x) are not validation: a missing or malformed field reaches the handler as undefined or 'undefined'. safeParse with the entity schema, 400 on failure.",
+  "rule": ".claude/rules/trust-config-not-headers.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\b(?:req|request)\\.(?:body|query|params)\\s+as\\b|\\b(?:String|Number|Boolean)\\(\\s*(?:req|request)?\\.?(?:body|query|params)\\b[\\w.]*\\s*[)?]",
+  "bad": "const body = req.body as { name: string };\nconst page = Number(query.page);",
+  "good": "const parsed = LoginInput.safeParse(req.body);\nif (!parsed.success) return reply.code(400).send(badRequest(parsed.error));"
+}

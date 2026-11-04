@@ -1,0 +1,24 @@
+{
+  "id": "void-needs-catch",
+  "why": "`void start()` discards the promise; its rejection is unhandled and kills the process. `void x().catch(log)` or guarded().",
+  "rule": ".claude/rules/await-handled-at-a-boundary.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\bvoid\\s+(?![\\w.]+\\([^;]*\\.catch\\s*\\()[\\w.]+\\s*\\([^;]*\\)\\s*;",
+  "bad": "void loop();\nvoid server.close();",
+  "good": "void loop().catch((err: unknown) => log.error({ err }, 'loop died'));\nshutdown('SIGTERM', 0).catch(() => process.exit(1));"
+}

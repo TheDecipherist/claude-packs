@@ -1,0 +1,26 @@
+{
+  "id": "one-error-body",
+  "why": "A route that builds its own 404/400 body diverges from the error handler's contract (here: an empty correlation_id). One notFound()/badRequest() builder, used everywhere.",
+  "rule": ".claude/rules/security-always-on.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/app.ts",
+    "**/errors.*"
+  ],
+  "code": false,
+  "pattern": "code\\s*:\\s*['\\\"](?:NOT_FOUND|BAD_REQUEST|INTERNAL|UNAUTHORIZED|FORBIDDEN)['\\\"]",
+  "bad": "return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'not found', correlation_id: '' } });",
+  "good": "return notFound(reply);"
+}

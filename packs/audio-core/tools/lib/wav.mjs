@@ -20,17 +20,22 @@ export function readWav(buf) {
   throw new Error('no data chunk');
 }
 
+// One reader per sample encoding: format 3 is IEEE float (64 bit, else 32), any other is integer PCM by bit depth.
+const READERS = {
+  f32: (buf, p) => buf.readFloatLE(p),
+  f64: (buf, p) => buf.readDoubleLE(p),
+  i16: (buf, p) => buf.readInt16LE(p) / 32768,
+  i24: (buf, p) => buf.readIntLE(p, 3) / 8388608,
+  i32: (buf, p) => buf.readInt32LE(p) / 2147483648,
+};
+
 function decode(buf, start, size, { format, channels, bits }) {
+  const encoding = format === 3 ? (bits === 64 ? 'f64' : 'f32') : `i${bits}`;
+  if (!Object.hasOwn(READERS, encoding)) throw new Error(`unsupported bit depth ${bits}`);
+  const read = READERS[encoding]; // chosen once, not per sample
   const bytes = bits / 8;
   const frames = Math.floor(size / (bytes * channels));
   const out = new Float64Array(frames);
-  for (let i = 0; i < frames; i += 1) {
-    const p = start + i * bytes * channels;
-    if (format === 3) out[i] = bits === 64 ? buf.readDoubleLE(p) : buf.readFloatLE(p);
-    else if (bits === 16) out[i] = buf.readInt16LE(p) / 32768;
-    else if (bits === 24) out[i] = buf.readIntLE(p, 3) / 8388608;
-    else if (bits === 32) out[i] = buf.readInt32LE(p) / 2147483648;
-    else throw new Error(`unsupported bit depth ${bits}`);
-  }
+  for (let i = 0; i < frames; i += 1) out[i] = read(buf, start + i * bytes * channels);
   return out;
 }

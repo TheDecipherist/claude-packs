@@ -1,0 +1,24 @@
+{
+  "id": "mongoclient-outside-gateway",
+  "why": "A second MongoClient is a second connection pool. The client lives in the gateway (cached on globalThis) or in a one-off script, nowhere else.",
+  "rule": ".claude/rules/one-client-one-pool.md",
+  "concepts": [
+    "db-callers"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\bnew\\s+MongoClient\\s*\\(",
+  "bad": "const client = new MongoClient(uri);",
+  "good": "const db = await getDb();"
+}

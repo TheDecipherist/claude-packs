@@ -44,6 +44,11 @@
     "copy-trees": [
       "kind:copy",
       ".claude/layout.json"
+    ],
+    "js": [
+      "src/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "tests/**/*.{js,mjs,cjs,ts,tsx}",
+      "test/**/*.{js,mjs,cjs,ts,tsx}"
     ]
   },
   "skillsIn": null,
@@ -96,6 +101,11 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/untrusted-boundary.mjs\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/dispatch-once.mjs\"",
+            "timeout": 15
           }
         ]
       },

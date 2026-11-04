@@ -1,0 +1,24 @@
+{
+  "name": "fastify",
+  "description": "Fastify servers: security always on, trust config not headers, Zod at every route, streams and hijacks handled.",
+  "folders": {},
+  "concepts": {
+    "fastify-app": [
+      "**/app.ts",
+      "**/server.ts",
+      "**/src/index.ts",
+      "**/plugins/**/*.ts"
+    ],
+    "routes": [
+      "**/routes/**/*.ts",
+      "**/handlers/**/*.ts",
+      "**/controllers/**/*.ts",
+      "**/app.ts",
+      "**/server.ts",
+      "**/ui/router*.ts",
+      "**/auth/**/*.ts"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

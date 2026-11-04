@@ -16,6 +16,7 @@ export const CLI = join(KIT, 'bin/claude-packs.mjs');
 export const run = (dir, ...args) => execFileSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 export const cli = (dir, ...args) => spawnSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 export const fresh = (prefix) => mkdtempSync(join(tmpdir(), prefix));
-export const hookStatus = (dir, name, payload) =>
-  spawnSync('node', [join(dir, '.claude/hooks', name)], { input: JSON.stringify(payload), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } }).status;
+export const hookRun = (dir, name, payload) =>
+  spawnSync('node', [join(dir, '.claude/hooks', name)], { input: JSON.stringify(payload), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
+export const hookStatus = (dir, name, payload) => hookRun(dir, name, payload).status;
 export const selftest = (dir, hook) => spawnSync('node', [join(dir, '.claude/hooks', hook), '--selftest'], { encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });

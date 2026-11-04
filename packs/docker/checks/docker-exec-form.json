@@ -1,0 +1,16 @@
+{
+  "id": "docker-exec-form",
+  "why": "Shell-form CMD/ENTRYPOINT runs the app under sh -c: sh is PID 1, swallows SIGTERM, and the app never shuts down cleanly. Use the JSON-array form.",
+  "rule": ".claude/rules/docker-exec-form.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s*(CMD|ENTRYPOINT)\\s+(?!\\[)\\S",
+  "bad": "CMD node dist/index.js",
+  "good": "ENTRYPOINT [\"node\", \"dist/index.js\"]"
+}

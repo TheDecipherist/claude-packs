@@ -1,0 +1,19 @@
+{
+  "name": "shell-hooks",
+  "description": "Shell and Node hooks for Claude Code: portable, anchored, quoted, one prelude, JSON by a tool.",
+  "folders": {},
+  "concepts": {
+    "shell-hooks": [
+      "**/hooks/**/*.sh",
+      "**/hooks/**/*.mjs",
+      "**/hooks/**/*.js",
+      "**/hooks/**/*.cjs"
+    ],
+    "hook-settings": [
+      "**/.claude/settings.json",
+      "**/.claude/settings.local.json"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

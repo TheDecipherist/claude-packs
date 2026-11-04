@@ -56,7 +56,14 @@
         "purpose": "scripts that never ship"
       }
     },
-    "concepts": {},
+    "concepts": {
+      "js": [
+        "core",
+        "api",
+        "channel",
+        "api-tests"
+      ]
+    },
     "kinds": {
       "schema": {
         "what": "a Zod schema (z.object) and the error contract",

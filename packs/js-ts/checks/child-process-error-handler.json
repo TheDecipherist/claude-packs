@@ -1,0 +1,28 @@
+{
+  "id": "child-process-error-handler",
+  "why": "A spawned child with a 'close' handler but no 'error' handler: when the binary cannot start, Node emits 'error' with no listener (crash) and the wrapping promise never resolves.",
+  "rule": ".claude/rules/await-handled-at-a-boundary.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "(?:(?<![\\w.])|(?<=child_process\\.)|(?<=\\bcp\\.))(?:spawn|execFile|exec|fork)\\s*\\(",
+  "needs": [
+    "\\.on\\s*\\(\\s*['\\\"]error['\\\"]"
+  ],
+  "bad": "const child = spawn('bash', ['-c', command]);\nchild.on('close', (code) => resolve(code));",
+  "good": "const child = spawn('bash', ['-c', command]);\nchild.on('error', reject);\nchild.on('close', (code) => resolve(code));\nconst m = re.exec(line);"
+}

@@ -11,7 +11,7 @@ import { lockCommand } from '../lib/kit-lock.mjs';
 import { readLock } from '../lib/manifest.mjs';
 import { newProject } from '../lib/new.mjs';
 import { dupScan } from '../lib/once-only-report.mjs';
-import { availablePacks, readPack } from '../lib/packs.mjs';
+import { PRESETS, availablePacks, readPack } from '../lib/packs.mjs';
 import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
 import { plannerSkills } from '../lib/planner.mjs';
 import { sync } from '../lib/sync.mjs';
@@ -22,7 +22,7 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
   new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
                      workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
                      --packs <a,b>     the packs (default audio-core); --profile <name>, --config <name> as for init
-  init [pack...]     install packs into this project (base is always included)
+  init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
                      and create the layout folders
                      --config <name>   the configuration (configs lists them; stored in layout.json
                                        "configuration"); with no packs named, the ones it takes by default
@@ -147,6 +147,8 @@ async function main() {
       return lockCommand(rest[0], dir, { force, branch: rest.includes('--branch') ? rest[rest.indexOf('--branch') + 1] : undefined });
     case 'list':
       for (const name of availablePacks()) console.log(`${name.padEnd(12)} ${readPack(name).description}`);
+      console.log('\npresets (init <preset> installs the packs that stack needs):');
+      for (const [name, packs] of Object.entries(PRESETS)) console.log(`${name.padEnd(12)} ${packs.join(', ')}`);
       return 0;
     default:
       console.log(HELP);

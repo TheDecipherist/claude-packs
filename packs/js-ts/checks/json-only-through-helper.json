@@ -1,0 +1,27 @@
+{
+  "id": "json-only-through-helper",
+  "why": "JSON.stringify throws on circular references, BigInt and throwing toJSON, and turns Error into {}; JSON.parse throws on any bad input. One helper (lib/json.ts: toJson / parseJson) handles all of it once; a logger uses pino. A raw call is a crash waiting for the one value that triggers it.",
+  "rule": ".claude/rules/json-only-through-one-helper.md",
+  "concepts": [
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/lib/json.*",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/tests/**",
+    "**/test/**",
+    "**/*.config.*",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": true,
+  "pattern": "\\bJSON\\s*\\.\\s*(parse|stringify)\\s*\\(",
+  "bad": "export function logLine(level: 'info' | 'warn' | 'error', fields: Record<string, unknown>): void {\n  console.log(JSON.stringify({ ts: new Date().toISOString(), level, service: 'admiralmcp-api', ...fields }));\n}",
+  "good": "import { toJson, parseJson } from '../lib/json';\nrequest.log.warn({ jobId, err }, 'job retry');\nconst body = toJson(payload);\nconst cfg = parseJson(text, ConfigSchema);\n// JSON.stringify is only called in lib/json.ts\nconst s = 'JSON.parse(x) in a string is not a call';"
+}

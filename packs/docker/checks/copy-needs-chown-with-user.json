@@ -1,0 +1,17 @@
+{
+  "id": "copy-needs-chown-with-user",
+  "why": "Files copied as root are unwritable by the USER the app runs as; the first write to a cache or temp dir fails with EACCES. COPY --chown=node:node when USER is set.",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "mode": "needs",
+  "pattern": "^\\s*USER\\s+(?!root\\b)\\S+",
+  "needs": [
+    "--chown="
+  ],
+  "bad": "COPY --from=build /app/dist ./dist\nUSER node",
+  "good": "COPY --chown=node:node --from=build /app/dist ./dist\nUSER node"
+}

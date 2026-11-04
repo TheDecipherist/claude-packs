@@ -1,0 +1,12 @@
+{
+  "name": "mongo",
+  "description": "MongoDB with the native driver: one client, one gateway, aggregation reads, bulkWrite writes, safe deletes.",
+  "folders": {},
+  "concepts": {
+    "db-gateway": ["**/gateway.ts", "**/gateway/**", "**/db/**", "**/lib/db.*", "**/lib/db/**", "**/adapters/**", "**/repositories/**", "**/*.repository.*", "**/*mongo*"],
+    "db-scripts": ["**/scripts/**", "**/migrations/**", "**/seeds/**", "**/bin/**"],
+    "db-callers": ["**/routes/**", "**/handlers/**", "**/services/**", "**/app/**", "**/pages/**", "**/components/**", "**/ui/**", "**/lifecycle/**"]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

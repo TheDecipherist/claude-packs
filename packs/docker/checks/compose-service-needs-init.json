@@ -1,0 +1,11 @@
+{
+  "id": "compose-service-needs-init",
+  "why": "This service has no `init: true`: the app is PID 1 with no signal forwarding or zombie reaping, so docker stop waits 10 s then SIGKILLs it mid-request. Every service gets init: true.",
+  "rule": ".claude/rules/compose-swarm-safe.md",
+  "concepts": ["compose"],
+  "code": false,
+  "flags": "m",
+  "pattern": "^  [\\w.-]+:[ \\t]*\\n(?:(?:    (?!init:\\s*true\\b)[^\\n]*|[ \\t]*)(?:\\n|(?![\\s\\S])))*?    (?:image|build):[^\\n]*(?:\\n|(?![\\s\\S]))(?:(?:    (?!init:\\s*true\\b)[^\\n]*|[ \\t]*)(?:\\n|(?![\\s\\S])))*(?=^  \\S|(?![\\s\\S]))",
+  "bad": "services:\n  mongo:\n    image: mongo:8.2.3\n    init: true\n  api:\n    image: registry/api:1.2.3\n    ports: ['3000']\n",
+  "good": "services:\n  mongo:\n    image: mongo:8.2.3\n    init: true\n  api:\n    image: registry/api:1.2.3\n    init: true\n    stop_grace_period: 15s\n    healthcheck:\n      test: [\"CMD\", \"true\"]\n"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "no-nested-ternary",
+  "why": "A ternary inside a ternary is an if-chain in one line. Use a lookup table (lookup-over-if-chains) or a small function.",
+  "rule": ".claude/rules/lookup-over-if-chains.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": true,
+  "pattern": "\\s\\?\\s[^:;\\n]*\\s\\?\\s[^:;\\n]*\\s:\\s",
+  "bad": "const label = w.status === 'ok' ? (w.fresh ? 'live' : 'stale') : 'dead';",
+  "good": "const label = LABELS[w.status];\nconst v = a?.b ?? c ? d : e;\nconst RE = /expect\\(\\s*([^()]+(?:\\([^()]*\\))?)\\s*\\)/;"
+}

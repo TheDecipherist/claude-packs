@@ -1,0 +1,20 @@
+{
+  "id": "no-bash-c-with-variable",
+  "why": "bash -c with a string the project can edit runs whatever that file says; a gate command rewritten to `true` turns red green. Hash-pin the config or pass an argv array.",
+  "rule": ".claude/rules/hooks-portable-anchored-quoted.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.test.*",
+    "**/test/**"
+  ],
+  "code": false,
+  "pattern": "\\bspawn(?:Sync)?\\s*\\(\\s*['\\\"](?:bash|sh|zsh)['\\\"]\\s*,\\s*\\[\\s*['\\\"]-c['\\\"]\\s*,\\s*(?!['\\\"`])[\\w.]+",
+  "bad": "const child = spawn('bash', ['-c', command], { cwd });",
+  "good": "const child = spawn(argv[0], argv.slice(1), { cwd });"
+}

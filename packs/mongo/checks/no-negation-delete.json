@@ -1,0 +1,26 @@
+{
+  "id": "no-negation-delete",
+  "why": "A delete filter on $ne/$nin/$not deletes everything EXCEPT one value; one wrong constant empties the store while reading as a cleanup. Name what to delete, not what to keep, and count first.",
+  "rule": ".claude/rules/deletes-name-what-dies.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts",
+    "db-callers"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\.delete(Many|One)\\s*\\([^)]*\\$(ne|nin|not)\\b",
+  "bad": "await col.deleteMany({ version: { $ne: current } });",
+  "good": "await col.deleteMany({ version: { $in: staleVersions } });"
+}

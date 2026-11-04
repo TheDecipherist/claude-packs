@@ -1,0 +1,11 @@
+{
+  "id": "compose-service-needs-healthcheck",
+  "why": "This service has no healthcheck: it is 'healthy' while serving errors, and rolling update, rollback and restart_policy have nothing to decide on.",
+  "rule": ".claude/rules/compose-swarm-safe.md",
+  "concepts": ["compose"],
+  "code": false,
+  "flags": "m",
+  "pattern": "^  [\\w.-]+:[ \\t]*\\n(?:(?:    (?!healthcheck:)[^\\n]*|[ \\t]*)(?:\\n|(?![\\s\\S])))*?    (?:image|build):[^\\n]*(?:\\n|(?![\\s\\S]))(?:(?:    (?!healthcheck:)[^\\n]*|[ \\t]*)(?:\\n|(?![\\s\\S])))*(?=^  \\S|(?![\\s\\S]))",
+  "bad": "services:\n  mongo:\n    image: mongo:8.2.3\n    healthcheck:\n      test: [\"CMD\", \"mongosh\", \"--eval\", \"db.adminCommand('ping')\"]\n  api:\n    image: registry/api:1.2.3\n    init: true\n",
+  "good": "services:\n  api:\n    image: registry/api:1.2.3\n    init: true\n    healthcheck:\n      test: [\"CMD\", \"node\", \"dist/healthcheck.js\"]\n      start_period: 20s\n"
+}

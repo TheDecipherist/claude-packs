@@ -1,0 +1,18 @@
+{
+  "id": "hook-json-by-tool",
+  "why": "printf-built JSON breaks on the first quote or backslash in a value and the consumer drops the line silently. Produce JSON with node -e or jq.",
+  "rule": ".claude/rules/hooks-portable-anchored-quoted.md",
+  "concepts": [
+    "shell-hooks"
+  ],
+  "globs": [
+    "**/*.sh"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "pattern": "\\b(?:printf|echo)\\s+(?:-e\\s+)?['\\\"]\\s*\\{[^'\\\"]*\\\\?\\\"\\w+\\\\?\\\"\\s*:",
+  "bad": "printf '{\"decision\":\"block\",\"reason\":\"%s\"}' \"$1\"",
+  "good": "node -e 'console.log(JSON.stringify({ decision: \"block\", reason: process.argv[1] }))' \"$1\""
+}

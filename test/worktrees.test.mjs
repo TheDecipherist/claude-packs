@@ -204,6 +204,13 @@ const CASES = {
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
   },
+  'dispatch-once.mjs': ({ here, wt }) => {
+    // The worktree's branch already switches on blendStyle; main does not. Each checkout is scanned on its own.
+    put(join(wt, 'src/dsp/Blend.cpp'), 'float blend (Layer& l) { switch (l.blendStyle) { default: return 0.0f; } }\n');
+    const second = 'int label (Layer& l) { switch (l.blendStyle) { default: return 0; } }\n';
+    assert.equal(fire(here, 'dispatch-once.mjs', join(wt, 'src/dsp/Label.cpp'), second), 2);
+    assert.equal(fire(here, 'dispatch-once.mjs', join(here, 'src/dsp/Label.cpp'), second), 0);
+  },
   'once-only.mjs': ({ here, wt }) => {
     // the function lives only in the worktree: a near-copy is refused there, and judged against main's tree in main
     put(join(wt, 'src/dsp/Svf.cpp'), `#include "Svf.h"\n\n${SVF('Svf')}\n`);

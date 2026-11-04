@@ -1,0 +1,28 @@
+{
+  "id": "sse-needs-error-listener",
+  "why": "A keepalive write on an errored socket emits 'error' on the ServerResponse; with no listener that is an uncaught exception. Register raw.on('error', stop) before the first write.",
+  "rule": ".claude/rules/streams-and-hijacks.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "text/event-stream",
+  "needs": [
+    "\\.on\\s*\\(\\s*['\\\"]error['\\\"]"
+  ],
+  "bad": "raw.writeHead(200, { 'content-type': 'text/event-stream' });\nraw.on('close', stop);",
+  "good": "raw.writeHead(200, { 'content-type': 'text/event-stream' });\nraw.on('error', stop);\nraw.on('close', stop);"
+}

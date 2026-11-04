@@ -1,0 +1,31 @@
+{
+  "id": "entry-registers-shutdown",
+  "why": "An entry file that listens or connects must shut down on purpose: SIGTERM and SIGINT close the server then the database; uncaughtException and unhandledRejection do the same and exit non-zero. Missing any one of the four leaves the pool open on that path.",
+  "rule": ".claude/rules/process-lifecycle.md",
+  "concepts": [
+    "entry"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "mode": "needs",
+  "pattern": "\\.listen\\s*\\(|\\bcreateServer\\s*\\(|\\bconnectGateway\\s*\\(|\\bconnectDb\\s*\\(|\\bmongoClient\\s*\\(\\s*\\)\\s*\\.connect",
+  "needs": [
+    "(\\bSIGTERM\\b|\\binstallLifecycle\\s*\\()",
+    "(\\bSIGINT\\b|\\binstallLifecycle\\s*\\()",
+    "(\\buncaughtException\\b|\\binstallLifecycle\\s*\\()",
+    "(\\bunhandledRejection\\b|\\binstallLifecycle\\s*\\()"
+  ],
+  "bad": "const app = Fastify();\nawait app.listen({ port: env.PORT, host: '0.0.0.0' });",
+  "good": "import { installLifecycle } from './lifecycle.js';\ninstallLifecycle(app);\nawait app.listen({ port: env.PORT, host: '0.0.0.0' });"
+}

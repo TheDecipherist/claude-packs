@@ -3,8 +3,12 @@
 // Checks live in .claude/checks/*.json (one lesson per file):
 //   { "id", "why", "rule", "globs": [...], "exclude": [...], "pattern": "<regex>", "flags": "",
 //     "code": true,            // match against code with comments/strings blanked (C/C++/JS)
-//     "bad": "<snippet the check must catch>", "good": "<fixed snippet it must pass>" }
+//     "bad": "<snippet the check must catch>", "good": "<fixed snippet it must pass>",
+//     "mode": "forbid" (default) | "require" | "needs",  "needs": ["<regex>", ...] }
 //   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals)
+//   mode "needs": when the pattern appears, every regex in "needs" must appear as well (an entry file that listens also
+//   registers shutdown; a gateway that creates a MongoClient also caches and names it). A write is refused only for a need
+//   it newly leaves missing.
 // PreToolUse (Write|Edit|MultiEdit|NotebookEdit|Bash): blocks a write that ADDS a match, by any route (a tool,
 // or the shell's >, >>, tee, sed -i, cp, mv, a heredoc; lib/writes.mjs).  --selftest: proves every check.
 import { readdirSync, readFileSync } from 'node:fs';
@@ -50,9 +54,31 @@ function matches(check, text) {
   return found;
 }
 
-// "forbid" (default): the pattern must not appear.  "require": the pattern must not disappear.
-const isRequire = (c) => c.mode === 'require';
-const violates = (c, text) => (isRequire(c) ? matches(c, text).length === 0 : matches(c, text).length > 0);
+// The needs a text that has the pattern does not meet ([] when the pattern is absent).
+function missing(c, text) {
+  if (matches(c, text).length === 0) return [];
+  const subject = c.code ? blankCode(text) : c.strings ? blankCode(text, true) : text;
+  return (c.needs ?? []).filter((n) => !new RegExp(n, (c.flags ?? '').replace('g', '')).test(subject));
+}
+
+// One entry per mode: whether a text breaks the check, and what a write newly breaks (before -> after).
+// "forbid" (default): the pattern must not appear.  "require": it must not disappear.  "needs": see above.
+const MODES = {
+  forbid: {
+    violates: (c, text) => matches(c, text).length > 0,
+    added: (c, before, after) => { const had = new Set(matches(c, before)); return matches(c, after).filter((t) => !had.has(t)); },
+  },
+  require: {
+    violates: (c, text) => matches(c, text).length === 0,
+    added: (c, before, after) => (matches(c, before).length > 0 && matches(c, after).length === 0 ? [`removes required: ${c.pattern}`] : []),
+  },
+  needs: {
+    violates: (c, text) => missing(c, text).length > 0,
+    added: (c, before, after) => { const had = missing(c, before); return missing(c, after).filter((n) => !had.includes(n)).map((n) => `has ${c.pattern} but is missing: ${n}`); },
+  },
+};
+const modeOf = (c) => MODES[c.mode ?? 'forbid'];
+const violates = (c, text) => modeOf(c).violates(c, text);
 
 function selftest(checks) {
   const problems = [];
@@ -63,6 +89,8 @@ function selftest(checks) {
       if (violates(c, c.good)) problems.push(`${c.file}: wrongly flags its "good" example`);
     }
     for (const k of ['id', 'why', 'globs', 'pattern']) if (!c[k]) problems.push(`${c.file}: missing "${k}"`);
+    if (!modeOf(c)) problems.push(`${c.file}: unknown mode "${c.mode}" (forbid, require or needs)`);
+    if (c.mode === 'needs' && !c.needs?.length) problems.push(`${c.file}: mode needs without "needs"`);
   }
   return problems;
 }
@@ -96,15 +124,7 @@ function judge(file, result) {
   const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []));
   if (relevant.length === 0) return 0;
 
-  const hits = [];
-  for (const c of relevant) {
-    if (isRequire(c)) {
-      if (!violates(c, result.before) && violates(c, result.after)) hits.push({ c, text: `removes required: ${c.pattern}` });
-      continue;
-    }
-    const before = new Set(matches(c, result.before));
-    for (const text of matches(c, result.after)) if (!before.has(text)) hits.push({ c, text });
-  }
+  const hits = relevant.filter(modeOf).flatMap((c) => modeOf(c).added(c, result.before, result.after).map((text) => ({ c, text })));
   if (hits.length === 0) return 0;
 
   const msg = hits

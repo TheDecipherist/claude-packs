@@ -1,0 +1,28 @@
+{
+  "name": "docker",
+  "description": "Dockerfiles, Compose and Swarm: exec form, init, non-root, pinned bases, healthchecks, secrets, swarm-safe compose.",
+  "folders": {},
+  "concepts": {
+    "dockerfile": [
+      "**/Dockerfile",
+      "**/Dockerfile.*",
+      "**/*.Dockerfile",
+      "**/.dockerignore"
+    ],
+    "compose": [
+      "**/compose*.yml",
+      "**/compose*.yaml",
+      "**/docker-compose*.yml",
+      "**/docker-compose*.yaml",
+      "**/stack*.yml",
+      "**/stack*.yaml"
+    ],
+    "docker-scripts": [
+      "**/docker/**/*.sh",
+      "**/entrypoint*.sh",
+      "**/.gitattributes"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

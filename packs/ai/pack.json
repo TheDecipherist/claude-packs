@@ -1,0 +1,21 @@
+{
+  "name": "ai",
+  "description": "Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config.",
+  "folders": {},
+  "concepts": {
+    "ai": [
+      "**/ai/**",
+      "**/llm/**",
+      "**/critic/**",
+      "**/agents/**",
+      "**/prompts/**",
+      "**/*prompt*",
+      "**/*critic*",
+      "**/*llm*",
+      "**/*anthropic*",
+      "**/*openai*"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

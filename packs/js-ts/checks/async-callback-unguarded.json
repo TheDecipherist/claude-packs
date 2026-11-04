@@ -1,0 +1,26 @@
+{
+  "id": "async-callback-unguarded",
+  "why": "An async function passed to a timer, an event handler or forEach is never awaited: its rejection is unhandled, and since Node 15 an unhandled rejection kills the process. Wrap it in guarded(fn, log, what) from lib/guarded.ts.",
+  "rule": ".claude/rules/await-handled-at-a-boundary.md",
+  "concepts": [
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/tests/**",
+    "**/test/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/lib/guarded.*"
+  ],
+  "code": true,
+  "pattern": "\\b(setTimeout|setInterval|setImmediate|queueMicrotask|forEach|addEventListener|on|once|prependListener)\\s*\\(\\s*(?:'[^'\\n]*'\\s*,\\s*|\\\"[^\\\"\\n]*\\\"\\s*,\\s*)?async\\b",
+  "bad": "setInterval(async () => { await sweepExpired(db); }, 60_000);\nemitter.on('message', async (m) => { await handle(m); });\nusers.forEach(async (u) => await notify(u));",
+  "good": "setInterval(guarded(() => sweepExpired(db), log, 'sweep'), 60_000);\nemitter.on('message', guarded(handle, log, 'message'));\nawait Promise.all(users.map((u) => notify(u)));\nconst f = async () => { await x(); };"
+}

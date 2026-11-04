@@ -1,0 +1,24 @@
+{
+  "id": "no-cast-escape-hatches",
+  "why": "`as never` and `as unknown as T` switch the type checker off at exactly the place that needed it (a Mongo filter, a tool argument). Type the helper (Filter<T>, OptionalUnlessRequiredId<T>) instead.",
+  "rule": ".claude/rules/no-unsafe-assertions.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\bas\\s+never\\b|\\bas\\s+unknown\\s+as\\b|\\bas\\s+any\\b",
+  "bad": "await col.updateOne(filter as never, update as never);\nconst s = x as unknown as Source[];",
+  "good": "await col.updateOne(filter, update);"
+}

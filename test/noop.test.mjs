@@ -7,12 +7,14 @@ import { KIT, assert, cli, copyFileSync, execFileSync, fresh, join, mkdirSync, r
 
 // base files changed on purpose, what they do for a synth unchanged: their synth examples made neutral (item 2: base names no
 // synth word); lib/writes.mjs gains judgeEvent, the one guard frame the new hooks and folder-law share (once-only); placement-law
-// reads a kind's own "extensions" (KWB-36) and folder-law a layout's "sourceFiles" (KWB-37), both absent in a synth layout
+// reads a kind's own "extensions" (KWB-36) and folder-law a layout's "sourceFiles" (KWB-37), both absent in a synth layout;
+// 0.11.0: lesson-checks gains the "needs" mode, glob.mjs and git-guard turn their if-chains into tables (lookup-over-if-chains)
 const FX = join(KIT, 'test/fixtures/noop');
 export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mjs', 'git-guard.mjs', 'making.mjs', 'once-only.mjs', 'placement-law.mjs',
-  'shape-law.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
+  'shape-law.mjs', 'lesson-checks.mjs', 'lib/glob.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
   .map((f) => `.claude/hooks/${f}`).concat(['.claude/rules/instances-by-index-identities-by-id.md', '.claude/skills/prove-instances-identical/SKILL.md',
-    '.claude/tools/shape-symmetry.mjs', '.claude/tools/shape-symmetry-selftest.mjs']);
+    '.claude/tools/shape-symmetry.mjs', '.claude/tools/shape-symmetry-selftest.mjs',
+    '.claude/tools/freeze.mjs', '.claude/tools/lib/wav.mjs']);   // 0.11.0: their if-chains are tables (lookup-over-if-chains)
 
 function updated(project, named = true) {
   const dir = fresh(`noop-${project}-`);
@@ -30,6 +32,9 @@ function updated(project, named = true) {
 }
 
 const HOVER = ['.claude/rules/hover-every-pressable.md', 'lib/painter/.claude/skills/hover-state/SKILL.md'];
+// 0.11.0 (v7 additions): base's three dispatch laws. Their rules come to every project; their hook (dispatch-once) and checks
+// (lookup-over-if-chains, field-map-over-if-runs) are new, so an existing install holds them back until "enable" names them.
+const V7 = ['.claude/rules/lookup-over-if-chains.md', '.claude/rules/field-map-over-if-runs.md', '.claude/rules/behaviour-lives-with-its-kind.md'];
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
 
 for (const project of ['stellix', 'sub37']) {
@@ -40,11 +45,12 @@ for (const project of ['stellix', 'sub37']) {
     const layout = JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
     assert.equal(layout.configuration, 'synth-creator');
     delete layout.configuration;
+    delete layout.concepts.js;   // 0.11.0: base's js concept (raw globs, so a complete layout gains it), for the dispatch laws
     assert.equal(`${JSON.stringify(layout, null, 2)}\n`, expected(project, 'layout.json'), 'layout.json, the key aside');
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = lock.packs.includes('gpu-painter') ? HOVER : [];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => !CHANGED.includes(f)), [], 'only the base files changed on purpose differ in content');

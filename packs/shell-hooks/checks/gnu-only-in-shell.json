@@ -1,0 +1,18 @@
+{
+  "id": "gnu-only-in-shell",
+  "why": "GNU-only: on macOS `date +%N` prints the literal N, sha1sum/stat -c/readlink -f do not exist, and the hook exits non-zero, which blocks every tool call. Use node -e for time, hashes and file stats.",
+  "rule": ".claude/rules/hooks-portable-anchored-quoted.md",
+  "concepts": [
+    "shell-hooks"
+  ],
+  "globs": [
+    "**/*.sh"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "pattern": "\\bdate\\s+\\+\\S*%\\d*N|\\b(?:sha1|sha256|md5)sum\\b|\\bstat\\s+-c\\b|\\breadlink\\s+-f\\b|\\bsed\\s+-i\\s+(?!'')(?!\\\")[^\\s]",
+  "bad": "NOW=$(date +%s%3N)",
+  "good": "NOW=$(node -e 'console.log(Date.now())')\nH=$(node -e 'const c=require(\"node:crypto\");console.log(c.createHash(\"sha1\").update(process.argv[1]).digest(\"hex\").slice(0,12))' \"$DIR\")"
+}

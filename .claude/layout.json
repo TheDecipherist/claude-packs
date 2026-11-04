@@ -87,6 +87,11 @@
     "copy-trees": [
       "kind:copy",
       ".claude/layout.json"
+    ],
+    "js": [
+      "src/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "tests/**/*.{js,mjs,cjs,ts,tsx}",
+      "test/**/*.{js,mjs,cjs,ts,tsx}"
     ]
   },
   "kinds": {
@@ -113,7 +118,10 @@
   "disable": [],
   "enable": [
     "hooks/secrets-guard.mjs",
-    "hooks/untrusted-boundary.mjs"
+    "hooks/untrusted-boundary.mjs",
+    "hooks/dispatch-once.mjs",
+    "checks/lookup-over-if-chains.json",
+    "checks/field-map-over-if-runs.json"
   ],
   "commands": {
     "test": "npm test",

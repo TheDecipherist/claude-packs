@@ -1,0 +1,31 @@
+{
+  "id": "process-env-only-in-config",
+  "why": "process.env read outside the config module is a setting the Zod env schema never sees: a typo is discovered at runtime, not at startup. new Anthropic() with no key does the same silently.",
+  "rule": ".claude/rules/env-through-config.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/env.*",
+    "**/config.*",
+    "**/config/**",
+    "**/*.config.*",
+    "**/scripts/**",
+    "**/bin/**",
+    "**/hooks/**"
+  ],
+  "code": true,
+  "pattern": "\\bprocess\\.env\\b|\\bnew\\s+(Anthropic|OpenAI)\\s*\\(\\s*\\)",
+  "bad": "const key = process.env.ANTHROPIC_API_KEY;\nconst client = new Anthropic();",
+  "good": "import { env } from '../env.js';\nconst client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });"
+}

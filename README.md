@@ -57,6 +57,14 @@ Every control, point, handle, tab, list row, key or button has a cursor that nam
 
 `doctor` is red while the project has UI code and no gate is declared, or the command names a file that is not there. `"hover": "none: <reason>"` declines with its reason. A fresh project with no UI code yet is not red.
 
+## Node projects: seven packs, presets, and the dispatch laws (0.11.0)
+
+- `init node-api` (or `node-ui`, `mcp-server`, `node-lib`; `list` shows them) installs the packs that stack needs in the `node`
+  configuration: `js-ts`, `mongo`, `fastify`, `ai`, `docker`, `shell-hooks`, `html-ui`, any of them also by name.
+- Every project gets three dispatch laws in base: three branches on one value are a lookup (`lookup-over-if-chains`), three ifs on
+  one object's fields are a field table (`field-map-over-if-runs`), and a kind is switched on in one place (`dispatch-once`, a hook).
+  An install from before 0.11.0 holds the new hook and checks back until `.claude/layout.json` `"enable"` names them.
+
 ## Commands
 
 ```

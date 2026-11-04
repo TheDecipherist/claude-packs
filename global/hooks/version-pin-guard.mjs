@@ -81,17 +81,20 @@ function fromWorkflow(text) {
   return out;
 }
 
+// The parser for each manifest: by exact file name, else by the first name pattern that fits, else a workflow by its path.
+const BY_NAME = { 'package.json': fromPackageJson, 'CMakeLists.txt': fromCmake, 'pyproject.toml': fromPyproject, 'Cargo.toml': fromCargo, 'go.mod': fromGoMod };
+const BY_PATTERN = [
+  [/\.cmake$/, fromCmake],
+  [/^requirements.*\.(txt|in)$/, fromRequirements],
+  [/^(Dockerfile|Containerfile)(\..+)?$|\.dockerfile$/i, fromDockerfile],
+];
+
 export function extractorFor(file) {
   const name = basename(file);
-  if (name === 'package.json') return fromPackageJson;
-  if (name === 'CMakeLists.txt' || name.endsWith('.cmake')) return fromCmake;
-  if (/^requirements.*\.(txt|in)$/.test(name)) return fromRequirements;
-  if (name === 'pyproject.toml') return fromPyproject;
-  if (name === 'Cargo.toml') return fromCargo;
-  if (name === 'go.mod') return fromGoMod;
-  if (/^(Dockerfile|Containerfile)(\..+)?$|\.dockerfile$/i.test(name)) return fromDockerfile;
-  if (/\.github[\\/]workflows[\\/].+\.ya?ml$/.test(file)) return fromWorkflow;
-  return null;
+  if (Object.hasOwn(BY_NAME, name)) return BY_NAME[name];
+  const hit = BY_PATTERN.find(([re]) => re.test(name));
+  if (hit) return hit[1];
+  return /\.github[\\/]workflows[\\/].+\.ya?ml$/.test(file) ? fromWorkflow : null;
 }
 
 // Pins in `after` that are new or different from `before`.

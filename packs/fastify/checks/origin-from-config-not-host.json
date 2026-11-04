@@ -1,0 +1,28 @@
+{
+  "id": "origin-from-config-not-host",
+  "why": "Host and x-forwarded-* headers are client-controlled unless the proxy sets them. Origin, issuer, redirects and cookie flags come from PUBLIC_URL in the env schema.",
+  "rule": ".claude/rules/trust-config-not-headers.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/env.*",
+    "**/config.*",
+    "**/config/**",
+    "**/proxy.*"
+  ],
+  "code": false,
+  "pattern": "\\bheaders\\s*(?:\\.host\\b|\\[\\s*['\\\"](?:host|x-forwarded-proto|x-forwarded-host|x-forwarded-for)['\\\"]\\s*\\])",
+  "bad": "const proto = req.headers['x-forwarded-proto'] ?? 'http';\nconst origin = `${proto}://${req.headers.host}`;",
+  "good": "const origin = env.PUBLIC_URL;"
+}

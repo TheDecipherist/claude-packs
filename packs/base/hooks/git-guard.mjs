@@ -47,16 +47,20 @@ export function problem(command) {
     const urls = tokenUrls(args);
     if (!urls.length) continue;
     const where = mask(urls[0]);
-    if (sub === 'push' && /(^|\s)(--set-upstream|-[a-zA-Z]*u[a-zA-Z]*)(\s|$)/.test(args)) {
-      return `push -u with ${where} would write the token into .git/config as the branch's upstream`;
-    }
-    if (sub === 'remote' && /^\s*(add|set-url)\b/.test(args)) return `remote ${args.trim().split(/\s+/)[0]} would store ${where} in .git/config`;
-    if (sub === 'clone') return `clone would store ${where} as origin in the new repo's .git/config`;
-    if (sub === 'submodule') return `submodule would store ${where} in .gitmodules and .git/config`;
-    if (sub === 'config') return `config would store ${where} in git config`;
+    const stored = Object.hasOwn(STORES_TOKEN, sub) ? STORES_TOKEN[sub](args, where) : null;
+    if (stored) return stored;
   }
   return null;
 }
+
+// Each git subcommand that would store a token URL in git config, and what it stores (null: this form stores nothing).
+const STORES_TOKEN = {
+  push: (args, where) => (/(^|\s)(--set-upstream|-[a-zA-Z]*u[a-zA-Z]*)(\s|$)/.test(args) ? `push -u with ${where} would write the token into .git/config as the branch's upstream` : null),
+  remote: (args, where) => (/^\s*(add|set-url)\b/.test(args) ? `remote ${args.trim().split(/\s+/)[0]} would store ${where} in .git/config` : null),
+  clone: (_args, where) => `clone would store ${where} as origin in the new repo's .git/config`,
+  submodule: (_args, where) => `submodule would store ${where} in .gitmodules and .git/config`,
+  config: (_args, where) => `config would store ${where} in git config`,
+};
 
 // ---------- the house laws ----------
 export const DEFAULTS = {

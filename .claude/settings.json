@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/placement-law.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs .claude/hooks/secrets-guard.mjs .claude/hooks/untrusted-boundary.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/placement-law.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs .claude/hooks/secrets-guard.mjs .claude/hooks/untrusted-boundary.mjs .claude/hooks/dispatch-once.mjs",
             "timeout": 60
           }
         ]
