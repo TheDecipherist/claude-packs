@@ -8,10 +8,11 @@ import { KIT, assert, cli, copyFileSync, execFileSync, fresh, join, mkdirSync, r
 // base files changed on purpose, what they do for a synth unchanged: their synth examples made neutral (item 2: base names no
 // synth word); lib/writes.mjs gains judgeEvent, the one guard frame the new hooks and folder-law share (once-only); placement-law
 // reads a kind's own "extensions" (KWB-36) and folder-law a layout's "sourceFiles" (KWB-37), both absent in a synth layout;
-// 0.11.0: lesson-checks gains the "needs" mode, glob.mjs and git-guard turn their if-chains into tables (lookup-over-if-chains)
+// 0.11.0: lesson-checks gains the "needs" mode, glob.mjs and git-guard turn their if-chains into tables (lookup-over-if-chains),
+// git-guard and lib/pushed.mjs take a push over SSH (KWB-39)
 const FX = join(KIT, 'test/fixtures/noop');
 export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mjs', 'git-guard.mjs', 'making.mjs', 'once-only.mjs', 'placement-law.mjs',
-  'shape-law.mjs', 'lesson-checks.mjs', 'lib/glob.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
+  'shape-law.mjs', 'lesson-checks.mjs', 'lib/glob.mjs', 'lib/pushed.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
   .map((f) => `.claude/hooks/${f}`).concat(['.claude/rules/instances-by-index-identities-by-id.md', '.claude/skills/prove-instances-identical/SKILL.md',
     '.claude/tools/shape-symmetry.mjs', '.claude/tools/shape-symmetry-selftest.mjs',
     '.claude/tools/freeze.mjs', '.claude/tools/lib/wav.mjs']);   // 0.11.0: their if-chains are tables (lookup-over-if-chains)
