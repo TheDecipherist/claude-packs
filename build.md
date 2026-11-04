@@ -31,3 +31,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 ## Log
 
 - 2026-11-04 00:50 EST: 0.11.0 started; merge applied, .incoming files reconciled; commit e17a79d (local, push blocked by KWB-39).
+- 2026-11-04: 0.11.0 and 0.12.0 landed on main (964057b): npm test 167 of 167. 0.13.0: the gate ran once on a66749b in 252 s (it took 12 minutes and more before), 170 of 171; the noop list fixed (a rule held with a hook Sub37 does not have), noop 3 of 3 run alone: 171 of 171.
