@@ -148,7 +148,8 @@
     "hooks/dispatch-once.mjs",
     "checks/lookup-over-if-chains.json",
     "checks/field-map-over-if-runs.json",
-    "hooks/suite-once.mjs"
+    "hooks/suite-once.mjs",
+    "hooks/template-law.mjs"
   ],
   "commands": {
     "test": "npm test",

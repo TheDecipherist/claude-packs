@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.23.0 (2026-11-04)
+
+template-law (Tim: anything "component" used more than once is a template, enforced, in html, c++ and apps).
+
+- New base hook `template-law`: a write that adds an element built by hand, in the shape of one already in this file or another of the checkout, is refused. It strips names and text (lib/elements.mjs), so copies that once-only cannot see look the same: markup by tags, attribute names and nesting (HTML, JSX, Vue, Svelte, template strings), and code by the members set on one object in a row (a C++ control, a widget). Using a component, a `.map()`, data rows and one object used twice are left alone; `one-off: <reason>` on a line marks a real exception. A new hook: held back in an existing project until `enable` names it. On AdmiralMCP's 175 files it finds 3 shapes, in 111 ms, and none in the kit.
+- `scan` reports elements built by hand more than once. dispatch-once takes its walk from the shared lib.
+
 ## 0.22.1 (2026-11-04)
 
 - One template, all the way through: `house-control-behaviours`, `prove-control`, `hover-state` and `hover-every-pressable` still asked to walk every control. They now walk one per template and every one-off, and prove the rest by a table read that each is built from its template and wired, which is what catches a control wired to nothing. `pointer-feedback`: the hover lives in the template.

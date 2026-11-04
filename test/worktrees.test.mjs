@@ -212,6 +212,13 @@ const CASES = {
     put(join(own, 'CLAUDE.md'), 'changed\n');
     assert.equal(bash(here, 'suite-once.mjs', `cd ${own} && npm test`), 2);
   },
+  'template-law.mjs': ({ here, wt }) => {
+    // The worktree's branch already has this element; main does not. Each checkout is read on its own.
+    const el = (t) => `<div class="tile"><h3 class="name">${t}</h3><p>${t}</p></div>\n`;
+    put(join(wt, 'src/app/one.html'), el('One'));
+    assert.equal(fire(here, 'template-law.mjs', join(wt, 'src/app/two.html'), el('Two')), 2);
+    assert.equal(fire(here, 'template-law.mjs', join(here, 'src/app/two.html'), el('Two')), 0);
+  },
   'dispatch-once.mjs': ({ here, wt }) => {
     // The worktree's branch already switches on blendStyle; main does not. Each checkout is scanned on its own.
     put(join(wt, 'src/dsp/Blend.cpp'), 'float blend (Layer& l) { switch (l.blendStyle) { default: return 0.0f; } }\n');

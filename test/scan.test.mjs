@@ -78,3 +78,12 @@ test('--out writes the report there; --prompt prints the review brief', () => {
   assert.match(brief, /read in the code/);
   assert.match(brief, /Connect to a production database/);
 });
+
+test('a project with no JS scans too: C++ only, plain HTML only', () => {
+  const dir = fresh('scan-cpp-');
+  put(dir, 'src/PluginProcessor.cpp', 'void a() {}\n');
+  assert.match(scanned(dir).text, /Configuration `synth-creator`/);
+  const html = fresh('scan-html-');
+  put(html, 'index.html', '<h1>Hi</h1>\n');
+  assert.match(scanned(html).text, /Configuration `base`/);
+});

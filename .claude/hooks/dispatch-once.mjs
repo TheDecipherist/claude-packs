@@ -5,9 +5,10 @@
 // places. Refused: the kind's behaviour belongs in one object, table or class (rule: behaviour-lives-with-its-kind).
 // Every write route (lib/writes.mjs judgeEvent); a file is judged against its own checkout (a worktree against the worktree);
 // tests, `protected` globs, vendored and built folders are never scanned. `--selftest` proves it.
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { extname, join, relative } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { extname, join } from 'node:path';
 import { blankCode } from './lib/cpp-scan.mjs';
+import { CODE, TESTS, codeFiles } from './lib/elements.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
@@ -15,9 +16,6 @@ import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './li
 import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
-const CODE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx']);
-const SKIP = /(^|\/)(\.git|node_modules|build|Builds|dist|out|_deps|JUCE|JuceLibraryCode|cmake-build[^/]*|\.claude)(\/|$)/;
-const TESTS = ['tests/**', 'test/**', '**/tests/**', '**/test/**', '**/*.test.*', '**/*.spec.*', '**/*_test.*'];
 const SWITCH = /\bswitch\s*\(\s*([^()]*?(?:\([^()]*\))?)\s*\)\s*\{/g;
 
 // The kind a switch dispatches on: the last name in its expression (args.kind -> kind, p->mode() -> mode).
@@ -36,21 +34,6 @@ const count = (list) => list.reduce((m, k) => m.set(k, (m.get(k) ?? 0) + 1), new
 export function newKinds(before, after) {
   const was = count(kindsSwitched(before));
   return [...count(kindsSwitched(after))].filter(([k, n]) => n > (was.get(k) ?? 0)).map(([k]) => k);
-}
-
-function codeFiles(root, skipGlobs) {
-  const out = [];
-  const walk = (dir) => {
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
-      const abs = join(dir, e.name);
-      const rel = relative(root, abs).replace(/\\/g, '/');
-      if (SKIP.test(rel) || matchesAny(rel, skipGlobs)) continue;
-      if (e.isDirectory()) walk(abs);
-      else if (CODE.has(extname(e.name)) && statSync(abs).size < 400_000) out.push(rel);
-    }
-  };
-  walk(root);
-  return out;
 }
 
 // { kind -> [files] }: the other code files of the checkout that already switch on each kind.

@@ -1,9 +1,9 @@
 {
-  "kit": "0.22.0",
+  "kit": "0.23.0",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T16:17:46.326Z",
+  "updated": "2026-11-04T16:56:40.560Z",
   "files": {
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
     ".claude/rules/bug-fix-starts-red.md": "4c42c339a6682b66e37e9fd1dfdfcd003314f17a8b94e7f9c8ebdd42e6d54a52",
@@ -22,13 +22,13 @@
     ".claude/rules/split-before-the-limit.md": "94ba2cb59ecc2d90f4a9a5e5a71a44332fe95587a86b42bffbd4f5c39d336e68",
     ".claude/rules/subagent-dispatch.md": "e94c60baada3d6e6ee1215aad756c9cbb82e3e445820241bd5ca42b65775cf88",
     ".claude/rules/test-only-what-changed.md": "9bfc1450db334675b92b2cbf968339bedd193d9bc33f8ff5b506ff60d52a4d72",
-    ".claude/rules/test-the-template-once.md": "c7d4331448b5cb35133798424b8eb00cb3ae7474cfeaae0725714a339466cab1",
+    ".claude/rules/test-the-template-once.md": "d6c51fa9d9891d2c87e228cb2224cb01cd1e0f6ac3a81c912a3c25f6c78194a3",
     ".claude/rules/untrusted-content-boundary.md": "810a7efafbe193847bc1cf54ebdcf7f37583e864a8cb6145937a1d30f598e2d8",
     ".claude/checks/field-map-over-if-runs.json": "2546e1cb8307419ccea73853a5cda32599586da4ea74fc724bee97bf2b66edb2",
     ".claude/checks/lookup-over-if-chains.json": "2acab405d0a4d760265d90ca34d390f2d82ef65911b501a2cad09c82aecb747c",
     ".claude/checks/no-code-after-midline-comment.json": "6689387457bd48e61e7f6442b3007e53b685ffcf852bc083e533f37bb016edb7",
     ".claude/hooks/brief-guard.mjs": "14bc35e0fbf6bf0f862024913f9eae3611946effcc5d0b32968402076f956ffd",
-    ".claude/hooks/dispatch-once.mjs": "cc7585afb3291334a372cbe0d9b5531c9737abb419a01d8d669d92b6df9bb8bf",
+    ".claude/hooks/dispatch-once.mjs": "9699bc5986636980d937ac887e5a692d4391ade5535da4d9c5306cec6e726326",
     ".claude/hooks/file-size-guard.mjs": "88aa9deeeddd17e4bef732d858692171e06a6202cdc1db355110ac6e3b20e2df",
     ".claude/hooks/folder-law.mjs": "b5bb70327aafddce6083b4f8d59668b28c3077b5e0d70f34a27aec0bc2e5a2a6",
     ".claude/hooks/git-guard.mjs": "0c14a7f142c7091f1d87321c6e455151dd9a4e2085044a5594cbeb334d75499e",
@@ -37,6 +37,7 @@
     ".claude/hooks/lib/cpp-scan.mjs": "ce1cb73ad3ed63669900865a3d0ff634db278f5f7c112f02e49d2f917fc7efe3",
     ".claude/hooks/lib/dup-index.mjs": "86708303de3704cf838cfa988b34fca78523cd84cfbd12db3af5eccf76beba91",
     ".claude/hooks/lib/dup.mjs": "e69d5b3a25d936838749c7ff1791c8bd942d1c04dfbb83954a920615c5e663cb",
+    ".claude/hooks/lib/elements.mjs": "da911842a59388d696bfcdf096701498d9e635faee3a3b5be263ff11ec100cb7",
     ".claude/hooks/lib/git-guard-selftest.mjs": "c28ef3b300023613c6e0414edd6c33ee70d8f1be3ce36195c7f2be8ce8e73728",
     ".claude/hooks/lib/glob.mjs": "ef96f30a68a7da275ab0fa11be56331d03e086cb055dd4e19069a5d73c9b2cd2",
     ".claude/hooks/lib/hook-log.mjs": "ecd174188f5dd65ff956158f95ee736e60f04a699f9f6af819b2f6572e5f5889",
@@ -63,6 +64,7 @@
     ".claude/hooks/secrets-guard.mjs": "50aca09f7911bfaae7300295030e5389093c97ec68c4629a3c07d4370525c1b1",
     ".claude/hooks/shape-law.mjs": "6dc9ad3ea73f691aeb7a18fe9114aafdcb9a6137f27424ad8f076f6f19283e9d",
     ".claude/hooks/suite-once.mjs": "4c8dc3d7ab8b77c5b4851623ba0d57834a3860e4396fd73a3870d9694a0fe542",
+    ".claude/hooks/template-law.mjs": "d8f8301e1138b39395f8e7de0a65a01aa2962de05d4d3acbb9ef3b24a05c363f",
     ".claude/hooks/untrusted-boundary.mjs": "b560fa39dd48d890e9faabddf5c44351059c7745b04b71ddfeff5b92f547ca8d",
     ".claude/tools/shape-symmetry-selftest.mjs": "e02314dd51acd59d55bcffa8d92d18af20c3a6f688d3ada2041789d384c25099",
     ".claude/tools/shape-symmetry.mjs": "ca7f90c38547651ad570d19634d9343e8755e02ea5e9adf87f7afd5da3e171c6",

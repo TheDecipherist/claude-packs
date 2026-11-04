@@ -56,3 +56,18 @@ test('no law still asks to walk every instance: one per template, the rest by a 
     assert.doesNotMatch(read(rel), /walk every control|for every interactive element|on every slot it appears/, rel);
   }
 });
+
+test('scan names elements built by hand more than once, html and c++', () => {
+  const dir = fresh('uid-scan-');
+  const card = (t) => `<div class="card"><h3 class="t">${t}</h3><p>${t}</p><a href="/">more</a></div>\n`;
+  const knob = (n) => `  ${n}.setRange (0.0, 1.0);\n  ${n}.setValue (0.5);\n  ${n}.setStyle (Rotary);\n`;
+  mkdirSync(join(dir, 'src'));
+  writeFileSync(join(dir, 'src/a.html'), card('A'));
+  writeFileSync(join(dir, 'src/b.html'), card('B'));
+  writeFileSync(join(dir, 'src/c.cpp'), `void f() {\n${knob('cutoff')}\n  int gap;\n${knob('drive')}}\n`);
+  const r = cli(dir, 'scan');
+  const text = readFileSync(r.stdout.match(/Report: (\S+)/)[1], 'utf8');
+  assert.match(text, /2 element\(s\) built by hand more than once/);
+  assert.match(text, /<div>: src\/a\.html:1, src\/b\.html:1/);
+  assert.match(text, /cutoff: src\/c\.cpp:2, src\/c\.cpp:7/);
+});

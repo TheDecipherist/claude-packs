@@ -74,6 +74,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the walks test one control per template and read the rest; concepts: none (design/shape.json declares none); reuse: test-the-template-once (packs/base/rules).
   done when: no law asks to walk every instance; the whole suite green once, committed; landed.
 
+- 0.23.0, template-law (work/0.23.0-template-law), started 2026-11-04 (Tim: enforce that anything component used more than once is a template, html, c++, app).
+  making: a base hook that refuses a hand-built copy of an element by its shape; concepts: none (design/shape.json declares none); reuse: judgeEvent (packs/base/hooks/lib/writes.mjs), blankCode (lib/cpp-scan.mjs), the walk moved from dispatch-once to lib/elements.mjs.
+  done when: its selftest each way, seen red; its worktree case; scan lists them; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

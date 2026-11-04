@@ -149,6 +149,10 @@ A pack is rules, checks, hooks and skills in a folder, in a repository of your o
 
 In every project: **one template, changed once, tested once** (`test-the-template-once`). Behaviour is tested on the template; a structural pass proves the instances are that template. `shape_symmetry` reads every instance and swaps a spread of them, so a thousand identical controls cost one read and a few swaps.
 
+## Anything used twice is one template (0.23.0)
+
+The `template-law` hook refuses a second hand-built copy of an element, in HTML, JSX, Vue, Svelte, template strings and C++, by comparing shapes with names and text stripped. Extract the component and pass the differences in, or mark a real exception on its line: `one-off: <reason>`. `scan` lists what a project already repeats. In an existing project, name `hooks/template-law.mjs` in `"enable"`.
+
 ## Commands
 
 ```
