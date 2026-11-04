@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.21.0 (2026-11-04)
+
+Custom packs (Tim: if a person makes something for their employer's internals, it should be easy to make a repo and share it with their team).
+
+- `new-pack <name> [--repo <git-url>]`: a ready repository for a team's own packs (`packs/<name>/`, a manifest, an example rule, check and skill).
+- `add <name> --from <git-url>`: fetches the repository to a cache, never runs it, checks the manifest, and installs the pack in any configuration. The lock records its url and commit, so a
+  teammate's checkout restores the same pack; `update` pulls the newest. Access is the git host's. A custom pack's hooks stay off until the project's `"enable"` names them.
+
 ## 0.20.0 (2026-11-04)
 
 What a real install found (AdmiralMCP on 0.14.0, its build/kit-review-plan.md Phase 5).

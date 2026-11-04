@@ -62,6 +62,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the kit bugs, gaps and tunes AdmiralMCP's install listed, kit-lock adopting its own lease, the ids shape; concepts: none (design/shape.json declares none); reuse: the lesson checks' bad and good examples, holdToExamples (test/kit-cli.mjs), acquire (lib/kit-lock.mjs), localBranches (packs/base/hooks/lib/pushed.mjs).
   done when: each item has a bad or a test that fails without it; the whole suite green once, committed; landed.
 
+- 0.21.0, custom packs (work/0.21.0-custom-packs, on 0.20.0), started 2026-11-04 (Tim: someone makes a pack for their team, puts it in a repo, teammates get it).
+  making: new-pack scaffolds a team's pack repo; add --from installs a pack from a git url in any configuration; update pulls it; concepts: none (design/shape.json declares none); reuse: readPack, planFiles (lib/packs.mjs), sync (lib/sync.mjs), manifestProblems (lib/pack-manifest.mjs), optIn (lib/switches.mjs).
+  done when: a test goes new-pack, git push, add --from, a check fires, its hook held until enable, update pulls a new version, a teammate's project restores it from the lock; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

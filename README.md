@@ -117,6 +117,16 @@ A `pack.json` is a manifest like a `package.json`. A pack says what it is, who m
 
 `type` is `stock` for the packs in this package and `custom` for anyone else's. `name`, `version`, `description`, `type`, `author`, `license` and `repository.url` are required.
 
+## Custom packs: share your own with your team (0.21.0)
+
+```
+npx --no-install @thedecipherist/claude-packs new-pack acme-internal --repo git@git.acme.example:team/acme-internal.git
+# edit packs/acme-internal/, push it, then in any project:
+npx --no-install @thedecipherist/claude-packs add acme-internal --from git@git.acme.example:team/acme-internal.git
+```
+
+A pack is rules, checks, hooks and skills in a folder, in a repository of your own. `update` pulls the newest, and the lock records the commit, so teammates get the same pack. Hooks from a custom pack stay off until a project names them in `"enable"`.
+
 ## Commands
 
 ```
