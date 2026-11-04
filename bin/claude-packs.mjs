@@ -13,6 +13,7 @@ import { newProject } from '../lib/new.mjs';
 import { dupScan } from '../lib/once-only-report.mjs';
 import { availablePacks, readPack } from '../lib/packs.mjs';
 import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
+import { plannerSkills } from '../lib/planner.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
@@ -33,6 +34,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
   configs            list the configurations: what each installs, its packs and its folder template
   config <name>      switch this project to another configuration; prints what changes first
                      --dry-run         print what would change and stop
+  planner-skills [--out <dir>]   one project-layout skill body per configuration, from its layout template
+                     (printed, or written to <dir>/<configuration>/project-layout/SKILL.md)
   update-all <dir...>  update every listed project that already has claude-packs
                      (e.g. update-all ~/projects/*); folders without it are skipped
   doctor [--strict]  verify the install (paths, folders, hooks, checks' own examples); --strict also fails
@@ -90,6 +93,8 @@ async function main() {
       if (isSynth(chosen) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
       return doctor(dir);
     }
+    case 'planner-skills':
+      return plannerSkills(rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null);
     case 'configs':
       console.log(describeConfigs(layoutConfiguration(dir)));
       return 0;
