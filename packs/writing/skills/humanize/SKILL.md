@@ -16,7 +16,7 @@ Always do:
    - em dashes gone; no "not X but Y"; triads cut; no summary close (end on the ask or the last point); no punchline sentences; no colon drama; no stock connectors or slop words;
    - sentence and paragraph shapes varied, no staccato performance; repeated terms NOT thesaurus-varied;
    - more I/we than you/your unless the medium demands otherwise, and "I" not "we" for the author's own projects;
-   - padding cut: could it be said in half the words; self-contained; ASCII only; no time or date anywhere.
+   - padding cut: could it be said in half the words; self-contained; ASCII only; no invented time or date.
 3. Run the spot tests on any suspect sentence:
    - **Deletion test:** remove it. Paragraph loses nothing: it was filler.
    - **Genericity test:** swap the names, tool and subject for any other. Sentence still reads fine: it says nothing; make it specific or cut.

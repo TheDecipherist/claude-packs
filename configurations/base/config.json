@@ -10,7 +10,10 @@
     "choose": [
       "shell",
       "ci",
-      "docker"
+      "docker",
+      "web",
+      "ui-craft",
+      "content-site"
     ],
     "default": []
   },

@@ -12,6 +12,7 @@ import { matchesAny } from './lib/glob.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { verdicts } from './lib/selftest.mjs';
+import { isContent } from './lib/content.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -23,7 +24,7 @@ const EXEMPT = ['**/*.generated.*', '**/generated/**', 'build/**', '_deps/**'];
 const lines = (text) => (text === '' ? 0 : text.split('\n').length - (text.endsWith('\n') ? 1 : 0));
 
 export function verdict(rel, before, after, limit) {
-  if (!isSource(rel) || matchesAny(rel, EXEMPT)) return null;
+  if (!isSource(rel) || matchesAny(rel, EXEMPT) || isContent(rel)) return null;
   const n = lines(after);
   if (n <= limit || n <= lines(before)) return null;
   return `BLOCKED by file-size-guard: ${rel} would be ${n} lines (limit ${limit}).\n` +

@@ -39,7 +39,7 @@ test('the tells are refused in public text, by id; code, URLs and other files ar
     ["Here's the thing: it broke.\n", 'no-stock-connectors'], ['A robust tool.\n', 'no-slop-words'], ['The reality: nobody reads it.\n', 'no-dramatic-colon'],
     ['It serves as the entry.\n', 'no-copula-dodging'], ['It is fast, ensuring a smooth run.\n', 'no-trailing-ing'], ['Leveraging the cache, it flies.\n', 'no-participial-opener'],
     ['Experts say it is fine.\n', 'no-vague-attribution'], ['There is no one-size-fits-all answer.\n', 'no-pseudo-wisdom'],
-    ["It's not a bug. It's a feature.\n", 'no-not-x-but-y'], ['I built this last year.\n', 'no-time-or-date'],
+    ["It's not a bug. It's a feature.\n", 'no-not-x-but-y'],
   ]) {
     const r = write(dir, 'README.md', text);
     assert.equal(r.status, 2, text);

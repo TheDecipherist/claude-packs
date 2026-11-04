@@ -36,5 +36,8 @@
     ]
   },
   "skillsIn": null,
-  "hooks": {}
+  "hooks": {},
+  "optIn": [
+    "checks/no-time-or-date.json"
+  ]
 }

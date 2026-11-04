@@ -240,6 +240,15 @@ const CASES = {
     assert.equal(fire(here, 'code-shape.mjs', join(wt, 'src/app/one.cpp'), packed), 0);
     assert.equal(fire(here, 'code-shape.mjs', join(here, 'src/app/one.cpp'), packed), 2);
   },
+  'repo-litter.mjs': ({ here, wt }) => {
+    // The worktree's layout allows this asset; main's does not. A git add is judged by the checkout it runs in.
+    put(join(wt, 'hero.png'), 'x');
+    put(join(here, 'hero.png'), 'x');
+    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards: { repoLitter: { allow: ['hero.png'] } } }));
+    const add = (cwd) => fireAs(here, 'repo-litter.mjs', { tool_name: 'Bash', tool_input: { command: 'git add hero.png' }, cwd }).status;
+    assert.equal(add(wt), 0);
+    assert.equal(add(here), 2);
+  },
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
     put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');

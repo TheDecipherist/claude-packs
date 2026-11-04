@@ -24,7 +24,8 @@
       "dynamic-data",
       "mongo",
       "ai",
-      "nginx"
+      "nginx",
+      "content-site"
     ],
     "default": [
       "js-ts",

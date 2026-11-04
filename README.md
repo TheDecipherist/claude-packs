@@ -71,8 +71,9 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 40 | 8 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 20 | 7 | 17 | 7 |
+| `base` | Universal engineering, in every configuration | 20 | 7 | 18 | 7 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 1 | 2 | 0 | 0 |
+| `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 9 | 12 | 0 | 1 |
 | `docker` | Dockerfiles, Compose and Swarm | 5 | 24 | 0 | 1 |
 | `dynamic-data` | Definition-driven systems: a CMS, an admin generator, a low-code platform | 10 | 9 | 0 | 1 |
@@ -83,7 +84,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `hook-proof` | A hook that should refuse does refuse | 1 | 5 | 0 | 1 |
 | `host-agent` | Software that runs as root on machines it does not own | 1 | 7 | 0 | 0 |
 | `html-ui` | Server-rendered HTML: every value escaped | 2 | 5 | 0 | 0 |
-| `http-api` | Any HTTP server, in any framework: records tied to their caller, guards that fail closed, versioned routes, three layers | 9 | 29 | 0 | 2 |
+| `http-api` | Any HTTP server, in any framework: records tied to their caller, guards that fail closed, versioned routes, three layers | 9 | 31 | 0 | 2 |
 | `js-ts` | JavaScript and TypeScript | 27 | 35 | 0 | 0 |
 | `mongo` | MongoDB with the native driver | 6 | 18 | 0 | 0 |
 | `multi-tenant` | One system, many customers: no role crosses a tenant | 1 | 2 | 0 | 1 |
@@ -192,11 +193,18 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 | `untrusted-boundary` | Write | Refuses a model call with outside text and no per-call boundary |
 | `git-guard` | Bash | Refuses a token in git config, and with `house: true` the git laws: stage by name, no rebase or force, branches from the fetched trunk |
 | `suite-once` | Bash | Refuses the whole test suite on uncommitted work |
+| `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
 Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
 Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
+
+## Published text is not code
+
+A content folder (`articles/`, `blog/`, `posts/`, `content/`, `tutorials/`, `examples/`, `samples/`) holds text and samples. The writing laws read it. The code laws, `template-law`, `code-shape`, `once-only` and `file-size-guard` leave it alone, and `scan` lists what it finds there apart, so a tutorial's compose file is never a project fault and a sample key never heads the report. Under a code root the word means nothing: `src/app/blog/page.tsx` is code. `"guards": { "content": ["<glob>"] }` adds a project's own.
+
+Dates are facts in an article. The `no-time-or-date` check is opt-in, for an author who wants none in posts, and even then it leaves articles alone.
 
 ## Where things apply
 

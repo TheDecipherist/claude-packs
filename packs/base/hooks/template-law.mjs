@@ -7,6 +7,7 @@
 import { readFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { parametersOf } from './lib/code-shapes.mjs';
+import { isContent } from './lib/content.mjs';
 import { languageOf } from './lib/languages.mjs';
 import { nearCopy } from './lib/near-copies.mjs';
 import { EXTS, readText, repoIndex } from './lib/repo-index.mjs';
@@ -82,10 +83,11 @@ function judgeWrite(w, rel) {
   const fresh = after.shapes.filter((s, i) => after.shapes.findIndex((x) => x.id === s.id) === i && here.get(s.id) > (was.get(s.id) ?? 0));
   const { statements, defs } = addedTo(before, after);
   if (!fresh.length && !statements.length && !defs.length) return null;
-  const skip = skippedBy(readLayout(claudeRoot(w.path)));
-  if (matchesAny(rel, skip)) return null;
+  const layout = readLayout(claudeRoot(w.path));
+  const skip = skippedBy(layout);
+  if (matchesAny(rel, skip) || isContent(rel, layout)) return null;
   const root = checkoutRoot(w.path);
-  const entries = repoIndex(root, [...TESTS, ...skip]);
+  const entries = repoIndex(root, [...TESTS, ...skip], layout);
   const others = copiesElsewhere(entries, rel);
   for (const s of fresh) {
     const elsewhere = others.get(s.id) ?? [];
@@ -123,6 +125,7 @@ function selftest() {
     ['a table as data rows', w('src/rows2.cpp', table('kTwo')), 0],
     ['a copy tree', w('vendored/more.h', reader('dropOf', 'name')), 0],
     ['a tree the layout excludes', w('kept/more.h', reader('dropOf', 'name')), 0],
+    ['a tutorial sample in a content folder', w('articles/guide/gate.h', reader('tapOf', 'key')), 0],
     ['a near copy, with a line added every few lines', w('src/steps2.py', steps('load_more', true)), 2],
     ['a function the repo already has, written again', w('src/other.ts', 'export function formatDateRange(x, y) {\n  return `${x} to ${y}`;\n}\n'), 2],
     ['a plain-word name is not judged', w('src/plain.ts', 'export function render(x) {\n  return x;\n}\n'), 0],

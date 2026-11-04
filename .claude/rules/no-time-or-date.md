@@ -15,17 +15,15 @@ paths:
   - "drafts/**"
 ---
 
-# No time or date in public text
-
-"a major AI tell".
+# No invented time or date
 
 <constraints>
-Never do:
-- Write any time or date reference, invented or not: months, years, "last year", "in June", "at 11pm", "3 days ago", "recently joined".
-
 Always do:
-- Keep a duration the author states ("about 10 years"): the only exception.
+- Keep a date or a duration that is a real fact the reader needs: history, a release, a measured span.
+
+Never do:
+- Invent a time reference to sound lived-in: "last year", "in June", "at 11pm", "recently".
 </constraints>
 
 ## Check
-`no-time-or-date` (lesson check).
+`no-time-or-date` (a lesson check, opt-in): for an author who wants no dates at all in posts. Name `checks/no-time-or-date.json` in `"enable"`.

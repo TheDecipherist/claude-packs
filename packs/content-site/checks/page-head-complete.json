@@ -1,0 +1,26 @@
+{
+  "id": "page-head-complete",
+  "why": "A page with no canonical, description or social image is found less, and shared badly.",
+  "rule": ".claude/rules/page-head-is-complete.md",
+  "globs": [
+    "**/*.html"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/admin*/**",
+    "**/*template*",
+    "**/partials/**",
+    "**/_*/**"
+  ],
+  "pattern": "<html\\b",
+  "bad": "<html lang=\"en\"><head><title>A</title></head></html>",
+  "good": "<html lang=\"en\"><head><title>A</title><meta name=\"description\" content=\"x\"><link rel=\"canonical\" href=\"/a\"><meta property=\"og:image\" content=\"/a.png\"></head></html>",
+  "mode": "needs",
+  "needs": [
+    "rel=[\"']canonical",
+    "name=[\"']description",
+    "property=[\"']og:image"
+  ]
+}

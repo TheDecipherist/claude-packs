@@ -31,7 +31,8 @@
       "go",
       "ci",
       "dynamic-data",
-      "zod"
+      "zod",
+      "content-site"
     ],
     "default": [
       "js-ts"

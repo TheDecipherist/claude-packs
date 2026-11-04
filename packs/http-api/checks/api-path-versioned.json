@@ -22,8 +22,8 @@
     "**/data/**",
     "**/docs/**"
   ],
-  "pattern": "\\.(?:use|all|get|post|put|patch|delete|route)\\s*\\(\\s*['\"`]/api/(?!v\\d+(?:/|['\"`]))",
-  "bad": "app.use('/api/sessions', router);\napp.get('/api/orders', handler);",
+  "pattern": "\\.(?:use|all|get|post|put|patch|delete|route)\\s*\\(\\s*['\"`]/(?:[\\w-]+/)?api/(?!v\\d+(?:/|['\"`]))",
+  "bad": "app.use('/api/sessions', router);\napp.get('/api/orders', handler);\nrouter.get('/adminTools/api/config', handler);",
   "good": "app.use('/api/v1/sessions', router);\napp.get('/api/v2/orders', handler);",
   "replaces": [
     "api-routes-versioned"

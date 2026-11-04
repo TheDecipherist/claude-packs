@@ -19,8 +19,8 @@
     "**/build/**",
     "**/.next/**"
   ],
-  "pattern": "JSON\\.stringify\\(\\s*req(?:uest)?\\.body\\s*\\)",
-  "bad": "const rawBody = JSON.stringify(req.body);",
-  "good": "const rawBody = req.rawBody;",
+  "pattern": "(?:[Hh]mac|[Ss]ignature)[\\s\\S]{0,200}JSON\\.stringify\\(\\s*req(?:uest)?\\.body\\s*\\)|JSON\\.stringify\\(\\s*req(?:uest)?\\.body\\s*\\)[\\s\\S]{0,200}(?:[Hh]mac|[Ss]ignature)",
+  "bad": "const rawBody = JSON.stringify(req.body);\nconst sig = createHmac('sha256', key).update(rawBody).digest('hex');",
+  "good": "const sig = createHmac('sha256', key).update(req.rawBody).digest('hex');",
   "kind": "security"
 }

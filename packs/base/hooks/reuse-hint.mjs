@@ -49,7 +49,7 @@ export function matches(prompt, index) {
 function main(text) {
   const event = JSON.parse(text || '{}');
   const at = `${event.cwd ?? process.cwd()}/x`;
-  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(at), [...TESTS, ...skippedBy(readLayout(claudeRoot(at)))]));
+  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(at), [...TESTS, ...skippedBy(readLayout(claudeRoot(at)))], readLayout(claudeRoot(at))));
   if (found.length) console.log(`Already in this repo, call it rather than write it again:\n${found.map((f) => `- ${f.name} (${f.at})`).join('\n')}`);
   return 0;
 }

@@ -1,0 +1,28 @@
+{
+  "id": "failure-is-not-empty",
+  "why": "A route that answers an empty 200 when its database is down tells every client there is no data. A failure and nothing to report must never look the same.",
+  "rule": ".claude/rules/one-error-contract.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "kind": "failures and lost data",
+  "code": true,
+  "pattern": "\\bif\\s*\\(\\s*!\\s*(?:db|client|conn|connection|pool)\\s*\\)\\s*(?:\\{\\s*)?return\\s+res\\.(?:json|send)\\(|\\bcatch\\b[^{]*\\{\\s*(?:return\\s+)?res\\.json\\(\\s*(?:\\[\\s*\\]|\\{\\s*\\w+\\s*:\\s*\\[\\s*\\])",
+  "bad": "if (!db) return res.json({ comments: [], total: 0 });\ntry { list(); } catch (e) { return res.json([]); }",
+  "good": "if (!db) return res.status(503).json({ code: 'unavailable' });"
+}

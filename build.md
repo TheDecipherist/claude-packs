@@ -96,6 +96,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the dynamic-data pack, versioning checks in http-api, full-stack as a composition of packs; concepts: none (design/shape.json declares none); reuse: hitsOf (packs/base/hooks/lesson-checks.mjs), the pack layout of packs/http-api.
   done when: the checks measured on real repos with hits read; the moved laws reach a full-stack install; the whole suite green once, committed; landed.
 
+- 0.27.0, published text is not code (work/0.27.0-content-sites), started 2026-11-04 (false triggers on content files, dates allowed in articles; the content-site pack; repo-litter).
+  making: one content rule for every hook and the scan, a content-site pack, repo-litter, the new http-api checks; concepts: none (design/shape.json declares none); reuse: isContent (packs/base/hooks/lib/content.mjs), gitAdds (packs/base/hooks/lib/git-adds.mjs).
+  done when: the site's false secrets and samples are gone from a scan, with real faults still caught; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

@@ -22,6 +22,7 @@ import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { readShape } from './lib/shape.mjs';
 import { readPayload, writesOf } from './lib/writes.mjs';
+import { isContent } from './lib/content.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const HOW = `Code that exists once is called, never copied: ${FIX}. A function written for a many concept takes the instance as a parameter.\n` +
@@ -39,7 +40,7 @@ function judged(payload) {
     const rel = relative(root, w.path).replace(/\\/g, '/');
     const layout = readLayout(claudeRoot(w.path));
     const shape = readShape(root);
-    if (matchesAny(rel, [...excludeGlobs(layout, shape), ...copyGlobs(layout)])) continue;
+    if (matchesAny(rel, [...excludeGlobs(layout, shape), ...copyGlobs(layout)]) || isContent(rel, layout)) continue;
     const range = changedLines(w.before, w.after);
     if (range) out.push({ root, layout, shape, w, rel, range });
   }

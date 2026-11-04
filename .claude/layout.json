@@ -152,7 +152,8 @@
     "hooks/template-law.mjs",
     "checks/one-walk-per-template.json",
     "hooks/reuse-hint.mjs",
-    "hooks/code-shape.mjs"
+    "hooks/code-shape.mjs",
+    "hooks/repo-litter.mjs"
   ],
   "commands": {
     "test": "npm test",

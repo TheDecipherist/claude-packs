@@ -18,7 +18,10 @@
       "ci",
       "js-ts",
       "python",
-      "dynamic-data"
+      "dynamic-data",
+      "web",
+      "ui-craft",
+      "content-site"
     ],
     "default": [
       "go"

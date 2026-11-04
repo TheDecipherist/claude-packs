@@ -15,6 +15,7 @@ import { basename, join, relative, resolve } from 'node:path';
 import { judgeEvent } from './lib/writes.mjs';
 import { checkoutRoot } from './lib/project.mjs';
 import { bashOf, git, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
+import { gitAdds } from './lib/git-adds.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ENV = /^\.env(\..+)?$/;
@@ -32,7 +33,7 @@ export const SECRETS = [
   ['a Stripe secret key', /\b[rs]k_live_[A-Za-z0-9]{20,}/g],
   ['a private key', /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----\s+[A-Za-z0-9+/=\s]{64,}/g],
   ['a prefixed API key', /\b(?!price_|prod_|pk_|[rs]k_live_|github_pat_|gh[pousr]_)(?=[a-z]{2,8}_)(?=[\w-]*[A-Z])(?=[\w-]*\d)[a-z]{2,8}_[A-Za-z0-9_-]{24,}\b/g],
-  ['a connection string with its password', /\b(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqp):\/\/[^\s:@/'"`]+:(?!\$\{|\$[A-Za-z_]|<|\*+@)[^\s@/'"`]{3,}@/g],
+  ['a connection string with its password', /\b(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqp):\/\/[^\s:@/'"`]+:(?!\$\{|\$[A-Za-z_]|<|\*+@|[^\s@]*(?:[Pp]ass(?:word|wd)?|[Cc]hange|[Ee]xample|[Yy]our|[Ss]ecret|[Pp]laceholder|xxx|XXX))[^\s@/'"`]{3,}@/g],
 ];
 const count = (text, re) => (text.match(re) ?? []).length;
 export const addedSecret = (before, after) => SECRETS.find(([, re]) => count(after, re) > count(before ?? '', re))?.[0] ?? null;
@@ -54,14 +55,8 @@ function judgeWrite(w) {
 
 // `git add` of a secret file by name, or a sweep (-A, ., --all, a folder) while one is not ignored.
 function judgeAdd(command, cwd) {
-  const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '');
-  for (const part of body.split(/&&|\|\||;|\|/)) {
-    const w = part.trim().split(/\s+/);
-    if (w[0] !== 'git') continue;
-    let at = 1, dir = cwd;
-    while (at < w.length && w[at].startsWith('-')) { if (w[at] === '-C') dir = resolve(dir, w[at + 1] ?? '.'); at += ['-C', '-c'].includes(w[at]) ? 2 : 1; }
-    if (w[at] !== 'add') continue;
-    const args = w.slice(at + 1).filter((a) => !a.startsWith('-') || ['-A', '--all'].includes(a));
+  for (const { dir, args: raw } of gitAdds(command, cwd)) {
+    const args = raw.filter((a) => !a.startsWith('-') || ['-A', '--all'].includes(a));
     const named = args.find((a) => isSecretFile(a));
     if (named) return `\`git add ${named}\`: a secret file is never staged (.env, keys, credentials). Keep it ignored; commit a .env.example with the names and no values.`;
     if (args.some((a) => ['-A', '--all', '.', '*'].includes(a) || a.endsWith('/'))) {

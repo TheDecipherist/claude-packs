@@ -8,7 +8,16 @@
   "globs": [],
   "exclude": [
     "**/node_modules/**",
-    "**/CHANGELOG*"
+    "**/CHANGELOG*",
+    "articles/**",
+    "**/articles/**",
+    "blog/**",
+    "**/blog/**",
+    "posts/**",
+    "**/posts/**",
+    "content/**",
+    "**/content/**",
+    "drafts/**"
   ],
   "prose": true,
   "pattern": "\\b(?:in|last|this|next|since) (?:January|February|March|April|June|July|August|September|October|November|December)\\b|\\b(?:January|February|March|April|June|July|August|September|October|November|December|May) (?:\\d{1,2}, )?\\d{4}\\b|\\b(?:last|this|next) (?:year|month|week)\\b|\\b\\d+ (?:days?|weeks?|months?|years?) ago\\b|\\bat \\d{1,2}(?::\\d\\d)?\\s?(?:am|pm)\\b|\\brecently\\b",

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.27.0 (2026-11-04)
+
+From the scan of a content-heavy site, the first of its kind, where the kit judged published text as code.
+
+- Content folders. `isContent` (`hooks/lib/content.mjs`) is one rule for the whole kit: `articles/`, `blog/`, `posts/`, `content/`, `tutorials/`, `examples/` and `samples/` hold text and samples, unless they sit under a code root. `template-law`, `code-shape`, `once-only`, `file-size-guard` and the code checks leave them alone at the write; the writing laws still read them. On that site, 50 "secrets" in code became 0, and 973 sample hits left the count. `guards.content` adds a project's own.
+- `scan` reports code first and public text last, and `suggest` takes no evidence from samples. It now finds plain HTML sites, which got no UI pack before.
+- `no-time-or-date` is opt-in, and leaves articles alone even when on: dates there are the subject. A date that is a fact is fine; the rule now refuses invented ones.
+- A placeholder password in a connection string is no longer a secret.
+- New `content-site` pack: complete page heads, one source per page, defended public forms, sized media, and the `publish-a-page` skill.
+- New base hook `repo-litter`: `git add` of a file over 10 MB, a working screenshot in the repo root, or a debug dump is refused. `scan` reports the repo's weight. Held back in existing projects.
+- New checks in `http-api`: `failure-is-not-empty` (an empty 200 when the database is down) and `csp-not-switched-off`. `api-path-versioned` now reads paths like `/adminTools/api/`: every API is versioned, an internal one too.
+- `hmac-over-reserialised-body` no longer fires on a plain proxy forward. `scan --prompt` now asks whether CLAUDE.md and the README still tell the truth.
+
 ## 0.26.0 (2026-11-04)
 
 - New `dynamic-data` pack, from the post-mortem of a 20-year CMS and its successor's design: one definition drives every surface, definitions are validated data, the engine enforces and the UI reflects, every dynamic surface has a boundary, fields have owners, saves are patches, a fact is stored once, imports drop nothing, a list is a saved query, and a new tenant costs one document. Ten rules, nine checks and the `design-a-definition` skill. It finds little on the three repos measured, which are not definition-driven; its checks are proved by their examples, drawn from that system's real faults.

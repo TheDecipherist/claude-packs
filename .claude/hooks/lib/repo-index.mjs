@@ -1,10 +1,11 @@
 // What a checkout already holds, per file: its element shapes, its statements and its definitions, kept between calls in the temp folder and read
 // again only for a file whose time or size moved. template-law judges a write against it; reuse-hint shows it at the prompt.
-//   repoIndex(root, skipGlobs) -> { rel: { m, s, shapes: [[id, line, what]], st: [[hash, line]], defs: [[name, line]] } }
+//   repoIndex(root, skipGlobs, layout) -> { rel: { m, s, shapes: [[id, line, what]], st: [[hash, line]], defs: [[name, line]] } }
 import { createHash } from 'node:crypto';
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { extname, join } from 'node:path';
+import { isContent } from './content.mjs';
 import { MARKUP, codeFiles, shapesOf } from './elements.mjs';
 import { ALL_CODE } from './languages.mjs';
 import { definesOf, fingerprint } from './near-copies.mjs';
@@ -34,12 +35,12 @@ export function readText(text, rel) {
 
 const fileOf = (root) => join(tmpdir(), `claude-packs-repo-${createHash('sha256').update(root).digest('hex').slice(0, 12)}.json`);
 
-export function repoIndex(root, skip) {
+export function repoIndex(root, skip, layout = {}) {
   const file = fileOf(root);
   let old = {};
   try { old = JSON.parse(readFileSync(file, 'utf8')); } catch { /* the first call builds it */ }
   const now = {};
-  for (const rel of codeFiles(root, skip, EXTS)) {
+  for (const rel of codeFiles(root, skip, EXTS).filter((f) => !isContent(f, layout))) {
     const st = statSync(join(root, rel));
     const had = old[rel];
     if (had && had.m === st.mtimeMs && had.s === st.size) { now[rel] = had; continue; }

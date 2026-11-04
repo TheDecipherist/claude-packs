@@ -8,7 +8,7 @@ paths:
 
 <constraints>
 Always do:
-- Serve every route under `/api/v<N>/` from the first line, with the prefix set once, where routes are mounted.
+- Serve every route under `/api/v<N>/` from the first line, with the prefix set once, where routes are mounted. That holds for an API only your own pages call: there is no good reason not to version one.
 - Keep a published version additive: add optional fields and new routes only.
 - Make a breaking change a new version: removing or renaming a field, changing a type, tightening validation, changing a status code or a default.
 - Keep the old version working, marked with `Deprecation` and `Sunset` headers and a date, until its traffic is gone.

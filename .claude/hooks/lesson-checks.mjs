@@ -16,6 +16,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { writesOf } from './lib/writes.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
+import { isContent } from './lib/content.mjs';
 import { blankProse } from './lib/prose.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
@@ -154,7 +155,8 @@ function main(text) {
 function judge(file, result) {
   const checks = loadChecks(claudeRoot(file));
   const rel = relative(checkoutRoot(file), file);
-  const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []));
+  const published = isContent(rel, readLayout(claudeRoot(file)));
+  const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []) && (!published || c.prose));
   if (relevant.length === 0) return 0;
 
   const hits = relevant.filter(modeOf).flatMap((c) => modeOf(c).added(c, result.before, result.after).map((text) => ({ c, text })));

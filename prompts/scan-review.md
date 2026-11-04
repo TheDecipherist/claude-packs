@@ -8,7 +8,8 @@ Always do:
   1. **Security:** who can reach what. Injection and XSS through query strings and stored text, open redirects, OAuth `redirect_uri`, what the CSP really stops, authorization on every route, secrets and prompts written to disk or logs.
   2. **Runaway work:** anything that sets off itself: a watcher that writes what it watches, retries with no limit, loops with no stop, polling, anything that costs money per call.
   3. **Work that disappears:** a failed send marked delivered, a box cleared before the send succeeded, a queue item lost on restart, errors swallowed, no shutdown handling.
-  4. **Platform and operations:** what behaves differently on the other OS, signals that do nothing, a deploy that drops in-flight work.
+  4. **Docs that lie:** compare CLAUDE.md, the README and the deploy notes with the code. A stale CLAUDE.md misleads every session, so name each claim that is no longer true: a stack, a command, a folder.
+  5. **Platform and operations:** what behaves differently on the other OS, signals that do nothing, a deploy that drops in-flight work.
 - Verify the hits in `claude-packs-scan.md`. Sample each check, and count real and false for what you read. Give counts only for what you counted; say so when a count is partial.
 - Mark every finding with how you know it: **measured** (you ran it), **read in the code** (you traced it, did not fire it), or **claim** (likely, not confirmed). Measure what you can run safely in this copy.
 - Rank by what happens to the owner, worst first, and give each finding one plain sentence of consequence.

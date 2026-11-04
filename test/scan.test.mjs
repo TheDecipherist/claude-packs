@@ -54,7 +54,7 @@ test('a secret file is never copied, and no secret value reaches the report', ()
   assert.match(text, /1 possible secret\(s\)/);
   const dir = project();
   put(dir, 'src/mask.test.ts', `const t = '${TOKEN}';\n`);
-  assert.match(scanned(dir).text, /In test files \(1\):\n- src\/mask\.test\.ts:1/);
+  assert.match(scanned(dir).text, /In test files and content folders \(1\):\n- src\/mask\.test\.ts:1/);
 });
 
 test('the report recommends with evidence, leaves out what is not there, and lists every check hit by file and line', () => {
