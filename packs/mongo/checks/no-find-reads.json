@@ -19,8 +19,8 @@
     "**/tests/**"
   ],
   "code": false,
-  "pattern": "^(?!.*//\\s*mongo:\\s*allow find).*[Cc]ollection\\b[^\\n]*\\.find\\s*\\(|\\.find\\s*\\(\\s*\\{[^\\n]*\\)\\s*\\.(toArray|limit|sort|skip)\\s*\\(",
+  "pattern": "^(?!.*//\\s*mongo:\\s*allow find)(?![^\\n]*\\.(?:limit|sort)\\s*\\()[^\\n]*[Cc]ollection\\b[^\\n]*\\.find\\s*\\(|^(?![^\\n]*\\.(?:limit|sort)\\s*\\()[^\\n]*\\.find\\s*\\(\\s*\\{[^\\n]*\\)\\s*\\.(?:toArray|skip)\\s*\\(",
   "flags": "m",
   "bad": "const docs = await collection.find({ a: 1 }).toArray();\nconst rows = await collection.find(q).toArray();\n",
-  "good": "const docs = await col.aggregate([{ $match: { a: 1 } }, { $limit: 50 }]).toArray();\nconst x = items.find((i) => i.id === id);"
+  "good": "const docs = await col.aggregate([{ $match: { a: 1 } }, { $limit: 50 }]).toArray();\nconst x = items.find((i) => i.id === id);\nconst last = await collection.find(q).sort({ at: -1 }).limit(20).toArray();\n"
 }

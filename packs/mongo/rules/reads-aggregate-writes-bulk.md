@@ -4,7 +4,7 @@ paths:
   - "placeholder"
 ---
 
-# Reads are aggregation pipelines; multi-document writes are one bulkWrite
+# Reads shape and bound in the database; multi-document writes are one bulkWrite
 
 <constraints>
 Always do:
@@ -18,7 +18,7 @@ Always do:
 - Count with `estimatedDocumentCount` for "roughly how many"; `countDocuments` only when a filter demands it.
 
 Never do:
-- `collection.find(` for a read (`no-find-reads` check). Add `// mongo: allow find` with the reason for the rare exception.
+- An unbounded `collection.find(` (`no-find-reads` check): a `find` with `.sort()` or `.limit()` in the database is fine; anything that joins or reshapes is a pipeline. Add `// mongo: allow find` with the reason for the rare exception.
 - `insertMany` / `updateMany` / `deleteMany` as the multi-document write path (`bulk-over-many` check). `deleteMany` stays for test cleanup.
 - `$skip` for pagination; an unanchored `$regex` (it forces a collection scan; anchor with `^`).
 - `findOne` then `insertOne` as a uniqueness check.

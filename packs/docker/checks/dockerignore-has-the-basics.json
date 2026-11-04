@@ -10,11 +10,11 @@
   "mode": "needs",
   "pattern": "[\\s\\S]",
   "needs": [
-    "^node_modules",
-    "^\\.git\\b",
-    "^\\.env",
-    "^dist\\b",
-    "^coverage\\b"
+    "^\\**/?node_modules",
+    "^\\**/?\\.git\\b",
+    "^\\**/?\\.env",
+    "^\\**/?dist\\b",
+    "^\\**/?coverage\\b"
   ],
   "bad": "node_modules\n",
   "good": "node_modules\n.git\n.env*\ndist\ncoverage\n.claude\n"

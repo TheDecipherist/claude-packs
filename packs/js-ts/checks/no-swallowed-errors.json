@@ -19,7 +19,7 @@
     "**/.claude/**"
   ],
   "code": true,
-  "pattern": "catch\\s*(?:\\([^)]*\\))?\\s*\\{\\s*\\}|\\.catch\\s*\\(\\s*(?:\\(\\s*[\\w$]*\\s*\\)|[\\w$]+)?\\s*=>\\s*(?:\\{\\s*\\}|null|undefined|void\\s+0)\\s*\\)|\\.catch\\s*\\(\\s*(?:noop|_\\.noop)\\s*\\)",
-  "bad": "try { await save(x); } catch {}\nawait send(m).catch(() => {});\nconst v = await get(k).catch(() => null);",
+  "pattern": "catch\\s*(?:\\([^)]*\\))?\\s*\\{\\s*\\}|\\.catch\\s*\\(\\s*(?:\\(\\s*[\\w$]*\\s*\\)|[\\w$]+)?\\s*=>\\s*(?:\\{\\s*\\}|\\(\\s*\\{\\s*\\}\\s*\\)|\\[\\s*\\]|null|undefined|void\\s+0)\\s*\\)|\\.catch\\s*\\(\\s*(?:noop|_\\.noop)\\s*\\)",
+  "bad": "try { await save(x); } catch {}\nawait send(m).catch(() => {});\nconst v = await get(k).catch(() => null);\nconst v = await get(k).catch(() => ({}));\n",
   "good": "try { await save(x); } catch (err: unknown) { throw new Error('save failed', { cause: err }); }\nawait send(m).catch((err: unknown) => log.warn({ err }, 'send failed'));"
 }

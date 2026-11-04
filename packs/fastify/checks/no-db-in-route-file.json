@@ -6,7 +6,8 @@
     "**/routes/**",
     "**/app/api/**/route.ts",
     "**/app.ts",
-    "**/server.ts"
+    "**/server.ts",
+    "**/ui/**/*.ts"
   ],
   "exclude": [
     "**/node_modules/**",

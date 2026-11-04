@@ -18,12 +18,12 @@
     "**/tests/**",
     "**/boundary.*"
   ],
-  "code": true,
   "mode": "needs",
   "pattern": "\\.messages\\.(?:create|parse|stream)\\s*\\(|\\.beta\\.messages\\.\\w+\\s*\\(|\\.chat\\.completions\\.create\\s*\\(|\\.responses\\.create\\s*\\(|\\bgenerateText\\s*\\(|\\bgenerateObject\\s*\\(|\\bstreamText\\s*\\(",
   "needs": [
-    "\\b(?:wrapBoundary|wrapForPlanner|wrapForExecutor|sha256(?:Hex)?)\\b"
+    "\\b(?:wrapBoundary|wrapForPlanner|wrapForExecutor|wrapUntrusted|sha256(?:Hex)?)\\b|from\\s+['\"][^'\"]*boundary|untrusted:\\s*none"
   ],
   "bad": "const res = await client.messages.create({ model, messages: [{ role: 'user', content: `# Diff\\n${input.diff}` }] });",
-  "good": "const content = `${TEMPLATE}\\n${wrapBoundary(input.diff, 'executor diff')}`;\nconst res = await client.messages.create({ model, messages: [{ role: 'user', content }] });"
+  "good": "const content = `${TEMPLATE}\\n${wrapBoundary(input.diff, 'executor diff')}`;\nconst res = await client.messages.create({ model, messages: [{ role: 'user', content }] });",
+  "strings": true
 }

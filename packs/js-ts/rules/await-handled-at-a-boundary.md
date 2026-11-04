@@ -14,7 +14,7 @@ Always do:
   - `setTimeout`, `setInterval` and `setImmediate` callbacks;
   - event handlers (`.on`, `.once`, `addEventListener`, stream and socket events);
   - queue and change-stream consumers, cron jobs, MCP tool handlers (check what your SDK version does with a throw), CLI `main()`.
-  Wrap these with the project's `guarded(fn, log, what)` helper in `lib/guarded.ts`, which is the only place that writes that `try/catch`.
+  Wrap these with the project's `guarded(fn, log, what)` helper (`lib/guarded.ts`: create it if the project has none), which is the only place that writes that `try/catch`.
 - **Boundaries that do catch** stay thin: Fastify route handlers just `await` and `throw`. Fastify's error handler (`setErrorHandler`) maps the error to a response and logs it once.
 - **A resource that must be released** (a session, a lock, a file handle, a Mongo transaction, a Chrome) gets `try { … } finally { release }`, or `await using` when the resource supports it.
 - **An operation you can actually recover from** (retry, fallback, a default for a missing optional) catches **only the error it can recover from**, narrowed with `instanceof` or a code, and rethrows everything else.

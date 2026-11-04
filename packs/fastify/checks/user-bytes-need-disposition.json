@@ -24,5 +24,6 @@
     "Content-Disposition"
   ],
   "bad": "return reply.type(got.meta.mime).send(got.bytes);",
-  "good": "return reply.header('Content-Disposition', `attachment; filename=\"${safeName}\"`).type(got.meta.mime).send(got.bytes);"
+  "good": "return reply.header('Content-Disposition', `attachment; filename=\"${safeName}\"`).type(got.meta.mime).send(got.bytes);",
+  "flags": "i"
 }

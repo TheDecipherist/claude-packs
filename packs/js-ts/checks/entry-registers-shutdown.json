@@ -17,7 +17,6 @@
     "**/test/**",
     "**/tests/**"
   ],
-  "code": true,
   "mode": "needs",
   "pattern": "\\.listen\\s*\\(|\\bcreateServer\\s*\\(|\\bconnectGateway\\s*\\(|\\bconnectDb\\s*\\(|\\bmongoClient\\s*\\(\\s*\\)\\s*\\.connect",
   "needs": [
@@ -27,5 +26,6 @@
     "(\\bunhandledRejection\\b|\\binstallLifecycle\\s*\\()"
   ],
   "bad": "const app = Fastify();\nawait app.listen({ port: env.PORT, host: '0.0.0.0' });",
-  "good": "import { installLifecycle } from './lifecycle.js';\ninstallLifecycle(app);\nawait app.listen({ port: env.PORT, host: '0.0.0.0' });"
+  "good": "import { installLifecycle } from './lifecycle.js';\ninstallLifecycle(app);\nawait app.listen({ port: env.PORT, host: '0.0.0.0' });",
+  "strings": true
 }

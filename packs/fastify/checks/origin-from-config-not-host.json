@@ -24,5 +24,8 @@
   "code": false,
   "pattern": "\\bheaders\\s*(?:\\.host\\b|\\[\\s*['\\\"](?:host|x-forwarded-proto|x-forwarded-host|x-forwarded-for)['\\\"]\\s*\\])",
   "bad": "const proto = req.headers['x-forwarded-proto'] ?? 'http';\nconst origin = `${proto}://${req.headers.host}`;",
-  "good": "const origin = env.PUBLIC_URL;"
+  "good": "const origin = env.PUBLIC_URL;",
+  "globs": [
+    "**/ui/**/*.ts"
+  ]
 }

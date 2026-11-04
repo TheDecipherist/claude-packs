@@ -11,7 +11,7 @@ paths:
 <constraints>
 Always do:
 - **Logs:** use the structured logger, never `console` plus `JSON.stringify`. In Fastify that is pino: `request.log` / `fastify.log`, `log.info({ fields }, 'message')`, with errors under the `err` key so pino records name, message and stack. Pino serializes safely and never throws on odd values.
-- **Everything else:** one file per project, `lib/json.ts`, holds the only `JSON.parse` and `JSON.stringify` calls:
+- **Everything else:** one file per project, `lib/json.ts` (create it if the project has none), holds the only `JSON.parse` and `JSON.stringify` calls:
   - `toJson(value)` uses `safe-stable-stringify`: circular references become `"[Circular]"`, `BigInt` becomes a string, `Error` becomes `{ name, message, stack, cause }`. It returns a string and never throws.
   - `parseJson(text, schema)` wraps `JSON.parse` in `try` and validates with the Zod schema. It returns `{ ok: true, value } | { ok: false, error }` and never throws.
 - Check the current version of `safe-stable-stringify` and `pino` with `latest-versions` before adding them.

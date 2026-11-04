@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.20.0 (2026-11-04)
+
+What a real install found (AdmiralMCP on 0.14.0, its build/kit-review-plan.md Phase 5).
+
+- Bugs: `entry-registers-shutdown` read its signal names with strings blanked, so handlers never counted; `no-nested-ternary` missed `a ? b : c ? d : e`; `no-swallowed-errors`
+  missed `.catch(() => ({}))`.
+- The lock records the kit version. git-guard: `guards.git.ghAuth: "cli"` for a machine where gh is logged in; `guards.git.trunkNeedsYes` so neither a commit nor the session's end waits on a
+  trunk only the owner pushes.
+- Checks that missed what they exist for: `driver-outside-gateway` (accessor functions), `no-db-in-route-file` and `origin-from-config-not-host` (`ui/`), `no-inline-client-script`,
+  `stored-text-through-renderer` (more fields, `esc(a ?? b)`), `no-latest-base` (`--platform`), `dockerignore-has-the-basics` (`**/` forms).
+- Tuned: `line-under-200-chars` and `json-only-through-helper` leave tests, scripts and templates alone; `no-express-no-vite` allows vitest and the word; `lookup-over-if-chains` skips null guards;
+  `model-call-needs-boundary` takes an imported boundary; `mongoclient-cached-and-named` takes a module cache; `copy-needs-chown-with-user`, `user-bytes-need-disposition`, `docker-exec-form` on HEALTHCHECK.
+- `no-find-reads` and `reads-aggregate-writes-bulk`: a `find` that sorts or limits in the database is fine; the check is for unbounded reads.
+- Rules that named files a project may not have say to create them. kit-lock adopts its own lease after a session id change (KWB-40). The shape `ids` (KWB-16) and a row's `senses` (KWB-20).
+
 ## 0.19.0 (2026-11-04)
 
 The pack manifest (Tim, 2026-11-04: pack.json says if a pack is stock or custom, has a git url, fields like a package.json, and who made it).

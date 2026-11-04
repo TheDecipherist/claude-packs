@@ -15,7 +15,7 @@
     "**/test/**"
   ],
   "code": false,
-  "pattern": "<script[^>]*>\\s*(?:\\$\\{[^}]*\\}\\s*)?(?:[^<]*\\n){8,}",
-  "bad": "<script nonce=\"${nonce}\">\nconst a=1;\nconst b=2;\nconst c=3;\nconst d=4;\nconst e=5;\nconst f=6;\nconst g=7;\nconst h=8;\nconst i=9;\n</script>",
-  "good": "<script nonce=\"${nonce}\" src=\"/ui/client.js\"></script>"
+  "pattern": "<script\\b(?![^>]*\\b(?:src=|type=[\"']application/(?:ld\\+)?json))[^>]*>[\\s\\S]{300,}?</script>",
+  "bad": "<script>a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()</script>\n",
+  "good": "<script src=\"/app.js\" nonce=\"${nonce}\"></script>\n<script>boot();</script>\n"
 }

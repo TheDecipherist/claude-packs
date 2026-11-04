@@ -10,7 +10,7 @@
   "mode": "needs",
   "pattern": "^\\s*USER\\s+(?!root\\b)\\S+",
   "needs": [
-    "--chown="
+    "--chown=|\\bchown\\b"
   ],
   "bad": "COPY --from=build /app/dist ./dist\nUSER node",
   "good": "COPY --chown=node:node --from=build /app/dist ./dist\nUSER node"

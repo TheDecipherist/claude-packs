@@ -50,7 +50,7 @@ function compile(name, row) {
     names: new Set((Array.isArray(row.names) ? row.names : []).filter((n) => typeof n === 'string').map((n) => n.toUpperCase())),
     selectors: Object.keys(row.selectors ?? {}), constants: Object.keys(row.constants ?? {}),
     // manifest prose (a constant's reason, a selector's description) quoted in a brief is never an instance literal
-    quotes: [...Object.values(row.constants ?? {}).map((c) => c?.reason), ...Object.values(row.selectors ?? {})].filter((q) => typeof q === 'string' && q.length > 3),
+    quotes: [...(row.senses ?? []), ...Object.values(row.constants ?? {}).map((c) => c?.reason), ...Object.values(row.selectors ?? {})].filter((q) => typeof q === 'string' && q.length > 3),
   };
 }
 
@@ -78,7 +78,7 @@ export function validateShape(shape) {
   if (j.values !== undefined && !(Array.isArray(j.values) && j.values.every((v) => typeof v === 'string' && v.trim()))) out.push(`${SHAPE_FILE}: "values" must be a list of type names (strings)`);
   for (const c of Object.values(shape.concepts)) {
     const at = `${SHAPE_FILE} "${c.name}"`;
-    if (c.shape !== 'one' && c.shape !== 'many') out.push(`${at}: shape must be "one" or "many" (is ${JSON.stringify(c.shape)})`);
+    if (!['one', 'many', 'ids'].includes(c.shape)) out.push(`${at}: shape must be "one", "many" or "ids" (different things by ID, KWB-16) (is ${JSON.stringify(c.shape)})`);
     if (c.shape === 'many' && !(typeof c.row.generator === 'string' && c.row.generator.trim())) out.push(`${at}: a many concept needs its generator (the one way an instance's id is made, e.g. "${c.name}Id(i, field)")`);
     if (c.row.count !== undefined && !(Number.isInteger(c.row.count) && c.row.count > 0)) out.push(`${at}: count must be a whole number above 0`);
     if (c.shape === 'one' && c.row.count !== undefined) out.push(`${at}: a one concept has no count`);

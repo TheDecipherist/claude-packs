@@ -58,6 +58,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: every pack.json a manifest like a package.json: type, version, author, license, repository, homepage, keywords, engines; a validator, and `list` showing them; concepts: none (design/shape.json declares none); reuse: readPack and availablePacks (lib/packs.mjs).
   done when: every stock pack passes the validator; a custom pack with no author or git url fails it, by name; `list` shows version, type and author; the whole suite green once, committed; landed.
 
+- 0.20.0, what a real install found (work/0.20.0-install-fixes), started 2026-11-04 (Tim: plan and build everything open; admiralmcp/build/kit-review-plan.md Phase 5).
+  making: the kit bugs, gaps and tunes AdmiralMCP's install listed, kit-lock adopting its own lease, the ids shape; concepts: none (design/shape.json declares none); reuse: the lesson checks' bad and good examples, holdToExamples (test/kit-cli.mjs), acquire (lib/kit-lock.mjs), localBranches (packs/base/hooks/lib/pushed.mjs).
+  done when: each item has a bad or a test that fails without it; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

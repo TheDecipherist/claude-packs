@@ -13,11 +13,20 @@
     ".claude/**",
     "**/.claude/**",
     "**/*.min.*",
-    "**/*.d.ts"
+    "**/*.d.ts",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/scripts/**",
+    "**/templates/**",
+    "**/views/**",
+    "**/ui/**",
+    "**/*.view.ts"
   ],
   "code": false,
   "flags": "m",
-  "pattern": "^.{201,}$",
+  "pattern": "^(?!\\s*(?:import\\b|export \\{|export \\*)).{201,}$",
   "bad": "const x = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';",
   "good": "const x = 'short';"
 }

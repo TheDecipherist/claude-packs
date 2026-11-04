@@ -10,7 +10,7 @@
   ],
   "code": false,
   "flags": "m",
-  "pattern": "^\\s*(CMD|ENTRYPOINT)\\s+(?!\\[)\\S",
+  "pattern": "(?<!\\\\\\s*\\n)^\\s*(CMD|ENTRYPOINT)\\s+(?!\\[)\\S",
   "bad": "CMD node dist/index.js",
-  "good": "ENTRYPOINT [\"node\", \"dist/index.js\"]"
+  "good": "ENTRYPOINT [\"node\", \"dist/index.js\"]\nHEALTHCHECK --interval=30s \\\n  CMD curl -f http://localhost/ || exit 1\n"
 }

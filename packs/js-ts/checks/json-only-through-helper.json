@@ -18,7 +18,9 @@
     "**/test/**",
     "**/*.config.*",
     ".claude/**",
-    "**/.claude/**"
+    "**/.claude/**",
+    "**/scripts/**",
+    "**/hooks/**"
   ],
   "code": true,
   "pattern": "\\bJSON\\s*\\.\\s*(parse|stringify)\\s*\\(",

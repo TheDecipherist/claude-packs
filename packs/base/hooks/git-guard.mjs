@@ -67,6 +67,8 @@ export const DEFAULTS = {
   house: false,
   owner: 'TheDecipherist',
   tokenVar: 'PERSONAL_GITHUB_TOKEN',
+  ghAuth: 'token',       // 'cli': gh is logged in on this machine, so no call names a token
+  trunkNeedsYes: false,  // true: only the owner pushes the trunk, so neither a commit nor the session's end waits for it
   trunks: ['main', 'master'],
   refuseTrunk: false,
   neverStage: ['~/firmware'],
@@ -136,7 +138,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
       return `This is the trunk. Every task is built on its own branch and merged when complete: ${c.branchStart}.`;
     }
     // WB-107: an agent's isolated worktree cannot push (its harness refuses), so the lead pushes its branch; Stop still holds it
-    if (!pushedBefore && env.unpushed && subOf(w) === 'commit' && !/\/\.claude\/worktrees\/agent-[^/]+(\/|$)/.test(here)) {
+    if (!pushedBefore && env.unpushed && subOf(w) === 'commit' && !/\/\.claude\/worktrees\/agent-[^/]+(\/|$)/.test(here) && !(c.trunkNeedsYes && (c.trunks ?? []).includes(env.branch(here)))) {
       const u = env.unpushed(here, c);
       if (u?.error) env.warn?.(`git-guard: GitHub was not checked before this commit (${u.error}); the commit goes ahead unchecked. Push when it is back (KWB-26).`);
       else if (u?.commits?.length) return unpushedMessage(u, c);
@@ -150,7 +152,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
       if (!ssh && !p.includes(`$${tok}`) && !p.includes(`\${${tok}}`)) return `A push names the token as $${tok}, never a pasted one.`;
       pushedBefore = true;
     }
-    if (/(^|\s)gh\s/.test(p) && !cmd.includes(`GH_TOKEN=$${tok}`)) return `Every \`gh\` names the token: source ~/.env && GH_TOKEN=$${tok} gh ... ${c.accountNote}`;
+    if (c.ghAuth !== 'cli' && /(^|\s)gh\s/.test(p) && !cmd.includes(`GH_TOKEN=$${tok}`)) return `Every \`gh\` names the token: source ~/.env && GH_TOKEN=$${tok} gh ... ${c.accountNote}`;
     if (/\bgh\s+repo\s+create\b/.test(p) && (!p.includes(`${owner}/`) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
     if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${esc(tok)}`).test(p)) {
       return 'The token is never stored in a remote URL or a config file. Name it on the push only.';

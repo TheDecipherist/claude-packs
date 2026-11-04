@@ -18,7 +18,7 @@
     "**/tests/**"
   ],
   "code": true,
-  "pattern": "\\bnew\\s+MongoClient\\b|\\.collection\\s*(?:<[^>]*>)?\\s*\\(|\\bgetDb\\s*\\(\\s*\\)\\s*\\.|\\bclient\\.db\\s*\\(",
-  "bad": "const rows = await getDb().collection('sessions').find({}).toArray();",
+  "pattern": "\\bnew\\s+MongoClient\\b|\\.collection\\s*(?:<[^>]*>)?\\s*\\(|\\bgetDb\\s*\\(\\s*\\)\\s*\\.|\\bclient\\.db\\s*\\(|\\b\\w+(?:Col|Coll|Collection)\\s*\\(\\s*\\)\\s*\\.\\s*(?:find|insert|update|delete|aggregate|bulkWrite)",
+  "bad": "const rows = await getDb().collection('sessions').find({}).toArray();\nconst r = await sessionsCollection().findOne({ id });\n",
   "good": "const rows = await listSessions(ownerId);\nawait scope.experiments.insertOne(doc);"
 }

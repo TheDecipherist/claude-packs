@@ -14,7 +14,7 @@
     "**/.claude/**"
   ],
   "code": true,
-  "pattern": "\\s\\?\\s[^:;\\n]*\\s\\?\\s[^:;\\n]*\\s:\\s",
-  "bad": "const label = w.status === 'ok' ? (w.fresh ? 'live' : 'stale') : 'dead';",
-  "good": "const label = LABELS[w.status];\nconst v = a?.b ?? c ? d : e;\nconst RE = /expect\\(\\s*([^()]+(?:\\([^()]*\\))?)\\s*\\)/;"
+  "pattern": "\\s\\?\\s[^:;\\n]*\\s\\?\\s[^:;\\n]*\\s:\\s|\\s\\?\\s[^:;\\n{}(),]*\\s:\\s[^?;\\n{}(),]*\\s\\?\\s",
+  "bad": "const label = w.status === 'ok' ? (w.fresh ? 'live' : 'stale') : 'dead';\nconst y = a ? b : c ? d : e;\n",
+  "good": "const label = LABELS[w.status];\nconst v = a?.b ?? c ? d : e;\nconst RE = /expect\\(\\s*([^()]+(?:\\([^()]*\\))?)\\s*\\)/;\nconst s = `${a ? 'x' : ''} ${b ? 'y' : ''}`;\n"
 }

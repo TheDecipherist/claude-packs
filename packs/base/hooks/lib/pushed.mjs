@@ -122,6 +122,7 @@ export function localBranches(cwd, cfg = {}) {
   if (r === null) return null;
   const byRemote = new Map();
   for (const [branch, sha, up, ref] of r.split('\n').filter(Boolean).map((l) => l.split('\t'))) {
+    if (cfg.trunkNeedsYes && (cfg.trunks ?? []).includes(branch)) continue; // only the owner pushes it
     const remote = up && up !== '.' ? up : 'origin';
     const name = up && up !== '.' && ref ? ref.replace(/^refs\/heads\//, '') : branch;
     if (!byRemote.has(remote)) byRemote.set(remote, []);

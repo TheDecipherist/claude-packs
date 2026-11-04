@@ -161,7 +161,8 @@
     "git": {
       "house": true,
       "refuseTrunk": true,
-      "branchStart": "git switch -c work/<version>-<name> main"
+      "branchStart": "git switch -c work/<version>-<name> main",
+      "ghAuth": "cli"
     }
   },
   "complete": true
