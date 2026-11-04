@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Web UI (Next.js, HTML, CSS, Tailwind 4): accessibility, one primitives module, styles in stylesheets, performance, production build, client boundaries.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

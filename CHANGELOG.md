@@ -2,7 +2,7 @@
 
 ## 0.24.0 (2026-11-04)
 
-Anything repeated becomes a template, in C++ above all (Tim: "we need to thoroughly do c++", "anything you find that is repeated should have something that makes it reuseable and template like", "maybe make a specific c++ pack"). Measured on Stellix: 523 files, 51,492 lines.
+Anything repeated becomes a template, in C++ above all ("we need to thoroughly do c++", "anything you find that is repeated should have something that makes it reuseable and template like", "maybe make a specific c++ pack"). Measured on Stellix: 523 files, 51,492 lines.
 
 - `template-law` reads statements, not lines (`lib/code-shapes.mjs`). It now sees many statements on one line, and three kinds of repeat in code: an object set up field by field, a run of statements with one shape (a copied helper, whole or in part), and one call repeated with other arguments (a table written as code). Data tables, includes, imports, macros and JS template strings are not statements here. On Stellix it finds 302 repeats, 950 copies, where 0.23.0 found 10 and 68. Of 26 sampled by reading, none was a false match and 3 were borderline. A hook call there takes about 100 ms warm, 520 ms cold.
 - A refusal says what to do: what the repeat should become, what differs between the copies (the template's parameters), and to take the copies out first. `scan` lists every repeat the same way, and in `claude-packs-scan.json`.
@@ -14,7 +14,7 @@ Anything repeated becomes a template, in C++ above all (Tim: "we need to thoroug
 
 ## 0.23.0 (2026-11-04)
 
-template-law (Tim: anything "component" used more than once is a template, enforced, in html, c++ and apps).
+template-law (anything "component" used more than once is a template, enforced, in html, c++ and apps).
 
 - New base hook `template-law`: a write that adds an element built by hand, in the shape of one already in this file or another of the checkout, is refused. It strips names and text (lib/elements.mjs), so copies that once-only cannot see look the same: markup by tags, attribute names and nesting (HTML, JSX, Vue, Svelte, template strings), and code by the members set on one object in a row (a C++ control, a widget). Using a component, a `.map()`, data rows and one object used twice are left alone; `one-off: <reason>` on a line marks a real exception. A new hook: held back in an existing project until `enable` names it. On AdmiralMCP's 175 files it finds 3 shapes, in 111 ms, and none in the kit.
 - `scan` reports elements built by hand more than once. dispatch-once takes its walk from the shared lib.
@@ -25,7 +25,7 @@ template-law (Tim: anything "component" used more than once is a template, enfor
 
 ## 0.22.0 (2026-11-04)
 
-The depth of ui-craft (Tim: everything in taste-skill is useful; a hovered element says so; anything used twice is one template, tested once).
+The depth of ui-craft (everything in taste-skill is useful; a hovered element says so; anything used twice is one template, tested once).
 
 - Rules: `pointer-feedback`, `screen-answers-one-question`, `data-tells-the-truth`, `apps-are-not-pages`, `page-holds-its-frame`, `pictures-do-a-job`; deeper `motion-is-rare`, `survives-real-data`, `interface-copy`, `no-generated-look`, `type-space-colour`.
 - Skills: `app-screen`, `chart-choice`, `page-critique`, `redesign-page`, `build-from-reference`, `write-the-page`. Tool `page-measure` for a `prove-page` gate, proved in real Chrome.
@@ -36,7 +36,7 @@ The depth of ui-craft (Tim: everything in taste-skill is useful; a hovered eleme
 
 ## 0.21.0 (2026-11-04)
 
-Custom packs (Tim: if a person makes something for their employer's internals, it should be easy to make a repo and share it with their team).
+Custom packs (if a person makes something for their employer's internals, it should be easy to make a repo and share it with their team).
 
 - `new-pack <name> [--repo <git-url>]`: a ready repository for a team's own packs (`packs/<name>/`, a manifest, an example rule, check and skill).
 - `add <name> --from <git-url>`: fetches the repository to a cache, never runs it, checks the manifest, and installs the pack in any configuration. The lock records its url and commit, so a
@@ -59,7 +59,7 @@ What a real install found (AdmiralMCP on 0.14.0, its build/kit-review-plan.md Ph
 
 ## 0.19.0 (2026-11-04)
 
-The pack manifest (Tim, 2026-11-04: pack.json says if a pack is stock or custom, has a git url, fields like a package.json, and who made it).
+The pack manifest (pack.json says if a pack is stock or custom, has a git url, fields like a package.json, and who made it).
 
 - Every `pack.json` now carries `name`, `version`, `description`, `type` (`stock` or `custom`), `author`, `license`, `homepage`, `repository` (`type`, `url`, optional
   `directory`), `keywords` and `engines` (`claude-packs`, the lowest kit version it works on). `lib/pack-manifest.mjs` checks them; doctor checks the installed packs;
@@ -67,29 +67,29 @@ The pack manifest (Tim, 2026-11-04: pack.json says if a pack is stock or custom,
 
 ## 0.18.0 (2026-11-04)
 
-hook-proof (Tim, 2026-11-04: whenever a hook is supposed to exit 2 and it exits 0, it is caught). Only exit 2 blocks, so a guard fails open and in silence.
+hook-proof (whenever a hook is supposed to exit 2 and it exits 0, it is caught). Only exit 2 blocks, so a guard fails open and in silence.
 
 - doctor is red for a hook no settings entry runs, and for a hook that crashed since it last changed (its exit code in `.claude/hooks.log`): those calls were not
   judged, and went through. A hook killed at its timeout leaves no line and is not seen.
 - New pack `hook-proof`, in every configuration: rule `a-refusal-is-exit-2`, skill `prove-a-hook`, and five checks on hook files and settings:
   `hook-exit-1-does-not-block`, `hook-catch-must-not-allow`, `hook-no-or-true`, `hook-command-no-pipe`, `hook-refusal-on-stderr`.
-- A work branch never needs a yes to push; only the trunk can, and only where a project's CLAUDE.md says so (Tim: "a project should not need a yes before pushing, only to main"): `finished-work-lands`, `land-branch`, `git-right-first-time`.
+- A work branch never needs a yes to push; only the trunk can, and only where a project's CLAUDE.md says so ("a project should not need a yes before pushing, only to main"): `finished-work-lands`, `land-branch`, `git-right-first-time`.
 
 ## 0.17.0 (2026-11-04)
 
 ui-craft and landing.
 
-- New pack `ui-craft` (Tim: build the UI/UX additions from the best public skills; docs/ui-craft-sources.md says what came from each): ten rules (forms, motion,
+- New pack `ui-craft` (build the UI/UX additions from the best public skills; docs/ui-craft-sources.md says what came from each): ten rules (forms, motion,
   real data, URL state, touch, dates and numbers, interface copy, type and space, the generated look, the rendered page), skills `ui-code-review` and
   `prove-page`, twelve checks. A check blocks only what is objective or what the sources agree on. The `node-ui` and `next-app` presets bring it; node
   and full-stack take it (full-stack by default); `scan` recommends it for a UI.
 - `layout.json` `"gates": { "a11y": "<command>" }`: doctor is red for UI code with no page gate, as for hover; `"none: <reason>"` declines.
 - `design-direction` reviews the plan against the brief; `design-review` says which findings are law and which taste, and judges the production build.
-- Rule `finished-work-lands` and skill `land-branch` (base; Tim: whenever a work branch is finished it is merged into main and pushed).
+- Rule `finished-work-lands` and skill `land-branch` (base: whenever a work branch is finished it is merged into main and pushed).
 
 ## 0.16.0 (2026-11-04)
 
-Scan (Tim, 2026-11-04: a real install's review found security bugs that could have been very bad in production, so a project owner should get that review before choosing to install anything).
+Scan (a real install's review found security bugs that could have been very bad in production, so a project owner should get that review before choosing to install anything).
 
 - `claude-packs scan [--out <file>]`: copies the project (what git tracks or would track; never .env, key files, node_modules or build output) to a temp
   folder, installs the recommended configuration and packs there, runs every check over every file with the secret patterns, the line limit
@@ -102,11 +102,11 @@ Scan (Tim, 2026-11-04: a real install's review found security bugs that could ha
 
 ## 0.15.0 (2026-11-04)
 
-Writing (Tim, 2026-11-04: whatever goes public, a manual, a md file, a reply, reads and is formatted properly; split tim-writing into small pieces).
+Writing (whatever goes public, a manual, a md file, a reply, reads and is formatted properly; split humanize into small pieces).
 
 - New pack `writing`, in every configuration's `always` packs. Nine rules on public text (README, `*.mdx`, docs/manual, docs/guide, manual,
   content, blog, posts, articles, drafts; internal specs, logs and briefs stay plain): `cut-the-padding`, `rhythm-like-talk`, `no-stock-language`,
-  `no-scaffolding`, `no-time-or-date`, `ascii-no-em-dash`, `write-from-your-own-corner`, `tims-voice`, `no-cargo-cult`.
+  `no-scaffolding`, `no-time-or-date`, `ascii-no-em-dash`, `write-from-your-own-corner`, `direct-voice`, `no-cargo-cult`.
 - Ten one-job skills: `humanize` (the last pass), `reply-stance`, `should-i-reply`, `reply-moves`, `reddit-post`, `pick-subreddit`, `reddit-title`,
   `argument-post`, `launch-post`, `post-voice`.
 - Eleven lesson checks for the tells a regex can see, held back in existing projects until `enable` names them.
@@ -118,7 +118,7 @@ Writing (Tim, 2026-11-04: whatever goes public, a manual, a md file, a reply, re
 
 ## 0.14.0 (2026-11-04)
 
-Stored text (Tim, 2026-11-04: UIs render what comes from a database with \r correct, code highlighted and markdown parsed).
+Stored text (UIs render what comes from a database with \r correct, code highlighted and markdown parsed).
 
 - New pack `stored-text`: rule `stored-text-renders-once` (one renderer, `stored-text.*`: normalise line endings; markdown with raw HTML off;
   highlight fenced code by language on the server; sanitize last; a terminal's lone `\r` overwrites its line; a visible backslash-r is a
@@ -135,7 +135,7 @@ Stored text (Tim, 2026-11-04: UIs render what comes from a database with \r corr
 
 ## 0.13.0 (2026-11-04)
 
-The time laws (KWB-41; Tim: "Anything like tests that consume a ton of time that could/should be avoided should have a small skill or rule or both").
+The time laws (KWB-41: "Anything like tests that consume a ton of time that could/should be avoided should have a small skill or rule or both").
 
 - doctor remembers a passed selftest (lib/selftest-cache.mjs) by the hash of the hook, hooks/lib, the runner, node, the detector and the
   project's guards: an unchanged hook is not proved again (7.5 s to 1.9 s per doctor, on every init, update and test). A failure is never
@@ -201,7 +201,7 @@ The v7 additions (claude-packs-kit-v7-additions.zip, merged by hand: the kit's o
 
 ## 0.10.1 (2026-11-03)
 
-The hover law (Tim, 2026-11-03; the kit half of Stellix B-261): "Controls dont have a hover state ... all controls and screens that
+The hover law (2026-11-03; the kit half of Stellix B-261): "Controls dont have a hover state ... all controls and screens that
 has points that can be interacted with needs to not only change the cursor to what the interaction is but also some kind of small
 effect on whats actually hovered."
 
@@ -221,7 +221,7 @@ effect on whats actually hovered."
 
 ## 0.10.0 (2026-11-03)
 
-Configurations (Tim, STEP 3: "Today the kit is one configuration pretending to be general. Build it as data."; KWB-31).
+Configurations (STEP 3: "Today the kit is one configuration pretending to be general. Build it as data."; KWB-31).
 
 - `configurations/<name>/config.json`: a kind of project as data: its packs (`always`, `choose`, `default`), its layout template
   (the folders `init` creates), `hookOrder` (its hooks' order per settings entry), `sourceFiles` (what doctor's coverage counts
@@ -234,7 +234,7 @@ Configurations (Tim, STEP 3: "Today the kit is one configuration pretending to b
 - base holds only universal engineering: git-guard, file-size-guard, folder-law, placement-law, the shape law (shape-law,
   brief-guard, making, making-check, once-only, shape-symmetry), lesson-checks, and two new laws. Everything synth-specific
   moved, byte for byte, to the new `synth-creator` pack (installed only by that configuration): build-guard, time-guard,
-  spec-lock, frozen-files (+ freeze.mjs), protect-vendor, stage-guard, build-sweep, idle-wake, tims-asks; the rules
+  spec-lock, frozen-files (+ freeze.mjs), protect-vendor, stage-guard, build-sweep, idle-wake, user-asks; the rules
   debug-by-measurement, done-means-fresh-evidence, hooks-and-gates, copy-trees-read-only; the build-step skill.
   realtime-checks.mjs moved to audio-core beside realtime-guard. The synth examples left in base (src/dsp, Voice.cpp, "sounds",
   synth.git) were made neutral; test/base-neutral.test.mjs refuses a synth word (sound, panel, patch, voice, DSP, synth) in base.
@@ -494,7 +494,7 @@ Two sessions each released a claude-packs 0.6.0 on 2026-10-31, from different ba
   selftests and this line's routes.
 - **One git-guard, in Node.** `git-guard.mjs` keeps main's token law (always on) and takes the house laws from the
   Python git-guard, switched on per project (`guards.git.house`; the trunk refusal with `guards.git.refuseTrunk`).
-- **Every kit hook is Node:** git-guard, build-guard, time-guard, tims-asks, idle-wake (base), gnu-shell and shell-traps
+- **Every kit hook is Node:** git-guard, build-guard, time-guard, user-asks, idle-wake (base), gnu-shell and shell-traps
   (global) are ported, each with its selftest. One is left: `browser-guard.py` (gpu-painter). Its port waits until Stellix
   runs 0.7.0, because Stellix's installed browser-guard refuses writing a file that holds the selftest's planted launch
   samples (probed: exit 2 on `browser-guard.mjs`; it exempts only its own Python file name).
@@ -503,7 +503,7 @@ Two sessions each released a claude-packs 0.6.0 on 2026-10-31, from different ba
 - **One session changes the kit at a time:** `.claude-packs-lock` at a checkout's root, and the repo's own
   `.claude/hooks/kit-lock.mjs` (committed `.claude/settings.json`), which refuses every write route while another
   session's lock is in any checkout of the repo. The release merge removes the lock.
-- Settings entries of the Python forerunners (`git-guard.py`, `build-guard.py`, `time-guard.py`, `tims-asks.py`,
+- Settings entries of the Python forerunners (`git-guard.py`, `build-guard.py`, `time-guard.py`, `user-asks.py`,
   `idle-wake.py`) and of project copies of `shell-traps` and `gnu-shell` are retired on update; a Node hook counts as
   "had" when the project ran its forerunner, so it stays on without an `enable` line.
 
@@ -523,12 +523,12 @@ Two sessions each released a claude-packs 0.6.0 on 2026-10-31, from different ba
 
 - **Instances (0.5.1):** identical containers by index, different things by ID (Stellix B-178): the rule, two lesson checks
   and the `prove-instances-identical` skill. **0.5.2:** CLAUDE.md names claude-packs as the source of truth.
-- **Moved from Stellix, project-neutral** (a project's values in `layout.json` "guards"): git-guard, time-guard, tims-asks,
+- **Moved from Stellix, project-neutral** (a project's values in `layout.json` "guards"): git-guard, time-guard, user-asks,
   idle-wake, build-guard (base); browser-guard and the no-opengl checks (gpu-painter); copy-and-prove (audio-core) and
   build-step (base) skills; the rules hooks-and-gates, plan-and-logs, copy-trees-read-only; copy-tree-guard merged into
   protect-vendor (folders of kind "copy"); from source-guard: file-size-guard counts scripts and CMake, no-shipped-images
   takes `guards.images`, one-seeded-random catches what source_rules caught, `no-code-after-midline-comment`.
-- **Opt-in:** tims-asks and idle-wake wait for `"enable"`; `update` switches on a hook or check new to a project only when
+- **Opt-in:** user-asks and idle-wake wait for `"enable"`; `update` switches on a hook or check new to a project only when
   its layout enables it, and prints what it switches on and what it holds back before it changes anything.
 - **WB-69, every route:** every guard that refuses a write covers Write, Edit, MultiEdit, NotebookEdit and the shell
   (`>`, `>>`, `tee`, `sed -i`, `cp`, `mv`, a heredoc into a file); `test/routes.test.mjs` tries each route on each guard.

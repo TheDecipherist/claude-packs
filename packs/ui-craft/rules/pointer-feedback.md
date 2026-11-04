@@ -6,7 +6,7 @@ paths:
 
 # Everything the pointer can act on says so
 
-Tim: a hovered element MUST show it is interactable by changing the cursor to match the action, and should usually do something that fits it.
+a hovered element MUST show it is interactable by changing the cursor to match the action, and should usually do something that fits it.
 
 <constraints>
 Always do:

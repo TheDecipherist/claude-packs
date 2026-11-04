@@ -26,7 +26,7 @@ Everything in the pack is written for the kit, in its own words. Ideas and publi
 | skills `design-direction`, `design-review` (web) | Anthropic: review the plan against the brief; taste-skill: defend a taste finding, judge the production build |
 | checks `ui-no-transition-all`, `ui-no-zoom-lock`, `ui-no-paste-block`, `ui-input-needs-autocomplete`, `ui-intl-for-dates` | Vercel's anti-patterns |
 | checks `ui-no-gradient-text`, `ui-no-ai-palette`, `ui-no-side-tab`, `ui-no-bounce-easing`, `ui-no-marketing-buzzword` | Impeccable |
-| rule `pointer-feedback` | Tim; taste-skill's timings; the press and hover law of the gpu-painter rule |
+| rule `pointer-feedback` | the user; taste-skill's timings; the press and hover law of the gpu-painter rule |
 | rules `screen-answers-one-question`, `data-tells-the-truth`, `apps-are-not-pages`; skills `app-screen`, `chart-choice` | taste-skill app-screens.md and its study of 23 product screens |
 | rule `page-holds-its-frame` | taste-skill layout.md, its house rules and how pages fail |
 | rule `pictures-do-a-job` | taste-skill imagery.md |

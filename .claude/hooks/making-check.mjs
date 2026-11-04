@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// making-check: a turn ends only when what it wrote is what it said it was making (Tim, claude-packs 0.9.0 item 7; KWB-1).
+// making-check: a turn ends only when what it wrote is what it said it was making (claude-packs 0.9.0 item 7; KWB-1).
 // A Stop hook. It reads the turn from the transcript (lib/turn.mjs: every file written by Write, Edit, MultiEdit,
 // NotebookEdit or the shell, refused calls left out) and sends the turn back (exit 2) naming what is missing when:
 //   - the turn wrote code or docs that touch a concept of design/shape.json and build.md's In progress entry for this
@@ -44,13 +44,13 @@ const LAW = /(?:design\/)?shape\.json|(?:docs\/)?[\w.-]*-spec\.md|(?:docs\/)?law
 const LOCATOR = /:\d+\b|#[\w-]+|\{#[\w-]+\}|§\s*\d[\d.]*|\bL-?\d+\b|\b(?:section|line|row|rule|law)\s+["'`]?[\w.-]+|"[\w -]{2,40}"\s+row/i;
 // The turn says it did something other than it was told.
 const OVERRIDE = [
-  /\b(?:instead of|rather than|not)\s+(?:what\s+)?(?:the\s+)?(?:brief|prompt|order|instruction|request|work ?order|lead|Tim|you)\s+(?:asked|said|told|wanted|named|specified)/i,
+  /\b(?:instead of|rather than|not)\s+(?:what\s+)?(?:the\s+)?(?:brief|prompt|order|instruction|request|work ?order|lead|you)\s+(?:asked|said|told|wanted|named|specified)/i,
   /\b(?:the\s+)?(?:brief|prompt|order|instruction|request|work ?order|lead)\s+(?:said|asked|told|wanted|named|specified)\b[^.\n]{0,160}\b(?:but|however|instead)\b/i,
-  /\b(?:you|Tim)\s+(?:said|asked|told me|wanted)\b[^.\n]{0,160}\b(?:but I|however I|instead I|I instead)\b/i,
+  /\byou\s+(?:said|asked|told me|wanted)\b[^.\n]{0,160}\b(?:but I|however I|instead I|I instead)\b/i,
   /\bI\s+(?:deviated|departed|diverged)\s+from\b/i,
-  /\b(?:overrode|overriding|override[sd]?)\s+(?:the\s+|your\s+|Tim's\s+)?(?:brief|instruction|order|prompt|request|work ?order)/i,
-  /\bcontrary\s+to\s+(?:the\s+|your\s+|Tim's\s+)?(?:brief|instruction|order|prompt|request|work ?order)/i,
-  /\b(?:did\s+not|didn't)\s+(?:follow|do\s+what)\s+(?:the\s+|your\s+|Tim's\s+)?(?:brief|instruction|order|prompt|request|work ?order|you)/i,
+  /\b(?:overrode|overriding|override[sd]?)\s+(?:the\s+|your\s+)?(?:brief|instruction|order|prompt|request|work ?order)/i,
+  /\bcontrary\s+to\s+(?:the\s+|your\s+)?(?:brief|instruction|order|prompt|request|work ?order)/i,
+  /\b(?:did\s+not|didn't)\s+(?:follow|do\s+what)\s+(?:the\s+|your\s+)?(?:brief|instruction|order|prompt|request|work ?order|you)/i,
 ];
 
 const splitName = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2').replace(/([A-Za-z])(\d)/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);

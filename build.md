@@ -14,7 +14,7 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 0.11.0, the v7 additions (work/0.10.0-v7-additions), started 2026-11-04 00:50 EST.
   making: the v7 additions merged into the kit without overwriting it (dispatch laws in base, the needs check mode, seven node packs under a node configuration, presets, per-service compose checks); concepts: none (design/shape.json declares no concept: packs, configurations, hooks and checks are each a different thing, addressed by name); reuse: judgeEvent (packs/base/hooks/lib/writes.mjs) for dispatch-once's write frame, hookRun (test/kit-cli.mjs) for the tests' hook calls, inferConfig (lib/configs.mjs) for a preset's configuration.
   done when: npm test all green; the node-api install's checks pass their selftest and doctor --strict is OK; the work branch is on GitHub (blocked: KWB-39).
-- KWB-39, git-guard takes SSH (Tim, 2026-11-04: "let git-guard take SSH"), on the same branch.
+- KWB-39, git-guard takes SSH ("let git-guard take SSH"), on the same branch.
   making: git-guard's push law accepts a push whose target is an SSH URL under the owner (named in the command, or the URL of the remote it names), the Stop hint offers that form; concepts: none (design/shape.json declares none); reuse: house() and its env (packs/base/hooks/git-guard.mjs), pushCommand (packs/base/hooks/lib/pushed.mjs).
   done when: git-guard's selftest has an SSH case each way (an owner SSH remote and URL pass; another owner's SSH remote and an HTTPS remote are refused), red without the fix; the kit's install updated; work/0.10.0-v7-additions pushed over SSH.
 
@@ -22,66 +22,70 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the v8 additions merged into the kit without overwriting it (packs web, tui, nginx; fastify's one isProd switch replacing security-always-on; fastify, js-ts and ai additions; eight presets); concepts: none (design/shape.json declares none); reuse: PRESETS and normalisePacks (lib/packs.mjs), the node configuration (configurations/node/config.json) for the new packs, fresh and hookRun (test/kit-cli.mjs) in the v8 test.
   done when: MERGE.md's Verify passes (selftest, doctor --strict, npm test, list); every .incoming reconciled; .incoming-v8/ deleted; the branch on GitHub.
 
-- 0.13.0, the time laws (work/0.13.0-time-laws, from main once v8 has landed), started 2026-11-04 (Tim: "yes" to the hook review).
+- 0.13.0, the time laws (work/0.13.0-time-laws, from main once v8 has landed), started 2026-11-04 ("yes" to the hook review).
   making: doctor caches a passing selftest by the hash of the hook and its libs; test-changed narrowed (a version bump alone, pack content by pack); a base hook suite-once and six small rules and two skills behind the hooks that cost the most time (KWB-41); concepts: none (design/shape.json declares none); reuse: judgeEvent (packs/base/hooks/lib/writes.mjs), hashFile (lib/manifest.mjs), the "# hook:" rule frontmatter (lib/packs.mjs planFiles), TABLE (scripts/test-changed.mjs).
   done when: a test shows the second doctor runs no unchanged selftest, and a changed hook is proved again; test-changed picks under 34 files for a version bump and for one pack's content; suite-once's selftest each way, seen red; KWB-41 closed.
 
-- 0.14.0, stored text (work/0.14.0-stored-text), started 2026-11-04 (Tim: UIs render what comes from a database with \r correct, code highlighted, markdown parsed).
+- 0.14.0, stored text (work/0.14.0-stored-text), started 2026-11-04 (UIs render what comes from a database with \r correct, code highlighted, markdown parsed).
   making: pack stored-text: one renderer for text from a database (line endings, markdown, highlighted code, sanitized), a rule, a skill and four lesson checks, taken by the node and full-stack configurations and the UI presets; concepts: none (design/shape.json declares none); reuse: the lesson-checks hook and its needs mode (packs/base/hooks/lesson-checks.mjs), PRESETS (lib/packs.mjs), fresh and hookRun (test/kit-cli.mjs).
   done when: each check refuses its bad and passes its good through the hook in an install; the UI presets bring the pack; doctor --strict OK; the whole suite green once, committed.
 
-- 0.14.1, MIT license (work/0.14.1-mit-license), started 2026-11-04 (Tim: "we should make our license MIT of this project").
+- 0.14.1, MIT license (work/0.14.1-mit-license), started 2026-11-04 ("we should make our license MIT of this project").
   making: the project under the MIT license: a LICENSE file, package.json and the lock say MIT; concepts: none (design/shape.json declares none); reuse: none, no code changes.
   done when: LICENSE at the root, package.json and package-lock.json name MIT, on main.
 
-- 0.15.0, writing (work/0.15.0-writing), started 2026-11-04 (Tim: split ./tim-writing into small pieces in the kit, so text that goes public reads human).
-  making: pack writing: the tim-writing skill split into small rules, one-job skills and lesson checks, with a prose mode in lesson-checks that leaves code and URLs out, in every configuration; concepts: none (design/shape.json declares none); reuse: the lesson-checks hook and its subject blanking (packs/base/hooks/lesson-checks.mjs), a configuration's "always" packs (lib/configs.mjs), hookRun (test/kit-cli.mjs).
-  done when: every section of tim-writing has a home; each check refuses its bad and leaves code and URLs alone, through the hook in an install; every skill passes doctor (Use when, under 8,000 characters); the whole suite green once, committed; ./tim-writing removed.
+- 0.15.0, writing (work/0.15.0-writing), started 2026-11-04 (split ./humanize into small pieces in the kit, so text that goes public reads human).
+  making: pack writing: the humanize skill split into small rules, one-job skills and lesson checks, with a prose mode in lesson-checks that leaves code and URLs out, in every configuration; concepts: none (design/shape.json declares none); reuse: the lesson-checks hook and its subject blanking (packs/base/hooks/lesson-checks.mjs), a configuration's "always" packs (lib/configs.mjs), hookRun (test/kit-cli.mjs).
+  done when: every section of humanize has a home; each check refuses its bad and leaves code and URLs alone, through the hook in an install; every skill passes doctor (Use when, under 8,000 characters); the whole suite green once, committed; ./humanize removed.
 
-- 0.16.0, scan (work/0.16.0-scan, from work/0.15.0-writing), started 2026-11-04 (Tim: a SCAN a user runs before choosing to install, on a copy, reporting what to install and every issue found).
+- 0.16.0, scan (work/0.16.0-scan, from work/0.15.0-writing), started 2026-11-04 (a SCAN a user runs before choosing to install, on a copy, reporting what to install and every issue found).
   making: claude-packs scan: a copy of the project, the recommended packs installed in it, every check over every file, a report with evidence, and a review prompt for what checks cannot see; concepts: none (design/shape.json declares none); reuse: sync (lib/sync.mjs), coverage (lib/coverage.mjs), the installed lesson-checks and secrets-guard, onceOnlyDoctor (lib/once-only-report.mjs).
   done when: a test proves the scanned project is byte for byte unchanged, .env is never copied and no secret value reaches the report; the recommendation has evidence per pack; no-find-reads catches collection.find(q); the whole suite green once, committed.
 
-- 0.17.0, ui-craft (work/0.17.0-ui-craft, from work/0.16.0-scan), started 2026-11-04 (Tim: build the UI/UX additions from the skills found, with taste-skill, and report what came from each).
+- 0.17.0, ui-craft (work/0.17.0-ui-craft, from work/0.16.0-scan), started 2026-11-04 (build the UI/UX additions from the skills found, with taste-skill, and report what came from each).
   making: pack ui-craft: small rules, skills and checks for application and page design, written from Vercel's guidelines, Anthropic's frontend-design, Impeccable and taste-skill, with a rendered-page gate; concepts: none (design/shape.json declares none); reuse: the hover gate generalised (lib/hover-gate.mjs), design-direction and design-review (packs/web/skills), PRESETS (lib/packs.mjs), hookRun (test/kit-cli.mjs).
   done when: each check refuses its bad through the hook in an install; doctor is red for UI code with no page gate; docs/ui-craft-sources.md says what came from each source; the whole suite green once, committed.
 
-- Landing (work/0.17.0-ui-craft), started 2026-11-04 (Tim: whenever a work branch is finished it is merged into main and pushed).
+- Landing (work/0.17.0-ui-craft), started 2026-11-04 (whenever a work branch is finished it is merged into main and pushed).
   making: rule finished-work-lands and skill land-branch in base; concepts: none (design/shape.json declares none); reuse: the git-guard laws (packs/base/hooks/git-guard.mjs), the "# hook:" rule frontmatter.
   done when: the rule and skill install, and this branch lands by them.
 
-- 0.18.0, hook-proof (work/0.18.0-hook-proof), started 2026-11-04 (Tim: whenever a hook is supposed to exit 2 and it exits 0, it is caught).
+- 0.18.0, hook-proof (work/0.18.0-hook-proof), started 2026-11-04 (whenever a hook is supposed to exit 2 and it exits 0, it is caught).
   making: pack hook-proof and doctor checks: a hook that crashed, one no settings entry runs, and the forms that fail open (exit 1, || true, a catch that allows) are caught; concepts: none (design/shape.json declares none); reuse: readHookLog (packs/base/hooks/lib/hook-log.mjs), the lesson-checks hook, holdToExamples (test/kit-cli.mjs).
   done when: a planted crash and a planted unregistered hook make doctor red; each check refuses its bad through the hook; the whole suite green once, committed; landed.
 
-- 0.19.0, the pack manifest (work/0.19.0-pack-manifest), started 2026-11-04 (Tim: pack.json says stock or custom, with a git url, fields like a package.json, and who made it).
+- 0.19.0, the pack manifest (work/0.19.0-pack-manifest), started 2026-11-04 (pack.json says stock or custom, with a git url, fields like a package.json, and who made it).
   making: every pack.json a manifest like a package.json: type, version, author, license, repository, homepage, keywords, engines; a validator, and `list` showing them; concepts: none (design/shape.json declares none); reuse: readPack and availablePacks (lib/packs.mjs).
   done when: every stock pack passes the validator; a custom pack with no author or git url fails it, by name; `list` shows version, type and author; the whole suite green once, committed; landed.
 
-- 0.20.0, what a real install found (work/0.20.0-install-fixes), started 2026-11-04 (Tim: plan and build everything open; admiralmcp/build/kit-review-plan.md Phase 5).
+- 0.20.0, what a real install found (work/0.20.0-install-fixes), started 2026-11-04 (plan and build everything open; admiralmcp/build/kit-review-plan.md Phase 5).
   making: the kit bugs, gaps and tunes AdmiralMCP's install listed, kit-lock adopting its own lease, the ids shape; concepts: none (design/shape.json declares none); reuse: the lesson checks' bad and good examples, holdToExamples (test/kit-cli.mjs), acquire (lib/kit-lock.mjs), localBranches (packs/base/hooks/lib/pushed.mjs).
   done when: each item has a bad or a test that fails without it; the whole suite green once, committed; landed.
 
-- 0.21.0, custom packs (work/0.21.0-custom-packs, on 0.20.0), started 2026-11-04 (Tim: someone makes a pack for their team, puts it in a repo, teammates get it).
+- 0.21.0, custom packs (work/0.21.0-custom-packs, on 0.20.0), started 2026-11-04 (someone makes a pack for their team, puts it in a repo, teammates get it).
   making: new-pack scaffolds a team's pack repo; add --from installs a pack from a git url in any configuration; update pulls it; concepts: none (design/shape.json declares none); reuse: readPack, planFiles (lib/packs.mjs), sync (lib/sync.mjs), manifestProblems (lib/pack-manifest.mjs), optIn (lib/switches.mjs).
   done when: a test goes new-pack, git push, add --from, a check fires, its hook held until enable, update pulls a new version, a teammate's project restores it from the lock; the whole suite green once, committed; landed.
 
-- 0.22.0, the depth of ui-craft (work/0.22.0-ui-depth, on 0.21.0), started 2026-11-04 (Tim: everything in taste-skill is useful; hover says so; one template, tested once).
+- 0.22.0, the depth of ui-craft (work/0.22.0-ui-depth, on 0.21.0), started 2026-11-04 (everything in taste-skill is useful; hover says so; one template, tested once).
   making: rules, skills and checks for app screens, pages, critique, redesign, references, words, pictures and pointer feedback, the page-measure tool, test-the-template-once and a shape_symmetry that scales; concepts: none (design/shape.json declares none); reuse: holdToExamples (test/kit-cli.mjs), swapPairs (packs/base/tools/shape-symmetry.mjs).
   done when: every check refuses through the hook; page-measure is proved in real Chrome; 1000 instances cost under 20 swaps; the whole suite green once, committed; landed.
 
-- 0.22.1, one template all the way through (work/0.22.1-one-template), started 2026-11-04 (Tim asked if his UI points were in; four documents still said to walk every control).
+- 0.22.1, one template all the way through (work/0.22.1-one-template), started 2026-11-04 (asked if his UI points were in; four documents still said to walk every control).
   making: the walks test one control per template and read the rest; concepts: none (design/shape.json declares none); reuse: test-the-template-once (packs/base/rules).
   done when: no law asks to walk every instance; the whole suite green once, committed; landed.
 
-- 0.23.0, template-law (work/0.23.0-template-law), started 2026-11-04 (Tim: enforce that anything component used more than once is a template, html, c++, app).
+- 0.23.0, template-law (work/0.23.0-template-law), started 2026-11-04 (enforce that anything component used more than once is a template, html, c++, app).
   making: a base hook that refuses a hand-built copy of an element by its shape; concepts: none (design/shape.json declares none); reuse: judgeEvent (packs/base/hooks/lib/writes.mjs), blankCode (lib/cpp-scan.mjs), the walk moved from dispatch-once to lib/elements.mjs.
   done when: its selftest each way, seen red; its worktree case; scan lists them; the whole suite green once, committed; landed.
 
-- 0.24.0, C++ templates and the hover gate (work/0.24.0-cpp-templates), started 2026-11-04 (Tim: thoroughly do C++, prove on Stellix; hover gate for ui-craft).
+- 0.24.0, C++ templates and the hover gate (work/0.24.0-cpp-templates), started 2026-11-04 (thoroughly do C++, prove on Stellix; hover gate for ui-craft).
   making: template-law reads repeated code by statement runs and names the differences (the template's parameters), measured on Stellix; a cpp pack and configuration (rules, the walk check, a skill); gates.hover also for ui-craft; concepts: none (design/shape.json declares none); reuse: gateProblems (lib/hover-gate.mjs), shapesOf (packs/base/hooks/lib/elements.mjs).
   done when: template-law finds Stellix's repeated components, with its misfires read and counted; doctor is red for web UI with no hover gate; the whole suite green once, committed; landed.
   measured: Stellix 523 files, 302 repeats, 950 copies; 26 sampled by reading, no false match, 3 borderline; the suite 215 of 216, the one a stale expectation, fixed and run alone 8 of 8.
+
+- 0.25.0, every language, and repetition caught before it is written (work/0.25.0-every-language), started 2026-11-04 (a python and shell pack; every language has repetition and template things; catch repetition before it is written).
+  making: one language table for the statement reader (python, shell, go, rust, java, c#, kotlin, swift, ruby, php, lua), near copies and re-made functions judged at the write, what already exists shown at the prompt, python and shell packs; concepts: none (design/shape.json declares none); reuse: statementsOf and codeShapes (packs/base/hooks/lib/code-shapes.mjs), judgeEvent (lib/writes.mjs), repeatedShapes (lib/repeats.mjs).
+  done when: each language has a copy refused and data passed, measured on a real repo of it with misfires read and counted; the whole suite green once, committed; landed.
 
 ## Steps
 

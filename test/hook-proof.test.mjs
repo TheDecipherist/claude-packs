@@ -1,4 +1,4 @@
-// 0.18.0 (Tim, 2026-11-04): whenever a hook is supposed to exit 2 and it exits 0, it is caught. Only exit 2 blocks, so a crash, a hook no
+// 0.18.0: whenever a hook is supposed to exit 2 and it exits 0, it is caught. Only exit 2 blocks, so a crash, a hook no
 // settings entry runs, and an `exit 1` all let the call through in silence.
 import { KIT, appendFileSync, assert, cli, fresh, holdToExamples, join, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
 

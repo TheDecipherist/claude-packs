@@ -1,6 +1,6 @@
 {
   "id": "no-time-or-date",
-  "why": "No time or date references at all: Tim calls them a major AI tell. A duration he states himself is the only exception.",
+  "why": "No time or date references at all: they are a major AI tell. A duration the author states is the only exception.",
   "rule": ".claude/rules/no-time-or-date.md",
   "concepts": [
     "public-text"

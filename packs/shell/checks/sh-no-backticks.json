@@ -1,0 +1,18 @@
+{
+  "id": "sh-no-backticks",
+  "why": "Backticks do not nest and hide in quoted text. $(...) does the same thing, and reads.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^[^#'\\n]*`[^`\\n]+`",
+  "flags": "m",
+  "bad": "now=`date`",
+  "good": "now=$(date)"
+}

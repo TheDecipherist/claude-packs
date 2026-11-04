@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // shell-traps (PreToolUse, Bash; global by design): refuses the shell traps that cost time on this Mac, with the right form.
 //
-// Tim, 2026-10-11: "make a skill that triggers the moment you touch bash" (the skill: shell-rules). A skill is read only
+// "make a skill that triggers the moment you touch bash" (the skill: shell-rules). A skill is read only
 // when remembered; this hook sees every command. It refuses (exit 2):
 //   - BSD flags on the GNU tools first on PATH: `date -r <seconds>`, `stat -f`, `sed -i ''` (WB-23);
 //   - an in-place perl edit of a code file (apprack B-135: twice it wrote its text at the top of the file);

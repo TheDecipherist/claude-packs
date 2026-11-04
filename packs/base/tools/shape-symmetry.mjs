@@ -87,7 +87,7 @@ export function runConcept(root, name, log = console.log) {
   if (diffs) red += 1;
   else if (sets.size === ids.length) log(`  members: every instance has the same ${sets.values().next().value.size} members`);
 
-  // (b) swap: every unordered pair of a few instances; of many, the first against an even spread (Tim: testing thousands of the same control
+  // (b) swap: every unordered pair of a few instances; of many, the first against an even spread (testing thousands of the same control
   // is a complete waste of time; `members` above already read every one)
   let pairs = 0, differ = 0;
   const chosen = swapPairs(ids);

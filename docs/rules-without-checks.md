@@ -10,4 +10,4 @@ A rule that a regex or a script can hold becomes a check or a hook (`skill-writi
 - **stellix:** `stellix-reset-generated`, `world-continuous-collision`
 - **synth-creator:** `debug-by-measurement`, `done-means-fresh-evidence`, `hooks-and-gates`
 - **ui-craft:** `page-holds-its-frame`, `page-proved-rendered`, `screen-answers-one-question`, `survives-real-data`, `type-space-colour`, `url-holds-the-state`
-- **writing:** `cut-the-padding`, `no-cargo-cult`, `no-scaffolding`, `tims-voice`, `write-from-your-own-corner`
+- **writing:** `cut-the-padding`, `no-cargo-cult`, `no-scaffolding`, `direct-voice`, `write-from-your-own-corner`

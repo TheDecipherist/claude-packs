@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

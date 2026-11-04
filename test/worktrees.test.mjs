@@ -106,10 +106,10 @@ const CASES = {
     assert.equal(pre(`cd ${wt} && ${loop('"cmake --build"')}`), 2);
     assert.equal(pre(`cd ${wt} && ${loop("'[c]make --build'")}`), 0);
   },
-  'tims-asks.mjs': ({ here, wt }) => {
+  'user-asks.mjs': ({ here, wt }) => {
     const t = join(wt, 'transcript.jsonl');
     writeFileSync(t, `${JSON.stringify({ type: 'user', timestamp: new Date().toISOString(), message: { content: 'make the bank louder' } })}\n`);
-    const r = fireAs(here, 'tims-asks.mjs', { hook_event_name: 'SessionStart', source: 'compact', transcript_path: t }, { TIMS_ASKS_LEDGER: join(wt, 'ledger.json') });
+    const r = fireAs(here, 'user-asks.mjs', { hook_event_name: 'SessionStart', source: 'compact', transcript_path: t }, { TIMS_ASKS_LEDGER: join(wt, 'ledger.json') });
     assert.equal(r.status, 0);
     assert.match(r.stdout, /make the bank louder/);
   },
@@ -233,6 +233,13 @@ const CASES = {
     assert.equal(fire(here, 'once-only.mjs', join(wt, 'src/dsp/Voice.cpp'), 'float Voice::render (float x) noexcept { return svf.process (x); }\n'), 0);
     assert.equal(fire(here, 'once-only.mjs', join(here, 'src/dsp/Copy.cpp'), SVF('Copy', '1.5f')), 0);
   },
+  'reuse-hint.mjs': ({ here, wt }) => {
+    // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
+    put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');
+    const said = (cwd) => fireAs(here, 'reuse-hint.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'format the date range', cwd }).stdout;
+    assert.match(said(wt), /formatDateRange/);
+    assert.doesNotMatch(said(here), /formatDateRange/);
+  },
   'making.mjs': ({ here, wt }) => {
     put(join(wt, 'design/shape.json'), JSON.stringify(SHAPE));
     const said = (cwd) => fireAs(here, 'making.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'drive slot 2 louder', cwd }).stdout;
@@ -266,7 +273,7 @@ test('every hook judges a worktree file against the worktree, inside a real git 
     const layout = JSON.parse(readFileSync(lf, 'utf8'));
     layout.folders.engines_copy = { path: 'src/engines/copied', kind: 'copy', purpose: 'a copy tree' };
     layout.guards = { copy: { tools: ['tools/copy_in.py'] }, git: { refuseTrunk: true } };
-    layout.enable = ['hooks/tims-asks.mjs', 'hooks/idle-wake.mjs']; // the opt-in hooks too, so every hook is tried
+    layout.enable = ['hooks/user-asks.mjs', 'hooks/idle-wake.mjs']; // the opt-in hooks too, so every hook is tried
     writeFileSync(lf, JSON.stringify(layout, null, 2));
     execFileSync('node', [CLI, 'update', '--dir', dir], { stdio: 'ignore' });
     put(join(dir, 'src/params/Params.h'), PARAMS('cutoff', 'res'));

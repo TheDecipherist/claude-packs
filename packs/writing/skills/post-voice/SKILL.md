@@ -1,43 +1,22 @@
 ---
 name: post-voice
-description: Use when writing a post, a manual page or an article in Tim's own voice.
+description: Use when writing a post, a manual page or an article in the author's own voice.
 ---
 
-# Tim's post voice (from his own posts)
+# The voice of a post (one job: it reads like a person telling what happened)
 
-The reply register is flat and conclusion-first. His posts are different, and this is the register for posts, manual pages and articles:
+A reply is flat and conclusion-first. A post is different, and this is the register for posts, manual pages and articles:
 
-- **Opens plain.** "Hey guys, yes another token article but this one is
-  different." / "I was reading about prompt injection and I wanted to see
-  if I could actually trigger it." Employer in the first lines when it
-  matters: "I work at MongoDB" plus "(my employer, so check it yourself)".
-- **Narrates in the order it happened.** I noticed, I didn't understand
-  why, so I wrote a hook, the first thing it showed was, that surprised
-  me. He does not argue in order; he tells what he did and saw.
-- **Explains the mechanism right after the number**, in plain words:
-  "every nested thing becomes its own table with a foreign key back to the
-  parent". A number never stands alone.
-- **Has a "to be fair" paragraph** that gives the other side its win
-  ("To be fair, plain query text was about the same", "Obviously 18x is a
-  huge object, but it is a real one").
-- **Closes with an offer, not a lesson.** "If you want the harness let me
-  know." / "Happy to share the hook if anyone wants it." Or the humble
-  ask: "Am I missing something?"
-- **Words he uses:** super dangerous, a nightmare waiting to happen, that's
-  when it really burns, Obviously, I would have had no clue, Claude loves
-  writing, beyond fast, honestly I got tired of, Mongo (not MongoDB)
-  mid-sentence, sql in lowercase, the occasional didnt/wasnt/doesnt.
-- **Words he doesn't:** anything that sounds like a keynote. No "evening
-  gone", no "token tax", no "the test for done". No "we" for his own
-  work.
-- **His own manual pages read like his posts.** First person, same
-  openers, same "to be fair", same plain mechanism-after-claim. A manual
-  page in a different voice from the launch post is a tell by itself.
+- **Opens plain.** "I was reading about prompt injection and I wanted to see if I could actually trigger it." A conflict of interest goes in the first lines, once: "I work on this tool, so check it yourself."
+- **Narrates in the order it happened.** I noticed, I didn't understand why, so I wrote a hook, the first thing it showed was, that surprised me. It does not argue in order; it tells what was done and seen.
+- **Explains the mechanism right after the number**, in plain words: "every nested thing becomes its own table with a foreign key back to the parent". A number never stands alone.
+- **Has a "to be fair" paragraph** that gives the other side its win ("To be fair, plain query text was about the same").
+- **Closes with an offer, not a lesson.** "Happy to share the hook if anyone wants it." Or the humble ask: "Am I missing something?"
+- **Uses the author's own words.** Read their earlier writing and keep the phrases they really use, spelling habits included. Ask for a sample when there is none.
+- **Avoids anything that sounds like a keynote.** No coined phrases, no slogans. "I", not "we", for one person's own work.
+- **Manual pages read like the posts.** First person, same openers, same "to be fair", same plain mechanism after the claim. A manual page in a different voice from the launch post is a tell by itself.
 
-**Target register for posts (Tim's own words):**
-> Hey guys, yes another token article but this one is different. I work at
-> MongoDB (my employer, so check it yourself). While building a token
-> optimizer I found that 95% of the tokens Claude spent on one of my
-> databases were being wasted on something obvious.
+**Target register for a post:**
+> I found that 95% of the tokens spent on one of my databases were being wasted on something obvious. I work on the tool that found it, so check it yourself.
 
-Greeting, disclosure, one oddly specific number, and the thing he found, in that order.
+The thing found, one oddly specific number, and the disclosure.

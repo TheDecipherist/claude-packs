@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // stack-guard (PreToolUse, Write|Edit|MultiEdit|NotebookEdit|Bash): the full-stack configuration's stack is Fastify and
-// Next.js, and Zod 4 (Tim, STEP 3 item 4). Refused, by every write route (lib/writes.mjs) and on an install command:
+// Next.js, and Zod 4 (STEP 3 item 4). Refused, by every write route (lib/writes.mjs) and on an install command:
 //   - express or vite added to a package.json (dependencies of any kind) or installed (`npm i`, `pnpm add`, `yarn add`, `bun add`);
 //   - an import or require of express or vite (or one of their subpaths, @vitejs/*) added to a JS or TS file;
 //   - zod pinned below 4 in a package.json, or installed as zod@3.

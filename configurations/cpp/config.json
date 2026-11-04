@@ -10,7 +10,10 @@
     "choose": [
       "cpp",
       "docker",
-      "shell-hooks"
+      "shell-hooks",
+      "python",
+      "shell",
+      "js-ts"
     ],
     "default": [
       "cpp"

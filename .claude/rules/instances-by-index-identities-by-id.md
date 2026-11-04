@@ -21,7 +21,7 @@ paths:
 Learned on Stellix (2026-10-31, B-175, B-177, B-178, B-200): its four slots are identical containers, yet one slot had its own
 effects chain, its own effect moons, the only multi-core rendering, the only push laws, the only ARP controls in the press map and its own
 set of effect parameters, because the first build played that slot and every later step, test and agent brief named it. The checks were
-scoped to the engine folders, so the world and space code left two slots without their effects (B-200). Tim: "slots are index based.
+scoped to the engine folders, so the world and space code left two slots without their effects (B-200). The owner: "slots are index based.
 it shouldnt matter if you swap one."
 
 <constraints>

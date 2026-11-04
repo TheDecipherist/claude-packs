@@ -1,4 +1,4 @@
-// 0.17.0 (Tim, 2026-11-04): application and page design, from Vercel's guidelines, Anthropic's frontend-design, Impeccable and taste-skill
+// 0.17.0: application and page design, from Vercel's guidelines, Anthropic's frontend-design, Impeccable and taste-skill
 // (docs/ui-craft-sources.md says what came from each). A check blocks only what is objective or what the sources agree on; taste stays a rule.
 import { KIT, assert, cli, existsSync, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
 

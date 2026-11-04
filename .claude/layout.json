@@ -150,7 +150,8 @@
     "checks/field-map-over-if-runs.json",
     "hooks/suite-once.mjs",
     "hooks/template-law.mjs",
-    "checks/one-walk-per-template.json"
+    "checks/one-walk-per-template.json",
+    "hooks/reuse-hint.mjs"
   ],
   "commands": {
     "test": "npm test",

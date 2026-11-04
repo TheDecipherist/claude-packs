@@ -1,4 +1,4 @@
-// 0.10.0 (Tim, STEP 3 item 3): synth-creator is everything the kit installed before configurations, unchanged for Stellix and
+// 0.10.0 (STEP 3 item 3): synth-creator is everything the kit installed before configurations, unchanged for Stellix and
 // Sub37. test/fixtures/noop/<project>/before/ is that project's own install state (layout.json, settings.json, the lock and
 // CLAUDE.md, copied 2026-11-03), expected/ is what the 0.9.15 kit's `update` made of it. The 0.10.0 update, in the
 // synth-creator configuration, must make the same: the same settings, the same CLAUDE.md, the same files in the lock, and
@@ -41,8 +41,8 @@ const V7 = ['.claude/rules/lookup-over-if-chains.md', '.claude/rules/field-map-o
 const TIME = ['.claude/rules/git-right-first-time.md', '.claude/rules/reuse-before-writing.md', '.claude/rules/making-line-first.md', '.claude/rules/split-before-the-limit.md',
   '.claude/skills/pick-tests/SKILL.md', '.claude/skills/build-through-the-queue/SKILL.md'];
 // 0.15.0: the writing pack comes with every configuration. Its rules and skills reach a project with no refusing in them; its checks are held back.
-const ELEMENTS = ['.claude/hooks/lib/elements.mjs', '.claude/hooks/lib/code-shapes.mjs', '.claude/skills/make-it-a-template/SKILL.md'];   // 0.23.0, 0.24.0: the shared reader and its skill; template-law itself is held back
-const WRITING = [...['cut-the-padding', 'rhythm-like-talk', 'no-stock-language', 'no-scaffolding', 'no-time-or-date', 'ascii-no-em-dash', 'write-from-your-own-corner', 'tims-voice', 'no-cargo-cult'].map((r) => `.claude/rules/${r}.md`),
+const ELEMENTS = ['.claude/hooks/lib/elements.mjs', '.claude/hooks/lib/code-shapes.mjs', '.claude/hooks/lib/languages.mjs', '.claude/hooks/lib/near-copies.mjs', '.claude/hooks/lib/repo-index.mjs', '.claude/skills/make-it-a-template/SKILL.md', '.claude/skills/fix-from-scan/SKILL.md'];   // 0.23.0, 0.24.0: the shared reader and its skill; template-law itself is held back
+const WRITING = [...['cut-the-padding', 'rhythm-like-talk', 'no-stock-language', 'no-scaffolding', 'no-time-or-date', 'ascii-no-em-dash', 'write-from-your-own-corner', 'direct-voice', 'no-cargo-cult'].map((r) => `.claude/rules/${r}.md`),
   ...['humanize', 'reply-stance', 'should-i-reply', 'reply-moves', 'reddit-post', 'pick-subreddit', 'reddit-title', 'argument-post', 'launch-post', 'post-voice'].map((s) => `.claude/skills/${s}/SKILL.md`), '.claude/hooks/lib/prose.mjs'];
 const LANDING = ['.claude/rules/test-the-template-once.md', '.claude/rules/finished-work-lands.md', '.claude/skills/land-branch/SKILL.md', '.claude/rules/a-refusal-is-exit-2.md', '.claude/skills/prove-a-hook/SKILL.md'];   // 0.17.0: with git-guard, which every project has
 const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only where the project has time-guard: the rule goes where its hook goes

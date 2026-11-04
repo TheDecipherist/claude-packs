@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Server-rendered HTML (template strings, views): every value escaped, no inline style or script, safe links.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

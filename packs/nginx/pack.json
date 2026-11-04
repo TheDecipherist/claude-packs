@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "NGINX in front of containers: Docker DNS resolver, keepalive, stdout logs, headers with always, CSP, ModSecurity/CRS tuning.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

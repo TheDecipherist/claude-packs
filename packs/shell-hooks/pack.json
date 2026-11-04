@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Shell and Node hooks for Claude Code: portable, anchored, quoted, one prelude, JSON by a tool.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

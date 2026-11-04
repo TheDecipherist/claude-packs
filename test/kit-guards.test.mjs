@@ -40,7 +40,7 @@ test('the kit repo has its own base pack installed: kit-lock and every base hook
   for (const g of Object.values(JSON.parse(readFileSync(join(KIT, 'packs/base/pack.json'), 'utf8')).hooks).flat()) {
     for (const h of g.hooks) {
       const name = h.command.match(/hooks\/([\w-]+\.mjs)/)[1];
-      if (['build-sweep.mjs', 'idle-wake.mjs', 'tims-asks.mjs'].includes(name)) continue; // opt-in
+      if (['build-sweep.mjs', 'idle-wake.mjs', 'user-asks.mjs'].includes(name)) continue; // opt-in
       assert.match(all, new RegExp(`\\.claude/hooks/${name.replace('.', '\\.')}`), name);
     }
   }

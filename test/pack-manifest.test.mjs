@@ -1,4 +1,4 @@
-// 0.19.0 (Tim, 2026-11-04): a pack.json says if it is stock or custom, has a git url, fields like a package.json, and who made it.
+// 0.19.0: a pack.json says if it is stock or custom, has a git url, fields like a package.json, and who made it.
 import { manifestProblems } from '../lib/pack-manifest.mjs';
 import { availablePacks, readPack } from '../lib/packs.mjs';
 import { CLI, assert, execFileSync, test } from './kit-cli.mjs';
@@ -26,5 +26,5 @@ test('a custom pack passes with an author and a git url, and each missing field 
 });
 
 test('list shows each pack\'s version, type and author', () => {
-  assert.match(execFileSync('node', [CLI, 'list'], { encoding: 'utf8' }), /^mongo +1\.0\.0 +stock +Tim Clausen: MongoDB/m);
+  assert.match(execFileSync('node', [CLI, 'list'], { encoding: 'utf8' }), /^mongo +1\.0\.0 +stock +claude-packs: MongoDB/m);
 });

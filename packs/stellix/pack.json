@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Stellix spec laws: the world, determinism, generated reset, no shipped images.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

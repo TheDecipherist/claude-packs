@@ -1,4 +1,4 @@
-// hook-log: every hook's run time, one line per call in the project's .claude/hooks.log (KWB-24: Tim saw 17 hooks take 48 s on
+// hook-log: every hook's run time, one line per call in the project's .claude/hooks.log (KWB-24: The user saw 17 hooks take 48 s on
 // one rm and nothing said which). A line: ISO time, event, hook, ms, exit code, tool, tab-separated. The node hooks write it
 // through this file (the runner for the hooks it runs, asHook for a hook run on its own); the python ones through
 // lib/house.py's log_hook, the same line. doctor reads it (median and worst per hook over its last 100 calls).

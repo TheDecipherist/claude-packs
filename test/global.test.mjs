@@ -63,7 +63,7 @@ test('the guard blocks an unchecked pin and passes once versions.md has a fresh 
   assert.equal(guard(dir, { tool_name: 'Write', tool_input: { file_path: join(dir, 'src.cpp'), content: 'x' } }).status, 0);
 });
 
-// The global part is exactly three pieces (Tim, 2026-10-31): latest-versions with version-pin-guard, gnu-shell and
+// The global part is exactly three pieces: latest-versions with version-pin-guard, gnu-shell and
 // shell-traps. Nothing else: build-guard is a base-pack project hook. A hand-installed identical copy is taken over and its
 // settings entry never doubled; anything else in ~/.claude (a hand-kept build-guard, a skill) is left exactly as it was.
 test('global add installs exactly latest-versions, gnu-shell and shell-traps, and nothing else', () => {

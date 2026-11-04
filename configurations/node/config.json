@@ -19,7 +19,10 @@
       "tui",
       "nginx",
       "stored-text",
-      "ui-craft"
+      "ui-craft",
+      "python",
+      "shell",
+      "cpp"
     ],
     "default": [
       "js-ts"

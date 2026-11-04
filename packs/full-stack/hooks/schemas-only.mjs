@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // schemas-only (PreToolUse, Write|Edit|MultiEdit|NotebookEdit|Bash): a Zod schema is written once, in the schemas folder
-// (Tim, STEP 3 item 4: "Zod v4 schemas only under schemas/"). Routes, handlers, adapters and the web app import the shape
+// (STEP 3 item 4: "Zod v4 schemas only under schemas/"). Routes, handlers, adapters and the web app import the shape
 // from there (and infer its type with z.infer), so a request, a record and a form never drift apart.
 // Refused, by every write route (lib/writes.mjs): a write that ADDS a `z.object(` (or `z.strictObject(` / `z.looseObject(`)
 // to a JS or TS file outside the layout's "schemas" concept (default: any schemas/ folder). env.ts is the one other place a

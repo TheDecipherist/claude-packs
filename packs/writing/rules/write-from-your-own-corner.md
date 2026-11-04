@@ -16,5 +16,5 @@ Always do:
 
 Never do:
 - Write a closing thought or a summary close: measured at about 0%.
-- Hedge symmetrically ("it depends on your use case"), or both-sides a claim Tim holds.
+- Hedge symmetrically ("it depends on your use case"), or both-sides a claim the author holds.
 </constraints>

@@ -21,7 +21,8 @@ import { fileURLToPath } from 'node:url';
 import { programOf, programWrites } from './program-writes.mjs';
 
 const HOME = process.env.HOME ?? '';
-const expand = (p) => p.replace(/^(~|\$HOME|\$\{HOME\})(?=\/|$)/, HOME);
+// A path that starts with a variable is where that variable points, never a folder of this name in the project (KWB-44). One not set is somewhere unknown.
+const expand = (p) => p.replace(/^(~|\$HOME|\$\{HOME\})(?=\/|$)/, HOME).replace(/^\$\{?([A-Za-z_]\w*)\}?(?=\/|$)/, (_, name) => process.env[name] ?? `/unresolved-${name}`);
 const NOT_FILES = new Set(['/dev/null', '/dev/stdout', '/dev/stderr', '/dev/tty']);
 
 export function readText(path) {

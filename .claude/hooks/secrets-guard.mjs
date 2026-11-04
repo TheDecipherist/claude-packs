@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// secrets-guard (PreToolUse, Write|Edit|MultiEdit|NotebookEdit|Bash): a secret never lands in git (KWB-33; Tim's STEP 3: ".env
+// secrets-guard (PreToolUse, Write|Edit|MultiEdit|NotebookEdit|Bash): a secret never lands in git (KWB-33; STEP 3: ".env
 // never committed"). Refused, by every write route (lib/writes.mjs) and on `git add`:
 //   1. staging a secret file: `git add` (with -f too) of a .env (.env.example, .sample, .template and .dist are fine), a key
 //      file (*.pem, *.key, *.p12, *.pfx, *.jks, *.keystore, id_rsa and its kin) or credentials.json; and `git add -A` / `.` /

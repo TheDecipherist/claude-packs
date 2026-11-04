@@ -14,7 +14,7 @@ paths:
 
 # Anything used more than once is one template: changed once, tested once
 
-Tim: any element used more than once is made as a template, so a change, an update or a test happens once, not for every instance. A test that repeats the same behaviour over thousands of identical controls is a complete waste of time.
+any element used more than once is made as a template, so a change, an update or a test happens once, not for every instance. A test that repeats the same behaviour over thousands of identical controls is a complete waste of time.
 
 <constraints>
 Always do:

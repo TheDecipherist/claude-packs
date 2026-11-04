@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // build-guard (PreToolUse, Bash): no heavy job takes the whole machine.
 //
-// Tim, 2026-10-11: "nothing should be able to take the entire system". Five agents each compiling with -j18 at once put
+// "nothing should be able to take the entire system". Five agents each compiling with -j18 at once put
 // ~90 jobs on 18 cores and every build took hours. Every compile and test run goes through the machine-wide queue
 // ~/.claude/bin/buildq (two at a time). This refuses (exit 2) a heavy command started any other way, a polling loop, an
 // agent's build or test run of everything, and any build from an agent started as `KIND: light`
@@ -77,7 +77,7 @@ export function polling(cmd) {
   return null;
 }
 
-// Opening an .app or running the binary inside one (kept for the agent-jobs rule; the refusal itself is off: Tim,
+// Opening an .app or running the binary inside one (kept for the agent-jobs rule; the refusal itself is off: The user,
 // 2026-10-11, agents may open the app; the fault was one agent doing it on repeat).
 export function launchesApp(cmd) {
   return /(^|[;&|(\s])open\s+(-[a-zA-Z]+\s+)*[^\s;&|]*\.app\b|(^|[;&|(\s])open\s+-a\s|\.app\/Contents\/MacOS\//.test(blankQuotes(stripHeredocs(cmd)));
@@ -144,19 +144,19 @@ function main(text) {
   let ev;
   try { ev = JSON.parse(text); } catch { return 0; }
   const project = process.env.CLAUDE_PROJECT_DIR ?? ev.cwd ?? '';
-  if (project && existsSync(join(project, '.claude', 'hooks', 'pre.js'))) return 0; // a project's own dispatcher wins (Tim, 2026-10-18)
+  if (project && existsSync(join(project, '.claude', 'hooks', 'pre.js'))) return 0; // a project's own dispatcher wins
   if (ev.tool_name !== 'Bash') return 0;
   const cmd = String(ev.tool_input?.command ?? '');
   const aid = ev.agent_id;
-  // AN AGENT BUILDS AND TESTS ONLY WHAT ITS CHANGE NEEDS (Tim, 2026-10-11: one agent ran all 425 tests on 1 core)
+  // AN AGENT BUILDS AND TESTS ONLY WHAT ITS CHANGE NEEDS (one agent ran all 425 tests on 1 core)
   if (aid) {
     const scope = tooWide(cmd, ev.cwd ?? process.cwd());
     if (scope) {
       return refuse(`${scope} Build only the targets your change needs (\`--target X --target Y\`), and run only its tests (\`-R 'pattern'\`, at most 30). ` +
-        'The whole suite runs once, as the gate before landing, never while working (Tim, 2026-10-11).');
+        'The whole suite runs once, as the gate before landing, never while working.');
     }
   }
-  // NO POLLING (Tim, 2026-10-11: agents ran `until grep -q done log; do sleep 10` for minutes on end)
+  // NO POLLING (agents ran `until grep -q done log; do sleep 10` for minutes on end)
   const poll = polling(cmd);
   if (poll) {
     return refuse(`polling refused (${poll}). Waiting in a sleep loop hides what you are doing and burns turns. Run the job in the FOREGROUND ` +
@@ -166,11 +166,11 @@ function main(text) {
   // A light agent may RUN an already-built program through the queue (a render), never compile or run a test suite
   if (aid && /(cmake\s+--build|\bctest\b|\bmake\b|\bninja\b|xcodebuild|tools\/build\.sh\s+(build|test))/.test(maskQuotes(stripHeredocs(cmd))) && lightAgent(ev)) {
     return refuse('this agent was started as KIND: light, and light agents do not build or run tests (at most 3 build agents run at once, ' +
-      'Tim 2026-10-11). Do the light part, and say in your report what needs building.');
+      '). Do the light part, and say in your report what needs building.');
   }
   const what = offending(cmd);
   if (!what) return 0;
-  return refuse(`\`${what}\` straight from the shell is refused. Nothing may take the whole machine (Tim, 2026-10-11). Run it through the ` +
+  return refuse(`\`${what}\` straight from the shell is refused. Nothing may take the whole machine. Run it through the ` +
     `machine-wide build queue, which runs two at a time and waits for a free slot by itself:\n    buildq ${what} ...        ` +
     '(~/.claude/bin/buildq; buildq --status shows the slots)\nor the project\'s own wrapper if it has one (the build and test commands in ' +
     '.claude/layout.json). Do not wrap it in a loop.');

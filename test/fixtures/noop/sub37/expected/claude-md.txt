@@ -17,7 +17,7 @@ a bug.
    default it carried was chased as a separate bug. This law WINS over the kit's
    `state-load-versioned-and-safe` rule where that rule says "ignore unknown IDs":
    unknown means not applied and never a crash, never dropped
-   (`.claude/rules/sub37-unknown-bytes-round-trip.md`; Tim, 2026-10-31).
+   (`.claude/rules/sub37-unknown-bytes-round-trip.md`; the user, 2026-10-31).
 
 2. **Two sources or it is a guess.** The corpus tells you the neutral value, the
    manual tells you the direction, the firmware settles the law. One source is a
@@ -28,7 +28,7 @@ a bug.
    built on.
 
 4. **Never trust a build you have not run.** The kit's
-   `done-means-fresh-evidence` rule is the general law and wins (Tim,
+   `done-means-fresh-evidence` rule is the general law and wins (the user,
    2026-10-31). This machine adds two things it does not say: a test's exit
    code is not evidence when the test prints numbers (read the numbers), and
    look at the picture.
@@ -48,7 +48,7 @@ a bug.
    and it is the authority. The kit's `parameter-ids-never-change` rule and its
    `param-id-lock` hook are the second net; this wording wins where they differ
    (Sub37 registers from the generated table, not from `juce::ParameterID`
-   literals; Tim, 2026-10-31).
+   literals; the user, 2026-10-31).
 
 8. **Sync everything that moves, and default it OFF.** This is a plugin in a
    host. Offering the option falsifies no law: it sets a time or a rate from the
@@ -137,7 +137,7 @@ to "correct" into a bug. `docs/laws.md` carries the evidence.
 
 The commands are the generated **Project commands** block at the end of this
 file (configure, build, test, test-one, standalone, panel-check, panel-export,
-snapshot); it wins over any copy here (Tim, 2026-10-31). Every build, test and
+snapshot); it wins over any copy here. Every build, test and
 program run from `build/` goes through `buildq`. Standalone for listening: the
 `standalone` command, then
 `open build/Sub37_artefacts/RelWithDebInfo/Standalone/Sub37.app`. For the

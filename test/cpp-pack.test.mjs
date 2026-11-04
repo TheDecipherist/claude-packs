@@ -1,4 +1,4 @@
-// 0.24.0 (Tim, 2026-11-04): "we need to thoroughly do c++", "anything you find that is repeated should have something that makes it reuseable and
+// 0.24.0: "we need to thoroughly do c++", "anything you find that is repeated should have something that makes it reuseable and
 // template like", "maybe make a specific c++ pack". The fixtures are the shapes measured on Stellix: many statements on a line, helpers copied
 // from gate to gate with other names, descriptors filled field by field, tables written as calls, and a gate that presses every control.
 import { assert, cli, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';

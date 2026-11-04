@@ -14,10 +14,10 @@ learnsql, aws) but dies in showcase/meme subs; avoid "Title: subtitle"
 colons; never "Please help" as a title. Flair: pick the value or humor
 flair; never the self-promo or low-effort-question flair.
 
-Title rules added 2026-10: the title is the claim, said the way Tim would
+Title rules added 2026-10: the title is the claim, said the way the author would
 say it in a comment ("Everyone argues schemaless vs schema like it's
 either/or. It isn't, and picking a side is the actual mistake"). It is
 about the reader's own setup, something they can disagree with from the
 feed without opening the post. No product name, no brand word a topic word
-already implies, no tagline. Dry one-liners are Tim's register too ("I
+already implies, no tagline. Dry one-liners are the author's register too ("I
 almost got owned. By myself.").

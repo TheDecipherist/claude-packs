@@ -15,7 +15,9 @@ import { PRESETS, availablePacks, readPack } from '../lib/packs.mjs';
 import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
 import { plannerSkills } from '../lib/planner.mjs';
 import { addCustomPack, loadCustomPacks, newPack } from '../lib/custom-packs.mjs';
+import { fixPlan } from '../lib/fix-plan.mjs';
 import { scan } from '../lib/scan.mjs';
+import { suggest, suggestionOf } from '../lib/suggest.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
@@ -30,6 +32,7 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                                        "configuration"); with no packs named, the ones it takes by default
                      --profile <name>  start from a tailored layout shipped in the package (e.g. stellix)
                      --layout <file>   start from your own layout.json
+                     --auto            the configuration and packs suggest finds, so nobody picks them by hand
   add <pack...>      add packs to an existing install
                      --from <git-url>  a custom pack from a team's repository; its hooks stay off until "enable" names them
   new-pack <name> [--repo <git-url>]  a new repository for a team's own pack, ready to edit and push
@@ -49,6 +52,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      with a count, against design/shape.json; exit 1 when any
   scan [--out <file>]  before installing anything: on a copy of the project, what to install and every issue the checks
                      find; the project is never touched. scan --prompt prints the review brief for what checks cannot see
+  suggest            which configuration and packs this project needs, read from its own files, with the evidence
+  fix [--from <scan.json>] [--out <file>]  the last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
   symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
@@ -91,12 +96,17 @@ async function main() {
   const seedLayout = seed ? JSON.parse(readFileSync(seed, 'utf8')) : null;
   const installed = readLock(resolve(dir, '.claude')).packs;
   const fromUrl = rest.includes('--from') ? rest.splice(rest.indexOf('--from'), 2)[1] : null;
-  const fetched = ['new-pack', 'scan', 'global'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
+  const fetched = ['new-pack', 'scan', 'suggest', 'fix', 'global'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
 
   switch (command) {
     case 'new':
       return (await newProject(dir, rest[0], { packs: packs ?? (config ? readConfig(config).packs.default : ['audio-core']), seedLayout, config })).code;
     case 'init': {
+      if (rest.includes('--auto')) {
+        const pick = suggestionOf(dir);
+        await sync(dir, pick.packs.map((p) => p.pack), { force, mkdirs: true, seedLayout, config: pick.config });
+        return doctor(dir);
+      }
       if (rest.length === 0 && !config) throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');
       const chosen = rest.length ? rest : readConfig(config).packs.default;
       await sync(dir, chosen, { force, mkdirs: true, seedLayout, config });
@@ -146,6 +156,12 @@ async function main() {
       if (rest.includes('--prompt')) { process.stdout.write(readFileSync(fileURLToPath(new URL('../prompts/scan-review.md', import.meta.url)), 'utf8')); return 0; }
       await scan(dir, { out: rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null });
       return 0;
+    case 'suggest':
+      suggest(dir);
+      break;
+    case 'fix':
+      await fixPlan(dir, { from: fromUrl ? resolve(fromUrl) : null, out: rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null });
+      break;
     case 'new-pack':
       return newPack(dir, rest[0], { repo: rest.includes('--repo') ? rest[rest.indexOf('--repo') + 1] : null });
     case 'survey':

@@ -1,0 +1,18 @@
+{
+  "id": "sh-no-eval",
+  "why": "eval runs whatever a variable holds, with the script's rights.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^[^#\\n]*(?:^|[;&|\\s])eval\\s",
+  "flags": "m",
+  "bad": "eval \"$cmd\"",
+  "good": "\"$@\""
+}

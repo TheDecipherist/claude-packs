@@ -1,4 +1,4 @@
-// 0.10.0 (Tim, STEP 3 item 4): the full-stack configuration. Fastify and Next.js only (stack-guard), Zod 4 schemas only in the
+// 0.10.0 (STEP 3 item 4): the full-stack configuration. Fastify and Next.js only (stack-guard), Zod 4 schemas only in the
 // schemas folder (schemas-only), rules per folder (thin routes, handlers, one database gateway with chain keys first, one error
 // contract, env.ts shapes, health and logs, multistage Docker, inject() tests), its folder template, and doctor's coverage
 // counting TypeScript as source (KWB-32).

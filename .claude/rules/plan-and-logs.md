@@ -18,7 +18,7 @@ Always do:
 - Log a bug in `bugs.md` the moment it is found, before it is fixed. A fixed bug moves to Fixed with its cause, the fix, the date and the gate that now catches it.
 - Record in `docs/laws.md` every house law the project leaves, with the user's yes. Put a row in `docs/licences.md` before any file is copied in, with its source, commit and licence.
 - Send a question the spec leaves open to the user as a `d-n`, with the spec's recommendation. Never decide it by guessing.
-- Write internal docs plainly. The `tim-writing` skill is for public writing only, not for specs, logs or briefs.
+- Write internal docs plainly. The `humanize` skill is for public writing only, not for specs, logs or briefs.
 
 Never do:
 - Edit the spec (`docs/*-spec.md`). It is the user's.

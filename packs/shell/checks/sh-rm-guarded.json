@@ -1,0 +1,18 @@
+{
+  "id": "sh-rm-guarded",
+  "why": "An empty variable turns `rm -rf \"$dir/\"` into a delete from the root. `${dir:?}` stops the script instead.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "\\brm\\s+-[a-zA-Z]*[rR][a-zA-Z]*\\s+\\\"?\\$\\{?\\w+(?!\\w*:\\?)\\}?",
+  "flags": "m",
+  "bad": "rm -rf \"$dir/build\"",
+  "good": "rm -rf \"${dir:?}/build\""
+}

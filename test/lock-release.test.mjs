@@ -91,7 +91,7 @@ test('the kit-lock hook writes the extensible form and still reads both', () => 
   assert.equal(commit('old').status, 0);
 });
 
-// The lease (KWB-29, KWB-30; Tim 2026-11-03, STEP 2): started_at and last_seen, last_seen renewed at most once a minute by the
+// The lease (KWB-29, KWB-30, STEP 2): started_at and last_seen, last_seen renewed at most once a minute by the
 // holder's own hook calls; 30 minutes without renewal and the lock is stale, and the next session that starts work takes it
 // over, the take-over logged (who held it, branch, since, last seen) in .claude/kit-lock.log; a lease renewed in the last 30
 // minutes is never taken or deleted (`lock release --force` is the only way). kit-lock guards commits, merges and releases;

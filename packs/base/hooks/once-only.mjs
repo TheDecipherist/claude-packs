@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// once-only: code that exists once is called, never copied (Tim, claude-packs 0.9.0 item 9; KWB-1). Before a source write
+// once-only: code that exists once is called, never copied (claude-packs 0.9.0 item 9; KWB-1). Before a source write
 // lands (C++, Python, JS), the lines it adds are compared with the whole repo through an index kept between calls
 // (lib/dup-index.mjs, KWB-24: jscpd's whole-repo scan on every write was too slow; only files that changed are read again),
 // at jscpd's thresholds (lib/dup.mjs: 50 tokens and 6 lines, a gap of up to 2 lines, so a copy with one line changed is

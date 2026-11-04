@@ -1,4 +1,4 @@
-// 0.10.0 (Tim, STEP 3 item 2): base gains secrets-guard (KWB-33) and the SHA-256 boundary law, untrusted-boundary (KWB-34),
+// 0.10.0 (STEP 3 item 2): base gains secrets-guard (KWB-33) and the SHA-256 boundary law, untrusted-boundary (KWB-34),
 // each with a rule that states it. A new project gets both; a project that had base before gets neither until it names them in
 // "enable" (a new law never switches on by itself), and a rule that states a hook's law ("# hook:" in its frontmatter) is held
 // back with its hook.

@@ -91,7 +91,7 @@ function tokenRepo(dir) {
 
 test('WB-4: every hook in every pack has a passing --selftest, and doctor runs them all', () => {
   // Pack hooks import the shared lib/ that base installs beside them, so they run from an install.
-  // 0.7.0: the opt-in hooks (tims-asks, idle-wake) install only when enabled, so this install enables them.
+  // 0.7.0: the opt-in hooks (user-asks, idle-wake) install only when enabled, so this install enables them.
   const dir = init('audio-core', 'gpu-painter', 'stellix');
   const lf = join(dir, '.claude/layout.json');
   const layout = JSON.parse(readFileSync(lf, 'utf8'));

@@ -1,4 +1,4 @@
-// 0.14.0 (Tim, 2026-11-04): a UI renders what comes from a database through one renderer: \r correct, code highlighted, markdown parsed,
+// 0.14.0: a UI renders what comes from a database through one renderer: \r correct, code highlighted, markdown parsed,
 // and sanitized, because turning stored text into HTML is how a stored script reaches a page.
 import { assert, cli, fresh, hookRun, join, readFileSync, run, test } from './kit-cli.mjs';
 

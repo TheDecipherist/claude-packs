@@ -31,7 +31,7 @@ All replies: no preamble, conclusion first. (Posts are different: `post-voice`.)
 - **Praise:** take it cleanly. "Thanks brother. Appreciate it." No
   deflecting, no over-thanking.
 
-**Target register for replies (Tim's own words, study it):**
+**Target register for replies (the author's own words, study it):**
 > Hooks are the only thing that can cover you. There is no enforcement in
 > a skill or in Claude.md for that matter. Hooks are the only thing that
 > can stop Claude from reading, writing or piping a curl command through

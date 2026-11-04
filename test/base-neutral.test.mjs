@@ -1,4 +1,4 @@
-// 0.10.0 (Tim, STEP 3 item 2; KWB-31): base holds only universal engineering, so every configuration can install it. A synth
+// 0.10.0 (STEP 3 item 2; KWB-31): base holds only universal engineering, so every configuration can install it. A synth
 // word in base (sound, panel, patch, voice, DSP, synth) means a synth law or a synth example sits where a web service or a
 // tool gets it too: it goes to the synth-creator pack, or the example is made neutral. The same holds for the base
 // configuration's own config.json. The synth-creator pack carries what moved, and the synth-creator configuration installs it.
@@ -30,7 +30,7 @@ test('base and the base configuration name no synth word', () => {
 
 test('what left base is in the synth-creator pack, and only the synth-creator configuration installs that pack', () => {
   const moved = ['hooks/build-guard.mjs', 'hooks/time-guard.mjs', 'hooks/spec-lock.mjs', 'hooks/frozen-files.mjs', 'hooks/protect-vendor.mjs',
-    'hooks/stage-guard.mjs', 'hooks/build-sweep.mjs', 'hooks/idle-wake.mjs', 'hooks/tims-asks.mjs', 'tools/freeze.mjs',
+    'hooks/stage-guard.mjs', 'hooks/build-sweep.mjs', 'hooks/idle-wake.mjs', 'hooks/user-asks.mjs', 'tools/freeze.mjs',
     'rules/debug-by-measurement.md', 'rules/done-means-fresh-evidence.md', 'rules/hooks-and-gates.md', 'rules/copy-trees-read-only.md',
     'skills/build-step/SKILL.md'];
   for (const m of moved) {

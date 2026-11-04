@@ -1,4 +1,4 @@
-// 0.22.0 (Tim, 2026-11-04): everything in taste-skill, hover that says so, and one template tested once. The page-measure tool runs in real Chrome.
+// 0.22.0: everything in taste-skill, hover that says so, and one template tested once. The page-measure tool runs in real Chrome.
 import { KIT, assert, cli, existsSync, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, spawnSync, test, writeFileSync } from './kit-cli.mjs';
 import { judge, measure } from '../packs/ui-craft/tools/page-measure.mjs';
 

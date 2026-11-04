@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// time-guard: nothing is slow without someone being told (Tim, 2026-10-11, after a night of two-hour panel exports that
+// time-guard: nothing is slow without someone being told (after a night of two-hour panel exports that
 // every agent, and the session watching them, took for normal).
 //
 // PreToolUse + PostToolUse on every tool, for the session and every agent it starts. After a call it tells the caller

@@ -16,5 +16,5 @@ Always do:
 Never do:
 - Write uniform sentence lengths, or the overcorrection, the dramatic staccato ("It's not. It's a band-aid.").
 - Write "not X, but Y" mirrored constructions: make it a plain statement.
-- Write a punchline sentence, the line that sums a paragraph up as an aphorism: "the token tax exists only where there is something to know", "every one of those posts was somebody's evening gone". One exception: a tagline Tim chose, as the last line.
+- Write a punchline sentence, the line that sums a paragraph up as an aphorism: "the token tax exists only where there is something to know", "every one of those posts was somebody's evening gone". One exception: a tagline the user chose, as the last line.
 </constraints>

@@ -206,7 +206,7 @@
     "hooks/stage-guard.mjs"
   ],
   "enable": [
-    "hooks/tims-asks.mjs",
+    "hooks/user-asks.mjs",
     "hooks/idle-wake.mjs",
     "checks/no-opengl.json",
     "checks/no-opengl-link.json",

@@ -1,6 +1,6 @@
 // dup: the one copy-paste reader (once-only at write time, making-check at the end of a turn, doctor's count and
 // `claude-packs dup scan`). Code that exists once is called, never copied: a near-duplicate of a block already in the repo
-// is refused with where the first one lives (Tim, 0.9.0 item 9).
+// is refused with where the first one lives (0.9.0 item 9).
 //
 // The detector is jscpd (5.4.2, an optional dependency of the kit: a Rust binary). Measured on a C++ repo of 580 C++,
 // Python and JS sources: 0.3 s for the whole tree, so it runs at write time; a planted copy of a function with one line

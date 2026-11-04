@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Text from a database reaches the page through one renderer: line endings normalised, markdown parsed, code highlighted, HTML sanitized.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

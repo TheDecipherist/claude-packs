@@ -101,7 +101,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/tims-asks.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/user-asks.mjs",
             "timeout": 15
           }
         ]

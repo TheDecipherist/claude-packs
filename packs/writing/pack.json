@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Text that goes public reads like a person wrote it: cadence, voice, stance for replies, structure for posts. Rules, one-job skills and checks on public text.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

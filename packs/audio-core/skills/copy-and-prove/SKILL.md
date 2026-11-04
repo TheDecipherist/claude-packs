@@ -25,7 +25,7 @@ say whether the copy or the tidy-up did it, because the copy had never been meas
 ## 1. The licence row, before the first file moves
 
 Write the row in the target's `docs/licences.md`: what it is, where it came from (repo, path, commit hash), its licence,
-where it will be used. Read "Tim's rulings" at the top of that file first; they say what is already allowed.
+where it will be used. Read "the user's rulings" at the top of that file first; they say what is already allowed.
 
 What never comes across, whatever the source:
 
@@ -34,8 +34,8 @@ What never comes across, whatever the source:
 - factory preset bodies, sample data, ROM bytes, vendor artwork;
 - anything from `~/firmware`.
 
-Tables and numbers derived from a hardware unit but written as our own code come across only where Tim has ruled so in
-`docs/licences.md`. For any other such table, ask him and record the answer.
+Tables and numbers derived from a hardware unit but written as our own code come across only where the user has ruled so in
+`docs/licences.md`. For any other such table, ask the user and record the answer.
 
 Search the part and everything it includes before copying:
 `grep -rniE "factory|firmware|korg|roland|lexicon|eventide|yamaha|\btc\b|re-201|h910|pcm ?[0-9]" <files>`
@@ -72,7 +72,7 @@ python3 tools/null_compare.py source.wav copy.wav
 - A clean 6 dB level change is nearly always a default hidden inside the module or a weight missing from a normaliser,
   not the algorithm.
 - A difference only in the tail is un-reset state or a different block size.
-- `--allow-db` is for a difference Tim has accepted, with the reason written in `docs/licences.md`. It is not for making
+- `--allow-db` is for a difference the user has accepted, with the reason written in `docs/licences.md`. It is not for making
   a red result green.
 
 Show the gate can fail: change one coefficient in the copy, see `DIFFERENT`, put it back.

@@ -1,4 +1,4 @@
-// 0.21.0 (Tim, 2026-11-04): if a person makes something for their employer's internals, it is easy to make a repo and share it with their team.
+// 0.21.0: if a person makes something for their employer's internals, it is easy to make a repo and share it with their team.
 import { CLI, assert, execFileSync, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
 
 const env = () => ({ ...process.env, CLAUDE_PACKS_CACHE: join(process.env.TMPDIR, 'pack-cache') });

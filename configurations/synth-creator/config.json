@@ -12,7 +12,9 @@
       "cpp",
       "audio-core",
       "gpu-painter",
-      "stellix"
+      "stellix",
+      "python",
+      "shell"
     ],
     "default": [
       "cpp",
@@ -108,7 +110,7 @@
       "git-guard.mjs"
     ],
     "SessionStart compact": [
-      "tims-asks.mjs"
+      "user-asks.mjs"
     ],
     "SessionStart": [
       "build-sweep.mjs"

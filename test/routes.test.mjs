@@ -191,3 +191,14 @@ test('brief-guard refuses a doc that names an instance by every route, and an ag
   const r = spawnSync('node', [join(dir, '.claude/hooks/brief-guard.mjs')], { input: JSON.stringify({ tool_name: 'Agent', tool_input: { prompt: 'Drive slot 2.' } }), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
   assert.equal(r.status, 2);
 });
+
+// KWB-44: a path that starts with a variable is where the variable points.
+test('a shell write to a path in a variable is judged where the variable points', async () => {
+  const { shellWrites } = await import('../packs/base/hooks/lib/shell-writes.mjs');
+  process.env.KIT_TEST_OUT = '/somewhere/else';
+  assert.deepEqual(shellWrites('echo hi > $KIT_TEST_OUT/a.txt', '/project').map((w) => w.path), ['/somewhere/else/a.txt']);
+  assert.deepEqual(shellWrites('echo hi > ${KIT_TEST_OUT}/b.txt', '/project').map((w) => w.path), ['/somewhere/else/b.txt']);
+  delete process.env.KIT_TEST_OUT;
+  assert.ok(!shellWrites('echo hi > $KIT_TEST_OUT/a.txt', '/project')[0].path.startsWith('/project'));
+});
+

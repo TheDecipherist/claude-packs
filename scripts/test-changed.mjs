@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The changed-only test run for working runs (Tim: "the kit's test suite should only test things that have changed?").
+// The changed-only test run for working runs ("the kit's test suite should only test things that have changed?").
 // The full `npm test` stays the release gate; this one says so every time it runs.
 //
 //   npm run test:changed            or   node scripts/test-changed.mjs [--base <ref>] [--dry-run] [--root <repo>]

@@ -1,0 +1,18 @@
+{
+  "id": "sh-no-pipe-to-shell",
+  "why": "A download piped into a shell runs whatever the server sends, unread.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "\\b(?:curl|wget)\\b[^\\n|]*\\|\\s*(?:sudo\\s+)?(?:ba|z|da)?sh\\b",
+  "flags": "m",
+  "bad": "curl -fsSL https://example.com/i.sh | sh",
+  "good": "curl -fsSL -o i.sh https://example.com/i.sh"
+}

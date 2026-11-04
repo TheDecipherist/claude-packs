@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Dockerfiles, Compose and Swarm: exec form, init, non-root, pinned bases, healthchecks, secrets, swarm-safe compose.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

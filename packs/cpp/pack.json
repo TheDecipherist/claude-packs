@@ -3,10 +3,20 @@
   "version": "1.0.0",
   "description": "Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
-  "repository": { "type": "git", "url": "https://github.com/TheDecipherist/claude-packs.git", "directory": "packs/cpp" },
-  "keywords": ["cpp", "c++", "templates"],
-  "engines": { "claude-packs": ">=0.24.0" }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/cpp"
+  },
+  "keywords": [
+    "cpp",
+    "c++",
+    "templates"
+  ],
+  "engines": {
+    "claude-packs": ">=0.24.0"
+  }
 }

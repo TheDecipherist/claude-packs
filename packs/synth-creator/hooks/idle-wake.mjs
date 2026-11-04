@@ -1,19 +1,19 @@
 #!/usr/bin/env node
-// idle-wake: a proposed next step is started when Tim has gone quiet (Tim, 2026-10-11: "If I havent said anything for
+// idle-wake: a proposed next step is started when the user has gone quiet ("If I havent said anything for
 // 15min I am probably in bed. And unless there is no logical reason for you to not start the next thing ... then you
 // obviously should start"; later: "maybe you also need to check memory at this time?").
 //
 // A Stop hook with `asyncRewake`: it runs in the background after the main session ends ANY turn, so the turn ends and
-// Tim can type. It watches the session's transcript; anything written to it (Tim typing, an agent reporting, the session
+// The user can type. It watches the session's transcript; anything written to it (the user typing, an agent reporting, the session
 // working) ends the watch quietly. After WAIT_MIN minutes of silence it exits 2, which wakes the session with the message
-// below and EVERY ASK Tim made in the last day, word for word (tims-asks.mjs). A turn that ends with the words NOTHING OPEN
+// below and EVERY ASK the user made in the last day, word for word (user-asks.mjs). A turn that ends with the words NOTHING OPEN
 // starts no watch, so a finished night does not wake itself every 15 minutes.
 //   node idle-wake.mjs --selftest
 import { appendFileSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { asks, render } from './tims-asks.mjs';
+import { asks, render } from './user-asks.mjs';
 
 const WAIT_MIN = Number(process.env.IDLE_WAKE_MIN ?? 15);
 const LOOK_S = Number(process.env.IDLE_WAKE_LOOK_S ?? 10);
@@ -25,10 +25,10 @@ const PROPOSES = new RegExp([
   "\\bI'll\\s+(?:start|begin|continue|carry\\s+on|pick\\s+up|move\\s+on)\\b", "\\bthen\\s+I(?:'ll|\\s+will)\\b", '\\bready\\s+to\\s+(?:start|begin|go)\\b',
 ].join('|'), 'i');
 
-const WAKE = (m, what) => `idle-wake: Tim has said nothing for ${m.toFixed(0)} minutes since you ${what}. He is probably in bed. First go through his asks ` +
-  "below and build.md's In progress: anything not done and proved is open work. Then, unless there is a logical reason not to (it needs his eyes, " +
+const WAKE = (m, what) => `idle-wake: The user has said nothing for ${m.toFixed(0)} minutes since you ${what}. They are probably away. First go through their asks ` +
+  "below and build.md's In progress: anything not done and proved is open work. Then, unless there is a logical reason not to (it needs their eyes, " +
   'ears or hands, it is destructive or outward-facing, or it waits on something unfinished), START the next thing NOW, so what was started is ' +
-  'finished when he wakes. If there is such a reason, say it in one line and take the next thing instead. If truly nothing is left that you ' +
+  'finished when they are back. If there is such a reason, say it in one line and take the next thing instead. If truly nothing is left that you ' +
   'can do, end your turn with the words NOTHING OPEN.';
 
 export function proposes(text) {
@@ -68,7 +68,7 @@ async function selftest() {
   expect("silence after 'Next I'd build P4'", (await watch(ev("Done. Next I'd build P4 PAD SETUP."), 3, 1, still))[0], 2);
   expect("silence after 'Shall I start the bank?'", (await watch(ev('All green. Shall I start the bank?'), 3, 1, still))[0], 2);
   expect("silence after 'My recommendation'", (await watch(ev('My recommendation: the cache first.'), 3, 1, still))[0], 2);
-  expect('Tim types during the wait', (await watch(ev("Next I'd build P4."), 3, 1, async () => appendFileSync(t, '{"type":"user"}\n')))[0], 0);
+  expect('the user types during the wait', (await watch(ev("Next I'd build P4."), 3, 1, async () => appendFileSync(t, '{"type":"user"}\n')))[0], 0);
   expect('silence after a plain report (every turn arms)', (await watch(ev('K10 is landed as fb67cbb3. 46 of 46 green.'), 3, 1, still))[0], 2);
   expect('a turn ending NOTHING OPEN', (await watch(ev('All asks done and proved. NOTHING OPEN'), 3, 1, still))[0], 0);
   expect('another hook event', (await watch({ hook_event_name: 'PostToolUse', transcript_path: t, last_assistant_message: 'Shall I?' }, 3, 1, still))[0], 0);

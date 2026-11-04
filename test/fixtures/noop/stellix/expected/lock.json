@@ -58,7 +58,7 @@
     ".claude/hooks/shape-law.mjs": "ccc2aed02d3936371af0712eeb42c1463991b8edcabe626a016d5431afd745e3",
     ".claude/hooks/spec-lock.mjs": "8e0478c5c1b5a4fded0aa03b27533592a45e714fea3185a05e4869883bd4ee5a",
     ".claude/hooks/time-guard.mjs": "529a3eb742263061a5291ff3187fb64e7c52e7a06a15f9be452cba72714acd89",
-    ".claude/hooks/tims-asks.mjs": "e0a190fdd2e4a5e4e40ca94554d0656dc06609231dc361187b5089eb50d3afa9",
+    ".claude/hooks/user-asks.mjs": "e0a190fdd2e4a5e4e40ca94554d0656dc06609231dc361187b5089eb50d3afa9",
     ".claude/tools/freeze.mjs": "79e34c6a57539ec5d84254c12e187b1b3e1b1c8b2016d5b69cda0dc13b5c89f1",
     ".claude/tools/shape-symmetry-selftest.mjs": "ec9ffc53b20543c863488bf9421af3c6ae2a6733bed38111ea1181e2e871e5f6",
     ".claude/tools/shape-symmetry.mjs": "eb32f2953d3aa546761272b1f91951ab7182cda8f7bda8937446bd7fd2cc10e6",

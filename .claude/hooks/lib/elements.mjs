@@ -1,4 +1,4 @@
-// Elements built by hand (0.23.0; Tim: anything "component" used more than once is a template, in html, c++ and apps). once-only compares
+// Elements built by hand (0.23.0: anything "component" used more than once is a template, in html, c++ and apps). once-only compares
 // code as written, so two controls that differ in their names and text look different to it. Here names and text are stripped, and what is
 // left is the element's shape: copies of one element have one shape.
 //   markup   an element and its children: tags, attribute names, nesting (HTML, JSX, Vue, Svelte, template strings)
@@ -12,7 +12,7 @@ import { matchesAny } from './glob.mjs';
 
 export const CODE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx']);
 export const MARKUP = new Set(['.html', '.htm', '.vue', '.svelte', '.tsx', '.jsx', '.ts', '.js', '.mjs']);
-export const SKIP = /(^|\/)(\.git|node_modules|build|Builds|dist|out|_deps|JUCE|JuceLibraryCode|third_party|vendor|cmake-build[^/]*|\.claude)(\/|$)/;
+export const SKIP = /(^|\/)(\.git|node_modules|build|Builds|dist|out|target|_deps|JUCE|JuceLibraryCode|third_party|vendor|Pods|venv|\.venv|site-packages|__pycache__|\.tox|\.next|coverage|cmake-build[^/]*|\.claude)(\/|$)/;
 export const TESTS = ['tests/**', 'test/**', '**/tests/**', '**/test/**', '**/*.test.*', '**/*.spec.*', '**/*_test.*'];
 
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
@@ -53,7 +53,7 @@ function markupShapes(text) {
 }
 
 export function shapesOf(text, ext) {
-  return [...(MARKUP.has(ext) ? markupShapes(text) : []), ...(CODE.has(ext) ? codeShapes(text) : [])];
+  return [...(MARKUP.has(ext) ? markupShapes(text) : []), ...codeShapes(text, ext)];
 }
 
 // A short setup needs a third copy to be a pattern (two members; three on one name, the same habit in two files). Rows are a fault on their own.

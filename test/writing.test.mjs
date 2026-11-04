@@ -1,4 +1,4 @@
-// 0.15.0 (Tim, 2026-11-04): text that goes public reads like a person wrote it. tim-writing split into small pieces: rules on public text,
+// 0.15.0: text that goes public reads like a person wrote it. humanize split into small pieces: rules on public text,
 // one-job skills, and a lesson check for each tell a regex can see. "prose": true leaves code and URLs out.
 import { KIT, assert, cli, fresh, hookRun, join, readFileSync, readdirSync, run, test } from './kit-cli.mjs';
 

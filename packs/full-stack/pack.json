@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "The full-stack configuration's own laws: Fastify and Next.js only (stack-guard), Zod 4 schemas only in the schemas folder (schemas-only), and its rules per folder: thin routes, handlers, one database gateway with chain keys first, one error contract, env.ts shapes, health and logs, multistage Docker, inject() tests.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {

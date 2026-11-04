@@ -1,5 +1,5 @@
 {
-  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A. 0.4.0: the SOUND and MIXER layers (lib/app/src/layer*, cards, controls) are UI, so the control and look rules load there; confirm against the re-survey. 0.6.0: the copy trees are folders of kind copy (protect-vendor guards them; copy-tree-guard.py is merged into it), and guards carries Stellix's values for the house guards. enable: the opt-in hooks Stellix runs (tims-asks, idle-wake); guards.git.refuseTrunk: Stellix works on a branch per step.",
+  "_comment": "Stellix, tailored from docs/project.md (surveyed 2026-10-26, branch work/notes-hit, b41d77d). Complete: packs add no default folders. stage-guard is disabled: the house git-guard already refuses git add -A. 0.4.0: the SOUND and MIXER layers (lib/app/src/layer*, cards, controls) are UI, so the control and look rules load there; confirm against the re-survey. 0.6.0: the copy trees are folders of kind copy (protect-vendor guards them; copy-tree-guard.py is merged into it), and guards carries Stellix's values for the house guards. enable: the opt-in hooks Stellix runs (user-asks, idle-wake); guards.git.refuseTrunk: Stellix works on a branch per step.",
   "complete": true,
   "folders": {
     "app": {
@@ -309,7 +309,7 @@
     }
   },
   "enable": [
-    "hooks/tims-asks.mjs",
+    "hooks/user-asks.mjs",
     "hooks/idle-wake.mjs"
   ]
 }

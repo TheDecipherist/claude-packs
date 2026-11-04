@@ -27,13 +27,13 @@ const setLayout = (dir, change) => {
 test('the house hooks install where they belong, project-neutral, and pass their selftests', () => {
   const dir = tmp();
   const out = run(dir, 'init', 'audio-core', 'gpu-painter');
-  assert.match(out, /held back, not switched on .*hooks\/idle-wake\.mjs, hooks\/tims-asks\.mjs/, 'the opt-in hooks wait for "enable"');
-  assert.ok(!existsSync(join(dir, '.claude/hooks/tims-asks.mjs')) && !existsSync(join(dir, '.claude/hooks/idle-wake.mjs')));
-  setLayout(dir, (l) => { l.enable = ['hooks/tims-asks.mjs', 'hooks/idle-wake.mjs']; });
-  assert.match(run(dir, 'update'), /switching on \(new to this project\): hooks\/idle-wake\.mjs, hooks\/tims-asks\.mjs/);
+  assert.match(out, /held back, not switched on .*hooks\/idle-wake\.mjs, hooks\/user-asks\.mjs/, 'the opt-in hooks wait for "enable"');
+  assert.ok(!existsSync(join(dir, '.claude/hooks/user-asks.mjs')) && !existsSync(join(dir, '.claude/hooks/idle-wake.mjs')));
+  setLayout(dir, (l) => { l.enable = ['hooks/user-asks.mjs', 'hooks/idle-wake.mjs']; });
+  assert.match(run(dir, 'update'), /switching on \(new to this project\): hooks\/idle-wake\.mjs, hooks\/user-asks\.mjs/);
   const hooks = readdirSync(join(dir, '.claude/hooks'));
   assert.deepEqual(hooks.filter((h) => h.endsWith('.py')), ['browser-guard.py'], 'every kit hook is Node but browser-guard (README says why)');
-  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'tims-asks.mjs', 'idle-wake.mjs', 'browser-guard.py', 'protect-vendor.mjs']) {
+  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'user-asks.mjs', 'idle-wake.mjs', 'browser-guard.py', 'protect-vendor.mjs']) {
     assert.ok(hooks.includes(h), h);
     const r = spawnSync(h.endsWith('.py') ? 'python3' : 'node', [join(dir, '.claude/hooks', h), '--selftest'], { env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' });
     assert.equal(r.status, 0, `${h}: ${r.stdout}${r.stderr}`);
@@ -45,7 +45,7 @@ test('the house hooks install where they belong, project-neutral, and pass their
   assert.ok(!existsSync(join(audioOnly, '.claude/hooks/browser-guard.py')), 'browser-guard comes with gpu-painter');
   const s = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
   // run by node itself (idle-wake: async) or named in a run-hooks.mjs command, one node process per settings entry (KWB-24)
-  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'idle-wake.mjs', 'tims-asks.mjs']) assert.match(s, new RegExp(`(?:node \\\\"\\$CLAUDE_PROJECT_DIR/|run-hooks\\.mjs\\\\"[^"]* )\\.claude/hooks/${h.replace('.', '\\.')}`));
+  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'idle-wake.mjs', 'user-asks.mjs']) assert.match(s, new RegExp(`(?:node \\\\"\\$CLAUDE_PROJECT_DIR/|run-hooks\\.mjs\\\\"[^"]* )\\.claude/hooks/${h.replace('.', '\\.')}`));
   assert.match(s, /node \\"\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/idle-wake\.mjs/, 'an async hook keeps its own entry');
   assert.match(s, /python3 \\"\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/browser-guard\.py/);
   const settings = JSON.parse(s);
@@ -148,29 +148,29 @@ test('a project\'s own hook entries stay; a kit hook already registered by hand 
   }
 });
 
-// A project that ran a Python forerunner by hand (Stellix: git-guard.py, tims-asks.py in its settings) had that hook:
+// A project that ran a Python forerunner by hand (Stellix: git-guard.py, user-asks.py in its settings) had that hook:
 // update switches the Node hook on without an "enable" line, and retires the Python entry.
 test('a Node hook is on in a project that ran its Python forerunner, and the forerunner\'s entry goes', () => {
   const dir = tmp();
   run(dir, 'init', 'audio-core');
   const lf = join(dir, '.claude/claude-packs.lock.json');
   const l = JSON.parse(readFileSync(lf, 'utf8'));
-  for (const h of ['git-guard.mjs', 'tims-asks.mjs', 'time-guard.mjs']) { delete l.files[`.claude/hooks/${h}`]; rmSync(join(dir, '.claude/hooks', h), { force: true }); }
+  for (const h of ['git-guard.mjs', 'user-asks.mjs', 'time-guard.mjs']) { delete l.files[`.claude/hooks/${h}`]; rmSync(join(dir, '.claude/hooks', h), { force: true }); }
   writeFileSync(lf, JSON.stringify(l));
   const sf = join(dir, '.claude/settings.json');
   const s = JSON.parse(readFileSync(sf, 'utf8'));
   for (const ev of Object.keys(s.hooks)) s.hooks[ev] = s.hooks[ev].map((g) => ({ ...g, hooks: g.hooks.filter((h) => !/git-guard|time-guard/.test(h.command)) }));
   s.hooks.PreToolUse.push({ matcher: 'Bash', hooks: [{ type: 'command', command: 'python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.py"' }] });
-  s.hooks.SessionStart = [{ matcher: 'compact', hooks: [{ type: 'command', command: 'python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/tims-asks.py"' }] }];
+  s.hooks.SessionStart = [{ matcher: 'compact', hooks: [{ type: 'command', command: 'python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/user-asks.py"' }] }];
   writeFileSync(sf, JSON.stringify(s));
   const out = run(dir, 'update');
-  assert.ok(existsSync(join(dir, '.claude/hooks/git-guard.mjs')) && existsSync(join(dir, '.claude/hooks/tims-asks.mjs')), 'had under the Python name');
+  assert.ok(existsSync(join(dir, '.claude/hooks/git-guard.mjs')) && existsSync(join(dir, '.claude/hooks/user-asks.mjs')), 'had under the Python name');
   assert.ok(!existsSync(join(dir, '.claude/hooks/time-guard.mjs')), 'a hook it never had stays off');
   assert.match(out, /held back, not switched on .*hooks\/time-guard\.mjs/);
   assert.match(out, /retired settings entries .*git-guard\.py/);
   const all = readFileSync(sf, 'utf8');
   assert.match(all, /run-hooks\.mjs\\"[^"]* \.claude\/hooks\/git-guard\.mjs/, 'the Node hook runs (through run-hooks.mjs, KWB-24)');
-  assert.doesNotMatch(all, /git-guard\.py|tims-asks\.py/);
+  assert.doesNotMatch(all, /git-guard\.py|user-asks\.py/);
 });
 
 // The house git laws hold in a real git worktree: a commit there is judged by the worktree's branch, not main's.
@@ -275,13 +275,13 @@ test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable
   writeFileSync(join(dir, 'design/shape.json'), '{ "concepts": {}, "exclude": [] }\n');
   const out = run(dir, 'update');
   assert.doesNotMatch(out, /shape-law|brief-guard/, 'switched on by the first update already');
-  for (const item of ['hooks/git-guard.mjs', 'hooks/build-guard.mjs', 'hooks/time-guard.mjs', 'hooks/tims-asks.mjs', 'hooks/idle-wake.mjs', 'hooks/browser-guard.py', 'checks/no-opengl.json', 'checks/no-code-after-midline-comment.json']) {
+  for (const item of ['hooks/git-guard.mjs', 'hooks/build-guard.mjs', 'hooks/time-guard.mjs', 'hooks/user-asks.mjs', 'hooks/idle-wake.mjs', 'hooks/browser-guard.py', 'checks/no-opengl.json', 'checks/no-code-after-midline-comment.json']) {
     assert.match(out, new RegExp(`held back, not switched on .*${item.replace(/[./]/g, (c) => `\\${c}`)}`), item);
     assert.ok(!existsSync(join(dir, '.claude', item)), `${item} not installed`);
   }
   assert.ok(out.indexOf('held back') < out.indexOf('Packs:'), 'the list comes before the work');
   const settings = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
-  for (const h of ['git-guard', 'build-guard', 'time-guard', 'tims-asks', 'idle-wake', 'browser-guard']) assert.doesNotMatch(settings, new RegExp(`hooks/${h}\\.(py|mjs)`), h);
+  for (const h of ['git-guard', 'build-guard', 'time-guard', 'user-asks', 'idle-wake', 'browser-guard']) assert.doesNotMatch(settings, new RegExp(`hooks/${h}\\.(py|mjs)`), h);
   assert.match(before, /protect-vendor/);
   assert.match(settings, /protect-vendor/, 'what it had stays on');
   assert.match(run(dir, 'doctor'), /OK:/);
@@ -289,7 +289,7 @@ test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable
   setLayout(dir, (l) => { l.enable = ['hooks/git-guard.mjs']; });
   assert.match(run(dir, 'update'), /switching on \(new to this project\): hooks\/git-guard\.mjs/);
   assert.ok(existsSync(join(dir, '.claude/hooks/git-guard.mjs')));
-  assert.ok(!existsSync(join(dir, '.claude/hooks/tims-asks.mjs')));
+  assert.ok(!existsSync(join(dir, '.claude/hooks/user-asks.mjs')));
   execFileSync('git', ['init', '-q', '-b', 'main'], { cwd: dir });
   execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x'], { cwd: dir });
   const commit = fire(dir, 'git-guard.mjs', { tool_name: 'Bash', tool_input: { command: 'git commit -m x -- a.h' }, cwd: dir });

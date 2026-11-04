@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // gnu-shell (SessionStart; global by design): the Bash tool runs bash 5 with the GNU tools, not zsh with the BSD ones.
 //
-// Tim, 2026-10-11: "can you do a proper skill/hook for zsh because this seems to happen alot?". Claude Code's Bash tool runs
+// "can you do a proper skill/hook for zsh because this seems to happen alot?". Claude Code's Bash tool runs
 // the login shell, zsh on this Mac: `$VAR` holding several words is not split, an unmatched glob is an error, and
 // `sed -i`, `date -d`, `stat -c` are the BSD tools'. The fix has two halves:
 //   1. THE SHELL: settings.json `env` sets CLAUDE_CODE_SHELL and SHELL to /opt/homebrew/bin/bash (Homebrew's bash 5).
 //   2. THE TOOLS: this hook writes one `export PATH=...` to the file CLAUDE_ENV_FILE names, which Claude Code sources
 //      before every Bash call: ~/.claude/bin first (buildq, the machine-wide build queue), then the `libexec/gnubin`
 //      folder of every GNU formula installed, so sed, date, stat, awk, tar, find, xargs, which are the GNU builds; and a
-//      line that warns on EVERY command while the session runs zsh (WB-41). Tim's own terminal is not touched.
+//      line that warns on EVERY command while the session runs zsh (WB-41). The user's own terminal is not touched.
 // It says so at the session's start when it cannot deliver: no Homebrew, a formula missing, the shell not bash 5.
 // On Linux (KWB-27) the system's sed, date, stat and awk are the GNU builds already: no Homebrew is looked for, the PATH line
 // puts only ~/.claude/bin first, and the shell is still checked for bash 5 (any bash 5, not Homebrew's).
@@ -65,7 +65,7 @@ export function run(envFile, shell, { platform = process.platform, pre } = {}) {
   }
   if (missing.length) {
     said.push(`gnu-shell: GNU formula(s) not installed: ${missing.join(', ')}; those tools are the macOS (BSD) builds this session. ` +
-      `Tim installs them with: brew install ${missing.join(' ')}`);
+      `Install them with: brew install ${missing.join(' ')}`);
   }
   if (!envFile) said.push('gnu-shell: CLAUDE_ENV_FILE is not set, so the GNU tools could not be put first on the Bash tool\'s PATH.');
   if (!shellOk(shell)) said.push(shellSaid(shell, true));

@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-// tims-asks: everything Tim asked, back in front of the session, so nothing discussed is forgotten (Tim, 2026-10-11:
+// user-asks: everything the user asked, back in front of the session, so nothing discussed is forgotten (2026-10-11:
 // "Sometimes you 'forget' certain things we had discussed ... maybe you also need to check memory at this time?").
 //
-// Every message Tim sends is in the session's transcript: a turn of his own (type `user`, his text) or a message sent
+// Every message the user sends is in the session's transcript: a turn of their own (type `user`, their text) or a message sent
 // while the session was working (a `queue-operation` enqueue). This reads them back, with their times, two ways:
-//   - a SessionStart hook on `compact`: his asks of the last HOURS hours go back into the context, word for word;
-//   - idle-wake.mjs: the wake after his silence carries the same list.
+//   - a SessionStart hook on `compact`: their asks of the last HOURS hours go back into the context, word for word;
+//   - idle-wake.mjs: the wake after their silence carries the same list.
 // THE LEDGER: each ask has a status and its evidence, beside the project's own memory folder
 // (~/.claude/projects/<the project's path, every character not a letter or digit made a dash>/asks-ledger.json), outside
-// git, so compaction cannot touch it. Only OPEN asks come back word for word; done or answered ones are a count; needs-tim
+// git, so compaction cannot touch it. Only OPEN asks come back word for word; done or answered ones are a count; needs-user
 // and planned ones are one line each. Marking takes evidence (a commit, a bug number, a build.md step, or where it is planned):
-//   node tims-asks.mjs --transcript <path> [--hours 24] [--all]
-//   node tims-asks.mjs --mark <id> done|answered|planned|needs-tim|not-an-ask "<evidence>"
-//   node tims-asks.mjs --selftest
+//   node user-asks.mjs --transcript <path> [--hours 24] [--all]
+//   node user-asks.mjs --mark <id> done|answered|planned|needs-user|not-an-ask "<evidence>"
+//   node user-asks.mjs --selftest
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
@@ -21,17 +21,17 @@ import { fileURLToPath } from 'node:url';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 export const HOURS = Number(process.env.TIMS_ASKS_HOURS ?? 24);
-const STATUSES = new Set(['done', 'answered', 'planned', 'needs-tim', 'not-an-ask', 'open']);
+const STATUSES = new Set(['done', 'answered', 'planned', 'needs-user', 'not-an-ask', 'open']);
 const QUIET = new Set(['done', 'answered', 'not-an-ask']);
 const HEAD = (h, n) => `TIM'S ASKS from the last ${h.toFixed(0)} hours (${n} messages). Compaction may have dropped some of them from what you remember; ` +
   'the ledger below holds which are done, with evidence. Every OPEN one is work: check it is not already done (then mark it with the evidence), ' +
-  'finish it, or if it needs Tim say so in one line and mark it needs-tim. Do not wait to be reminded.';
+  'finish it, or if it needs the user say so in one line and mark it needs-user. Do not wait to be reminded.';
 
 const mainRoot = (p) => p.replace(/\/\.claude\/worktrees\/[^/]+(\/.*)?$/, '');
 export const ledgerFor = (root) => join(homedir(), '.claude', 'projects', mainRoot(resolve(root)).replace(/[^A-Za-z0-9]/g, '-'), 'asks-ledger.json');
 export const LEDGER = process.env.TIMS_ASKS_LEDGER || ledgerFor(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
-// Tim's own words in a transcript entry, or null (a tool's result, a hook's or the system's text, an agent's report).
+// The user's own words in a transcript entry, or null (a tool's result, a hook's or the system's text, an agent's report).
 function textOf(e) {
   if (e.type === 'queue-operation' && e.operation === 'enqueue') return typeof e.content === 'string' ? e.content : null;
   if (e.type === 'user' && !e.isMeta && !e.isSidechain) {
@@ -84,12 +84,12 @@ export function render(items, hours = HOURS, ledger = null, every = false) {
   const stamp = (w) => (w ? new Date(w * 1000).toISOString().slice(5, 16).replace('T', ' ') : '     ?     ');
   const rows = items.map(([w, t]) => { const id = askId(t); return { w, t, id, st: led[id]?.status ?? 'open', ev: led[id]?.evidence ?? '' }; });
   const open = rows.filter((r) => r.st === 'open');
-  const waits = rows.filter((r) => r.st === 'needs-tim' || r.st === 'planned');
+  const waits = rows.filter((r) => r.st === 'needs-user' || r.st === 'planned');
   const quiet = rows.filter((r) => QUIET.has(r.st));
   const lines = [HEAD(hours, items.length),
-    `LEDGER (${LEDGER}): ${quiet.length} done or answered, ${waits.length} waiting on Tim or planned, ${open.length} OPEN. Only the open ones are work; ` +
-    'do not redo a done one. When one is done, mark it with its evidence: node .claude/hooks/tims-asks.mjs --mark <id> done "<commit / bug / step>" ' +
-    '(or answered, planned, needs-tim, not-an-ask).'];
+    `LEDGER (${LEDGER}): ${quiet.length} done or answered, ${waits.length} waiting on the user or planned, ${open.length} OPEN. Only the open ones are work; ` +
+    'do not redo a done one. When one is done, mark it with its evidence: node .claude/hooks/user-asks.mjs --mark <id> done "<commit / bug / step>" ' +
+    '(or answered, planned, needs-user, not-an-ask).'];
   if (open.length) { lines.push('OPEN, word for word:'); for (const r of open) lines.push(`- ${r.id} [${stamp(r.w)}] ${squash(r.t).slice(0, 1200)}`); }
   if (waits.length) { lines.push('WAITING (one line each):'); for (const r of waits) lines.push(`- ${r.id} [${stamp(r.w)}] ${r.st}: ${r.ev.slice(0, 160)} <- ${squash(r.t).slice(0, 90)}`); }
   if (every && quiet.length) { lines.push('DONE / ANSWERED:'); for (const r of quiet) lines.push(`- ${r.id} [${stamp(r.w)}] ${r.st}: ${r.ev.slice(0, 120)} <- ${squash(r.t).slice(0, 90)}`); }
@@ -110,7 +110,7 @@ function selftest() {
     { type: 'user', timestamp: iso(60), message: { content: [{ type: 'text', text: 'is it correct the agents still run?' }] } },
     { type: 'assistant', timestamp: iso(30), message: { content: "Next I'd build P4." } },
   ];
-  const t = join(tmpdir(), `tims-asks-${process.pid}.jsonl`);
+  const t = join(tmpdir(), `user-asks-${process.pid}.jsonl`);
   writeFileSync(t, rows.map((r) => JSON.stringify(r)).join('\n'));
   const items = asks(t, 24, now);
   rmSync(t, { force: true });
@@ -121,15 +121,15 @@ function selftest() {
   const checks = [
     ['a done ask is counted, not listed; the open ones are listed word for word', out.includes('1 done or answered') && out.includes('2 OPEN') && !out.includes('add 20 80s bass arps') && out.includes('and make a hook for chrome')],
     ['done without evidence is refused', (() => { try { mark('x', 'done', '', led); return false; } catch { return true; } })()],
-    ["Tim's own words, mid-turn ones too, no tool results, system text, meta lines, his old asks or the assistant",
+    ["the user's own words, mid-turn ones too, no tool results, system text, meta lines, their old asks or the assistant",
       JSON.stringify(items.map(([, x]) => x)) === JSON.stringify(['add 20 80s bass arps', 'and make a hook for chrome', 'is it correct the agents still run?'])],
     ["the ledger is the project's own, beside its memory, and a worktree's is its project's",
-      ledgerFor('/Users/tim/projects/my_synth') === join(homedir(), '.claude/projects/-Users-tim-projects-my-synth/asks-ledger.json') &&
-      ledgerFor('/Users/tim/projects/my_synth/.claude/worktrees/agent-x') === ledgerFor('/Users/tim/projects/my_synth')],
+      ledgerFor('/Users/dev/projects/my_synth') === join(homedir(), '.claude/projects/-Users-dev-projects-my-synth/asks-ledger.json') &&
+      ledgerFor('/Users/dev/projects/my_synth/.claude/worktrees/agent-x') === ledgerFor('/Users/dev/projects/my_synth')],
   ];
   for (const [name, ok] of checks) if (!ok) console.error(`FAIL  ${name}`);
   const bad = checks.filter(([, ok]) => !ok).length;
-  console.log(`tims-asks selftest: ${bad ? 'FAIL' : 'OK'}`);
+  console.log(`user-asks selftest: ${bad ? 'FAIL' : 'OK'}`);
   return bad ? 1 : 0;
 }
 
@@ -148,7 +148,7 @@ function main(argv) {
     return 0;
   }
   // A HOOK (SessionStart on compact): what it prints is added to the session's context
-  return asHook('tims-asks', hookMain);
+  return asHook('user-asks', hookMain);
 }
 
 function hookMain(input) {

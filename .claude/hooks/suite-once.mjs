@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// suite-once (PreToolUse, Bash): the whole test suite runs once, as the gate before landing, never while working (Tim, 2026-10-11: one
+// suite-once (PreToolUse, Bash): the whole test suite runs once, as the gate before landing, never while working (one
 // agent ran all 425 tests on 1 core; KWB-41: a session ran the kit's suite again and again, 12 minutes each, on code that had not
 // changed). A whole-suite command (`npm test`, `pnpm|yarn|bun test`, a bare `ctest`, the project's "commands".test in layout.json) is
 // refused while the checkout it runs in has uncommitted tracked changes: uncommitted means still working, and working runs only the

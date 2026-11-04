@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary.",
   "type": "stock",
-  "author": "Tim Clausen",
+  "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
   "repository": {
@@ -181,6 +181,11 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/reuse-hint.mjs\"",
             "timeout": 10
           }
         ]

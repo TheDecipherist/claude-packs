@@ -1,4 +1,4 @@
-// 0.10.0 (Tim, STEP 3 item 1): a configuration is data. configurations/<name>/config.json names its packs, its layout
+// 0.10.0 (STEP 3 item 1): a configuration is data. configurations/<name>/config.json names its packs, its layout
 // template, its hook order and the house-rules preamble of its CLAUDE.md block. `init --config <name>` stores the choice in
 // layout.json "configuration", `update` applies that one, `config <name>` switches and lists what changes, `configs` lists
 // them and doctor prints the one installed (KWB-31).

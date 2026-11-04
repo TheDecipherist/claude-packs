@@ -62,7 +62,7 @@ base now holds only universal engineering: git-guard, file-size-guard, folder-la
 brief-guard, making, making-check, once-only), lesson-checks, and two new laws, `secrets-guard` (no .env, key file or literal
 secret into git) and `untrusted-boundary` (a model call gets outside text only inside a per-call SHA-256 boundary), each with a
 rule. Everything synth-specific moved to the `synth-creator` pack: build-guard, time-guard, spec-lock, frozen-files,
-protect-vendor, stage-guard, build-sweep, idle-wake, tims-asks, freeze.mjs, the debug-by-measurement, done-means-fresh-evidence,
+protect-vendor, stage-guard, build-sweep, idle-wake, user-asks, freeze.mjs, the debug-by-measurement, done-means-fresh-evidence,
 hooks-and-gates and copy-trees-read-only rules and the build-step skill. A test refuses a synth word in base.
 
 ## The hover law: everything the pointer can act on says so (0.10.1)
@@ -217,7 +217,7 @@ npx --no-install @thedecipherist/claude-packs global doctor
 npx --no-install @thedecipherist/claude-packs global remove   # removes only what it installed and you did not edit
 ```
 
-Everything else in this package is per project (Tim, 2026-10-31). The global part is exactly three pieces, and `global add` installs nothing else:
+Everything else in this package is per project. The global part is exactly three pieces, and `global add` installs nothing else:
 
 1. **latest-versions** (the skill and its `version-pin-guard` hook), because "look up the newest release before you pin anything" applies to every project, including new ones that have no packs yet.
 2. **gnu-shell** (SessionStart: bash 5 and the GNU tools first on the Bash tool's PATH, `~/.claude/bin` first, a warning on every command in a zsh session) and
@@ -327,7 +327,7 @@ work on the kit and `doctor --strict` passes on it; kit-lock stays registered be
 
 ## The house hooks, skills and rules move into the kit (0.6.0, this branch's line)
 
-claude-packs is the source of truth for every rule, check, hook and skill used to build synths (Tim, 2026-10-31). What
+claude-packs is the source of truth for every rule, check, hook and skill used to build synths. What
 Stellix carried by hand that is not about Stellix alone now ships here, each made project-neutral. A project's own values
 go in `layout.json` under `"guards"`; every key has a house default.
 
@@ -336,7 +336,7 @@ go in `layout.json` under `"guards"`; every key has a house default.
 | hook | `git-guard.mjs` | base | main's token law always (no token stored in git config, Sub37 WB-3); with `house: true` the house git laws: no `add -A`/`commit -a`, no undo over a dirty tree, no rebase/amend/force/`--no-verify`/branch delete, a push names the owner's repo and the token variable, every `gh` names the token, no token pasted, nothing under `~/firmware` staged, no commit while the branch's earlier commits are not on GitHub and no session end (Stop) while a local branch is ahead of GitHub or missing there (KWB-26: GitHub's heads by `git ls-remote`, the token sent from the environment or ~/.env and never stored; out of reach, a warning and the work goes ahead); the trunk refusal (no commit on main/master) only when `refuseTrunk` is true | `git`: `house` (false), `owner` (TheDecipherist), `tokenVar` (PERSONAL_GITHUB_TOKEN), `trunks`, `refuseTrunk` (false), `neverStage`, `safeRestore`, `branchStart`, `accountNote` |
 | hook | `build-guard.mjs` | base | every compile and test run through the machine-wide build queue (`buildq` or the project's wrapper); no polling loops; agents build only what their change needs | – |
 | hook | `time-guard.mjs` | base | tells the caller when a call, a build, a ctest, a probe, a panel export, a headless Chrome or a wait loop runs long, or an agent's worktree goes unsaved; refuses a pgrep wait loop that can never end (a heredoc body is text, not a loop) | `time`: `probePattern`, `saveCommand` |
-| hook | `tims-asks.mjs` | base, **opt-in** | after a compaction, Tim's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |
+| hook | `user-asks.mjs` | base, **opt-in** | after a compaction, the user's asks of the last day back in the context, with a ledger of which are done (beside the project's own memory folder) | – |
 | hook | `idle-wake.mjs` | base, **opt-in** | after 15 minutes of silence, wakes the session with its open asks (Stop, asyncRewake) | – |
 | hook | `build-sweep.mjs` | base, **opt-in** | removes the build output (layout `buildOutput`, default `build/**`) of agent worktrees quiet for 2 hours; never sources, never the main checkout's build; warns at session start under 40 GB free (SessionStart, SubagentStop; `--now [--dry-run]` by hand) | – |
 | hook | `shape-law.mjs` | base | the number rule at write time, every folder: an instance of a MANY concept is an example, a selector or a declared constant from design/shape.json | `shape scan` |
@@ -357,8 +357,8 @@ go in `layout.json` under `"guards"`; every key has a house default.
 
 ### Nothing new switches on unless the project chose it
 
-- `init` and `add` bring every hook and check of the packs named, except the opt-in ones (`tims-asks`, `idle-wake`, `build-sweep`).
-- `update` brings a hook or check that is NEW to the project (not in its lock, not on disk, not run by its `settings.json`) only when `.claude/layout.json` `"enable"` names it, e.g. `"enable": ["hooks/git-guard.mjs", "hooks/tims-asks.mjs", "checks/no-opengl.json"]`. What the project already had stays on (a Node hook counts as had when the project ran its Python forerunner, e.g. `git-guard.py`).
+- `init` and `add` bring every hook and check of the packs named, except the opt-in ones (`user-asks`, `idle-wake`, `build-sweep`).
+- `update` brings a hook or check that is NEW to the project (not in its lock, not on disk, not run by its `settings.json`) only when `.claude/layout.json` `"enable"` names it, e.g. `"enable": ["hooks/git-guard.mjs", "hooks/user-asks.mjs", "checks/no-opengl.json"]`. What the project already had stays on (a Node hook counts as had when the project ran its Python forerunner, e.g. `git-guard.py`).
 - `update` prints both lists before it changes anything: `switching on (new to this project): …` and `held back, not switched on: …`.
 - git-guard's trunk refusal is a setting, `"guards": { "git": { "refuseTrunk": true } }`, off by default.
 
@@ -381,7 +381,7 @@ read-only path is refused like a tool write (`> build/log.txt` in a project whos
 - A project that carried these hooks by hand: delete its own copies first, or name them in `"enable"`. An identical copy is
   taken over; a different one gets the package's version beside it as `.pack-new`.
 - Settings entries for `copy-tree-guard.py` (merged into protect-vendor), `shell-traps` and `gnu-shell` (global by design),
-  and the Python forerunners `git-guard.py`, `build-guard.py`, `time-guard.py`, `tims-asks.py`, `idle-wake.py` (Node now)
+  and the Python forerunners `git-guard.py`, `build-guard.py`, `time-guard.py`, `user-asks.py`, `idle-wake.py` (Node now)
   are retired from a project's `settings.json`, and `update` says so.
 - A settings entry that runs a script some pack ships is the package's; every other entry is the project's own and stays.
 - A concept entry `"kind:copy"` expands to every folder of that kind.

@@ -1,0 +1,26 @@
+{
+  "name": "python",
+  "version": "1.0.0",
+  "description": "Python projects: what is repeated becomes a template in the forms Python has for it, errors are handled where they can be, resources are closed, subprocess and network calls are safe.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/python"
+  },
+  "keywords": [
+    "python"
+  ],
+  "engines": {
+    "claude-packs": ">=0.25.0"
+  },
+  "concepts": {
+    "python": [
+      "**/*.py",
+      "**/*.pyi"
+    ]
+  }
+}

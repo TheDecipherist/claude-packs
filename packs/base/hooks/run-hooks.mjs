@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // run-hooks: one node process runs every kit hook of one settings entry, instead of one node process per hook (KWB-24:
-// Tim saw 17 hooks take 48 s on one rm; each was its own node start, all at once, on a loaded machine). settings.json
+// The user saw 17 hooks take 48 s on one rm; each was its own node start, all at once, on a loaded machine). settings.json
 // names the runner and its hooks in one command: node ".../run-hooks.mjs" .claude/hooks/a.mjs .claude/hooks/b.mjs
 // Each hook module exports hook(text) (the event's JSON text, as stdin was) and returns its exit code; the runner calls
 // them in turn, catches each one's stdout and stderr, writes each one's timing line to .claude/hooks.log (lib/hook-log.mjs)

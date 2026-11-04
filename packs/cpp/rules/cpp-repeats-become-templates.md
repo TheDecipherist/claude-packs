@@ -6,7 +6,7 @@ paths:
 
 # Anything repeated in C++ becomes a template: pick the form that fits the repeat
 
-Tim: anything found repeated should have something that makes it reusable and template-like. Measured on a real C++ repo: 950 copies in 302 repeats, almost none of them whole classes. They were descriptors filled field by field, helpers copied from file to file, and tables written as calls.
+anything found repeated should have something that makes it reusable and template-like. Measured on a real C++ repo: 950 copies in 302 repeats, almost none of them whole classes. They were descriptors filled field by field, helpers copied from file to file, and tables written as calls.
 
 <constraints>
 Always do:

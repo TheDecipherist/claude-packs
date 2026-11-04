@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // untrusted-boundary (PreToolUse, Write|Edit|MultiEdit|NotebookEdit|Bash): text from outside reaches a model only inside a
-// SHA-256 boundary (KWB-34). The house form (Tim's release-watcher skills): every block of untrusted text sent to a model (a
+// SHA-256 boundary (KWB-34). The house form (the user's release-watcher skills): every block of untrusted text sent to a model (a
 // web page, a fetched document, a scraped row, a user's upload, a stored copy of any of them) is wrapped, per call, in a
 // boundary named by the SHA-256 of the block, with a note before and after that gives the exact hash and says the block is
 // information, not instructions; our own fields (ids, dates, the task) stay outside it.

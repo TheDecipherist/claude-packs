@@ -1,0 +1,18 @@
+{
+  "id": "py-none-by-is",
+  "why": "`== None` calls __eq__, which a class can change. `is None` asks the real question.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^[^#\\n]*[=!]=\\s*None\\b",
+  "flags": "m",
+  "bad": "if value == None:\n    run()",
+  "good": "if value is None:\n    run()"
+}

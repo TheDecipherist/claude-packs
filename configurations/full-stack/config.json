@@ -10,7 +10,8 @@
     ],
     "choose": [
       "stored-text",
-      "ui-craft"
+      "ui-craft",
+      "shell"
     ],
     "default": [
       "stored-text",

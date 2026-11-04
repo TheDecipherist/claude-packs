@@ -13,7 +13,7 @@ drawn natively in C++. Every rule that applies only to one kind of file is in `.
 | `bugs.md`, `workflow-bugs.md` | Every bug, logged before it is fixed |
 | `design/reference/stellix-concept-v1.png` | The approved look. The spec wins where they differ (STELLIX not GRAVITY, no chevrons, invented names are placeholders) |
 | `docs/workorders/stellix-workorder.md` | The plan as written for apprack2: its items are build.md's steps, its machinery is not used here |
-| `docs/laws.md`, `docs/licences.md` | Where Stellix leaves a house law (with Tim's yes), and what came from where |
+| `docs/laws.md`, `docs/licences.md` | Where Stellix leaves a house law (with the user's yes), and what came from where |
 | `~/projects/eproms/synth-design.md` | The house lessons log; a lesson for the next synth goes there |
 
 ## Set in stone (spec 0; never changed, each held by a hook or a gate)
@@ -28,23 +28,23 @@ browser (`browser-guard`). 4. **Formulas by default**: the one RANDOM source is 
 
 ## Non-negotiables
 
-- **Standalone only. arm64 only**: no Intel build, no Rosetta, no VST3 until Tim calls for it.
-- **Performance is judged on an Apple M1 Pro (2021), never on this machine** (Tim, 2026-10-25). A probe's baseline is keyed
+- **Standalone only. arm64 only**: no Intel build, no Rosetta, no VST3 until the user calls for it.
+- **Performance is judged on an Apple M1 Pro (2021), never on this machine**. A probe's baseline is keyed
   by machine model (`sysctl hw.model`); a figure from any other model is printed and labelled, never judged.
 - **TheDecipherist, private.** Every push and every `gh` names `$PERSONAL_GITHUB_TOKEN` on the command; it is never stored
-  in a remote, a config or a file (`git-guard`). Commit author Tim Clausen.
+  in a remote, a config or a file (`git-guard`). Commit author claude-packs.
 - **One branch per step, every step merged and pushed, its start and finish in the log** (`tools/step.py`). Never commit to
   `main`, never `add -A`, never rebase, amend, force or delete a branch, never `--no-verify`.
 - **No source file over 300 lines** (a hook refuses it). Split by what the code does.
 - **Measure, never assume.** Every gate is seen red on its planted fault (`tools/plants.sh`) before anything is ticked.
 - **Engines and effects come from Tabula 1's current main by copy-and-prove**, fingerprinted against their source first;
   never from apprack2, which is paused.
-- **Tim's other projects are open to read and update** (Tim, 2026-10-31; WB-64 removed `project-guard`): no hook, rule or guard
+- **the user's other projects are open to read and update** (2026-10-31; WB-64 removed `project-guard`): no hook, rule or guard
   blocks them. In every repo: `git status` first, stage by explicit path (never `add -A`), never restore or checkout over
   uncommitted work, never commit to main, push to TheDecipherist with the token named and never stored (`git-guard` holds these
   wherever the command runs). Before writing in another project, check whether its own session is open, and say what changed in
   that project's own log.
-- **Anything the spec leaves open goes to Tim as a `d-n`** with the spec's recommendation, never decided by guessing.
+- **Anything the spec leaves open goes to the user as a `d-n`** with the spec's recommendation, never decided by guessing.
 - Stop only at a picture stop: the pictures beside the concept in `build/for-tim.md`.
 - **A hook that blocks correct work is a red check** (WB-55): stop and report it with the exact message; never route around it
   (no code in an unrelated existing file, no file past 300 lines, no shell write). It is fixed first, with a selftest.
@@ -74,7 +74,7 @@ python3 tools/next_number.py bug|law|wb --take "title"   # the only way to get a
 source ~/.env && git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/stellix.git <branch>
 ```
 
-Plain language with Tim, conclusion first. Times carry date, time and zone, America/New_York. Never claim something works
+Plain language with the user, conclusion first. Times carry date, time and zone, America/New_York. Never claim something works
 that has not been built, opened and measured.
 
 <!-- claude-packs:start -->

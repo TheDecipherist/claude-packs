@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// making: before anything is built, what is being made and the shape of every concept it touches (Tim, claude-packs 0.9.0
+// making: before anything is built, what is being made and the shape of every concept it touches (claude-packs 0.9.0
 // item 6; KWB-1). A UserPromptSubmit hook: the same short text goes in front of every prompt, under 80 words, exactly
-// Tim's content: what are you making; each concept you touch and its shape from design/shape.json; a new concept gets its
+// The user's content: what are you making; each concept you touch and its shape from design/shape.json; a new concept gets its
 // row first; a brief naming an instance is wrong by definition; used more than once, one function, parameterized, and
 // where it lives. The answer is a `making:` line in the step's In progress entry in build.md (making-check reads it).
 // When the prompt itself names an instance of a many concept, one line more: "you named X: building for all <shape>, X

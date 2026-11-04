@@ -1,4 +1,4 @@
-// 0.9.0, Tim: "the kit's test suite should only test things that have changed?" `npm run test:changed` maps the files changed since
+// 0.9.0, The owner: "the kit's test suite should only test things that have changed?" `npm run test:changed` maps the files changed since
 // the base (git diff plus untracked) to the tests that cover them (imports, names, the packs table), always with the fresh-tmp
 // preload, and says the full `npm test` is the release gate.
 import assert from 'node:assert/strict';

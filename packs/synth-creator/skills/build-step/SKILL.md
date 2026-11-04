@@ -10,16 +10,16 @@ summary. Where they disagree, the repo wins. The step tool is the project's (the
 usually `python3 tools/step.py`); if the repo has none, copy `tools/step.py` and `tools/hooks/` from a sibling synth that
 has them before doing any of this by hand.
 
-The house rule (Tim, 2026-10-06): **every build task is built in a new branch. Once completed it is merged into the
+The house rule: **every build task is built in a new branch. Once completed it is merged into the
 trunk. We must not be able to lose any work.** MegaSynth lost two days of panel work to one checkout, more to work nobody
 had written down as started, and more to steps called done because the code compiled. A step is a promise with a
 measurement on the end, and a pushed branch is what a dead session leaves behind.
 
-## 0. Before acting on a paste from Tim
+## 0. Before acting on a paste from the user
 
 - If the project's spec carries an edition line ("Spec edition: ..." at the top of `docs/*-spec.md`) and the paste names an
   edition, check the file shows it. Older, or no line: **stop and say so**, naming both editions.
-- Every file a paste names must be there. One missing or older: **stop and tell Tim**, naming the file and what was found;
+- Every file a paste names must be there. One missing or older: **stop and tell the user**, naming the file and what was found;
   do not carry on with the parts that do not depend on it.
 
 ## 1. At the start of a session
@@ -32,8 +32,8 @@ It prints the count, the current step, the branch you are on, uncommitted change
 its last commit. An unmerged branch is unfinished work: read its last commit message and its In-progress row before
 starting anything else. Read `bugs.md`'s Open table too.
 
-**If the work in front of you is not a step in build.md, stop and ask Tim whether the plan has changed.** A bug fix or a
-change of plan he has agreed goes on `start --work <name> "task"` and is merged with `land`.
+**If the work in front of you is not a step in build.md, stop and ask the user whether the plan has changed.** A bug fix or a
+change of plan the user has agreed goes on `start --work <name> "task"` and is merged with `land`.
 
 ## 2. Start: the branch comes first
 
@@ -105,11 +105,11 @@ with a merge commit, writes that commit's short hash into the log line in a seco
 branch.
 
 It refuses an empty proof, a step that is not the current one (side-by-side steps take `--out-of-order`), and unnamed new
-files. If a merge conflicts it stops with both sides intact: resolve by hand, never by throwing a side away, and ask Tim
+files. If a merge conflicts it stops with both sides intact: resolve by hand, never by throwing a side away, and ask the user
 if it is not obvious which line is right. If it prints NOT PUSHED, push with the command it shows. A step is not finished
 until the trunk is pushed.
 
-## 6. Tell Tim
+## 6. Tell the user
 
 Conclusion first, in plain language: the step, what proved it, the new count, the next step. Show the changed `build.md`.
 Never claim a step works that has not been built, opened and measured.

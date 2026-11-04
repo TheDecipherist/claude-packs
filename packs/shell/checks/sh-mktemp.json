@@ -1,0 +1,18 @@
+{
+  "id": "sh-mktemp",
+  "why": "A fixed path in /tmp collides with another run, and another user can plant it.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": ">>?\\s*\\\"?/tmp/\\w",
+  "flags": "m",
+  "bad": "echo x > /tmp/out.txt",
+  "good": "out=$(mktemp)\necho x > \"$out\""
+}
