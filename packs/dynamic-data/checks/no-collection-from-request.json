@@ -1,0 +1,27 @@
+{
+  "id": "no-collection-from-request",
+  "why": "A collection named by the request reaches every collection. Resolve it through an allowlist, switched on.",
+  "rule": ".claude/rules/every-dynamic-surface-has-a-boundary.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\.collection\\(\\s*(?:req|request|ctx)\\.(?:params|query|body)\\b|\\.collection\\(\\s*params\\.\\w+",
+  "bad": "const rows = await db.collection(req.params.collection).find({}).toArray();",
+  "good": "const def = definitions.get(req.params.collection);\nconst rows = await gateway.find(def, scope);",
+  "kind": "security"
+}

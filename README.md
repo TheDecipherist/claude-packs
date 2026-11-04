@@ -74,15 +74,16 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `base` | Universal engineering, in every configuration | 20 | 7 | 17 | 7 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 1 | 2 | 0 | 0 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 9 | 12 | 0 | 1 |
-| `docker` | Dockerfiles, Compose and Swarm | 4 | 24 | 0 | 1 |
-| `fastify` | Fastify servers | 5 | 15 | 0 | 0 |
-| `full-stack` | The full-stack configuration's own laws | 12 | 1 | 2 | 0 |
+| `docker` | Dockerfiles, Compose and Swarm | 5 | 24 | 0 | 1 |
+| `dynamic-data` | Definition-driven systems: a CMS, an admin generator, a low-code platform | 10 | 9 | 0 | 1 |
+| `fastify` | Fastify servers | 6 | 15 | 0 | 0 |
+| `full-stack` | The stack choice: Fastify and Next.js only | 1 | 1 | 1 | 0 |
 | `go` | Go: errors handled, wrapped and never discarded | 1 | 2 | 0 | 0 |
 | `gpu-painter` | GPU-drawn UI on Dawn, with no OpenGL | 15 | 6 | 1 | 6 |
 | `hook-proof` | A hook that should refuse does refuse | 1 | 5 | 0 | 1 |
 | `host-agent` | Software that runs as root on machines it does not own | 1 | 7 | 0 | 0 |
 | `html-ui` | Server-rendered HTML: every value escaped | 2 | 5 | 0 | 0 |
-| `http-api` | Any HTTP server, in any framework: records tied to their caller, guards that fail closed, validated input | 3 | 26 | 0 | 1 |
+| `http-api` | Any HTTP server, in any framework: records tied to their caller, guards that fail closed, versioned routes, three layers | 9 | 29 | 0 | 2 |
 | `js-ts` | JavaScript and TypeScript | 27 | 35 | 0 | 0 |
 | `mongo` | MongoDB with the native driver | 6 | 18 | 0 | 0 |
 | `multi-tenant` | One system, many customers: no role crosses a tenant | 1 | 2 | 0 | 1 |
@@ -99,6 +100,11 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `web` | Web UI: Next.js, HTML, CSS, Tailwind | 8 | 22 | 0 | 5 |
 | `websocket` | WebSocket services: identity from the connection | 1 | 3 | 0 | 0 |
 | `writing` | Text that goes public reads like a person wrote it | 9 | 11 | 0 | 10 |
+| `zod` | Zod 4 schemas written once, in one folder | 2 | 0 | 1 | 0 |
+
+## APIs are versioned, in any framework
+
+`http-api` holds every route under `/api/v<N>/`: `api-path-versioned` reads mounts and routes in any framework, `next-api-route-versioned` reads Next.js route files, and `client-calls-a-version` reads the calls. `apis-are-versioned` says what a version promises: a published version only grows, and a breaking change is a new one with the old kept working behind `Deprecation` and `Sunset` headers. `change-an-api` walks a change. `/health`, auth callbacks and webhooks are left out, since the platform or the provider owns those paths.
 
 ## Configurations
 
@@ -111,7 +117,7 @@ A project is one configuration: a kind of project, as data in `configurations/<n
 | `go` | Go projects | `go` |
 | `node` | A Node.js or TypeScript service, web app, CLI, library or MCP server | `js-ts` |
 | `python` | Python projects | `python` |
-| `full-stack` | A Fastify API and a Next.js web app, with one schemas folder and one database gateway. It fixes a folder layout, so it is offered and never assumed | `stored-text`, `ui-craft` |
+| `full-stack` | A Fastify API and a Next.js web app, with one schemas folder and one database gateway. It fixes a folder layout, so it is offered and never assumed. It always takes `full-stack`, `http-api`, `fastify`, `zod` and `docker` | `js-ts`, `stored-text`, `ui-craft` |
 | `synth-creator` | JUCE synths and effects | `cpp`, `audio-core` |
 
 ```
@@ -188,7 +194,7 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 | `suite-once` | Bash | Refuses the whole test suite on uncommitted work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
-Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` and `schemas-only` (`full-stack`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
+Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
 Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
 

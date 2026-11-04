@@ -5,19 +5,29 @@
     "always": [
       "base",
       "full-stack",
+      "http-api",
+      "fastify",
+      "zod",
+      "docker",
       "writing",
       "hook-proof"
     ],
     "choose": [
+      "js-ts",
       "stored-text",
       "ui-craft",
       "shell",
       "react",
       "multi-tenant",
       "websocket",
-      "ci"
+      "ci",
+      "dynamic-data",
+      "mongo",
+      "ai",
+      "nginx"
     ],
     "default": [
+      "js-ts",
       "stored-text",
       "ui-craft"
     ]

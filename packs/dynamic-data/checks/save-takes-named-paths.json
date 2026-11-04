@@ -1,0 +1,27 @@
+{
+  "id": "save-takes-named-paths",
+  "why": "A save that takes the whole body is mass assignment: any field a client sends is written, whatever its role may touch. Check the paths against what the role may write.",
+  "rule": ".claude/rules/rules-live-in-the-engine.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\.(?:updateOne|updateMany|findOneAndUpdate|findByIdAndUpdate)\\([^;]*\\$set\\s*:\\s*(?:req|request)\\.body\\b|\\.(?:insertOne|replaceOne)\\([^;]*(?:req|request)\\.body\\s*\\)",
+  "bad": "await col.updateOne({ _id: id }, { $set: req.body });",
+  "good": "await write(entity, id, patch, { role, scope });",
+  "kind": "security"
+}

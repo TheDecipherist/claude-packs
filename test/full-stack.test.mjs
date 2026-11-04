@@ -25,7 +25,7 @@ test('init --config full-stack: its folders, its laws and no synth law', () => {
   const md = readFileSync(join(dir, 'CLAUDE.md'), 'utf8');
   assert.match(md, /a Zod schema outside the schemas folder/);
   assert.doesNotMatch(md, /drawing code/);
-  assert.match(md, /Installed packs: base, stored-text, ui-craft\./);
+  assert.match(md, /Installed packs: base, js-ts, stored-text, ui-craft\./);
   for (const h of ['stack-guard.mjs', 'schemas-only.mjs', 'secrets-guard.mjs', 'untrusted-boundary.mjs']) {
     const s = selftest(dir, h);
     assert.equal(s.status, 0, `${h}: ${s.stdout}${s.stderr}`);
@@ -49,7 +49,8 @@ test('the full-stack hooks refuse express, a schema in a route and a .env git do
 });
 
 test('doctor --strict counts TypeScript as source in a full-stack project (KWB-32)', () => {
-  const dir = fullStack();
+  const dir = fresh('fs-cover-');   // without js-ts, whose rules cover every .ts file
+  assert.equal(cli(dir, 'init', 'stored-text', '--config', 'full-stack').status, 0);
   mkdirSync(join(dir, 'stray'), { recursive: true });
   writeFileSync(join(dir, 'stray/util.ts'), 'export const x = 1;\n');
   const red = cli(dir, 'doctor', '--strict');

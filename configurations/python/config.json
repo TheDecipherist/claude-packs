@@ -18,7 +18,8 @@
       "http-api",
       "multi-tenant",
       "ci",
-      "go"
+      "go",
+      "dynamic-data"
     ],
     "default": [
       "python"

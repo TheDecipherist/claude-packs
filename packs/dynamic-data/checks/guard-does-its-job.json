@@ -1,0 +1,28 @@
+{
+  "id": "guard-does-its-job",
+  "why": "A guard whose first line returns true lets everything through, with the real check left dead below it.",
+  "rule": ".claude/rules/rules-live-in-the-engine.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\b(?:function\\s+|(?:const|let)\\s+)(?:check|can|allow|verify|authori[sz]e|validate|has[A-Z]|is[A-Z])\\w*\\s*(?:=\\s*(?:async\\s*)?)?\\([^)]*\\)[^{;]*\\{\\s*return\\s+true\\s*;",
+  "bad": "function checkCollection(name) {\n  return true;\n  if (!ALLOWED.includes(name)) throw new Error(name);\n}",
+  "good": "function checkCollection(name) {\n  if (!ALLOWED.includes(name)) throw new Error(name);\n  return true;\n}",
+  "kind": "security",
+  "code": true
+}

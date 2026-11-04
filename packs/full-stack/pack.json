@@ -1,7 +1,7 @@
 {
   "name": "full-stack",
   "version": "1.0.0",
-  "description": "The full-stack configuration's own laws: Fastify and Next.js only (stack-guard), Zod 4 schemas only in the schemas folder (schemas-only), and its rules per folder: thin routes, handlers, one database gateway with chain keys first, one error contract, env.ts shapes, health and logs, multistage Docker, inject() tests.",
+  "description": "The full-stack configuration's stack choice: Fastify and Next.js only (stack-guard). The rest of the configuration is other packs: http-api, fastify, zod, docker.",
   "type": "stock",
   "author": "claude-packs",
   "license": "MIT",
@@ -43,13 +43,6 @@
     "channel": [
       "channel"
     ],
-    "env": [
-      "**/env.ts"
-    ],
-    "docker": [
-      "**/Dockerfile",
-      "**/Dockerfile.*"
-    ],
     "manifests": [
       "**/package.json"
     ],
@@ -74,11 +67,6 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stack-guard.mjs\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/schemas-only.mjs\"",
             "timeout": 10
           }
         ]

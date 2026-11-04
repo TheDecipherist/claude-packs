@@ -92,6 +92,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a README that describes the kit as it is, with a test that holds it; concepts: none (design/shape.json declares none); reuse: PRESETS (lib/packs.mjs).
   done when: test/readme.test.mjs green; the whole suite green once, committed; landed.
 
+- 0.26.0, dynamic-data, API versioning and the full-stack split (work/0.26.0-dynamic-data), started 2026-11-04 (a pack from the CMS design docs; versioning in any framework; full-stack into smaller packs).
+  making: the dynamic-data pack, versioning checks in http-api, full-stack as a composition of packs; concepts: none (design/shape.json declares none); reuse: hitsOf (packs/base/hooks/lesson-checks.mjs), the pack layout of packs/http-api.
+  done when: the checks measured on real repos with hits read; the moved laws reach a full-stack install; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

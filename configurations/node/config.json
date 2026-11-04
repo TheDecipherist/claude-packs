@@ -29,7 +29,9 @@
       "websocket",
       "host-agent",
       "go",
-      "ci"
+      "ci",
+      "dynamic-data",
+      "zod"
     ],
     "default": [
       "js-ts"

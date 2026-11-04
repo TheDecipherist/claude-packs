@@ -17,7 +17,8 @@
       "host-agent",
       "ci",
       "js-ts",
-      "python"
+      "python",
+      "dynamic-data"
     ],
     "default": [
       "go"

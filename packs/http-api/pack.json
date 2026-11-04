@@ -18,5 +18,28 @@
   ],
   "engines": {
     "claude-packs": ">=0.25.0"
+  },
+  "concepts": {
+    "routes": [
+      "**/routes/**",
+      "**/app/api/**"
+    ],
+    "handlers": [
+      "**/handlers/**",
+      "**/controllers/**",
+      "**/services/**"
+    ],
+    "adapters": [
+      "**/adapters/**",
+      "**/repositories/**"
+    ],
+    "api": [
+      "**/routes/**",
+      "**/app/api/**",
+      "**/server.ts",
+      "**/server.js",
+      "**/app.ts",
+      "**/app.js"
+    ]
   }
 }

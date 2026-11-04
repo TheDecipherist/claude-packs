@@ -1,5 +1,5 @@
 ---
-# concepts: docker
+# concepts: dockerfile
 ---
 # The image is built in stages: dependencies and build, then a small runtime with production modules only
 

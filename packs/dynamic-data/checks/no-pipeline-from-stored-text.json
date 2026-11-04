@@ -1,0 +1,27 @@
+{
+  "id": "no-pipeline-from-stored-text",
+  "why": "A pipeline parsed from stored text runs with no schema, no allowlist and no tenant filter. Compile it from a validated expression tree.",
+  "rule": ".claude/rules/every-dynamic-surface-has-a-boundary.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\.aggregate\\(\\s*JSON\\.parse\\(",
+  "bad": "const rows = await col.aggregate(JSON.parse(query.pipeline)).toArray();",
+  "good": "const rows = await gateway.run(compile(query.tree), scope);",
+  "kind": "security"
+}

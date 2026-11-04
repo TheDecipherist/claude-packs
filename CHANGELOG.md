@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.26.0 (2026-11-04)
+
+- New `dynamic-data` pack, from the post-mortem of a 20-year CMS and its successor's design: one definition drives every surface, definitions are validated data, the engine enforces and the UI reflects, every dynamic surface has a boundary, fields have owners, saves are patches, a fact is stored once, imports drop nothing, a list is a saved query, and a new tenant costs one document. Ten rules, nine checks and the `design-a-definition` skill. It finds little on the three repos measured, which are not definition-driven; its checks are proved by their examples, drawn from that system's real faults.
+- API versioning in any framework: `api-path-versioned`, `next-api-route-versioned` and `client-calls-a-version` in `http-api`, the `apis-are-versioned` rule and the `change-an-api` skill. Only Fastify routes were judged before, and nothing covered a breaking change inside a version.
+- `full-stack` is split. Most of its rules held for any project, so they moved to packs anyone can take: the layered API laws to `http-api`, `tests-use-inject` to `fastify`, `dockerfile-multistage` to `docker`, the schema laws and `schemas-only` to a new `zod` pack, and the hover law into `ui-craft`'s `pointer-feedback`. The `full-stack` pack is now only the stack choice. The configuration always takes `http-api`, `fastify`, `zod` and `docker`, and `js-ts` by default: it could not take `fastify` before.
+- `replaces` on a check: a wider check stands in for a narrower one, so a project with both sees a hit once.
+
 ## 0.25.1 (2026-11-04)
 
 - The README is a front page for everyone: what the kit does, how to start, every pack, configuration, preset, command and base hook. The notes from earlier releases moved to `docs/history.md`. `test/readme.test.mjs` fails when the page falls behind.

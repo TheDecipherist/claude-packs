@@ -40,6 +40,9 @@ function majorsOf(root, dep) {
 }
 const appliesTo = (root, c) => Object.entries(c.whenDep ?? {}).every(([dep, major]) => { const found = majorsOf(root, dep); return !found.length || found.some((m) => m >= major); });
 
+// "replaces": [ids]: when both are installed, the wider check stands and the narrower one is left out, so a hit is reported once.
+const withoutReplaced = (checks) => { const gone = new Set(checks.flatMap((c) => c.replaces ?? [])); return checks.filter((c) => !gone.has(c.id)); };
+
 export function loadChecks(root = ROOT) {
   const dir = join(root, '.claude', 'checks');
   let files = [];
@@ -49,11 +52,11 @@ export function loadChecks(root = ROOT) {
     return [];
   }
   const layout = readLayout(root);
-  return files.filter((f) => appliesTo(root, JSON.parse(readFileSync(join(dir, f), 'utf8')))).map((f) => {
+  return withoutReplaced(files.filter((f) => appliesTo(root, JSON.parse(readFileSync(join(dir, f), 'utf8')))).map((f) => {
     const c = { file: f, ...JSON.parse(readFileSync(join(dir, f), 'utf8')) };
     const fromConcepts = (c.concepts ?? []).flatMap((k) => conceptGlobs(layout, k) ?? []);
     return { ...c, globs: [...resolveAliases(layout, c.globs ?? []), ...fromConcepts], exclude: resolveAliases(layout, c.exclude ?? []) };
-  });
+  }));
 }
 
 // What a check reads: one blanking per kind. strings: comments blanked, strings kept.

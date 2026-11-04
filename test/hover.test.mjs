@@ -19,8 +19,8 @@ const synthWithUi = () => {
   return dir;
 };
 
-test('gpu-painter and full-stack carry the hover rule, scoped to UI code, naming the cursor, the effect and the one hit test', () => {
-  for (const [pack, rule] of [['gpu-painter', 'hover-every-pressable.md'], ['full-stack', 'web-hover-every-pressable.md']]) {
+test('gpu-painter and ui-craft carry the hover rule, scoped to UI code, naming the cursor, the effect and the one hit test', () => {
+  for (const [pack, rule] of [['gpu-painter', 'hover-every-pressable.md'], ['ui-craft', 'pointer-feedback.md']]) {
     const text = readFileSync(join(KIT, 'packs', pack, 'rules', rule), 'utf8');
     assert.match(text, /# concepts: ui\b/, rule);
     assert.match(text, /cursor/i, rule);
@@ -45,7 +45,7 @@ test('an installed synth gets the rule and the skill; full-stack gets its rule l
   assert.ok(existsSync(join(synth, '.claude/rules/hover-every-pressable.md')));
   assert.ok(existsSync(join(synth, 'src/painter/.claude/skills/hover-state/SKILL.md')));
   const web = init(['--config', 'full-stack'], 'hov-i2-');
-  assert.match(readFileSync(join(web, '.claude/rules/web-hover-every-pressable.md'), 'utf8'), /"channel\/\*\*"/);
+  assert.ok(existsSync(join(web, '.claude/rules/pointer-feedback.md')));
   assert.ok(existsSync(join(web, '.claude/skills/hover-state/SKILL.md')));
 });
 

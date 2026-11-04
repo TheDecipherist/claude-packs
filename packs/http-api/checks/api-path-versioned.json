@@ -1,0 +1,31 @@
+{
+  "id": "api-path-versioned",
+  "why": "An unversioned API route cannot change without breaking every client.",
+  "rule": ".claude/rules/apis-are-versioned.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/data/**",
+    "**/docs/**"
+  ],
+  "pattern": "\\.(?:use|all|get|post|put|patch|delete|route)\\s*\\(\\s*['\"`]/api/(?!v\\d+(?:/|['\"`]))",
+  "bad": "app.use('/api/sessions', router);\napp.get('/api/orders', handler);",
+  "good": "app.use('/api/v1/sessions', router);\napp.get('/api/v2/orders', handler);",
+  "replaces": [
+    "api-routes-versioned"
+  ]
+}
