@@ -2,7 +2,7 @@
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T15:36:00.201Z",
+  "updated": "2026-11-04T15:47:13.216Z",
   "files": {
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
     ".claude/rules/bug-fix-starts-red.md": "b10bac915dbfa15465e626cc1aa13b55a9a38ef0cc27e9dbb90de1e51a91a97c",
@@ -88,6 +88,8 @@
     ".claude/skills/reddit-title/SKILL.md": "553461a75528e7c0d04e25f569538781579fa333889ae744621b61f40124f6d6",
     ".claude/skills/reply-moves/SKILL.md": "5c5198c66bc65629ce8e0bacf12d0c36682925cb0c98e67f99a60b48df0743e2",
     ".claude/skills/reply-stance/SKILL.md": "7073a3173374eb890a00e2ec8b9728a320a54640ef613e9e88ed469689b60ddc",
-    ".claude/skills/should-i-reply/SKILL.md": "c045369284b02b5ef5f625a020b7af5955e0c81e85a1d4aa0a2d23bc05cdc041"
+    ".claude/skills/should-i-reply/SKILL.md": "c045369284b02b5ef5f625a020b7af5955e0c81e85a1d4aa0a2d23bc05cdc041",
+    ".claude/rules/a-refusal-is-exit-2.md": "db258a2a150a57436d0b657584b013ee69c0612b464493eeb8bd1855d1153075",
+    ".claude/skills/prove-a-hook/SKILL.md": "9d4ab7bba5e4c41fee99678ed9790e9bad87bd8ad42622741dba243b5a98ce52"
   }
 }

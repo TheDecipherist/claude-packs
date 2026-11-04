@@ -1,8 +1,7 @@
 // 0.17.0 (Tim, 2026-11-04): application and page design, from Vercel's guidelines, Anthropic's frontend-design, Impeccable and taste-skill
 // (docs/ui-craft-sources.md says what came from each). A check blocks only what is objective or what the sources agree on; taste stays a rule.
-import { KIT, assert, cli, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, existsSync, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
 
-const write = (dir, rel, content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
 const checks = readdirSync(join(KIT, 'packs/ui-craft/checks')).map((f) => JSON.parse(readFileSync(join(KIT, 'packs/ui-craft/checks', f), 'utf8')));
 
 test('the UI presets and full-stack bring the pack; every check names a rule that is there, and every rule names checks that are', () => {
@@ -18,13 +17,7 @@ test('the UI presets and full-stack bring the pack; every check names a rule tha
 test('each check refuses its bad example and passes its good one through the hook, in a real install', () => {
   const dir = fresh('uic-all-');
   run(dir, 'init', 'next-app');
-  for (const c of checks) {
-    const file = c.concepts.includes('ui-styles') && !c.bad.includes('<') ? 'src/app.css' : 'src/ui/Thing.tsx';
-    const r = write(dir, file, c.bad);
-    assert.equal(r.status, 2, c.id);
-    assert.match(r.stderr, new RegExp(c.id));
-    assert.equal(write(dir, file, c.good).status, 0, `${c.id}: good`);
-  }
+  holdToExamples(dir, checks, (c) => (c.concepts.includes('ui-styles') && !c.bad.includes('<') ? 'src/app.css' : 'src/ui/Thing.tsx'));
 });
 
 test('doctor is red for UI code with no page gate, and green with one or with a reason', () => {

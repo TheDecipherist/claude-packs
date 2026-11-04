@@ -1,0 +1,11 @@
+{
+  "name": "hook-proof",
+  "description": "A hook that should refuse does refuse: exit 2 is the only block, a crash or a swallowed exit lets the call through, and nothing is proved until it is seen red.",
+  "folders": {},
+  "concepts": {
+    "hook-files": ["**/.claude/hooks/**", "**/hooks/**/*.sh", "**/hooks/**/*.mjs", "**/hooks/**/*.js", "**/hooks/**/*.cjs", "**/hooks/**/*.py"],
+    "hook-config": ["**/.claude/settings.json", "**/.claude/settings.local.json"]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

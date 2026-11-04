@@ -42,7 +42,7 @@ const TIME = ['.claude/rules/git-right-first-time.md', '.claude/rules/reuse-befo
 // 0.15.0: the writing pack comes with every configuration. Its rules and skills reach a project with no refusing in them; its checks are held back.
 const WRITING = [...['cut-the-padding', 'rhythm-like-talk', 'no-stock-language', 'no-scaffolding', 'no-time-or-date', 'ascii-no-em-dash', 'write-from-your-own-corner', 'tims-voice', 'no-cargo-cult'].map((r) => `.claude/rules/${r}.md`),
   ...['humanize', 'reply-stance', 'should-i-reply', 'reply-moves', 'reddit-post', 'pick-subreddit', 'reddit-title', 'argument-post', 'launch-post', 'post-voice'].map((s) => `.claude/skills/${s}/SKILL.md`), '.claude/hooks/lib/prose.mjs'];
-const LANDING = ['.claude/rules/finished-work-lands.md', '.claude/skills/land-branch/SKILL.md'];   // 0.17.0: with git-guard, which every project has
+const LANDING = ['.claude/rules/finished-work-lands.md', '.claude/skills/land-branch/SKILL.md', '.claude/rules/a-refusal-is-exit-2.md', '.claude/skills/prove-a-hook/SKILL.md'];   // 0.17.0: with git-guard, which every project has
 const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only where the project has time-guard: the rule goes where its hook goes
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
 
@@ -56,6 +56,7 @@ for (const project of ['stellix', 'sub37']) {
     delete layout.configuration;
     delete layout.concepts.js;   // 0.11.0: base's js concept (raw globs, so a complete layout gains it), for the dispatch laws
     delete layout.concepts['public-text'];   // 0.15.0: the writing pack's concept, raw globs too
+    delete layout.concepts['hook-files']; delete layout.concepts['hook-config'];   // 0.18.0: the hook-proof pack's
     assert.equal(`${JSON.stringify(layout, null, 2)}\n`, expected(project, 'layout.json'), 'layout.json, the key aside');
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));

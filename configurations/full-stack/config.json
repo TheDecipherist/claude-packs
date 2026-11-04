@@ -5,7 +5,8 @@
     "always": [
       "base",
       "full-stack",
-      "writing"
+      "writing",
+      "hook-proof"
     ],
     "choose": [
       "stored-text",

@@ -4,7 +4,8 @@
   "packs": {
     "always": [
       "base",
-      "writing"
+      "writing",
+      "hook-proof"
     ],
     "choose": [],
     "default": []

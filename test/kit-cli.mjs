@@ -19,4 +19,14 @@ export const fresh = (prefix) => mkdtempSync(join(tmpdir(), prefix));
 export const hookRun = (dir, name, payload) =>
   spawnSync('node', [join(dir, '.claude/hooks', name)], { input: JSON.stringify(payload), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
 export const hookStatus = (dir, name, payload) => hookRun(dir, name, payload).status;
+// A Write fired at the project's lesson checks, and a set of checks held to their examples through the hook, in a real install.
+export const lessonWrite = (dir, rel, content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
+export function holdToExamples(dir, checks, fileFor) {
+  for (const c of checks) {
+    const file = fileFor(c);
+    const r = lessonWrite(dir, file, c.bad);
+    if (r.status !== 2 || !r.stderr.includes(c.id)) throw new Error(`${c.id}: its bad example was not refused in ${file}: ${r.status} ${r.stderr}`);
+    if (lessonWrite(dir, file, c.good).status !== 0) throw new Error(`${c.id}: its good example was refused in ${file}`);
+  }
+}
 export const selftest = (dir, hook) => spawnSync('node', [join(dir, '.claude/hooks', hook), '--selftest'], { encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });

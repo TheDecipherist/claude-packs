@@ -1,0 +1,17 @@
+{
+  "id": "hook-exit-1-does-not-block",
+  "why": "Exit 1 is a non-blocking error: the call goes ahead. A refusal is exit 2. Mark a real non-refusal with a `not a refusal` comment on its line.",
+  "rule": ".claude/rules/a-refusal-is-exit-2.md",
+  "concepts": [
+    "hook-files"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/*.test.*"
+  ],
+  "pattern": "^(?![^\\n]*not a refusal)(?:\\s*exit 1\\b|[^\\n]*\\b(?:process|sys)\\.exit\\(1\\))",
+  "bad": "if grep -q \"rm -rf\" \"$cmd\"; then\n  echo \"BLOCKED\" >&2\n  exit 1\nfi\n",
+  "good": "if grep -q \"rm -rf\" \"$cmd\"; then\n  echo \"BLOCKED\" >&2\n  exit 2\nfi\ntest -f x || exit 1  # not a refusal: a usage error\n",
+  "flags": "m"
+}

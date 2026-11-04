@@ -5,7 +5,8 @@
     "always": [
       "base",
       "synth-creator",
-      "writing"
+      "writing",
+      "hook-proof"
     ],
     "choose": [
       "audio-core",

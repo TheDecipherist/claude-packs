@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.18.0 (2026-11-04)
+
+hook-proof (Tim, 2026-11-04: whenever a hook is supposed to exit 2 and it exits 0, it is caught). Only exit 2 blocks, so a guard fails open and in silence.
+
+- doctor is red for a hook no settings entry runs, and for a hook that crashed since it last changed (its exit code in `.claude/hooks.log`): those calls were not
+  judged, and went through. A hook killed at its timeout leaves no line and is not seen.
+- New pack `hook-proof`, in every configuration: rule `a-refusal-is-exit-2`, skill `prove-a-hook`, and five checks on hook files and settings:
+  `hook-exit-1-does-not-block`, `hook-catch-must-not-allow`, `hook-no-or-true`, `hook-command-no-pipe`, `hook-refusal-on-stderr`.
+
 ## 0.17.0 (2026-11-04)
 
 ui-craft and landing.

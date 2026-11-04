@@ -92,6 +92,10 @@ Run it before installing anything. It works on a copy in a temp folder and never
 
 Pack `ui-craft` (in the `node-ui` and `next-app` presets, and by default in `full-stack`): small rules for forms, motion, real data, URL state, touch, copy, type and the generated look, twelve checks, and a rendered-page gate (`"gates": { "a11y": "<command>" }`, built by the `prove-page` skill). It is written from Vercel's Web Interface Guidelines, Anthropic's frontend-design, Impeccable and taste-skill; [docs/ui-craft-sources.md](docs/ui-craft-sources.md) says what came from each.
 
+## A refusal is exit 2 (0.18.0)
+
+A hook that crashes, exits 1, is killed or is not registered lets the call through, and nothing says so. `doctor` is red for a hook that crashed and for one no settings entry runs; the `hook-proof` pack (in every configuration) adds checks on the forms that fail open, the rule `a-refusal-is-exit-2` and the skill `prove-a-hook`.
+
 ## Commands
 
 ```
