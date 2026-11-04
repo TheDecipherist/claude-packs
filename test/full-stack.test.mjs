@@ -25,7 +25,7 @@ test('init --config full-stack: its folders, its laws and no synth law', () => {
   const md = readFileSync(join(dir, 'CLAUDE.md'), 'utf8');
   assert.match(md, /a Zod schema outside the schemas folder/);
   assert.doesNotMatch(md, /drawing code/);
-  assert.match(md, /Installed packs: base\./);
+  assert.match(md, /Installed packs: base, stored-text\./);
   for (const h of ['stack-guard.mjs', 'schemas-only.mjs', 'secrets-guard.mjs', 'untrusted-boundary.mjs']) {
     const s = selftest(dir, h);
     assert.equal(s.status, 0, `${h}: ${s.stdout}${s.stderr}`);
