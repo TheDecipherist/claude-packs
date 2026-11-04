@@ -15,7 +15,8 @@
       "html-ui",
       "web",
       "tui",
-      "nginx"
+      "nginx",
+      "stored-text"
     ],
     "default": [
       "js-ts"

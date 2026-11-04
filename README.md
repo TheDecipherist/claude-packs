@@ -72,6 +72,10 @@ Every control, point, handle, tab, list row, key or button has a cursor that nam
 - The whole suite runs once, committed, before landing: `suite-once` refuses it on uncommitted work. While working, run what the change reaches (`pick-tests`, `npm run test:changed`).
 - Small rules sit behind the hooks that cost the most turns (`git-right-first-time`, `reuse-before-writing`, `making-line-first`, `split-before-the-limit`, `long-work-in-the-background`), so the first try is the right one.
 
+## Stored text: what comes from a database renders properly (0.14.0)
+
+Pack `stored-text` (in the `node-ui` and `next-app` presets, and by default in `full-stack`; `add stored-text` elsewhere): every stored document reaches the page through one renderer, `stored-text.*`: line endings normalised, markdown parsed, code highlighted, HTML sanitized. The skill `render-stored-text` builds it and proves it with one fixture row; four checks hold it.
+
 ## Commands
 
 ```

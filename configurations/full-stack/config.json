@@ -6,8 +6,12 @@
       "base",
       "full-stack"
     ],
-    "choose": [],
-    "default": []
+    "choose": [
+      "stored-text"
+    ],
+    "default": [
+      "stored-text"
+    ]
   },
   "layout": {
     "folders": {

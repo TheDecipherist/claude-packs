@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.14.0 (2026-11-04)
+
+Stored text (Tim, 2026-11-04: UIs render what comes from a database with \r correct, code highlighted and markdown parsed).
+
+- New pack `stored-text`: rule `stored-text-renders-once` (one renderer, `stored-text.*`: normalise line endings; markdown with raw HTML off;
+  highlight fenced code by language on the server; sanitize last; a terminal's lone `\r` overwrites its line; a visible backslash-r is a
+  write bug, fixed at the source), skill `render-stored-text` (how to build it, and the fixture row that proves it), and four checks:
+  `stored-text-renderer-complete` (needs mode: the renderer does all four jobs), `stored-text-libs-only-in-renderer`,
+  `no-raw-html-from-data` (`dangerouslySetInnerHTML`, `innerHTML`, `v-html` take only the renderer's output) and
+  `stored-text-through-renderer` (a `content`, `body`, `markdown` or `transcript` field straight into markup; it reads names, not data
+  flow; a `plain text:` comment marks a field that is plain).
+- The `node-ui` and `next-app` presets bring it; the node and full-stack configurations take it (full-stack by default).
+
 ## 0.13.0 (2026-11-04)
 
 The time laws (KWB-41; Tim: "Anything like tests that consume a ton of time that could/should be avoided should have a small skill or rule or both").

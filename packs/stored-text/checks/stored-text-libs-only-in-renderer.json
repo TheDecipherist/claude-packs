@@ -1,0 +1,30 @@
+{
+  "id": "stored-text-libs-only-in-renderer",
+  "why": "A second place that parses markdown or highlights code is a second place that forgets to sanitize, and pages start to differ. These libraries are imported only in stored-text.*.",
+  "rule": ".claude/rules/stored-text-renders-once.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.mjs",
+    "**/*.vue",
+    "**/*.svelte"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/stored-text.*"
+  ],
+  "strings": true,
+  "pattern": "(?:\\bfrom\\s+|\\bimport\\s+|\\brequire\\(\\s*|\\bimport\\(\\s*)['\"](?:marked|markdown-it|micromark|react-markdown|remark[\\w-]*|rehype[\\w-]*|shiki|highlight\\.js|prismjs|dompurify|isomorphic-dompurify|sanitize-html)(?:/[^'\"]*)?['\"]",
+  "bad": "import { marked } from 'marked';\nconst html = marked.parse(row.body);\n",
+  "good": "import { renderStored } from '../lib/stored-text.js';\nconst html = renderStored(row.body);\n"
+}

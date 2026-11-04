@@ -1,0 +1,31 @@
+{
+  "id": "no-raw-html-from-data",
+  "why": "HTML put on a page by hand skips the sanitize step: stored markdown can carry a script. The only HTML inserted raw is the renderer's output.",
+  "rule": ".claude/rules/stored-text-renders-once.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.mjs",
+    "**/*.vue",
+    "**/*.svelte",
+    "**/*.html"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/stored-text.*"
+  ],
+  "strings": true,
+  "pattern": "dangerouslySetInnerHTML=\\{\\{\\s*__html:(?!\\s*renderStored\\()|\\.(?:innerHTML|outerHTML)\\s*\\+?=(?!\\s*(?:renderStored\\(|['\"`]{2}))|\\bv-html=\"(?!renderStored\\()",
+  "bad": "<div dangerouslySetInnerHTML={{ __html: row.body }} />\n",
+  "good": "<StoredText source={row.body} />\n<div dangerouslySetInnerHTML={{ __html: renderStored(row.body) }} />\nel.innerHTML = '';\n"
+}

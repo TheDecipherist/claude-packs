@@ -1,0 +1,25 @@
+{
+  "id": "stored-text-through-renderer",
+  "why": "A stored document put straight into markup shows its markdown as symbols, its code as one grey block and its \\r as stray characters. It goes through the renderer. A field that truly is plain gets a `plain text:` comment on its line.",
+  "rule": ".claude/rules/stored-text-renders-once.md",
+  "concepts": [
+    "stored-text-ui"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/stored-text.*"
+  ],
+  "pattern": "^(?![^\\n]*plain text:)[^\\n]*(?:>\\s*\\{\\s*[\\w$.?]*(?:\\?\\.|\\.)(?:content|body|markdown|transcript)\\s*\\}|\\$\\{\\s*(?:(?:esc\\w*|escapeHtml)\\(\\s*)?[\\w$.?]*(?<!\\breq)(?<!\\brequest)(?:\\?\\.|\\.)(?:content|body|markdown|transcript)\\s*\\)?\\s*\\})",
+  "flags": "m",
+  "bad": "<p>{row.body}</p>\n",
+  "good": "<StoredText source={row.body} />\nconst page = html`<div>${raw(renderStored(row.body))}</div>`;\n<td>{row.title}</td>\n<td>{row.content}</td> {/* plain text: a short label from an enum */}\nconst u = `${req.body}`;\n"
+}
