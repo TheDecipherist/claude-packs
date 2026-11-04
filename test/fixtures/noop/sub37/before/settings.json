@@ -1,0 +1,93 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lesson-checks.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/file-size-guard.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/frozen-files.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/placement-law.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/realtime-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spec-lock.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/folder-law.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stage-guard.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/param-id-lock.mjs\"",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "additionalDirectories": [
+      "../"
+    ]
+  }
+}

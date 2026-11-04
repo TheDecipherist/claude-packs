@@ -1,0 +1,241 @@
+# Sub37 — Moog Sub 37, reimplemented by The Decipherist
+
+Built from `~/projects/synthkit`. **Read `docs/before-you-call-it-finished.md`
+before saying anything here is done**, and `docs/laws.md` before changing any
+constant.
+
+## Non-negotiables
+
+These apply to every machine. They are findings, not opinions: each one is
+invisible until something sounds subtly wrong, and each is easy to "correct" into
+a bug.
+
+1. **Round-trip unmapped patch bytes VERBATIM.** Most of a real record is unnamed
+   on day one. Discarding what you cannot yet read breaks sysex export and makes
+   later attribution impossible — and the loss is silent. One machine's extension
+   record was parsed as zeros for weeks and every effects knob, pan, comb and EQ
+   default it carried was chased as a separate bug. This law WINS over the kit's
+   `state-load-versioned-and-safe` rule where that rule says "ignore unknown IDs":
+   unknown means not applied and never a crash, never dropped
+   (`.claude/rules/sub37-unknown-bytes-round-trip.md`; Tim, 2026-10-31).
+
+2. **Two sources or it is a guess.** The corpus tells you the neutral value, the
+   manual tells you the direction, the firmware settles the law. One source is a
+   hypothesis. Tag everything (`docs/provenance.md`).
+
+3. **A wrong law that sounds good is worse than a known gap.** A gap is on the
+   ledger in `todo.md` and someone will close it. A plausible wrong law gets
+   built on.
+
+4. **Never trust a build you have not run.** The kit's
+   `done-means-fresh-evidence` rule is the general law and wins (Tim,
+   2026-10-31). This machine adds two things it does not say: a test's exit
+   code is not evidence when the test prints numbers (read the numbers), and
+   look at the picture.
+
+5. **Never ear-calibrate a unit.** The ear accepted a wheel-to-pitch law at 1/4.7
+   of its true strength and an envelope maximum at 1/5, and each felt fine in
+   isolation. Units come from the DSP consumer of the slot or an absolute number
+   in the manual; the ear only ORDERS the remaining debts.
+
+6. **The cutoff is a SUM, and the term you miss has no parameter behind it.**
+   `src/engine/Coeffs.*` writes it out term by term for that reason. If your
+   engine sums fewer terms than the firmware, the difference is your bug and it
+   is measurable. See `docs/before-you-call-it-finished.md` §3.
+
+7. **Freeze parameter IDs at v0.1 and never renumber.** Hosts persist automation
+   by ID. `tools/tests_main.cpp` asserts the list; that assertion is deliberate
+   and it is the authority. The kit's `parameter-ids-never-change` rule and its
+   `param-id-lock` hook are the second net; this wording wins where they differ
+   (Sub37 registers from the generated table, not from `juce::ParameterID`
+   literals; Tim, 2026-10-31).
+
+8. **Sync everything that moves, and default it OFF.** This is a plugin in a
+   host. Offering the option falsifies no law: it sets a time or a rate from the
+   clock instead of from a knob, and it is off until the player asks. What the
+   hardware could do governs the SOUND LAWS; it does not govern whether the
+   plugin can take a tempo.
+
+9. **The shell, the DSP blocks and the panel renderer are DEPENDENCIES.** If you
+   are about to copy a file out of `~/projects/synthshell`, `~/projects/dspblocks`
+   or `~/projects/synthpanel-creator`, stop. Fix it there; every machine gets the
+   fix on its next build.
+
+10. **Log everything as it happens.** `docs/research.md` for findings,
+    `bugs.md` one line per bug, `todo.md` for the debt. Not at the end.
+
+## This machine's own non-negotiables
+
+Each of these is invisible until something sounds subtly wrong, and each is easy
+to "correct" into a bug. `docs/laws.md` carries the evidence.
+
+1. **BEAT FREQ adds in HERTZ. FREQUENCY adds in CENTS.** They sit side by side on
+   the faceplate and they are different arithmetic. `[MAN p.26]` contrasts them
+   outright: BEAT keeps "the same number of cycles per second regardless of the
+   musical pitch", while FREQUENCY's beating "is halved or doubled as you play an
+   octave lower or higher". Adding BEAT in semitones compiles, sounds plausible,
+   and is the one behaviour the manual explicitly says it is not.
+
+2. **It is PARAPHONIC. One filter, one MultiDrive, one amplifier, one pair of
+   envelopes.** DUO MODE gives the two OSCILLATORS different pitches; it does not
+   give the machine two voices. Model it as two voices and a held duo interval is
+   twice as loud and each note gets its own filter sweep.
+
+3. **The SLOPE selector is a TAP of one four-stage ladder, not a cascade of
+   fewer stages.** All four slopes come off the same ladder inside the same
+   resonance loop. Cascading instead moves the resonant peak with the slope, and
+   the manual says you can change slope "in real time as you play", which a
+   shifting resonance would make unusable.
+
+4. **MULTIDRIVE IS AFTER THE FILTER.** `[MAN p.28]`: the OTA and FET stages are
+   "located between the filter and the amplifier in the signal path". In front is
+   the obvious guess and it is wrong; the filter would tame the distortion
+   instead of the distortion colouring what the filter let through.
+
+5. **The sub oscillator never follows the WAVE knob.** It is always a square, an
+   exact octave below oscillator 1 `[MAN p.27]`, and `[MAN p.24]` says so from
+   the other side: "Waveform modulation has no effect on the sub oscillator".
+
+6. **The mixer's unity is 5, not 10.** Above 5 the filter INPUT overdrives, which
+   is where this machine's gentle distortion comes from `[MAN p.27]`. Treat 10 as
+   unity and every patch is clean and thin.
+
+7. **FILTER KB TRACK is a RATIO centred on MIDI note 48.** Halfway is 1:1 and the
+   top is 2:1 `[MAN p.29]`, and the anchor note is stated outright, which is rare.
+   Centre it on 60 and every patch is wrong by an octave of cutoff at the extremes.
+
+8. **Envelope LOOP skips SUSTAIN.** `[MAN p.31]` lists the looping stages as
+   delay, attack, hold, decay and release. An envelope that waited at sustain
+   could never loop.
+
+9. **The division ladder is ordered by DURATION, so dotted and triplet values
+   INTERLEAVE with the plain ones.** Grouping by kind is the obvious wrong guess
+   and it puts every CC band on the wrong division. And slot 8 is a DOTTED
+   QUARTER whatever its three printed labels say: the firmware string reads
+   ` 1/4T.`, the manual's TIME VALUE column reads `DOTTED 1/4 NOTE TRIPLET`, and
+   only its DIVISION column, `1/4 DOT`, is right. The ladder's own arithmetic
+   arbitrates.
+
+10. **TWO PRINTED CHARTS IN THIS MANUAL, EIGHT ERRORS BETWEEN THEM.** The NRPN
+    chart's VALUE RANGE column is wrong six times and the division table is wrong
+    twice. Every one was caught by a second chart or by arithmetic, and every one
+    was checked against the RENDERED page before being called an error. Never take
+    a printed chart as a single source on this machine.
+
+11. **The printed CUTOFF scale is NOT the cutoff law.** Moog's overlay prints 20,
+    80, 320, 500, 1.2k, 5k and 20k at even angles and those ratios are x4, x4,
+    x1.56, x2.4, x4.17, x4. The ends are solid three times over; the curve between
+    them is unestablished and fitting one to the silkscreen is fitting to a
+    silkscreen.
+
+12. **Legato single triggering is the DEFAULT.** `[MAN p.31]`. MULTI TRIG, RESET,
+    GLIDE LEGATO, DUO MODE and OSC 2 KB CTRL all do nothing whatever one note at a
+    time, so any probe that plays one note at a time will report five working
+    controls as dead wiring. This one already did.
+
+## Build
+
+The commands are the generated **Project commands** block at the end of this
+file (configure, build, test, test-one, standalone, panel-check, panel-export,
+snapshot); it wins over any copy here (Tim, 2026-10-31). Every build, test and
+program run from `build/` goes through `buildq`. Standalone for listening: the
+`standalone` command, then
+`open build/Sub37_artefacts/RelWithDebInfo/Standalone/Sub37.app`. For the
+tight edit-build-listen loop use JUCE's AudioPluginHost rather than a DAW — no
+scan, no cache.
+
+Steps are built on their own `work/` or `step/` branch with
+`python3 tools/step.py` (the `build-step` skill) and merged when their "done
+when" in `build.md` is measured.
+
+`docs/the-gates.md` says what each test catches and how it is proved to work.
+
+## Panel
+
+`panel/panel.json` is the spec; `~/projects/synthpanel-creator` renders it.
+**Panel drawing, themes and layout are fixed THERE, never patched here.** A local
+patch forks the renderer and every other machine misses the fix.
+
+```
+npm run panel:validate     # the spec is well formed
+npm run panel:check        # legends fit, nothing overlaps
+npm run panel:png          # look at it
+npm run panel:native       # export to resources/native for the plugin
+```
+
+**There is no panel code in this repo and there never will be.** The component
+that paints the export is `synthkit::NativePanel`, linked in as `synthkitpanel`
+from `~/projects/synthkit/panel/`. Until the export exists it draws the SPEC —
+plain shapes at the spec's own coordinates, with "panel artwork pending" across
+its own face — so the unit is playable and the bindings are testable from day
+one. **Nothing is swapped when the artwork lands**: run `npm run panel:native`,
+rebuild, and the same component paints the real panel with the same ids, the
+same events and the same hit areas.
+
+Then LOOK AT IT, at the width the window opens rather than the width of the
+render. `Sub37Snapshot` writes the PNG; a green build says nothing about
+a picture nobody looked at, and three units shipped the placeholder that way.
+
+## Status
+
+v0.2, 2026-10-08. The Moog Sub 37, decoded from its owner's manual, its MIDI CC
+and NRPN charts, and the panel processor's own tables in OS 1.1.0.
+
+88 parameters, frozen. The engine is the machine: paraphonic, two variable-shape
+oscillators, a square sub an octave down, pink noise, a mixer feedback channel, a
+four-pole Moog ladder tapped at 6/12/18/24 dB per octave, MultiDrive after the
+filter, two six-stage DAHDSR envelopes and two full modulation buses. The panel
+is measured off Moog's own front-panel artwork. Four laws are `[REF]` and all
+four are on `todo.md` with a lead.
+
+What is NOT here, each with its reason written down: the arpeggiator and
+sequencer (the shell's ARP is the one arp), Moog's factory bank (the archive has
+none), and the patch record layout (Moog has never published it).
+
+<!-- claude-packs:start -->
+<!-- Generated by claude-packs from .claude/layout.json. Edit that file and run `npx claude-packs update`; edits here are replaced. -->
+## Project layout
+
+<constraints>
+Always do:
+- Put every kind of thing in its one place. The rules, checks and skills for it load only there:
+  - processBlock and the audio-thread engine: voice, ladder, MultiDrive, envelopes, mod buses → `src/engine/`
+  - the processor: parameter registration, programs, session, clock → `src/`
+  - the window and anything that paints: the editor, the native panel component, its gestures → `src/ui/`
+  - the program record and the sysex both ways → `src/patch/`
+  - the generated headers (Sub37Params.h, Sub37Factory.h): run tools/gen_headers.py, never hand edit → `src/generated/`
+  - the parameter table (append only) and the factory bank → `data/`
+  - the panel source (gen_panel.py) and its output panel.json and bindings.json → `panel/`
+  - a probe or gate with --selftest (the house template keeps them in tools/) → `tools/`
+  - reference pictures and their measured analysis → `design/reference/`
+  - the PNG panel export, until the native rebuild deletes it → `resources/`
+  - laws, research, provenance, the gates, licences → `docs/`
+  - scripts: gen_headers.py, measure scripts, the snapshot renderer → `tools/`
+- The other folders:
+  - `cmake/`: Siblings.cmake, CheckGenerated.cmake, GenVersion.cmake (copies of synthkit/cmake)
+- Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.
+- When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.
+- When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.
+
+Never do:
+- Create source files outside these folders, or put a kind of thing anywhere but its place. The folder-law and placement-law hooks refuse both.
+- Put drawing code in audio or world folders, or audio and world logic in the painter or UI folders.
+- Edit files in `.claude/rules`, `.claude/checks` or `.claude/hooks` to get past a block. Fix the code, or ask the user to change the law.
+- Route around a block: no override variables, no writing through the shell after a refusal, no parking files in a scratchpad, no putting new code into an unrelated existing file.
+- Point at a document by line number. Cite a fixed anchor (`{#id}`) or a symbol name; lines move.
+</constraints>
+
+## Project commands
+
+Skills and checks run these; use them, not the raw tools:
+- configure: `cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo`
+- build: `buildq cmake --build build`
+- test: `buildq ctest --test-dir build --output-on-failure`
+- test-one: `buildq ctest --test-dir build --output-on-failure -R <name>`
+- standalone: `buildq cmake --build build --target Sub37_Standalone`
+- panel-check: `npm run panel:validate && npm run panel:check`
+- panel-export: `npm run panel:native`
+- snapshot: `Sub37Snapshot (built by the build command) writes the editor to PNG`
+
+Installed packs: base, audio-core.
+<!-- claude-packs:end -->

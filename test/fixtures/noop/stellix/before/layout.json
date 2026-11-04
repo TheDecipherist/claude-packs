@@ -1,0 +1,251 @@
+{
+  "_comment": "Where everything lives. folders = the folders; kinds = what goes where (CLAUDE.md shows it, placement-law enforces it); concepts = which rules fire where. Edit here, then run `npx --no-install @thedecipherist/claude-packs update`.",
+  "folders": {
+    "app": {
+      "path": "lib/app",
+      "purpose": "the standalone, processor, editor, player, demo and the one launch function (launch.cpp)"
+    },
+    "app_gates": {
+      "path": "lib/app/gates",
+      "purpose": "the gate readers: the window's STELLIX_LOOK_* readings (state and steps), linked only by the gate build StellixGates (stellix_gate_readers), never by the shipped Stellix.app (F9)"
+    },
+    "app_copy": {
+      "path": "lib/app/tabula",
+      "kind": "copy",
+      "purpose": "a COPY TREE (kind copy): Tabula 1's PIANO loader, bridge and prebuild tool (they use JUCE, which the engines may not see), copied unchanged by tools/copy_tabula.py; read-only as every copy tree"
+    },
+    "snapshot": {
+      "path": "lib/snapshot",
+      "purpose": "the one shared snapshot header the painter reads (header-only)"
+    },
+    "world": {
+      "path": "lib/world",
+      "purpose": "the world: travellers, strikes, rebounds, PULL, walls, the snapshot ring, State and the seeded RandomSource"
+    },
+    "engines": {
+      "path": "lib/engines",
+      "purpose": "SlotSound and Tabula 1's voice, copied and proved (src/tabula is changed only under null tests, L8 and d-14, each changed part pinned by tools/copy_tabula.py --check)"
+    },
+    "engines_copy": {
+      "path": "lib/engines/src/tabula",
+      "kind": "copy",
+      "purpose": "a COPY TREE (kind copy): Tabula 1's voice, effects and dspblocks files and PIANO's recordings, copied unchanged by tools/copy_tabula.py; read-only (L8): every file has its origin line (repo, commit, SHA-256, licence row), changed only under null tests and pinned"
+    },
+    "engines_own": {
+      "path": "lib/engines/src/own",
+      "kind": "own",
+      "purpose": "PROMOTED files (kind own): copied files that measured identical to their source, moved out of the copy tree by tools/copy_promote.py into Stellix's own code, each with its .origin record (origin line, licence row, the measurement); these may be changed"
+    },
+    "dsp": {
+      "path": "lib/effects",
+      "purpose": "effects and dynamics: delay, EQ, compressor, limiter (S11a-S11d)"
+    },
+    "painter": {
+      "path": "lib/painter",
+      "purpose": "everything drawn: scene, camera, card, GPU layer, shaders, the Painter facade"
+    },
+    "gpu": {
+      "path": "lib/gpu",
+      "purpose": "the Dawn (WebGPU) foundation: the shared instance and device, the render thread, the CAMetalLayer surface, the HDR target and tonemap, the off-screen path, embedded WGSL (F6); lib/gpu/harness holds the test harness's GPU readbacks (pictures, opt-in timestamps), never run in a normal frame"
+    },
+    "records": {
+      "path": "data",
+      "purpose": "data/records (fixed ids, moons) and data/bank (factory patches)"
+    },
+    "probes": {
+      "path": "probes",
+      "purpose": "probe executables, each with --selftest, and the shot program (pictures, benches)"
+    },
+    "plants": {
+      "path": "tools/plants",
+      "purpose": "planted-fault sources run by tools/plants.sh"
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "spec, delay spec, laws, licences, research, work order (plan and logs at the root: build.md, bugs.md, workflow-bugs.md)"
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": "build.sh, step.py, gates/, hooks/, plants.sh and plants.d/, copy and compare tools"
+    }
+  },
+  "concepts": {
+    "cpp": [
+      "lib/**/*.cpp",
+      "lib/**/*.h",
+      "lib/**/*.mm",
+      "probes/**/*.cpp",
+      "probes/**/*.h",
+      "tools/plants/**/*.cpp"
+    ],
+    "audio": [
+      "lib/app/src/processor.h",
+      "lib/app/src/processor.cpp",
+      "lib/app/src/sound.h",
+      "lib/app/src/mixer.h",
+      "lib/engines/include/**",
+      "lib/engines/src/*.cpp",
+      "lib/effects/**"
+    ],
+    "dsp": [
+      "lib/effects/**",
+      "lib/engines/include/**",
+      "lib/engines/src/*.cpp"
+    ],
+    "params": [
+      "lib/app/src/controls.h",
+      "lib/app/src/params.h",
+      "lib/app/src/moonparams.h",
+      "lib/app/src/host_params.h",
+      "lib/app/src/processor.h",
+      "data/records/**",
+      "data/bank/**"
+    ],
+    "records": [
+      "data/records/**",
+      "data/bank/**",
+      "lib/world/include/stellix/world/state.h"
+    ],
+    "world": [
+      "lib/world/**",
+      "lib/snapshot/**",
+      "lib/app/src/launch.*",
+      "lib/app/src/demo.cpp"
+    ],
+    "painter": [
+      "lib/painter/**",
+      "lib/gpu/src/**",
+      "lib/gpu/include/**",
+      "lib/gpu/shaders/**"
+    ],
+    "shaders": [
+      "lib/gpu/shaders/**",
+      "lib/painter/shaders/**",
+      "**/*.wgsl"
+    ],
+    "ui": [
+      "lib/app/src/editor*.h",
+      "lib/app/src/live.*",
+      "lib/painter/src/view.*"
+    ],
+    "app": [
+      "lib/app/**"
+    ],
+    "tests": [
+      "probes/**",
+      "lib/*/tests/**",
+      "tools/gates/**",
+      "tools/plants/**",
+      "tools/plants.d/**"
+    ],
+    "bench": [
+      "probes/shot/cpugate.cpp",
+      "probes/shot/simbench.cpp",
+      "probes/shot/shot.cpp",
+      "probes/machine/**"
+    ],
+    "build": [
+      "CMakeLists.txt",
+      "**/CMakeLists.txt",
+      "cmake/**"
+    ],
+    "claude": [
+      ".claude/skills/**",
+      "**/.claude/skills/**",
+      ".claude/agents/**",
+      ".claude/rules/**"
+    ],
+    "notes": [
+      "bugs.md",
+      "workflow-bugs.md",
+      "**/known-issues*.md",
+      "docs/**/*.md"
+    ],
+    "presets": [
+      "data/factory.csv",
+      "data/params.csv",
+      "presets/**",
+      "banks/**"
+    ],
+    "tooling": [
+      "tools/**",
+      ".claude/hooks/**",
+      ".claude/settings.json"
+    ],
+    "plan": [
+      "build.md",
+      "**/build.md"
+    ],
+    "copy-trees": [
+      "kind:copy",
+      ".claude/layout.json"
+    ]
+  },
+  "kinds": {},
+  "files": {
+    "seeded_random": "lib/world/include/stellix/world/random_source.h",
+    "world_math": "lib/snapshot/include/stellix/world_math.h",
+    "snapshot": "lib/snapshot/include/stellix/snapshot.h",
+    "render_thread": "lib/gpu/src/render_thread.cpp"
+  },
+  "protected": [
+    "design/reference/**"
+  ],
+  "buildOutput": [
+    "out/**"
+  ],
+  "writeOnce": [
+    "build/evidence/**"
+  ],
+  "keepWorktrees": [
+    "night"
+  ],
+  "disable": [
+    "hooks/no-shipped-images.mjs",
+    "checks/one-seeded-random.json",
+    "hooks/stage-guard.mjs"
+  ],
+  "enable": [
+    "hooks/tims-asks.mjs",
+    "hooks/idle-wake.mjs",
+    "checks/no-opengl.json",
+    "checks/no-opengl-link.json",
+    "checks/no-code-after-midline-comment.json",
+    "hooks/build-sweep.mjs"
+  ],
+  "commands": {
+    "build": "bash tools/build.sh build",
+    "test": "bash tools/build.sh test",
+    "test-one": "bash tools/build.sh test -R <name>",
+    "plants": "bash tools/plants.sh",
+    "run": "bash tools/build.sh run",
+    "step": "python3 tools/step.py status",
+    "cpu-gate": "bash tools/build.sh test -R stellix.cpu_gate",
+    "frame-bench": "stellix_shot --bench (built by `bash tools/build.sh build`)",
+    "picture-gates": "bash tools/build.sh test -R '_gate'"
+  },
+  "siblings": [],
+  "guards": {
+    "git": {
+      "house": true,
+      "refuseTrunk": true,
+      "safeRestore": "python3 tools/safe_restore.py <paths>",
+      "branchStart": "python3 tools/step.py start <STEP> \"task\" (work that is not a step: start --work <name> \"task\")",
+      "repo": "TheDecipherist/stellix"
+    },
+    "copy": {
+      "tools": [
+        "tools/copy_tabula.py",
+        "tools/copy_reimport.py",
+        "tools/copy_promote.py"
+      ]
+    },
+    "time": {
+      "saveCommand": "add new files by path, then python3 tools/step.py save \"<note>\""
+    },
+    "browser": {
+      "pictureCommand": "the shot program (stellix_shot --render)"
+    }
+  },
+  "complete": true
+}
