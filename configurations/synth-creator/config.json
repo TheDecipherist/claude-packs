@@ -3,7 +3,8 @@
   "description": "JUCE synths and effects units: realtime audio, the sound engines, the Dawn GPU painter, Stellix. Everything the kit installed before configurations existed.",
   "packs": {
     "always": [
-      "base"
+      "base",
+      "synth-creator"
     ],
     "choose": [
       "audio-core",
@@ -64,6 +65,59 @@
         "in": "tools"
       }
     }
+  },
+  "hookOrder": {
+    "PreToolUse Write|Edit|MultiEdit|NotebookEdit|Bash": [
+      "lesson-checks.mjs",
+      "file-size-guard.mjs",
+      "frozen-files.mjs",
+      "placement-law.mjs",
+      "protect-vendor.mjs",
+      "spec-lock.mjs",
+      "folder-law.mjs",
+      "shape-law.mjs",
+      "brief-guard.mjs",
+      "once-only.mjs",
+      "secrets-guard.mjs",
+      "untrusted-boundary.mjs",
+      "realtime-guard.mjs",
+      "browser-guard.py",
+      "no-shipped-images.mjs"
+    ],
+    "PreToolUse Agent|Task": [
+      "brief-guard.mjs"
+    ],
+    "PreToolUse Bash": [
+      "stage-guard.mjs",
+      "git-guard.mjs",
+      "build-guard.mjs"
+    ],
+    "PreToolUse *": [
+      "time-guard.mjs"
+    ],
+    "PostToolUse *": [
+      "time-guard.mjs"
+    ],
+    "Stop": [
+      "idle-wake.mjs",
+      "making-check.mjs",
+      "git-guard.mjs"
+    ],
+    "SessionStart compact": [
+      "tims-asks.mjs"
+    ],
+    "SessionStart": [
+      "build-sweep.mjs"
+    ],
+    "SubagentStop": [
+      "build-sweep.mjs"
+    ],
+    "UserPromptSubmit": [
+      "making.mjs"
+    ],
+    "PostToolUse Write|Edit|MultiEdit|NotebookEdit|Bash": [
+      "param-id-lock.mjs"
+    ]
   },
   "preamble": {
     "always": [

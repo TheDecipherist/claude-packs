@@ -95,10 +95,10 @@ test('WB-4: every hook in every pack has a passing --selftest, and doctor runs t
   const dir = init('audio-core', 'gpu-painter', 'stellix');
   const lf = join(dir, '.claude/layout.json');
   const layout = JSON.parse(readFileSync(lf, 'utf8'));
-  layout.enable = JSON.parse(readFileSync(join(PKG, 'packs/base/pack.json'), 'utf8')).optIn;
+  layout.enable = JSON.parse(readFileSync(join(PKG, 'packs/synth-creator/pack.json'), 'utf8')).optIn;
   writeFileSync(lf, JSON.stringify(layout, null, 2));
   execFileSync('node', [CLI, 'update', '--dir', dir], { encoding: 'utf8' });
-  const shipped = ['packs/base', 'packs/audio-core', 'packs/gpu-painter', 'packs/stellix']
+  const shipped = ['packs/base', 'packs/synth-creator', 'packs/audio-core', 'packs/gpu-painter', 'packs/stellix']
     .flatMap((p) => { try { return readdirSync(join(PKG, p, 'hooks')).filter((f) => f.endsWith('.mjs')); } catch { return []; } }).sort();
   const installed = readdirSync(join(dir, '.claude/hooks')).filter((f) => f.endsWith('.mjs')).sort();
   assert.deepEqual(installed, shipped);

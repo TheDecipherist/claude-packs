@@ -25,7 +25,7 @@ const posix = (p) => p.split(sep).join('/');
 export const TABLE = [
   { files: /^(test\/fresh-tmp\.mjs|package\.json)$/, why: 'preloaded into, or runs, every test', tests: () => true },
   { files: /^(packs|profiles|prompts|configurations)\//, why: 'pack and configuration files reach a project through an install: the tests that install packs',
-    tests: (text) => text.includes('bin/claude-packs.mjs') && /['"](init|new|add|update|update-all)['"]/.test(text) },
+    tests: (text) => (text.includes('bin/claude-packs.mjs') || text.includes('./kit-cli.mjs')) && /['"](init|new|add|update|update-all)['"]/.test(text) },
   { files: /^global\//, why: 'the global part: the tests that run `global`', tests: (text) => /['"]global['"]/.test(text) },
 ];
 const GENERIC = new Set(['SKILL.md', 'pack.json', 'package.json', 'layout.json', 'settings.json', 'README.md', 'CHANGELOG.md', 'selftest.mjs', 'index.mjs']);

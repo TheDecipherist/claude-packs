@@ -166,6 +166,17 @@ const CASES = {
     assert.equal(bash(here, 'spec-lock.mjs', `sed -i '' s/a/b/ ${join(wt, 'src/dsp/Svf.cpp')}`), 0);
     lock('unlock');
   },
+  'secrets-guard.mjs': ({ here, wt }) => {
+    put(join(wt, '.gitignore'), '.env\n');   // the worktree ignores .env; main does not (yet)
+    assert.equal(fire(here, 'secrets-guard.mjs', join(wt, '.env'), 'A=1\n'), 0, 'ignored by the worktree');
+    assert.equal(fire(here, 'secrets-guard.mjs', join(here, '.env'), 'A=1\n'), 2, 'not ignored by main');
+    assert.equal(bash(here, 'secrets-guard.mjs', `git -C ${wt} add .env`), 2);
+  },
+  'untrusted-boundary.mjs': ({ here, wt }) => {
+    const call = 'const r = await client.messages.create({ messages: [{ role: "user", content: page }] });\n';
+    assert.equal(fire(here, 'untrusted-boundary.mjs', join(wt, 'tools/ask.mjs'), call), 2);
+    assert.equal(fire(here, 'untrusted-boundary.mjs', join(wt, 'tools/ask.mjs'), `const page = wrapUntrusted(html);\n${call}`), 0);
+  },
   'stage-guard.mjs': ({ here, wt }) => {
     assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add -A`), 2);
     assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add src/dsp/Svf.cpp`), 0);

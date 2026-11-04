@@ -10,7 +10,7 @@
 //     instance; the test loops over every instance or takes the instance as a parameter;
 //   - a selector for a concept (pickSlot, slotFor, firstSlot, ownerSlot) not listed in the manifest;
 //   - a new type that holds instances (an index member, or made N times in an array) whose concept has no row.
-// No design/shape.json: nothing is declared, so nothing is judged (doctor fails a synth without one). `--selftest`.
+// No design/shape.json: nothing is declared, so nothing is judged (doctor fails a project of a configuration that needs one). `--selftest`.
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -59,7 +59,7 @@ const SELFTEST_SHAPE = {
   concepts: {
     slot: {
       shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'], patterns: ['\\bSlot::(amber|cyan|violet|green)\\b'],
-      arrays: ['kSlotNames'], selectors: { selectedSlot: 'the slot the player has open', firstEmpty: 'the first slot with no sound' },
+      arrays: ['kSlotNames'], selectors: { selectedSlot: 'the slot the player has open', firstEmpty: 'the first slot with nothing in it' },
       constants: { initSlot: { instance: 1, reason: 'INIT plays one saw in slot 1' } },
     },
     mixer: { shape: 'one', id: 'mixer', words: ['mixer'] },
@@ -79,19 +79,19 @@ function selftest() {
   const loop = 'for (int slot = 0; slot < kSlots; ++slot) set(slotId(slot, "reverb.mix"), v);\n';
   return verdicts('shape-law', [
     // planted: an engine file
-    ['engine: slotIx == 1', w('src/engines/Voice.cpp', 'void f() { if (slotIx == 1) startCrew(); }\n'), 2],
-    ['engine: slots[1]', w('src/engines/Voice.cpp', 'auto& s = slots[1];\n'), 2],
+    ['engine: slotIx == 1', w('src/engines/Engine.cpp', 'void f() { if (slotIx == 1) startCrew(); }\n'), 2],
+    ['engine: slots[1]', w('src/engines/Engine.cpp', 'auto& s = slots[1];\n'), 2],
     ['engine: "slot2.reverb.mix"', w('src/engines/Bank.cpp', 'void f() { set("slot2.reverb.mix", v); }\n'), 2],
     ['engine: Slot::cyan (a manifest pattern)', w('src/engines/Bank.cpp', 'auto c = Slot::cyan;\n'), 2],
     ['engine: the one concept by number ("mixer2.bus")', w('src/engines/Bus.cpp', 'route("mixer2.bus");\n'), 2],
     // planted: a world file and a UI file
     ['world: s == 2 inside a loop over the slots', w('src/world/Space.cpp', 'for (int s = 0; s < kSlots; ++s) if (s == 2) addDelay(s);\n'), 2],
     ['world: case 2 in a switch on the slot', w('src/world/Space.cpp', 'switch (slot) {\ncase 2: addDelay(); break;\n}\n'), 2],
-    ['ui: a hand-listed set, one line per slot', w('src/ui/Panel.cpp', 'slotGain.set(0, g);\nslotGain.set(1, g);\nslotGain.set(2, g);\nslotGain.set(3, g);\n'), 2],
-    ['ui: "the PAD slot"', w('src/ui/Panel.cpp', '// the PAD slot gets the arp\n'), 2],
-    ['ui: an unlisted name before a concept word ("the PAD planet", KWB-12)', w('src/ui/Panel.cpp', '// the PAD planet gets the arp\n'), 2],
-    ['ui: a caps concept word with no label before it, by number ("SLOTS 2", KWB-22)', w('src/ui/Panel.cpp', '// SLOTS 2 gets the arp\n'), 2],
-    ['ui: kSlotNames[2]', w('src/ui/Panel.cpp', 'draw(kSlotNames[2]);\n'), 2],
+    ['ui: a hand-listed set, one line per slot', w('src/ui/View.cpp', 'slotGain.set(0, g);\nslotGain.set(1, g);\nslotGain.set(2, g);\nslotGain.set(3, g);\n'), 2],
+    ['ui: "the PAD slot"', w('src/ui/View.cpp', '// the PAD slot gets the arp\n'), 2],
+    ['ui: an unlisted name before a concept word ("the PAD planet", KWB-12)', w('src/ui/View.cpp', '// the PAD planet gets the arp\n'), 2],
+    ['ui: a caps concept word with no label before it, by number ("SLOTS 2", KWB-22)', w('src/ui/View.cpp', '// SLOTS 2 gets the arp\n'), 2],
+    ['ui: kSlotNames[2]', w('src/ui/View.cpp', 'draw(kSlotNames[2]);\n'), 2],
     ['world: a selector not in the manifest', w('src/world/Pick.cpp', 'int pickSlot(int pad) {\n  return pad % 4;\n}\n'), 2],
     ['world: a new instance type with no row', w('src/world/Lane.h', 'struct Lane { int index; float gain; };\n'), 2],
     ['world: a value-like type not in "values" (KWB-10)', w('src/world/Tex.h', 'struct Tex { int index; float u; };\n'), 2],
@@ -102,7 +102,7 @@ function selftest() {
     ['doc: "Drive slot 2"', w('docs/notes.md', 'Drive slot 2 with the pad.\n'), 2],
     ['doc: "the second slot"', w('docs/notes.md', 'The second slot holds the pad.\n'), 2],
     // a shell route
-    ['bash heredoc: slotIx == 1', sh("cat > src/engines/Voice.cpp <<'EOF'\nif (slotIx == 1) go();\nEOF"), 2],
+    ['bash heredoc: slotIx == 1', sh("cat > src/engines/Engine.cpp <<'EOF'\nif (slotIx == 1) go();\nEOF"), 2],
     ['bash sed -i adds a literal', sh("sed -i 's|// PLACE|if (slot == 3) h();|' src/world/Old.cpp"), 2],
     // the allowed forms
     ['allowed: the generator in a loop', w('src/engines/Bank.cpp', loop), 0],
@@ -116,15 +116,15 @@ function selftest() {
     ['allowed: a listed identity name ("the DELAY planet", KWB-12)', w('src/ui/Space.cpp', '// the DELAY planet sits by the FILTER planet\n'), 0],
     ['allowed: a type of a known concept', w('src/world/Card.h', 'struct SlotCard { int index; };\n'), 0],
     ['allowed: not instances (buffer[1], channel == 1)', w('src/engines/Mix.cpp', 'float s = buffer[1]; if (channel == 1) s = pos[0];\nif (slots == kSlots) full = true;\n'), 0],
-    ['allowed: a multi-word caps label\'s value ("AIM PLANETS 100", KWB-22)', w('src/ui/Panel.cpp', '// every planet off, AIM PLANETS 100: nothing heard\n'), 0],
-    ['allowed: a multi-word caps label before the word ("a NOTES MONO slot", KWB-22)', w('src/engines/Voice.cpp', '// a NOTES MONO slot sounds only in the newest voice\n'), 0],
+    ['allowed: a multi-word caps label\'s value ("AIM PLANETS 100", KWB-22)', w('src/ui/View.cpp', '// every planet off, AIM PLANETS 100: nothing heard\n'), 0],
+    ['allowed: a multi-word caps label before the word ("a NOTES MONO slot", KWB-22)', w('src/engines/Engine.cpp', '// a NOTES MONO slot plays only its newest note\n'), 0],
     ['allowed: a number past the count is a value ("slot 40 ms", KWB-22)', w('docs/notes.md', 'Each slot 40 ms later than the last.\n'), 0],
     ['allowed: the whole range "slots 1-4"', w('docs/notes.md', 'Slots 1-4 all play every note.\n'), 0],
     ['allowed: a line already there, edited and moved (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), 'void f() { if (slot == 2) g(); }\n// PLACE', '// PLACE\nvoid f() { if (slot == 2) g(); } // closed: B-1')), 0],
     ['an edit adding a second copy of a literal already there (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', 'void h() { if (slot == 2) g(); }')), 2],
     ['allowed: a literal already there, untouched', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', '// nothing')), 0],
     ['allowed: excluded (build/)', w('build/gen/Table.cpp', 'auto& s = slots[1];\n'), 0],
-    ['allowed: no design/shape.json', w('src/engines/Voice.cpp', 'if (slotIx == 1) go();\n', bare), 0],
+    ['allowed: no design/shape.json', w('src/engines/Engine.cpp', 'if (slotIx == 1) go();\n', bare), 0],
     ['allowed: another project', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/src/x.cpp'), 'if (slotIx == 1) go();\n')), 0],
   ]);
 }

@@ -1,6 +1,6 @@
 // shape: the one reader of design/shape.json and the number rule (claude-packs 0.9.0; KWB-1: a hard-coded "slot 2" came
 // from one spec sentence, spread through briefs and tests, and got past a check scoped to the engine folders).
-// Everything in a synth is ONE (a fixed thing, reached by a frozen id) or MANY (N instances of one shape, reached only by
+// Everything in a project is ONE (a fixed thing, reached by a frozen id) or MANY (N instances of one shape, reached only by
 // a generator or a loop). A literal instance of a concept, anywhere, is allowed only as:
 //   example   the line opens with "seen in:" or "example:" (after comment marks, a bullet or a table bar);
 //   selector  the line uses a selector listed for the concept;
@@ -191,7 +191,7 @@ function lineHits(line, c, shape, aliases, inSwitch) {
   }
   if (c.shape === 'many') {
     const role = new RegExp(`(?<![A-Za-z0-9_])([A-Z][A-Z0-9]+)\\s+(${c.single.flatMap((w) => [esc(w), esc(cap(w))]).join('|')})(?![A-Za-z0-9_])`, 'g');
-    for (const m of line.matchAll(role)) if (!NOT_ROLES.has(m[1]) && !c.words.includes(m[1].toLowerCase()) && !c.names.has(m[1]) && !labelBefore(m.index)) add(m[1], `names it by a role ("${m[0]}"): the instance is a sound or a job, not a ${c.name}`);
+    for (const m of line.matchAll(role)) if (!NOT_ROLES.has(m[1]) && !c.words.includes(m[1].toLowerCase()) && !c.names.has(m[1]) && !labelBefore(m.index)) add(m[1], `names it by a role ("${m[0]}"): the instance is a job or a value, not a ${c.name}`);
   }
   for (const m of line.matchAll(/([A-Za-z_]\w*)\s*(?:\[\s*(\d+)\s*\]|\.at\(\s*(\d+)\s*\))/g)) {
     const lead = line.slice(0, m.index).trimEnd();

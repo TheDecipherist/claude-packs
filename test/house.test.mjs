@@ -219,7 +219,7 @@ test('update takes over a file that is the pack\'s own version instead of writin
   // A file the lock does not know, already identical to the pack's (a project's hand copy before reinstall).
   const fresh = tmp();
   mkdirSync(join(fresh, '.claude/hooks'), { recursive: true });
-  copyFileSync(join(PACKS, 'base/hooks/time-guard.mjs'), join(fresh, '.claude/hooks/time-guard.mjs'));
+  copyFileSync(join(PACKS, 'synth-creator/hooks/time-guard.mjs'), join(fresh, '.claude/hooks/time-guard.mjs'));   // synth-creator's since 0.10.0
   run(fresh, 'init', 'audio-core');
   assert.ok(!existsSync(join(fresh, '.claude/hooks/time-guard.mjs.pack-new')));
   assert.ok(lock(fresh).files['.claude/hooks/time-guard.mjs'], 'tracked from now on');

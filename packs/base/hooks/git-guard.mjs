@@ -114,7 +114,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
           const safe = c.safeRestore
             ? `Commit it, or use the safe form: ${c.safeRestore} (git status, every dirty file copied aside and checked, then only those paths restored).`
             : 'Commit it first (a work-in-progress commit on a branch), then undo what you meant to.';
-          return `\`git ${verb}\` on a tree with uncommitted work. Two days of panel work were lost this way. Uncommitted now:\n    ${d.slice(0, 12).join('\n    ')}\n${safe} No override exists.`;
+          return `\`git ${verb}\` on a tree with uncommitted work. Two days of work were lost this way. Uncommitted now:\n    ${d.slice(0, 12).join('\n    ')}\n${safe} No override exists.`;
         }
       }
     }
@@ -209,7 +209,7 @@ async function selftest() {
   const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true };
   const clean = { ...isDirty, dirty: () => [] };
   const on = (branch, env = clean) => ({ ...env, branch: typeof branch === 'function' ? branch : () => branch });
-  const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/synth.git main';
+  const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/app.git main';
   const mustBlock = [
     ['git add -A', clean], ['git add .', clean], ["git commit -am 'x'", clean], ['git add ~/firmware/korg/m1.bin', clean],
     ['git -C /Users/someone/projects/other add -A', clean], ['cd ~/projects/other && git add -A', clean],
@@ -218,21 +218,21 @@ async function selftest() {
     ['git clean -fd', isDirty], ['GUARD_OK=1 git checkout -- x.h', isDirty], ['GUARD_OK=1 git restore build/Testing/Temporary/LastTest.log', isDirty],
     ['GUARD_OK=1 git restore --staged --worktree a.md', isDirty], ['git restore --staged --worktree a.md', isDirty],
     ['git push', clean], ['git push origin main', clean], [`${push} --force`, clean],
-    ['git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/mongodb/synth.git main', clean],
-    ['gh repo create TheDecipherist/synth --private', clean],
-    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create synth --private', clean],
-    ['git remote add origin https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/synth.git', clean],
-    [`git push https://x-access-token:ghp_${'a'.repeat(30)}@github.com/TheDecipherist/synth.git main`, clean],
+    ['git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/mongodb/app.git main', clean],
+    ['gh repo create TheDecipherist/app --private', clean],
+    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create app --private', clean],
+    ['git remote add origin https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/app.git', clean],
+    [`git push https://x-access-token:ghp_${'a'.repeat(30)}@github.com/TheDecipherist/app.git main`, clean],
     ['git branch -D step/C1-x', clean], ['git push origin --delete step/C1-x', clean], ['git rebase main', clean], ['git commit --amend -m x', clean],
     ["git commit -q -m 'bench' --no-verify", clean], ['GUARD_OK=1 git commit --no-verify -m x -- a.h', clean],
-    ['git push --no-verify https://x@github.com/TheDecipherist/synth.git main', clean],
+    ['git push --no-verify https://x@github.com/TheDecipherist/app.git main', clean],
   ];
   const mustPass = [
     ['git add build.md src/Row.h', isDirty], ["git commit -m 'C1: row clock' -- build.md src/Row.h", isDirty],
     ['cd ~/projects/other && git add tools/bank/kept.json', isDirty], ['git status', isDirty], ['git checkout -- x.h', clean],
     ['git restore --staged x.h', isDirty], ['python3 tools/safe_restore.py x.h', isDirty], ['git stash list', isDirty],
     ['git checkout -b c2-filter', isDirty], [push, isDirty],
-    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create TheDecipherist/synth --private', clean],
+    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create TheDecipherist/app --private', clean],
     ['cmake --build build --target Synth_Standalone -j8', isDirty], ['git log --oneline -6 | sed -n 1,3p', isDirty],
     ["git branch --list 'step/U5*' | tr -d ' *'", isDirty], ["grep -n 'def push' tools/step.py", isDirty], ["echo 'git push origin main'", isDirty],
     ["python3 - <<'EOF'\nprint('git add -A')\nEOF", isDirty],

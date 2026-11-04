@@ -77,7 +77,7 @@ function selftest() {
     ['a prompt naming slot 2 gets the echo', inject('the PAD in slot 2 is too quiet, fix it', shape).endsWith('you named slot 2: building for all slots (many, 4), slot 2 is the reproduction')],
     ['a prompt naming no instance gets the text alone', inject('make the reverb darker on every slot', shape) === TEXT],
     ['an example line is not an echo', inject('seen in: slot 3, build it for all slots', shape) === TEXT],
-    ['a selector is not an echo', inject('the selectedSlot loses its sound after a load', shape) === TEXT],
+    ['a selector is not an echo', inject('the selectedSlot loses its state after a load', shape) === TEXT],
     ['a one concept is never echoed as many', inject('the mixer 1 meter', shape).split('\n').length <= 2 && !inject('the mixer 1 meter', shape).includes('all mixers')],
     ['no manifest: the text alone', inject('drive slot 2', null) === TEXT],
     ['the cost is measured and stated as an estimate', /\d+ words, about \d+ tokens/.test(cost()) && cost().includes('estimate')],

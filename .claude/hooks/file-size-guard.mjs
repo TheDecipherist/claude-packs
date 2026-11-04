@@ -44,9 +44,9 @@ function main(text) {
 function selftest() {
   const big = 'x\n'.repeat(300);
   const cases = [
-    ['grows past the limit', verdict('src/dsp/Svf.cpp', big, `${big}y\n`, 300) !== null],
-    ['at the limit is fine', verdict('src/dsp/Svf.cpp', '', big, 300) === null],
-    ['shrinking a long file is allowed', verdict('src/dsp/Old.cpp', 'x\n'.repeat(500), 'x\n'.repeat(400), 300) === null],
+    ['grows past the limit', verdict('src/core/Svf.cpp', big, `${big}y\n`, 300) !== null],
+    ['at the limit is fine', verdict('src/core/Svf.cpp', '', big, 300) === null],
+    ['shrinking a long file is allowed', verdict('src/core/Old.cpp', 'x\n'.repeat(500), 'x\n'.repeat(400), 300) === null],
     ['docs are not source', verdict('docs/spec.md', '', 'x\n'.repeat(900), 300) === null],
     ['generated code is exempt', verdict('src/gen/Tables.generated.h', '', 'x\n'.repeat(900), 300) === null],
     ['a shell script is code', verdict('tools/plants.sh', '', 'x\n'.repeat(301), 300) !== null],

@@ -1,23 +1,5 @@
 {
-  "description": "Hook framework every project gets: lesson checks, spec lock, read-only vendor and copy trees, folder law, the house git laws, the time and idle watches.",
-  "folders": {
-    "docs": {
-      "path": "docs",
-      "purpose": "spec, laws, licences, work orders, decisions"
-    },
-    "src": {
-      "path": "src",
-      "purpose": "all source code, only inside the subfolders below"
-    },
-    "tests": {
-      "path": "tests",
-      "purpose": "unit tests, gates with planted faults, golden files"
-    },
-    "tools": {
-      "path": "tools",
-      "purpose": "scripts and research tooling (not shipped)"
-    }
-  },
+  "description": "Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary.",
   "concepts": {
     "cpp": [
       "src/**/*.cpp",
@@ -82,22 +64,7 @@
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/frozen-files.mjs\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/placement-law.mjs\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spec-lock.mjs\"",
             "timeout": 10
           },
           {
@@ -119,6 +86,16 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/once-only.mjs\"",
             "timeout": 20
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/secrets-guard.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/untrusted-boundary.mjs\"",
+            "timeout": 10
           }
         ]
       },
@@ -137,39 +114,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stage-guard.mjs\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs\"",
-            "timeout": 15
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-guard.mjs\"",
-            "timeout": 15
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
-            "timeout": 15
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
             "timeout": 15
           }
         ]
@@ -180,12 +125,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.mjs\"",
-            "asyncRewake": true,
-            "timeout": 1000
-          },
-          {
-            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making-check.mjs\"",
             "timeout": 60
           },
@@ -193,38 +132,6 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs\"",
             "timeout": 30
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tims-asks.mjs\"",
-            "timeout": 15
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
-            "timeout": 15
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
-            "timeout": 15
           }
         ]
       }
@@ -242,37 +149,6 @@
     ]
   },
   "name": "base",
-  "kinds": {
-    "tests": {
-      "what": "tests, gates with planted faults, golden renders",
-      "in": "tests",
-      "concepts": [
-        "tests"
-      ],
-      "files": [
-        "**/*_test.*",
-        "**/*Test.cpp",
-        "**/*Tests.cpp",
-        "**/test_*.*",
-        "**/*.test.*"
-      ]
-    },
-    "docs": {
-      "what": "the spec, laws.md, decisions, research, work orders",
-      "in": "docs",
-      "concepts": [
-        "docs-folder"
-      ],
-      "files": [
-        "**/laws.md",
-        "**/*-spec.md"
-      ]
-    },
-    "tools": {
-      "what": "scripts and research tools that never ship",
-      "in": "tools"
-    }
-  },
   "onByDefault": [
     "hooks/shape-law.mjs",
     "hooks/brief-guard.mjs",
@@ -281,9 +157,5 @@
     "hooks/making-check.mjs",
     "hooks/run-hooks.mjs"
   ],
-  "optIn": [
-    "hooks/tims-asks.mjs",
-    "hooks/idle-wake.mjs",
-    "hooks/build-sweep.mjs"
-  ]
+  "optIn": []
 }

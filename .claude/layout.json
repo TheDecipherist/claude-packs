@@ -1,5 +1,6 @@
 {
   "_comment": "Where everything lives. folders = the folders; kinds = what goes where (CLAUDE.md shows it, placement-law enforces it); concepts = which rules fire where. Edit here, then run `npx --no-install @thedecipherist/claude-packs update`.",
+  "configuration": "base",
   "folders": {
     "bin": {
       "path": "bin",
@@ -110,7 +111,10 @@
   "files": {},
   "protected": [],
   "disable": [],
-  "enable": [],
+  "enable": [
+    "hooks/secrets-guard.mjs",
+    "hooks/untrusted-boundary.mjs"
+  ],
   "commands": {
     "test": "npm test",
     "test-one": "node --import ./test/fresh-tmp.mjs --test test/<name>.test.mjs",

@@ -2,7 +2,7 @@
 // `claude-packs dup scan`). Code that exists once is called, never copied: a near-duplicate of a block already in the repo
 // is refused with where the first one lives (Tim, 0.9.0 item 9).
 //
-// The detector is jscpd (5.4.2, an optional dependency of the kit: a Rust binary). Measured on a synth repo of 580 C++,
+// The detector is jscpd (5.4.2, an optional dependency of the kit: a Rust binary). Measured on a C++ repo of 580 C++,
 // Python and JS sources: 0.3 s for the whole tree, so it runs at write time; a planted copy of a function with one line
 // changed is found as one near-miss clone (--max-gap-lines). Threshold: 50 tokens and 6 lines, a gap of up to 2 lines.
 //   findJscpd(starts) -> path | null       CLAUDE_PACKS_JSCPD, then node_modules/.bin/jscpd above each start, then PATH

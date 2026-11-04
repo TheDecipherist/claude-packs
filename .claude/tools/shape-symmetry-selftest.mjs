@@ -21,7 +21,7 @@ export function selftest(tool) {
     concepts: {
       slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', owns: ['parameters', 'effects'], symmetry: sym },
       lane: { shape: 'many', count: 3, symmetry: { ...sym, first: 1 } },
-      voice: { shape: 'many', count: 8 },
+      band: { shape: 'many', count: 8 },
       mixer: { shape: 'one', id: 'mixer' },
     },
   };
@@ -54,11 +54,11 @@ export function selftest(tool) {
     ['planted swap: every pair is still checked (6)', swaps(swapped.out), 6],
     ['planted: a members command that fails is red', failing.code, 1],
     ['N = 3, counted from 1: green with 3 pairs', `${lane.code} ${swaps(lane.out)} ${/swap 1<->2/.test(lane.out)}`, '0 3 true'],
-    ['a many concept with no symmetry block is red, and says what to add', `${run('voice').code} ${/no symmetry block/.test(run('voice').out)}`, '1 true'],
+    ['a many concept with no symmetry block is red, and says what to add', `${run('band').code} ${/no symmetry block/.test(run('band').out)}`, '1 true'],
     ['a one concept has no symmetry: red', run('mixer').code, 1],
     ['an unknown concept: red', run('nothing').code, 1],
     ['gen --cmake succeeds', gen.status, 0],
-    ['gen --cmake: one add_test per many concept (slot, lane, voice)', (text.match(/^add_test\(NAME shape_symmetry\.(slot|lane|voice) /gm) ?? []).length, 3],
+    ['gen --cmake: one add_test per many concept (slot, lane, band)', (text.match(/^add_test\(NAME shape_symmetry\.(slot|lane|band) /gm) ?? []).length, 3],
     ['gen --cmake: no test for a one concept', /shape_symmetry\.mixer/.test(text), false],
     ['gen --cmake: the manifest is a configure dependency', /CMAKE_CONFIGURE_DEPENDS .*design\/shape\.json/.test(text), true],
     ['gen --list: one line per many concept', list.length, 3],

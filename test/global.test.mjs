@@ -102,7 +102,7 @@ test('global add installs exactly latest-versions, gnu-shell and shell-traps, an
   for (const f of ['shell-traps.mjs', 'gnu-shell.mjs']) assert.equal(spawnSync('node', [pkg(f), '--selftest']).status, 0, f);
   assert.match(cli(home, 'doctor'), /OK/);
   assert.ok(!existsSync(fileURLToPath(new URL('../global/hooks/build-guard.py', import.meta.url))), 'build-guard is not global');
-  assert.ok(existsSync(fileURLToPath(new URL('../packs/base/hooks/build-guard.mjs', import.meta.url))), 'build-guard is a base-pack hook');
+  assert.ok(existsSync(fileURLToPath(new URL('../packs/synth-creator/hooks/build-guard.mjs', import.meta.url))), 'build-guard is a synth-creator hook (0.10.0)');
   const kitHooks = (d) => readdirSync(fileURLToPath(new URL(d, import.meta.url))).filter((f) => /\.(py|mjs)$/.test(f));
   assert.deepEqual(kitHooks('../global/hooks/').filter((f) => f.endsWith('.py')), [], 'every global hook is Node');
   assert.match(readFileSync(fileURLToPath(new URL('../README.md', import.meta.url)), 'utf8'), /Global by design: they fix this machine's shell for Claude, not any project's rules\./);

@@ -6,7 +6,8 @@
 //     before: the file's text now ('' when it does not exist); after: its text once the call has run, or null
 //     when that cannot be known (a perl -i, an inline program's write of text it builds). A guard that judges paths needs only path;
 //     one that judges content judges after, and lets an unknown after through.
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
+import { checkoutRoot, commandLeavesProject, insideProject } from './project.mjs';
 import { computeEdit } from './apply-edit.mjs';
 import { afterText, readText, shellWrites } from './shell-writes.mjs';
 
@@ -46,4 +47,25 @@ export function writesOf(payload, base = process.cwd()) {
 
 export function readPayload(text) {
   try { return JSON.parse(text); } catch { return null; }
+}
+
+// One guard's frame (0.10.0): read the event, judge its shell command (`command(text, cwd)`, unless it leaves the project) and
+// every write inside the project (`write(w, rel)`, rel from the file's own checkout); the first finding refuses, exit 2.
+// A finding that starts with "BLOCKED" is written as it is, any other as "BLOCKED by <name>: <finding>".
+export function judgeEvent(text, { name, command = null, write = null }) {
+  const payload = readPayload(text);
+  if (!payload) return 0;
+  const cwd = payload.cwd ?? process.cwd();
+  const refuse = (msg) => { process.stderr.write(msg.startsWith('BLOCKED') ? msg : `BLOCKED by ${name}: ${msg}\n`); return 2; };
+  const cmd = payload.tool_input?.command ?? '';
+  if (command && payload.tool_name === 'Bash' && !commandLeavesProject(cmd)) {
+    const msg = command(cmd, cwd);
+    if (msg) return refuse(msg);
+  }
+  if (write) for (const w of writesOf(payload, cwd)) {
+    if (!insideProject(w.path, cwd)) continue;
+    const msg = write(w, relative(checkoutRoot(w.path), w.path));
+    if (msg) return refuse(msg);
+  }
+  return 0;
 }

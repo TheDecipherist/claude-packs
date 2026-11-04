@@ -71,7 +71,7 @@ function selftest() {
   const doc = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text));
   const n = () => { try { return readFileSync(join(dir, '.claude/usage.log'), 'utf8').split('\n').filter((l) => /\tbrief-guard\tslot$/.test(l)).length; } catch { return 0; } };
   const cases = [
-    ['agent: "drive slot 2"', agent('Build the delay. Drive slot 2 and check it sounds.'), 2],
+    ['agent: "drive slot 2"', agent('Build the delay. Drive slot 2 and check it works.'), 2],
     ['agent: "the PAD slot"', agent('Give the PAD slot its reverb.'), 2],
     ['agent: "the second slot"', agent('Wire the second slot.'), 2],
     ['agent: a declared constant read by name passes (the number rule\'s third form)', agent('Start in slot 1 (initSlot).'), 0],
@@ -83,7 +83,7 @@ function selftest() {
     ['agent: no design/shape.json', agent('Drive slot 2.', bare), 0],
     ['recipe heading "Slot 1, the lead"', doc('docs/recipes.md', '# Recipes\n## Slot 1, the lead\n'), 2],
     ['recipe heading "Layer lead"', doc('docs/recipes.md', '# Recipes\n## Layer lead\n'), 0],
-    ['inbox brief "drive slot 2"', doc('inbox/brief-7.md', 'Drive slot 2 until it sounds.\n'), 2],
+    ['inbox brief "drive slot 2"', doc('inbox/brief-7.md', 'Drive slot 2 until it works.\n'), 2],
     ['inbox brief "example: slot 2"', doc('inbox/brief-7.md', 'Build the swap for all slots.\nexample: slot 2 lost its delay\n'), 0],
     ['bash heredoc into docs/', runHook(hook, dir, bashOf("cat >> docs/recipes.md <<'EOF'\n## Slot 2, the pad\nEOF", dir)), 2],
     ['not a brief: src/ is shape-law\'s', doc('src/world/x.md', 'slot 2\n'), 0],

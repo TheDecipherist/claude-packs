@@ -21,7 +21,7 @@ const TIMEOUT_S = 600;
 
 export function readManifest(root) {
   const file = join(root, 'design', 'shape.json');
-  if (!existsSync(file)) throw new Error(`no design/shape.json in ${root} (every synth declares its concepts there: one or many)`);
+  if (!existsSync(file)) throw new Error(`no design/shape.json in ${root} (every project declares its concepts there: one or many)`);
   return JSON.parse(readFileSync(file, 'utf8'));
 }
 

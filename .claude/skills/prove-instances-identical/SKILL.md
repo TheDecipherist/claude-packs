@@ -1,6 +1,6 @@
 ---
 name: prove-instances-identical
-description: Use when a container type (slot, oscillator, voice, layer, lane, band) is added or changed, when a step touched one instance, or before calling such a step done.
+description: Use when a container type (slot, oscillator, layer, lane, band, worker) is added or changed, when a step touched one instance, or before calling such a step done.
 ---
 
 # Prove the instances identical (one job: the generated gate shape_symmetry for a many concept)
@@ -15,7 +15,7 @@ Always do:
   commands the project provides; the kit never writes the project's test:
   - `members`: prints instance `{i}`'s members, one per line: every parameter ID, effect, planet, moon, press-map row it owns;
   - `swap`: exits 0 when instances `{i}` and `{j}` swap the same: load a state, swap the two instances' contents, run the same input,
-    compare with the indices swapped back: the sound bit for bit (effects and tails included), the world, the picture, the state
+    compare with the indices swapped back: the output bit for bit (effects and tails included), the world, the picture, the state
     (every parameter by generated ID) and the bindings (press map, host parameters, undo).
   - `first` (default 0) when instances are counted from 1; `instances` (a command printing N) for a many concept with no fixed count.
 - Generate the tests at configure time, never by hand. CMake:

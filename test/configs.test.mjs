@@ -2,18 +2,9 @@
 // template, its hook order and the house-rules preamble of its CLAUDE.md block. `init --config <name>` stores the choice in
 // layout.json "configuration", `update` applies that one, `config <name>` switches and lists what changes, `configs` lists
 // them and doctor prints the one installed (KWB-31).
-import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { assert, cli, existsSync, fresh, join, readFileSync, run, test, writeFileSync } from './kit-cli.mjs';
 
-const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
-const cli = (dir, ...args) => spawnSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
-const run = (dir, ...args) => execFileSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
-const project = () => mkdtempSync(join(tmpdir(), 'cfg-'));
+const project = () => fresh('cfg-');
 const layoutOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
 const lockOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
 const SYNTH_LINE = 'Put drawing code in audio or world folders';
@@ -21,7 +12,7 @@ const SYNTH_LINE = 'Put drawing code in audio or world folders';
 test('configs lists every configuration with what it installs', () => {
   const out = run(project(), 'configs');
   for (const name of ['base', 'synth-creator']) assert.match(out, new RegExp(`^${name}\\b`, 'm'), name);
-  assert.match(out, /synth-creator[\s\S]*packs: base \(always\); audio-core, gpu-painter, stellix \(to choose\)/);
+  assert.match(out, /synth-creator[\s\S]*packs: base, synth-creator \(always\); audio-core, gpu-painter, stellix \(to choose\)/);
   assert.match(out, /rules \d+, hooks \d+, checks \d+, skills \d+/);
 });
 

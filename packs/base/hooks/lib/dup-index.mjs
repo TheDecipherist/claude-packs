@@ -8,13 +8,13 @@
 //   A candidate clone: the windows of the new text that are also in one other file, chained in order along one diagonal (a
 //   line changed inside a copy moves it by a few tokens; a gap of up to LIMITS.gap lines), covering LOOSE.tokens tokens over
 //   LOOSE.lines lines on either side, a little under jscpd's LIMITS (lib/dup.mjs) so the candidates hold every clone jscpd
-//   finds (measured on a synth's 752 sources: all 55 files jscpd flags are among them). A window found in more than COMMON
+//   finds (measured on a C++ project's 752 sources: all 55 files jscpd flags are among them). A window found in more than COMMON
 //   places is boilerplate and never starts a match.
 //   loadIndex(root, { layout, shape }) -> { root, files: { rel: { h, l } }, built, read }   (read: files tokenized this call)
 //   clonesIn(index, writes, { ignore }) -> [{ at, other, lines, tokens }]  writes: [{ path, after, range | ranges }] (the changed
 //       lines, [lo, hi] each; one write per path), sides { file, start, end }
 //   judgeWrites(root, writes, { layout, shape, ignore }) -> { clones, error, index }: the index finds the candidates (it is
-//       looser than jscpd: a superset, measured on a synth's tree), then jscpd confirms on those files alone, so a write is
+//       looser than jscpd: a superset, measured on a C++ project's tree), then jscpd confirms on those files alone, so a write is
 //       refused when jscpd over the repo would refuse it, and a write with no candidate never starts jscpd.
 import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';

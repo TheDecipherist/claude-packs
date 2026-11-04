@@ -1,5 +1,5 @@
 // Every project hook judges only this project's own files. Claude regularly edits sibling
-// projects from one session (rolling a lesson out to every synth), and those edits must never be
+// projects from one session (rolling a lesson out to every project), and those edits must never be
 // blocked by this project's laws; the other project's own hooks govern it there.
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';

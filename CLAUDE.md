@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`@thedecipherist/claude-packs` ("the kit"): an npm CLI (Node 22+, ESM) that installs per-project Claude Code rules, lesson checks, hooks and skills into a *target* project's own `.claude/` (JUCE synths: realtime audio, DSP, Dawn GPU painter, Stellix). It is the source of truth for every law used to build synths: a fix to a hook, rule, check or skill that every synth uses is made here, with its test, and projects take it with `npx --no-install @thedecipherist/claude-packs update`. Nothing goes into `~/.claude` except `global add`, which installs exactly three pieces (latest-versions + `version-pin-guard`, `gnu-shell`, `shell-traps`).
+`@thedecipherist/claude-packs` ("the kit"): an npm CLI (Node 22+, ESM) that installs per-project Claude Code rules, lesson checks, hooks and skills into a *target* project's own `.claude/`, by configuration (0.10.0): `synth-creator` (JUCE synths: realtime audio, DSP, Dawn GPU painter, Stellix), `full-stack` (Fastify + Next.js) and `base` (universal engineering only). It is the source of truth for every law used to build synths: a fix to a hook, rule, check or skill that every synth uses is made here, with its test, and projects take it with `npx --no-install @thedecipherist/claude-packs update`. Nothing goes into `~/.claude` except `global add`, which installs exactly three pieces (latest-versions + `version-pin-guard`, `gnu-shell`, `shell-traps`).
 
 ## Commands
 
@@ -23,9 +23,11 @@ Never run `node --test` without the `fresh-tmp.mjs` preload: tests then share th
 
 ## Architecture
 
-**Installer** (`bin/claude-packs.mjs` → `lib/`). `lib/sync.mjs` runs an install: validate `settings.json` → back up → `buildLayout` (`layout.mjs`) → decide what switches on (`switches.mjs`) → copy pack files (`packs.mjs`) → remove dropped files → merge hooks into settings (`settings.mjs`) → regenerate rule `paths:` (`rules.mjs`) → write the CLAUDE.md block (`claude-md.mjs`) → write the lock (`manifest.mjs`). `doctor.mjs` verifies an install (selftests, coverage, hook timing, token sweep). `new.mjs` scaffolds a project; `shape-cli.mjs`, `symmetry-doctor.mjs`, `once-only-report.mjs` back the `shape`, `symmetry` and `dup` commands.
+**Installer** (`bin/claude-packs.mjs` → `lib/`). `lib/sync.mjs` runs an install: resolve the configuration → validate `settings.json` → back up → `buildLayout` (`layout.mjs`) → decide what switches on (`switches.mjs`) → copy pack files (`packs.mjs`) → remove dropped files → merge hooks into settings (`settings.mjs`) → regenerate rule `paths:` (`rules.mjs`) → write the CLAUDE.md block (`claude-md.mjs`) → write the lock (`manifest.mjs`). `doctor.mjs` verifies an install (selftests, coverage, hook timing, token sweep). `new.mjs` scaffolds a project; `shape-cli.mjs`, `symmetry-doctor.mjs`, `once-only-report.mjs` back the `shape`, `symmetry` and `dup` commands.
 
-**Packs** (`packs/{base,audio-core,gpu-painter,stellix}/`): content copied into target projects. `pack.json` declares `folders`, `concepts`, `kinds`, `hooks` (merged into settings), `optIn` and `skillsIn`. `rules/`, `checks/`, `hooks/`, `tools/` go to `.claude/`; skills go to `.claude/skills/` or a layout folder's nested `.claude/skills/`.
+**Configurations** (`configurations/<name>/config.json`, `lib/configs.mjs`, `lib/config-cli.mjs`): a kind of project as data: its packs (`always`, `choose`, `default`), its layout template, `hookOrder` (the order of its hooks per settings entry), `sourceFiles` (what doctor's coverage counts as source) and the `preamble` of the CLAUDE.md block. `layout.json` `"configuration"` names a project's; `update` applies it; an install that names none gets the smallest configuration that takes its packs. A configuration's own pack (`synth-creator`, `full-stack`) comes with it and is never written in the lock's `packs`. base holds only universal engineering; `test/base-neutral.test.mjs` refuses a synth word in it.
+
+**Packs** (`packs/{base,synth-creator,audio-core,gpu-painter,stellix,full-stack}/`): content copied into target projects. `pack.json` declares `folders`, `concepts`, `kinds`, `hooks` (merged into settings), `optIn` and `skillsIn`. `rules/`, `checks/`, `hooks/`, `tools/` go to `.claude/`; skills go to `.claude/skills/` or a layout folder's nested `.claude/skills/`.
 
 **Hooks run inside the target project**, so they import only from `packs/base/hooks/lib/`, never from `lib/`. Shared logic the CLI also needs lives in the hooks lib and `lib/` re-exports it (e.g. `lib/shape.mjs`). Key hook libs:
 - `project.mjs`: `insideProject()` (never judge a sibling project's files; `commandLeavesProject` for `cd`/`git -C`), `checkoutRoot()`/`claudeRoot()` (judge a file from its own checkout and that checkout's `layout.json`, because agents work in git worktrees under `.claude/worktrees/` while `CLAUDE_PROJECT_DIR` points at main).
@@ -50,7 +52,7 @@ Never run `node --test` without the `fresh-tmp.mjs` preload: tests then share th
 
 ## Authoring pack content
 
-- **Rule:** frontmatter `# concepts: a, b` + `paths:` (generated), a one-line `#` title stating the law, body in `<constraints>` with `Always do:` / `Never do:`.
+- **Rule:** frontmatter `# concepts: a, b` + `paths:` (generated), a one-line `#` title stating the law, body in `<constraints>` with `Always do:` / `Never do:`. A rule that states one hook's law may carry `# hook: <file>` instead: it is held, left out and switched on with that hook, and with no `# concepts:` it loads everywhere.
 - **Lesson check** (`checks/*.json`): `id`, `why`, `rule`, `globs`/`concepts`, `exclude`, `pattern`, optional `code: true` (comments/strings blanked), `bad`, `good`. It blocks only edits that *add* a match.
 - **Hook:** register in `pack.json` (and `optIn` if it should not switch on by default), judge writes via `writesOf`, check `insideProject` and `checkoutRoot`/`claudeRoot`, exit 2 with the reason on stderr to refuse, export `hook`, add a `--selftest` that plants the fault and the correct case, and add its worktree case. A hook's selftest must be seen red without the fix.
 - Cite `{#anchor}`s or symbol names in docs and rules, never line numbers.
@@ -74,6 +76,7 @@ Always do:
   - versions and notes → `docs/`
 - The other folders:
   - `bin/`: the claude-packs command (bin/claude-packs.mjs)
+  - `configurations/`: the configurations: one config.json per kind of project (its packs, layout template, hook order, preamble)
   - `global/`: the global part: latest-versions, gnu-shell, shell-traps (global add)
   - `lib/`: the command's library: sync, settings, layout, doctor, the kit lock
   - `packs/`: the packs a project installs: rules, checks, hooks, skills, tools (base, audio-core, gpu-painter, stellix)
@@ -83,11 +86,10 @@ Always do:
 - Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.
 - When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.
 - When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.
-- claude-packs (`~/projects/claude-packs`) is the source of truth for every rule, check, hook and skill used to build synths. A fix to one of them, or a lesson that should hold in every synth, is made there with its test, committed, pushed and released as a new version, then taken in with `npx --no-install @thedecipherist/claude-packs update`, so every synth gets it. A project edits its installed copy only to try a fix before it goes into the kit.
+- claude-packs (`~/projects/claude-packs`) is the source of truth for every rule, check, hook and skill this project's configuration installs. A fix to one of them is made there with its test, committed, pushed and released as a new version, then taken in with `npx --no-install @thedecipherist/claude-packs update`. A project edits its installed copy only to try a fix before it goes into the kit.
 
 Never do:
 - Create source files outside these folders, or put a kind of thing anywhere but its place. The folder-law and placement-law hooks refuse both.
-- Put drawing code in audio or world folders, or audio and world logic in the painter or UI folders.
 - Edit files in `.claude/rules`, `.claude/checks` or `.claude/hooks` to get past a block. Fix the code, or ask the user to change the law.
 - Route around a block: no override variables, no writing through the shell after a refusal, no parking files in a scratchpad, no putting new code into an unrelated existing file.
 - Point at a document by line number. Cite a fixed anchor (`{#id}`) or a symbol name; lines move.
