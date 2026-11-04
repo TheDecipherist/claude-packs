@@ -1,0 +1,28 @@
+{
+  "id": "sec-headers-present",
+  "why": "An app file that creates the Fastify instance must register helmet (inside the single isProd switch). Its absence is invisible in a diff; this check sees the whole file.",
+  "rule": ".claude/rules/security-one-switch.md",
+  "concepts": [
+    "fastify-app"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "\\bFastify\\s*\\(|\\bfastify\\s*\\(\\s*\\{",
+  "needs": [
+    "\\bhelmet\\b"
+  ],
+  "bad": "const app = Fastify({ logger });\nawait app.register(rateLimit, {});",
+  "good": "const app = Fastify({ logger });\nif (isProd) { await app.register(helmet, { contentSecurityPolicy: csp }); await app.register(rateLimit, {}); }"
+}

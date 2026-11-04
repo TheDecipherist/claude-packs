@@ -1,0 +1,26 @@
+{
+  "id": "wp-img-needs-dimensions",
+  "why": "An <img> without width and height reserves no box, so the layout shifts when it arrives (CLS). Give it intrinsic dimensions; the stylesheet keeps it fluid with max-width: 100%; height: auto.",
+  "rule": ".claude/rules/web-performance.md",
+  "concepts": [
+    "markup"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*"
+  ],
+  "code": false,
+  "pattern": "<img\\b(?![^>]*\\bwidth\\s*=)[^>]*>",
+  "bad": "<img src=\"/a.png\" alt=\"a\">",
+  "good": "<img src=\"/a.png\" alt=\"a\" width=\"320\" height=\"200\">"
+}

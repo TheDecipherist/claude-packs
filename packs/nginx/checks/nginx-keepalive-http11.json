@@ -1,0 +1,20 @@
+{
+  "id": "nginx-keepalive-http11",
+  "why": "upstream keepalive only works with HTTP/1.1 and a cleared Connection header; without them every proxied request opens a new connection.",
+  "rule": ".claude/rules/nginx-production.md",
+  "concepts": [
+    "nginx-conf"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "\\bkeepalive\\s+\\d+\\s*;",
+  "needs": [
+    "proxy_http_version\\s+1\\.1",
+    "proxy_set_header\\s+Connection\\s+\\\"\\\""
+  ],
+  "bad": "upstream api { server api:3000; keepalive 32; }",
+  "good": "upstream api { server api:3000; keepalive 32; }\nlocation / { proxy_http_version 1.1; proxy_set_header Connection \"\"; proxy_pass http://api; }"
+}

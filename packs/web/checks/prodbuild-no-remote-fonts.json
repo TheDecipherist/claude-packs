@@ -1,0 +1,22 @@
+{
+  "id": "prodbuild-no-remote-fonts",
+  "why": "A third-party font host is an extra DNS + TLS round trip on the critical path, a privacy leak and an availability dependency. Self-host: next/font or @fontsource, woff2, font-display: swap.",
+  "rule": ".claude/rules/production-build.md",
+  "concepts": [
+    "markup",
+    "styles"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "pattern": "fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|use\\.typekit\\.net|use\\.fontawesome\\.com|fonts\\.bunny\\.net",
+  "bad": "<link href=\"https://fonts.googleapis.com/css2?family=Inter\" rel=\"stylesheet\">",
+  "good": "import { Inter } from 'next/font/google';"
+}

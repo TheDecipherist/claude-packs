@@ -1,0 +1,26 @@
+{
+  "id": "a11y-no-positive-tabindex",
+  "why": "tabindex above 0 hijacks the tab order for the whole page. Use 0 to make something focusable, -1 to make it programmatically focusable, and DOM order for the rest.",
+  "rule": ".claude/rules/accessibility.md",
+  "concepts": [
+    "markup"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*"
+  ],
+  "code": false,
+  "pattern": "\\btab[Ii]ndex\\s*=\\s*[\\\"'{]?\\s*[1-9]",
+  "bad": "<div tabIndex={1}>",
+  "good": "<button tabIndex={0}>"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "no-db-in-route-file",
+  "why": "A route file is request-in, handler-call, response-out. A collection call or external fetch here is business logic in the wrong layer; move it to handlers/ and adapters/.",
+  "rule": ".claude/rules/three-layers.md",
+  "globs": [
+    "**/routes/**",
+    "**/app/api/**/route.ts",
+    "**/app.ts",
+    "**/server.ts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\.(?:aggregate|insertOne|insertMany|updateOne|updateMany|deleteOne|deleteMany|bulkWrite|findOneAndUpdate|countDocuments)\\s*\\(|\\bcollection\\s*\\(",
+  "bad": "app.get('/api/v1/sessions', async () => sessionsCollection().aggregate([{ $match: { deleted: false } }]).toArray());",
+  "good": "app.get('/api/v1/sessions', async (req) => listSessions(parse(req)));"
+}

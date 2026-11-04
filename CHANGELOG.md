@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.12.0 (2026-11-04)
+
+The v8 additions (claude-packs-kit-v8-additions.zip: the web side of mddkit), merged by hand on top of 0.11.0.
+
+- fastify: security is one `isProd` switch (mddkit http-security's iron rule), not "always on": rule `security-one-switch` and
+  checks `sec-headers-present` (needs mode: `Fastify(` needs `helmet`), `no-trust-proxy-true`, `no-err-message-to-client` replace
+  `security-always-on` and `security-not-behind-node-env` (deleted). `one-error-body` cites the new rule. Rules
+  `credentials-and-input` and `three-layers` with checks `no-regexp-from-input`, `password-needs-slow-hash`,
+  `secrets-compared-constant-time`, `api-routes-versioned`, `no-db-in-route-file`.
+- New packs: `web` (Next.js/React: accessibility, styles in stylesheets, Tailwind 4, one UI-primitives module, web performance,
+  production build, client boundaries; 7 rules, 20 checks, skills design-direction, design-review, pick-rendering-mode,
+  preflight-build, seo-audit), `tui` (1 rule, 5 checks, skill build-tui), `nginx` (nginx-production and modsecurity-tuning;
+  7 checks, skill waf-rollout). The node configuration takes them.
+- js-ts: rule `one-logger`, check `tsconfig-flags` (strict, noUncheckedIndexedAccess, verbatimModuleSyntax). ai: rule
+  `llm-pipeline-security`, check `model-output-validated`.
+- Presets: eight (`next-app`, `node-cli` and `edge` added).
+- docker's per-service compose checks arrived already in the kit (0.11.0): the same JSON, the kit's formatting kept.
+- Not taken: the zip's lib/packs.mjs beyond its PRESETS block (the kit's is newer). `seo-audit` has no `checks.md` beside it
+  (mddkit's references/checks.md was not in the zip; the skill says so and falls back).
+
 ## 0.11.0 (2026-11-04)
 
 The v7 additions (claude-packs-kit-v7-additions.zip, merged by hand: the kit's own files kept wherever the zip's were older).

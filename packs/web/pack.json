@@ -1,0 +1,55 @@
+{
+  "name": "web",
+  "description": "Web UI (Next.js, HTML, CSS, Tailwind 4): accessibility, one primitives module, styles in stylesheets, performance, production build, client boundaries.",
+  "folders": {},
+  "concepts": {
+    "markup": [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.html",
+      "**/*.vue",
+      "**/*.svelte"
+    ],
+    "styles": [
+      "**/*.css",
+      "**/*.scss",
+      "**/styles/**",
+      "**/tailwind.config.*",
+      "**/postcss.config.*"
+    ],
+    "pages": [
+      "**/app/**/page.tsx",
+      "**/app/**/layout.tsx",
+      "**/app/**/template.tsx",
+      "**/pages/**/*.tsx",
+      "**/pages/**/*.jsx",
+      "**/routes/**/*.tsx"
+    ],
+    "components": [
+      "**/components/**",
+      "**/client/**"
+    ],
+    "client": [
+      "**/app/**",
+      "**/components/**",
+      "**/client/**",
+      "**/public/**",
+      "**/*.tsx",
+      "**/*.jsx"
+    ],
+    "build-config": [
+      "**/next.config.*",
+      "**/webpack*.js",
+      "**/webpack*.mjs",
+      "**/webpack*.cjs",
+      "**/webpack*.ts",
+      "**/rollup.config.*",
+      "**/esbuild*.js",
+      "**/esbuild*.mjs",
+      "**/index.html",
+      "**/_document.tsx"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

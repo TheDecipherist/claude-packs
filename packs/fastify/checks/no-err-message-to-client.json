@@ -1,0 +1,24 @@
+{
+  "id": "no-err-message-to-client",
+  "why": "err.message in a response leaks hostnames, index names and connection detail. The client gets a controlled message or a correlation id; the stack goes to the log.",
+  "rule": ".claude/rules/security-one-switch.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\b(?:message|error|detail)\\s*:\\s*(?:err|error|e|ex)\\.message\\b|\\.send\\s*\\(\\s*(?:err|error|e)\\.message\\b",
+  "bad": "return reply.code(500).send({ error: { code: 'INTERNAL', message: err.message } });",
+  "good": "request.log.error({ err }, 'unhandled');\nreturn reply.code(500).send({ error: { code: 'INTERNAL', message: 'internal error', correlation_id: request.id } });"
+}

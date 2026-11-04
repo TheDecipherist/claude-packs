@@ -1,0 +1,30 @@
+{
+  "id": "rcss-button-cursor",
+  "why": "Buttons do not get cursor: pointer from the browser; the base stylesheet must set it on button, [role=button], [role=link] and [onclick], plus button:disabled { cursor: not-allowed }.",
+  "rule": ".claude/rules/styles-live-in-stylesheets.md",
+  "globs": [
+    "**/globals.css",
+    "**/global.css",
+    "**/base.css",
+    "**/app.css",
+    "**/index.css",
+    "**/main.css"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "(?:^|[\\s,{])(?:html|body|:root)\\s*\\{",
+  "needs": [
+    "cursor\\s*:\\s*pointer"
+  ],
+  "bad": "html { -webkit-text-size-adjust: 100%; }\nbody { margin: 0; }",
+  "good": "html { -webkit-text-size-adjust: 100%; }\nbutton, [role=\"button\"], [role=\"link\"], [onclick] { cursor: pointer; }\nbutton:disabled { cursor: not-allowed; }"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "model-output-validated",
+  "why": "This file calls a model but never parses the result with a schema. Model output is derived from untrusted input; it is data with a declared shape, validated with Zod before anything acts on it.",
+  "rule": ".claude/rules/llm-pipeline-security.md",
+  "concepts": [
+    "ai"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**",
+    "**/boundary.*"
+  ],
+  "code": true,
+  "mode": "needs",
+  "pattern": "\\.messages\\.(?:create|stream)\\s*\\(|\\.chat\\.completions\\.create\\s*\\(|\\.responses\\.create\\s*\\(|\\bgenerateText\\s*\\(|\\bstreamText\\s*\\(",
+  "needs": [
+    "(?<!JSON)\\.(?:safeParse|parse)\\s*\\(|\\bgenerateObject\\s*\\(|\\.messages\\.parse\\s*\\(|\\bz\\.\\w+\\s*\\("
+  ],
+  "bad": "const r = await client.messages.create({ model, messages });\nreturn JSON.parse(r.content[0].text);",
+  "good": "const r = await client.messages.create({ model, messages });\nconst out = CriticOutput.safeParse(parseJson(textOf(r)));\nif (!out.success) throw new AdmiralError(ErrorCodes.VALIDATION, 'critic output off-schema');"
+}

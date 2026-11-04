@@ -1,0 +1,21 @@
+{
+  "id": "rcss-no-100vw",
+  "why": "100vw includes the scrollbar, so a 100vw box overflows sideways on every desktop browser. width: 100%.",
+  "rule": ".claude/rules/styles-live-in-stylesheets.md",
+  "concepts": [
+    "styles"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "pattern": "\\b100vw\\b",
+  "bad": ".hero { width: 100vw; }",
+  "good": ".hero { width: 100%; }"
+}

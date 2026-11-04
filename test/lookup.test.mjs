@@ -151,16 +151,16 @@ test('presets install the packs a stack needs; docker, fastify, ai, shell-hooks 
   assert.equal(write(dir, 'compose.yml', 'services:\n  api:\n    image: registry/api:1.2.3\n    restart: always\n').status, 2);
   assert.equal(write(dir, 'compose.ok.yml', 'services:\n  api:\n    image: registry/api:1.2.3\n    init: true\n    healthcheck:\n      test: ["CMD", "true"]\n').status, 0);
   // fastify
-  const prod = write(dir, 'src/app.ts', "if (prod) {\n  await app.register(helmet, {});\n}\n");
-  assert.equal(prod.status, 2);
-  assert.match(prod.stderr, /security-not-behind-node-env/);
+  const bare = write(dir, 'src/app.ts', "const app = Fastify({ logger });\nawait app.register(rateLimit, {});\n");
+  assert.equal(bare.status, 2);
+  assert.match(bare.stderr, /sec-headers-present/);
   assert.equal(write(dir, 'src/routes/a.ts', "const origin = `${req.headers['x-forwarded-proto']}://${req.headers.host}`;\n").status, 2);
   assert.equal(write(dir, 'src/routes/b.ts', 'const parsed = LoginInput.safeParse(req.body);\n').status, 0);
   // ai
   const critic = write(dir, 'src/critic/claude.ts', "const r = await client.messages.create({ model: MODELS.critic.id, messages: [{ role: 'user', content: input.diff }] });\n");
   assert.equal(critic.status, 2);
   assert.match(critic.stderr, /model-call-needs-boundary/);
-  assert.equal(write(dir, 'src/critic/ok.ts', "const content = wrapBoundary(input.diff, 'diff');\nconst r = await client.messages.create({ model: MODELS.critic.id, messages: [{ role: 'user', content }] });\n").status, 0);
+  assert.equal(write(dir, 'src/critic/ok.ts', "const content = wrapBoundary(input.diff, 'diff');\nconst r = await client.messages.create({ model: MODELS.critic.id, messages: [{ role: 'user', content }] });\nconst out = CriticOutput.safeParse(parseJson(textOf(r)));\n").status, 0);
   // shell-hooks
   assert.equal(write(dir, 'hooks/x.sh', 'NOW=$(date +%s%3N)\n').status, 2);
   assert.equal(write(dir, 'hooks/y.sh', "NOW=$(node -e 'console.log(Date.now())')\n").status, 0);
@@ -171,4 +171,34 @@ test('presets install the packs a stack needs; docker, fastify, ai, shell-hooks 
   assert.equal(write(dir, 'src/x.ts', "import express from 'express';\n").status, 2);
   assert.equal(write(dir, 'src/schemas/user.ts', 'export const User = z.object({ name: z.string() });\n').status, 2);
   assert.equal(write(dir, 'src/schemas/user2.ts', 'export const User = z.object({ name: z.string().max(80), _id: z.string() });\n').status, 0);
+});
+
+test('v8: web, tui, nginx packs and the fastify security switch', () => {
+  const dir = fresh('cpl-');
+  run(dir, 'init', 'next-app', 'node-cli', 'edge', 'fastify');
+  // web
+  assert.equal(write(dir, 'src/app/page.tsx', '<div onClick={open}>Open</div>\n').status, 2);
+  assert.equal(write(dir, 'src/app/x/page.tsx', '<button className="px-2" onClick={save}>Save</button>\n').status, 2);
+  assert.equal(write(dir, 'src/components/Hero.tsx', '<img src="/hero.png" loading="lazy" class="hero">\n').status, 2);
+  assert.equal(write(dir, 'src/components/Ok.tsx', '<img src="/a.png" alt="a" width="320" height="200" />\n<Button onClick={save}>Save changes</Button>\n').status, 0);
+  assert.equal(write(dir, 'src/styles/globals.css', '.hero { width: 100vw; }\n').status, 2);
+  assert.equal(write(dir, 'src/styles/ok.css', '.hero { width: 100%; max-width: 640px; }\nbutton, [role="button"] { cursor: pointer; }\n').status, 0);
+  assert.equal(write(dir, 'src/app/layout.tsx', '<link href="https://fonts.googleapis.com/css2?family=Inter" rel="stylesheet" />\n').status, 2);
+  const client = write(dir, 'src/components/Admin.tsx', "'use client';\nimport { getDb } from '../server/gateway';\nwindow.location.href = '/admin';\n");
+  assert.equal(client.status, 2);
+  assert.match(client.stderr, /client-no-server-import/);
+  assert.match(client.stderr, /client-no-window-location-nav/);
+  // tui
+  assert.equal(write(dir, 'src/tui/index.tsx', "process.stdout.write('\\x1Bc');\n").status, 2);
+  const entry = write(dir, 'src/cli.tsx', "process.stdout.write('\\x1B[?1049h');\nrender(<App />);\n");
+  assert.equal(entry.status, 2);
+  assert.match(entry.stderr, /tui-entry-restores-terminal/);
+  assert.match(entry.stderr, /tui-gates-on-tty/);
+  // nginx
+  assert.equal(write(dir, 'nginx/nginx.conf', 'server { location / { proxy_pass http://api:3000; } }\n').status, 2);
+  assert.equal(write(dir, 'nginx/ok.conf', 'http { resolver 127.0.0.11 ipv6=off valid=10s; access_log /dev/stdout json; server { location / { set $api http://api:3000; proxy_pass $api; } } }\n').status, 0);
+  // fastify: the single switch is allowed; a missing helmet is not
+  assert.equal(write(dir, 'src/app.ts', "const app = Fastify({ trustProxy: 1 });\nif (isProd) { await app.register(helmet, {}); await app.register(rateLimit, {}); }\n").status, 0);
+  assert.equal(write(dir, 'src/plugins/proxy.ts', "const app = Fastify({ trustProxy: true });\n").status, 2);
+  assert.equal(write(dir, 'src/routes/login.ts', "if (token === expected) ok();\nreturn reply.code(500).send({ error: { message: err.message } });\n").status, 2);
 });

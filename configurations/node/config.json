@@ -1,6 +1,6 @@
 {
   "name": "node",
-  "description": "A Node.js or TypeScript service, CLI, library or MCP server: base, plus the packs its stack needs (js-ts, mongo, fastify, ai, docker, shell-hooks, html-ui). The node-api, node-ui, mcp-server and node-lib presets pick them.",
+  "description": "A Node.js or TypeScript service, web app, CLI, library, MCP server or edge proxy: base, plus the packs its stack needs (js-ts, mongo, fastify, ai, docker, shell-hooks, html-ui, web, tui, nginx). The presets pick them.",
   "packs": {
     "always": [
       "base"
@@ -12,7 +12,10 @@
       "ai",
       "docker",
       "shell-hooks",
-      "html-ui"
+      "html-ui",
+      "web",
+      "tui",
+      "nginx"
     ],
     "default": [
       "js-ts"

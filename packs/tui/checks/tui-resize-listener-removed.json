@@ -1,0 +1,26 @@
+{
+  "id": "tui-resize-listener-removed",
+  "why": "A resize listener that is never removed keeps rendering into a terminal the TUI has left, over the shell prompt. Every process.stdout.on('resize') has its off() on exit.",
+  "rule": ".claude/rules/tui-resize-and-screen.md",
+  "concepts": [
+    "tui",
+    "tui-entry"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "process\\.stdout\\.on\\s*\\(\\s*['\\\"]resize['\\\"]",
+  "needs": [
+    "process\\.stdout\\.(?:off|removeListener)\\s*\\(\\s*['\\\"]resize['\\\"]"
+  ],
+  "bad": "process.stdout.on('resize', onResize);",
+  "good": "process.stdout.on('resize', onResize);\nconst exit = () => { process.stdout.off('resize', onResize); };"
+}

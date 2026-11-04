@@ -1,0 +1,27 @@
+{
+  "name": "tui",
+  "description": "Terminal UIs (Ink + React or raw-mode Node): alternate screen, resize ordering, width as state, raw mode restored on every exit.",
+  "folders": {},
+  "concepts": {
+    "tui": [
+      "**/tui/**",
+      "**/*tui*",
+      "**/*.tui.*",
+      "**/ui/**/*.tsx",
+      "**/cli/**/*.tsx",
+      "**/ui/browse*",
+      "**/ui/screen*",
+      "**/screens/**"
+    ],
+    "tui-entry": [
+      "**/bin/**",
+      "**/cli.ts",
+      "**/cli.tsx",
+      "**/index.tsx",
+      "**/main.tsx",
+      "**/tui/index.*"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

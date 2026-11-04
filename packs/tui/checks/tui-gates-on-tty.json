@@ -1,0 +1,25 @@
+{
+  "id": "tui-gates-on-tty",
+  "why": "A TUI started on a non-TTY stdout (CI, a pipe, a log) writes escape codes into the log and reads stdin that never answers. Gate on isTTY and a minimum size, fall back to plain output.",
+  "rule": ".claude/rules/tui-resize-and-screen.md",
+  "concepts": [
+    "tui-entry"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "\\?1049h|setRawMode\\s*\\(\\s*true\\s*\\)|\\brender\\s*\\(\\s*<",
+  "needs": [
+    "\\bisTTY\\b"
+  ],
+  "bad": "process.stdout.write('\\x1B[?1049h');\nrender(<App />);",
+  "good": "if (!process.stdin.isTTY || !process.stdout.isTTY) return printPlain(report);\nprocess.stdout.write('\\x1B[?1049h');\nrender(<App />);"
+}

@@ -1,7 +1,7 @@
 {
   "id": "one-error-body",
   "why": "A route that builds its own 404/400 body diverges from the error handler's contract (here: an empty correlation_id). One notFound()/badRequest() builder, used everywhere.",
-  "rule": ".claude/rules/security-always-on.md",
+  "rule": ".claude/rules/security-one-switch.md",
   "concepts": [
     "routes"
   ],

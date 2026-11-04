@@ -1,0 +1,21 @@
+{
+  "id": "a11y-no-bare-outline-none",
+  "why": "outline: none removes the only focus indicator keyboard users have. Replace it with a :focus-visible style, never remove it bare.",
+  "rule": ".claude/rules/accessibility.md",
+  "concepts": [
+    "styles"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "pattern": "\\boutline\\s*:\\s*(?:none|0)\\b(?![^}]*(?:box-shadow|outline-offset|outline:\\s*\\d))",
+  "bad": "button:focus { outline: none; }",
+  "good": "button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }"
+}

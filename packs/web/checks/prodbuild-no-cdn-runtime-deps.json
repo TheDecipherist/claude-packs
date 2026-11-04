@@ -1,0 +1,21 @@
+{
+  "id": "prodbuild-no-cdn-runtime-deps",
+  "why": "A CDN script bypasses the bundler (no tree shaking, no dedup) and adds an origin. Bundle it or vendor the file.",
+  "rule": ".claude/rules/production-build.md",
+  "concepts": [
+    "markup"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "pattern": "(?:src|href)=[\\\"']https?://(?:unpkg\\.com|cdn\\.jsdelivr\\.net|cdnjs\\.cloudflare\\.com)",
+  "bad": "<script src=\"https://unpkg.com/htmx.org@2.0.4\"></script>",
+  "good": "import 'htmx.org';"
+}

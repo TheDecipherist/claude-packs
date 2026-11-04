@@ -1,0 +1,31 @@
+{
+  "id": "client-no-server-import",
+  "why": "A value import from a server module in a 'use client' file pulls the gateway, env and secrets into the browser bundle. Pass data through props or a route handler; only `import type` is allowed.",
+  "rule": ".claude/rules/client-boundaries.md",
+  "globs": [
+    "**/*.tsx",
+    "**/*.ts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*",
+    "**/server/**",
+    "**/db/**",
+    "**/lib/db*"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "(?=[\\s\\S]*^\\s*['\\\"]use client['\\\"])[\\s\\S]*?^import\\s+(?!type\\b)[^;\\n]*from\\s+['\\\"][^'\\\"\\n]*(?:/server/|\\.server['\\\"]|/db/|gateway)",
+  "bad": "'use client';\nimport { getDb } from '../server/gateway';",
+  "good": "'use client';\nimport type { Session } from '../server/gateway';\nimport { Button } from '@/components/ui';"
+}

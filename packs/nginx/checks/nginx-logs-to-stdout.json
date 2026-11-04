@@ -1,0 +1,15 @@
+{
+  "id": "nginx-logs-to-stdout",
+  "why": "A log file inside the container is invisible to the Docker log driver and fills the writable layer. /dev/stdout and /dev/stderr.",
+  "rule": ".claude/rules/nginx-production.md",
+  "concepts": [
+    "nginx-conf"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "pattern": "\\b(?:access|error)_log\\s+/var/log/",
+  "bad": "access_log /var/log/nginx/access.log;",
+  "good": "access_log /dev/stdout json;\nerror_log /dev/stderr warn;"
+}

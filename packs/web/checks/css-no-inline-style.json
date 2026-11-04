@@ -1,0 +1,27 @@
+{
+  "id": "css-no-inline-style",
+  "why": "style=\"\u2026\" cannot be responsive, hover or animated and starts a specificity war. Static styling goes in the stylesheet; a runtime value goes in as a custom property (style=\"--progress: 73%\").",
+  "rule": ".claude/rules/styles-live-in-stylesheets.md",
+  "concepts": [
+    "markup"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*",
+    "**/*.html"
+  ],
+  "code": false,
+  "pattern": "\\bstyle\\s*=\\s*(?:\\\"(?!\\s*--)|'(?!\\s*--)|\\{\\{(?!\\s*['\\\"]--))",
+  "bad": "<div style={{ width: 240, color: 'red' }}>\n<span style=\"margin-top:6px\">",
+  "good": "<div className=\"bar\" style={{ '--progress': `${pct}%` }}>\n<span style=\"--gap: 6px\">"
+}

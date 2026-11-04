@@ -1,0 +1,17 @@
+{
+  "id": "nginx-no-crlf",
+  "why": "A CRLF nginx.conf fails nginx -t inside a Linux container with a nonsensical error. LF only.",
+  "rule": ".claude/rules/nginx-production.md",
+  "concepts": [
+    "nginx-conf",
+    "modsec"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "\\r$",
+  "bad": "server {\r\n}\r\n",
+  "good": "server {\n}\n"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "nginx",
+  "description": "NGINX in front of containers: Docker DNS resolver, keepalive, stdout logs, headers with always, CSP, ModSecurity/CRS tuning.",
+  "folders": {},
+  "concepts": {
+    "nginx-conf": [
+      "**/nginx.conf",
+      "**/*.nginx.conf",
+      "**/nginx/**",
+      "**/conf.d/**/*.conf",
+      "**/sites-enabled/**"
+    ],
+    "modsec": [
+      "**/modsecurity.conf",
+      "**/modsecurity.d/**",
+      "**/modsec*/**",
+      "**/crs-setup.conf",
+      "**/*.modsec.conf",
+      "**/owasp-crs/**",
+      "**/REQUEST-*.conf",
+      "**/RESPONSE-*.conf"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

@@ -18,6 +18,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: git-guard's push law accepts a push whose target is an SSH URL under the owner (named in the command, or the URL of the remote it names), the Stop hint offers that form; concepts: none (design/shape.json declares none); reuse: house() and its env (packs/base/hooks/git-guard.mjs), pushCommand (packs/base/hooks/lib/pushed.mjs).
   done when: git-guard's selftest has an SSH case each way (an owner SSH remote and URL pass; another owner's SSH remote and an HTTPS remote are refused), red without the fix; the kit's install updated; work/0.10.0-v7-additions pushed over SSH.
 
+- 0.12.0, the v8 additions (work/0.12.0-v8-additions, from the v7 branch), started 2026-11-04.
+  making: the v8 additions merged into the kit without overwriting it (packs web, tui, nginx; fastify's one isProd switch replacing security-always-on; fastify, js-ts and ai additions; eight presets); concepts: none (design/shape.json declares none); reuse: PRESETS and normalisePacks (lib/packs.mjs), the node configuration (configurations/node/config.json) for the new packs, fresh and hookRun (test/kit-cli.mjs) in the v8 test.
+  done when: MERGE.md's Verify passes (selftest, doctor --strict, npm test, list); every .incoming reconciled; .incoming-v8/ deleted; the branch on GitHub.
+
 ## Steps
 
 ## Log
