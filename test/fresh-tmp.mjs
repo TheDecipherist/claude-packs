@@ -18,3 +18,6 @@ process.env.CLAUDE_PACKS_SELFTEST_CACHE ??= join(dir, 'selftests');
 // sit outside the kit's node_modules (0.9.0).
 const jscpd = fileURLToPath(new URL('../node_modules/.bin/jscpd', import.meta.url));
 if (existsSync(jscpd)) process.env.CLAUDE_PACKS_JSCPD ??= jscpd;
+
+// A test's simulated sessions are not this Claude process: kit-lock reads CLAUDE_PID as its holder (KWB-40).
+delete process.env.CLAUDE_PID;

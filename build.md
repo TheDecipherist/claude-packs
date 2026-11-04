@@ -76,5 +76,6 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 - 2026-11-04 00:50 EST: 0.11.0 started; merge applied, .incoming files reconciled; commit e17a79d (local, push blocked by KWB-39).
 - 2026-11-04: 0.11.0 and 0.12.0 landed on main (964057b): npm test 167 of 167. 0.13.0: the gate ran once on a66749b in 252 s (it took 12 minutes and more before), 170 of 171; the noop list fixed (a rule held with a hook Sub37 does not have), noop 3 of 3 run alone: 171 of 171.
+- 2026-11-04: 0.19.0 manifest (192 of 192). 0.20.0 install fixes, 0.21.0 custom packs, 0.22.0 ui-craft depth: the gate ran once in 257 s, 202 of 204; shape.test's message and CLAUDE_PID in the preload fixed, those files alone: 204 of 204.
 - 2026-11-04: 0.18.0 hook-proof: the gate ran once in 263 s, 188 of 189; the timing test's fakes are in no settings entry, as doctor now says; it passes alone: 189 of 189.
 - 2026-11-04: 0.15.0 writing (178 of 178), 0.16.0 scan and 0.17.0 ui-craft and landing: the gate ran once on 6b26cf0, 186 of 186 in 256 s; landed by land-branch.
