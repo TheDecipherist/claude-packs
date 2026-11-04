@@ -1,0 +1,67 @@
+{
+  "description": "The full-stack configuration's own laws: Fastify and Next.js only (stack-guard), Zod 4 schemas only in the schemas folder (schemas-only), and its rules per folder: thin routes, handlers, one database gateway with chain keys first, one error contract, env.ts shapes, health and logs, multistage Docker, inject() tests.",
+  "name": "full-stack",
+  "configurationPack": true,
+  "folders": {},
+  "concepts": {
+    "api": [
+      "api"
+    ],
+    "core": [
+      "core"
+    ],
+    "routes": [
+      "routes"
+    ],
+    "handlers": [
+      "handlers"
+    ],
+    "adapters": [
+      "adapters"
+    ],
+    "schemas": [
+      "schemas"
+    ],
+    "channel": [
+      "channel"
+    ],
+    "env": [
+      "**/env.ts"
+    ],
+    "docker": [
+      "**/Dockerfile",
+      "**/Dockerfile.*"
+    ],
+    "manifests": [
+      "**/package.json"
+    ],
+    "api-tests": [
+      "api-tests"
+    ],
+    "tests": [
+      "api-tests",
+      "**/*.test.ts",
+      "**/*.test.tsx"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stack-guard.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/schemas-only.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
