@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-furniture-text",
+  "why": "Furniture text decorates a page with facts nobody asked for. A section heading can simply say Pricing.",
+  "rule": ".claude/rules/interface-copy.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\b(?:Field notes|Quietly trusted by|Scroll to explore|Available for work|Est\\.\\s*(?:19|20)\\d\\d)\\b",
+  "bad": "<p>Est. 2024</p>\n",
+  "good": "<p>Pricing</p>\n",
+  "flags": "i"
+}

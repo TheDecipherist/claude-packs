@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-zebra-rows",
+  "why": "Zebra rows add stripes where a 1px rule does the job.",
+  "rule": ".claude/rules/apps-are-not-pages.md",
+  "concepts": [
+    "ui-markup",
+    "ui-styles"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\b(?:even|odd):bg-|nth-child\\((?:even|odd|2n)\\)[^{]*\\{[^}]*background",
+  "bad": "<tr className=\"even:bg-gray-50\" />\n",
+  "good": "<tr className=\"border-b\" />\n"
+}

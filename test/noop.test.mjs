@@ -15,7 +15,7 @@ export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mj
   'shape-law.mjs', 'lesson-checks.mjs', 'lib/glob.mjs', 'lib/pushed.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
   .map((f) => `.claude/hooks/${f}`).concat(['.claude/rules/instances-by-index-identities-by-id.md', '.claude/skills/prove-instances-identical/SKILL.md',
     '.claude/tools/shape-symmetry.mjs', '.claude/tools/shape-symmetry-selftest.mjs',
-    '.claude/tools/freeze.mjs', '.claude/tools/lib/wav.mjs']);   // 0.11.0: their if-chains are tables (lookup-over-if-chains)
+    '.claude/tools/freeze.mjs', '.claude/tools/lib/wav.mjs', '.claude/rules/subagent-dispatch.md', '.claude/rules/bug-fix-starts-red.md']);   // 0.11.0: their if-chains are tables (lookup-over-if-chains)
 
 function updated(project, named = true) {
   const dir = fresh(`noop-${project}-`);
@@ -42,7 +42,7 @@ const TIME = ['.claude/rules/git-right-first-time.md', '.claude/rules/reuse-befo
 // 0.15.0: the writing pack comes with every configuration. Its rules and skills reach a project with no refusing in them; its checks are held back.
 const WRITING = [...['cut-the-padding', 'rhythm-like-talk', 'no-stock-language', 'no-scaffolding', 'no-time-or-date', 'ascii-no-em-dash', 'write-from-your-own-corner', 'tims-voice', 'no-cargo-cult'].map((r) => `.claude/rules/${r}.md`),
   ...['humanize', 'reply-stance', 'should-i-reply', 'reply-moves', 'reddit-post', 'pick-subreddit', 'reddit-title', 'argument-post', 'launch-post', 'post-voice'].map((s) => `.claude/skills/${s}/SKILL.md`), '.claude/hooks/lib/prose.mjs'];
-const LANDING = ['.claude/rules/finished-work-lands.md', '.claude/skills/land-branch/SKILL.md', '.claude/rules/a-refusal-is-exit-2.md', '.claude/skills/prove-a-hook/SKILL.md'];   // 0.17.0: with git-guard, which every project has
+const LANDING = ['.claude/rules/test-the-template-once.md', '.claude/rules/finished-work-lands.md', '.claude/skills/land-branch/SKILL.md', '.claude/rules/a-refusal-is-exit-2.md', '.claude/skills/prove-a-hook/SKILL.md'];   // 0.17.0: with git-guard, which every project has
 const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only where the project has time-guard: the rule goes where its hook goes
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
 

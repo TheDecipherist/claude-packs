@@ -27,6 +27,7 @@ Always do:
 - Plant the faults the gate exists for and see it red: one instance missing a member, one pair that swaps differently.
 - Check the IDs: the generator produces exactly the frozen lock's string for every instance and field.
 - Report each difference by where it lives: a code path, a record field, a wiring.
+- Keep it structural and cheap: this gate proves instances are one template. Behaviour is tested once on the template (`test-the-template-once`), never per instance. With many instances `members` runs on all and `swap` on a sample: the tool picks it.
 
 Never do:
 - Prove a change on one instance and call it done.

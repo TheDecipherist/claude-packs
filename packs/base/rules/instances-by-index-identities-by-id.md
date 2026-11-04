@@ -29,7 +29,7 @@ Always do:
   in the manifest), or a declared constant (a named row in the manifest, read by name).
 - Prove a change to a container on every instance with the generated gate `shape_symmetry` (the `prove-instances-identical` skill):
   every instance has the same members, and every pair swaps the same.
-- Write tests, probes, planted faults and agent briefs with the instance as a parameter, run on every instance.
+- Write tests, probes, planted faults and agent briefs with the instance as a parameter. Behaviour is tested once on the template (`test-the-template-once`); `shape_symmetry` is the cheap proof the rest are that template, so a behaviour test never loops over every instance of hundreds.
 
 Never do:
 - Scope a check, a gate or a review to folders ("the engine"): a many concept is many everywhere.

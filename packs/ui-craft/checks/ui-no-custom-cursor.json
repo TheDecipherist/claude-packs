@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-custom-cursor",
+  "why": "A custom cursor costs usability and reads as a gimmick. Use the cursor that names the action.",
+  "rule": ".claude/rules/pointer-feedback.md",
+  "concepts": [
+    "ui-markup",
+    "ui-styles"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "cursor:\\s*url\\(",
+  "bad": ".hero { cursor: url(/dot.png), auto; }\n",
+  "good": ".hero { cursor: pointer; }\n"
+}

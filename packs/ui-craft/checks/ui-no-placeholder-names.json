@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-placeholder-names",
+  "why": "Placeholder people and companies say nobody looked at this. Use believable sample data, listed for the owner.",
+  "rule": ".claude/rules/data-tells-the-truth.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\b(?:John Doe|Jane Doe|Acme(?: Inc| Corp)?|User \\d+|Lorem Corp)\\b",
+  "bad": "<td>John Doe</td>\n",
+  "good": "<td>Mia Lund</td>\n"
+}

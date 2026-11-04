@@ -13,7 +13,7 @@ Always do:
 - Require the agent to end with exactly one status line, `DONE`, `DONE_WITH_CONCERNS`, `BLOCKED` or `NEEDS_CONTEXT`, plus the path of its report.
 - Give read-only agents read-only tools, and give writing agents the exact list of files they may write.
 - Review an agent's work as unverified claims: read the diff, re-run the verdict. A stated reason never lowers a finding's severity.
-- Pass the instance under test as a parameter and ask for the proof on every instance (the swap test, `prove-instances-identical`).
+- Pass the instance under test as a parameter: behaviour is proved once on the template, and the generated gate proves the instances are that template (`prove-instances-identical`).
 - Quote the `design/shape.json` row of every concept the brief touches, word for word: its shape,
   its generator, its selectors and constants. Name the shape and the generator; an instance appears only on a `seen in:` or
   `example:` line (`brief-guard` refuses any other, KWB-1).

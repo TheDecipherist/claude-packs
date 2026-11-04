@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-lorem",
+  "why": "Placeholder copy reached the source. Write real words, or sample ones listed for the owner.",
+  "rule": ".claude/rules/interface-copy.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\blorem ipsum\\b|\\bdolor sit amet\\b",
+  "bad": "<p>Lorem ipsum dolor sit amet</p>\n",
+  "good": "<p>Find an order in one search.</p>\n",
+  "flags": "i"
+}

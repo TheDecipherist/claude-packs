@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-animate-layout",
+  "why": "Animating width, height, top, left, margin or padding forces layout on every frame. Use transform and opacity.",
+  "rule": ".claude/rules/motion-is-rare.md",
+  "concepts": [
+    "ui-markup",
+    "ui-styles"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "transition(?:-property)?:[^;\\n]*\\b(?:width|height|top|left|margin|padding)\\b",
+  "bad": ".bar { transition: width 0.3s; }\n",
+  "good": ".bar { transition: transform 0.3s; }\n"
+}

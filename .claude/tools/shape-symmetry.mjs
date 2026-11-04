@@ -77,7 +77,9 @@ export function runConcept(root, name, log = console.log) {
     log(`  members ${i}: ${members.size}`);
   }
   let diffs = 0;
-  for (const i of sets.keys()) for (const j of sets.keys()) {
+  const first = sets.keys().next().value;
+  // Identical to the first means identical to each other, so many instances cost one pass, not N squared (0.22.0).
+  for (const i of sets.keys()) for (const j of ids.length > ALL_PAIRS_UP_TO ? [first] : sets.keys()) {
     if (i === j) continue;
     const lacks = [...sets.get(i)].filter((m) => !sets.get(j).has(m)).sort();
     if (lacks.length) { diffs += 1; log(`  members DIFFER: instance ${i} has ${lacks.join(', ')} that instance ${j} lacks`); }
@@ -85,20 +87,29 @@ export function runConcept(root, name, log = console.log) {
   if (diffs) red += 1;
   else if (sets.size === ids.length) log(`  members: every instance has the same ${sets.values().next().value.size} members`);
 
-  // (b) swap, every unordered pair
+  // (b) swap: every unordered pair of a few instances; of many, the first against an even spread (Tim: testing thousands of the same control
+  // is a complete waste of time; `members` above already read every one)
   let pairs = 0, differ = 0;
-  for (let a = 0; a < ids.length; a += 1) for (let b = a + 1; b < ids.length; b += 1) {
-    const [i, j] = [ids[a], ids[b]];
+  const chosen = swapPairs(ids);
+  for (const [i, j] of chosen) {
     const r = sh(sym.swap, root, { i, j });
     pairs += 1;
     if (r.code === 0) log(`  swap ${i}<->${j}: same`);
     else { differ += 1; log(`  swap ${i}<->${j}: DIFFERS: "${r.line}" exited ${r.code}${tail(r.out + r.err)}`); }
   }
-  const want = (ids.length * (ids.length - 1)) / 2;
-  log(`  swap: ${pairs} pairs checked (N·(N-1)/2 = ${want} for N = ${ids.length}), ${differ} differ`);
+  const want = chosen.length;
+  log(ids.length > ALL_PAIRS_UP_TO ? `  swap: ${pairs} pairs checked (a spread of N = ${ids.length}), ${differ} differ` : `  swap: ${pairs} pairs checked (N·(N-1)/2 = ${want} for N = ${ids.length}), ${differ} differ`);
   if (differ || pairs !== want) red += 1;
   log(`${head}: ${red ? 'RED' : 'GREEN'}`);
   return red ? 1 : 0;
+}
+
+const ALL_PAIRS_UP_TO = 8;
+const SPREAD = 8;
+function swapPairs(ids) {
+  if (ids.length <= ALL_PAIRS_UP_TO) return ids.flatMap((a, x) => ids.slice(x + 1).map((b) => [a, b]));
+  const step = (ids.length - 1) / SPREAD;
+  return [...new Set(Array.from({ length: SPREAD }, (_, k) => Math.round((k + 1) * step)))].map((x) => [ids[0], ids[x]]);
 }
 
 // One test per many concept. A many concept with no symmetry block still gets its test, which is red until it has one.

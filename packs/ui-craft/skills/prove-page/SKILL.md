@@ -9,7 +9,7 @@ description: Use when a project has UI code and no page gate, when doctor asks f
 Always do:
 1. Use the test runner the project has. Playwright is the usual one: pin it through `latest-versions`, with `@axe-core/playwright` for accessibility.
 2. Open each key page in a real browser, on the production build, at three widths: 1440, 768 and 390.
-3. Assert, per page and width:
+3. Measure with `.claude/tools/page-measure.mjs`: `const facts = await page.evaluate(measure)`, then `expect(judge(facts)).toEqual([])`. Then assert, per page and width:
    - no axe violations at the WCAG A and AA levels, in both colour schemes;
    - no horizontal overflow, and no text clipped or covered;
    - headlines at two lines or fewer, and a single `h1`;

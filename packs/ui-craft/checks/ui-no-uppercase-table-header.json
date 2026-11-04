@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-uppercase-table-header",
+  "why": "An uppercase tracked table header is louder than the data. Use small grey sentence case.",
+  "rule": ".claude/rules/apps-are-not-pages.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "<th\\b[^>]*\\buppercase\\b",
+  "bad": "<th className=\"uppercase text-xs\">Name</th>\n",
+  "good": "<th className=\"text-xs text-muted\">Name</th>\n"
+}

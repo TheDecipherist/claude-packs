@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-scroll-hijack",
+  "why": "Capturing the wheel takes scrolling away from the person. Native scroll only.",
+  "rule": ".claude/rules/motion-is-rare.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "addEventListener\\(\\s*['\"](?:wheel|mousewheel|touchmove)['\"][^\\n]*preventDefault",
+  "bad": "window.addEventListener('wheel', (e) => { e.preventDefault(); move(e); }, { passive: false });\n",
+  "good": "window.addEventListener('scroll', onScroll, { passive: true });\n"
+}

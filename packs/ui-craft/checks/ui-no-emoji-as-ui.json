@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-emoji-as-ui",
+  "why": "Emoji as icons or bullets read as generated. Use words, or one icon set.",
+  "rule": ".claude/rules/no-generated-look.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "[\\u{1F300}-\\u{1FAFF}\\u{2600}-\\u{27BF}]",
+  "bad": "<li>\ud83d\ude80 Fast</li>\n",
+  "good": "<li>Fast</li>\n",
+  "flags": "u"
+}

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.22.0 (2026-11-04)
+
+The depth of ui-craft (Tim: everything in taste-skill is useful; a hovered element says so; anything used twice is one template, tested once).
+
+- Rules: `pointer-feedback`, `screen-answers-one-question`, `data-tells-the-truth`, `apps-are-not-pages`, `page-holds-its-frame`, `pictures-do-a-job`; deeper `motion-is-rare`, `survives-real-data`, `interface-copy`, `no-generated-look`, `type-space-colour`.
+- Skills: `app-screen`, `chart-choice`, `page-critique`, `redesign-page`, `build-from-reference`, `write-the-page`. Tool `page-measure` for a `prove-page` gate, proved in real Chrome.
+- Twelve checks from taste-skill's lint rules, and `no-ts-enum` and `test-name-says-behaviour` in js-ts.
+- `test-the-template-once` (base): behaviour is tested on the template, once; a structural pass proves the instances are that template. `instances-by-index`, `subagent-dispatch` and `prove-instances-identical` say so.
+- `shape_symmetry` scales: over 8 instances `members` compares each with the first and `swap` takes a spread of 8, so 1,000 instances cost under 20 swaps, not 499,500.
+- `scan` lists secret-shaped text in test files apart. docs/rules-without-checks.md lists the rules no regex can hold. README: the packs table from the manifests, credits.
+
 ## 0.21.0 (2026-11-04)
 
 Custom packs (Tim: if a person makes something for their employer's internals, it should be easy to make a repo and share it with their team).

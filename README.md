@@ -4,14 +4,30 @@ Per-project Claude Code rules, lesson checks, hooks and skills for The Decipheri
 
 ## Packs
 
-| Pack | For | Rules | Checks | Hooks | Skills |
-|---|---|---|---|---|---|
-| `base` | every project, every configuration (always installed) | 9 | 1 | lesson-checks, file-size-guard, folder-law, placement-law, shape-law, brief-guard, making, making-check, once-only, git-guard, secrets-guard, untrusted-boundary | add-lesson-check, pressure-test-skill, prove-instances-identical |
-| `synth-creator` | the synth-creator configuration's own (always with it) | 4 | 0 | spec-lock, protect-vendor (vendored code and copy trees), frozen-files, stage-guard, build-guard, time-guard; opt-in: tims-asks, idle-wake, build-sweep | build-step |
-| `full-stack` | the full-stack configuration's own (always with it) | 10 | 0 | stack-guard, schemas-only | – |
-| `audio-core` | any JUCE synth or effect | 40 | 8 | realtime-guard, param-id-lock | juce-realtime-audit, measure-tone, copy-and-prove, … (+ tone-report tool, `.clang-tidy`) |
-| `gpu-painter` | GPU-drawn UI on Dawn (Metal / D3D12) | 14 | 6 | browser-guard | gpu-frame-bench, gpu-golden-check, gpu-golden-update, gpu-lifecycle-stress, gpu-capture |
-| `stellix` | the Stellix spec laws | 5 | 5 | no-shipped-images | – |
+`list` shows every pack and preset, with its version and author.
+
+| Pack | For | Rules | Checks | Skills |
+|---|---|---|---|---|
+| `ai` | Code that calls a model | 2 | 4 | 0 |
+| `audio-core` | Any JUCE synth or effect | 40 | 8 | 7 |
+| `base` | Universal engineering every configuration gets | 19 | 3 | 5 |
+| `docker` | Dockerfiles, Compose and Swarm | 3 | 21 | 1 |
+| `fastify` | Fastify servers | 5 | 15 | 0 |
+| `full-stack` | The full-stack configuration's own laws | 11 | 0 | 1 |
+| `gpu-painter` | GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows), drawn nat | 15 | 6 | 6 |
+| `hook-proof` | A hook that should refuse does refuse | 1 | 5 | 1 |
+| `html-ui` | Server-rendered HTML (template strings, views) | 1 | 4 | 0 |
+| `js-ts` | JavaScript and TypeScript | 23 | 25 | 0 |
+| `mongo` | MongoDB with the native driver | 5 | 16 | 0 |
+| `nginx` | NGINX in front of containers | 2 | 7 | 1 |
+| `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 |
+| `stellix` | Stellix spec laws | 5 | 5 | 0 |
+| `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 1 |
+| `synth-creator` | The synth-creator configuration's own laws, installed with it and neve | 5 | 0 | 2 |
+| `tui` | Terminal UIs (Ink + React or raw-mode Node) | 1 | 5 | 1 |
+| `ui-craft` | Application and page design in any web stack | 16 | 24 | 8 |
+| `web` | Web UI (Next | 7 | 20 | 5 |
+| `writing` | Text that goes public reads like a person wrote it | 9 | 11 | 10 |
 
 The projects on the kit: Stellix (`init audio-core gpu-painter stellix --profile stellix`) and Sub37 (`init audio-core --profile sub37`), both in the synth-creator configuration.
 
@@ -127,6 +143,12 @@ npx --no-install @thedecipherist/claude-packs add acme-internal --from git@git.a
 
 A pack is rules, checks, hooks and skills in a folder, in a repository of your own. `update` pulls the newest, and the lock records the commit, so teammates get the same pack. Hooks from a custom pack stay off until a project names them in `"enable"`.
 
+## UI depth: apps, pages, one template (0.22.0)
+
+`ui-craft` now separates app screens from pages, because what makes a page distinctive breaks a working screen. App screens get `screen-answers-one-question`, `data-tells-the-truth` and the `app-screen` and `chart-choice` skills. Pages get `page-holds-its-frame`, `pictures-do-a-job`, and the `write-the-page` and `page-critique` skills. `redesign-page` and `build-from-reference` cover existing pages and design images, and `.claude/tools/page-measure.mjs` measures a rendered page for a `prove-page` gate.
+
+In every project: **one template, changed once, tested once** (`test-the-template-once`). Behaviour is tested on the template; a structural pass proves the instances are that template. `shape_symmetry` reads every instance and swaps a spread of them, so a thousand identical controls cost one read and a few swaps.
+
 ## Commands
 
 ```
@@ -170,7 +192,7 @@ npx --no-install @thedecipherist/claude-packs lock status|take|release [--force]
 2. Bring project.md back. The packs' layout, concepts, rules and skill triggers get tuned to it.
 
 ## Install from the tarball
-`npm i -D ./thedecipherist-claude-packs-0.7.0.tgz`, then `npx --no-install @thedecipherist/claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
+`npm i -D ./thedecipherist-claude-packs-<version>.tgz`, then `npx --no-install @thedecipherist/claude-packs init …`. Needs Node 22+. `npm test` runs the end-to-end tests.
 
 A new project: `npx --no-install @thedecipherist/claude-packs new <name> [--packs audio-core,gpu-painter] [--profile <name>] [--dir <parent>]` makes the
 folder, the house files (`CLAUDE.md`, `build.md`, `bugs.md`, `workflow-bugs.md`, `docs/versions.md`, `.gitignore`), a git
@@ -371,6 +393,10 @@ Sub37's `workflow-bugs.md` WB-1 to WB-4. Each has a test in `test/sub37-wb.test.
 | WB-3 | doctor | token sweep | reads `.git/config` of the project, every nested repo (four levels down) and every repo in `layout.siblings`, and fails on a URL carrying a secret or a bare GitHub token. It names the key and masks the token |
 | WB-4 | selftests | every hook | `folder-law`, `frozen-files`, `protect-vendor`, `spec-lock`, `realtime-guard`, `param-id-lock` and `no-shipped-images` gained `--selftest`. Each builds a throwaway project (`hooks/lib/selftest.mjs`) and runs the hook as Claude Code does, so nobody probes a hook by pasting a payload into a shell command. `doctor` runs every hook's selftest, in parallel, and notes a hook without one |
 | | test | `npm test` | each test process gets its own empty temp folder (`test/fresh-tmp.mjs`), so doctor's sibling sweep never reads the system temp folder |
+
+## Credits
+
+The kit learned from [superpowers](https://github.com/obra/superpowers) (MIT), mddkit and MDD, Vercel's Web Interface Guidelines (MIT), Anthropic's frontend-design (Apache 2.0), Impeccable (Apache 2.0), taste-skill and imagegen-skills (MIT). [docs/ui-craft-sources.md](docs/ui-craft-sources.md) says what came from each UI source.
 
 ## License
 
