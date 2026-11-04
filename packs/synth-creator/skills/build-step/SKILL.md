@@ -54,7 +54,7 @@ MANY with its count, generator, selectors and declared constants).
 
 - **A concept the step introduces gets its row first, as the step's first commit** (`step.py save "shape: <concept> row"`
   with only `design/shape.json` in it), before any code that uses it. `shape-law` refuses an instance type with no row.
-- Build for the shape: one loop over every instance, or the generator. An instance a bug was seen in goes on a `seen in:`
+- Build for the shape: one loop over every instance, or the generator. Test the behaviour once, on the template (`test-the-template-once`). An instance a bug was seen in goes on a `seen in:`
   line; a rule that picks one is a selector listed in the row; a fixed one is a named constant there. Anything else is
   refused with "example, rule, or constant?".
 - **Every subagent brief quotes the manifest row of every concept it touches, word for word**, and names the shape and

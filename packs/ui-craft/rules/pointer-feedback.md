@@ -15,6 +15,7 @@ Always do:
 - Press answers too: a small change in 100-160ms, so a click is felt.
 - Use the same hit area for hover and press: one function or element, never a second list.
 - Make hover and focus-visible agree, so a keyboard user sees what a mouse user sees.
+- Build the hover into the template, so every instance has it and it is changed and tested once (`test-the-template-once`).
 
 Never do:
 - A `pointer` cursor on something inert, or no change on something that acts.

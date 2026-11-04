@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.22.1 (2026-11-04)
+
+- One template, all the way through: `house-control-behaviours`, `prove-control`, `hover-state` and `hover-every-pressable` still asked to walk every control. They now walk one per template and every one-off, and prove the rest by a table read that each is built from its template and wired, which is what catches a control wired to nothing. `pointer-feedback`: the hover lives in the template.
+
 ## 0.22.0 (2026-11-04)
 
 The depth of ui-craft (Tim: everything in taste-skill is useful; a hovered element says so; anything used twice is one template, tested once).

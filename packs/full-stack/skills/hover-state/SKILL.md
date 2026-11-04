@@ -14,7 +14,7 @@ The law is the rule `web-hover-every-pressable`: a cursor naming the interaction
 4. Define it once on the shared component, so every use gets it; do not restyle per page.
 
 ## Prove it: the hover walk
-A browser test (Playwright, in the project's own test folder) that, for every interactive element on each screen (`button, a[href], [role=button], [role=tab], input, select, textarea, [tabindex]`):
+A browser test (Playwright, in the project's own test folder) that, for one element of each component and every one-off on each screen (`button, a[href], [role=button], [role=tab], input, select, textarea, [tabindex]`):
 1. moves the pointer to its centre;
 2. reads `getComputedStyle(el).cursor` and requires the interaction's cursor, never `auto` or `default`;
 3. screenshots the element's box and a ring round it before and after: the box changes by a floor, the ring does not;

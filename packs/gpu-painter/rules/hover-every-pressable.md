@@ -11,7 +11,7 @@ Always do:
 - Give every element the pointer can act on (a control, a point or handle, a tab, a list row, a key, a button, a text field) two things when the pointer is over it: (a) a cursor that names the interaction (drag up-down, drag left-right, drag both ways, press, text) and (b) a small visible effect on that element itself (lift, ring, brighten, glow).
 - Find the hovered item with the same function the press uses (one hit test). The press and the hover share it, so a thing drawn as interactive cannot be missing from the hover; never keep a second list of hoverable things.
 - Draw the effect on the hovered item's own pixels, ease it in and out (a glide of about 0.1 s) on the frame clock, and let it come back to rest when the pointer leaves.
-- Give a new control its hover in the same change that gives it its press, and prove it with the hover walk in the skill `hover-state`: the gate moves the pointer over every pressable item and reads that the cursor and the drawn pixels change.
+- Give a new control its hover in the same change that gives it its press, and prove it with the hover walk in the skill `hover-state`: the gate moves the pointer over one item of each template and every one-off, and reads that the cursor and the drawn pixels change.
 - Use the disabled look only for what is truly disabled (it does not respond to a press). A control that responds gets the hover.
 
 Never do:

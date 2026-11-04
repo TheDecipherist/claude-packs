@@ -22,9 +22,10 @@ Always do:
 - Give every choice control (dropdown, select, menu, any control drawn with a chevron or that holds one of a list of values) a real list:
   a press opens the list with every choice and the current one marked; choosing one sets it, and Escape or a press outside closes it.
   It never steps to the next value on a press. The ‹ › arrows beside a list may step, as their own controls.
-- Check a new or changed control against this list with the `new-panel-control` skill, and walk every control through the real window in the behaviour gate.
-- Walk every control of every page in the real window, on a loaded patch and not only on INIT: each one moves its value and the sound or
-  the picture, and each choice control opens its list. The gate is red on a planted control that does nothing and on a planted dropdown
+- Check a new or changed control against this list with the `new-panel-control` skill, and walk one control of each template through the real window in the behaviour gate.
+- Walk one control of each template in the real window, on a loaded patch and not only on INIT: it moves its value and the sound or
+  the picture, and a choice control opens its list. Prove the rest by a read, not a walk (`test-the-template-once`): a table check that every
+  control is built from its template and its binding reaches a live parameter, which is what catches a control wired to nothing. The gate is red on a planted control that does nothing and on a planted dropdown
   that steps instead of opening.
 - When a project's reference synth (Solera, MegaSynth) does a behaviour differently, copy it and write down what was copied.
 

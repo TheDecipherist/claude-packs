@@ -70,6 +70,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: rules, skills and checks for app screens, pages, critique, redesign, references, words, pictures and pointer feedback, the page-measure tool, test-the-template-once and a shape_symmetry that scales; concepts: none (design/shape.json declares none); reuse: holdToExamples (test/kit-cli.mjs), swapPairs (packs/base/tools/shape-symmetry.mjs).
   done when: every check refuses through the hook; page-measure is proved in real Chrome; 1000 instances cost under 20 swaps; the whole suite green once, committed; landed.
 
+- 0.22.1, one template all the way through (work/0.22.1-one-template), started 2026-11-04 (Tim asked if his UI points were in; four documents still said to walk every control).
+  making: the walks test one control per template and read the rest; concepts: none (design/shape.json declares none); reuse: test-the-template-once (packs/base/rules).
+  done when: no law asks to walk every instance; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

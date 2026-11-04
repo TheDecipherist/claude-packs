@@ -48,3 +48,11 @@ test('one template: a thousand instances cost one read and a handful of swaps, n
   const n = Number(r.stdout.match(/swap: (\d+) pairs checked \(a spread of N = 1000\)/)[1]);
   assert.ok(n > 0 && n < 20, `${n} swaps`);
 });
+
+test('no law still asks to walk every instance: one per template, the rest by a read', () => {
+  const read = (rel) => readFileSync(join(KIT, 'packs', rel), 'utf8');
+  for (const rel of ['audio-core/rules/house-control-behaviours.md', 'audio-core/skills/prove-control/SKILL.md', 'gpu-painter/skills/hover-state/SKILL.md', 'full-stack/skills/hover-state/SKILL.md']) {
+    assert.match(read(rel), /one (?:control|item|element) of (?:this|each) (?:template|component)/, rel);
+    assert.doesNotMatch(read(rel), /walk every control|for every interactive element|on every slot it appears/, rel);
+  }
+});

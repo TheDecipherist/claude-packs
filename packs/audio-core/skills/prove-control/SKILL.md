@@ -14,8 +14,8 @@ For the control's parameter ID, run each check through the real path and save th
 4. **Init and reset:** the init patch and the reset action give the value the spec states.
 5. **MIDI** (if mapped): the CC or learn moves the parameter over its full range.
 6. **Undo:** one drag is one undo step, and host automation never enters undo.
-7. **In the real window:** press, drag, wheel and double click the control on a loaded patch (not only INIT), on every slot it appears
-   on; the value and the sound or picture change. A choice control (dropdown, select, menu) opens its list on a press, shows every
+7. **In the real window:** press, drag, wheel and double click one control of this template on a loaded patch (not only INIT); a table
+   read proves the same control on the other slots is that template and is wired (`test-the-template-once`). The value and the sound or picture change. A choice control (dropdown, select, menu) opens its list on a press, shows every
    choice with the current one marked, sets the one chosen, and closes on Escape or a press outside; it never steps on a press.
 8. **IDs:** the parameter ID list diff is empty except for the intended change (see `parameter-ids-never-change`).
 

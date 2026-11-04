@@ -16,7 +16,7 @@ The law is the rule `hover-every-pressable`: a cursor naming the interaction, an
 6. Add the item to the hover walk (below) in the same change.
 
 ## Prove it: the hover walk
-A gate that runs the real window (or the real page) and, for every item the pointer can act on:
+A gate that runs the real window (or the real page) and, for one item of each template and every one-off the pointer can act on (`test-the-template-once`: a template's other instances are proved by a read that they are built from it):
 1. moves the pointer there through the same function a mouse move calls, and waits the glide on the virtual frame clock;
 2. reads that the hover model found the item the press finds there (the two lists agree);
 3. reads that the cursor is the interaction's;
