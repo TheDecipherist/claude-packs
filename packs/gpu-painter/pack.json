@@ -1,5 +1,24 @@
 {
+  "name": "gpu-painter",
+  "version": "1.0.0",
   "description": "GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows), drawn natively: no OpenGL, no browser.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/gpu-painter"
+  },
+  "keywords": [
+    "gpu",
+    "dawn",
+    "webgpu"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {
     "painter": {
       "path": "src/painter",
@@ -41,7 +60,6 @@
       }
     ]
   },
-  "name": "gpu-painter",
   "files": {
     "render_thread": "src/painter/render_thread.cpp"
   },

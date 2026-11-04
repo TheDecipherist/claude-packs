@@ -96,6 +96,27 @@ Pack `ui-craft` (in the `node-ui` and `next-app` presets, and by default in `ful
 
 A hook that crashes, exits 1, is killed or is not registered lets the call through, and nothing says so. `doctor` is red for a hook that crashed and for one no settings entry runs; the `hook-proof` pack (in every configuration) adds checks on the forms that fail open, the rule `a-refusal-is-exit-2` and the skill `prove-a-hook`.
 
+## The pack manifest (0.19.0)
+
+A `pack.json` is a manifest like a `package.json`. A pack says what it is, who made it and where it lives:
+
+```json
+{
+  "name": "acme-internal",
+  "version": "1.2.0",
+  "description": "What it is for.",
+  "type": "custom",
+  "author": "Acme Platform Team <platform@acme.example>",
+  "license": "UNLICENSED",
+  "homepage": "https://git.acme.example/platform/claude-packs-acme",
+  "repository": { "type": "git", "url": "git@git.acme.example:platform/claude-packs-acme.git" },
+  "keywords": ["internal"],
+  "engines": { "claude-packs": ">=0.19.0" }
+}
+```
+
+`type` is `stock` for the packs in this package and `custom` for anyone else's. `name`, `version`, `description`, `type`, `author`, `license` and `repository.url` are required.
+
 ## Commands
 
 ```

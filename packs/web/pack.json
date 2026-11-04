@@ -1,6 +1,24 @@
 {
   "name": "web",
+  "version": "1.0.0",
   "description": "Web UI (Next.js, HTML, CSS, Tailwind 4): accessibility, one primitives module, styles in stylesheets, performance, production build, client boundaries.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/web"
+  },
+  "keywords": [
+    "nextjs",
+    "react",
+    "css"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
     "markup": [

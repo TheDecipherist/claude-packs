@@ -1,6 +1,23 @@
 {
   "name": "js-ts",
+  "version": "1.0.0",
   "description": "JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/js-ts"
+  },
+  "keywords": [
+    "javascript",
+    "typescript"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
     "js": [

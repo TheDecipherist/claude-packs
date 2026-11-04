@@ -1,10 +1,40 @@
 {
   "name": "stored-text",
+  "version": "1.0.0",
   "description": "Text from a database reaches the page through one renderer: line endings normalised, markdown parsed, code highlighted, HTML sanitized.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/stored-text"
+  },
+  "keywords": [
+    "markdown",
+    "sanitize",
+    "ui"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
-    "stored-text-ui": ["**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.svelte", "**/ui/**/*.ts", "**/views/**/*.ts", "**/templates/**/*.ts", "**/render*.ts", "**/*.view.ts"],
-    "stored-text-renderer": ["**/stored-text.*"]
+    "stored-text-ui": [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.vue",
+      "**/*.svelte",
+      "**/ui/**/*.ts",
+      "**/views/**/*.ts",
+      "**/templates/**/*.ts",
+      "**/render*.ts",
+      "**/*.view.ts"
+    ],
+    "stored-text-renderer": [
+      "**/stored-text.*"
+    ]
   },
   "skillsIn": null,
   "hooks": {}

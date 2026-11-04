@@ -54,6 +54,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: pack hook-proof and doctor checks: a hook that crashed, one no settings entry runs, and the forms that fail open (exit 1, || true, a catch that allows) are caught; concepts: none (design/shape.json declares none); reuse: readHookLog (packs/base/hooks/lib/hook-log.mjs), the lesson-checks hook, holdToExamples (test/kit-cli.mjs).
   done when: a planted crash and a planted unregistered hook make doctor red; each check refuses its bad through the hook; the whole suite green once, committed; landed.
 
+- 0.19.0, the pack manifest (work/0.19.0-pack-manifest), started 2026-11-04 (Tim: pack.json says stock or custom, with a git url, fields like a package.json, and who made it).
+  making: every pack.json a manifest like a package.json: type, version, author, license, repository, homepage, keywords, engines; a validator, and `list` showing them; concepts: none (design/shape.json declares none); reuse: readPack and availablePacks (lib/packs.mjs).
+  done when: every stock pack passes the validator; a custom pack with no author or git url fails it, by name; `list` shows version, type and author; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

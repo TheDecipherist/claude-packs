@@ -1,6 +1,25 @@
 {
-  "synth": true,
+  "name": "audio-core",
+  "version": "1.0.0",
   "description": "Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/audio-core"
+  },
+  "keywords": [
+    "juce",
+    "audio",
+    "dsp"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
+  "synth": true,
   "folders": {
     "app": {
       "path": "src/app",
@@ -91,7 +110,6 @@
       }
     ]
   },
-  "name": "audio-core",
   "kinds": {
     "audio-entry": {
       "what": "processBlock, voices, voice allocation, the note ledger, the parameter snapshot",

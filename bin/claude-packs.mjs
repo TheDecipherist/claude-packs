@@ -155,7 +155,7 @@ async function main() {
     case 'lock':
       return lockCommand(rest[0], dir, { force, branch: rest.includes('--branch') ? rest[rest.indexOf('--branch') + 1] : undefined });
     case 'list':
-      for (const name of availablePacks()) console.log(`${name.padEnd(12)} ${readPack(name).description}`);
+      for (const name of availablePacks()) { const p = readPack(name); console.log(`${name.padEnd(14)}${p.version.padEnd(8)}${p.type.padEnd(7)}${p.author}: ${p.description}`); }
       console.log('\npresets (init <preset> installs the packs that stack needs):');
       for (const [name, packs] of Object.entries(PRESETS)) console.log(`${name.padEnd(12)} ${packs.join(', ')}`);
       return 0;

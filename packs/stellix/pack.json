@@ -1,5 +1,22 @@
 {
+  "name": "stellix",
+  "version": "1.0.0",
   "description": "Stellix spec laws: the world, determinism, generated reset, no shipped images.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/stellix"
+  },
+  "keywords": [
+    "synth"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {
     "world": {
       "path": "src/world",
@@ -36,7 +53,6 @@
       }
     ]
   },
-  "name": "stellix",
   "files": {
     "seeded_random": "src/world/seeded_random.h",
     "world_math": "src/world/world_math.h",

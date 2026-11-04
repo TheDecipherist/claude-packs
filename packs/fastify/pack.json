@@ -1,6 +1,23 @@
 {
   "name": "fastify",
+  "version": "1.0.0",
   "description": "Fastify servers: security always on, trust config not headers, Zod at every route, streams and hijacks handled.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/fastify"
+  },
+  "keywords": [
+    "fastify",
+    "api"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
     "fastify-app": [

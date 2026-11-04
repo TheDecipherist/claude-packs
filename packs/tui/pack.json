@@ -1,6 +1,23 @@
 {
   "name": "tui",
+  "version": "1.0.0",
   "description": "Terminal UIs (Ink + React or raw-mode Node): alternate screen, resize ordering, width as state, raw mode restored on every exit.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/tui"
+  },
+  "keywords": [
+    "terminal",
+    "tui"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
     "tui": [

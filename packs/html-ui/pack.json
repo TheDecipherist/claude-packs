@@ -1,6 +1,23 @@
 {
   "name": "html-ui",
+  "version": "1.0.0",
   "description": "Server-rendered HTML (template strings, views): every value escaped, no inline style or script, safe links.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/html-ui"
+  },
+  "keywords": [
+    "html",
+    "ssr"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
     "ui-templates": [

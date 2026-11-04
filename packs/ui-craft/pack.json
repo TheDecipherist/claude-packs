@@ -1,10 +1,42 @@
 {
   "name": "ui-craft",
+  "version": "1.0.0",
   "description": "Application and page design in any web stack: forms, motion, states, navigation, touch, copy, type and space, the look of generated UI, and a rendered-page gate.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/ui-craft"
+  },
+  "keywords": [
+    "ui",
+    "ux",
+    "accessibility"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
-    "ui-markup": ["**/*.tsx", "**/*.jsx", "**/*.html", "**/*.vue", "**/*.svelte", "**/ui/**/*.ts", "**/views/**/*.ts", "**/templates/**/*.ts", "**/*.view.ts"],
-    "ui-styles": ["**/*.css", "**/*.scss", "**/tailwind.config.*"]
+    "ui-markup": [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.html",
+      "**/*.vue",
+      "**/*.svelte",
+      "**/ui/**/*.ts",
+      "**/views/**/*.ts",
+      "**/templates/**/*.ts",
+      "**/*.view.ts"
+    ],
+    "ui-styles": [
+      "**/*.css",
+      "**/*.scss",
+      "**/tailwind.config.*"
+    ]
   },
   "skillsIn": null,
   "hooks": {}

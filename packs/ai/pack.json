@@ -1,6 +1,23 @@
 {
   "name": "ai",
+  "version": "1.0.0",
   "description": "Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/ai"
+  },
+  "keywords": [
+    "llm",
+    "security"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "folders": {},
   "concepts": {
     "ai": [

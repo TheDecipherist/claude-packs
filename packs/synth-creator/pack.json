@@ -1,6 +1,23 @@
 {
-  "description": "The synth-creator configuration's own laws, installed with it and never by another: the build queue (build-guard), the time watch, the spec lock, frozen fixes, read-only vendored code and copy trees, staging by name, the session watches (idle-wake, tims-asks, build-sweep), and the rules and skill a synth build lives by.",
   "name": "synth-creator",
+  "version": "1.0.0",
+  "description": "The synth-creator configuration's own laws, installed with it and never by another: the build queue (build-guard), the time watch, the spec lock, frozen fixes, read-only vendored code and copy trees, staging by name, the session watches (idle-wake, tims-asks, build-sweep), and the rules and skill a synth build lives by.",
+  "type": "stock",
+  "author": "Tim Clausen",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/synth-creator"
+  },
+  "keywords": [
+    "synth",
+    "build"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
   "configurationPack": true,
   "folders": {},
   "concepts": {},

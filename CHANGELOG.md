@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.19.0 (2026-11-04)
+
+The pack manifest (Tim, 2026-11-04: pack.json says if a pack is stock or custom, has a git url, fields like a package.json, and who made it).
+
+- Every `pack.json` now carries `name`, `version`, `description`, `type` (`stock` or `custom`), `author`, `license`, `homepage`, `repository` (`type`, `url`, optional
+  `directory`), `keywords` and `engines` (`claude-packs`, the lowest kit version it works on). `lib/pack-manifest.mjs` checks them; doctor checks the installed packs;
+  `list` shows version, type and author. The kit's own packs start at 1.0.0.
+
 ## 0.18.0 (2026-11-04)
 
 hook-proof (Tim, 2026-11-04: whenever a hook is supposed to exit 2 and it exits 0, it is caught). Only exit 2 blocks, so a guard fails open and in silence.
