@@ -6,7 +6,7 @@
 <constraints>
 Always do:
 - Stage by name: `git add <paths>`, then `git commit -m "..." -- <paths>`.
-- Push every commit before the next one, and every branch from its first commit: a later commit and the session's end both wait for it.
+- Push every commit before the next one, and every branch from its first commit: a later commit and the session's end both wait for it. A work branch never needs a yes to push; only the trunk can.
 - Push to the repo by name: a remote whose URL is the owner's SSH URL, or the token form with the token as `$VARIABLE`, never pasted.
 - Name the token on every `gh` call, when the project's guards ask for it.
 - Commit before undoing anything: a work-in-progress commit on a branch, then undo.

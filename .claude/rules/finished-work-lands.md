@@ -12,5 +12,6 @@ Always do:
 Never do:
 - Leave finished work on a branch waiting for someone to ask.
 - Land work that is unfinished, or has a red test. A branch that cannot land yet says why.
-- Land over a project's own law: where its CLAUDE.md says a push or a merge needs a yes, ask once, with the branch ready.
+- Ask before pushing a work branch: a work branch always pushes, from its first commit, with no yes needed.
+- Land on the trunk over a project's own law: only the trunk can need a yes. Where its CLAUDE.md says so, ask once, with the branch pushed and ready.
 </constraints>

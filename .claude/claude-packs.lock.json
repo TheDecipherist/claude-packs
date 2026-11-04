@@ -2,13 +2,13 @@
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T15:47:13.216Z",
+  "updated": "2026-11-04T15:53:06.445Z",
   "files": {
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
     ".claude/rules/bug-fix-starts-red.md": "b10bac915dbfa15465e626cc1aa13b55a9a38ef0cc27e9dbb90de1e51a91a97c",
     ".claude/rules/field-map-over-if-runs.md": "1e05dbe8241a655a05b9e2068e1ee1c47dd83db5186d66c8456b5a8d1a6c319e",
-    ".claude/rules/finished-work-lands.md": "99ce67d151953457acae04037ee5a46d73d31397795da63dc9fb50e189e8aafc",
-    ".claude/rules/git-right-first-time.md": "d6965a663664e7e212b3f3eff92c176a11f68540b3aeefe963a31fed49892944",
+    ".claude/rules/finished-work-lands.md": "1447061a741b0c1d995af08d1e0569ebc00b306e250e1f96e51faf3aa4fdabf7",
+    ".claude/rules/git-right-first-time.md": "3fd5d16574cea43e40d618dde6bc0926ec87311fb0bcb52dd8c0fb795dd1f2c7",
     ".claude/rules/instances-by-index-identities-by-id.md": "eba6d2d90eb6adc60fe5a50a2a20ded43cf0e8ff53efcbbebd6280c1c6ef1bc0",
     ".claude/rules/lookup-over-if-chains.md": "3017d46ccd87e021ac8ce4c0039f26a93e8517fae3a39dd26988e342fd40e545",
     ".claude/rules/making-line-first.md": "dacbf3eb9e0f47586b4f42485b46d26302f678492a79a79d5623e5c94f6bfcdc",
@@ -66,7 +66,7 @@
     ".claude/tools/shape-symmetry.mjs": "392e132aadbb51d5cad60f79e3b46b5c12743416f2cec6baee8e1ce744ca7356",
     ".claude/tools/test-verdict.mjs": "cbd803d2816c15f757bd2f81f6dc2d63131534362a34de7b18d56f694e5d286f",
     ".claude/skills/add-lesson-check/SKILL.md": "1a0d8c0a0a54d86683132cc575f9b8d0ec8adafb7ccd665fddd4e69130db238c",
-    ".claude/skills/land-branch/SKILL.md": "66afa54b0c450c599fcf305c56ff6cb61be2a67e9c0223087fd51df37d0697c4",
+    ".claude/skills/land-branch/SKILL.md": "2f6ff9309844f7264b7ce428a4e895ef340a84c67256655a6c995cb783fac5c6",
     ".claude/skills/pick-tests/SKILL.md": "f51517d0dd55ed10f15864d43ea023fcb53dfdfa00834b8258809a6da034130c",
     ".claude/skills/pressure-test-skill/SKILL.md": "67028f7437b5474f4f79b54e283f368d8619993bfef2a28aaa850685dfb1bb67",
     ".claude/skills/prove-instances-identical/SKILL.md": "093456777836801ba761ef30fc7b5ecaa15ab4d95977f0130f03caa6a70dc52c",

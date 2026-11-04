@@ -8,6 +8,7 @@ hook-proof (Tim, 2026-11-04: whenever a hook is supposed to exit 2 and it exits 
   judged, and went through. A hook killed at its timeout leaves no line and is not seen.
 - New pack `hook-proof`, in every configuration: rule `a-refusal-is-exit-2`, skill `prove-a-hook`, and five checks on hook files and settings:
   `hook-exit-1-does-not-block`, `hook-catch-must-not-allow`, `hook-no-or-true`, `hook-command-no-pipe`, `hook-refusal-on-stderr`.
+- A work branch never needs a yes to push; only the trunk can, and only where a project's CLAUDE.md says so (Tim: "a project should not need a yes before pushing, only to main"): `finished-work-lands`, `land-branch`, `git-right-first-time`.
 
 ## 0.17.0 (2026-11-04)
 

@@ -109,7 +109,7 @@ test('doctor: a hook whose median is over 500 ms is a red check, with its median
   fake('quick-fake', 0);
   const r = run(dir, 'doctor');
   assert.match(r.stdout, /PROBLEM: slow-fake: median [0-9]+ ms over its last 3 calls \(worst [0-9]+ ms\), over 500 ms/);
-  assert.doesNotMatch(r.stdout, /PROBLEM: quick-fake/);
+  assert.doesNotMatch(r.stdout, /PROBLEM: quick-fake: median/);   // the fakes are in no settings entry, which doctor says too (0.18.0)
   assert.match(r.stdout, /hook timing/);
   assert.equal(r.status, 1);
 });
