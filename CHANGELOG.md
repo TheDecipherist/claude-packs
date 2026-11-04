@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.1 (2026-11-04)
+
+- git-guard: a commit in a Claude agent's isolated worktree (.claude/worktrees/agent-*) is not refused for its branch being ahead of
+  GitHub: the harness refuses pushes there, so the lead pushes the branch; Stop still holds every branch to GitHub (KWB-42).
+
 ## 0.13.0 (2026-11-04)
 
 The time laws (KWB-41; Tim: "Anything like tests that consume a ton of time that could/should be avoided should have a small skill or rule or both").

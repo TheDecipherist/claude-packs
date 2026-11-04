@@ -135,7 +135,8 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
     if (c.refuseTrunk && /\bgit\b.*\bcommit\b/.test(p) && (c.trunks ?? []).includes(env.branch(here)) && env.hasHead(here)) {
       return `This is the trunk. Every task is built on its own branch and merged when complete: ${c.branchStart}.`;
     }
-    if (!pushedBefore && env.unpushed && subOf(w) === 'commit') {
+    // WB-107: an agent's isolated worktree cannot push (its harness refuses), so the lead pushes its branch; Stop still holds it
+    if (!pushedBefore && env.unpushed && subOf(w) === 'commit' && !/\/\.claude\/worktrees\/agent-[^/]+(\/|$)/.test(here)) {
       const u = env.unpushed(here, c);
       if (u?.error) env.warn?.(`git-guard: GitHub was not checked before this commit (${u.error}); the commit goes ahead unchecked. Push when it is back (KWB-26).`);
       else if (u?.commits?.length) return unpushedMessage(u, c);
@@ -260,6 +261,11 @@ async function selftest() {
   if (house('cd /r/wt && git commit --no-edit', '/r', byDir, TRUNK) !== null) bad.push('a commit after cd into a worktree on a branch');
   if (house('git -C /r/wt commit --no-edit', '/r', byDir, TRUNK) !== null) bad.push('git -C a worktree on a branch');
   if (house('cd /r && git commit --no-edit', '/r/wt', byDir, TRUNK) === null) bad.push('cd onto the trunk then commit');
+  // WB-107: an agent's isolated worktree cannot push (its harness refuses), so push-then-commit is the lead's there; elsewhere it holds
+  const ahead = { ...on('work/x'), unpushed: () => ({ branch: 'work/x', url: 'https://github.com/TheDecipherist/app.git', commits: [{ sha: 'abc1234', subject: 'x' }] }) };
+  if (house("git commit -m x -- a.h", '/r/.claude/worktrees/agent-a1b2', ahead) !== null) bad.push('a commit in an agent worktree with its branch ahead of GitHub (WB-107)');
+  if (house("git commit -m x -- a.h", '/r/.claude/worktrees/night', ahead) === null) bad.push('NOT BLOCKED: a commit in a lead worktree with its branch ahead of GitHub');
+  if (house("git commit -m x -- a.h", '/r', ahead) === null) bad.push('NOT BLOCKED: a commit in the main checkout with its branch ahead of GitHub');
   const other = { owner: 'Acme', tokenVar: 'ACME_TOKEN', trunks: ['trunk'], safeRestore: 'python3 tools/safe_restore.py <paths>', branchStart: 'python3 tools/step.py start <STEP> "task"', refuseTrunk: true };
   for (const [cmd, env, want] of [
     ['git push https://x-access-token:$ACME_TOKEN@github.com/Acme/app.git b', clean, null], [push, clean, 'Acme'],
