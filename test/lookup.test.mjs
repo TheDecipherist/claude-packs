@@ -14,7 +14,7 @@ test('every install gets the lookup rule and check, with real paths', () => {
   run(dir, 'init', 'audio-core');
   const rule = readFileSync(join(dir, '.claude/rules/lookup-over-if-chains.md'), 'utf8');
   assert.match(rule, /src\/\*\*\/\*\.cpp/);
-  assert.match(rule, /\*\*\/\*\.ts/);
+  assert.match(rule, /src\/\*\*\/\*\.\{[^}]*\bts\b/);   // base's js concept, scoped like cpp (0.11.0: src/, tests/, test/)
   assert.ok(existsSync(join(dir, '.claude/checks/lookup-over-if-chains.json')));
 });
 
