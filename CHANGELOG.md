@@ -12,6 +12,10 @@ Stored text (Tim, 2026-11-04: UIs render what comes from a database with \r corr
   `stored-text-through-renderer` (a `content`, `body`, `markdown` or `transcript` field straight into markup; it reads names, not data
   flow; a `plain text:` comment marks a field that is plain).
 - The `node-ui` and `next-app` presets bring it; the node and full-stack configurations take it (full-stack by default).
+## 0.13.1 (2026-11-04)
+
+- git-guard: a commit in a Claude agent's isolated worktree (.claude/worktrees/agent-*) is not refused for its branch being ahead of
+  GitHub: the harness refuses pushes there, so the lead pushes the branch; Stop still holds every branch to GitHub (KWB-42).
 
 ## 0.13.0 (2026-11-04)
 
