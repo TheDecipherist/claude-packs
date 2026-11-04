@@ -3,7 +3,8 @@
   "description": "A Node.js or TypeScript service, web app, CLI, library, MCP server or edge proxy: base, plus the packs its stack needs (js-ts, mongo, fastify, ai, docker, shell-hooks, html-ui, web, tui, nginx). The presets pick them.",
   "packs": {
     "always": [
-      "base"
+      "base",
+      "writing"
     ],
     "choose": [
       "js-ts",

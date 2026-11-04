@@ -1,0 +1,18 @@
+{
+  "id": "no-time-or-date",
+  "why": "No time or date references at all: Tim calls them a major AI tell. A duration he states himself is the only exception.",
+  "rule": ".claude/rules/no-time-or-date.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "\\b(?:in|last|this|next|since) (?:January|February|March|April|June|July|August|September|October|November|December)\\b|\\b(?:January|February|March|April|June|July|August|September|October|November|December|May) (?:\\d{1,2}, )?\\d{4}\\b|\\b(?:last|this|next) (?:year|month|week)\\b|\\b\\d+ (?:days?|weeks?|months?|years?) ago\\b|\\bat \\d{1,2}(?::\\d\\d)?\\s?(?:am|pm)\\b|\\brecently\\b",
+  "bad": "I started this last year, in June, at 11pm.\n",
+  "good": "I have been doing this for about 10 years.\nThe list may grow.\n",
+  "flags": "i"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "no-not-x-but-y",
+  "why": "Mirrored constructions read generated. Make it a plain statement.",
+  "rule": ".claude/rules/rhythm-like-talk.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "\\bnot (?:just |only |merely )?[^.,;\\n]{1,40}, but\\b|\\bit(?:'s| is) not [^.\\n]{1,40}\\.\\s+it(?:'s| is)\\b",
+  "bad": "It's not a bug. It's a band-aid.\nThis is not a tool, but a way of life.\n",
+  "good": "It's a band-aid.\nIt is not done yet.\n",
+  "flags": "i"
+}

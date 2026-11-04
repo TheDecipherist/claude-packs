@@ -4,7 +4,8 @@
   "packs": {
     "always": [
       "base",
-      "full-stack"
+      "full-stack",
+      "writing"
     ],
     "choose": [
       "stored-text"

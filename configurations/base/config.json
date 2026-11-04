@@ -3,7 +3,8 @@
   "description": "Universal engineering only: the git laws, the line limit, the folder and placement laws, the shape law, once-only, making, secrets and the untrusted-content boundary. For a project no other configuration fits.",
   "packs": {
     "always": [
-      "base"
+      "base",
+      "writing"
     ],
     "choose": [],
     "default": []

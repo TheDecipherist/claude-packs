@@ -76,6 +76,10 @@ Every control, point, handle, tab, list row, key or button has a cursor that nam
 
 Pack `stored-text` (in the `node-ui` and `next-app` presets, and by default in `full-stack`; `add stored-text` elsewhere): every stored document reaches the page through one renderer, `stored-text.*`: line endings normalised, markdown parsed, code highlighted, HTML sanitized. The skill `render-stored-text` builds it and proves it with one fixture row; four checks hold it.
 
+## Writing: what goes public reads like a person wrote it (0.15.0)
+
+The `writing` pack comes with every configuration. Rules load on public text, the `humanize` skill is the last pass on anything that goes out, and nine other one-job skills cover replies and Reddit posts. Checks refuse what a regex can see (em dashes, slop words, dates) in new projects; an existing project names them in `"enable"`. Move the `public-text` concept in `.claude/layout.json` if a project's public text lives elsewhere.
+
 ## Commands
 
 ```

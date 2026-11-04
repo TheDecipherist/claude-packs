@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.15.0 (2026-11-04)
+
+Writing (Tim, 2026-11-04: whatever goes public, a manual, a md file, a reply, reads and is formatted properly; split tim-writing into small pieces).
+
+- New pack `writing`, in every configuration's `always` packs. Nine rules on public text (README, `*.mdx`, docs/manual, docs/guide, manual,
+  content, blog, posts, articles, drafts; internal specs, logs and briefs stay plain): `cut-the-padding`, `rhythm-like-talk`, `no-stock-language`,
+  `no-scaffolding`, `no-time-or-date`, `ascii-no-em-dash`, `write-from-your-own-corner`, `tims-voice`, `no-cargo-cult`.
+- Ten one-job skills: `humanize` (the last pass), `reply-stance`, `should-i-reply`, `reply-moves`, `reddit-post`, `pick-subreddit`, `reddit-title`,
+  `argument-post`, `launch-post`, `post-voice`.
+- Eleven lesson checks for the tells a regex can see, held back in existing projects until `enable` names them.
+- lesson-checks: `"prose": true` (lib/prose.mjs) leaves frontmatter, code, comments, link targets and URLs out, so `npm test -- x` is no double dash.
+
 ## 0.14.1 (2026-11-04)
 
 - The project is under the MIT license: LICENSE at the root; package.json and the lock say MIT (they said UNLICENSED).

@@ -5,7 +5,8 @@
 //     "code": true,            // match against code with comments/strings blanked (C/C++/JS)
 //     "bad": "<snippet the check must catch>", "good": "<fixed snippet it must pass>",
 //     "mode": "forbid" (default) | "require" | "needs",  "needs": ["<regex>", ...] }
-//   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals)
+//   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals);
+//   "prose": true blanks what a reader does not read as prose in markdown: code, URLs, frontmatter (a check on public text)
 //   mode "needs": when the pattern appears, every regex in "needs" must appear as well (an entry file that listens also
 //   registers shutdown; a gateway that creates a MongoClient also caches and names it). A write is refused only for a need
 //   it newly leaves missing.
@@ -15,6 +16,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { writesOf } from './lib/writes.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
+import { blankProse } from './lib/prose.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
@@ -40,8 +42,12 @@ function loadChecks(root = ROOT) {
   });
 }
 
+// What a check reads: one blanking per kind. strings: comments blanked, strings kept.
+const BLANKING = { prose: blankProse, code: blankCode, strings: (text) => blankCode(text, true) };
+const subjectOf = (c, text) => { const kind = Object.keys(BLANKING).find((k) => c[k]); return kind ? BLANKING[kind](text) : text; };
+
 function matches(check, text) {
-  const subject = check.code ? blankCode(text) : check.strings ? blankCode(text, true) : text;   // strings: comments blanked, strings kept
+  const subject = subjectOf(check, text);
   const re = new RegExp(check.pattern, `${(check.flags ?? '').replace('g', '')}g`);
   const lines = text.split('\n');
   const found = [];
@@ -57,7 +63,7 @@ function matches(check, text) {
 // The needs a text that has the pattern does not meet ([] when the pattern is absent).
 function missing(c, text) {
   if (matches(c, text).length === 0) return [];
-  const subject = c.code ? blankCode(text) : c.strings ? blankCode(text, true) : text;
+  const subject = subjectOf(c, text);
   return (c.needs ?? []).filter((n) => !new RegExp(n, (c.flags ?? '').replace('g', '')).test(subject));
 }
 

@@ -1,0 +1,18 @@
+{
+  "id": "no-dramatic-colon",
+  "why": "Dramatic colon setups are measured at literal zero in human text. Write a normal sentence.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "(?:^|[.!?]\\s+)The (?:reality|truth|catch|kicker|twist|lesson|takeaway|problem|result):\\s",
+  "bad": "The reality: nobody cares.\n",
+  "good": "Nobody cares.\nThe result of the run: `ok`.\n",
+  "flags": "m"
+}

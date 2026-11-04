@@ -1,0 +1,18 @@
+{
+  "id": "no-slop-words",
+  "why": "The short slop list: these words read generated. The list does not grow.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "\\b(?:delv(?:e|es|ing)|tapestry|testament|landscape|journey|seamless(?:ly)?|robust|game-changer|crucial|dive into|unleash(?:es|ing)?|leverag(?:e|es|ing)|supercharg(?:e|es|ing))\\b",
+  "bad": "A robust way to leverage your data.\n",
+  "good": "A way to use your data that has not failed in a year of use.\n",
+  "flags": "i"
+}

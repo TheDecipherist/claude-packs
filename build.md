@@ -34,6 +34,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the project under the MIT license: a LICENSE file, package.json and the lock say MIT; concepts: none (design/shape.json declares none); reuse: none, no code changes.
   done when: LICENSE at the root, package.json and package-lock.json name MIT, on main.
 
+- 0.15.0, writing (work/0.15.0-writing), started 2026-11-04 (Tim: split ./tim-writing into small pieces in the kit, so text that goes public reads human).
+  making: pack writing: the tim-writing skill split into small rules, one-job skills and lesson checks, with a prose mode in lesson-checks that leaves code and URLs out, in every configuration; concepts: none (design/shape.json declares none); reuse: the lesson-checks hook and its subject blanking (packs/base/hooks/lesson-checks.mjs), a configuration's "always" packs (lib/configs.mjs), hookRun (test/kit-cli.mjs).
+  done when: every section of tim-writing has a home; each check refuses its bad and leaves code and URLs alone, through the hook in an install; every skill passes doctor (Use when, under 8,000 characters); the whole suite green once, committed; ./tim-writing removed.
+
 ## Steps
 
 ## Log

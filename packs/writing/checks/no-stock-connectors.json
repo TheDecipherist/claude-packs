@@ -1,0 +1,18 @@
+{
+  "id": "no-stock-connectors",
+  "why": "Stock connectors measured at zero in human text. Delete them and say the thing.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "\\b(?:here's the thing|that said,|so here's what happened)",
+  "bad": "Here's the thing: it was slow.\n",
+  "good": "It was slow.\n",
+  "flags": "i"
+}

@@ -2,7 +2,7 @@
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T07:07:59.106Z",
+  "updated": "2026-11-04T15:22:20.394Z",
   "files": {
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
     ".claude/rules/bug-fix-starts-red.md": "b10bac915dbfa15465e626cc1aa13b55a9a38ef0cc27e9dbb90de1e51a91a97c",
@@ -28,8 +28,8 @@
     ".claude/hooks/dispatch-once.mjs": "cc7585afb3291334a372cbe0d9b5531c9737abb419a01d8d669d92b6df9bb8bf",
     ".claude/hooks/file-size-guard.mjs": "88aa9deeeddd17e4bef732d858692171e06a6202cdc1db355110ac6e3b20e2df",
     ".claude/hooks/folder-law.mjs": "b5bb70327aafddce6083b4f8d59668b28c3077b5e0d70f34a27aec0bc2e5a2a6",
-    ".claude/hooks/git-guard.mjs": "2f6bcaa4e22fbc8590665a09b455e96109afe7c64d1066ac64f2e5181c052fc2",
-    ".claude/hooks/lesson-checks.mjs": "adf8eaa46e6f85355bcd05b9ca07a1bb9cbe623638ac39128010377a9918725d",
+    ".claude/hooks/git-guard.mjs": "265440f2da46fd1b429947da309a349cc4613dc3a3cbd7e706ea8ed16d6c697e",
+    ".claude/hooks/lesson-checks.mjs": "0f944f24c5e25bebf9532655a31b40da54cbad602b1eb2614b0fd37f5a34ef1c",
     ".claude/hooks/lib/apply-edit.mjs": "b5ba751ef1b21a32430592091b2dc795f64697afc6ca39443faa1c8b539af9f5",
     ".claude/hooks/lib/cpp-scan.mjs": "ce1cb73ad3ed63669900865a3d0ff634db278f5f7c112f02e49d2f917fc7efe3",
     ".claude/hooks/lib/dup-index.mjs": "86708303de3704cf838cfa988b34fca78523cd84cfbd12db3af5eccf76beba91",
@@ -43,6 +43,7 @@
     ".claude/hooks/lib/program-read.mjs": "3d61eee7bcb93e4ee9d84b4b67fefc5bca3faa810db467257acac068b9f46e0d",
     ".claude/hooks/lib/program-writes.mjs": "3d4c6a86ff17f2b0d277c697c8a45100dd8d527f7e1d3407bcdce98c2f892a1d",
     ".claude/hooks/lib/project.mjs": "7efb2ab68e4a09b3341d51751be0b880157ec846fdb2494da0d8bd8d23890b9b",
+    ".claude/hooks/lib/prose.mjs": "f381ed0951d6eccf745b1535794d1e9977fa0583ccc2b1dc3d176bce02f0f8b6",
     ".claude/hooks/lib/pushed.mjs": "7c06f9099df7ceae54549c5c872d3b714ee39f0bbdc2dd1e99083ac46b20dbfa",
     ".claude/hooks/lib/selftest.mjs": "63485e4d9e39af1df5e59a54a89b4e2745eb0a14fb20cbac9ad4370e473a13e3",
     ".claude/hooks/lib/shape-code.mjs": "9abd91144d786891f54bea83bcc8cd6a4752f198750e6f16393fa4b71a20d825",
@@ -66,6 +67,25 @@
     ".claude/skills/add-lesson-check/SKILL.md": "1a0d8c0a0a54d86683132cc575f9b8d0ec8adafb7ccd665fddd4e69130db238c",
     ".claude/skills/pick-tests/SKILL.md": "f51517d0dd55ed10f15864d43ea023fcb53dfdfa00834b8258809a6da034130c",
     ".claude/skills/pressure-test-skill/SKILL.md": "67028f7437b5474f4f79b54e283f368d8619993bfef2a28aaa850685dfb1bb67",
-    ".claude/skills/prove-instances-identical/SKILL.md": "093456777836801ba761ef30fc7b5ecaa15ab4d95977f0130f03caa6a70dc52c"
+    ".claude/skills/prove-instances-identical/SKILL.md": "093456777836801ba761ef30fc7b5ecaa15ab4d95977f0130f03caa6a70dc52c",
+    ".claude/rules/ascii-no-em-dash.md": "90ef9a960b9e26c2112a7fe02938a59dbb693bb3479e87ea5fc34c35b174215f",
+    ".claude/rules/cut-the-padding.md": "f7255ed109bf0832e1e32515c8b61fa832e573c711b4ad706cf46c8b1a1f2a3c",
+    ".claude/rules/no-cargo-cult.md": "3311a9f1ab93441969576dca671ba8da4cb39809e02301b165da8560b328c46c",
+    ".claude/rules/no-scaffolding.md": "1c7bcb49d485af5395a714e8ca9e0c6607bb63b963a7ec60646c1958f15b0dcd",
+    ".claude/rules/no-stock-language.md": "b7099d9745a16f4b73023ed2945c6c2d14a8bb3fac738488de49440dd44d61a3",
+    ".claude/rules/no-time-or-date.md": "16a6246ffcae5eb6e9e0bfbc1b2c422b029e99464c2e6792fe386a3a7cde14e5",
+    ".claude/rules/rhythm-like-talk.md": "f54671fb716f364500f790b0648dec31d3d0e9249bb745418d5ef9722cc3e779",
+    ".claude/rules/tims-voice.md": "f6577eeb48db477bf296fee20653ea962427abd41ec3e7a81b14936a1e8b8c65",
+    ".claude/rules/write-from-your-own-corner.md": "8152b565dbb0e3dacc78d280094f5b4a6be4838f73ec2cd8bd811cd99b3d516e",
+    ".claude/skills/argument-post/SKILL.md": "6ad39573dfdd051f6fe52b0a187293e40bc144a5a8e3e2ae42a9033ad03b734d",
+    ".claude/skills/humanize/SKILL.md": "147aa12b787e212ebdb3910bec10472fa4005669823e5fff9a31160e567d9168",
+    ".claude/skills/launch-post/SKILL.md": "f121c2a36cfb99dca21ba0f067a1d746e35983dd2c00ec9e0eba3858777e0cde",
+    ".claude/skills/pick-subreddit/SKILL.md": "90e3664c2439f79090e0981fbe3936d5214895d4f70067f8cf665e85be60c7e6",
+    ".claude/skills/post-voice/SKILL.md": "3d5297a3ca84ac47b78ce4e035ac084f04479e1af82a5cffa7008bc0d7c8e8ef",
+    ".claude/skills/reddit-post/SKILL.md": "64b9a91eba4a5f13dc8d831e699c043b37dfe10f7d00be0b38a4709e2102773f",
+    ".claude/skills/reddit-title/SKILL.md": "553461a75528e7c0d04e25f569538781579fa333889ae744621b61f40124f6d6",
+    ".claude/skills/reply-moves/SKILL.md": "5c5198c66bc65629ce8e0bacf12d0c36682925cb0c98e67f99a60b48df0743e2",
+    ".claude/skills/reply-stance/SKILL.md": "2b163d11361d0f11da364bfe5e676b62fa8c9dd3af0432f4946f48a2dcfc5dba",
+    ".claude/skills/should-i-reply/SKILL.md": "c045369284b02b5ef5f625a020b7af5955e0c81e85a1d4aa0a2d23bc05cdc041"
   }
 }

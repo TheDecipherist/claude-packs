@@ -1,0 +1,18 @@
+{
+  "id": "no-copula-dodging",
+  "why": "\"serves as\", \"stands as\", \"functions as\" and \"boasts\" are is and has in a costume.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "\\b(?:serves as|stands as|functions as|boasts)\\b",
+  "bad": "The file serves as the entry point.\n",
+  "good": "The file is the entry point.\n",
+  "flags": "i"
+}

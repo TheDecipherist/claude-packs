@@ -92,6 +92,20 @@
       "src/**/*.{js,mjs,cjs,jsx,ts,tsx}",
       "tests/**/*.{js,mjs,cjs,ts,tsx}",
       "test/**/*.{js,mjs,cjs,ts,tsx}"
+    ],
+    "public-text": [
+      "README*",
+      "**/README*",
+      "**/*.mdx",
+      "docs/manual/**",
+      "docs/guide/**",
+      "docs/guides/**",
+      "manual/**",
+      "content/**",
+      "blog/**",
+      "posts/**",
+      "articles/**",
+      "drafts/**"
     ]
   },
   "kinds": {
