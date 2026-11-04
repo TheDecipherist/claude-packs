@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.10.1 (2026-11-03)
+
+The hover law (Tim, 2026-11-03; the kit half of Stellix B-261): "Controls dont have a hover state ... all controls and screens that
+has points that can be interacted with needs to not only change the cursor to what the interaction is but also some kind of small
+effect on whats actually hovered."
+
+- Rule `hover-every-pressable` (gpu-painter, concept `ui`) and `web-hover-every-pressable` (full-stack, concept `ui`, now the
+  `channel` folder): every element the pointer can act on has a cursor naming its interaction and a small visible effect on the
+  hovered thing itself; the hover follows the press's own hit test (one function, never a second list); the disabled look is only
+  for what is truly disabled.
+- Skill `hover-state` (gpu-painter, full-stack): how to add the hover to a new control and how to prove it with a hover walk
+  (the pointer over every pressable item; the cursor and the drawn pixels change; the ring round it does not; it returns to rest;
+  the faults planted so the gate is seen red). Cites Stellix's `tools/gates/hover_gate.sh` and
+  `lib/app/gates/editor_hoverwalk_read.h` as the worked example.
+- Check: `layout.json` `"gates": { "hover": "<command>" }` (a project-owned key, kept by every update). doctor is red when the hover
+  rule is installed, a file stands under its paths and no hover gate is declared, or the declared command names a file that is not
+  there; `"none: <reason>"` declines with its reason. A fresh project with no UI code yet stays green (`doctor --strict` on a fresh
+  install of each configuration is unchanged). The Stellix profile declares `bash tools/gates/hover_gate.sh`.
+- `test/hover.test.mjs`: 7 tests, red on 0.10.0, green.
+
 ## 0.10.0 (2026-11-03)
 
 Configurations (Tim, STEP 3: "Today the kit is one configuration pretending to be general. Build it as data."; KWB-31).

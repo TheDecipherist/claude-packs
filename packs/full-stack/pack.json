@@ -42,6 +42,9 @@
       "api-tests",
       "**/*.test.ts",
       "**/*.test.tsx"
+    ],
+    "ui": [
+      "channel"
     ]
   },
   "skillsIn": null,

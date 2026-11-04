@@ -175,6 +175,9 @@
     "checks/one-seeded-random.json",
     "hooks/stage-guard.mjs"
   ],
+  "gates": {
+    "hover": "bash tools/gates/hover_gate.sh"
+  },
   "commands": {
     "build": "bash tools/build.sh build",
     "test": "bash tools/build.sh test",

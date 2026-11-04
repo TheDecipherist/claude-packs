@@ -47,6 +47,16 @@ rule. Everything synth-specific moved to the `synth-creator` pack: build-guard, 
 protect-vendor, stage-guard, build-sweep, idle-wake, tims-asks, freeze.mjs, the debug-by-measurement, done-means-fresh-evidence,
 hooks-and-gates and copy-trees-read-only rules and the build-step skill. A test refuses a synth word in base.
 
+## The hover law: everything the pointer can act on says so (0.10.1)
+
+Every control, point, handle, tab, list row, key or button has a cursor that names its interaction (drag up-down, left-right or both ways, press, text) and a small visible effect on the hovered thing itself. The hover uses the press's own hit test, never a second list. The rule is `hover-every-pressable` (gpu-painter) or `web-hover-every-pressable` (full-stack), the how is the skill `hover-state`, and the proof is a hover walk. A project declares that gate in `layout.json`:
+
+```json
+"gates": { "hover": "bash tools/gates/hover_gate.sh" }
+```
+
+`doctor` is red while the project has UI code and no gate is declared, or the command names a file that is not there. `"hover": "none: <reason>"` declines with its reason. A fresh project with no UI code yet is not red.
+
 ## Commands
 
 ```

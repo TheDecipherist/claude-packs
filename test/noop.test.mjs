@@ -29,6 +29,7 @@ function updated(project, named = true) {
   return { dir, out };
 }
 
+const HOVER = ['.claude/rules/hover-every-pressable.md', 'lib/painter/.claude/skills/hover-state/SKILL.md'];
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
 
 for (const project of ['stellix', 'sub37']) {
@@ -43,7 +44,8 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    assert.deepEqual(Object.keys(lock.files).sort(), Object.keys(was.files).sort(), 'the same files, no more, no fewer');
+    const added = lock.packs.includes('gpu-painter') ? HOVER : [];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => !CHANGED.includes(f)), [], 'only the base files changed on purpose differ in content');
   });
