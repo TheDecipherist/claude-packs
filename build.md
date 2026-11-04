@@ -81,6 +81,7 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 0.24.0, C++ templates and the hover gate (work/0.24.0-cpp-templates), started 2026-11-04 (Tim: thoroughly do C++, prove on Stellix; hover gate for ui-craft).
   making: template-law reads repeated code by statement runs and names the differences (the template's parameters), measured on Stellix; a cpp pack and configuration (rules, the walk check, a skill); gates.hover also for ui-craft; concepts: none (design/shape.json declares none); reuse: gateProblems (lib/hover-gate.mjs), shapesOf (packs/base/hooks/lib/elements.mjs).
   done when: template-law finds Stellix's repeated components, with its misfires read and counted; doctor is red for web UI with no hover gate; the whole suite green once, committed; landed.
+  measured: Stellix 523 files, 302 repeats, 950 copies; 26 sampled by reading, no false match, 3 borderline; the suite 215 of 216, the one a stale expectation, fixed and run alone 8 of 8.
 
 ## Steps
 
