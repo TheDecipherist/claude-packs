@@ -320,3 +320,7 @@ Sub37's `workflow-bugs.md` WB-1 to WB-4. Each has a test in `test/sub37-wb.test.
 | WB-3 | doctor | token sweep | reads `.git/config` of the project, every nested repo (four levels down) and every repo in `layout.siblings`, and fails on a URL carrying a secret or a bare GitHub token. It names the key and masks the token |
 | WB-4 | selftests | every hook | `folder-law`, `frozen-files`, `protect-vendor`, `spec-lock`, `realtime-guard`, `param-id-lock` and `no-shipped-images` gained `--selftest`. Each builds a throwaway project (`hooks/lib/selftest.mjs`) and runs the hook as Claude Code does, so nobody probes a hook by pasting a payload into a shell command. `doctor` runs every hook's selftest, in parallel, and notes a hook without one |
 | | test | `npm test` | each test process gets its own empty temp folder (`test/fresh-tmp.mjs`), so doctor's sibling sweep never reads the system temp folder |
+
+## License
+
+MIT. See [LICENSE](LICENSE).

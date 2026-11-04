@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.1 (2026-11-04)
+
+- The project is under the MIT license: LICENSE at the root; package.json and the lock say MIT (they said UNLICENSED).
+
 ## 0.14.0 (2026-11-04)
 
 Stored text (Tim, 2026-11-04: UIs render what comes from a database with \r correct, code highlighted and markdown parsed).
