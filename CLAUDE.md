@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`@thedecipherist/claude-packs` ("the kit"): an npm CLI (Node 22+, ESM) that installs per-project Claude Code rules, lesson checks, hooks and skills into a *target* project's own `.claude/`, by configuration (0.10.0): `synth-creator` (JUCE synths: realtime audio, DSP, Dawn GPU painter, Stellix), `full-stack` (Fastify + Next.js) and `base` (universal engineering only). It is the source of truth for every law used to build synths: a fix to a hook, rule, check or skill that every synth uses is made here, with its test, and projects take it with `npx --no-install @thedecipherist/claude-packs update`. Nothing goes into `~/.claude` except `global add`, which installs exactly three pieces (latest-versions + `version-pin-guard`, `gnu-shell`, `shell-traps`).
+`@thedecipherist/claude-packs` ("the kit"): an npm CLI (Node 22+, ESM) that installs per-project Claude Code rules, lesson checks, hooks and skills into a *target* project's own `.claude/`, by configuration (0.10.0): `synth-creator` (JUCE synths: realtime audio, DSP, Dawn GPU painter, Stellix), `full-stack` (Fastify + Next.js), `node` (Node and TypeScript projects; presets such as `init node-api` pick its packs) and `base` (universal engineering only). It is the source of truth for every law used to build synths: a fix to a hook, rule, check or skill that every synth uses is made here, with its test, and projects take it with `npx --no-install @thedecipherist/claude-packs update`. Nothing goes into `~/.claude` except `global add`, which installs exactly three pieces (latest-versions + `version-pin-guard`, `gnu-shell`, `shell-traps`).
 
 ## Commands
 
 ```
-npm test                       # the full suite and the release gate. Always via npm: it preloads test/fresh-tmp.mjs
-npm run test:changed           # only the tests covering files changed since the base (prints why each was picked)
+npm test                       # the full suite: the gate before landing, once, on committed work (suite-once refuses it on uncommitted work). Always via npm: it preloads test/fresh-tmp.mjs
+npm run test:changed           # what to run while working: only the tests covering files changed since the base (prints why each was picked)
 node scripts/test-changed.mjs --dry-run [--base <ref>]
 node --import ./test/fresh-tmp.mjs --test test/shape.test.mjs                     # one file
 node --import ./test/fresh-tmp.mjs --test --test-name-pattern "<name>" test/*.test.mjs   # one test
@@ -23,11 +23,11 @@ Never run `node --test` without the `fresh-tmp.mjs` preload: tests then share th
 
 ## Architecture
 
-**Installer** (`bin/claude-packs.mjs` → `lib/`). `lib/sync.mjs` runs an install: resolve the configuration → validate `settings.json` → back up → `buildLayout` (`layout.mjs`) → decide what switches on (`switches.mjs`) → copy pack files (`packs.mjs`) → remove dropped files → merge hooks into settings (`settings.mjs`) → regenerate rule `paths:` (`rules.mjs`) → write the CLAUDE.md block (`claude-md.mjs`) → write the lock (`manifest.mjs`). `doctor.mjs` verifies an install (selftests, coverage, hook timing, token sweep). `new.mjs` scaffolds a project; `shape-cli.mjs`, `symmetry-doctor.mjs`, `once-only-report.mjs` back the `shape`, `symmetry` and `dup` commands.
+**Installer** (`bin/claude-packs.mjs` → `lib/`). `lib/sync.mjs` runs an install: resolve the configuration → validate `settings.json` → back up → `buildLayout` (`layout.mjs`) → decide what switches on (`switches.mjs`) → copy pack files (`packs.mjs`) → remove dropped files → merge hooks into settings (`settings.mjs`) → regenerate rule `paths:` (`rules.mjs`) → write the CLAUDE.md block (`claude-md.mjs`) → write the lock (`manifest.mjs`). `doctor.mjs` verifies an install (selftests, coverage, hook timing, token sweep); a passed selftest is remembered by hash until the hook changes (`selftest-cache.mjs`, `--fresh` runs them all). `new.mjs` scaffolds a project; `shape-cli.mjs`, `symmetry-doctor.mjs`, `once-only-report.mjs` back the `shape`, `symmetry` and `dup` commands.
 
 **Configurations** (`configurations/<name>/config.json`, `lib/configs.mjs`, `lib/config-cli.mjs`): a kind of project as data: its packs (`always`, `choose`, `default`), its layout template, `hookOrder` (the order of its hooks per settings entry), `sourceFiles` (what doctor's coverage counts as source) and the `preamble` of the CLAUDE.md block. `layout.json` `"configuration"` names a project's; `update` applies it; an install that names none gets the smallest configuration that takes its packs. A configuration's own pack (`synth-creator`, `full-stack`) comes with it and is never written in the lock's `packs`. base holds only universal engineering; `test/base-neutral.test.mjs` refuses a synth word in it.
 
-**Packs** (`packs/{base,synth-creator,audio-core,gpu-painter,stellix,full-stack}/`): content copied into target projects. `pack.json` declares `folders`, `concepts`, `kinds`, `hooks` (merged into settings), `optIn` and `skillsIn`. `rules/`, `checks/`, `hooks/`, `tools/` go to `.claude/`; skills go to `.claude/skills/` or a layout folder's nested `.claude/skills/`.
+**Packs** (`packs/*/`; `bin/claude-packs.mjs list` shows them and the presets): content copied into target projects. `pack.json` declares `folders`, `concepts`, `kinds`, `hooks` (merged into settings), `optIn` and `skillsIn`. `rules/`, `checks/`, `hooks/`, `tools/` go to `.claude/`; skills go to `.claude/skills/` or a layout folder's nested `.claude/skills/`.
 
 **Hooks run inside the target project**, so they import only from `packs/base/hooks/lib/`, never from `lib/`. Shared logic the CLI also needs lives in the hooks lib and `lib/` re-exports it (e.g. `lib/shape.mjs`). Key hook libs:
 - `project.mjs`: `insideProject()` (never judge a sibling project's files; `commandLeavesProject` for `cd`/`git -C`), `checkoutRoot()`/`claudeRoot()` (judge a file from its own checkout and that checkout's `layout.json`, because agents work in git worktrees under `.claude/worktrees/` while `CLAUDE_PROJECT_DIR` points at main).

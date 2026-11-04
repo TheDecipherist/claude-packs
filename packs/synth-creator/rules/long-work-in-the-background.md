@@ -1,0 +1,16 @@
+---
+# hook: time-guard.mjs
+---
+# Long work runs in the background, and a warning about time is acted on
+
+<constraints>
+Always do:
+- Start anything over about two minutes as a background job with its output in a file; you are told when it ends. Do other work meanwhile.
+- When `time-guard` says something is slow, look at it now: find what is running, say so, and stop it if it is not needed.
+- Commit an agent's work when `time-guard` says it has gone unsaved.
+
+Never do:
+- Wait in a `sleep`, `until` or `pgrep` loop, or poll a job's output file.
+- Start a second copy of a job that is still running, or start it again without reading why the first one ended.
+- Treat a slow job as normal because the last one was slow too.
+</constraints>

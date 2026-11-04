@@ -204,6 +204,14 @@ const CASES = {
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
   },
+  'suite-once.mjs': ({ here }) => {
+    // The checkout the suite runs in decides: a clean worktree may run the gate, the same worktree with uncommitted work may not.
+    git(here, 'worktree', 'add', '-q', '.claude/worktrees/agent-suite', '-b', 'work/suite');
+    const own = join(here, '.claude/worktrees/agent-suite');
+    assert.equal(bash(here, 'suite-once.mjs', `cd ${own} && npm test`), 0);
+    put(join(own, 'CLAUDE.md'), 'changed\n');
+    assert.equal(bash(here, 'suite-once.mjs', `cd ${own} && npm test`), 2);
+  },
   'dispatch-once.mjs': ({ here, wt }) => {
     // The worktree's branch already switches on blendStyle; main does not. Each checkout is scanned on its own.
     put(join(wt, 'src/dsp/Blend.cpp'), 'float blend (Layer& l) { switch (l.blendStyle) { default: return 0.0f; } }\n');

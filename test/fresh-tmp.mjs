@@ -10,6 +10,10 @@ const dir = mkdtempSync(join(tmpdir(), 'claude-packs-test-'));
 process.env.TMPDIR = dir;
 process.on('exit', () => rmSync(dir, { recursive: true, force: true }));
 
+// One memory of proved hooks for the whole run (the runner's preload makes it, its test processes inherit it), so a hook is proved once
+// per run, never carried over from an earlier run (lib/selftest-cache.mjs, KWB-41).
+process.env.CLAUDE_PACKS_SELFTEST_CACHE ??= join(dir, 'selftests');
+
 // once-only's detector (jscpd, the kit's optional dependency) for hooks installed into a test's throwaway project, which
 // sit outside the kit's node_modules (0.9.0).
 const jscpd = fileURLToPath(new URL('../node_modules/.bin/jscpd', import.meta.url));

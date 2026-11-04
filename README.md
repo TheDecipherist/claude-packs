@@ -66,6 +66,12 @@ Every control, point, handle, tab, list row, key or button has a cursor that nam
   one object's fields are a field table (`field-map-over-if-runs`), and a kind is switched on in one place (`dispatch-once`, a hook).
   An install from before 0.11.0 holds the new hook and checks back until `.claude/layout.json` `"enable"` names them.
 
+## Time laws: nothing is proved twice (0.13.0)
+
+- `doctor` does not rerun a hook's selftest while the hook, its libs and the project's guards are unchanged; `doctor --fresh` runs them all.
+- The whole suite runs once, committed, before landing: `suite-once` refuses it on uncommitted work. While working, run what the change reaches (`pick-tests`, `npm run test:changed`).
+- Small rules sit behind the hooks that cost the most turns (`git-right-first-time`, `reuse-before-writing`, `making-line-first`, `split-before-the-limit`, `long-work-in-the-background`), so the first try is the right one.
+
 ## Commands
 
 ```

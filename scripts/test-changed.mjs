@@ -14,18 +14,37 @@
 //   - the table below, for what no import or name shows: pack files reach a project only through an install.
 // Every run uses the fresh-tmp preload (running without it was KWB-2's cause).
 import { spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PRESETS } from '../lib/packs.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 const posix = (p) => p.split(sep).join('/');
 
 // What no import or name shows. `tests` picks the test files by their text.
+const installs = (text) => (text.includes('bin/claude-packs.mjs') || text.includes('./kit-cli.mjs')) && /['"](init|new|add|update|update-all)['"]/.test(text);
+
+// The text of a test that brings a pack in: its name, a preset that holds it, a configuration that takes it (by --config; a
+// configuration's own pack also comes with the packs it offers), or a walk over every configuration (KWB-41).
+function brings(root, pack) {
+  const words = new Set([pack]);
+  const configs = [];
+  const dir = join(root, 'configurations');
+  for (const name of existsSync(dir) ? readdirSync(dir) : []) {
+    const c = JSON.parse(readFileSync(join(dir, name, 'config.json'), 'utf8'));
+    if (c.packs.always.includes(pack)) for (const p of c.packs.choose) words.add(p);
+    if ([...c.packs.always, ...c.packs.choose].includes(pack)) configs.push(name);
+  }
+  for (const [preset, packs] of Object.entries(PRESETS)) if (packs.some((p) => words.has(p))) words.add(preset);
+  return new RegExp(`['"](?:${[...words].join('|')})['"]|--config['"]?,?\\s*['"]?(?:${configs.join('|') || '$^'})\\b|['"]configurations['"]`);
+}
+
 export const TABLE = [
   { files: /^(test\/fresh-tmp\.mjs|package\.json)$/, why: 'preloaded into, or runs, every test', tests: () => true },
-  { files: /^(packs|profiles|prompts|configurations)\//, why: 'pack and configuration files reach a project through an install: the tests that install packs',
-    tests: (text) => (text.includes('bin/claude-packs.mjs') || text.includes('./kit-cli.mjs')) && /['"](init|new|add|update|update-all)['"]/.test(text) },
+  { files: /^packs\/(?!base\/)[\w-]+\//, why: 'a pack reaches a project through an install: the tests that bring this pack in',
+    tests: (text, changed, root) => installs(text) && brings(root, changed.split('/')[1]).test(text) },
+  { files: /^(packs\/base|profiles|prompts|configurations)\//, why: 'base, the seeds and the configurations reach every project: the tests that install packs', tests: (text) => installs(text) },
   { files: /^global\//, why: 'the global part: the tests that run `global`', tests: (text) => /['"]global['"]/.test(text) },
 ];
 const GENERIC = new Set(['SKILL.md', 'pack.json', 'package.json', 'layout.json', 'settings.json', 'README.md', 'CHANGELOG.md', 'selftest.mjs', 'index.mjs']);
@@ -92,7 +111,7 @@ export function choose(root, changed, g = graph(root)) {
       if (named) { add(t, `names ${named === c ? c : `${named} (holds ${c})`}`); hit = true; }
       else if (!GENERIC.has(base) && base.length > 5 && new RegExp(`[/'"\`\\s]${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"\`\\s)]`).test(text[t])) { add(t, `names ${base} (${c})`); hit = true; }
     }
-    for (const row of TABLE) if (row.files.test(c)) for (const t of tests) if (row.tests(text[t])) { add(t, `${c}: ${row.why}`); hit = true; }
+    for (const row of TABLE) if (row.files.test(c)) for (const t of tests) if (row.tests(text[t], c, root)) { add(t, `${c}: ${row.why}`); hit = true; }
     if (!hit) uncovered.push(c);
   }
   return { chosen, uncovered, tests };
@@ -106,6 +125,13 @@ export function changedFiles(root, base) {
   const untracked = git(root, 'ls-files', '--others', '--exclude-standard').stdout;
   return [...new Set(`${diff.stdout}\n${untracked}`.split('\n').map((l) => l.trim()).filter(Boolean))]
     .filter((f) => !f.startsWith('.claude/worktrees/') && f !== '.claude-packs-lock' && !f.startsWith('node_modules/')).sort();
+}
+
+// A manifest whose only change is its version lines: a release's bump, which no test depends on (KWB-41: it chose every test).
+export function versionBumpOnly(root, base, file) {
+  if (!/(^|\/)package(-lock)?\.json$/.test(file)) return false;
+  const lines = git(root, 'diff', '-U0', base, '--', file).stdout.split('\n').filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---)/.test(l));
+  return lines.length > 0 && lines.every((l) => /^[+-]\s*"version":/.test(l));
 }
 
 function defaultBase(root) {
@@ -125,11 +151,14 @@ export function main(argv) {
     else { console.error('usage: test-changed.mjs [--base <ref>] [--dry-run] [--root <repo>]'); return 2; }
   }
   const base = o.base ? { ref: o.base, label: o.base } : defaultBase(o.root);
-  const changed = changedFiles(o.root, base.ref);
+  const touched = changedFiles(o.root, base.ref);
+  const bumped = touched.filter((f) => versionBumpOnly(o.root, base.ref, f));
+  const changed = touched.filter((f) => !bumped.includes(f));
   const { chosen, uncovered, tests } = choose(o.root, changed);
   const gate = 'This is a changed-only working run. The release gate is the full `npm test`, run before every release.';
   console.log(`test:changed: base ${base.label} (${git(o.root, 'rev-parse', '--short', base.ref).stdout.trim()}), ${changed.length} changed file(s)`);
   for (const c of changed) console.log(`  ${c}`);
+  if (bumped.length) console.log(`version bump only: ${bumped.join(', ')} (no test reads a version)`);
   console.log(`chose ${chosen.size} of ${tests.length} test files:`);
   for (const [t, why] of chosen) {
     const more = why.length > 3 ? `\n    (+${why.length - 3} more)` : '';

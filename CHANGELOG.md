@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.13.0 (2026-11-04)
+
+The time laws (KWB-41; Tim: "Anything like tests that consume a ton of time that could/should be avoided should have a small skill or rule or both").
+
+- doctor remembers a passed selftest (lib/selftest-cache.mjs) by the hash of the hook, hooks/lib, the runner, node, the detector and the
+  project's guards: an unchanged hook is not proved again (7.5 s to 1.9 s per doctor, on every init, update and test). A failure is never
+  remembered; `doctor --fresh` runs them all. `npm test` keeps one memory per run.
+- Hook `suite-once` (base): a whole-suite command (`npm test`, a bare `ctest`, the project's `commands.test`) is refused on uncommitted
+  work: the whole suite runs once, as the gate before landing. Named tests and changed-only runs pass. Rule `test-only-what-changed`,
+  skill `pick-tests`. New to a project, so held back until `enable` names it; the kit runs it on itself.
+- `test:changed`: a version bump alone chooses no test; a pack other than base chooses only the tests that bring it in, by name, preset
+  or configuration (nginx 29 of 35 files to 6).
+- Rules behind the hooks that cost the most turns, each installed with its hook: `git-right-first-time`, `reuse-before-writing`,
+  `making-line-first`, `split-before-the-limit`, `long-work-in-the-background` (synth-creator). Skill `build-through-the-queue`.
+
 ## 0.12.0 (2026-11-04)
 
 The v8 additions (claude-packs-kit-v8-additions.zip: the web side of mddkit), merged by hand on top of 0.11.0.

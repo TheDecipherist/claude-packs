@@ -36,8 +36,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs",
-            "timeout": 15
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/suite-once.mjs",
+            "timeout": 25
           }
         ]
       }

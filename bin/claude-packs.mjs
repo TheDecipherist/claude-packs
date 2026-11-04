@@ -38,7 +38,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      (printed, or written to <dir>/<configuration>/project-layout/SKILL.md)
   update-all <dir...>  update every listed project that already has claude-packs
                      (e.g. update-all ~/projects/*); folders without it are skipped
-  doctor [--strict]  verify the install (paths, folders, hooks, checks' own examples); --strict also fails
+  doctor [--strict] [--fresh]  verify the install (paths, folders, hooks, checks' own examples); a hook's selftest that
+                     passed is not run again until the hook changes (--fresh runs them all); --strict also fails
                      when a rule matches no file or a source file is covered by no rule
   shape scan         every instance literal in the repo (code, tests, docs, briefs), by file and concept,
                      with a count, against design/shape.json; exit 1 when any
@@ -70,6 +71,7 @@ function parse(argv) {
     else if (argv[i] === '--dry-run') opts.dryRun = true;
     else if (argv[i] === '--force') opts.force = true;
     else if (argv[i] === '--strict') opts.strict = true;
+    else if (argv[i] === '--fresh') opts.fresh = true;
     else if (argv[i] === '--home') opts.home = resolve(argv[++i]);
     else opts.rest.push(argv[i]);
   }
@@ -79,7 +81,7 @@ function parse(argv) {
 
 async function main() {
   const [command, ...argv] = process.argv.slice(2);
-  const { dir, force, strict, rest, seed, home, packs, config, dryRun } = parse(argv);
+  const { dir, force, strict, fresh, rest, seed, home, packs, config, dryRun } = parse(argv);
   const seedLayout = seed ? JSON.parse(readFileSync(seed, 'utf8')) : null;
   const installed = readLock(resolve(dir, '.claude')).packs;
 
@@ -127,7 +129,7 @@ async function main() {
       return failed ? 1 : 0;
     }
     case 'doctor':
-      return doctor(dir, console.log, { strict });
+      return doctor(dir, console.log, { strict, fresh });
     case 'shape':
       return shapeCommand(rest[0], dir);
     case 'survey':

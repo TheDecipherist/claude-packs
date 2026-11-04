@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 export { default as assert } from 'node:assert/strict';
 export { test } from 'node:test';
 export { execFileSync, spawnSync, join };
-export { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+export { appendFileSync, copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 
 export const KIT = fileURLToPath(new URL('..', import.meta.url));
 export const CLI = join(KIT, 'bin/claude-packs.mjs');

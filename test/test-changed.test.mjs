@@ -75,3 +75,33 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   assert.equal(pick('test/fresh-tmp.mjs').length, choose(KIT, [], g).tests.length, 'the preload: every test');
   assert.deepEqual(choose(KIT, ['CHANGELOG.md'], g).uncovered, ['CHANGELOG.md']);
 });
+
+test('a pack that is not base: only the tests that bring it in, by name, preset or configuration (KWB-41)', () => {
+  const g = graph(KIT);
+  const pick = (...changed) => [...choose(KIT, changed, g).chosen.keys()];
+  const all = choose(KIT, [], g).tests.length;
+  const nginx = pick('packs/nginx/rules/nginx-production.md');
+  assert.ok(nginx.includes('test/lookup.test.mjs'), 'the preset `edge` brings nginx');
+  assert.ok(nginx.includes('test/configurations.test.mjs'), 'a test that walks every configuration');
+  assert.ok(!nginx.includes('test/install.test.mjs') && !nginx.includes('test/noop.test.mjs'), nginx.join(' '));
+  assert.ok(nginx.length < all / 2, `${nginx.length} of ${all}`);
+  const synth = pick('packs/synth-creator/rules/debug-by-measurement.md');
+  assert.ok(synth.includes('test/install.test.mjs') && synth.includes('test/noop.test.mjs'), 'audio-core brings the synth-creator pack');
+  assert.ok(pick('packs/base/rules/skill-writing.md').length > synth.length, 'base: every test that installs');
+});
+
+test('a version bump alone chooses no test; any other package.json change still chooses them all (KWB-41)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'tc-ver-'));
+  mkdirSync(join(dir, 'test'));
+  writeFileSync(join(dir, 'test/a.test.mjs'), "import { test } from 'node:test'; test('a', () => {});\n");
+  writeFileSync(join(dir, 'package.json'), '{\n  "name": "x",\n  "version": "1.0.0",\n  "license": "MIT"\n}\n');
+  git(dir, 'init', '-q');
+  git(dir, 'add', 'test', 'package.json');
+  git(dir, 'commit', '-qm', 'x');
+  const dry = () => spawnSync('node', [SCRIPT, '--root', dir, '--base', 'HEAD', '--dry-run'], { encoding: 'utf8' }).stdout;
+  writeFileSync(join(dir, 'package.json'), '{\n  "name": "x",\n  "version": "1.0.1",\n  "license": "MIT"\n}\n');
+  assert.match(dry(), /chose 0 of/);
+  assert.match(dry(), /version bump only: package\.json/);
+  writeFileSync(join(dir, 'package.json'), '{\n  "name": "x",\n  "version": "1.0.1",\n  "license": "ISC"\n}\n');
+  assert.doesNotMatch(dry(), /version bump only/);
+});
