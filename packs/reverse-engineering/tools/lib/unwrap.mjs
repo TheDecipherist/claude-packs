@@ -18,13 +18,14 @@ function reversedWords(b, width, phase) {
   return out;
 }
 
-// MIDI's 8-to-7 packing: seven data bytes and one byte of their high bits, that byte first or last.
-function unpacked7(b, phase, highFirst) {
+// MIDI's 8-to-7 packing: seven data bytes and one byte of their high bits, that byte first or last, and its bit k for data byte k or for data byte 6-k.
+// Roland's updates are high bits first with bit k for byte k; the wrong order reads as noise, so both are tried.
+function unpacked7(b, phase, highFirst, bitK) {
   const out = [];
-  for (let i = phase; i + 8 <= b.length; i += 8) {
-    const high = b[highFirst ? i : i + 7];
-    for (let k = 0; k < 7; k += 1) out.push((b[i + k + (highFirst ? 1 : 0)] & 0x7f) | (((high >> (highFirst ? 6 - k : k)) & 1) << 7));
-  }
+  const take = (high, from, count) => { for (let k = 0; k < count; k += 1) out.push((b[from + k] & 0x7f) | (((high >> (bitK ? k : 6 - k)) & 1) << 7)); };
+  let i = phase;
+  for (; i + 8 <= b.length; i += 8) take(b[highFirst ? i : i + 7], highFirst ? i + 1 : i, 7);
+  if (highFirst && b.length - i >= 2) take(b[i], i + 1, b.length - i - 1); // a message's last group is short, and dropping it shifts everything after
   return Buffer.from(out);
 }
 
@@ -52,9 +53,10 @@ function sysexMessages(b) {
 
 const perMessage = (b, header, open) => Buffer.concat(sysexMessages(b).map((m) => open(m.subarray(header))));
 const LONGEST_HEADER = 20;
+const SEVEN_BIT = [true, false].flatMap((first) => [true, false].map((bitK) => ({ first, bitK, name: `7-bit packed, high bits ${first ? 'first' : 'last'}, bit ${bitK ? 'k' : '6-k'}` })));
 const PACKINGS = [
-  { name: '7-bit packed, high bits first', open: (m) => unpacked7(m, 0, true) },
-  { name: '7-bit packed, high bits last', open: (m) => unpacked7(m, 0, false) },
+  ...SEVEN_BIT.map((p) => ({ name: p.name, open: (m) => unpacked7(m, 0, p.first, p.bitK) })),
+  ...SEVEN_BIT.filter((p) => p.first).map((p) => ({ name: `${p.name}, checksum last`, open: (m) => unpacked7(m.subarray(0, -1), 0, p.first, p.bitK) })),
   { name: 'nibbles, high first', open: (m) => joinedNibbles(m, 0, true) },
   { name: 'nibbles, low first', open: (m) => joinedNibbles(m, 0, false) },
 ];
@@ -70,7 +72,7 @@ export function wrappings() {
     ...phases(2).map((p) => ({ name: `16-bit words swapped, from ${p}`, open: (b) => reversedWords(b, 2, p) })),
     ...phases(3).map((p) => ({ name: `24-bit words reversed, from ${p}`, open: (b) => reversedWords(b, 3, p) })),
     ...phases(4).map((p) => ({ name: `32-bit words reversed, from ${p}`, open: (b) => reversedWords(b, 4, p) })),
-    ...phases(8).flatMap((p) => [true, false].map((first) => ({ name: `7-bit packed, high bits ${first ? 'first' : 'last'}, from ${p}`, open: (b) => unpacked7(b, p, first) }))),
+    ...phases(8).flatMap((p) => SEVEN_BIT.map((s) => ({ name: `${s.name}, from ${p}`, open: (b) => unpacked7(b, p, s.first, s.bitK) }))),
     ...phases(2).flatMap((p) => [true, false].map((first) => ({ name: `nibbles, ${first ? 'high' : 'low'} first, from ${p}`, open: (b) => joinedNibbles(b, p, first) }))),
     ...phases(LONGEST_HEADER + 1).flatMap((h) => PACKINGS.map((p) => ({ name: `sysex messages, ${h}-byte header, ${p.name}`, open: (b) => perMessage(b, h, p.open) }))),
   ];

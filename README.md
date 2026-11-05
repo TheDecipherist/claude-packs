@@ -93,7 +93,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `nginx` | NGINX in front of containers | 2 | 7 | 0 | 1 |
 | `python` | Python: templates, errors, resources, safe subprocess calls | 2 | 11 | 0 | 1 |
 | `react` | React: failed requests, effects, accessible controls | 2 | 6 | 0 | 0 |
-| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 8 | 4 | 1 | 5 |
+| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 8 | 4 | 1 | 6 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
 | `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first | 6 | 5 | 0 | 4 |
@@ -210,7 +210,7 @@ Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median ove
 
 Four packs carry what rebuilding classic machines from firmware taught, and most of it is about failures that pass every test: units deaf to the transport, presets silently on defaults, a list of algorithms behind one DSP path.
 
-`reverse-engineering` starts from the machine's own names: `names-sweep` searches an image for what the manual prints, through every wrapping met so far, and reports the record size, the order and the tables. It needs two sources before anything is named, a source tag on every law and a debt ledger for what was tuned by ear, and it keeps firmware out of git. `midi` holds the law of clock and sync, and treats a program as records that round-trip byte for byte. `sound-design` proves sound by measuring audio. `instrument-shell` keeps sessions loadable and panels reachable. `init synth-rebuild` takes them all.
+`reverse-engineering` starts from the machine's own names: `names-sweep` searches an image for what the manual prints, in the forms a display uses and through every wrapping met so far, and reports the record size, the order, the pools and the tables; `menu-map` joins every parameter to the page that reaches it. It needs two sources before anything is named, a source tag on every law and a debt ledger for what was tuned by ear, and it keeps firmware out of git. `midi` holds the law of clock and sync, and treats a program as records that round-trip byte for byte. `sound-design` proves sound by measuring audio. `instrument-shell` keeps sessions loadable and panels reachable. `init synth-rebuild` takes them all.
 
 A project says what it is, in `"guards": { "instrument": { "kind": "reproduction" } }` or `"original"`, because the laws differ: on a reproduction the machine is the spec, aliasing and all.
 

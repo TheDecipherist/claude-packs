@@ -4,12 +4,13 @@
 //   node names-sweep.mjs <image> [<image>...] --names <file> [--pair] [--base 0x8000,...] [--min 4] [--json]
 // The names file has one name per line, `group<TAB>name` to keep kinds apart (patch, arp, reverb, menu, parameter), `#` for a comment.
 // --pair reads two images as one interleaved EPROM pair. Every wrapping in lib/unwrap.mjs is tried, and the one that reads the most names wins.
-// A name found proves the unwrapping. Exit 1 when no name reads under any wrapping, and the report says what was searched.
+// Names reading prove the unwrapping. Exit 1 when too few read under any wrapping, and the report says what was searched.
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { interleave, shiftedHits, wrappings } from './lib/unwrap.mjs';
 
 const MAX_HITS = 64;
+const PROOF = 3; // names: one or two can read by chance in a large image, so fewer proves nothing
 const POINTERS = [
   { name: 'u16 big-endian', width: 2, write: 'writeUInt16BE', top: 0xffff },
   { name: 'u16 little-endian', width: 2, write: 'writeUInt16LE', top: 0xffff },
@@ -30,11 +31,20 @@ function hitsIn(view, text) {
   return hits;
 }
 
-// Case is the one thing a display changes freely, so both sides are folded.
+// A display does not print what a manual prints: it changes case, drops spaces and cuts a name to its column ("Decay Time" is `Decaytime`, "Filter Balance" `FilterBalanc`).
+// So a name is searched as printed, squeezed, and cut to each column width. A cut under eight characters would match by chance.
+const COLUMNS = [16, 15, 12, 10, 8];
+export function displayForms(name) {
+  const squeezed = name.replace(/\s+/g, '');
+  const cuts = COLUMNS.filter((w) => w < squeezed.length).map((w) => squeezed.slice(0, w));
+  return [...new Set([name, squeezed, ...cuts].map((f) => f.toLowerCase()))];
+}
+
 const folded = (view) => Buffer.from(view.toString('latin1').toLowerCase(), 'latin1');
 function found(names, view) {
   const low = folded(view);
-  return names.map((n) => ({ ...n, hits: hitsIn(low, Buffer.from(n.name.toLowerCase(), 'latin1')) })).filter((n) => n.hits.length);
+  const hitsOf = (n) => { for (const form of displayForms(n.name)) { const hits = hitsIn(low, Buffer.from(form, 'latin1')); if (hits.length) return { hits, form }; } return null; };
+  return names.map((n) => ({ ...n, ...hitsOf(n) })).filter((n) => n.hits?.length);
 }
 
 // A custom character set: only names long enough for the letters' distances to mean anything, in each case the display might use.
@@ -90,6 +100,21 @@ function nextRuns(view, from, count = 3) {
   return (text.match(/[\x20-\x7e]{4,}/g) ?? []).slice(1, count + 1);
 }
 
+// Hits in one unbroken printable run are a pool or a fixed-width blob with no separators: read the run whole, because a name that fills its field has no terminator.
+function poolOf(view, offsets) {
+  const printable = (x) => x >= 0x20 && x < 0x7f;
+  const runs = new Map();
+  for (const at of offsets) {
+    let from = at;
+    let to = at;
+    while (from > 0 && printable(view[from - 1])) from -= 1;
+    while (to < view.length && printable(view[to])) to += 1;
+    runs.set(from, { from, to, hits: (runs.get(from)?.hits ?? 0) + 1 });
+  }
+  const best = [...runs.values()].sort((a, b) => b.hits - a.hits)[0];
+  return best?.hits >= 2 ? best : null;
+}
+
 function groupsOf(hits, view, bases, wanted) {
   return [...new Set(wanted.map((n) => n.group))].map((group) => {
     const mine = hits.filter((n) => n.group === group);
@@ -98,7 +123,7 @@ function groupsOf(hits, view, bases, wanted) {
     return {
       group, found: mine.length, of: wanted.filter((n) => n.group === group).length, first: offsets[0], last,
       stride: mostCommonGap(offsets), order: orderHeld(mine), pointers: offsets.length >= 4 ? pointerTable(view, offsets, bases) : null,
-      next: offsets.length ? nextRuns(view, last) : [],
+      next: offsets.length ? nextRuns(view, last) : [], pool: poolOf(view, offsets),
     };
   });
 }
@@ -112,6 +137,7 @@ export function sweep(image, names, { bases = [0] } = {}) {
   const seen = new Set(best.hits.map((n) => n.name));
   return {
     names: names.length, wrapping: best.hits.length ? best.name : null, reads: best.hits.length,
+    proven: best.hits.length >= Math.min(PROOF, names.length),
     tried: tried.map((t) => ({ name: t.name, reads: t.hits.length })),
     groups: best.hits.length ? groupsOf(best.hits, best.view, bases, names) : [],
     missing: names.filter((n) => !seen.has(n.name)).map((n) => n.name),
@@ -125,18 +151,20 @@ function groupLine(g) {
   if (g.stride) parts.push(`stride ${g.stride.gap} (${g.stride.count} of ${g.stride.of} gaps)`);
   if (g.order.of) parts.push(`the manual's order holds ${g.order.held} of ${g.order.of}`);
   if (g.pointers) parts.push(`pointers at ${hex(g.pointers.at)} (${g.pointers.entries}, ${g.pointers.kind}, base ${hex(g.pointers.base)})`);
+  if (g.pool) parts.push(`${g.pool.hits} in one run ${hex(g.pool.from)}..${hex(g.pool.to)} (${g.pool.to - g.pool.from} bytes, read it whole)`);
   if (g.next.length) parts.push(`then ${g.next.map((s) => JSON.stringify(s)).join(' ')}`);
   return parts.join('; ');
 }
 
 function nothingRead(label, r) {
   const searched = r.tried.map((t) => t.name).join(', ');
-  return `${label}: none of ${r.names} names reads under any of ${r.tried.length} wrappings. Searched: ${searched}.\n` +
+  const said = r.reads ? `only ${r.reads} of ${r.names} names read, which chance can do, under` : `none of ${r.names} names reads under`;
+  return `${label}: ${said} any of ${r.tried.length} wrappings. Searched: ${searched}.\n` +
     'The image is still wrapped some other way, or the names file is wrong. This says nothing about what the machine holds.';
 }
 
 export function report(label, r) {
-  if (!r.wrapping) return nothingRead(label, r);
+  if (!r.proven) return nothingRead(label, r);
   const others = r.tried.filter((t) => t.reads && t.name !== r.wrapping).slice(0, 4).map((t) => `${t.name} ${t.reads}`).join(', ');
   const more = r.missing.length > 8 ? `, and ${r.missing.length - 8} more` : '';
   return [
@@ -162,7 +190,7 @@ function main(argv) {
   const bases = (value('--base') ?? '0').split(',').map(Number);
   const results = imagesOf(files, argv.includes('--pair')).map(([label, image]) => [label, sweep(image, names, { bases })]);
   console.log(argv.includes('--json') ? JSON.stringify(Object.fromEntries(results), null, 2) : results.map(([label, r]) => report(label, r)).join('\n\n'));
-  return results.some(([, r]) => r.wrapping) ? 0 : 1;
+  return results.some(([, r]) => r.proven) ? 0 : 1;
 }
 
 if (process.argv[1] && import.meta.url.endsWith(basename(process.argv[1]))) process.exit(main(process.argv.slice(2)));

@@ -1,7 +1,7 @@
 // 0.30.0: a name the manual prints is the fastest way into an image, and the test of every way of unwrapping it. Each image here is built wrapped the way a real one was.
 import { assert, cli, existsSync, fresh, join, spawnSync, test, writeFileSync, KIT } from './kit-cli.mjs';
-import { interleave } from '../packs/reverse-engineering/tools/lib/unwrap.mjs';
-import { readNames, report, sweep } from '../packs/reverse-engineering/tools/names-sweep.mjs';
+import { interleave, wrappings } from '../packs/reverse-engineering/tools/lib/unwrap.mjs';
+import { displayForms, readNames, report, sweep } from '../packs/reverse-engineering/tools/names-sweep.mjs';
 
 const TOOL = join(KIT, 'packs/reverse-engineering/tools/names-sweep.mjs');
 const PATCHES = ['Super Saw', 'Glass Keys', 'Deep Bass', 'Soft Pad', 'Hard Sync', 'Bell Tree'];
@@ -42,7 +42,7 @@ for (const [wrapped, expected, image] of [
   ['16-bit words swapped', /16-bit words swapped/, () => swapped(imageWithBank(), 2)],
   ['24-bit words stored low byte first', /24-bit words reversed/, () => swapped(imageWithBank(), 3)],
   ['32-bit words swapped', /32-bit words reversed/, () => swapped(imageWithBank(), 4)],
-  ['7-bit packed sysex', /7-bit packed, high bits first, from 0/, () => packed7(imageWithBank())],
+  ['7-bit packed sysex', /7-bit packed, high bits first, bit 6-k, from 0/, () => packed7(imageWithBank())],
   ['nibbles', /nibbles, high first, from 0/, () => nibbles(imageWithBank())],
 ]) {
   test(`a name reads through ${wrapped}, and names the wrapping`, () => {
@@ -59,7 +59,62 @@ test('an OS update: packing restarts at every sysex message, so each one is open
   for (let i = 0; i < packed.length; i += 64) messages.push(Buffer.from([0xf0, ...header, ...packed.subarray(i, i + 64), 0xf7]), Buffer.from([0x00, 0x83, 0x60]));
   const r = sweep(Buffer.concat(messages), names);
   assert.equal(r.reads, PATCHES.length, JSON.stringify(r.tried.filter((t) => t.reads).slice(0, 3)));
-  assert.match(r.wrapping, /sysex messages, 9-byte header, 7-bit packed, high bits first/);
+  assert.match(r.wrapping, /sysex messages, 9-byte header, 7-bit packed, high bits first, bit 6-k/);
+});
+
+test('Roland\'s bit order: the high bits byte first, its bit k for data byte k', () => {
+  const data = imageWithBank();
+  const out = [];
+  for (let i = 0; i < data.length; i += 7) {
+    const seven = [...data.subarray(i, i + 7)];
+    out.push(seven.reduce((h, x, k) => h | (((x >> 7) & 1) << k), 0), ...seven.map((x) => x & 0x7f));
+  }
+  const r = sweep(Buffer.from(out), names);
+  assert.equal(r.reads, PATCHES.length);
+  assert.match(r.wrapping, /high bits first, bit k, from 0/);
+});
+
+test('a short last group and a checksum: every byte comes back, so nothing after them shifts', () => {
+  const data = Buffer.from(Array.from({ length: 100 }, (_, i) => (i * 37 + 5) & 255));
+  const messages = [];
+  for (let at = 0; at < data.length; at += 45) {
+    const chunk = data.subarray(at, at + 45);
+    const body = [];
+    for (let i = 0; i < chunk.length; i += 7) {
+      const seven = [...chunk.subarray(i, i + 7)];
+      body.push(seven.reduce((h, x, k) => h | (((x >> 7) & 1) << k), 0), ...seven.map((x) => x & 0x7f));
+    }
+    messages.push(Buffer.from([0xf0, 0x41, 0x10, 0x12, ...body, 0x55, 0xf7]));
+  }
+  const open = wrappings().find((w) => w.name === 'sysex messages, 3-byte header, 7-bit packed, high bits first, bit k, checksum last').open;
+  assert.deepEqual([...open(Buffer.concat(messages))], [...data]);
+});
+
+test('a display does not print what a manual prints: squeezed, and cut to a column', () => {
+  assert.ok(displayForms('Decay Time').includes('decaytime'));
+  assert.ok(displayForms('Filter Balance').includes('filterbalanc'));
+  assert.ok(!displayForms('Filter Balance').includes('filter'), 'a cut too short matches by chance');
+  const image = imageWithBank();
+  ['FilterBalanc 4A1', 'Decaytime    1B3', 'OscillatorVo 2A3'].forEach((t, i) => image.write(t, 0x1000 + i * 16, 'latin1'));
+  const printed = ['Filter Balance', 'Decay Time', 'Oscillator Volume'].map((name) => ({ group: 'parameter', name }));
+  const r = sweep(image, printed);
+  assert.equal(r.reads, 3);
+  assert.equal(r.groups[0].stride.gap, 16);
+});
+
+test('names in one unbroken run are a pool, to be read whole', () => {
+  const image = imageWithBank();
+  image.write('Off     Sine    Triangle  Sawtooth', 0x1200, 'latin1');
+  const [g] = sweep(image, ['Sine', 'Triangle', 'Sawtooth'].map((name) => ({ group: 'wave', name })), {}).groups;
+  assert.deepEqual([g.pool.hits, g.pool.from], [3, 0x1200]);
+});
+
+test('one name reading proves nothing: chance does that', () => {
+  const image = imageWithBank();
+  const wanted = [{ group: 'patch', name: 'Super Saw' }, ...Array.from({ length: 19 }, (_, i) => ({ group: 'patch', name: `Absent Name ${i}` }))];
+  const r = sweep(image, wanted);
+  assert.equal(r.proven, false);
+  assert.match(report('rom', r), /only 1 of 20 names read, which chance can do/);
 });
 
 test('an EPROM pair: neither half reads alone, the interleave does', () => {
@@ -105,7 +160,7 @@ test('the names file keeps groups, and a name too short to mean anything is drop
 test('the tool, the skill and the rule install with the pack, and a project can run it', () => {
   const dir = fresh('ns-install-');
   assert.equal(cli(dir, 'init', 'reverse-engineering', '--config', 'cpp').status, 0);
-  for (const f of ['tools/names-sweep.mjs', 'tools/lib/unwrap.mjs', 'rules/names-before-code.md', 'skills/names-first/SKILL.md']) assert.ok(existsSync(join(dir, '.claude', f)), f);
+  for (const f of ['tools/names-sweep.mjs', 'tools/lib/unwrap.mjs', 'rules/names-before-code.md', 'skills/names-first/SKILL.md', 'skills/menu-map/SKILL.md']) assert.ok(existsSync(join(dir, '.claude', f)), f);
   writeFileSync(join(dir, 'rom.bin'), imageWithBank());
   writeFileSync(join(dir, 'names.txt'), PATCHES.join('\n'));
   const r = spawnSync('node', [join(dir, '.claude/tools/names-sweep.mjs'), join(dir, 'rom.bin'), '--names', join(dir, 'names.txt')], { encoding: 'utf8' });

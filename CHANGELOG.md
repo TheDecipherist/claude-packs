@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.31.0 (2026-11-05)
+
+0.30.0 was written from the playbook, without the two repos where this work was done and documented. Read against them and run on their real images, it was missing most of the method, and its tool could not read one of the updates it was meant for.
+
+- `names-sweep` searches a name as a display prints it: squeezed and cut to a column. On a real image that took the names read from 10 to 142 of 226.
+- It tries both bit orders of 7-to-8 packing. Roland's order was missing, so a real OS update read as nothing; it now reads through the packing its research recorded.
+- It keeps a message's short last group and drops a trailing checksum. Without them an update read names while 63% of its bytes were wrong; with them the eight files of a real update decode to the EPROM, 524,288 of 524,288.
+- It reports a pool: names in one unbroken printable run, to be read whole because a name that fills its field has no terminator.
+- One or two names reading no longer counts as proof. They can read by chance, and the tool says so and exits 1.
+- `names-first` adds name pools and value blobs, completing a manual's cut lists from the firmware, using a list's item count, pairing N names with N numbers to find a unit, and proving a table across images. It warns against the manual's prose order and against tables built by walking its names.
+- New skill `menu-map`: the tree from the manual's sections, joined by its own display drawings, with both mismatch lists: on a page but in no dump, and in the patch map with no page.
+
 ## 0.30.0 (2026-11-05)
 
 The reverse-engineering pack held the audit rules and almost none of the finding techniques, and the fastest one was missing: a machine has to print what it calls things, so its names are in the image as text.

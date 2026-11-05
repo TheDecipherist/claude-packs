@@ -112,6 +112,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a skill, a rule and a names-sweep tool in the reverse-engineering pack; concepts: none (design/shape.json declares none); reuse: a pack tool as tone-report.mjs is (packs/audio-core/tools), gather-sources (packs/reverse-engineering/skills).
   done when: names-sweep finds a known name under every wrapping the repos met, on a real image too; the whole suite green once, committed; landed.
 
+- 0.31.0, names from the display (work/0.31.0-names-from-the-display), started 2026-11-05 (what the JP-8000 and Virus repos documented about names, which 0.30.0 was written without).
+  making: names-sweep reads the display's own forms, Roland's bit order and name pools; a menu-map skill; concepts: none (design/shape.json declares none); reuse: sweep, wrappings (packs/reverse-engineering/tools).
+  done when: names-sweep gives the addresses docs/research.md records on the real JP-8000 and Virus images and reads the JP-8000 update; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log
