@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 (2026-11-05)
+
+- `suggest` and `init --auto` no longer read `node_modules`. In a new project with no `.gitignore`, the kit's own installed files were taken as the project: it was called `node`, and `reverse-engineering` was missed.
+
 ## 1.0.0 (2026-11-05)
 
 The first public release. From here versions follow semver: a change that can break an installed project is a major version.

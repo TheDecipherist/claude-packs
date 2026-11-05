@@ -144,6 +144,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the package made public, with what assumed one machine taken out; concepts: none (design/shape.json declares none); reuse: DEFAULTS (packs/base/hooks/git-guard.mjs).
   done when: the tarball holds nothing personal; the whole suite green once, committed; landed; published and read back from npm.
 
+- 1.0.1, node_modules (work/1.0.1-node-modules), started 2026-11-05 (found by installing the published package in an empty folder).
+  making: suggest leaves installed dependencies out; concepts: none (design/shape.json declares none); reuse: INSTALLED (lib/scan-detect.mjs).
+  done when: the test seen red then green; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

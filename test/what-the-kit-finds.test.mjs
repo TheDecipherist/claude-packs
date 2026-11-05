@@ -102,3 +102,12 @@ test('a UI is drawn straight on and aligned, and the image skill separates the o
   assert.match(skill, /separate the object from the photograph/);
   assert.match(skill, /find the grid/);
 });
+
+test('installed dependencies are no evidence about a project, even before it has a .gitignore', () => {
+  const dir = project({ 'docs/research.md': '# Research\n\nThe reset vector is at 0x0000 [FW].\n', 'node_modules/kit/bin/x.mjs': '// x\n', 'node_modules/kit/hooks/h.mjs': '// x\n', 'node_modules/kit/a.py': '# x\n' });
+  execFileSync('git', ['init', '-q'], { cwd: dir });
+  const said = suggested(dir);
+  assert.doesNotMatch(said, /node_modules/);
+  assert.doesNotMatch(said, /configuration: node/);
+  assert.match(said, packLine('reverse-engineering'));
+});
