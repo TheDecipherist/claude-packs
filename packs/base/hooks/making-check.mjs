@@ -46,7 +46,7 @@ const LOCATOR = /:\d+\b|#[\w-]+|\{#[\w-]+\}|§\s*\d[\d.]*|\bL-?\d+\b|\b(?:sectio
 const OVERRIDE = [
   /\b(?:instead of|rather than|not)\s+(?:what\s+)?(?:the\s+)?(?:brief|prompt|order|instruction|request|work ?order|lead|you)\s+(?:asked|said|told|wanted|named|specified)/i,
   /\b(?:the\s+)?(?:brief|prompt|order|instruction|request|work ?order|lead)\s+(?:said|asked|told|wanted|named|specified)\b[^.\n]{0,160}\b(?:but|however|instead)\b/i,
-  /\byou\s+(?:said|asked|told me|wanted)\b[^.\n]{0,160}\b(?:but I|however I|instead I|I instead)\b/i,
+  /\byou\s+(?:said|asked|told me|wanted)\b[^.\n]{0,160}\b(?:but I|however I|instead I|I instead)\b(?!['’]d\b|\s+(?:would|think|recommend|suggest|expect|believe)\b)/i, // a view is not an action (KWB-47)
   /\bI\s+(?:deviated|departed|diverged)\s+from\b/i,
   /\b(?:overrode|overriding|override[sd]?)\s+(?:the\s+|your\s+)?(?:brief|instruction|order|prompt|request|work ?order)/i,
   /\bcontrary\s+to\s+(?:the\s+|your\s+)?(?:brief|instruction|order|prompt|request|work ?order)/i,
@@ -197,7 +197,8 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   }
 
   // 3. the override rule
-  const said = OVERRIDE.map((re) => text.match(re)).find(Boolean);
+  const claims = text.replace(/"[^"\n]*"|`[^`\n]*`/g, '""'); // a quotation reports words, it claims nothing (KWB-47)
+  const said = OVERRIDE.map((re) => claims.match(re)).find(Boolean);
   if (said) {
     const cites = text.split('\n').some((l) => [...l.matchAll(LAW)].some((m) => LOCATOR.test(l.slice(Math.max(0, m.index - 60), m.index + m[0].length + 60))));
     const decided = /\bDecisions?\b/.test(text) && writes.some((w) => /decisions/i.test(w.path) || (existsSync(w.path) && /^#+\s*Decisions\b/im.test(readFileSync(w.path, 'utf8'))));

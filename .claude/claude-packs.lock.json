@@ -1,9 +1,9 @@
 {
-  "kit": "0.35.0",
+  "kit": "0.35.1",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-05T07:32:00.506Z",
+  "updated": "2026-11-05T07:40:00.874Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -53,7 +53,7 @@
     ".claude/hooks/lib/house.py": "0c8a2e113eec53c48caa8e11f5dd8f1d611ed239cc137c246d8d7bab8e4aa661",
     ".claude/hooks/lib/languages.mjs": "88f1a42df10703854abbb28103931f41acd25ba465d9cb8ed85e646d62ef7725",
     ".claude/hooks/lib/layout.mjs": "f448969e479cce2c22bdfa902f7057e7d97581a9ecbdcb2d86cd3f97f544e8e9",
-    ".claude/hooks/lib/making-check-selftest.mjs": "fcf28d90e0a5b0fb9c61995c89dfdf02a052717ef25257301480070c9a7cd53d",
+    ".claude/hooks/lib/making-check-selftest.mjs": "a3704c33fae18f5ddb5ea7135e5467c7eee9367966363263812f25a69379dff5",
     ".claude/hooks/lib/near-copies.mjs": "644f7b3773a58d0ff32ae81ec74981e052bf2d32c79426d08898825f75e4ea5f",
     ".claude/hooks/lib/program-read.mjs": "3d61eee7bcb93e4ee9d84b4b67fefc5bca3faa810db467257acac068b9f46e0d",
     ".claude/hooks/lib/program-writes.mjs": "3d4c6a86ff17f2b0d277c697c8a45100dd8d527f7e1d3407bcdce98c2f892a1d",
@@ -69,7 +69,7 @@
     ".claude/hooks/lib/shell-writes.mjs": "eb4b7f45161c70e97a03232db2e35cdb3209497fbdbe79bdeb310c14512406c1",
     ".claude/hooks/lib/turn.mjs": "33c25c32795f9bcbac6dacd91594d35af5b8a1b06600d9d80ae0b24ed78d7fb1",
     ".claude/hooks/lib/writes.mjs": "f35e72aa4ca8a0f26d46c57173fc2f561376ac341c3f96d5155d4cde6fc8fc5f",
-    ".claude/hooks/making-check.mjs": "e9b6103da009577ff8f93f65e2bdaec05a926b60080c04d6558f5cb90d45280f",
+    ".claude/hooks/making-check.mjs": "d7a2a51568cae0cf96984166a50092f617f3147b9d4339f9f8331c584c3361a8",
     ".claude/hooks/making.mjs": "d523b6766af26f4ec66f786c4cd094941fc00eb2260d72835efafe5d35c77c1d",
     ".claude/hooks/once-only.mjs": "92018b82227abe6e4487df479779800779ae19b60d9e9a1aa791407dd36a59f7",
     ".claude/hooks/placement-law.mjs": "affd16057b575614175a06d7251cbf8a6f682df03ad3527c87588c7c31fa70d8",

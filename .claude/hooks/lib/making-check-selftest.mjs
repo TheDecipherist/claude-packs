@@ -78,6 +78,9 @@ export function selftest(hookUrl) {
       try { put(at('src/slot/filter.cpp'), before.replace('2.0f - 2.0f', '1.9f - 2.0f')); return turn([use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: '2.0f', new_string: '1.9f' })]); } finally { put(at('src/slot/filter.cpp'), before); }
     })(), 0],
     ['the turn wrote code that calls slotFilter', landed('src/slot/level.cpp', 'float level (float x, int slot) { return slotFilter (x, slot); }\n', () => turn([W('src/slot/level.cpp', 'float level (float x, int slot) { return slotFilter (x, slot); }\n')])), 0],
+    ['a view is no override: an estimate that differs from the user\'s', turn([W('src/slot/gain.cpp', slotCode)], { last: 'You said it is small, but I would plan for hours. It is built as you asked.' }), 0],
+    ['a view is no override, in the short form', turn([W('src/slot/gain.cpp', slotCode)], { last: 'You said it is small, but I\'d plan for hours.' }), 0],
+    ['a quotation is no claim', turn([W('src/slot/gain.cpp', slotCode)], { last: 'The hook matched "you said it is small, but I built something else" in a log.' }), 0],
     ['an override with no citation', turn([W('src/slot/gain.cpp', slotCode)], { last: 'The brief said to drive slot 2, but I built it for every slot instead.' }), 2],
     ['an override citing docs/laws.md and logging the brief as the bug', turn([W('src/slot/gain.cpp', slotCode), W('bugs.md', '| B-9 | the brief named slot 2 |\n')], { last: 'The brief said to drive slot 2, but docs/laws.md L8 says every slot is one shape, so I built it for all; B-9 logs the brief.' }), 0],
     ['an override citing design/shape.json without logging the brief', turn([W('src/slot/gain.cpp', slotCode)], { last: 'You asked for slot 2 only, but I built every slot instead: design/shape.json row "slot" is many(4).' }), 2],

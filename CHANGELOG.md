@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.35.1 (2026-11-05)
+
+- `making-check` no longer sends back a turn for giving a view or quoting words (KWB-47). An estimate that differed from the user's, in the words of the override pattern, was read as ignoring an instruction, and a reply quoting those words fired it again. What a turn did is still judged.
+
 ## 0.35.0 (2026-11-05)
 
 - New rule and check `timing-from-synthcore`, in the `synth-creator` pack: tempo, MIDI clock, transport and keys come from `synthcore`. The kit never named it, so nothing stopped a unit writing a second clock. The check has no hit on seven real units.

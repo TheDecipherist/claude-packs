@@ -132,6 +132,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a rule and a check that time comes from synthcore, and an opt-in check that the UI is drawn in code; concepts: none (design/shape.json declares none); reuse: lesson checks (packs/base/hooks/lesson-checks.mjs).
   done when: both checks fire through the hook and the timing check has no hit on seven real units; the whole suite green once, committed; landed.
 
+- 0.35.1, a view is no override (work/0.35.1-an-estimate-is-no-override), started 2026-11-05 (KWB-47).
+  making: making-check judges what a turn did, not a view or a quotation; concepts: none (design/shape.json declares none); reuse: OVERRIDE (packs/base/hooks/making-check.mjs).
+  done when: both cases seen red, then green, and the real override cases still refused; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log
@@ -147,3 +151,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 0.32.0 what the kit finds: the gate ran once on 24c18f5, 339 of 339. On the repos that showed each fault: one repo's false secrets 11,410 to 2, three others to 0; reverse-engineering projects recognised 5 of 5, a plain DSP library still left out; names-sweep lands on the documented table start at 0xDCC9A, 0x5712F and 0x562B6.
 - 2026-11-05: 0.33.0 pdf-to-md: the gate ran once on 9c4ffd6, 339 of 339.
 - 2026-11-05: 0.34.0 a new reverse-engineering project: the gate ran once on 3607534, 341 of 341. On the real MPX 500 ROM --banked found the system table at 0x3A568 and the program directory unaided.
+- 2026-11-05: 0.35.0 the foundation: the gate ran once on 6d788ad, 341 of 342: the timing check refused the raw byte compare the midi pack gives as correct, so it now judges only a second clock; the test passes alone on c00d581.
