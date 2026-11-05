@@ -8,7 +8,8 @@ export const SECRETS = [
   ['a Slack token', /\bxox[abprs]-[A-Za-z0-9-]{10,}/g],
   ['a Stripe secret key', /\b[rs]k_live_[A-Za-z0-9]{20,}/g],
   ['a private key', /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----\s+[A-Za-z0-9+/=\s]{64,}/g],
-  ['a prefixed API key', /\b(?!price_|prod_|pk_|[rs]k_live_|github_pat_|gh[pousr]_)(?=[a-z]{2,8}_)(?=[\w-]*[A-Z])(?=[\w-]*\d)[a-z]{2,8}_[A-Za-z0-9_-]{24,}\b/g],
+  // A key's random part runs unbroken; a long identifier (`cap_Filter_Env_Attack_2`) is short words between underscores.
+  ['a prefixed API key', /\b(?!price_|prod_|pk_|[rs]k_live_|github_pat_|gh[pousr]_)(?=[a-z]{2,8}_)(?=[\w-]*[A-Z])(?=[\w-]*\d)(?=[a-z]{2,8}_[\w-]*?[A-Za-z0-9]{20})[a-z]{2,8}_[A-Za-z0-9_-]{24,}\b/g],
   ['a connection string with its password', /\b(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqp):\/\/[^\s:@/'"`]+:(?!\$\{|\$[A-Za-z_]|<|\*+@|[^\s@]*(?:[Pp]ass(?:word|wd)?|[Cc]hange|[Ee]xample|[Yy]our|[Ss]ecret|[Pp]laceholder|xxx|XXX))[^\s@/'"`]{3,}@/g],
 ];
 

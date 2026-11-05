@@ -1,3 +1,7 @@
+---
+# loads: at launch.
+---
+
 # Every refusal is judged: right or wrong, with why
 
 A project cannot tell which hooks earn their place from what people complained about. Bug logs recorded a handful of one hook's false refusals; it had refused 89 times.

@@ -1,14 +1,5 @@
 ---
-paths:
-  - "**/*.cpp"
-  - "**/*.cc"
-  - "**/*.h"
-  - "**/*.hpp"
-  - "**/*.mm"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.js"
-  - "**/*.mjs"
+# concepts: cpp, js, notes, tooling
 ---
 
 # A computed value is a sum: account for every term

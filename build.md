@@ -116,6 +116,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: names-sweep reads the display's own forms, Roland's bit order and name pools; a menu-map skill; concepts: none (design/shape.json declares none); reuse: sweep, wrappings (packs/reverse-engineering/tools).
   done when: names-sweep gives the addresses docs/research.md records on the real JP-8000 and Virus images and reads the JP-8000 update; the whole suite green once, committed; landed.
 
+- 0.32.0, what the kit finds (work/0.32.0-what-the-kit-finds), started 2026-11-05 (six real repos checked: false secrets, build output read as source, reverse-engineering projects not recognised, tables found by word and not by density).
+  making: suggest and scan read a project as it is; the key pattern stops taking identifiers; names-sweep reports where names sit densest; the lessons of two bug logs in names-first; concepts: none (design/shape.json declares none); reuse: recommend (lib/scan-detect.mjs), repoWeight (lib/repo-weight.mjs), sweep (packs/reverse-engineering/tools/names-sweep.mjs).
+  done when: each fault is measured gone on the repo that showed it, with real keys still caught; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

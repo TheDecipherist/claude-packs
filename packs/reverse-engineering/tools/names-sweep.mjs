@@ -7,9 +7,12 @@
 // Names reading prove the unwrapping. Exit 1 when too few read under any wrapping, and the report says what was searched.
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
-import { interleave, shiftedHits, wrappings } from './lib/unwrap.mjs';
+import { entropyOf, interleave, shiftedHits, wrappings } from './lib/unwrap.mjs';
 
-const MAX_HITS = 64;
+const MAX_HITS = 2048; // a common word is everywhere, and the cap must not cut off the one hit in the table
+const SPAN_PER_NAME = 640; // bytes a name may take: a preset record's stride can be 512
+const MAX_SPAN = 32768;
+const FLAT = 7.5; // bits per byte: past this no text is showing and no structure either
 const PROOF = 3; // names: one or two can read by chance in a large image, so fewer proves nothing
 const POINTERS = [
   { name: 'u16 big-endian', width: 2, write: 'writeUInt16BE', top: 0xffff },
@@ -40,6 +43,27 @@ export function displayForms(name) {
   return [...new Set([name, squeezed, ...cuts].map((f) => f.toLowerCase()))];
 }
 
+// Firmware also drops vowels and stops early (`BrickWll`, `ARP SWNG`, `MinWool`), so a name that did not read is tried loosely: a word's first three letters stand, vowels may go, and it may end early.
+const VOWEL = /[aeiou]/;
+const letter = (c, kept) => { const safe = c.replace(/[^a-z0-9]/g, '\\$&'); return kept && VOWEL.test(c) ? `${safe}?` : safe; };
+function wordPattern(word) {
+  const letters = [...word];
+  const tail = letters.slice(3).reverse().reduce((inner, c) => `(?:${letter(c, true)}${inner})?`, '');
+  return letters.slice(0, 3).map((c, i) => letter(c, i > 0)).join('') + tail;
+}
+export function abbreviationOf(name) {
+  const words = name.toLowerCase().split(/\s+/).filter(Boolean);
+  return new RegExp(`(?<![a-z])${words.map(wordPattern).join('[ .]?')}(?![a-z])`, 'g');
+}
+
+function abbreviated(view, names) {
+  const text = view.toString('latin1').toLowerCase();
+  return names.filter((n) => n.name.length >= 5).map((n) => {
+    const hits = [...text.matchAll(abbreviationOf(n.name))].filter((m) => m[0].length >= Math.max(5, n.name.length / 2)).slice(0, MAX_HITS);
+    return { ...n, hits: hits.map((m) => m.index), abbreviated: hits[0]?.[0] };
+  }).filter((n) => n.hits.length);
+}
+
 const folded = (view) => Buffer.from(view.toString('latin1').toLowerCase(), 'latin1');
 function found(names, view) {
   const low = folded(view);
@@ -63,7 +87,7 @@ function mostCommonGap(offsets) {
   const counts = new Map();
   for (let i = 1; i < offsets.length; i += 1) { const gap = offsets[i] - offsets[i - 1]; counts.set(gap, (counts.get(gap) ?? 0) + 1); }
   const [gap, count] = [...counts].sort((a, b) => b[1] - a[1])[0] ?? [0, 0];
-  return count >= 2 ? { gap, count, of: offsets.length - 1 } : null;
+  return count >= 2 && count >= (offsets.length - 1) / 5 ? { gap, count, of: offsets.length - 1 } : null; // a gap a few pairs share is no stride, and reading one invents a table
 }
 
 // How many neighbours in the names file's order also sit in that order in the image.
@@ -71,6 +95,32 @@ function orderHeld(hits) {
   let held = 0;
   for (let i = 1; i < hits.length; i += 1) if (hits[i].hits[0] > hits[i - 1].hits[0]) held += 1;
   return { held, of: Math.max(0, hits.length - 1) };
+}
+
+// Where the most different names sit closest: the table itself. A common word also turns up in presets and messages, so the first hit is not the table.
+function densest(hits, span) {
+  const all = hits.flatMap((n) => n.hits.map((at) => ({ at, name: n.name }))).sort((a, b) => a.at - b.at);
+  const held = new Map();
+  const drop = (name) => { if (held.get(name) > 1) held.set(name, held.get(name) - 1); else held.delete(name); };
+  let best = null;
+  let from = 0;
+  for (let to = 0; to < all.length; to += 1) {
+    held.set(all[to].name, (held.get(all[to].name) ?? 0) + 1);
+    while (all[to].at - all[from].at > span || held.get(all[from].name) > 1) { drop(all[from].name); from += 1; } // a stray earlier copy of a name is no part of the table
+    const width = all[to].at - all[from].at;
+    if (held.size > (best?.names ?? 1) || (held.size === best?.names && width < best.to - best.from)) best = { names: held.size, from: all[from].at, to: all[to].at, first: from, last: to };
+  }
+  return best && withNeighbours(all, best);
+}
+
+// The tightest window drops a first entry whose name comes again later in the table, so it takes back any hit as close as the table's own entries. A stray copy is further off.
+function withNeighbours(all, { names, first, last }) {
+  const gaps = all.slice(first + 1, last + 1).map((h, i) => h.at - all[first + i].at).sort((a, b) => a - b);
+  const reach = 2 * (gaps[Math.floor(gaps.length / 2)] ?? 0);
+  let [from, to] = [first, last];
+  while (from > 0 && all[from].at - all[from - 1].at <= reach) from -= 1;
+  while (to < all.length - 1 && all[to + 1].at - all[to].at <= reach) to += 1;
+  return { names, from: all[from].at, to: all[to].at };
 }
 
 // Every place an address of one of the hits is stored, in this pointer format.
@@ -120,9 +170,11 @@ function groupsOf(hits, view, bases, wanted) {
     const mine = hits.filter((n) => n.group === group);
     const offsets = [...new Set(mine.flatMap((n) => n.hits))].sort((a, b) => a - b);
     const last = offsets[offsets.length - 1];
+    const dense = densest(mine, Math.min(MAX_SPAN, mine.length * SPAN_PER_NAME));
+    const inTable = dense ? mine.map((n) => ({ ...n, hits: n.hits.filter((at) => at >= dense.from && at <= dense.to) })).filter((n) => n.hits.length) : mine;
     return {
-      group, found: mine.length, of: wanted.filter((n) => n.group === group).length, first: offsets[0], last,
-      stride: mostCommonGap(offsets), order: orderHeld(mine), pointers: offsets.length >= 4 ? pointerTable(view, offsets, bases) : null,
+      group, found: mine.length, of: wanted.filter((n) => n.group === group).length, first: offsets[0], last, dense,
+      stride: mostCommonGap(offsets), order: orderHeld(inTable), pointers: offsets.length >= 4 ? pointerTable(view, offsets, bases) : null,
       next: offsets.length ? nextRuns(view, last) : [], pool: poolOf(view, offsets),
     };
   });
@@ -134,9 +186,12 @@ export function sweep(image, names, { bases = [0] } = {}) {
   tried.push({ name: `custom character set, shift ${relative.shift ?? '-'}`, view: image, hits: relative.names });
   tried.sort((a, b) => b.hits.length - a.hits.length);
   const best = tried[0];
+  const read = new Set(best.hits.map((n) => n.name));
+  const shortened = best.hits.length >= PROOF ? abbreviated(best.view, names.filter((n) => !read.has(n.name))) : [];
+  best.hits.push(...shortened);
   const seen = new Set(best.hits.map((n) => n.name));
   return {
-    names: names.length, wrapping: best.hits.length ? best.name : null, reads: best.hits.length,
+    names: names.length, wrapping: best.hits.length ? best.name : null, reads: best.hits.length, entropy: entropyOf(image), shortened: shortened.map((n) => [n.name, n.abbreviated]),
     proven: best.hits.length >= Math.min(PROOF, names.length),
     tried: tried.map((t) => ({ name: t.name, reads: t.hits.length })),
     groups: best.hits.length ? groupsOf(best.hits, best.view, bases, names) : [],
@@ -148,6 +203,7 @@ const hex = (n) => `0x${n.toString(16).toUpperCase()}`;
 function groupLine(g) {
   if (!g.found) return `  ${g.group}: 0 of ${g.of}`;
   const parts = [`  ${g.group}: ${g.found} of ${g.of}, ${hex(g.first)}..${hex(g.last)}`];
+  if (g.dense) parts.push(`densest ${g.dense.names} names at ${hex(g.dense.from)}..${hex(g.dense.to)}`);
   if (g.stride) parts.push(`stride ${g.stride.gap} (${g.stride.count} of ${g.stride.of} gaps)`);
   if (g.order.of) parts.push(`the manual's order holds ${g.order.held} of ${g.order.of}`);
   if (g.pointers) parts.push(`pointers at ${hex(g.pointers.at)} (${g.pointers.entries}, ${g.pointers.kind}, base ${hex(g.pointers.base)})`);
@@ -159,8 +215,9 @@ function groupLine(g) {
 function nothingRead(label, r) {
   const searched = r.tried.map((t) => t.name).join(', ');
   const said = r.reads ? `only ${r.reads} of ${r.names} names read, which chance can do, under` : `none of ${r.names} names reads under`;
+  const flat = r.entropy >= FLAT ? ' It looks compressed or encrypted: read what loads it, and if nothing does, record that the text is not in these files and stop.' : '';
   return `${label}: ${said} any of ${r.tried.length} wrappings. Searched: ${searched}.\n` +
-    'The image is still wrapped some other way, or the names file is wrong. This says nothing about what the machine holds.';
+    `The image is still wrapped some other way, or the names file is wrong. This says nothing about what the machine holds. Entropy ${r.entropy.toFixed(2)} bits per byte.${flat}`;
 }
 
 export function report(label, r) {
@@ -170,6 +227,7 @@ export function report(label, r) {
   return [
     `${label}: ${r.reads} of ${r.names} names read ${r.wrapping} (${r.tried.length} wrappings tried${others ? `; also ${others}` : ''})`,
     ...r.groups.map(groupLine),
+    ...(r.shortened.length ? [`  abbreviated: ${r.shortened.slice(0, 8).map(([name, as]) => `${name} as "${as}"`).join(', ')}`] : []),
     r.missing.length ? `  not found: ${r.missing.slice(0, 8).join(', ')}${more}` : '  every name found',
   ].join('\n');
 }

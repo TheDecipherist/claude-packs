@@ -1,9 +1,9 @@
 {
-  "kit": "0.29.0",
+  "kit": "0.32.0",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-05T04:37:07.740Z",
+  "updated": "2026-11-05T06:45:56.758Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -17,7 +17,7 @@
     ".claude/rules/open-items-tagged.md": "b5535a7ad55f3972177a4a2a12ecb2559d798239111ef1492ec728be87beee48",
     ".claude/rules/plan-and-logs.md": "a7f7898f3e81b30353aca8d195a4898d7e1c74a2c01e5e6a3bec2bd6d2bd79d4",
     ".claude/rules/references-use-anchors.md": "a5fdcfdc2fa95d4f9a96e9c99e64f08502dd7bace29c1c91d7b30b0e4c800ccf",
-    ".claude/rules/refusals-are-judged.md": "28ae66b9fcd64fff229e0edd42e035398f4c063d786324f9821c3f567a2f0e51",
+    ".claude/rules/refusals-are-judged.md": "dc3721ed0275c2b4012f271239566253287a9b0eacf48d5069ba117405923ddb",
     ".claude/rules/reuse-before-writing.md": "77b54d7b28a9372abdb0128bd12da572f7566b6a1630e908458d02643ff99570",
     ".claude/rules/secrets-never-committed.md": "3b14cd19d6f744f97ad4ff675edf9b410ef9e79b1e744b3be7509d962086118e",
     ".claude/rules/skill-writing.md": "cd7475c22cafc56a3bc992e8742fd648c4390a31c91f8896ed2367edec16ed47",
@@ -61,7 +61,7 @@
     ".claude/hooks/lib/prose.mjs": "f381ed0951d6eccf745b1535794d1e9977fa0583ccc2b1dc3d176bce02f0f8b6",
     ".claude/hooks/lib/pushed.mjs": "1376e52a75a02ffc61b8ce9a72bfbe529ed617dd4fcf51bc6076cf52a1daffe1",
     ".claude/hooks/lib/repo-index.mjs": "39f3ed768cb0d98b451d04fd6899ba6a70fe6da926aa61bfe801626c909be0e1",
-    ".claude/hooks/lib/secret-patterns.mjs": "b9d642b8165907731b5f22ac8e48564c7ac54fe623289cc3de5a7edfb1e51d68",
+    ".claude/hooks/lib/secret-patterns.mjs": "0b96d5e65c32c1b545267e62b9f1b25e8272902d9fb13520f35e4d088fa440ce",
     ".claude/hooks/lib/selftest.mjs": "63485e4d9e39af1df5e59a54a89b4e2745eb0a14fb20cbac9ad4370e473a13e3",
     ".claude/hooks/lib/shape-code.mjs": "9abd91144d786891f54bea83bcc8cd6a4752f198750e6f16393fa4b71a20d825",
     ".claude/hooks/lib/shape.mjs": "a9335c017e4518b6110ff560eeda80f4133917c3e939adb9427c76ce3b55d6db",

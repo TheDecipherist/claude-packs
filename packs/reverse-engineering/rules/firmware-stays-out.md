@@ -1,14 +1,5 @@
 ---
-paths:
-  - "**/*.cpp"
-  - "**/*.cc"
-  - "**/*.h"
-  - "**/*.hpp"
-  - "**/*.mm"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.js"
-  - "**/*.mjs"
+# concepts: cpp, js, notes, tooling
 ---
 
 # Firmware stays out of git: ship facts, never bytes

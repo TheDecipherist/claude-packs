@@ -12,7 +12,7 @@ import { bashOf, git, runHook, scratchProject, verdicts } from './lib/selftest.m
 import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
-const FIRMWARE = /\.(bin|rom|eprom|epr|hex|srec|s19|mot|ic\d+|lod|syx|mid|dis|disasm|asm\.txt)$/i;
+const FIRMWARE = /\.(bin|rom|eprom|epr|hex|srec|s19|mot|ic\d+|lod|syx|mid|dis|disasm|asm\.txt|lst|wiz|mfw|raf)$/i;
 const OWN_BUILD = /(^|\/)(build|out|dist|target)\//;
 
 const staged = (dir, arg) => (spawnSync('git', ['ls-files', '--others', '--modified', '--exclude-standard', '--', arg], { cwd: dir, encoding: 'utf8' }).stdout ?? '').split('\n').filter(Boolean).map((f) => resolve(dir, f));

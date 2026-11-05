@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.32.0 (2026-11-05)
+
+Six more real repos were read with the kit, and it was wrong about them in ways no test had seen.
+
+- `suggest` and `scan` read a project as it is. The kit's own files in `.claude/` are no longer evidence: `audio-thread-realtime-safe.md` had counted as reverse-engineering notes because the name holds `-re`. A reverse-engineering project is known by `[FW]` findings and its disassemblers, MIDI by what the code does, and a configuration named in `layout.json` stands.
+- A long identifier is no longer a secret: control names in panel JSON were reported as keys, 11,410 of them in one repo. A key's random part runs unbroken.
+- A build folder is known by what the build leaves, whatever it is called. `scan` leaves it out and reports it: one repo held 1,663 tracked build files, 43% of the repo.
+- `names-sweep` reports where names sit densest, so a common word elsewhere does not hide the table; tries names with vowels dropped; wants most gaps to agree before calling a stride; says when an image looks compressed or encrypted and to stop; and reads three bytes per 16-bit word.
+- New rule `addresses-name-their-space`. `names-first`, `menu-map`, `gather-sources`, `bank-census` and `findings-are-withdrawn-in-place` corrected against what these repos and two bug logs record, including where 0.31.0 said too much.
+- `no-rom-table-literal` reads decimal tables, and `firmware-out-of-git` knows `.lst`, `.wiz`, `.mfw` and `.raf`.
+- Reverse-engineering rules load where the work is: research notes and tools as well as code, through concepts. They were scoped to code files alone, so they did not load in research notes, and their hand-written paths hid stray files from `doctor`. Only `names-before-code` loads at launch, because it applies before any file is opened.
+
 ## 0.31.0 (2026-11-05)
 
 0.30.0 was written from the playbook, without the two repos where this work was done and documented. Read against them and run on their real images, it was missing most of the method, and its tool could not read one of the updates it was meant for.

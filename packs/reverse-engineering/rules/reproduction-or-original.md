@@ -1,14 +1,5 @@
 ---
-paths:
-  - "**/*.cpp"
-  - "**/*.cc"
-  - "**/*.h"
-  - "**/*.hpp"
-  - "**/*.mm"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.js"
-  - "**/*.mjs"
+# concepts: cpp, js, notes, tooling
 ---
 
 # Say whether this is a reproduction or an original: the laws differ

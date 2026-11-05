@@ -1,14 +1,5 @@
 ---
-paths:
-  - "**/*.cpp"
-  - "**/*.cc"
-  - "**/*.h"
-  - "**/*.hpp"
-  - "**/*.mm"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.js"
-  - "**/*.mjs"
+# concepts: cpp, js, notes, tooling
 ---
 
 # Every law carries its source, and a guess is a debt

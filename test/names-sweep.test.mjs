@@ -1,7 +1,7 @@
 // 0.30.0: a name the manual prints is the fastest way into an image, and the test of every way of unwrapping it. Each image here is built wrapped the way a real one was.
-import { assert, cli, existsSync, fresh, join, spawnSync, test, writeFileSync, KIT } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, join, readFileSync, readdirSync, spawnSync, test, writeFileSync, KIT } from './kit-cli.mjs';
 import { interleave, wrappings } from '../packs/reverse-engineering/tools/lib/unwrap.mjs';
-import { displayForms, readNames, report, sweep } from '../packs/reverse-engineering/tools/names-sweep.mjs';
+import { abbreviationOf, displayForms, readNames, report, sweep } from '../packs/reverse-engineering/tools/names-sweep.mjs';
 
 const TOOL = join(KIT, 'packs/reverse-engineering/tools/names-sweep.mjs');
 const PATCHES = ['Super Saw', 'Glass Keys', 'Deep Bass', 'Soft Pad', 'Hard Sync', 'Bell Tree'];
@@ -102,6 +102,63 @@ test('a display does not print what a manual prints: squeezed, and cut to a colu
   assert.equal(r.groups[0].stride.gap, 16);
 });
 
+test('firmware drops vowels and stops early: the misses are tried loosely, and said to be', () => {
+  for (const [name, shown] of [['Brick Wall', 'brickwll'], ['Mineral Wool', 'minwool'], ['Arp Swing', 'arp swng'], ['Concrete', 'concret']]) assert.match(shown, abbreviationOf(name), name);
+  assert.doesNotMatch('brickyard', abbreviationOf('Brick Wall'));
+  const image = imageWithBank();
+  image.write('Marble  Plaster Concret BrickWll MinWool Wood', 0x1000, 'latin1');
+  const wanted = ['Marble', 'Plaster', 'Wood', 'Concrete', 'Brick Wall', 'Mineral Wool'].map((name) => ({ group: 'material', name }));
+  const r = sweep(image, wanted);
+  assert.deepEqual(r.missing, []);
+  assert.match(report('rom', r), /abbreviated: .*Brick Wall as "brickwll"/);
+});
+
+test('a common word elsewhere does not hide the table: the densest place is reported', () => {
+  const image = imageWithBank();
+  image.write('decay', 0x200, 'latin1');
+  image.write('level', 0x300, 'latin1');
+  image.write('decay', 0x13F0, 'latin1');
+  ['decay', 'level', 'depth', 'speed'].forEach((name, i) => image.write(`${name}\0`, 0x1400 + i * 6, 'latin1'));
+  const [g] = sweep(image, ['decay', 'level', 'depth', 'speed'].map((name) => ({ group: 'parameter', name }))).groups;
+  assert.equal(g.first, 0x200);
+  assert.deepEqual([g.dense.names, g.dense.from], [4, 0x1400]);
+  assert.deepEqual(g.order, { held: 3, of: 3 });
+});
+
+test('a table\'s first entry stays in it when its name comes again further down', () => {
+  const image = imageWithBank();
+  image.write('decay', 0x1000, 'latin1');
+  ['decay', 'level', 'depth', 'speed', 'decay', 'width'].forEach((name, i) => image.write(`${name}\\0`.replace('\\0', '\0'), 0x1400 + i * 8, 'latin1'));
+  const [g] = sweep(image, ['decay', 'level', 'depth', 'speed', 'width'].map((name) => ({ group: 'parameter', name }))).groups;
+  assert.deepEqual([g.dense.names, g.dense.from], [5, 0x1400]);
+});
+
+test('two gaps agreeing among many are no stride', () => {
+  const image = imageWithBank();
+  const spots = [0x900, 0x910, 0x920, 0xA05, 0xB31, 0xC77, 0xD02, 0xE5A, 0xF13, 0x1033, 0x1109, 0x1250, 0x13A1, 0x1467];
+  spots.forEach((at, i) => image.write(`item${String.fromCharCode(97 + i)}`, at, 'latin1'));
+  const [g] = sweep(image, spots.map((_, i) => ({ group: 'x', name: `item${String.fromCharCode(97 + i)}` })), {}).groups;
+  assert.equal(g.stride, null);
+});
+
+test('flat high entropy with no name reading says to stop and read the loader', () => {
+  let seed = 3;
+  const noise = Buffer.from(Array.from({ length: 65536 }, () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return (seed >> 13) & 255; }));
+  assert.match(report('rom', sweep(noise, names)), /looks compressed or encrypted: read what loads it/);
+});
+
+test('three bytes per 16-bit word, marker first, inside one sysex message', () => {
+  const data = imageWithBank();
+  const body = [];
+  for (let i = 0; i + 1 < data.length; i += 2) {
+    const word = (data[i] << 8) | data[i + 1];
+    body.push(0x40 | (word >> 12), (word >> 6) & 0x3f, word & 0x3f);
+  }
+  const r = sweep(Buffer.from([0xf0, 0x04, 0x01, ...body, 0xf7]), names);
+  assert.equal(r.reads, PATCHES.length);
+  assert.match(r.wrapping, /three bytes per word, high byte first/);
+});
+
 test('names in one unbroken run are a pool, to be read whole', () => {
   const image = imageWithBank();
   image.write('Off     Sine    Triangle  Sawtooth', 0x1200, 'latin1');
@@ -154,15 +211,25 @@ test('no name reads: it fails, and says what it searched rather than that the ma
 
 test('the names file keeps groups, and a name too short to mean anything is dropped', () => {
   assert.deepEqual(readNames('# x\npatch\tSuper Saw\nSaw\nreverb\tGold Plate\nDelay\n'), [{ group: 'patch', name: 'Super Saw' }, { group: 'reverb', name: 'Gold Plate' }, { group: 'name', name: 'Delay' }]);
-  assert.match(report('rom', sweep(imageWithBank(), names)), /6 of 6 names read as stored.*\n {2}patch: 6 of 6, 0x400\.\.0x5E0; stride 96 \(5 of 5 gaps\)/);
+  assert.match(report('rom', sweep(imageWithBank(), names)), /6 of 6 names read as stored.*\n {2}patch: 6 of 6, 0x400\.\.0x5E0; densest 6 names at 0x400\.\.0x5E0; stride 96 \(5 of 5 gaps\)/);
 });
 
 test('the tool, the skill and the rule install with the pack, and a project can run it', () => {
   const dir = fresh('ns-install-');
   assert.equal(cli(dir, 'init', 'reverse-engineering', '--config', 'cpp').status, 0);
-  for (const f of ['tools/names-sweep.mjs', 'tools/lib/unwrap.mjs', 'rules/names-before-code.md', 'skills/names-first/SKILL.md', 'skills/menu-map/SKILL.md']) assert.ok(existsSync(join(dir, '.claude', f)), f);
+  for (const f of ['tools/names-sweep.mjs', 'tools/lib/unwrap.mjs', 'rules/names-before-code.md', 'rules/addresses-name-their-space.md', 'skills/names-first/SKILL.md', 'skills/menu-map/SKILL.md']) assert.ok(existsSync(join(dir, '.claude', f)), f);
   writeFileSync(join(dir, 'rom.bin'), imageWithBank());
   writeFileSync(join(dir, 'names.txt'), PATCHES.join('\n'));
   const r = spawnSync('node', [join(dir, '.claude/tools/names-sweep.mjs'), join(dir, 'rom.bin'), '--names', join(dir, 'names.txt')], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
+});
+
+test('reverse-engineering rules load where the work is: research notes and tools as well as code, and only the first step at launch', () => {
+  const dir = fresh('ns-rules-');
+  assert.equal(cli(dir, 'init', 'reverse-engineering', '--config', 'cpp').status, 0);
+  const rule = (f) => readFileSync(join(dir, '.claude/rules', f), 'utf8');
+  for (const f of readdirSync(join(KIT, 'packs/reverse-engineering/rules')).filter((n) => n !== 'names-before-code.md')) {
+    for (const where of ['docs/**/*.md', 'tools/**', 'src/**/*.cpp']) assert.ok(rule(f).includes(`"${where}"`), `${f} loads on ${where}`);
+  }
+  assert.doesNotMatch(rule('names-before-code.md'), /^paths:/m);
 });

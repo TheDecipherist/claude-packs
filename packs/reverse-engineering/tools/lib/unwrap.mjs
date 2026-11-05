@@ -1,6 +1,7 @@
 // Every way a firmware image or a dump has been seen to wrap its text. Text is rarely encrypted, but it is often wrapped, and a name a manual prints is
 // the test of an unwrapping: if the name reads, the unwrapping is right. A new wrapping is one row.
 //   wrappings() -> [{ name, open(buffer) -> buffer }]     interleave(a, b) -> one image from an even and an odd EPROM
+//   entropyOf(buffer) -> bits per byte
 //   shiftedHits(buffer, text) -> [{ at, shift }]           a custom character set: the letters keep their distances, whatever the code of 'A'
 
 const eachByte = (b, fn) => Buffer.from(b.map(fn));
@@ -39,6 +40,16 @@ function joinedNibbles(b, phase, highFirst) {
   return out;
 }
 
+// A 16-bit word as three bytes, marker first: 0x40 | top four bits, then two groups of six. Not 7-in-8, and a CPU guess fails until it is undone.
+function threeByteWords(b, bigEndian) {
+  const out = [];
+  for (let i = 0; i + 3 <= b.length; i += 3) {
+    const word = ((b[i] & 0x0f) << 12) | ((b[i + 1] & 0x3f) << 6) | (b[i + 2] & 0x3f);
+    out.push(...(bigEndian ? [word >> 8, word & 255] : [word & 255, word >> 8]));
+  }
+  return Buffer.from(out);
+}
+
 // An OS update is many sysex messages, in a MIDI file or not, each with its own header, so packed groups restart at every message. Data bytes are below 0x80, so F0 and F7 end them.
 function sysexMessages(b) {
   const out = [];
@@ -59,6 +70,8 @@ const PACKINGS = [
   ...SEVEN_BIT.filter((p) => p.first).map((p) => ({ name: `${p.name}, checksum last`, open: (m) => unpacked7(m.subarray(0, -1), 0, p.first, p.bitK) })),
   { name: 'nibbles, high first', open: (m) => joinedNibbles(m, 0, true) },
   { name: 'nibbles, low first', open: (m) => joinedNibbles(m, 0, false) },
+  { name: 'three bytes per word, high byte first', open: (m) => threeByteWords(m, true) },
+  { name: 'three bytes per word, low byte first', open: (m) => threeByteWords(m, false) },
 ];
 
 const phases = (n) => Array.from({ length: n }, (_, i) => i);
@@ -93,4 +106,10 @@ export function shiftedHits(buffer, text) {
   const hits = [];
   for (let at = hay.indexOf(needle); at !== -1 && hits.length < 64; at = hay.indexOf(needle, at + 1)) hits.push({ at, shift: (buffer[at] - text.charCodeAt(0)) & 255 });
   return hits;
+}
+
+export function entropyOf(b) {
+  const counts = new Array(256).fill(0);
+  for (const x of b) counts[x] += 1;
+  return counts.filter(Boolean).reduce((bits, n) => bits - (n / b.length) * Math.log2(n / b.length), 0);
 }

@@ -1,3 +1,7 @@
+---
+# loads: at launch. It applies before any file is opened, so no path could trigger it.
+---
+
 # The machine's own names come first: the manual, then the strings, then the code
 
 <constraints>
