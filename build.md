@@ -122,3 +122,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-04: 0.18.0 hook-proof: the gate ran once in 263 s, 188 of 189; the timing test's fakes are in no settings entry, as doctor now says; it passes alone: 189 of 189.
 - 2026-11-04: 0.15.0 writing (178 of 178), 0.16.0 scan and 0.17.0 ui-craft and landing: the gate ran once on 6b26cf0, 186 of 186 in 256 s; landed by land-branch.
 - 2026-11-04: 0.29.0 logging: the gate ran once on f64709c, 301 of 305; a rule's `**/*` paths hid doctor's coverage (KWB-46) and the ignore test needed the logs line; the four pass alone on ffc1e16. Cost measured: 12 hooks through the runner, median 76 ms per call.
+- 2026-11-05: 0.30.0 names first: the gate ran once on a06a3c9, 319 of 319. Measured on a real EPROM: 255 factory patch names read as stored, 222 of 254 in the manual's order; one real OS update file reads under none of 118 wrappings.
