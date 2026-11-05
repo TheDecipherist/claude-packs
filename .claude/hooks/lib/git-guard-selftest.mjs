@@ -43,7 +43,7 @@ export function pushedCases(hookFile) {
   cases.push(['an earlier commit never pushed: the next commit is refused', r1.status, 2]);
   cases.push(['the refusal names the commit and the push with the token named', /\bone\b/.test(r1.stderr) && /git push https:\/\/x-access-token:\$PERSONAL_GITHUB_TOKEN@github\.com\/\S+ work\/x/.test(r1.stderr), true]);
   cases.push(['the refusal never offers deleting a branch', /branch -[dD]|--delete|delete the branch/.test(r1.stderr), false]);
-  cases.push(['a push earlier in the same command counts', bash(`source ~/.env && git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/repo.git work/x && ${C}`).status, 0]);
+  cases.push(['a push earlier in the same command counts', bash(`source ~/.env && git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/HouseOwner/repo.git work/x && ${C}`).status, 0]);
   push('work/x');
   cases.push(['pushed seconds after a refusal (the cache is fresh): the commit passes', bash(C).status, 0]);
   commit('two');

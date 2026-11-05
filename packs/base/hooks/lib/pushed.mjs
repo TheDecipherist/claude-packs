@@ -165,10 +165,10 @@ export function sshOwner(url) {
   return (url ?? '').match(/^(?:ssh:\/\/)?git@github(?:\.com|-[\w.-]+)[:/]([\w.-]+)\/[\w.-]+?(?:\.git)?\/?$/)?.[1] ?? null;
 }
 
-export function pushCommand(url, branches, { owner = 'TheDecipherist', tokenVar = 'PERSONAL_GITHUB_TOKEN' } = {}) {
-  if (sshOwner(url) === owner) return `git push ${url} ${branches.join(' ')}`;
+export function pushCommand(url, branches, { owner, tokenVar = 'PERSONAL_GITHUB_TOKEN' } = {}) {
+  if (owner && sshOwner(url) === owner) return `git push ${url} ${branches.join(' ')}`;
   const m = (url ?? '').match(/github\.com[:/]([^/]+)\/([^/\s]+?)(?:\.git)?\/?$/);
-  const repo = m ? `${m[1]}/${m[2]}` : `${owner}/${(url ?? 'repo').split('/').pop().replace(/\.git$/, '')}`;
+  const repo = m ? `${m[1]}/${m[2]}` : `${owner ?? '<owner>'}/${(url ?? 'repo').split('/').pop().replace(/\.git$/, '')}`;
   return `source ~/.env && git push https://x-access-token:$${tokenVar}@github.com/${repo}.git ${branches.join(' ')}`;
 }
 

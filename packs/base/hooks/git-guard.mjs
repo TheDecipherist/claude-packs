@@ -65,7 +65,7 @@ const STORES_TOKEN = {
 // ---------- the house laws ----------
 export const DEFAULTS = {
   house: false,
-  owner: 'TheDecipherist',
+  owner: null,           // guards.git.owner: this project's GitHub owner. Unset, a push or a new repo is not held to one
   tokenVar: 'PERSONAL_GITHUB_TOKEN',
   ghAuth: 'token',       // 'cli': gh is logged in on this machine, so no call names a token
   trunkNeedsYes: false,  // true: only the owner pushes the trunk, so neither a commit nor the session's end waits for it
@@ -74,7 +74,7 @@ export const DEFAULTS = {
   neverStage: ['~/firmware'],
   safeRestore: null,
   branchStart: 'git switch -c work/<name>',
-  accountNote: 'The default account on this machine is the MongoDB one.',
+  accountNote: '',
 };
 
 const gitOut = (cwd, ...a) => { try { return execFileSync('git', a, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 10000 }); } catch { return null; } };
@@ -146,14 +146,14 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
     if (/\bgit\b.*\bpush\b/.test(p)) {
       if (/\s(-f|--force|--force-with-lease)\b/.test(p)) return 'Never force a push. Nothing pushed is rebased or amended.';
       const ssh = sshOwner(pushTarget(w, here, env)) === owner; // over SSH the key picks the account; the URL names the repo (KWB-39)
-      if (!ssh && !new RegExp(`github\\.com/${esc(owner)}/[\\w.-]+`).test(p)) {
+      if (owner && !ssh && !new RegExp(`github\\.com/${esc(owner)}/[\\w.-]+`).test(p)) {
         return `A push must name the repo: git push https://x-access-token:$${tok}@github.com/${owner}/<repo>.git <branch>, or a remote whose URL is git@github.com:${owner}/<repo>.git (SSH). ${c.accountNote}`;
       }
       if (!ssh && !p.includes(`$${tok}`) && !p.includes(`\${${tok}}`)) return `A push names the token as $${tok}, never a pasted one.`;
       pushedBefore = true;
     }
     if (c.ghAuth !== 'cli' && /(^|\s)gh\s/.test(p) && !cmd.includes(`GH_TOKEN=$${tok}`)) return `Every \`gh\` names the token: source ~/.env && GH_TOKEN=$${tok} gh ... ${c.accountNote}`;
-    if (/\bgh\s+repo\s+create\b/.test(p) && (!p.includes(`${owner}/`) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
+    if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
     if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${esc(tok)}`).test(p)) {
       return 'The token is never stored in a remote URL or a config file. Name it on the push only.';
     }
@@ -209,7 +209,7 @@ async function selftest() {
     ['git push https://x-access-token:$T@github.com/a/b.git work/x', false],
     ['git push -u origin work/x', false],
     ['git remote set-url origin https://github.com/a/b.git', false],
-    ['git remote add o git@github-decipherist:TheDecipherist/b.git', false],
+    ['git remote add o git@github-house:HouseOwner/b.git', false],
     ['git clone https://me@github.com/a/b.git', false],
     ['echo https://u:p@x.com/y', false],
   ];
@@ -220,7 +220,7 @@ async function selftest() {
   const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true };
   const clean = { ...isDirty, dirty: () => [] };
   const on = (branch, env = clean) => ({ ...env, branch: typeof branch === 'function' ? branch : () => branch });
-  const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/app.git main';
+  const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/HouseOwner/app.git main';
   const remote = (url) => ({ ...clean, remoteUrl: () => url });   // a remote whose URL is url (KWB-39: SSH names the repo)
   const mustBlock = [
     ['git add -A', clean], ['git add .', clean], ["git commit -am 'x'", clean], ['git add ~/firmware/korg/m1.bin', clean],
@@ -230,31 +230,32 @@ async function selftest() {
     ['git clean -fd', isDirty], ['GUARD_OK=1 git checkout -- x.h', isDirty], ['GUARD_OK=1 git restore build/Testing/Temporary/LastTest.log', isDirty],
     ['GUARD_OK=1 git restore --staged --worktree a.md', isDirty], ['git restore --staged --worktree a.md', isDirty],
     ['git push', clean], ['git push origin main', clean], [`${push} --force`, clean],
-    ['git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/mongodb/app.git main', clean],
-    ['gh repo create TheDecipherist/app --private', clean],
+    ['git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/other-org/app.git main', clean],
+    ['gh repo create HouseOwner/app --private', clean],
     ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create app --private', clean],
-    ['git remote add origin https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/TheDecipherist/app.git', clean],
-    [`git push https://x-access-token:ghp_${'a'.repeat(30)}@github.com/TheDecipherist/app.git main`, clean],
+    ['git remote add origin https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/HouseOwner/app.git', clean],
+    [`git push https://x-access-token:ghp_${'a'.repeat(30)}@github.com/HouseOwner/app.git main`, clean],
     ['git branch -D step/C1-x', clean], ['git push origin --delete step/C1-x', clean], ['git rebase main', clean], ['git commit --amend -m x', clean],
     ["git commit -q -m 'bench' --no-verify", clean], ['GUARD_OK=1 git commit --no-verify -m x -- a.h', clean],
-    ['git push --no-verify https://x@github.com/TheDecipherist/app.git main', clean],
-    ['git push -u origin work/x', remote('git@github.com:mongodb/app.git')], ['git push origin work/x', remote('https://github.com/TheDecipherist/app.git')],
-    ['git push git@github.com:mongodb/app.git work/x', clean], ['git push -f origin work/x', remote('git@github.com:TheDecipherist/app.git')],
+    ['git push --no-verify https://x@github.com/HouseOwner/app.git main', clean],
+    ['git push -u origin work/x', remote('git@github.com:other-org/app.git')], ['git push origin work/x', remote('https://github.com/HouseOwner/app.git')],
+    ['git push git@github.com:other-org/app.git work/x', clean], ['git push -f origin work/x', remote('git@github.com:HouseOwner/app.git')],
   ];
   const mustPass = [
     ['git add build.md src/Row.h', isDirty], ["git commit -m 'C1: row clock' -- build.md src/Row.h", isDirty],
     ['cd ~/projects/other && git add tools/bank/kept.json', isDirty], ['git status', isDirty], ['git checkout -- x.h', clean],
     ['git restore --staged x.h', isDirty], ['python3 tools/safe_restore.py x.h', isDirty], ['git stash list', isDirty],
     ['git checkout -b c2-filter', isDirty], [push, isDirty],
-    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create TheDecipherist/app --private', clean],
+    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create HouseOwner/app --private', clean],
     ['cmake --build build --target Synth_Standalone -j8', isDirty], ['git log --oneline -6 | sed -n 1,3p', isDirty],
     ["git branch --list 'step/U5*' | tr -d ' *'", isDirty], ["grep -n 'def push' tools/step.py", isDirty], ["echo 'git push origin main'", isDirty],
     ["python3 - <<'EOF'\nprint('git add -A')\nEOF", isDirty],
-    ['git push -u origin work/x', remote('git@github.com:TheDecipherist/app.git')], ['git push origin work/x', remote('git@github-decipherist:TheDecipherist/app.git')],
-    ['git push git@github.com:TheDecipherist/app.git work/x', clean], ['git push ssh://git@github.com/TheDecipherist/app.git work/x', clean],
+    ['git push -u origin work/x', remote('git@github.com:HouseOwner/app.git')], ['git push origin work/x', remote('git@github-house:HouseOwner/app.git')],
+    ['git push git@github.com:HouseOwner/app.git work/x', clean], ['git push ssh://git@github.com/HouseOwner/app.git work/x', clean],
   ];
-  for (const [cmd, env] of mustBlock) if (house(cmd, '.', env) === null) bad.push(`NOT BLOCKED: ${cmd}`);
-  for (const [cmd, env] of mustPass) { const r = house(cmd, '.', env); if (r !== null) bad.push(`WRONGLY BLOCKED: ${cmd} -> ${r}`); }
+  const OWNED = { owner: 'HouseOwner' };
+  for (const [cmd, env] of mustBlock) if (house(cmd, '.', env, OWNED) === null) bad.push(`NOT BLOCKED: ${cmd}`);
+  for (const [cmd, env] of mustPass) { const r = house(cmd, '.', env, OWNED); if (r !== null) bad.push(`WRONGLY BLOCKED: ${cmd} -> ${r}`); }
   const TRUNK = { refuseTrunk: true };
   for (const cmd of ["git commit -m 'x' -- a.h", "GUARD_OK=1 git commit -m 'x' -- a.h"]) if (house(cmd, '.', on('main'), TRUNK) === null) bad.push(`NOT BLOCKED on trunk: ${cmd}`);
   if (house("git commit -m 'x' -- a.h", '.', on('main')) !== null) bad.push('a commit on main with the trunk refusal off (the default)');
@@ -264,7 +265,7 @@ async function selftest() {
   if (house('git -C /r/wt commit --no-edit', '/r', byDir, TRUNK) !== null) bad.push('git -C a worktree on a branch');
   if (house('cd /r && git commit --no-edit', '/r/wt', byDir, TRUNK) === null) bad.push('cd onto the trunk then commit');
   // WB-107: an agent's isolated worktree cannot push (its harness refuses), so push-then-commit is the lead's there; elsewhere it holds
-  const ahead = { ...on('work/x'), unpushed: () => ({ branch: 'work/x', url: 'https://github.com/TheDecipherist/app.git', commits: [{ sha: 'abc1234', subject: 'x' }] }) };
+  const ahead = { ...on('work/x'), unpushed: () => ({ branch: 'work/x', url: 'https://github.com/HouseOwner/app.git', commits: [{ sha: 'abc1234', subject: 'x' }] }) };
   if (house("git commit -m x -- a.h", '/r/.claude/worktrees/agent-a1b2', ahead) !== null) bad.push('a commit in an agent worktree with its branch ahead of GitHub (WB-107)');
   if (house("git commit -m x -- a.h", '/r/.claude/worktrees/night', ahead) === null) bad.push('NOT BLOCKED: a commit in a lead worktree with its branch ahead of GitHub');
   if (house("git commit -m x -- a.h", '/r', ahead) === null) bad.push('NOT BLOCKED: a commit in the main checkout with its branch ahead of GitHub');

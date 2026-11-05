@@ -155,7 +155,7 @@ function selftestBuildOutput(hook) {
   const w = (file) => runHook(hook, dir, { tool_name: 'Write', tool_input: { file_path: join(dir, file), content: 'x\n' } });
   const b = (command) => runHook(hook, dir, { tool_name: 'Bash', tool_input: { command }, cwd: dir });
   return verdicts('protect-vendor buildOutput', [
-    ['build/for-tim.md under buildOutput out/**', e('build/for-tim.md'), 0],
+    ['build/for-you.md under buildOutput out/**', e('build/for-you.md'), 0],
     ['out/ under buildOutput out/**', e('out/lib/x.o'), 2],
     ['build/_deps stays vendored', e('build/_deps/juce-src/x.h'), 2],
     // KWB-21: evidence is written once

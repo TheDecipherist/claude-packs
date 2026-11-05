@@ -140,6 +140,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a rule for basic UX on any UI, and analyse-reference-look learns the object from the photograph; concepts: none (design/shape.json declares none); reuse: analyse-reference-look (packs/audio-core/skills).
   done when: the rule loads on UI code and the skill carries the steps; the whole suite green once, committed; landed.
 
+- 1.0.0, public (work/1.0.0-public), started 2026-11-05 (the first public release on npm).
+  making: the package made public, with what assumed one machine taken out; concepts: none (design/shape.json declares none); reuse: DEFAULTS (packs/base/hooks/git-guard.mjs).
+  done when: the tarball holds nothing personal; the whole suite green once, committed; landed; published and read back from npm.
+
 ## Steps
 
 ## Log

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0 (2026-11-05)
+
+The first public release. From here versions follow semver: a change that can break an installed project is a major version.
+
+- The package is public on npm: `npm i -D @thedecipherist/claude-packs`.
+- Breaking: `git-guard` has no default GitHub owner. A project with `guards.git.house` that wants pushes and new repos held to an owner names it in `guards.git.owner`.
+- Nothing in the package assumes one person's machine or accounts. The hooks and their selftests name no real account or organisation, and `no-personal-name` also catches a lowercase name.
+
 ## 0.36.1 (2026-11-05)
 
 - git-guard: a commit in a repo other than the project's is not judged against the project's `guards.git.repo`. A repo with no remote was

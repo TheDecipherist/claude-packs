@@ -2,13 +2,13 @@
 // still runs it can be moved on.
 import { KIT, assert, execFileSync, join, readFileSync, test } from './kit-cli.mjs';
 
-const NAME = new RegExp(['\\bT' + 'im\\b', 'Clau' + 'sen', 'ti' + 'ms-', 'ti' + 'm-writing', 'tim_' + 'carter'].join('|'));
+const NAME = new RegExp(['\\b[Tt]' + 'im\\b', 'Clau' + 'sen', 'ti' + 'ms-', 'ti' + 'm-writing', 'tim_' + 'carter'].join('|'));
 const LEFT_OUT = new Set(['lib/settings.mjs']);
 
 test('no file names a person', () => {
   const files = execFileSync('git', ['ls-files', '-co', '--exclude-standard'], { cwd: KIT, encoding: 'utf8' }).split('\n').filter((f) => f && !LEFT_OUT.has(f));
   const hits = [];
-  for (const f of files) {
+  for (const f of files.filter((name) => !name.startsWith('test/fixtures/'))) { // real projects' files, kept verbatim and never shipped
     if (NAME.test(f)) hits.push(f);
     let text = '';
     try { text = readFileSync(join(KIT, f), 'utf8'); } catch { continue; }

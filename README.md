@@ -4,10 +4,10 @@ Rules, checks, hooks and skills that hold Claude Code to what a senior engineer 
 
 ## Start here
 
-Install the package in the project (Node 22+), from a tarball made with `npm pack` in this repo:
+Install the package in the project (Node 22+):
 
 ```
-npm i -D ./thedecipherist-claude-packs-<version>.tgz
+npm i -D @thedecipherist/claude-packs
 ```
 
 Then four commands:
