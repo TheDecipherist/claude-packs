@@ -8,6 +8,8 @@ description: Use after adding, renaming, re-ranging or removing a control, or be
 ## Steps
 For the control's parameter ID, run each check through the real path and save the command plus its output as evidence. Use the project's own probes and tests (see CLAUDE.md, Project commands).
 
+Start with the real input path (`a-control-is-proved-through-its-input`): a gesture sent at the real editor's peer moves the parameter, the pixels and the audio. A gate that writes the parameter proves none of the control. Then see it red: with this control's input handling compiled out, the gate fails while the parameter's own tests stay green.
+
 1. **Host:** set the parameter by ID in an offline render, at its minimum, default and maximum. The render must change, and a null test against default must fail where it should and pass where it should.
 2. **Editor:** the widget is attached to that same ID. Moving it changes the parameter, and a host-set value shows in the widget with the same text as the host's value-to-text.
 3. **Patch:** save, load and compare. The value is bit-identical, and old patches without the ID load the spec default.

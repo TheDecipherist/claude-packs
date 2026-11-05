@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 (unreleased)
+## 1.1.0 (2026-11-05)
 
 Faults a real build found: the MPX 500 rebuild ran 1.0.0 for a whole unit, and its report ranks them.
 
@@ -37,6 +37,12 @@ New projects:
 - New rule `unattended-runs`: with the user away, take the recommended choice, keep every law, record the choice (KF-7).
 - `straight-on-and-aligned` loads in `design/` and on panel and look tools, where the analysis happens, not only in `src/app`.
 - `gather-sources` covers a source that cannot be fetched (KF-11). `addresses-name-their-space` warns that a rising run may be pointers (KF-16). `cpu-worst-case-per-block` lists a program load and says how to measure on a shared machine (KF-29). `plan-and-logs` reads a licence before choosing a source (KF-38). `test-the-template-once` and `house-control-behaviours` ask for one cheap pass of every instance through its real input path (KF-41).
+
+What the build taught:
+
+- New rule `a-control-is-proved-through-its-input`: a gate that writes the parameter proves nothing about the control. Driving the real editor found five real bugs. `prove-control` starts there, and sees the gate go red with the control's input handling compiled out.
+- `analyse-reference-look` asks for a control and a confidence per measure, seed boxes for a dark part on a dark panel, rectifying against a known anchor, how to rank sources that disagree, the typeface as a scored choice, planted faults diffed against the unplanted result, and the render measured by the code that measured the target.
+- `ui-matches-reference-look`: a look gate checks geometry exactly, and a whole-picture score is never a pass.
 
 ## 1.0.1 (2026-11-05)
 

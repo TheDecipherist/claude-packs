@@ -160,6 +160,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a new project gets what it needs on its first day: the build queue the kit sends it to, suggest from its notes, a lock of every pack, doctor --strict that can pass, rules that agree with each other and with a reproduction's brief, a law for an unattended run; concepts: none (design/shape.json declares none); reuse: recommend (lib/scan-detect.mjs), coverage (lib/coverage.mjs), toDo (lib/doctor.mjs).
   done when: each fault's test seen red then green; doctor --strict passes on a new project; the whole suite green once, committed; landed.
 
+- 1.1.0, what the build taught (work/1.1.0-build-laws), started 2026-11-05.
+  making: the build's lessons as laws: a control is proved through its own input path, in a rule and in prove-control, and analyse-reference-look and the look gate hold what the MPX 500 panel had to work out alone; concepts: none (design/shape.json declares none); reuse: prove-control and analyse-reference-look (packs/audio-core/skills), ui-matches-reference-look (packs/audio-core/rules).
+  done when: each law's test seen red then green; the whole suite green once, committed; landed; docs/1.1-report.md and docs/1.1-DONE written.
+
 ## Steps
 
 ## Log
@@ -183,3 +187,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.0.1 node_modules: the gate ran once on aa0037c, 344 of 344. Landed, not yet published.
 - 2026-11-05: 1.1.0 group 1, what fails silently or fails open, landed from work/1.1.0-fail-open at 7e2710d; the gate 371 of 371.
 - 2026-11-05: 1.1.0 group 2, false refusals, landed from work/1.1.0-false-refusals at f55d4df; the gate 398 of 398.
+- 2026-11-05: 1.1.0 group 3, new projects, landed from work/1.1.0-new-projects at e7bf651; the gate 416 of 416.
