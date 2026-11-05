@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
-import { sshOwner, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
+import { forRepo, sshOwner, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -185,7 +185,7 @@ function main(text) {
   }
   if (!cfg.house || !/git|gh |ghp_|github_pat_/.test(command)) return 0;
   const warnings = [];
-  const env = { ...real, unpushed: (cwd, c) => unpushed(cwd, real.branch(cwd), c), warn: (m) => warnings.push(m) };
+  const env = { ...real, unpushed: (cwd, c) => unpushed(cwd, real.branch(cwd), forRepo(cwd, resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), c)), warn: (m) => warnings.push(m) };
   const reason = house(command, payload.cwd ?? process.cwd(), env, cfg);
   if (warnings.length) process.stdout.write(JSON.stringify({ systemMessage: warnings.join('\n') }));
   if (!reason) return 0;

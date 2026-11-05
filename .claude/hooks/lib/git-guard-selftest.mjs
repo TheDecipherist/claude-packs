@@ -59,6 +59,13 @@ export function pushedCases(hookFile) {
   const byUrl = spawnSync(process.execPath, [RUNNER, hookFile], { cwd: lone, encoding: 'utf8', input: JSON.stringify({ session_id: session, cwd: lone, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }), env: { ...process.env, CLAUDE_PROJECT_DIR: lone } });
   cases.push(['no remote, guards.git.repo named: its unpushed commits refuse the next commit', byUrl.status, 2]);
 
+  // KWB-43: another repo with no remote, the project's layout naming the project's own repo: nothing to compare with
+  const other = join(top, 'other');
+  git(top, 'init', '-q', '-b', 'work/o', other);
+  git(other, 'commit', '-q', '--allow-empty', '-m', 'a');
+  git(other, 'commit', '-q', '--allow-empty', '-m', 'b');
+  const foreign = spawnSync(process.execPath, [RUNNER, hookFile], { cwd: other, encoding: 'utf8', input: JSON.stringify({ session_id: session, cwd: other, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }), env: { ...process.env, CLAUDE_PROJECT_DIR: lone } });
+  cases.push(["a repo with no remote is not judged against the project's guards.git.repo", foreign.status, 0]);
   // Stop: work/x is ahead, work/y was never pushed
   git(dir, 'switch', '-q', '-c', 'work/y');
   const s1 = stop();

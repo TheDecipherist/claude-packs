@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.2 (2026-11-05)
+
+- git-guard: a commit in a repo other than the project's is not judged against the project's `guards.git.repo`. A repo with no remote was
+  told to push its history into the project's repo (KWB-43, Stellix WB-108).
+
 ## 0.13.1 (2026-11-04)
 
 - git-guard: a commit in a Claude agent's isolated worktree (.claude/worktrees/agent-*) is not refused for its branch being ahead of
