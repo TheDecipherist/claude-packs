@@ -188,3 +188,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.1.0 group 1, what fails silently or fails open, landed from work/1.1.0-fail-open at 7e2710d; the gate 371 of 371.
 - 2026-11-05: 1.1.0 group 2, false refusals, landed from work/1.1.0-false-refusals at f55d4df; the gate 398 of 398.
 - 2026-11-05: 1.1.0 group 3, new projects, landed from work/1.1.0-new-projects at e7bf651; the gate 416 of 416.
+- 2026-11-05: 1.1.0 group 4, what the build taught, landed from work/1.1.0-build-laws at f4a3ab6; the gate 429 of 429. 1.1.0 finished, not published.
