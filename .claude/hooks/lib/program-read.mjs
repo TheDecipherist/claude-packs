@@ -114,6 +114,9 @@ function chain(expr) {
 
 const str = (v) => (v && (v.t === 'str' || v.t === 'path') ? v.v : null);
 const joinPaths = (parts) => (parts.some((p) => p === null) ? null : parts.reduce((a, b) => (b.startsWith('/') ? b : a ? `${a.replace(/\/$/, '')}/${b}` : b), ''));
+// A path made of a part the reader cannot work out (a helper's own parameter) is unknown, never a path of null (KF-40: read_text on one
+// crashed sixteen hooks).
+const pathOf = (v) => (v === null ? null : { t: 'path', v });
 const PATH_FNS = /^(?:(?:pathlib\.)?(?:Pure)?(?:Posix)?Path|os\.path\.join|path\.join|path\.resolve|join|resolve|File\.join|os\.path\.expanduser|os\.path\.abspath|path\.normalize)$/;
 const READS = /^(?:(?:fs|fsp|fs\.promises)\.)?readFileSync$|^File\.read$|^IO\.read$/;
 
@@ -129,7 +132,7 @@ export function evaluate(expr, ctx) {
     const slash = splitTop(e, '/');
     if (slash.length > 1) {
       const vs = slash.map((p) => evaluate(p, ctx));
-      return vs[0]?.t === 'path' ? { t: 'path', v: joinPaths(vs.map(str)) } : null;
+      return vs[0]?.t === 'path' ? pathOf(joinPaths(vs.map(str))) : null;
     }
   }
   const c = chain(e);
@@ -166,7 +169,7 @@ function callFn(name, args, ctx) {
   const vs = args.filter((a) => !/^\w+\s*=[^=]/.test(a)).map((a) => evaluate(a, ctx));
   if (/(?:^|\.)Path\.home$/.test(name)) return process.env.HOME ? { t: 'path', v: process.env.HOME } : null;
   if (/(?:^|\.)Path\.cwd$|^process\.cwd$|^os\.getcwd$/.test(name)) return { t: 'path', v: ctx.at('.') };
-  if (PATH_FNS.test(name)) return vs.length ? { t: 'path', v: joinPaths(vs.map(str)) } : null;
+  if (PATH_FNS.test(name)) return vs.length ? pathOf(joinPaths(vs.map(str))) : null;
   if (READS.test(name) || /^(?:io\.|codecs\.)?open$/.test(name)) {
     const p = str(vs[0]);
     if (p === null) return null;
@@ -179,7 +182,7 @@ function callFn(name, args, ctx) {
 function callMethod(base, m, args, ctx) {
   const vs = args.map((a) => evaluate(a, ctx));
   if (['expanduser', 'resolve', 'absolute'].includes(m)) return base.t === 'path' ? base : null;
-  if (m === 'joinpath') return { t: 'path', v: joinPaths([base.v, ...vs.map(str)]) };
+  if (m === 'joinpath') return pathOf(joinPaths([base.v, ...vs.map(str)]));
   if ((m === 'read_text' && base.t === 'path') || (m === 'read' && base.t === 'file')) {
     ctx.reads?.add(ctx.at(base.v));
     return { t: 'str', v: ctx.readText(ctx.at(base.v)) ?? '' };

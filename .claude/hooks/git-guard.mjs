@@ -5,8 +5,8 @@
 // branch's upstream, and `remote add/set-url`, `clone`, `submodule` and `config` store it as a remote; the token then
 // sits in .git/config in plain text. Pushing to a token URL WITHOUT -u stores nothing and is allowed.
 //
-// THE HOUSE LAWS, when the project switches them on (.claude/layout.json "guards": { "git": { "house": true } };
-// a project whose history is on main moves to the branch flow first, then enables them):
+// THE HOUSE LAWS: a new install has them (KF-8). A project installed before 1.1.0 switches them on itself, with .claude/layout.json
+// "enable": ["guards/git-house"] or "guards": { "git": { "house": true } }; one whose history is on main moves to the branch flow first:
 //   1. No `git add -A`, `add .`, `add --all`, `commit -a`. Stage by path.
 //   2. No checkout / restore / stash / reset --hard / clean over uncommitted work; no override lets one through.
 //      `git restore --staged` (unstage only) passes. The project's safe form, if any, is named (guards.git.safeRestore).
@@ -23,14 +23,14 @@
 // first word (after VAR=value) is git or gh. `cd` and `git -C` move the folder the dirty-tree and trunk checks look at.
 // The laws hold in every repo a command reaches. `--selftest` proves both halves.
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
-import { forRepo, sshOwner, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
+import { NEW_INSTALL_GIT, ghLaw, pushLaw } from './lib/git-auth.mjs';
+import { forRepo, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -145,14 +145,12 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
     }
     if (/\bgit\b.*\bpush\b/.test(p)) {
       if (/\s(-f|--force|--force-with-lease)\b/.test(p)) return 'Never force a push. Nothing pushed is rebased or amended.';
-      const ssh = sshOwner(pushTarget(w, here, env)) === owner; // over SSH the key picks the account; the URL names the repo (KWB-39)
-      if (owner && !ssh && !new RegExp(`github\\.com/${esc(owner)}/[\\w.-]+`).test(p)) {
-        return `A push must name the repo: git push https://x-access-token:$${tok}@github.com/${owner}/<repo>.git <branch>, or a remote whose URL is git@github.com:${owner}/<repo>.git (SSH). ${c.accountNote}`;
-      }
-      if (!ssh && !p.includes(`$${tok}`) && !p.includes(`\${${tok}}`)) return `A push names the token as $${tok}, never a pasted one.`;
+      const refused = pushLaw(p, pushTarget(w, here, env), c);
+      if (refused) return refused;
       pushedBefore = true;
     }
-    if (c.ghAuth !== 'cli' && /(^|\s)gh\s/.test(p) && !cmd.includes(`GH_TOKEN=$${tok}`)) return `Every \`gh\` names the token: source ~/.env && GH_TOKEN=$${tok} gh ... ${c.accountNote}`;
+    const ghRefused = ghLaw(cmd, p, c);
+    if (ghRefused) return ghRefused;
     if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
     if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${esc(tok)}`).test(p)) {
       return 'The token is never stored in a remote URL or a config file. Name it on the push only.';
@@ -167,7 +165,8 @@ function main(text) {
   try { payload = JSON.parse(text); } catch { return 0; }
   const command = payload.tool_input?.command ?? '';
   // the project's laws: its own layout (a worktree with its own layout.json is judged by it, else the project's)
-  const cfg = { ...DEFAULTS, ...(readLayout(claudeRoot(join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json'))).guards?.git ?? {}) };
+  const layout = readLayout(claudeRoot(join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json')));
+  const cfg = { ...DEFAULTS, ...(layout.enable?.includes('guards/git-house') ? NEW_INSTALL_GIT : {}), ...(layout.guards?.git ?? {}) }; // KF-8: an existing project opts in
   if (payload.hook_event_name === 'Stop') {
     if (!cfg.house) return 0;
     const v = stopVerdict(resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), cfg, payload.session_id);

@@ -51,4 +51,4 @@ Never do:
 - `shape_symmetry` (generated at configure time by `npx --no-install @thedecipherist/claude-packs symmetry gen`, run by `.claude/tools/shape-symmetry.mjs`): for each many
   concept, the members of every instance are the same set, and every one of the N·(N-1)/2 pairs swaps the same. Its selftest plants a
   missing member and a swap difference.
-- The project's own tests: the generated IDs equal the frozen lock for every instance.
+- The generated IDs equal the frozen lock for every instance, in the project's own tests.

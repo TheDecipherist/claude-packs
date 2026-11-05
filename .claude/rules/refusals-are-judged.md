@@ -11,6 +11,7 @@ Always do:
 - Mark a refusal you met, once you know: `npx --no-install @thedecipherist/claude-packs logs mark <id> right|wrong "<why>"`. `logs refusals --open` lists them.
 - Mark it wrong when correct work was refused, and report the hook.
 - Read `logs` before changing or retiring a hook.
+- Treat a crash as its own thing: it refused nothing, so it has no verdict. `logs crashes` lists them, and `logs clear <hook>|all fixed|superseded "<why>"` clears them, for doctor, once they are.
 
 Never do:
 - Delete or edit a log. Logs rotate, and `.claude/logs/` keeps them all.

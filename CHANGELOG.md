@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.0 (unreleased)
+
+Faults a real build found: the MPX 500 rebuild ran 1.0.0 for a whole unit, and its report ranks them.
+
+What fails silently or fails open:
+
+- A hook that crashes no longer lets the call through in silence. On a tool call the runner refuses it once and says why, and the same call again goes through, logged, so a broken hook cannot stop the write that fixes it. At Stop or a prompt the author is told. A crash has its own log, `crashes.jsonl`, and is no longer counted as a refusal (KF-18, KF-40).
+- `logs crashes` lists crashes, and `logs clear <hook>|all fixed|superseded "<why>"` clears them, so `doctor --strict` can pass honestly. A crash older than the hook or any file in `hooks/lib/` is history. A later crash is red again.
+- An inline edit through a local helper (`def sub(f, a, b): Path(f).read_text()`) crashed sixteen hooks. It is read now, and when no hook can read what a command writes to a source file, the author is told that no content law judged it (KF-40).
+- `doctor` is red for a live rule whose Check names a test nothing answers to: three such rules hid four real bugs for a whole build. A test answers with `proves: <rule>`, or `layout.json` `"ruleTests"` points at it or declines with `"none: <reason>"` (KF-31).
+- `param-id-lock` starts its lock at the first id it sees, never reads the build output (`buildOutput`, `out/`, `_deps`), reports a pattern it cannot compile by name, and `doctor` is red for a unit with parameters and an empty lock (KF-15, KF-18).
+- `suite-once` sees the whole suite through a project's wrapper, with options, in the background, and through `buildq` (KF-23).
+- A new install has `git-guard`'s house laws, using the machine's own git and gh login, with the trunk left to the owner. An existing project changes only through `"enable": ["guards/git-house"]` (KF-8).
+- `GH_TOKEN=$X` with X unset is refused, and the refusal names the logged-in account and `ghAuth: cli`. With `ghAuth: cli` a push needs no token in its URL, and with no owner a push over SSH is no longer refused for naming no token (KF-12).
+- `global add` installs base's shell reader. The kit no longer keeps a hand copy of it in `global/`.
+
 ## 1.0.1 (2026-11-05)
 
 - `suggest` and `init --auto` no longer read `node_modules`. In a new project with no `.gitignore`, the kit's own installed files were taken as the project: it was called `node`, and `reverse-engineering` was missed.

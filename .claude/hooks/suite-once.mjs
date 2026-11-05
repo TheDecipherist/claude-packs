@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // suite-once (PreToolUse, Bash): the whole test suite runs once, as the gate before landing, never while working (one
 // agent ran all 425 tests on 1 core; KWB-41: a session ran the kit's suite again and again, 12 minutes each, on code that had not
-// changed). A whole-suite command (`npm test`, `pnpm|yarn|bun test`, a bare `ctest`, the project's "commands".test in layout.json) is
-// refused while the checkout it runs in has uncommitted tracked changes: uncommitted means still working, and working runs only the
+// changed). A whole-suite command (`npm test`, `pnpm|yarn|bun test`, a bare `ctest`, the project's "commands".test in layout.json with any
+// options after it, a build wrapper's `build.sh test`: KF-23, the wrapper is the route the kit's own build rule names) is refused while the checkout it runs in has uncommitted tracked changes: uncommitted means still working, and working runs only the
 // tests the change reaches (rule: test-only-what-changed; skill: pick-tests). Once the work is committed the gate passes. Named tests
 // (`npm test -- a.test.mjs`, `ctest -R x`) are always allowed. `--selftest` proves it.
 import { execFileSync } from 'node:child_process';
@@ -14,10 +14,19 @@ import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b)\S+)*)$/;
-const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec)\s+|timeout\s+\S+\s+)+/;
+const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec|\S*buildq)\s+|timeout\s+\S+\s+)+/;
 const REDIRECT = /\s*(?:\d?>>?|&>)&?\s*\S+/g;
+const WRAPPER = /^\S*\bbuild\.sh\s+test(?:\s+-\S+)*$/;
 
 const clean = (part) => part.trim().replace(PREFIX, '').replace(REDIRECT, '').trim();
+const bare = (words) => words.replace(/^(?:bash|sh)\s+/, '').replace(/^\.\//, '');
+
+// The project's own command, as it is or with options; a name after it (`build.sh test one_gate`) is a named test.
+function ownSuite(words, test) {
+  if (!test) return false;
+  const [w, t] = [bare(words), bare(test)];
+  return w === t || (w.startsWith(`${t} `) && w.slice(t.length).trim().split(/\s+/).every((a) => a.startsWith('-')));
+}
 
 function uncommitted(dir) {
   try {
@@ -30,12 +39,12 @@ function uncommitted(dir) {
 export function refusal(command, cwd) {
   const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
   let here = cwd;
-  for (const part of body.split(/&&|\|\||;|\||\n/)) {
+  for (const part of body.split(/&&|\|\||;|\||\n|(?<![&>])&(?![&>])/)) {
     const cd = part.trim().match(/^cd\s+(\S+)$/);
     if (cd) { here = resolve(here, cd[1]); continue; }
     const words = clean(part);
     const { commands = {} } = readLayout(claudeRoot(here));
-    if (!WHOLE.test(words) && words !== commands.test) continue;
+    if (!WHOLE.test(words) && !WRAPPER.test(bare(words)) && !ownSuite(words, commands.test)) continue;
     const dirty = uncommitted(checkoutRoot(resolve(here, 'x')));
     if (!dirty.length) continue;
     return `\`${words}\` runs the whole suite, and this checkout has uncommitted work:\n    ${dirty.slice(0, 8).join('\n    ')}\n` +
@@ -66,6 +75,9 @@ function selftest() {
     ['a redirect and a pipe change nothing', sh('npm test > /tmp/log 2>&1 | tail -3'), 2],
     ['a bare ctest', sh('ctest --output-on-failure'), 2],
     ['the project\'s own whole-suite command', sh('bash tools/all.sh'), 2],
+    ['its command with an option, in the background', sh('nohup tools/all.sh --full-gate > /tmp/log 2>&1 &'), 2],
+    ['a build wrapper, with no command declared', sh('tools/build.sh test --full-gate'), 2],
+    ['a build wrapper with one test named', sh('tools/build.sh test one_gate'), 0],
     ['after other steps', sh('git status && npm test'), 2],
     ['named tests', sh('npm test -- a.test.mjs'), 0],
     ['the changed-only run', sh('npm run test:changed'), 0],

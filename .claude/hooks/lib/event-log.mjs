@@ -1,6 +1,6 @@
 // The detail behind hooks.log. Every call is one line of .claude/logs/events.jsonl: who, where, what was attempted, and each hook's time, exit code and reason. Every refusal
-// and crash is also a line of .claude/logs/refusals.jsonl, with an id, the branch and commit, the kit's version and the hash of the hook that decided, so it can be judged
-// later: `claude-packs logs mark <id> right|wrong "<why>"`. Bug logs only record the refusals somebody complained about; this records them all. Secrets are masked. File
+// is also a line of .claude/logs/refusals.jsonl, with an id, the branch and commit, the kit's version and the hash of the hook that decided, so it can be judged
+// later: `claude-packs logs mark <id> right|wrong "<why>"`. A crash refused nothing and is no verdict on the work, so it has its own log, crashes.jsonl (KF-40). Bug logs only record the refusals somebody complained about; this records them all. Secrets are masked. File
 // contents are not kept, only their size. Logs rotate and are never cleared.
 //   logCall(root, text, [{ hook, ms, code, reason, out }], append, total)
 import { createHash } from 'node:crypto';
@@ -10,6 +10,7 @@ import { maskSecrets } from './secret-patterns.mjs';
 
 export const EVENTS = join('.claude', 'logs', 'events.jsonl');
 export const REFUSALS = join('.claude', 'logs', 'refusals.jsonl');
+export const CRASHES = join('.claude', 'logs', 'crashes.jsonl');
 const KEEP = { command: 4000, prompt: 1000, reason: 4000, out: 500 };
 
 const cut = (text, n) => { const t = maskSecrets(text ?? ''); return t.length > n ? `${t.slice(0, n)}... [${t.length} chars]` : t; };
@@ -61,7 +62,7 @@ export function logCall(root, text, hooks, append, total) {
     append(root, EVENTS, `${JSON.stringify({ t, ...where, ...what, ...(total ? { ms: Math.round(total) } : {}), hooks: judged })}\n`);
     for (const h of judged.filter((x) => x.code !== 0)) {
       const id = createHash('sha1').update(`${t}${h.hook}${h.reason ?? ''}`).digest('hex').slice(0, 8);
-      append(root, REFUSALS, `${JSON.stringify({ id, t, hook: h.hook, code: h.code, reason: h.reason, ...where, ...what, ...headOf(ev.cwd ?? root), ...lawOf(root, h.hook) })}\n`);
+      append(root, h.code === 2 ? REFUSALS : CRASHES, `${JSON.stringify({ id, t, hook: h.hook, code: h.code, reason: h.reason, ...where, ...what, ...headOf(ev.cwd ?? root), ...lawOf(root, h.hook) })}\n`);
     }
   } catch { /* the log never stops a hook */ }
 }

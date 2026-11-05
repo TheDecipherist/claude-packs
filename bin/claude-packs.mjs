@@ -22,6 +22,8 @@ import { suggest, suggestionOf } from '../lib/suggest.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
+const INSTALLING = { installing: true }; // doctor at the end of an install: what the project has yet to do is a note
+
 const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [options]
 
   new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
@@ -57,6 +59,7 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
   fix [--from <scan.json>] [--out <file>]  the last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none
   logs               which hooks earn their place: calls, refusals and verdicts per hook, over all the history
                      logs refusals [--hook <h>] [--open]; logs mark <id> right|wrong "<why>"
+                     logs crashes; logs clear <hook>|all fixed|superseded "<why>"
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
   symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
@@ -108,13 +111,13 @@ async function main() {
       if (rest.includes('--auto')) {
         const pick = suggestionOf(dir);
         await sync(dir, pick.packs.map((p) => p.pack), { force, mkdirs: true, seedLayout, config: pick.config });
-        return doctor(dir);
+        return doctor(dir, console.log, INSTALLING);
       }
       if (rest.length === 0 && !config) throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');
       const chosen = rest.length ? rest : readConfig(config).packs.default;
       await sync(dir, chosen, { force, mkdirs: true, seedLayout, config });
       if (isSynth(chosen) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
-      return doctor(dir);
+      return doctor(dir, console.log, INSTALLING);
     }
     case 'planner-skills':
       return plannerSkills(rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null);
@@ -126,15 +129,15 @@ async function main() {
     case 'add': {
       const sources = fromUrl ? { ...fetched, [rest[0]]: addCustomPack(rest[0], fromUrl) } : fetched;
       await sync(dir, [...installed, ...rest], { force, mkdirs: true, sources });
-      return doctor(dir);
+      return doctor(dir, console.log, INSTALLING);
     }
     case 'remove':
       await sync(dir, installed.filter((p) => p === 'base' || !rest.includes(p)), { force });
-      return doctor(dir);
+      return doctor(dir, console.log, INSTALLING);
     case 'update':
       if (installed.length === 0) throw new Error('nothing installed here; run init first');
       await sync(dir, installed, { force, mkdirs: true, sources: fetched });
-      return doctor(dir);
+      return doctor(dir, console.log, INSTALLING);
     case 'update-all': {
       let failed = 0;
       for (const d of rest.map((x) => resolve(x))) {
@@ -143,7 +146,7 @@ async function main() {
         console.log(`\n== ${d}`);
         try {
           await sync(d, lockPacks, { force, mkdirs: true });
-          failed += await doctor(d);
+          failed += await doctor(d, console.log, INSTALLING);
         } catch (e) {
           failed += 1;
           console.log(`  PROBLEM: ${e.message}`);

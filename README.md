@@ -164,8 +164,8 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 | `remove <pack...>` | Remove packs; files you edited are kept |
 | `update` | Re-sync installed packs from this version |
 | `update-all <dir...>` | Update every listed project that has the kit |
-| `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"` |
-| `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing |
+| `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"`, `logs crashes`, `logs clear <hook>\|all fixed\|superseded "<why>"` |
+| `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing, and that a test answers each rule whose Check names one |
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |
@@ -197,7 +197,7 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 | `brief-guard` | Write | Refuses a brief that names a fixed instance |
 | `secrets-guard` | Write | Refuses a secret in code, or a secret file in git |
 | `untrusted-boundary` | Write | Refuses a model call with outside text and no per-call boundary |
-| `git-guard` | Bash | Refuses a token in git config, and with `house: true` the git laws: stage by name, no rebase or force, branches from the fetched trunk |
+| `git-guard` | Bash | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
 | `suite-once` | Bash | Refuses the whole test suite on uncommitted work |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
@@ -222,9 +222,11 @@ Dates are facts in an article. The `no-time-or-date` check is opt-in, for an aut
 
 ## Knowing which hooks earn their place
 
-A bug log only records the refusals somebody complained about, so it cannot say whether a hook works. The kit records them all. Every call is a line of `.claude/logs/events.jsonl`: the session, the tool, the file or command, and each hook's time, exit code and reason. Every refusal and crash is also a line of `refusals.jsonl`, with an id, the branch and commit, the kit's version and the hash of the hook that decided. Secrets are masked, and file contents are not kept.
+A bug log only records the refusals somebody complained about, so it cannot say whether a hook works. The kit records them all. Every call is a line of `.claude/logs/events.jsonl`: the session, the tool, the file or command, and each hook's time, exit code and reason. Every refusal is also a line of `refusals.jsonl`, and every crash a line of `crashes.jsonl`, with an id, the branch and commit, the kit's version and the hash of the hook that decided. Secrets are masked, and file contents are not kept.
 
 `logs` adds it all up, over every rotated file. `logs mark <id> right|wrong "<why>"` records a verdict. The logs stay out of git by default.
+
+A hook that crashes has judged nothing. On a tool call the runner refuses the call once and says so, and the same call again goes through, logged, so a broken hook can never stop the write that fixes it. `doctor` stays red for the crash until the hook changes or `logs clear` records why it is over.
 
 ## Where things apply
 
@@ -235,6 +237,7 @@ A bug log only records the refusals somebody complained about, so it cannot say 
 - **Skills** for one area go into that folder's nested `.claude/skills/`, so they only appear once Claude works there.
 - **Hooks judge only this project's files**, and a file in a git worktree by that worktree.
 - **`doctor --strict`** fails on a rule that matches no file and a source file no rule covers.
+- **`doctor`** fails on a live rule whose Check names a test nothing answers to. A test answers with `proves: <rule>` in it, or `layout.json` `"ruleTests"` points the rule at a file or declines it with `"none: <reason>"`. At the end of an install this is a note.
 
 ## It never overwrites your work
 

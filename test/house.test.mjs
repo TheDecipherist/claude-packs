@@ -65,7 +65,7 @@ test('git-guard takes the project\'s owner, token, trunk and commands from layou
   execFileSync('git', ['init', '-q', '-b', 'main'], { cwd: dir });
   execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x'], { cwd: dir });
   const bash = (command) => fire(dir, 'git-guard.mjs', { tool_name: 'Bash', tool_input: { command }, cwd: dir });
-  assert.equal(bash('git add -A').status, 0, 'the house laws are off until the project switches them on');
+  setLayout(dir, (l) => { delete l.guards; }); // a project installed before 1.1.0: test/kf-fail-open.test.mjs holds that the laws are off for it
   assert.equal(bash('git push -u https://x-access-token:abc@github.com/a/b.git work/x').status, 2, 'the token law is always on (Sub37 WB-3)');
   setLayout(dir, (l) => { l.guards = { git: { house: true } }; });
   assert.equal(bash('git add -A').status, 2);

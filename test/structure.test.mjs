@@ -51,7 +51,7 @@ test('doctor --strict fails while a source file sits outside every rule, passes 
   const strict = spawnSync('node', [CLI, 'doctor', '--strict', '--dir', dir], { encoding: 'utf8' });
   assert.equal(strict.status, 1);
   assert.match(strict.stdout, /source file\(s\) no rule covers.*lib\/Stray\.cpp/);
-  assert.match(run(dir, 'doctor'), /note: .*no rule covers/);
+  assert.match(spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' }).stdout, /note: .*no rule covers/);
 });
 
 test('the Stellix profile carries its own kinds', () => {
@@ -102,7 +102,7 @@ test('the Sub37 profile fits the template tree: laws, kinds and the id lock', ()
   put('panel/bindings.json', '{ "bindings": { "cursor": { "kind": "select" } } }\n');
   put('tools/sync_probe.cpp', 'int main() {}\n');
   run(dir, 'init', 'audio-core', '--profile', 'sub37');
-  assert.match(run(dir, 'doctor'), /OK: base, audio-core/);
+  assert.match(spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' }).stdout, /^1 problem\(s\)$/m, 'only the rules whose tests the project has yet to write');
   for (const d of ['src/app', 'src/audio', 'src/dsp', 'tests']) assert.equal(existsSync(join(dir, d)), false, `no default ${d}/`);
 
   const md = readFileSync(join(dir, 'CLAUDE.md'), 'utf8');

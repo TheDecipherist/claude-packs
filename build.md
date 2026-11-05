@@ -148,6 +148,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: suggest leaves installed dependencies out; concepts: none (design/shape.json declares none); reuse: INSTALLED (lib/scan-detect.mjs).
   done when: the test seen red then green; the whole suite green once, committed; landed.
 
+- 1.1.0, what fails silently or fails open (work/1.1.0-fail-open), started 2026-11-05 (the faults the MPX 500 build found).
+  making: a hook's crash is its own entry and refuses once, a crash can be cleared honestly, doctor names an installed rule whose test nothing answers to, param-id-lock protects from the first id and leaves build output alone, suite-once sees the project's wrapper, a new install gets git-guard's house laws; concepts: none (design/shape.json declares none); reuse: logCall (packs/base/hooks/lib/event-log.mjs), hookProofProblems (lib/hook-proof.mjs), coverage (lib/coverage.mjs), buildLayout (lib/layout.mjs).
+  done when: each fault's test seen red then green; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

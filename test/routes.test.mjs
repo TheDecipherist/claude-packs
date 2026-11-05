@@ -162,12 +162,13 @@ test('version-pin-guard refuses an unchecked pin by every route that can write a
   assert.match(r.stderr, /b\$& 2: no row/);
 });
 
-test('the shell route reader is one file: the global copy is the project copy', () => {
+test('the shell route reader is one file: global add installs base\'s, and the kit holds no copy', async () => {
+  const { FILES } = await import('../lib/global.mjs');
   for (const f of ['shell-writes.mjs', 'program-writes.mjs', 'program-read.mjs']) {
-    const a = readFileSync(fileURLToPath(new URL(`../packs/base/hooks/lib/${f}`, import.meta.url)), 'utf8');
-    const b = readFileSync(fileURLToPath(new URL(`../global/hooks/lib/${f}`, import.meta.url)), 'utf8');
-    assert.equal(a, b, f);
+    assert.ok(FILES.some(([from, to]) => from === `../packs/base/hooks/lib/${f}` && to === `hooks/claude-packs/lib/${f}`), f);
   }
+  const shim = readFileSync(fileURLToPath(new URL('../global/hooks/lib/shell-writes.mjs', import.meta.url)), 'utf8');
+  assert.equal(shim.split('\n').filter((l) => l && !l.startsWith('//')).length, 1, 'one line that points at base');
 });
 
 test('the shell route reader proves each route and program form (KWB-8)', () => {
