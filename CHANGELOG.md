@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.0 (2026-11-05)
+
+Trying to reverse engineer a real machine from nothing found what no test had: the pack could not reach a new project.
+
+- The base configuration offers `reverse-engineering`. A new project has no code to read, so it was given plain `base`, and `add reverse-engineering` was refused: nobody starting from a ROM and a manual got any of it.
+- `names-sweep --banked` reads a ROM larger than the CPU's address space. It tries each bank at each window. A negative `--base` used to crash it.
+
 ## 0.33.0 (2026-11-05)
 
 - New base skill `pdf-to-md`: a PDF is read with docling, which keeps tables as tables. It says how to spot a download that is not a PDF and a scan with no text, and leaves images out: 79 KB and 37 seconds on an 87-page manual, against 2.2 MB and 114 seconds by default.

@@ -13,7 +13,7 @@
       "docker",
       "web",
       "ui-craft",
-      "content-site"
+      "content-site", "reverse-engineering"
     ],
     "default": []
   },

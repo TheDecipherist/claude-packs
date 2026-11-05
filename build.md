@@ -124,6 +124,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a base skill pdf-to-md; concepts: none (design/shape.json declares none); reuse: the skill format of packs/base/skills.
   done when: the skill installs in every configuration and its command is measured on a real manual; the whole suite green once, committed; landed.
 
+- 0.34.0, a new reverse-engineering project (work/0.34.0-a-new-re-project), started 2026-11-05 (the MPX 500 test: a new project could not get the pack, and a banked ROM crashed names-sweep).
+  making: the base configuration offers reverse-engineering; names-sweep reads banked ROMs; concepts: none (design/shape.json declares none); reuse: pointerTable (packs/reverse-engineering/tools/names-sweep.mjs).
+  done when: init --auto gives a new project with firmware findings the pack, and names-sweep finds the MPX 500 program directory unaided; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

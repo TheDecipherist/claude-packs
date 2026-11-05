@@ -198,6 +198,21 @@ test('a table of pointers is found, and the entries past the manual list are sho
   assert.deepEqual(g.next, ['Unlisted One']);
 });
 
+test('a banked ROM: --banked finds the table a plain search cannot, and a negative base does not crash', () => {
+  const dir = fresh('ns-bank-');
+  const image = Buffer.alloc(0x40000, 0xa5);
+  const bank = 0x18000;
+  PATCHES.forEach((p, i) => { image.write(`${p}\0`, bank + 0x100 + i * 96, 'latin1'); image.writeUInt16LE(0x8000 + 0x100 + i * 96, bank + 0x4000 + i * 2); });
+  writeFileSync(join(dir, 'rom.bin'), image);
+  writeFileSync(join(dir, 'names.txt'), PATCHES.join('\n'));
+  const run = (...args) => spawnSync('node', [TOOL, join(dir, 'rom.bin'), '--names', join(dir, 'names.txt'), ...args], { encoding: 'utf8' });
+  assert.doesNotMatch(run().stdout, /pointers at/);
+  assert.match(run('--banked').stdout, /pointers at 0x1C000 \(6, u16 little-endian, base -0x10000\)/);
+  const given = run('--base', '-0x10000');
+  assert.equal(given.status, 0, given.stderr);
+  assert.match(given.stdout, /pointers at 0x1C000/);
+});
+
 test('no name reads: it fails, and says what it searched rather than that the machine has no text', () => {
   const dir = fresh('ns-');
   writeFileSync(join(dir, 'rom.bin'), Buffer.alloc(4096, 0xff));

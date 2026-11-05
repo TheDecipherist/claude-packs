@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // The fastest way into a firmware image or a dump: search it for the names the manual prints. Patch names, arp patterns, delay and reverb programs, menus,
 // parameters. One name gives a table, the table's stride gives a record size, its order gives the parameter order, and what points at it leads to the code.
-//   node names-sweep.mjs <image> [<image>...] --names <file> [--pair] [--base 0x8000,...] [--min 4] [--json]
+//   node names-sweep.mjs <image> [<image>...] --names <file> [--pair] [--base 0x8000,...] [--banked] [--min 4] [--json]
 // The names file has one name per line, `group<TAB>name` to keep kinds apart (patch, arp, reverb, menu, parameter), `#` for a comment.
 // --pair reads two images as one interleaved EPROM pair. Every wrapping in lib/unwrap.mjs is tried, and the one that reads the most names wins.
 // Names reading prove the unwrapping. Exit 1 when too few read under any wrapping, and the report says what was searched.
@@ -126,14 +126,14 @@ function withNeighbours(all, { names, first, last }) {
 // Every place an address of one of the hits is stored, in this pointer format.
 function seatsOf(view, offsets, base, kind) {
   const encoded = (o) => { const b = Buffer.alloc(kind.width); b[kind.write](o + base); return b; };
-  return offsets.filter((o) => o + base <= kind.top).flatMap((o) => hitsIn(view, encoded(o))).sort((a, b) => a - b);
+  return offsets.filter((o) => o + base >= 0 && o + base <= kind.top).flatMap((o) => hitsIn(view, encoded(o))).sort((a, b) => a - b);
 }
 
 // Where addresses of the hits sit close together: that run is the table the code indexes.
 function pointerTable(view, offsets, bases) {
   let best = null;
   for (const base of bases) {
-    for (const kind of POINTERS) {
+    for (const kind of POINTERS.filter((k) => base >= 0 || k.width === 2)) { // a bank is reached through a 16-bit address
       let run = [];
       for (const seat of seatsOf(view, offsets, base, kind)) {
         run = run.length && seat - run[run.length - 1] <= kind.width * 4 ? [...run, seat] : [seat];
@@ -206,7 +206,7 @@ function groupLine(g) {
   if (g.dense) parts.push(`densest ${g.dense.names} names at ${hex(g.dense.from)}..${hex(g.dense.to)}`);
   if (g.stride) parts.push(`stride ${g.stride.gap} (${g.stride.count} of ${g.stride.of} gaps)`);
   if (g.order.of) parts.push(`the manual's order holds ${g.order.held} of ${g.order.of}`);
-  if (g.pointers) parts.push(`pointers at ${hex(g.pointers.at)} (${g.pointers.entries}, ${g.pointers.kind}, base ${hex(g.pointers.base)})`);
+  if (g.pointers) parts.push(`pointers at ${hex(g.pointers.at)} (${g.pointers.entries}, ${g.pointers.kind}, base ${g.pointers.base < 0 ? '-' : ''}${hex(Math.abs(g.pointers.base))})`);
   if (g.pool) parts.push(`${g.pool.hits} in one run ${hex(g.pool.from)}..${hex(g.pool.to)} (${g.pool.to - g.pool.from} bytes, read it whole)`);
   if (g.next.length) parts.push(`then ${g.next.map((s) => JSON.stringify(s)).join(' ')}`);
   return parts.join('; ');
@@ -232,6 +232,15 @@ export function report(label, r) {
   ].join('\n');
 }
 
+// A CPU sees a bank of a larger ROM through a window, so an address is the file offset less the bank plus the window: every plausible pairing, as a base.
+const BANK_STEP = 0x4000;
+const WINDOWS = [0x0000, 0x4000, 0x8000, 0xc000];
+function bankedBases(size) {
+  const bases = new Set([0]);
+  for (let bank = 0; bank < size; bank += BANK_STEP) for (const window of WINDOWS) bases.add(window - bank);
+  return [...bases];
+}
+
 function imagesOf(files, pair) {
   if (!pair) return files.map((f) => [basename(f), readFileSync(f)]);
   return [[`${basename(files[0])}+${basename(files[1])}`, interleave(readFileSync(files[0]), readFileSync(files[1]))]];
@@ -241,12 +250,13 @@ function main(argv) {
   const value = (flag) => { const i = argv.indexOf(flag); return i === -1 ? undefined : argv[i + 1]; };
   const files = argv.filter((a, i) => !a.startsWith('--') && !['--names', '--base', '--min'].includes(argv[i - 1]));
   if (!files.length || !value('--names')) {
-    console.error('usage: names-sweep.mjs <image>... --names <file> [--pair] [--base 0x8000,...] [--min 4] [--json]');
+    console.error('usage: names-sweep.mjs <image>... --names <file> [--pair] [--base 0x8000,...] [--banked] [--min 4] [--json]');
     return 2;
   }
   const names = readNames(readFileSync(value('--names'), 'utf8'), Number(value('--min') ?? 4));
-  const bases = (value('--base') ?? '0').split(',').map(Number);
-  const results = imagesOf(files, argv.includes('--pair')).map(([label, image]) => [label, sweep(image, names, { bases })]);
+  const given = (value('--base') ?? '0').split(',').map((b) => Number.parseInt(b));
+  const basesFor = (image) => (argv.includes('--banked') ? bankedBases(image.length) : given);
+  const results = imagesOf(files, argv.includes('--pair')).map(([label, image]) => [label, sweep(image, names, { bases: basesFor(image) })]);
   console.log(argv.includes('--json') ? JSON.stringify(Object.fromEntries(results), null, 2) : results.map(([label, r]) => report(label, r)).join('\n\n'));
   return results.some(([, r]) => r.proven) ? 0 : 1;
 }

@@ -1,6 +1,6 @@
 // 0.32.0: six real repos read wrongly. A kit rule file taken for reverse-engineering notes, firmware findings not seen at all, a named configuration overruled, control names
 // reported as 11,410 secrets, and 1,663 tracked build files read as source.
-import { assert, cli, execFileSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
 import { buildFolders } from '../lib/repo-weight.mjs';
 import { SECRETS, maskSecrets } from '../packs/base/hooks/lib/secret-patterns.mjs';
 
@@ -64,4 +64,12 @@ test('a build folder is known by what the build leaves, and scan neither reads i
   const text = readFileSync(said.stdout.match(/Report: (\S+)/)[1], 'utf8');
   assert.match(text, /build output held in git: build-reso\/ \(2 of 4 files\)/);
   assert.doesNotMatch(text, /no-rom-table-literal/);
+});
+
+test('a new reverse-engineering project with no code yet gets the pack, from its notes alone', () => {
+  const dir = project({ 'docs/research.md': '# Research\n\nThe reset vector is at 0x0000 [FW].\n' });
+  assert.match(suggested(dir), packLine('reverse-engineering'));
+  assert.equal(cli(dir, 'init', '--auto').status, 0);
+  assert.ok(existsSync(join(dir, '.claude/skills/names-first/SKILL.md')));
+  assert.ok(existsSync(join(dir, '.claude/tools/names-sweep.mjs')));
 });
