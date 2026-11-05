@@ -99,7 +99,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first | 6 | 5 | 0 | 4 |
 | `stellix` | Laws of one synth project | 5 | 5 | 1 | 0 |
 | `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 0 | 1 |
-| `synth-creator` | The synth-creator configuration's own laws | 5 | 0 | 9 | 2 |
+| `synth-creator` | The synth-creator configuration's own laws | 6 | 2 | 9 | 2 |
 | `tui` | Terminal UIs | 1 | 5 | 0 | 1 |
 | `ui-craft` | Application and page design in any web stack | 16 | 24 | 0 | 9 |
 | `web` | Web UI: Next.js, HTML, CSS, Tailwind | 8 | 22 | 0 | 5 |

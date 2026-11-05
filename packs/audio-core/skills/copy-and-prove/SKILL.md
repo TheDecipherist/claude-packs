@@ -8,7 +8,7 @@ description: Use when code is taken from another house synth (an engine, an effe
 The canonical text is the target synth's `CLAUDE.md` (its sharing rule: which synth parts come from, and from which
 branch) and its `docs/licences.md`. This file is the operating summary; the repo wins.
 
-The rule: global components are LINKED (`synthshell`, `dspblocks`, `synthkit`, `synthpanel-creator`, and the components
+The rule: global components are LINKED (`synthcore`, `dspblocks`, `synthkit`, and the components
 in `synthkit/components`). Everything else that comes from another synth is COPIED and becomes the new synth's own. The
 source synth is not touched and nothing is shared with it. A project that links no global component copies those too,
 with a licence row, like any other part.

@@ -1,6 +1,6 @@
 // 0.32.0: six real repos read wrongly. A kit rule file taken for reverse-engineering notes, firmware findings not seen at all, a named configuration overruled, control names
 // reported as 11,410 secrets, and 1,663 tracked build files read as source.
-import { assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
 import { buildFolders } from '../lib/repo-weight.mjs';
 import { SECRETS, maskSecrets } from '../packs/base/hooks/lib/secret-patterns.mjs';
 
@@ -72,4 +72,21 @@ test('a new reverse-engineering project with no code yet gets the pack, from its
   assert.equal(cli(dir, 'init', '--auto').status, 0);
   assert.ok(existsSync(join(dir, '.claude/skills/names-first/SKILL.md')));
   assert.ok(existsSync(join(dir, '.claude/tools/names-sweep.mjs')));
+});
+
+test('a unit cannot write a second clock, and a project that draws in code cannot add an image', () => {
+  const dir = project({ 'src/Processor.cpp': '// x\n' });
+  assert.equal(cli(dir, 'init', '--config', 'synth-creator').status, 0);
+  const write = (content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, 'src/Processor.cpp'), content } }).status;
+  assert.equal(write('const auto pos = getPlayHead()->getPosition();\n'), 2);
+  assert.equal(write('if (m.isMidiClock()) ++pulses;\n'), 2);
+  assert.equal(write('if (b == 0xF8) ++pulses;\n'), 2);
+  assert.equal(write('host.readTransport (getPlayHead(), midi, n);\n'), 0);
+  const image = 'g.drawImageAt (knob, 0, 0);\n';
+  assert.equal(write(image), 0, 'off until the project chooses it');
+  const file = join(dir, '.claude/layout.json');
+  writeFileSync(file, JSON.stringify({ ...JSON.parse(readFileSync(file, 'utf8')), enable: ['checks/ui-drawn-in-code.json'] }));
+  assert.equal(cli(dir, 'update').status, 0);
+  assert.equal(write(image), 2);
+  assert.equal(write('g.fillEllipse (bounds);\n'), 0);
 });

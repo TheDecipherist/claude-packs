@@ -1,9 +1,9 @@
 {
-  "kit": "0.33.0",
+  "kit": "0.35.0",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-05T06:54:52.300Z",
+  "updated": "2026-11-05T07:24:28.869Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",

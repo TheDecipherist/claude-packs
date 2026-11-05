@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.35.0 (2026-11-05)
+
+- New rule and check `timing-from-synthcore`, in the `synth-creator` pack: tempo, MIDI clock, transport and keys come from `synthcore`. The kit never named it, so nothing stopped a unit writing a second clock. The check has no hit on seven real units.
+- New opt-in check `ui-drawn-in-code`: no images, sprites or embedded assets in a project that draws its UI in code. Switch it on with `"enable": ["checks/ui-drawn-in-code.json"]`.
+- `copy-and-prove` names `synthcore` as the linked foundation.
+
 ## 0.34.0 (2026-11-05)
 
 Trying to reverse engineer a real machine from nothing found what no test had: the pack could not reach a new project.

@@ -130,6 +130,7 @@
   "optIn": [
     "hooks/user-asks.mjs",
     "hooks/idle-wake.mjs",
-    "hooks/build-sweep.mjs"
+    "hooks/build-sweep.mjs",
+    "checks/ui-drawn-in-code.json"
   ]
 }

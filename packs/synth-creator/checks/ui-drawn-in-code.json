@@ -1,0 +1,23 @@
+{
+  "id": "ui-drawn-in-code",
+  "why": "Nothing is pre-rendered: the UI is drawn in code, so it scales to any size and a control changes in one place. No images, sprites or embedded assets.",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/build/**",
+    "**/_deps/**",
+    "**/JUCE/**"
+  ],
+  "pattern": "\\bdrawImage(?:At|Within|Transformed)?\\s*\\(|\\bImageCache::|\\bBinaryData::|\\bImageFileFormat::",
+  "code": true,
+  "bad": "g.drawImageAt (ImageCache::getFromMemory (BinaryData::knob_png, BinaryData::knob_pngSize), 0, 0);",
+  "good": "g.fillEllipse (bounds.reduced (2.0f));"
+}

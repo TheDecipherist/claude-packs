@@ -128,6 +128,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the base configuration offers reverse-engineering; names-sweep reads banked ROMs; concepts: none (design/shape.json declares none); reuse: pointerTable (packs/reverse-engineering/tools/names-sweep.mjs).
   done when: init --auto gives a new project with firmware findings the pack, and names-sweep finds the MPX 500 program directory unaided; the whole suite green once, committed; landed.
 
+- 0.35.0, the foundation (work/0.35.0-the-foundation), started 2026-11-05 (the kit never named synthcore, so nothing stopped a unit writing its own clock).
+  making: a rule and a check that time comes from synthcore, and an opt-in check that the UI is drawn in code; concepts: none (design/shape.json declares none); reuse: lesson checks (packs/base/hooks/lesson-checks.mjs).
+  done when: both checks fire through the hook and the timing check has no hit on seven real units; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log
