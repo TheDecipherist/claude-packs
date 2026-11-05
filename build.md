@@ -108,6 +108,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: rotation, an event log, a refusal ledger and the logs command; concepts: none (design/shape.json declares none); reuse: logHook (packs/base/hooks/lib/hook-log.mjs), runAll (packs/base/hooks/run-hooks.mjs).
   done when: no log is ever cut; a refusal keeps its reason and can be judged; the cost per call is measured; the whole suite green once, committed; landed.
 
+- 0.30.0, names first (work/0.30.0-names-first), started 2026-11-05 (the reverse-engineering pack starts from the machine's own names: the manual's list, then strings in the image).
+  making: a skill, a rule and a names-sweep tool in the reverse-engineering pack; concepts: none (design/shape.json declares none); reuse: a pack tool as tone-report.mjs is (packs/audio-core/tools), gather-sources (packs/reverse-engineering/skills).
+  done when: names-sweep finds a known name under every wrapping the repos met, on a real image too; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

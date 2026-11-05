@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.30.0 (2026-11-05)
+
+The reverse-engineering pack held the audit rules and almost none of the finding techniques, and the fastest one was missing: a machine has to print what it calls things, so its names are in the image as text.
+
+- New skill `names-first` and rule `names-before-code`: the manual's names (patches, arp patterns, delay and reverb programs, menus, parameters) are listed and searched for before any disassembly.
+- New tool `names-sweep`: searches an image for those names as stored and through every wrapping the rebuilds met (an EPROM pair, a set high bit, swapped and reversed words, 7-bit packing, nibbles, each sysex message opened behind its own header, a custom character set). It reports the wrapping, each group's stride and order, the pointer table, and the entries past the manual's list. A name that reads proves the unwrapping, and when none reads it says what was searched.
+- Measured on a real EPROM: 255 of a manual's factory patch names read as stored, 222 of 254 in the manual's order, which locates the factory bank with no disassembly. One real OS update file reads under none of the 118 wrappings, and the tool says so.
+- `gather-sources` puts the names first, and `re-deliverables` keeps the names file.
+
 ## 0.29.0 (2026-11-04)
 
 The kit could not say which of its hooks work. `hooks.log` cut itself to 16 hours, a refusal left no reason or file, and only the shape hooks counted what they refused: 89 refusals on one project against a handful ever written down.
