@@ -97,7 +97,7 @@ test('a UI is drawn straight on and aligned, and the image skill separates the o
   const rule = readFileSync(join(dir, '.claude/rules/straight-on-and-aligned.md'), 'utf8');
   assert.match(rule, /^paths:/m, 'it loads on UI code, not at every launch');
   assert.match(rule, /src\/app/);
-  assert.match(rule, /whatever looks grouped is a group/);
+  assert.match(rule, /whatever looks grouped as a group/);
   const skill = readFileSync(join(dir, '.claude/skills/analyse-reference-look/SKILL.md'), 'utf8');
   assert.match(skill, /separate the object from the photograph/);
   assert.match(skill, /find the grid/);
