@@ -104,6 +104,9 @@ export function selftest(hookUrl) {
     ['a brief in a notes folder naming a concept (KWB-19)', turn([W('notes/brief.md', '# Brief: the mixer, every slot\n')]), 0],
     ['source using a concept the making line does not name (KWB-19)', turn([W('src/mix/level.cpp', mixerCode)]), 2],
     ['mixer code with a making line naming the mixer', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: the mixer level; concepts: mixer (one); reuse: none' }), 0],
+    ['what a turn landed is over (KF-34)', turn([W('src/mix/level.cpp', mixerCode), use('Bash', { command: 'git merge --ff-only work/s1' })]), 0],
+    ['a write after the landing is judged (KF-34)', turn([use('Bash', { command: 'git merge --ff-only work/s1' }), W('src/mix/level.cpp', mixerCode)]), 2],
+    ['the shape word the rule asks for is no concept (KF-24)', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: x; concepts: slot, many; mixer, one; reuse: none' }), 0],
   ];
   return verdicts('making-check', cases);
 }

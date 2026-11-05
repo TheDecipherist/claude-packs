@@ -6,7 +6,7 @@
   "globs": [],
   "exclude": ["**/build/**"],
   "code": true,
-  "pattern": "for\\s*\\(\\s*(?:const\\s+)?auto\\s*&&?\\s*(\\w+)\\s*:\\s*[^;{}\\n]+\\)\\s*\\{?\\s*if\\s*\\(\\s*\\1\\s*(?:\\.|->)\\s*\\w+\\s*==",
+  "pattern": "for\\s*\\(\\s*(?:const\\s+)?auto\\s*&&?\\s*(\\w+)\\s*:\\s*[^;{}\\n]+\\)\\s*\\{?\\s*if\\s*\\(\\s*\\1\\s*(?:\\.|->)\\s*\\w+\\s*==[^\\n]*\\)\\s*(?:\\{[^{}]{0,200}?)?\\b(?:return|break)\\b",
   "bad": "for (const auto& c : shown().controls) if (c.id == id) return &c;",
-  "good": "const auto it = std::ranges::find (controls, id, &Control::id);\nfor (const auto& c : controls) total += c.width;\nfor (const auto& c : controls) if (c.width > limit) wide.push_back (c);"
+  "good": "const auto it = std::ranges::find (controls, id, &Control::id);\nfor (const auto& c : controls) total += c.width;\nfor (const auto& c : controls) if (c.width > limit) wide.push_back (c);\nfor (const auto& target : targets) if (target.kind == none) continue;"
 }

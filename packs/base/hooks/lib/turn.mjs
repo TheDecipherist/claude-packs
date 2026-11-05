@@ -66,9 +66,14 @@ export function lastTurn(path) {
   return { text: text.join('\n'), uses: uses.filter((u) => !refused.has(u.id)) };
 }
 
+// A landing ends a step. Compaction is no prompt, so one turn can hold a whole run, and its last step's making line says nothing of the steps before: the
+// MPX 500 was sent back for files written hours earlier, at a landing (KF-34). What a turn landed is over; only the writes after its last landing are judged.
+const LANDING = /(?:^|[;&|\n])\s*git\s+(?:-C\s+\S+\s+)?merge\s+(?:\S+\s+)*?--ff-only\b/;
+const sinceLanding = (uses) => uses.slice(uses.findLastIndex((u) => u.name === 'Bash' && LANDING.test(u.input.command ?? '')) + 1);
+
 export function writesOfTurn(turn, cwd = process.cwd()) {
   const out = [];
-  for (const u of turn.uses) {
+  for (const u of sinceLanding(turn.uses)) {
     const i = u.input;
     const at = (p) => resolve(u.cwd ?? cwd, p);
     if (u.name === 'Write' && i.file_path) out.push({ path: at(i.file_path), text: i.content ?? '', tool: u.name });

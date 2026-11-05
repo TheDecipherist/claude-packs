@@ -176,6 +176,11 @@ function chains(pairs, lines) {
   return out;
 }
 
+// using lines, includes, imports and one-line constants name things: two files that open alike hold no logic to extract, and writing the names out is worse (KF-32).
+const DECLARATION = /^\s*(?:$|using\b|#\s*include\b|import\b|from\s+\S+\s+import\b|namespace\b|[{}]\s*$|(?:static\s+|inline\s+)*(?:constexpr|const)\b[^(){}]*=[^(){}]*;\s*$)/;
+const MIN_LOGIC_LINES = 3;
+const holdsLogic = (text, { start, end }) => text.split('\n').slice(start - 1, end).filter((l) => !DECLARATION.test(l)).length >= MIN_LOGIC_LINES;
+
 export function judgeWrites(root, writes, { layout = {}, shape = null, ignore = [] } = {}) {
   const index = loadIndex(root, { layout, shape });
   const maybe = clonesIn(index, writes, { ignore });
@@ -192,7 +197,7 @@ export function judgeWrites(root, writes, { layout = {}, shape = null, ignore = 
     const paths = [...new Set(maybe.map((c) => c.other.file))].filter((f) => !written.has(real(f)));
     const r = scan(root, { extra, ignore, layout, shape, paths });
     if (r.error) return { clones: [], error: r.error, index };
-    return { clones: writes.flatMap((w) => (w.ranges ?? [w.range]).flatMap((range) => clonesOf(r.clones, w.path, range))), index };
+    return { clones: writes.flatMap((w) => (w.ranges ?? [w.range]).flatMap((range) => clonesOf(r.clones, w.path, range)).filter((c) => holdsLogic(w.after, c.at))), index };
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

@@ -40,7 +40,9 @@ export function statementsOf(text, lang) {
     const words = tokens.map((t) => t.t);
     const isCode = lang.commands ? words.length >= 2 : words.some((t) => t === '(' || t === '=');
     if (tokens.length >= (lang.commands ? 2 : 3) && words.some(isName) && isCode) {
-      out.push({ tokens, shape: shapeOf(words, lang), line: lineAt(starts, tokens[0].at), end: lineAt(starts, tokens.at(-1).at) });
+      // its line is where its first word is: the `),` a lambda's call leaves behind is the end of the last line, not this statement's start (KF-27)
+      const first = tokens.find((t) => /^[A-Za-z_\d"'*&]/.test(t.t)) ?? tokens[0];
+      out.push({ tokens, shape: shapeOf(words, lang), line: lineAt(starts, first.at), end: lineAt(starts, tokens.at(-1).at) });
     }
     tokens = [];
   };
@@ -50,9 +52,10 @@ export function statementsOf(text, lang) {
     if (lang.lines && depth === 0 && tokens.length && code.slice(last, m.index).includes('\n') && !CONTINUES.test(tokens.at(-1).t) && t !== '.') close();
     tokens.push({ t, at: m.index, to: m.index + t.length });
     last = m.index + t.length;
-    if (t === '(' || t === '[') depth += 1;
-    else if (t === ')' || t === ']') depth = Math.max(depth - 1, 0);
-    if ((t === ';' && depth === 0) || t === '{' || t === '}') close();
+    const dataBrace = lang.braces === false && (t === '{' || t === '}'); // a Python set or dict is one value, not a block (KF-14)
+    if (t === '(' || t === '[' || (dataBrace && t === '{')) depth += 1;
+    else if (t === ')' || t === ']' || (dataBrace && t === '}')) depth = Math.max(depth - 1, 0);
+    if ((t === ';' && depth === 0) || (!dataBrace && (t === '{' || t === '}'))) close();
   }
   close();
   return out;

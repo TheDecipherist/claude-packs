@@ -13,7 +13,7 @@ export function problem(command) {
   for (const raw of command.split(/&&|\|\||;|\n/)) {
     const seg = raw.trim();
     const add = seg.match(/^git\s+(?:-C\s+\S+\s+)?add\s+(.*)$/);
-    if (add) {
+    if (add && !/(^|\s)(-n|--dry-run)(\s|$)/.test(add[1])) { // a dry run stages nothing (KF-10)
       const args = add[1];
       if (/(^|\s)(-A|--all|-u|--update)(\s|$)/.test(args) || /(^|\s)(\.|\*|:\/)(\s|$)/.test(args)) {
         return 'stage the files you changed by name (git add path/one path/two), never everything at once';

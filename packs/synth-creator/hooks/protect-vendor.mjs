@@ -59,7 +59,8 @@ function message({ why, tree, layout, once }) {
   }
   if (!tree) {
     return `BLOCKED by protect-vendor: ${why} is vendored/generated code and is read-only.\n` +
-      'Fix our own code, wrap the library, or ask the user if the library itself must change.\n';
+      'Fix our own code, wrap the library, or ask the user if the library itself must change.\n' +
+      'If this folder is not build output, name where the build really goes in .claude/layout.json "buildOutput" (default build/**), and "writeOnce" for evidence kept there.\n';
   }
   const tools = layout.guards?.copy?.tools ?? [];
   return `BLOCKED by protect-vendor: ${why}, in the copy tree ${tree}. A copy tree (a folder of kind "copy" in .claude/layout.json) is read-only:\n` +

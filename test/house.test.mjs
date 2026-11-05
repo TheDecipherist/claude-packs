@@ -251,7 +251,7 @@ test('doctor fails when a hook fails its selftest', () => {
   run(dir, 'init', 'audio-core', 'gpu-painter');
   const hook = join(dir, '.claude/hooks/git-guard.mjs');
   const text = readFileSync(hook, 'utf8');
-  const law = "if (/\\bgit\\b.*\\b(rebase|filter-branch)\\b/.test(p)";
+  const law = "if (['rebase', 'filter-branch'].includes(sub)";
   assert.ok(text.includes(law));
   writeFileSync(hook, text.replace(law, 'if (false'));
   const py = join(dir, '.claude/hooks/browser-guard.py');

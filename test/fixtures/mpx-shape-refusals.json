@@ -1,0 +1,534 @@
+{
+ "_note": "The real shape-law refusals of the MPX 500 build, with its manifest and the two declarations they turn on. Each refusal: its verdict in that project's log, and the lines the hook refused. A wrong one must pass; a right one must stay refused, on at least one of its lines, but for \"changed\", whose mark gave a reason KF-36 shows false.",
+ "manifest": {
+  "concepts": {
+   "program": {
+    "shape": "many",
+    "count": 240,
+    "generator": "programAt(index), one row per directory entry, read from the ROM at build time",
+    "words": [
+     "program",
+     "programs"
+    ],
+    "arrays": [
+     "programs",
+     "kPrograms"
+    ],
+    "selectors": {
+     "currentProgram": "the program running now",
+     "cuedProgram": "the program selected and waiting for Load",
+     "programInBank": "a program by its bank and its place in that bank"
+    },
+    "owns": "name, algorithm, stored bytes, edit pages, Adjust parameter, stored tempo, stored mix"
+   },
+   "bank": {
+    "shape": "many",
+    "count": 24,
+    "generator": "bankAt(index), one row per bank in the bank table; the User Bank is a further row of the same type",
+    "words": [
+     "bank",
+     "banks"
+    ],
+    "arrays": [
+     "banks",
+     "kBanks"
+    ],
+    "selectors": {
+     "bankOfProgram": "the bank a program belongs to",
+     "currentBank": "the bank shown in Program Select",
+     "firstOfBank": "the first program of a bank, where a push and turn lands [MAN]"
+    },
+    "owns": "name, routing class, its programs"
+   },
+   "editPage": {
+    "shape": "many",
+    "generator": "pagesOf(program), rows of up to four parameters from the algorithm's table; a program has up to four pages",
+    "words": [
+     "editPage",
+     "editPages"
+    ],
+    "arrays": [
+     "editPages",
+     "kEditPages"
+    ],
+    "selectors": {
+     "currentPage": "the page the Edit Pages button has reached"
+    },
+    "owns": "up to four parameter rows, one per edit knob"
+   },
+   "editKnob": {
+    "shape": "many",
+    "count": 4,
+    "generator": "the panel table: one row per knob of one Knob class; instance id editKnobId(i)",
+    "words": [
+     "editKnob",
+     "editKnobs"
+    ],
+    "arrays": [
+     "editKnobs",
+     "kEditKnobs"
+    ],
+    "selectors": {
+     "adjustKnob": "the edit knob that carries the Adjust parameter on a program's first page",
+     "systemSelectKnob": "the edit knob that picks a System Mode parameter [MAN]",
+     "systemChangeKnob": "the edit knob that changes a System Mode value [MAN]"
+    },
+    "owns": "position, parameter slot on the current page"
+   },
+   "effectChannel": {
+    "shape": "many",
+    "count": 2,
+    "generator": "effectChannelAt(index): each of the two signal paths of the dual programs is one block graph of one type",
+    "words": [
+     "effectChannel",
+     "effectChannels"
+    ],
+    "arrays": [
+     "effectChannels",
+     "kEffectChannels"
+    ],
+    "selectors": {},
+    "owns": "one block graph, its input and output routing"
+   },
+   "paramSlot": {
+    "shape": "many",
+    "count": 52,
+    "generator": "paramSlotId(index): one generic host parameter per record slot, its meaning read from the loaded program's layout",
+    "words": [
+     "paramSlot",
+     "paramSlots"
+    ],
+    "arrays": [
+     "paramSlots",
+     "kParamSlots"
+    ],
+    "selectors": {},
+    "owns": "a host parameter, a stored value, a row of the current layout when the layout has that slot"
+   },
+   "machineModel": {
+    "shape": "one",
+    "generator": "constructed once by the processor from the factory programs",
+    "words": [
+     "machine",
+     "machineModel"
+    ],
+    "owns": "the panel's state: mode, LEDs, cued and current program, tempo, System values, the User Bank"
+   },
+   "engine": {
+    "shape": "one",
+    "generator": "constructed once by the processor",
+    "words": [
+     "engine"
+    ],
+    "owns": "the blocks, the routing, the plan in use"
+   },
+   "panelControl": {
+    "shape": "many",
+    "generator": "the rows of knobs and buttons in src/app/panel/generated/PanelTable.h, built by a loop in the editor",
+    "words": [
+     "knob",
+     "knobs",
+     "panelButton",
+     "panelButtons"
+    ],
+    "arrays": [
+     "knobs",
+     "buttons"
+    ],
+    "selectors": {
+     "programKnob": "the row whose id is program, which turns programs"
+    },
+    "owns": "a place, a look from its template, and what it drives"
+   }
+  },
+  "exclude": [
+   ".claude/**",
+   "build/**",
+   "docs/before-you-call-it-finished.md",
+   "docs/names.txt",
+   "docs/programs.json",
+   "docs/research.md",
+   "docs/workorders/**",
+   "node_modules/**",
+   "out/**",
+   "src/app/panel/generated/**",
+   "src/params/generated/**"
+  ],
+  "values": [
+   "MidiMessage"
+  ]
+ },
+ "declarations": {
+  "src/params/MachineModel.h": "void turnProgram (int steps, bool pushed);\nvoid turnEditKnob (int knob, int steps);\nvoid receiveProgramChange (int change, int nowMs);\n"
+ },
+ "refusals": [
+  {
+   "id": "f418a5bc",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tools/mpx_rom.py",
+     "Addresses: `file` is an offset into the ROM image; `cpu` is a Z80 address. Bank 0x18000 appears at window 0x8000."
+    ]
+   ]
+  },
+  {
+   "id": "20e166c6",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "workflow-bugs.md",
+     "`design/shape.json` declares `bank`, as work order R6 requires, and the machine's ROM is banked, so \"Bank 0x18000\" in a firmware note was refused as an instance of a program bank. On a firmware rebuild the word has two meanings by nature. Should have: skip a hex address after the word."
+    ]
+   ]
+  },
+  {
+   "id": "a2743aae",
+   "verdict": "right",
+   "lines": [
+    [
+     "tests/program_round_trip.cpp",
+     "const auto stored = mpx::factoryProgramBytes (0);"
+    ]
+   ]
+  },
+  {
+   "id": "4273cfbd",
+   "verdict": "right",
+   "lines": [
+    [
+     "src/params/MachineModel.h",
+     "[[nodiscard]] int firstOfBank (int bank) const noexcept;"
+    ],
+    [
+     "src/params/MachineModel.h",
+     "class MachineModel"
+    ]
+   ]
+  },
+  {
+   "id": "a1872e7d",
+   "verdict": "right",
+   "lines": [
+    [
+     "src/params/MachineModel.h",
+     "class MachineModel"
+    ]
+   ]
+  },
+  {
+   "id": "8e4309d6",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tests/machine_model.cpp",
+     "model.turnProgram (1, false);"
+    ],
+    [
+     "tests/machine_model.cpp",
+     "model.turnProgram (1, true);"
+    ],
+    [
+     "tests/machine_model.cpp",
+     "expect (model.bankOf (cued - 1) == bank, \"and on that bank's first program\");"
+    ]
+   ]
+  },
+  {
+   "id": "a176e63d",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "workflow-bugs.md",
+     "`model.turnProgram (1, false)` turns the knob one detent; the hook read it as driving one program by number, and read the words \"first program\" inside a test's message the same way. A call that takes a count looks like a call that takes an index. Should have: read a quoted message as text, and let a declared parameter name mark an amount."
+    ]
+   ]
+  },
+  {
+   "id": "fe65842a",
+   "verdict": "right",
+   "lines": [
+    [
+     "src/dsp/engine/Engine.h",
+     "class Engine"
+    ]
+   ]
+  },
+  {
+   "id": "92c4c983",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tests/engine_measure.cpp",
+     "std::printf (\"%d of %d slots moved no audio from their layout's first program\\n\", dead, slots);"
+    ]
+   ]
+  },
+  {
+   "id": "6ed8a084",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tools/look_gate.py",
+     "# Masks, as boxes in target pixels: damage and wear, and the PROGRAM knob, checked on its own."
+    ]
+   ]
+  },
+  {
+   "id": "165e4e0a",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "src/params/MidiPatches.cpp",
+     "return each && (*each == program || *each + 1 == program);"
+    ]
+   ]
+  },
+  {
+   "id": "917b1561",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "src/params/SystemParameters.cpp",
+     "int maximum;   // [FW] the parameter's row; MIDI Program Change's row says 2, and the guide's two words are kept"
+    ]
+   ]
+  },
+  {
+   "id": "caa08632",
+   "verdict": "right",
+   "lines": [
+    [
+     "tests/machine_edit.cpp",
+     "model.receiveProgramChange (2, 0);"
+    ],
+    [
+     "tests/machine_edit.cpp",
+     "model.receiveProgramChange (0, 0);"
+    ],
+    [
+     "tests/machine_edit.cpp",
+     "model.receiveProgramChange (mpx::bankSizes[1], 0);"
+    ],
+    [
+     "tests/machine_edit.cpp",
+     "model.receiveProgramChange (1, 0);"
+    ]
+   ]
+  },
+  {
+   "id": "5bed74ee",
+   "verdict": "right",
+   "lines": [
+    [
+     "tests/firmware_laws.cpp",
+     "// [MAN] the guide says fully Wet of the Tremolo to Detune banks, whose names run from bank 6 to bank 10."
+    ]
+   ]
+  },
+  {
+   "id": "9e689ecf",
+   "verdict": "right",
+   "lines": [
+    [
+     "tests/engine_laws.cpp",
+     "struct Stored"
+    ]
+   ]
+  },
+  {
+   "id": "9c85212b",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "design/analysis/front-panel.md",
+     "**Left open by the picture.** The two capsules on black are inferred from those on the band. The PROGRAM knob's cap is lost on the photographed unit: shape from the guide's drawing, centre and size from its well, checked on its own. The wordmark is not a font: its l and foot are measured shapes, its other letters Lato Black, tilted and slanted as measured. The switch's dark body runs past what the picture shows against the dark panel."
+    ]
+   ]
+  },
+  {
+   "id": "50b81a2f",
+   "verdict": "right",
+   "lines": [
+    [
+     "src/app/HostBridge.h",
+     "struct MidiMessage"
+    ]
+   ]
+  },
+  {
+   "id": "651b4f66",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tests/unit_harness.h",
+     "/** The first program with this name, or nothing. */"
+    ]
+   ]
+  },
+  {
+   "id": "06114ba0",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tests/wired_controls.cpp",
+     "// The knobs by what they do on a first program's first page: Adjust, Decay, HF Rlloff, Mix."
+    ],
+    [
+     "tests/wired_controls.cpp",
+     "unit.machine().turnProgram (30, false);"
+    ],
+    [
+     "tests/wired_controls.cpp",
+     "{ \"editPages\", \"second page, Edit knob 1 is PreDelay\", [] (Unit& unit) {"
+    ],
+    [
+     "tests/wired_controls.cpp",
+     "unit.machine().turnProgram (60, false);"
+    ]
+   ]
+  },
+  {
+   "id": "f52326ce",
+   "verdict": "right",
+   "lines": [
+    [
+     "tests/wired_paths.cpp",
+     "unit.machine().turnEditKnob (0, static_cast<int> (mpx::SystemItem::bypassMode));"
+    ],
+    [
+     "tests/wired_paths.cpp",
+     "unit.machine().turnEditKnob (2, steps);"
+    ],
+    [
+     "tests/wired_paths.cpp",
+     "first.machine().turnEditKnob (1, -4);"
+    ]
+   ]
+  },
+  {
+   "id": "d426c188",
+   "verdict": "right",
+   "lines": [
+    [
+     "tests/wired_paths.cpp",
+     "constexpr int selectKnob = 0;  // [MAN] Edit knob 1 in System Mode"
+    ],
+    [
+     "tests/wired_paths.cpp",
+     "constexpr int changeKnob = 2;  // [MAN] Edit knob 3 in System Mode"
+    ]
+   ]
+  },
+  {
+   "id": "0f902efa",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tests/effect_kinds.cpp",
+     "/** The first program a kind runs alone in, and its plan. */"
+    ]
+   ]
+  },
+  {
+   "id": "1a31cfe0",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tests/handoff_stress.cpp",
+     "midi.addEvent (juce::MidiMessage::programChange (1, change), 0);"
+    ]
+   ]
+  },
+  {
+   "id": "5204ced5",
+   "verdict": "wrong",
+   "lines": [
+    [
+     "tests/unit_harness.h",
+     "/** Sets a System item the way the panel does: [MAN] Edit knob 1 selects, Edit knob 3 changes. */"
+    ]
+   ]
+  },
+  {
+   "id": "9b358150",
+   "verdict": "right",
+   "lines": [
+    [
+     "workflow-bugs.md",
+     "A test helper's comment quoted the guide, \"Edit knob 1 selects, Edit knob 3 changes\", and was refused as naming panelControl instances. In System Mode those knobs are roles the machine gives them. Should have: let a `[MAN]` quotation stand, or say how to declare a role. Met by rewording."
+    ]
+   ]
+  },
+  {
+   "id": "9a464f86",
+   "verdict": "right",
+   "lines": [
+    [
+     "design/analysis/design-grid.json",
+     "\"knob 1\": [\"edit1\", \"digit1\", \"selectWord\"],"
+    ],
+    [
+     "design/analysis/design-grid.json",
+     "\"knob 2\": [\"edit2\", \"digit2\"],"
+    ],
+    [
+     "design/analysis/design-grid.json",
+     "\"knob 3\": [\"edit3\", \"digit3\", \"changeWord\"],"
+    ],
+    [
+     "design/analysis/design-grid.json",
+     "\"knob 4\": [\"edit4\", \"digit4\"],"
+    ]
+   ]
+  },
+  {
+   "id": "d2c1b74b",
+   "verdict": "right",
+   "lines": [
+    [
+     "design/analysis/design-grid.md",
+     "| frontal photograph | a Sound On Sound product shot, 1000 by 150, nearly straight on, flattened on the four slots | position across the ..."
+    ],
+    [
+     "design/analysis/design-grid.md",
+     "| side photograph | the same review's three-quarter shot | the PROGRAM knob's profile | any measurement |"
+    ],
+    [
+     "design/analysis/design-grid.md",
+     "| EDIT knob | 168 across, cap 95 | frontal 167.3 to 169.7 |"
+    ]
+   ],
+   "changed": "KF-36: the same words were marked wrong in 6ed8a084 and 9c85212b, and this mark says its reading was loose"
+  },
+  {
+   "id": "9612825c",
+   "verdict": "right",
+   "lines": [
+    [
+     "workflow-bugs.md",
+     "`design-grid.md` lists one size for each kind of knob, and \"EDIT knob\" in that table was refused as a role name for an instance, though `editKnob` is the concept itself. Rewording to the manifest's own names answered it. Should have: tell a concept's name from one of its instances."
+    ]
+   ],
+   "changed": "KF-36: the same words were marked wrong in 6ed8a084 and 9c85212b, and this mark says its reading was loose"
+  },
+  {
+   "id": "a14e362e",
+   "verdict": "right",
+   "lines": [
+    [
+     "tests/control_input.cpp",
+     "/** The first knob of a kind with no pointer and no parameter is an edit knob; the place picks one by its index. */"
+    ],
+    [
+     "tests/control_input.cpp",
+     "hand.dragUp (editKnobAt (0), turn);"
+    ],
+    [
+     "tests/control_input.cpp",
+     "hand.dragUp (editKnobAt (1), -turn);"
+    ]
+   ]
+  }
+ ]
+}

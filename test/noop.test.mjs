@@ -49,8 +49,8 @@ const WRITING = [...['cut-the-padding', 'rhythm-like-talk', 'no-stock-language',
   ...['humanize', 'reply-stance', 'should-i-reply', 'reply-moves', 'reddit-post', 'pick-subreddit', 'reddit-title', 'argument-post', 'launch-post', 'post-voice'].map((s) => `.claude/skills/${s}/SKILL.md`), '.claude/hooks/lib/prose.mjs'];
 const LANDING = ['.claude/rules/test-the-template-once.md', '.claude/rules/finished-work-lands.md', '.claude/skills/land-branch/SKILL.md', '.claude/rules/a-refusal-is-exit-2.md', '.claude/skills/prove-a-hook/SKILL.md'];   // 0.17.0: with git-guard, which every project has
 // 1.1.0: what a crash does (KF-18), what no hook could read (KF-40) and how git-guard proves the account (KF-12)
-const FAIL_OPEN = ['crash-policy', 'unread-writes', 'git-auth'].map((f) => `.claude/hooks/lib/${f}.mjs`);
-const REPAIRED = ['.claude/hooks/lib/program-read.mjs', '.claude/hooks/param-id-lock.mjs'];   // 1.1.0: the crash on a helper's path (KF-40), the lock from the first id (KF-15)
+const FAIL_OPEN = ['crash-policy', 'unread-writes', 'git-auth', 'shape-prose', 'shape-lists'].map((f) => `.claude/hooks/lib/${f}.mjs`);
+const REPAIRED = ['.claude/hooks/lib/program-read.mjs', '.claude/hooks/param-id-lock.mjs', '.claude/hooks/lib/turn.mjs'];   // 1.1.0: the crash on a helper's path (KF-40), the lock from the first id (KF-15)
 const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only where the project has time-guard: the rule goes where its hook goes
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
 

@@ -14,7 +14,8 @@ export function gitAdds(command, cwd) {
       if (w[at] === '-C') dir = resolve(dir, w[at + 1] ?? '.');
       at += ['-C', '-c'].includes(w[at]) ? 2 : 1;
     }
-    if (w[at] === 'add') out.push({ dir, args: w.slice(at + 1) });
+    const args = w.slice(at + 1);
+    if (w[at] === 'add' && !args.some((a) => a === '-n' || a === '--dry-run')) out.push({ dir, args }); // a dry run stages nothing (KF-10)
   }
   return out;
 }

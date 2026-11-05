@@ -17,33 +17,57 @@ import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const SWITCH = /\bswitch\s*\(\s*([^()]*?(?:\([^()]*\))?)\s*\)\s*\{/g;
+const FIX = 'Give each kind its own object, table entry or class (rule: behaviour-lives-with-its-kind), and call it from both places,\n' +
+  'so a new kind is one new entry instead of an edit in every switch.\n';
 
-// The kind a switch dispatches on: the last name in its expression (args.kind -> kind, p->mode() -> mode).
-export function kindsSwitched(text) {
+// The last word of each `case` label of the switch body that opens at `open`: `Kind::line` -> line, `'line'` -> line.
+function labelsOf(code, text, open) {
+  let depth = 0;
+  let close = open;
+  for (; close < code.length; close += 1) {
+    if (code[close] === '{') depth += 1;
+    else if (code[close] === '}' && --depth === 0) break;
+  }
+  const labels = new Set();
+  for (const m of code.slice(open, close).matchAll(/\bcase\s+([^:]*(?:::[^:]*)*?)\s*:(?!:)/g)) {
+    const at = open + m.index + m[0].indexOf(m[1]);
+    labels.add(text.slice(at, at + m[1].length).replace(/['"`]/g, '').split(/::|\./).pop().trim());
+  }
+  return labels;
+}
+
+// Each switch: the kind it dispatches on, the last name in its expression (args.kind -> kind, p->mode() -> mode), and its case labels.
+export function switchesOf(text) {
   const out = [];
-  for (const m of blankCode(text).matchAll(SWITCH)) {
-    const name = m[1].replace(/\(\s*\)$/, '').split(/\?\.|\.|->|::/).pop().trim();
-    if (/^[A-Za-z_$][\w$]{2,}$/.test(name)) out.push(name);
+  const code = blankCode(text);
+  for (const m of code.matchAll(SWITCH)) {
+    const kind = m[1].replace(/\(\s*\)$/, '').split(/\?\.|\.|->|::/).pop().trim();
+    if (/^[A-Za-z_$][\w$]{2,}$/.test(kind)) out.push({ kind, labels: labelsOf(code, text, m.index + m[0].length - 1) });
   }
   return out;
 }
 
-const count = (list) => list.reduce((m, k) => m.set(k, (m.get(k) ?? 0) + 1), new Map());
+// One kind or two? The bare word `kind` says little: a path step and an engine block both have one (KF-35). Two switches that share a case are on one
+// kind; two whose cases are all different are not; a switch with no case to read is judged by the name.
+const sameKind = (a, b) => a.kind === b.kind && (!a.labels.size || !b.labels.size || [...a.labels].some((l) => b.labels.has(l)));
+const count = (list) => list.reduce((m, s) => m.set(s.kind, (m.get(s.kind) ?? 0) + 1), new Map());
 
-// The kinds a write switches on more often than before.
-export function newKinds(before, after) {
-  const was = count(kindsSwitched(before));
-  return [...count(kindsSwitched(after))].filter(([k, n]) => n > (was.get(k) ?? 0)).map(([k]) => k);
+// The switches on a kind a write switches on more often than before.
+export function newSwitches(before, after) {
+  const was = count(switchesOf(before));
+  const now = switchesOf(after);
+  const grown = new Set([...count(now)].filter(([k, n]) => n > (was.get(k) ?? 0)).map(([k]) => k));
+  return now.filter((s) => grown.has(s.kind));
 }
 
 // { kind -> [files] }: the other code files of the checkout that already switch on each kind.
-export function elsewhere(root, selfRel, kinds, layout = readLayout(root)) {
+export function elsewhere(root, selfRel, switches, layout = readLayout(root)) {
   const skip = [...TESTS, ...(layout.protected ?? [])];
   const found = new Map();
   for (const rel of codeFiles(root, skip)) {
     if (rel === selfRel) continue;
-    const there = new Set(kindsSwitched(readFileSync(join(root, rel), 'utf8')));
-    for (const k of kinds) if (there.has(k)) found.set(k, [...(found.get(k) ?? []), rel]);
+    const there = switchesOf(readFileSync(join(root, rel), 'utf8'));
+    for (const s of switches) if (there.some((t) => sameKind(s, t)) && !found.get(s.kind)?.includes(rel)) found.set(s.kind, [...(found.get(s.kind) ?? []), rel]);
   }
   return found;
 }
@@ -51,14 +75,14 @@ export function elsewhere(root, selfRel, kinds, layout = readLayout(root)) {
 // One write: null when it adds no second place for a kind; else the refusal.
 function judgeWrite(w, rel) {
   if (w.op === 'delete' || w.after === null || w.after === undefined || !CODE.has(extname(w.path)) || matchesAny(rel, TESTS)) return null;
-  const kinds = newKinds(w.before ?? '', w.after);
-  if (kinds.length === 0) return null;
-  const found = elsewhere(checkoutRoot(w.path), rel, kinds, readLayout(claudeRoot(w.path)));
+  const added = newSwitches(w.before ?? '', w.after);
+  if (added.length === 0) return null;
+  const twice = added.find((s, i) => added.some((t, j) => i !== j && sameKind(s, t) && s.labels.size && t.labels.size));
+  if (twice) return `${rel} branches on "${twice.kind}" twice in this file.\n${FIX}`;
+  const found = elsewhere(checkoutRoot(w.path), rel, added, readLayout(claudeRoot(w.path)));
   if (found.size === 0) return null;
   const lines = [...found].map(([k, files]) => `  "${k}" is already switched on in: ${files.slice(0, 5).join(', ')}`).join('\n');
-  return `${rel} adds a second place that branches on the same kind.\n${lines}\n` +
-    'Give each kind its own object, table entry or class (rule: behaviour-lives-with-its-kind), and call it from both places,\n' +
-    'so a new kind is one new entry instead of an edit in every switch.\n';
+  return `${rel} adds a second place that branches on the same kind.\n${lines}\n${FIX}`;
 }
 
 const main = (text) => judgeEvent(text, { name: 'dispatch-once', write: judgeWrite });
@@ -79,6 +103,9 @@ function selftest() {
     ['a switch in a comment or string is not a switch', w('src/note.ts', '// switch (x.mode) {\nconst s = "switch (x.mode) {";\n'), 0],
     ['the kind is the last name in the expression', w('src/args.ts', 'function f(args) { switch (args?.shape.mode) { default: } }\n'), 2],
     ['a heredoc that adds a second switch', runHook(hook, dir, bashOf("cat > src/b.cpp <<'EOF'\nvoid b (Shape& s) { switch (s.mode) { default: break; } }\nEOF", dir)), 2],
+    ['a kind of the same name with other cases is another kind (KF-35)', w('src/path.cpp', 'void p (Step& s) { switch (s.mode) { case Pen::up: break; } }\n'), 0],
+    ['one case shared is the same kind', w('src/other.cpp', 'void o (Shape& s) { switch (s.mode) { case Mode::line: break; } }\n'), 2],
+    ['twice in one new file', w('src/twice.cpp', 'void a (S& s) { switch (s.pen) { case Pen::up: break; } }\nvoid b (S& s) { switch (s.pen) { case Pen::up: break; } }\n'), 2],
     ['another project is not ours', runHook(hook, dir, writeOf(join(dir, '..', 'elsewhere', 'x.cpp'), 'void x (S& s) { switch (s.mode) {} }\n')), 0],
   ]);
 }

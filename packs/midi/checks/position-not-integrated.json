@@ -16,7 +16,11 @@
     "**/JUCE/**",
     "**/node_modules/**",
     "**/*Clock*",
-    "**/*clock*"
+    "**/*clock*",
+    "**/tests/**",
+    "**/test/**",
+    "**/*_test.*",
+    "**/*Test.*"
   ],
   "pattern": "\\b\\w*(?:[pP]os|[pP]pq|[bB]eat)\\w*\\s*\\+=[^;\\n]*(?:bpm|[tT]empo)",
   "bad": "posBeats += n * bpm / (60.0 * sr);",

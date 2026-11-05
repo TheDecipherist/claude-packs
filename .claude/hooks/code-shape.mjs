@@ -27,15 +27,17 @@ function addedLines(before, after) {
   return after.split('\n').flatMap((l, i) => { const n = left.get(l) ?? 0; left.set(l, n - 1); return n > 0 ? [] : [i + 1]; });
 }
 
-function lineFault(lang, text, added, off, limits) {
+// Every line at fault at once: one a refusal cost a whole resend for each, the largest cost the kit added on the MPX 500 (37 of its 132 refusals).
+function lineFaults(lang, text, added, off, limits) {
   const code = lang.blank(text).split('\n');
   const perLine = statementsOf(text, lang).reduce((m, s) => m.set(s.line, (m.get(s.line) ?? 0) + 1), new Map());
+  const faults = [];
   for (const n of added.filter((x) => !off.has(x))) {
     const width = code[n - 1]?.trimEnd().length ?? 0;
-    if (width > limits.maxLineChars) return `line ${n} is ${width} columns of code (limit ${limits.maxLineChars}). Break it where it reads.`;
-    if ((perLine.get(n) ?? 0) > limits.maxStatementsPerLine) return `line ${n} holds ${perLine.get(n)} statements. One statement a line: a diff, a breakpoint and a coverage line then mean something, and the file's size is true.`;
+    if (width > limits.maxLineChars) faults.push(`line ${n} is ${width} columns of code (limit ${limits.maxLineChars}). Break it where it reads.`);
+    if ((perLine.get(n) ?? 0) > limits.maxStatementsPerLine) faults.push(`line ${n} holds ${perLine.get(n)} statements. One statement a line: a diff, a breakpoint and a coverage line then mean something, and the file's size is true.`);
   }
-  return null;
+  return faults;
 }
 
 function functionFault(before, after, off, limits) {
@@ -57,8 +59,8 @@ function judgeWrite(w, rel) {
   if (matchesAny(rel, layout.guards?.codeShape?.exclude ?? []) || isContent(rel, layout)) return null;
   const before = w.before ?? '';
   const off = oneOffLines(w.after);
-  const fault = lineFault(lang, w.after, addedLines(before, w.after), off, limits) ?? functionFault(functionsOf(before, ext), functionsOf(w.after, ext), off, limits);
-  return fault ? `${fault}\nIf this one truly must stay, say so above it: \`one-off: <reason>\`.\n` : null;
+  const faults = [...lineFaults(lang, w.after, addedLines(before, w.after), off, limits), functionFault(functionsOf(before, ext), functionsOf(w.after, ext), off, limits)].filter(Boolean);
+  return faults.length ? `${faults.join('\n')}\nIf one truly must stay, say so above it: \`one-off: <reason>\`.\n` : null;
 }
 
 const main = (text) => judgeEvent(text, { name: 'code-shape', write: judgeWrite });
@@ -76,6 +78,8 @@ function selftest() {
     ['too many parameters', w('src/b.cpp', 'void f(int a, int b, int c, int d, int e, int f, int g) {\n  run(a);\n}\n'), 2],
     ['a self parameter is not counted', w('src/b.py', 'def f(self, a, b, c, d, e, g):\n    run(a)\n'), 0],
     ['packed statements', w('src/c.cpp', 'void f() {\n  a(); b(); c();\n}\n'), 2],
+    ['a Python set comprehension is one statement (KF-14)', w('src/s.py', 'left = {keep(row) for row in rows} - {drop(row) for row in rows}\n'), 0],
+    ['a lambda in a list counts as in a call (KF-27)', w('src/l.cpp', 'void f()\n{\n    judge ("a", b, [&] { return g (1); }),\n    judge ("c", d, [&] { return g (2); }),\n}\n'), 0],
     ['a for header is one statement', w('src/d.cpp', 'void f() {\n  for (int i = 0; i < n; i++) total += v(i);\n}\n'), 0],
     ['a wide line', w('src/e.cpp', wide), 2],
     ['a wide comment is no code', w('src/f.cpp', `// ${'word '.repeat(50)}\nint x = 1;\n`), 0],

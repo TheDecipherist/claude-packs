@@ -47,7 +47,7 @@ export const LANGUAGES = [
     define: /^(?:[A-Za-z_][\w:<>,*& ]*[\s*&])?([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:const\s*)?(?:noexcept\s*)?\{/gm },
   { name: 'js', exts: ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.mts', '.cts'], blank: blankCode, lines: true, notCode: /^[ \t]*import\b[^;]*;?$/gm, minTokens: 60,
     define: /^(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:function\*?\s+([A-Za-z_$][\w$]*)|(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>|class\s+([A-Za-z_$][\w$]*))/gm },
-  { name: 'python', exts: ['.py', '.pyi'], blank: blanker({ line: ['#'], raw: ['"""', "'''"] }), lines: true, notCode: /^[ \t]*(?:from\s+\S+\s+)?import\b.*$/gm, minTokens: 45,
+  { name: 'python', exts: ['.py', '.pyi'], blank: blanker({ line: ['#'], raw: ['"""', "'''"] }), lines: true, braces: false, notCode: /^[ \t]*(?:from\s+\S+\s+)?import\b.*$/gm, minTokens: 45,
     define: /^(?:async\s+)?(?:def|class)\s+([A-Za-z_]\w*)/gm },
   { name: 'shell', exts: ['.sh', '.bash', '.zsh', '.ksh'], blank: blanker({ line: ['#'], hashWord: true, heredoc: true }), lines: true, commands: true, minTokens: 30,
     token: /"\s*"|'\s*'|[^\s;|&()<>{}]+|[;|&()<>{}]/g, notCode: /^[ \t]*(?:\.|source|set|shopt|trap|cd)\s.*$/gm, define: /^(?:function\s+)?([A-Za-z_][\w-]*)\s*(?:\(\s*\))?\s*\{/gm },

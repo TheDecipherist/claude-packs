@@ -97,3 +97,96 @@ export function pushedCases(hookFile) {
   rmSync(top, { recursive: true, force: true });
   return cases;
 }
+// The token law and the house laws, read from the hook's own exports.
+export async function selftest(hookFile, { problem, house }) {
+  const bad = [];
+  // the token law (Sub37 WB-3)
+  const tokenCases = [
+    ['git push -u https://x-access-token:abc@github.com/a/b.git work/x', true],
+    ['git push --set-upstream https://me:$TOKEN@github.com/a/b.git main', true],
+    ['cd ../b && git -C ../b push origin x -u https://u:p@github.com/a/b.git', true],
+    ['git remote set-url origin https://ghp_abc@github.com/a/b.git', true],
+    ['git remote add o https://u:${T}@github.com/a/b.git', true],
+    ['git clone https://x-access-token:abc@github.com/a/b.git', true],
+    ['git config remote.origin.url https://u:t@github.com/a/b.git', true],
+    ['git push https://x-access-token:$T@github.com/a/b.git work/x', false],
+    ['git push -u origin work/x', false],
+    ['git remote set-url origin https://github.com/a/b.git', false],
+    ['git remote add o git@github-house:HouseOwner/b.git', false],
+    ['git clone https://me@github.com/a/b.git', false],
+    ['echo https://u:p@x.com/y', false],
+  ];
+  for (const [cmd, block] of tokenCases) if ((problem(cmd) !== null) !== block) bad.push(`token law: ${cmd}`);
+  if (problem('git push -u https://u:SECRET@h/x.git b')?.includes('SECRET')) bad.push('the refusal prints the token');
+
+  // the house laws
+  const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true };
+  const clean = { ...isDirty, dirty: () => [] };
+  const on = (branch, env = clean) => ({ ...env, branch: typeof branch === 'function' ? branch : () => branch });
+  const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/HouseOwner/app.git main';
+  const remote = (url) => ({ ...clean, remoteUrl: () => url });   // a remote whose URL is url (KWB-39: SSH names the repo)
+  const mustBlock = [
+    ['git add -A', clean], ['git add .', clean], ["git commit -am 'x'", clean], ['git add ~/firmware/korg/m1.bin', clean],
+    ['git -C /Users/someone/projects/other add -A', clean], ['cd ~/projects/other && git add -A', clean],
+    ['cd ~/projects/other && git checkout -- tools/bank/kept.json', isDirty],
+    ['git checkout -- design/gen_panel.py', isDirty], ['git stash', isDirty], ['git restore .', isDirty], ['git reset --hard HEAD~1', isDirty],
+    ['git clean -fd', isDirty], ['GUARD_OK=1 git checkout -- x.h', isDirty], ['GUARD_OK=1 git restore build/Testing/Temporary/LastTest.log', isDirty],
+    ['GUARD_OK=1 git restore --staged --worktree a.md', isDirty], ['git restore --staged --worktree a.md', isDirty],
+    ['git push', clean], ['git push origin main', clean], [`${push} --force`, clean],
+    ['git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/other-org/app.git main', clean],
+    ['gh repo create HouseOwner/app --private', clean],
+    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create app --private', clean],
+    ['git remote add origin https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/HouseOwner/app.git', clean],
+    [`git push https://x-access-token:ghp_${'a'.repeat(30)}@github.com/HouseOwner/app.git main`, clean],
+    ['git branch -D step/C1-x', clean], ['git push origin --delete step/C1-x', clean], ['git rebase main', clean], ['git commit --amend -m x', clean],
+    ["git commit -q -m 'bench' --no-verify", clean], ['GUARD_OK=1 git commit --no-verify -m x -- a.h', clean],
+    ['git push --no-verify https://x@github.com/HouseOwner/app.git main', clean],
+    ['git push -u origin work/x', remote('git@github.com:other-org/app.git')], ['git push origin work/x', remote('https://github.com/HouseOwner/app.git')],
+    ['git push git@github.com:other-org/app.git work/x', clean], ['git push -f origin work/x', remote('git@github.com:HouseOwner/app.git')],
+    ['git checkout --theirs a.txt', isDirty],
+  ];
+  const mustPass = [
+    ['git add build.md src/Row.h', isDirty], ["git commit -m 'C1: row clock' -- build.md src/Row.h", isDirty],
+    ['cd ~/projects/other && git add tools/bank/kept.json', isDirty], ['git status', isDirty], ['git checkout -- x.h', clean],
+    ['git restore --staged x.h', isDirty], ['python3 tools/safe_restore.py x.h', isDirty], ['git stash list', isDirty],
+    ['git checkout -b c2-filter', isDirty], [push, isDirty],
+    ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create HouseOwner/app --private', clean],
+    ['cmake --build build --target Synth_Standalone -j8', isDirty], ['git log --oneline -6 | sed -n 1,3p', isDirty],
+    ["git branch --list 'step/U5*' | tr -d ' *'", isDirty], ["grep -n 'def push' tools/step.py", isDirty], ["echo 'git push origin main'", isDirty],
+    ["python3 - <<'EOF'\nprint('git add -A')\nEOF", isDirty],
+    ['git push -u origin work/x', remote('git@github.com:HouseOwner/app.git')], ['git push origin work/x', remote('git@github-house:HouseOwner/app.git')],
+    ['git push git@github.com:HouseOwner/app.git work/x', clean], ['git push ssh://git@github.com/HouseOwner/app.git work/x', clean],
+    ['git add -n .', clean], ['git add --dry-run -A', clean], ['git checkout --theirs a.txt', { ...isDirty, merging: () => true }],
+  ];
+  const OWNED = { owner: 'HouseOwner' };
+  for (const [cmd, env] of mustBlock) if (house(cmd, '.', env, OWNED) === null) bad.push(`NOT BLOCKED: ${cmd}`);
+  for (const [cmd, env] of mustPass) { const r = house(cmd, '.', env, OWNED); if (r !== null) bad.push(`WRONGLY BLOCKED: ${cmd} -> ${r}`); }
+  const TRUNK = { refuseTrunk: true };
+  for (const cmd of ["git commit -m 'x' -- a.h", "GUARD_OK=1 git commit -m 'x' -- a.h"]) if (house(cmd, '.', on('main'), TRUNK) === null) bad.push(`NOT BLOCKED on trunk: ${cmd}`);
+  if (house('git rev-parse HEAD^{commit}', '.', on('main'), TRUNK) !== null) bad.push('a word in an argument read as a commit on the trunk');
+  if (house("git commit -m 'x' -- a.h", '.', on('main')) !== null) bad.push('a commit on main with the trunk refusal off (the default)');
+  if (house("git commit -m 'first' -- a.h", '.', { ...on('main'), hasHead: () => false }, TRUNK) !== null) bad.push('the first commit');
+  const byDir = on((c) => (c.endsWith('wt') ? 'work/x' : 'main'));
+  if (house('cd /r/wt && git commit --no-edit', '/r', byDir, TRUNK) !== null) bad.push('a commit after cd into a worktree on a branch');
+  if (house('git -C /r/wt commit --no-edit', '/r', byDir, TRUNK) !== null) bad.push('git -C a worktree on a branch');
+  if (house('cd /r && git commit --no-edit', '/r/wt', byDir, TRUNK) === null) bad.push('cd onto the trunk then commit');
+  // WB-107: an agent's isolated worktree cannot push (its harness refuses), so push-then-commit is the lead's there; elsewhere it holds
+  const ahead = { ...on('work/x'), unpushed: () => ({ branch: 'work/x', url: 'https://github.com/HouseOwner/app.git', commits: [{ sha: 'abc1234', subject: 'x' }] }) };
+  if (house("git commit -m x -- a.h", '/r/.claude/worktrees/agent-a1b2', ahead) !== null) bad.push('a commit in an agent worktree with its branch ahead of GitHub (WB-107)');
+  if (house("git commit -m x -- a.h", '/r/.claude/worktrees/night', ahead) === null) bad.push('NOT BLOCKED: a commit in a lead worktree with its branch ahead of GitHub');
+  if (house("git commit -m x -- a.h", '/r', ahead) === null) bad.push('NOT BLOCKED: a commit in the main checkout with its branch ahead of GitHub');
+  const other = { owner: 'Acme', tokenVar: 'ACME_TOKEN', trunks: ['trunk'], safeRestore: 'python3 tools/safe_restore.py <paths>', branchStart: 'python3 tools/step.py start <STEP> "task"', refuseTrunk: true };
+  for (const [cmd, env, want] of [
+    ['git push https://x-access-token:$ACME_TOKEN@github.com/Acme/app.git b', clean, null], [push, clean, 'Acme'],
+    ['git commit -m x -- a', on('trunk'), 'tools/step.py'], ['git commit -m x -- a', on('main'), null], ['git stash', isDirty, 'safe_restore.py'],
+  ]) {
+    const r = house(cmd, '.', env, other);
+    if ((r === null) !== (want === null) || (want && !r.includes(want))) bad.push(`with a project's own values: ${cmd} -> ${r}`);
+  }
+  // the pushed laws (KWB-26), on a real repo and a bare "GitHub" beside it
+  const pushed = pushedCases(hookFile);
+  for (const [label, got, want] of pushed) if (got !== want) bad.push(`pushed law: ${label} (got ${got}, wanted ${want})`);
+  for (const b of bad) console.error(`git-guard selftest FAILED: ${b}`);
+  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases)`);
+  return bad.length ? 1 : 0;
+}

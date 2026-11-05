@@ -22,12 +22,13 @@ import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, real } from './lib
 import { judgeWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
-import { checkoutRoot, insideProject, ROOT } from './lib/project.mjs';
+import { checkoutRoot, claudeRoot, insideProject, ROOT } from './lib/project.mjs';
 import { readShape } from './lib/shape.mjs';
 import { lastTurn, writesOfTurn } from './lib/turn.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const MAX_SENDS = 3;
+const NOT_CONCEPTS = new Set(['none', 'no', '-', 'n/a', 'one', 'many', 'ids']);
 // the folder kinds a layout marks as code; a layout that marks none: any source file outside its docs folders
 const CODE_KINDS = new Set(['code', 'engine', 'ui', 'params', 'tests']);
 const NOT_CODE = ['build/**', 'inbox/**', 'docs/**', '**/*.md', '**/*.txt', '**/*.json'];
@@ -54,7 +55,8 @@ const OVERRIDE = [
 ];
 
 const splitName = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2').replace(/([A-Za-z])(\d)/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-const partsOf = (text) => new Set((text.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? []).flatMap(splitName));
+// each identifier's parts, and the identifier whole: a concept named editPage is the word editpage, not the words edit and page (KF-19, KF-39)
+const partsOf = (text) => new Set((text.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? []).flatMap((w) => [...splitName(w), w.toLowerCase()]));
 const rowOf = (c) => c?.row ?? c ?? {};
 const wordsOf = (name, c) => [name.toLowerCase(), ...(c?.words ?? rowOf(c).words ?? []).map((w) => String(w).toLowerCase())];
 
@@ -82,10 +84,11 @@ export function unknownConcepts(making, shape) {
   // bracketed text goes first, nested brackets too, so a ";" inside a shape ("slot (many, 4; slotId(i, field))") does not end the list (KWB-17)
   let flat = making;
   for (let prev; prev !== flat;) { prev = flat; flat = flat.replace(/\([^()]*\)/g, ' '); }
-  for (const m of flat.matchAll(/\bconcepts?\s*:\s*([^;|]+)/gi)) {
-    for (const item of m[1].split(',')) {
+  // the list runs to `reuse:` or the line's end, and a shape word after a concept ("editKnob, many") is what the rule asks for (KF-24)
+  for (const m of flat.matchAll(/\bconcepts?\s*:\s*(.*?)(?=\breuse\s*:|\||$)/gim)) {
+    for (const item of m[1].split(/[,;]/)) {
       const w = item.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, '');
-      if (w && !['none', 'no', '-', 'n/a'].includes(w) && !known.has(w)) out.push(w);
+      if (w && !NOT_CONCEPTS.has(w) && !known.has(w)) out.push(w);
     }
   }
   return out;
@@ -180,8 +183,10 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
     }
   }
 
-  // 2. once-only on the source the turn wrote
-  const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path)).map((w) => w.path))]
+  // 2. once-only on the source the turn wrote. The tools' writes passed once-only itself when it is installed; running its detector again on them at
+  // every Stop cost over the kit's own 500 ms line (KF-33). The shell's writes stay: much of what they write is unknown at write time.
+  const atWrite = existsSync(join(claudeRoot(join(cwd, 'x')), '.claude/hooks/once-only.mjs'));
+  const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))]
     .filter((p) => !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
   if (sources.length) {
     // once-only's index finds the candidates, jscpd confirms on those files alone (lib/dup-index.mjs; KWB-24: no whole-repo scan)

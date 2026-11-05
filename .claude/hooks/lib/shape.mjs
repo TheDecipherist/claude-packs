@@ -22,6 +22,8 @@ import { logRefusal } from './hook-log.mjs';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { matchesAny } from './glob.mjs';
+import { blankMessages, isFirstMatch, isKnownName, isLibraryCall, isLongerName, isSourceRole, isSum } from './shape-prose.mjs';
+import { handLists } from './shape-lists.mjs';
 
 export const SHAPE_FILE = 'design/shape.json';
 export const ASK = 'example, rule, or constant?';
@@ -113,7 +115,7 @@ export function isExampleLine(line) {
   return OPENS.test(rest) || EXAMPLE_CELL.test(line);
 }
 
-const named = (line, name) => new RegExp(`(?<![\\w])${esc(name)}(?![\\w])`).test(line);
+export const named = (line, name) => new RegExp(`(?<![\\w])${esc(name)}(?![\\w])`).test(line);
 export function classify(line, concept, shape) {
   const c = typeof concept === 'string' ? shape?.concepts?.[concept] : concept;
   if (isExampleLine(line)) return 'example';
@@ -165,15 +167,17 @@ const ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seven
 const NOT_ROLES = new Set(['ALL', 'EACH', 'EVERY', 'ANY', 'ONE', 'NEW', 'THE', 'NO', 'THIS', 'THAT', 'SAME', 'OTHER', 'OWN', 'NEXT', 'MANY', 'NOT', 'AND', 'OR', 'TODO', 'NOTE', 'FIXME', 'IN', 'ON', 'OF', 'TO', 'A', 'AN', 'EMPTY', 'SELECTED', 'OPEN', 'CURRENT',
   'PASS', 'FAIL', 'FAILED', 'RED', 'GREEN', 'OK', 'SKIP', 'WARN', 'ERROR']); // a gate's verdict before the word ("FAIL slot 2"; KWB-15)
 
-function lineHits(line, c, shape, aliases, inSwitch) {
+function lineHits(line, c, shape, aliases, inSwitch, file) {
   const hits = [];
-  const add = (instance, why) => hits.push({ instance: String(instance), why });
+  const add = (instance, why, call) => hits.push({ instance: String(instance), why, call });
+  const words = blankMessages(line, file); // what is read as words: a sentence in a string is text (KF-17)
   for (const re of c.patterns) for (const m of line.matchAll(re)) add(m[1] ?? m[0], `matches the pattern ${re.source}`);
   const W = c.words.map(esc).sort((a, b) => b.length - a.length).join('|');
-  const num = new RegExp(`(?<![A-Za-z0-9])(${W})(?:[ _#-]|\\s+(?:no\\.?|number|#)\\s*)?(\\d+)(?!\\d)((?:\\s*(?:-|–|\\.\\.|to|through)\\s*)(\\d+))?`, 'gi');
+  const num = new RegExp(`(?<![A-Za-z0-9])(${W})(?:[ _#-]|\\s+(?:no\\.?|number|#)\\s*)?(\\d+)(?![\\dxX])((?:\\s*(?:-|–|\\.\\.|to|through)\\s*)(\\d+))?`, 'gi'); // 0x18000 is an address (KF-13)
   // A multi-word all-caps label ("AIM EFFECTS", "NOTES MONO") names a control, not an instance (KWB-22): the caps word before it.
   const labelBefore = (at) => { const w = /([A-Z][A-Z0-9]+)\s+$/.exec(line.slice(0, at)); return w !== null && !NOT_ROLES.has(w[1]); };
-  for (const m of line.matchAll(num)) {
+  for (const m of words.matchAll(num)) {
+    if (isSourceRole(line, m)) continue; // KF-28
     if (c.count !== null && !m[3] && Number(m[2]) > c.count) continue; // past the count: a value, not an instance (KWB-22)
     if (m[1] === m[1].toUpperCase() && labelBefore(m.index)) continue; // AIM EFFECTS 100: a control's value
     if (m[3] && c.count !== null) {
@@ -186,13 +190,15 @@ function lineHits(line, c, shape, aliases, inSwitch) {
   for (const m of line.matchAll(camel)) add(m[2], `names it by number in an identifier ("${m[0]}")`);
   const S = c.single.map(esc).join('|');
   const ord = new RegExp(`(?<![A-Za-z0-9])(${ORDINALS.join('|')}|\\d+(?:st|nd|rd|th))[\\s_-]*(${S})(?![a-z])`, 'gi');
-  for (const m of line.matchAll(ord)) {
+  for (const m of words.matchAll(ord)) {
+    if (isFirstMatch(words, m)) continue; // KF-17
     const o = m[1].toLowerCase();
     add(ORDINALS.includes(o) ? ORDINALS.indexOf(o) + 1 : parseInt(o, 10), `names it by ordinal ("${m[0].trim()}")`);
   }
   if (c.shape === 'many') {
     const role = new RegExp(`(?<![A-Za-z0-9_])([A-Z][A-Z0-9]+)\\s+(${c.single.flatMap((w) => [esc(w), esc(cap(w))]).join('|')})(?![A-Za-z0-9_])`, 'g');
-    for (const m of line.matchAll(role)) if (!NOT_ROLES.has(m[1]) && !c.words.includes(m[1].toLowerCase()) && !c.names.has(m[1]) && !labelBefore(m.index)) add(m[1], `names it by a role ("${m[0]}"): the instance is a job or a value, not a ${c.name}`);
+    const notARole = (m) => NOT_ROLES.has(m[1]) || c.words.includes(m[1].toLowerCase()) || c.names.has(m[1]) || labelBefore(m.index) || isKnownName(m[1], m[2], shape) || isLongerName(words, m.index + m[0].length);
+    for (const m of words.matchAll(role)) if (!notARole(m)) add(m[1], `names it by a role ("${m[0]}"): the instance is a job or a value, not a ${c.name}`);
   }
   for (const m of line.matchAll(/([A-Za-z_]\w*)\s*(?:\[\s*(\d+)\s*\]|\.at\(\s*(\d+)\s*\))/g)) {
     const lead = line.slice(0, m.index).trimEnd();
@@ -203,41 +209,14 @@ function lineHits(line, c, shape, aliases, inSwitch) {
   }
   const EXPR = '[A-Za-z_]\\w*(?:(?:\\.|->|::)[A-Za-z_]\\w*|\\(\\)|\\[\\w*\\])*';
   for (const m of line.matchAll(new RegExp(`(${EXPR})\\s*(?:===?|!==?)\\s*(\\d+)(?![\\w.])`, 'g'))) if (conceptOfExpr(m[1], shape, aliases) === c.name) add(m[2], `compares a ${c.name} with a number ("${m[0]}")`);
-  for (const m of line.matchAll(new RegExp(`(?<![\\w.])(\\d+)\\s*(?:===?|!==?)\\s*(${EXPR})`, 'g'))) if (conceptOfExpr(m[2], shape, aliases) === c.name) add(m[1], `compares a ${c.name} with a number ("${m[0]}")`);
+  for (const m of line.matchAll(new RegExp(`(?<![\\w.])(\\d+)\\s*(?:===?|!==?)\\s*(${EXPR})`, 'g'))) if (conceptOfExpr(m[2], shape, aliases) === c.name && !isSum(line.slice(0, m.index))) add(m[1], `compares a ${c.name} with a number ("${m[0]}")`);
   if (inSwitch === c.name) for (const m of line.matchAll(/\bcase\s+(\d+)\s*:/g)) add(m[1], `a case for one ${c.name} ("${m[0]}")`);
   for (const m of line.matchAll(/(?<![\w])([A-Za-z_]\w*)\s*\(\s*(\d+)\s*[,)]/g)) {
     const ps = parts(m[1]);
-    if (ps.some((p) => c.single.includes(p)) && !ps.some((p) => c.plural.has(p) || COUNTISH.has(p))) add(m[2], `drives one ${c.name} by number ("${m[0].replace(/[,)]$/, '')}")`);
+    if (isLibraryCall(line, m.index, shape)) continue; // KF-20
+    if (ps.some((p) => c.single.includes(p)) && !ps.some((p) => c.plural.has(p) || COUNTISH.has(p))) add(m[2], `drives one ${c.name} by number ("${m[0].replace(/[,)]$/, '')}")`, m[1]);
   }
   return hits;
-}
-
-// Consecutive lines (or ;/, separated pieces of one line) that differ only in one number running over every instance:
-// a hand-listed set, one line per instance.
-function handLists(lines, c, out, seen) {
-  if (!c.count || c.count < 2 || c.shape !== 'many') return;
-  const mentions = (t) => parts(t).some((p) => c.words.includes(p)) || c.arrays.some((a) => named(t, a));
-  const templates = (t) => [...t.matchAll(/(?<![\w.])\d+(?![\w.])/g)].map((m) => ({ tpl: t.slice(0, m.index) + '#' + t.slice(m.index + m[0].length), v: Number(m[0]) }));
-  const runOver = (pieces, at, whole = null) => {
-    for (let i = 0; i + c.count <= pieces.length; i += 1) {
-      for (const first of templates(pieces[i].trim())) {
-        if (first.v > 1 || !mentions(whole ?? first.tpl)) continue;
-        let ok = true;
-        for (let k = 1; k < c.count && ok; k += 1) ok = templates(pieces[i + k].trim()).some((t) => t.tpl === first.tpl && t.v === first.v + k);
-        if (ok) return at(i);
-      }
-    }
-    return null;
-  };
-  const lineNo = runOver(lines, (i) => i);
-  if (lineNo !== null && !isExampleLine(lines[lineNo]) && !seen.has(`${lineNo}|${c.name}`)) {
-    out.push({ line: lineNo + 1, text: lines[lineNo].trim(), concept: c.name, instance: 'each', why: `a hand-listed set, one line per ${c.name}: write one loop over every ${c.name}, or the generator` });
-  }
-  lines.forEach((l, i) => {
-    if (seen.has(`${i}|${c.name}`) || isExampleLine(l) || classify(l, c, null)) return;
-    const pieces = l.split(/[;,]/);
-    if (pieces.length >= c.count && runOver(pieces, () => true, l)) out.push({ line: i + 1, text: l.trim(), concept: c.name, instance: 'each', why: `a hand-listed set, one piece per ${c.name}: write one loop over every ${c.name}, or the generator` });
-  });
 }
 
 export function findInstanceLiterals(text, file, shape, { only = null } = {}) {
@@ -259,11 +238,11 @@ export function findInstanceLiterals(text, file, shape, { only = null } = {}) {
       // only 'brief': an example or a declared constant read by name excuses it (the number rule's third form), a selector does not
       if (cls === 'example' || (cls === 'constant' && only === 'brief') || (cls && only !== 'example' && only !== 'brief')) continue;
       const once = new Set();
-      for (const h of lineHits(line, c, shape, aliases, inSwitch)) {
+      for (const h of lineHits(line, c, shape, aliases, inSwitch, file)) {
         if (once.has(h.instance)) continue;
         once.add(h.instance);
         seen.add(`${i}|${c.name}`);
-        out.push({ line: i + 1, text: shown[i].trim(), concept: c.name, instance: h.instance, why: h.why });
+        out.push({ line: i + 1, text: shown[i].trim(), concept: c.name, instance: h.instance, why: h.why, call: h.call });
       }
     }
   });

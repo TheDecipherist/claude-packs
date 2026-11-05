@@ -16,6 +16,17 @@ What fails silently or fails open:
 - `GH_TOKEN=$X` with X unset is refused, and the refusal names the logged-in account and `ghAuth: cli`. With `ghAuth: cli` a push needs no token in its URL, and with no owner a push over SSH is no longer refused for naming no token (KF-12).
 - `global add` installs base's shell reader. The kit no longer keeps a hand copy of it in `global/`.
 
+False refusals, each held against the build's real refusals in both directions:
+
+- `shape-law`: 14 of its 25 refusals were wrong. It no longer reads a hex address after a concept word, a sentence in a string, first as a search (`the first program with this name`), a sum (`x + 1 == program`), a library's call, a longer proper name (`MIDI Program Change`), a role quoted from a source (`[MAN] Edit knob 1 selects`), or a concept's own name or a listed selector (`EDIT knob`) as an instance. A call that takes a count is told from one that takes an index by its declared parameter: `turnProgram (int steps, ...)` passes and `turnEditKnob (int knob, ...)` is refused (KF-13, KF-17, KF-20, KF-28, KF-36).
+- `making-check` matches a camelCase concept by its row name, accepts the shape word its own rule asks for, and judges only the writes after a turn's last landing, since compaction lets one turn hold a whole run (KF-19, KF-24, KF-34, KF-39). It no longer reruns once-only's detector on writes once-only has judged: 462 ms to 353 ms on the real transcript (KF-33).
+- `code-shape` reports every line at fault in one refusal, and counts a Python brace and a lambda in a list correctly (KF-14, KF-27). One long line per refusal was the largest cost the kit added: 37 of 132.
+- `git-guard` and `stage-guard` read `git add -n` as a dry run, `git checkout --theirs` during a merge as a resolution, and judge the subcommand rather than a word in an argument, so `git rev-parse x^{commit}` is no commit (KF-10, KF-21).
+- `position-not-integrated` leaves tests' stubs alone, and `cpp-find-with-the-library` needs a `return` or `break` on the match (KF-25, KF-26).
+- `once-only` no longer counts a block of `using` lines, includes and one-line constants as a copy (KF-32).
+- `dispatch-once` tells two kinds of one name apart by their cases, and refuses two switches on one kind in one new file (KF-35).
+- `protect-vendor`'s refusal names `buildOutput` (KF-2).
+
 ## 1.0.1 (2026-11-05)
 
 - `suggest` and `init --auto` no longer read `node_modules`. In a new project with no `.gitignore`, the kit's own installed files were taken as the project: it was called `node`, and `reverse-engineering` was missed.

@@ -11,20 +11,21 @@
 //   - a selector for a concept (pickSlot, slotFor, firstSlot, ownerSlot) not listed in the manifest;
 //   - a new type that holds instances (an index member, or made N times in an array) whose concept has no row.
 // No design/shape.json: nothing is declared, so nothing is judged (doctor fails a project of a configuration that needs one). `--selftest`.
-import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkoutRoot, insideProject, relInCheckout, ROOT } from './lib/project.mjs';
 import { addedFindings, findInstanceLiterals, formatFinding, isExcluded, isTestFile, logRefusal, readShape } from './lib/shape.mjs';
 import { addedDefs, findSelectorDefs, findUnknownTypes } from './lib/shape-code.mjs';
+import { declaredAmount } from './lib/shape-prose.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const TEST_NOTE = 'a test that drives one instance proves that instance only: loop over every instance, or take the instance as a parameter';
 
-function judgeText(rel, before, after, shape) {
-  const lits = addedFindings(before, after, (t) => findInstanceLiterals(t, rel, shape));
+function judgeText(rel, before, after, shape, root) {
+  // a call that takes a count looks like one that takes an index; the declaration tells them apart (KF-17)
+  const lits = addedFindings(before, after, (t) => findInstanceLiterals(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after)));
   const test = isTestFile(rel);
   const out = lits.map((f) => `${formatFinding(f, rel)}${test ? `\n      ${TEST_NOTE}` : ''}`);
   const concepts = lits.map((f) => f.concept);
@@ -45,7 +46,7 @@ function main(text) {
     if (!shape || shape.error) continue;
     const rel = relInCheckout(w.path);
     if (rel.startsWith('..') || isExcluded(rel, shape)) continue;
-    const { out, concepts } = judgeText(rel, w.before, w.after, shape);
+    const { out, concepts } = judgeText(rel, w.before, w.after, shape, root);
     if (!out.length) continue;
     logRefusal(ROOT, 'shape-law', concepts);
     process.stderr.write(`BLOCKED by shape-law: this write names one instance of a concept that design/shape.json declares (KWB-1).\n${out.slice(0, 10).map((l) => `  ${l}`).join('\n')}${out.length > 10 ? `\n  ... and ${out.length - 10} more` : ''}\n` +
@@ -119,6 +120,12 @@ function selftest() {
     ['allowed: a multi-word caps label\'s value ("AIM PLANETS 100", KWB-22)', w('src/ui/View.cpp', '// every planet off, AIM PLANETS 100: nothing heard\n'), 0],
     ['allowed: a multi-word caps label before the word ("a NOTES MONO slot", KWB-22)', w('src/engines/Engine.cpp', '// a NOTES MONO slot plays only its newest note\n'), 0],
     ['allowed: a number past the count is a value ("slot 40 ms", KWB-22)', w('docs/notes.md', 'Each slot 40 ms later than the last.\n'), 0],
+    ['allowed: a hex address after the word (KF-13)', w('docs/notes.md', 'Slot 0x18000 appears at window 0x8000.\n'), 0],
+    ['allowed: first as a search (KF-17)', w('src/world/Find.cpp', '// the first slot with this name, or nothing\n'), 0],
+    ['allowed: a sentence in a string (KF-17)', w('tests/msg_test.cpp', 'expect (done, "and on that bank has a second slot");\n'), 0],
+    ['allowed: a sum, not a compare (KF-20)', w('src/world/Sum.cpp', 'bool same = each + 1 == slot;\n'), 0],
+    ['a short key in a string is still an instance (KF-17)', w('tests/key_test.cpp', 'set ("slot 2", 3);\n'), 2],
+    ['the first of the concept is still an instance (KF-17)', w('docs/notes.md', 'The first slot holds the pad.\n'), 2],
     ['allowed: the whole range "slots 1-4"', w('docs/notes.md', 'Slots 1-4 all play every note.\n'), 0],
     ['allowed: a line already there, edited and moved (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), 'void f() { if (slot == 2) g(); }\n// PLACE', '// PLACE\nvoid f() { if (slot == 2) g(); } // closed: B-1')), 0],
     ['an edit adding a second copy of a literal already there (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', 'void h() { if (slot == 2) g(); }')), 2],
