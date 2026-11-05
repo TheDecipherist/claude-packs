@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.36.0 (2026-11-05)
+
+The MPX 500 panel, rebuilt from one worn photograph taken off-axis, copied the camera's angle and a bent rack ear, and passed its look gate. A rule that said one size for one component was loaded and lost to the photograph.
+
+- New rule `straight-on-and-aligned` in `audio-core`: basic UX before the picture. A UI is drawn straight on, everything aligns horizontally and vertically, whatever looks grouped is a group, size comes from the kind, and a round control's parts share a centre.
+- `analyse-reference-look` separates the object from the photograph first, finds the grid and snaps to it, and has the gate check alignment, sizes and centres on their own.
+- `type-space-colour` and `build-from-reference` say the same for the web.
+
 ## 0.35.1 (2026-11-05)
 
 - `making-check` no longer sends back a turn for giving a view or quoting words (KWB-47). An estimate that differed from the user's, in the words of the override pattern, was read as ignoring an instruction, and a reply quoting those words fired it again. What a turn did is still judged.

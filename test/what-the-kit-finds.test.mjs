@@ -90,3 +90,15 @@ test('a unit cannot write a second clock, and a project that draws in code canno
   assert.equal(write(image), 2);
   assert.equal(write('g.fillEllipse (bounds);\n'), 0);
 });
+
+test('a UI is drawn straight on and aligned, and the image skill separates the object from the photograph', () => {
+  const dir = project({ 'src/app/Editor.cpp': '// x\n' });
+  assert.equal(cli(dir, 'init', '--config', 'synth-creator').status, 0);
+  const rule = readFileSync(join(dir, '.claude/rules/straight-on-and-aligned.md'), 'utf8');
+  assert.match(rule, /^paths:/m, 'it loads on UI code, not at every launch');
+  assert.match(rule, /src\/app/);
+  assert.match(rule, /whatever looks grouped is a group/);
+  const skill = readFileSync(join(dir, '.claude/skills/analyse-reference-look/SKILL.md'), 'utf8');
+  assert.match(skill, /separate the object from the photograph/);
+  assert.match(skill, /find the grid/);
+});

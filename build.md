@@ -136,6 +136,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: making-check judges what a turn did, not a view or a quotation; concepts: none (design/shape.json declares none); reuse: OVERRIDE (packs/base/hooks/making-check.mjs).
   done when: both cases seen red, then green, and the real override cases still refused; the whole suite green once, committed; landed.
 
+- 0.36.0, straight on (work/0.36.0-straight-on), started 2026-11-05 (the MPX 500 panel copied its photograph's angle and damage).
+  making: a rule for basic UX on any UI, and analyse-reference-look learns the object from the photograph; concepts: none (design/shape.json declares none); reuse: analyse-reference-look (packs/audio-core/skills).
+  done when: the rule loads on UI code and the skill carries the steps; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

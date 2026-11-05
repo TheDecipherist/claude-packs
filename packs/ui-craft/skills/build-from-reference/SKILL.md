@@ -17,7 +17,7 @@ Always do:
    - **Colour:** the palette, the accent, background and image treatment.
    - **Structure:** section order, density, repeated motifs.
 2. Say why it looks strong, in a few lines, and list what is unclear.
-3. Build to it section by section, comparing a screenshot with the reference at the same width.
+3. Build to it section by section, comparing a screenshot with the reference at the same width. A photograph is evidence of the design: draw the object straight on and aligned, never its camera angle or its wear.
 4. Resolve what is unclear in this order: the visible design language, the layout and spacing logic, the component family, the polish level, then the most faithful option that can be built.
 5. Report every place the code differs from the reference, and why.
 
