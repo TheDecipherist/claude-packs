@@ -158,3 +158,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 0.35.0 the foundation: the gate ran once on 6d788ad, 341 of 342: the timing check refused the raw byte compare the midi pack gives as correct, so it now judges only a second clock; the test passes alone on c00d581.
 - 2026-11-05: 0.35.1 a view is no override: the gate ran once on e78f52d, 342 of 342.
 - 2026-11-05: 0.36.0 straight on: the gate ran once on b21697b, 343 of 343.
+- 2026-11-05: 0.36.1 git-guard judges a repo by its own remote, not the project's: the suite ran once, 341 of 343, the two reds the noop list, which named the selftest and then passed 3 of 3.

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.36.1 (2026-11-05)
+
+- git-guard: a commit in a repo other than the project's is not judged against the project's `guards.git.repo`. A repo with no remote was
+  told to push its history into the project's repo (KWB-48, Stellix WB-108).
+
 ## 0.36.0 (2026-11-05)
 
 The MPX 500 panel, rebuilt from one worn photograph taken off-axis, copied the camera's angle and a bent rack ear, and passed its look gate. A rule that said one size for one component was loaded and lost to the photograph.

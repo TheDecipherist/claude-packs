@@ -1,9 +1,9 @@
 {
-  "kit": "0.35.1",
+  "kit": "0.36.1",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-05T07:40:00.874Z",
+  "updated": "2026-11-05T13:08:31.000Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -35,7 +35,7 @@
     ".claude/hooks/dispatch-once.mjs": "9699bc5986636980d937ac887e5a692d4391ade5535da4d9c5306cec6e726326",
     ".claude/hooks/file-size-guard.mjs": "0e31aa45abf03db12e3e41c6b8925aa7a9b2a966882c704098416ec07c4ae149",
     ".claude/hooks/folder-law.mjs": "b5bb70327aafddce6083b4f8d59668b28c3077b5e0d70f34a27aec0bc2e5a2a6",
-    ".claude/hooks/git-guard.mjs": "0c14a7f142c7091f1d87321c6e455151dd9a4e2085044a5594cbeb334d75499e",
+    ".claude/hooks/git-guard.mjs": "9bb897938fb075908213dbcadaf3a9776a3b7bff6475c1790d89f031bb75f012",
     ".claude/hooks/lesson-checks.mjs": "3d82d68e92796c3c9c41ee1743a8dda38dcd213533d38307be76e56d5880f848",
     ".claude/hooks/lib/apply-edit.mjs": "b5ba751ef1b21a32430592091b2dc795f64697afc6ca39443faa1c8b539af9f5",
     ".claude/hooks/lib/code-shapes.mjs": "23d567ed310da94630c22309a7f05dcdba74033c85dc71fc3fb7aabcc6fe3cf1",
@@ -47,7 +47,7 @@
     ".claude/hooks/lib/event-log.mjs": "3594e6483acf06196425d43ce8f422ff2d466ed5fea12d13ec71951de94c8158",
     ".claude/hooks/lib/function-shapes.mjs": "454bfb20c238d75ddce9172321f246eec868b52f00a61b657e0fec8ba5ce67ce",
     ".claude/hooks/lib/git-adds.mjs": "e00fa3137a83dc428185206a0a9d6316ad264880fe6971ab3f6e176a3e8ec6ff",
-    ".claude/hooks/lib/git-guard-selftest.mjs": "c28ef3b300023613c6e0414edd6c33ee70d8f1be3ce36195c7f2be8ce8e73728",
+    ".claude/hooks/lib/git-guard-selftest.mjs": "345e865a9d91083dfae4eb7fa30872eed138b66f8c60b6bd0b6f78b4f8ff0512",
     ".claude/hooks/lib/glob.mjs": "ef96f30a68a7da275ab0fa11be56331d03e086cb055dd4e19069a5d73c9b2cd2",
     ".claude/hooks/lib/hook-log.mjs": "16cda511394fa520f318d45c8f4fd9a4628693bd21565ea09088fbf3583499bc",
     ".claude/hooks/lib/house.py": "0c8a2e113eec53c48caa8e11f5dd8f1d611ed239cc137c246d8d7bab8e4aa661",
@@ -59,7 +59,7 @@
     ".claude/hooks/lib/program-writes.mjs": "3d4c6a86ff17f2b0d277c697c8a45100dd8d527f7e1d3407bcdce98c2f892a1d",
     ".claude/hooks/lib/project.mjs": "7efb2ab68e4a09b3341d51751be0b880157ec846fdb2494da0d8bd8d23890b9b",
     ".claude/hooks/lib/prose.mjs": "f381ed0951d6eccf745b1535794d1e9977fa0583ccc2b1dc3d176bce02f0f8b6",
-    ".claude/hooks/lib/pushed.mjs": "1376e52a75a02ffc61b8ce9a72bfbe529ed617dd4fcf51bc6076cf52a1daffe1",
+    ".claude/hooks/lib/pushed.mjs": "c3fd91b295502d3737cf896a72b5d339dfb377d38b20c41a8920599dcbf80e48",
     ".claude/hooks/lib/repo-index.mjs": "39f3ed768cb0d98b451d04fd6899ba6a70fe6da926aa61bfe801626c909be0e1",
     ".claude/hooks/lib/secret-patterns.mjs": "0b96d5e65c32c1b545267e62b9f1b25e8272902d9fb13520f35e4d088fa440ce",
     ".claude/hooks/lib/selftest.mjs": "63485e4d9e39af1df5e59a54a89b4e2745eb0a14fb20cbac9ad4370e473a13e3",

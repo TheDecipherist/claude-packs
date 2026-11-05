@@ -14,6 +14,7 @@
 // A repo that pushes by URL only and has no remote (Stellix) names its GitHub repo in guards.git.repo ("owner/name", or a URL
 // or path); with neither, there is nothing to compare with and nothing is judged.
 //   remoteHeads(cwd, remote, { tokenVar, repo, live }) -> { url, heads: Map<branch, sha>, cached } | { url, error }
+//   forRepo(cwd, projectDir, cfg) -> cfg, without guards.git.repo when cwd is another repo
 //   unpushed(cwd, branch, cfg) -> null | { error } | { branch, remote, url, commits: [{ sha, subject }] }
 //   localBranches(cwd, cfg) -> null | { error } | [{ branch, url, missing, ahead }]   (only the ones not on GitHub)
 //   pushCommand(url, branches, cfg) -> the push form with the token named
@@ -104,6 +105,13 @@ function withHeads(cwd, remote, cfg, judge) {
     found = judge(h);
   }
   return found;
+}
+
+// guards.git.repo names the project's own repo: a command in another repo is not judged against it (KWB-48; it told a repo with
+// no remote to push its history into the project's repo). A worktree of the project shares its git dir, so it stays judged.
+export function forRepo(cwd, projectDir, cfg = {}) {
+  const common = (dir) => { const d = out(git(dir, ['rev-parse', '--git-common-dir'])); return d ? resolve(dir, d) : null; };
+  return cfg.repo && common(cwd) !== common(projectDir) ? { ...cfg, repo: null } : cfg;
 }
 
 export function unpushed(cwd, branch, cfg = {}) {
