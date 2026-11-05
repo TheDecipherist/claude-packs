@@ -120,6 +120,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: suggest and scan read a project as it is; the key pattern stops taking identifiers; names-sweep reports where names sit densest; the lessons of two bug logs in names-first; concepts: none (design/shape.json declares none); reuse: recommend (lib/scan-detect.mjs), repoWeight (lib/repo-weight.mjs), sweep (packs/reverse-engineering/tools/names-sweep.mjs).
   done when: each fault is measured gone on the repo that showed it, with real keys still caught; the whole suite green once, committed; landed.
 
+- 0.33.0, PDF to Markdown (work/0.33.0-pdf-to-md), started 2026-11-05 (a PDF is read with docling).
+  making: a base skill pdf-to-md; concepts: none (design/shape.json declares none); reuse: the skill format of packs/base/skills.
+  done when: the skill installs in every configuration and its command is measured on a real manual; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

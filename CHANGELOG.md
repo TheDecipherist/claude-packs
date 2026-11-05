@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.33.0 (2026-11-05)
+
+- New base skill `pdf-to-md`: a PDF is read with docling, which keeps tables as tables. It says how to spot a download that is not a PDF and a scan with no text, and leaves images out: 79 KB and 37 seconds on an 87-page manual, against 2.2 MB and 114 seconds by default.
+
 ## 0.32.0 (2026-11-05)
 
 Six more real repos were read with the kit, and it was wrong about them in ways no test had seen.

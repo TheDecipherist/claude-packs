@@ -1,9 +1,9 @@
 {
-  "kit": "0.32.0",
+  "kit": "0.33.0",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-05T06:45:56.758Z",
+  "updated": "2026-11-05T06:54:52.300Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -88,6 +88,7 @@
     ".claude/skills/fix-from-scan/SKILL.md": "17f6efcb53e7f2dc703fd02b03bac3fc210ff423c447629ef4f3ff74b85a46f9",
     ".claude/skills/land-branch/SKILL.md": "2f6ff9309844f7264b7ce428a4e895ef340a84c67256655a6c995cb783fac5c6",
     ".claude/skills/make-it-a-template/SKILL.md": "d22ec5a5db71a3a820641f773c830333c59e6aee9ad7f32fd87db720801dab11",
+    ".claude/skills/pdf-to-md/SKILL.md": "fe9a5482a950c09b9aa0bffe0aeb975440d94914c81721c694db81626a0ed5da",
     ".claude/skills/pick-tests/SKILL.md": "f51517d0dd55ed10f15864d43ea023fcb53dfdfa00834b8258809a6da034130c",
     ".claude/skills/pressure-test-skill/SKILL.md": "67028f7437b5474f4f79b54e283f368d8619993bfef2a28aaa850685dfb1bb67",
     ".claude/skills/prove-instances-identical/SKILL.md": "3a030057cbf9b62c61f6e3b18ced3f0497719a997e77d6bfba3dc7d839082576",
