@@ -3,7 +3,7 @@
   "packs": [
     "base"
   ],
-  "updated": "2026-11-05T04:26:41.242Z",
+  "updated": "2026-11-05T04:37:07.740Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -17,7 +17,7 @@
     ".claude/rules/open-items-tagged.md": "b5535a7ad55f3972177a4a2a12ecb2559d798239111ef1492ec728be87beee48",
     ".claude/rules/plan-and-logs.md": "a7f7898f3e81b30353aca8d195a4898d7e1c74a2c01e5e6a3bec2bd6d2bd79d4",
     ".claude/rules/references-use-anchors.md": "a5fdcfdc2fa95d4f9a96e9c99e64f08502dd7bace29c1c91d7b30b0e4c800ccf",
-    ".claude/rules/refusals-are-judged.md": "00f9209519ef41a0c0e0045e86d0ea01bf83598cf4cfff66f01892dcf206ac4c",
+    ".claude/rules/refusals-are-judged.md": "28ae66b9fcd64fff229e0edd42e035398f4c063d786324f9821c3f567a2f0e51",
     ".claude/rules/reuse-before-writing.md": "77b54d7b28a9372abdb0128bd12da572f7566b6a1630e908458d02643ff99570",
     ".claude/rules/secrets-never-committed.md": "3b14cd19d6f744f97ad4ff675edf9b410ef9e79b1e744b3be7509d962086118e",
     ".claude/rules/skill-writing.md": "cd7475c22cafc56a3bc992e8742fd648c4390a31c91f8896ed2367edec16ed47",
