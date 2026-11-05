@@ -1,0 +1,23 @@
+{
+  "id": "sysex-length-literal",
+  "why": "A record's length belongs to its type. 67 presets were really 625 behind a fixed length.",
+  "rule": ".claude/rules/sysex-is-a-record.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\bgetSysExDataSize\\s*\\(\\s*\\)\\s*[!=]=\\s*\\d+",
+  "bad": "if (m.getSysExDataSize() != 268) return;",
+  "good": "if (m.getSysExDataSize() != lengthOf (type)) return;",
+  "code": true
+}

@@ -1,0 +1,23 @@
+{
+  "id": "no-tempo-writeback",
+  "why": "Writing the resolved tempo into the unit's own BPM field makes internal sync quietly follow the host, and every external test still passes.",
+  "rule": ".claude/rules/measure-the-clock-in-audio.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\b\\w*[bB]pm\\w*\\s*(?:\\.|->)\\s*store\\s*\\(\\s*(?:\\w*[tT]empo\\w*|resolved\\w*|host\\w*|pos\\w*\\s*(?:\\.|->))",
+  "bad": "bpm.store (tempo);",
+  "good": "resolveTempo (bpm.load(), transport);",
+  "code": true
+}

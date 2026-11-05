@@ -1,0 +1,30 @@
+{
+  "id": "no-hash-in-the-signal",
+  "why": "A hash in the signal path invents a difference the machine does not have, and hides a missing law.",
+  "rule": ".claude/rules/neutral-is-exact.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/gates/**",
+    "**/*_test.*",
+    "**/*.test.*"
+  ],
+  "pattern": "(?:cut|res|gain|level|filter)\\w*\\s*[*+]?=[^;\\n]*\\bhash\\w*\\s*\\(",
+  "bad": "cutoff *= 0.7f + 0.6f * hash01 (id);",
+  "good": "cutoff *= zone.trim;",
+  "flags": "i",
+  "code": true
+}

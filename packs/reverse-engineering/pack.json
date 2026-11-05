@@ -1,0 +1,35 @@
+{
+  "name": "reverse-engineering",
+  "version": "1.0.0",
+  "description": "Rebuilding a machine from its firmware, manuals and sound banks: two sources before naming anything, every law carries its source, a negative names what was scanned, every term of a sum is accounted for, and firmware stays out of git.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/reverse-engineering"
+  },
+  "keywords": [
+    "reverse-engineering",
+    "firmware"
+  ],
+  "engines": {
+    "claude-packs": ">=0.28.0"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/firmware-out-of-git.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

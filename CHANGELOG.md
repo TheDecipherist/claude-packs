@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.28.0 (2026-11-04)
+
+Four packs from the playbook of rebuilding classic machines from their firmware. Most of their laws come from failures that passed every test: nine units deaf to the transport, 272 of 625 presets silently on defaults, 15 algorithms on one DSP path.
+
+- `reverse-engineering`: two sources before naming, a source tag on every law and a ledger for what was tuned by ear, a negative names what was scanned, every term of a sum accounted for, findings withdrawn in place. The `gather-sources`, `bank-census`, `tripwire-the-law` and `re-deliverables` skills, and the `firmware-out-of-git` hook, with small named test fixtures allowed.
+- `midi`: the law of clock and sync, with the full reference beside the `clock-probe` skill; sysex as records that round-trip byte for byte; imports that count every loss. Nine checks.
+- `sound-design`: algorithms are data, neutral is exact, the meter before the engine, tests off the easy point. The `choose-observable`, `measure-reverb`, `spread-probe` and `measure-a-law` skills.
+- `instrument-shell`: sessions stay loadable, a collapse keeps every route, quiet says why, seams are declared. The `hit-the-painted-control` and `gates-from-commit-one` skills.
+- A project declares `guards.instrument.kind`, `reproduction` or `original`, and `oscillators-bandlimited` follows it: on a reproduction the machine is the spec.
+- `cpp` gains `cpp-builds-everywhere`, with `cpp-no-zero-size-array` and `cpp-m-pi-not-standard`. `repo-litter` refuses `:Zone.Identifier` files, which break a Windows checkout. `ci` gains `generated-files-have-no-diff`, and `a-control-is-seen-to-fire` the laws on injected faults.
+- Most of the new checks found little on four real repos, so they guard against regressions. They did find ROM tables in source, a raw struct in a session blob, and a hard-coded key anchor. One check was dropped after 213 false hits.
+
 ## 0.27.0 (2026-11-04)
 
 From the scan of a content-heavy site, the first of its kind, where the kit judged published text as code.

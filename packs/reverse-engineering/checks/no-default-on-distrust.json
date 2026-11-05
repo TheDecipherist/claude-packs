@@ -1,0 +1,24 @@
+{
+  "id": "no-default-on-distrust",
+  "why": "Falling back to a default for a value you distrust loads the wrong sound with no error: 272 of 625 presets did. Report it.",
+  "rule": ".claude/rules/account-every-term.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "if\\s*\\(\\s*!\\s*\\w*(?:trusted|valid|decoded)\\w*\\s*\\)[^;\\n]*=\\s*[^;\\n]*default",
+  "bad": "if (! trusted) v = algo.defaults();",
+  "good": "if (! trusted) report.add (name);",
+  "flags": "i",
+  "code": true
+}

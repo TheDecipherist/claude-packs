@@ -10,7 +10,7 @@ paths:
 Always do:
 - Correct every discontinuity (saw reset, pulse edge, hard-sync reset, and each of a supersaw's stacked saws) with a band-limiting method: PolyBLEP at minimum; 4th-order B-spline polyBLEP, minBLEP or mipmapped wavetables for the top octaves.
 - Keep the phase accumulator and its increment in `double`.
-- If a reverse-engineered oscillator must reproduce the original hardware's aliasing, make that a named, opt-in "vintage" mode with its own golden-file test. The default stays clean.
+- It depends on what is being built. On an original design, the default stays clean. On a reproduction (`guards.instrument.kind`), the machine is the spec: a naive saw is the instrument, with its source cited and a golden-file test.
 
 Never do:
 - Write a naive `phase * 2 - 1` saw or `phase < pw` pulse straight to the output.

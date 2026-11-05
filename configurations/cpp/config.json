@@ -14,7 +14,10 @@
       "python",
       "shell",
       "ci",
-      "go"
+      "go",
+      "reverse-engineering",
+      "midi",
+      "sound-design"
     ],
     "default": [
       "cpp"

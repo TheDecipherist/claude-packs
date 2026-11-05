@@ -1,11 +1,11 @@
 {
-  "kit": "0.27.0",
+  "kit": "0.28.0",
   "packs": [
     "base"
   ],
-  "updated": "2026-11-04T21:32:20.935Z",
+  "updated": "2026-11-05T02:52:02.544Z",
   "files": {
-    ".claude/rules/a-control-is-seen-to-fire.md": "0c5bd514c0bca703d65f5220f8e95074ab8df9b1b018f148ae0a87528b69df3d",
+    ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
     ".claude/rules/bug-fix-starts-red.md": "4c42c339a6682b66e37e9fd1dfdfcd003314f17a8b94e7f9c8ebdd42e6d54a52",
     ".claude/rules/field-map-over-if-runs.md": "1e05dbe8241a655a05b9e2068e1ee1c47dd83db5186d66c8456b5a8d1a6c319e",
@@ -70,7 +70,7 @@
     ".claude/hooks/making.mjs": "d523b6766af26f4ec66f786c4cd094941fc00eb2260d72835efafe5d35c77c1d",
     ".claude/hooks/once-only.mjs": "92018b82227abe6e4487df479779800779ae19b60d9e9a1aa791407dd36a59f7",
     ".claude/hooks/placement-law.mjs": "affd16057b575614175a06d7251cbf8a6f682df03ad3527c87588c7c31fa70d8",
-    ".claude/hooks/repo-litter.mjs": "6382a5379f6ff401aedb03e0cbe7673508928ea3241e4c81dc7e16407a66e4a6",
+    ".claude/hooks/repo-litter.mjs": "ac0f8c854f7f003ab80e9c17765e1af5f2d4a547f790092cb90b6b5eac943238",
     ".claude/hooks/reuse-hint.mjs": "0ae184b17f4e90bdcb86cb4f7f2eaec10aa1fd4e7434b6c2dc538d8b9a79daa3",
     ".claude/hooks/run-hooks.mjs": "e8103d5feb23abd101ed5d717665c63c24f1ac32f7bb26d1e7b85b515bbf412d",
     ".claude/hooks/secrets-guard.mjs": "4364f3ba614db380e0cb0cfd30d0ce4461438375dc9ade1201b0887630e0bd5a",

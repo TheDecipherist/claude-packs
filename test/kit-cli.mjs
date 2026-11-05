@@ -1,7 +1,9 @@
 // The kit's command as the 0.10.0 tests run it (one place, so their headers are not copies of each other): the CLI path, run
 // (throws on a non-zero exit, returns stdout), cli (returns the spawn result), a fresh folder, a hook fired as Claude Code fires it.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
+import assert from 'node:assert/strict';
+import { mkdirSync, mkdtempSync } from 'node:fs';
+import { test } from 'node:test';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,6 +23,20 @@ export const hookRun = (dir, name, payload) =>
 export const hookStatus = (dir, name, payload) => hookRun(dir, name, payload).status;
 // A Write fired at the project's lesson checks, and a set of checks held to their examples through the hook, in a real install.
 export const lessonWrite = (dir, rel, content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
+// One test per [pack, file, bad, good]: the pack installs, refuses the fault and takes the fix.
+export function holdsEachCase(cases, ...initArgs) {
+  for (const [pack, file, bad, good] of cases) {
+    test(`${pack}: ${file} is refused its fault and takes the fix`, () => {
+      const dir = fresh(`case-${pack}-`);
+      const r = cli(dir, 'init', pack, ...initArgs);
+      assert.equal(r.status, 0, r.stdout + r.stderr);
+      mkdirSync(join(dir, file, '..'), { recursive: true });
+      assert.equal(lessonWrite(dir, file, bad).status, 2);
+      assert.equal(lessonWrite(dir, file, good).status, 0);
+    });
+  }
+}
+
 export function holdToExamples(dir, checks, fileFor) {
   for (const c of checks) {
     const file = fileFor(c);

@@ -1,0 +1,22 @@
+{
+  "name": "midi",
+  "version": "1.0.0",
+  "description": "MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. Nine units once shipped deaf to the transport with every test green.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/midi"
+  },
+  "keywords": [
+    "midi",
+    "sysex",
+    "clock"
+  ],
+  "engines": {
+    "claude-packs": ">=0.28.0"
+  }
+}

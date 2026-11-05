@@ -15,7 +15,11 @@
       "stellix",
       "python",
       "shell",
-      "ci"
+      "ci",
+      "reverse-engineering",
+      "midi",
+      "sound-design",
+      "instrument-shell"
     ],
     "default": [
       "cpp",

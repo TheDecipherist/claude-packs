@@ -1,0 +1,23 @@
+{
+  "id": "no-raw-struct-blob",
+  "why": "A raw struct in a blob ties a session to one layout: change a field, and every saved session loads as defaults.",
+  "rule": ".claude/rules/session-blob-append-only.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\.append\\s*\\(\\s*&\\w+\\s*,\\s*sizeof\\b",
+  "bad": "sm.append (&s, sizeof (State));",
+  "good": "writeBlob (sm, s);",
+  "code": true
+}

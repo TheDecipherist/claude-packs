@@ -23,6 +23,7 @@ export const isRootImage = (rel, allow) => /^[^/]+\.(png|jpe?g|gif|webp|bmp|mov|
 function faultOf(rel, abs, cfg) {
   if (matchesAny(rel, cfg.allow ?? [])) return null;
   if (isRootImage(rel, [])) return `${rel} looks like a working screenshot in the repo root. Keep it out of git, or put an asset in its folder.`;
+  if (/:Zone\.Identifier$/.test(rel)) return `${rel} is a browser download marker. It is an invalid path on Windows and breaks checkout. Add *:Zone.Identifier to .gitignore.`;
   if (DUMP.test(rel)) return `${rel} is a log or a debug dump. Add it to .gitignore.`;
   let mb = 0;
   try { mb = statSync(abs).size / MB; } catch { return null; }
@@ -52,7 +53,7 @@ const main = (text) => judgeEvent(text, { name: 'repo-litter', command: judgeAdd
 
 function selftest() {
   const hook = new URL(import.meta.url).pathname;
-  const dir = scratchProject({ 'shot.png': 'x', 'favicon.png': 'x', 'src/a.ts': 'x', 'src/hero.png': 'x', 'trace.har': 'x', 'kept.png': 'x', '.claude/layout.json': JSON.stringify({ guards: { repoLitter: { maxFileMb: 1, allow: ['kept.png'] } } }) });
+  const dir = scratchProject({ 'src/a.pdf:Zone.Identifier': 'x', 'shot.png': 'x', 'favicon.png': 'x', 'src/a.ts': 'x', 'src/hero.png': 'x', 'trace.har': 'x', 'kept.png': 'x', '.claude/layout.json': JSON.stringify({ guards: { repoLitter: { maxFileMb: 1, allow: ['kept.png'] } } }) });
   git(dir, 'init', '-q');
   put(join(dir, 'media/big.bin'), 'x'.repeat(2 * MB));
   const add = (paths) => runHook(hook, dir, bashOf(`git add ${paths}`, dir));
@@ -61,6 +62,7 @@ function selftest() {
     ['a big file', add('media/big.bin'), 2],
     ['a folder holding a big file', add('media'), 2],
     ['a debug dump', add('trace.har'), 2],
+    ['a download marker', add('src/a.pdf:Zone.Identifier'), 2],
     ['source', add('src/a.ts'), 0],
     ['an image in its folder', add('src/hero.png'), 0],
     ['a favicon in the root', add('favicon.png'), 0],

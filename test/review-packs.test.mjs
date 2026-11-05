@@ -1,6 +1,6 @@
 // 0.25.0: packs made from senior reviews of three real repos. The worst faults there had no check: one customer reading another's data, a guard that
 // passed on an empty list, a password in a log. Each pack here installs alone, and refuses what it says it refuses.
-import { assert, cli, existsSync, fresh, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, holdsEachCase, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
 
 const CASES = [
   ['http-api', 'src/routes/segments.ts', 'const s = await findSegmentById(id);\nreturn json(s);\n', 'const s = await findSegmentById(id, session.user.id);\nreturn json(s);\n'],
@@ -18,16 +18,7 @@ const CASES = [
   ['ci', '.github/workflows/test.yml', 'on: push\njobs:\n  t:\n    runs-on: x\n', 'on: push\npermissions:\n  contents: read\njobs:\n  t:\n    runs-on: x\n'],
 ];
 
-for (const [pack, file, bad, good] of CASES) {
-  test(`${pack}: installs alone and judges ${file}`, () => {
-    const dir = fresh(`rp-${pack}-`);
-    const r = cli(dir, 'init', pack);
-    assert.equal(r.status, 0, r.stdout + r.stderr);
-    mkdirSync(join(dir, file, '..'), { recursive: true });
-    assert.equal(lessonWrite(dir, file, bad).status, 2);
-    assert.equal(lessonWrite(dir, file, good).status, 0);
-  });
-}
+holdsEachCase(CASES);
 
 test('a check for one major version leaves a project on an older one alone', () => {
   const dir = fresh('rp-dep-');

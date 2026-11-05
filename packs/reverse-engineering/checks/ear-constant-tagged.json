@@ -1,0 +1,23 @@
+{
+  "id": "ear-constant-tagged",
+  "why": "A value tuned by ear with no tag leaves the ledger unaware of a debt.",
+  "rule": ".claude/rules/every-law-has-a-source.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "(?:\\/\\/|#)(?![^\\n]*\\[EAR\\])[^\\n]*\\b(?:by ear|sounds? (?:right|good|fine|about right)|eyeballed)\\b",
+  "bad": "kDrive = 1.7f; // sounds right",
+  "good": "kDrive = 1.7f; // [EAR] ledger row 12: tuned by ear",
+  "flags": "i"
+}

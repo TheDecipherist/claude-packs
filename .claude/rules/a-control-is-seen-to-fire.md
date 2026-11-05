@@ -21,11 +21,15 @@ Always do:
 - Make a mock return what the real function returns.
 - Keep one test per data layer against the real store.
 - Fail a test when its setup failed.
+- Break every check on purpose, and write to the state you inject: an injection that passes means dead code or a missing check.
+- Establish which artefact you are looking at before diagnosing: check the binary's time and the server's age.
 
 Never do:
 - Return success from a stub, or leave `// for now` in front of `success: true`.
 - Declare a security dependency and never use it.
 - Skip a test because an earlier step made nothing.
+- Let a check recompute its own subject: it holds by construction.
+- Leave a local workaround with no test that fails the day upstream is fixed.
 </constraints>
 
 ## Check

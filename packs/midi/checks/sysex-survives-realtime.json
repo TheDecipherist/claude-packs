@@ -1,0 +1,27 @@
+{
+  "id": "sysex-survives-realtime",
+  "why": "A clock byte can land inside a SysEx dump. A parser that assumes F0 to F7 runs clean corrupts it.",
+  "rule": ".claude/rules/clock-is-a-pulse-stream.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "while\\s*\\([^)\\n]*!=\\s*0x[fF]7\\s*\\)",
+  "bad": "while (*p != 0xF7) out.push_back (*p++);",
+  "good": "while (*p != 0xF7) { if (*p >= 0xF8) { rt (*p++); continue; } out.push_back (*p++); }",
+  "mode": "needs",
+  "needs": [
+    "0x[fF]8|[rR]eal[tT]ime"
+  ],
+  "code": true
+}

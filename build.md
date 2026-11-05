@@ -100,6 +100,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: one content rule for every hook and the scan, a content-site pack, repo-litter, the new http-api checks; concepts: none (design/shape.json declares none); reuse: isContent (packs/base/hooks/lib/content.mjs), gitAdds (packs/base/hooks/lib/git-adds.mjs).
   done when: the site's false secrets and samples are gone from a scan, with real faults still caught; the whole suite green once, committed; landed.
 
+- 0.28.0, the audio packs (work/0.28.0-audio-packs), started 2026-11-04 (from the rebuild playbook: reverse-engineering, midi, sound-design, instrument-shell).
+  making: four packs and the firmware hook, measured on real synth repos; concepts: none (design/shape.json declares none); reuse: gitAdds (packs/base/hooks/lib/git-adds.mjs), hitsOf (packs/base/hooks/lesson-checks.mjs).
+  done when: every check measured on real repos with its hits read; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log

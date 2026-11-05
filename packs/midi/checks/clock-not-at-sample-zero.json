@@ -1,0 +1,23 @@
+{
+  "id": "clock-not-at-sample-zero",
+  "why": "A clock byte placed at sample zero jitters by a whole block.",
+  "rule": ".claude/rules/measure-the-clock-in-audio.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "midiClock\\s*\\(\\s*\\)\\s*,\\s*0\\s*\\)",
+  "bad": "buffer.addEvent (MidiMessage::midiClock(), 0);",
+  "good": "buffer.addEvent (MidiMessage::midiClock(), pulseSample);",
+  "code": true
+}

@@ -1,0 +1,22 @@
+{
+  "name": "instrument-shell",
+  "version": "1.0.0",
+  "description": "Instruments built on a shared shell: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/instrument-shell"
+  },
+  "keywords": [
+    "ui",
+    "juce",
+    "instrument"
+  ],
+  "engines": {
+    "claude-packs": ">=0.28.0"
+  }
+}

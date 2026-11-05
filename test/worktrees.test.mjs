@@ -249,6 +249,15 @@ const CASES = {
     assert.equal(add(wt), 0);
     assert.equal(add(here), 2);
   },
+  'firmware-out-of-git.mjs': ({ here, wt }) => {
+    // The worktree's layout names this fixture; main's does not. A git add is judged by the checkout it runs in.
+    put(join(wt, 'one.syx'), 'x');
+    put(join(here, 'one.syx'), 'x');
+    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards: { firmware: { fixtures: ['one.syx'] } } }));
+    const add = (cwd) => fireAs(here, 'firmware-out-of-git.mjs', { tool_name: 'Bash', tool_input: { command: 'git add one.syx' }, cwd }).status;
+    assert.equal(add(wt), 0);
+    assert.equal(add(here), 2);
+  },
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
     put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');
@@ -284,7 +293,7 @@ const CASES = {
 };
 
 test('every hook judges a worktree file against the worktree, inside a real git worktree', () => {
-  const p = project(['audio-core', 'gpu-painter', 'stellix'], (dir) => {
+  const p = project(['audio-core', 'gpu-painter', 'stellix', 'reverse-engineering'], (dir) => {
     const lf = join(dir, '.claude/layout.json');
     const layout = JSON.parse(readFileSync(lf, 'utf8'));
     layout.folders.engines_copy = { path: 'src/engines/copied', kind: 'copy', purpose: 'a copy tree' };

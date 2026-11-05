@@ -72,9 +72,9 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 40 | 8 | 2 | 7 |
 | `base` | Universal engineering, in every configuration | 20 | 7 | 18 | 7 |
-| `ci` | CI workflows: every language run, tools pinned, permissions stated | 1 | 2 | 0 | 0 |
+| `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
-| `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 9 | 12 | 0 | 1 |
+| `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
 | `docker` | Dockerfiles, Compose and Swarm | 5 | 24 | 0 | 1 |
 | `dynamic-data` | Definition-driven systems: a CMS, an admin generator, a low-code platform | 10 | 9 | 0 | 1 |
 | `fastify` | Fastify servers | 6 | 15 | 0 | 0 |
@@ -85,14 +85,18 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `host-agent` | Software that runs as root on machines it does not own | 1 | 7 | 0 | 0 |
 | `html-ui` | Server-rendered HTML: every value escaped | 2 | 5 | 0 | 0 |
 | `http-api` | Any HTTP server, in any framework: records tied to their caller, guards that fail closed, versioned routes, three layers | 9 | 31 | 0 | 2 |
+| `instrument-shell` | Instruments on a shared shell: sessions that still load, panels that keep every route | 5 | 1 | 0 | 2 |
 | `js-ts` | JavaScript and TypeScript | 27 | 35 | 0 | 0 |
+| `midi` | Clock, sync and sysex, right on the wire and in the audio | 5 | 9 | 0 | 2 |
 | `mongo` | MongoDB with the native driver | 6 | 18 | 0 | 0 |
 | `multi-tenant` | One system, many customers: no role crosses a tenant | 1 | 2 | 0 | 1 |
 | `nginx` | NGINX in front of containers | 2 | 7 | 0 | 1 |
 | `python` | Python: templates, errors, resources, safe subprocess calls | 2 | 11 | 0 | 1 |
 | `react` | React: failed requests, effects, accessible controls | 2 | 6 | 0 | 0 |
+| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: two sources before naming, every law sourced | 7 | 4 | 1 | 4 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
+| `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first | 6 | 5 | 0 | 4 |
 | `stellix` | Laws of one synth project | 5 | 5 | 1 | 0 |
 | `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 0 | 1 |
 | `synth-creator` | The synth-creator configuration's own laws | 5 | 0 | 9 | 2 |
@@ -141,6 +145,7 @@ npx --no-install @thedecipherist/claude-packs config <name> [--dry-run]   switch
 | `node-lib` | `js-ts` |
 | `edge` | `nginx`, `docker` |
 | `synth` | `cpp`, `audio-core` |
+| `synth-rebuild` | `cpp`, `audio-core`, `reverse-engineering`, `midi`, `sound-design`, `instrument-shell` |
 | `python-app` | `python`, `shell`, `docker` |
 | `shell-tools` | `shell` |
 | `go-app` | `go`, `shell`, `docker`, `ci` |
@@ -196,9 +201,17 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
-Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
+Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
 Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
+
+## Instruments, proved in the audio
+
+Four packs carry what rebuilding classic machines from firmware taught, and most of it is about failures that pass every test: units deaf to the transport, presets silently on defaults, a list of algorithms behind one DSP path.
+
+`reverse-engineering` needs two sources before anything is named, a source tag on every law and a debt ledger for what was tuned by ear, and it keeps firmware out of git. `midi` holds the law of clock and sync, and treats a program as records that round-trip byte for byte. `sound-design` proves sound by measuring audio. `instrument-shell` keeps sessions loadable and panels reachable. `init synth-rebuild` takes them all.
+
+A project says what it is, in `"guards": { "instrument": { "kind": "reproduction" } }` or `"original"`, because the laws differ: on a reproduction the machine is the spec, aliasing and all.
 
 ## Published text is not code
 
