@@ -8,7 +8,7 @@ paths:
 
 <constraints>
 Always do:
-- Make `juce::ScopedNoDenormals noDenormals;` the first line of every `processBlock` (and `processBlockBypassed` if it processes audio).
+- Make `juce::ScopedNoDenormals noDenormals;` the first line of every `processBlock` (and `processBlockBypassed` if it processes audio). `host.readTransport` (`timing-from-synthcore`) comes second: it does no DSP, and the guard must already hold.
 
 - Use `ScopedNoDenormals` on *every* thread that runs DSP: worker threads that render voices, offline renders, and test and benchmark executables. The flag belongs to one thread only.
 - Define `JUCE_DSP_ENABLE_SNAP_TO_ZERO=0` in CMake. JUCE's `JUCE_SNAP_TO_ZERO` only does anything on Intel (it's a no-op on Arm), so `juce::dsp` filters otherwise give block-size-dependent output on x86 and not on Apple Silicon.

@@ -69,6 +69,11 @@
     "ui": [
       "app"
     ],
+    "look-analysis": [
+      "design/**",
+      "tools/*panel*",
+      "tools/*look*"
+    ],
     "bench": [
       "bench"
     ],

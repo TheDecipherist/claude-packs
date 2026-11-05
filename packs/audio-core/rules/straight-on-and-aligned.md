@@ -1,5 +1,5 @@
 ---
-# concepts: ui
+# concepts: ui, look-analysis
 ---
 
 # A UI is drawn straight on, and everything aligns: basic UX comes before the picture

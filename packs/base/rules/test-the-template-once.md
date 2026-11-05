@@ -14,6 +14,7 @@ Always do:
 - Test behaviour once, on the template, with an instance chosen as a parameter: any instance must do.
 - Prove the instances really are the template with one structural pass over the data: every instance is built by the same factory, with the same members. That is a read, not a run of the behaviour.
 - Test an instance's own data where it differs: its label, its range, its ID, as a table.
+- Where one instance can be unhooked while its row, class and binding stay intact, add one cheap pass of every instance through the real input path: each moves something, and no more. It is not a behaviour walk: keep it apart from them, in its own every-instance pass, and name it so.
 
 Never do:
 - Loop a behaviour test over every instance of one template: `one-walk-per-template` refuses a loop that presses, clicks or drags them.

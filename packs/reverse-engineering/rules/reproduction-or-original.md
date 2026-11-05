@@ -14,5 +14,5 @@ Always do:
 
 Never do:
 - Invent a global control on a reproduction. It rewrites every preset.
-- Copy the machine's artwork: same sections, positions and labels, drawn your own way.
+- Copy the machine's artwork, unless the brief asks for it and `"guards": { "instrument": { "artwork": "verbatim" } }` says so. By default a reproduction has the same sections, positions and labels, drawn your own way. With `"artwork": "verbatim"` the picture is the spec, and whoever ships it decides whether they may: log that as an open question.
 </constraints>

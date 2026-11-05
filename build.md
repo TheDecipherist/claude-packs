@@ -156,6 +156,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: shape-law, making-check, code-shape, git-guard, lesson checks, once-only, dispatch-once and protect-vendor stop refusing what the MPX 500 build showed was correct, held against its real refusals both ways; concepts: none (design/shape.json declares none); reuse: findInstanceLiterals (packs/base/hooks/lib/shape.mjs), statementsOf (packs/base/hooks/lib/code-shapes.mjs), lastTurn (packs/base/hooks/lib/turn.mjs), kindsSwitched (packs/base/hooks/dispatch-once.mjs).
   done when: each fault's test seen red then green; every real refusal marked wrong passes and every one marked right stays refused, the stated exceptions apart; the whole suite green once, committed; landed.
 
+- 1.1.0, new projects (work/1.1.0-new-projects), started 2026-11-05.
+  making: a new project gets what it needs on its first day: the build queue the kit sends it to, suggest from its notes, a lock of every pack, doctor --strict that can pass, rules that agree with each other and with a reproduction's brief, a law for an unattended run; concepts: none (design/shape.json declares none); reuse: recommend (lib/scan-detect.mjs), coverage (lib/coverage.mjs), toDo (lib/doctor.mjs).
+  done when: each fault's test seen red then green; doctor --strict passes on a new project; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log
@@ -178,3 +182,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.0.0 public: the gate ran once on b24333f, 343 of 343. The 0.35.0 line above this one was lost to a refused command: its gate read 341 of 342, and the test that failed passed alone on c00d581.
 - 2026-11-05: 1.0.1 node_modules: the gate ran once on aa0037c, 344 of 344. Landed, not yet published.
 - 2026-11-05: 1.1.0 group 1, what fails silently or fails open, landed from work/1.1.0-fail-open at 7e2710d; the gate 371 of 371.
+- 2026-11-05: 1.1.0 group 2, false refusals, landed from work/1.1.0-false-refusals at f55d4df; the gate 398 of 398.

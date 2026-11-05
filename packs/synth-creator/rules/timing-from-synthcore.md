@@ -6,7 +6,7 @@
 
 <constraints>
 Always do:
-- Link `synthcore` for tempo, MIDI clock, transport, sync modes, QWERTY and the focus rule. Subclass `core::CoreHost`, and make `host.readTransport (getPlayHead(), midi, n);` the first line of `processBlock`.
+- Link `synthcore` for tempo, MIDI clock, transport, sync modes, QWERTY and the focus rule. Subclass `core::CoreHost`, and make `host.readTransport (getPlayHead(), midi, n);` the second line of `processBlock`, after `ScopedNoDenormals`.
 - Have every tempo-synced thing read the one master clock. Tap tempo sets the same `bpm` parameter the clock reads.
 - Fix a fault in the clock in `synthcore`, once, with its test, and take it in everywhere.
 

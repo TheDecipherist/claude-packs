@@ -15,6 +15,7 @@ Always do:
 6. Read the disk OS's own strings.
 7. Check the tool table before writing a disassembler.
 8. Take ratios from a redrawn trace, never absolutes.
+9. A source that exists and cannot be fetched (the host refuses automated access, the file is behind a login): record its name, where it is, what refused, and what it would have settled, in the project's decisions. Mark what rests on its absence as a `[gap]`, ask the user for the file when a person is there, and go on with the next source.
 
 Never do:
 - Start the disassembly before steps 1 to 4.

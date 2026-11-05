@@ -1,6 +1,6 @@
 {
   "id": "one-walk-per-template",
-  "why": "A test that presses, clicks or drags every instance of one template repeats the same behaviour hundreds of times and proves nothing more than one press does. Walk one instance of each template and every one-off; prove the rest with a read of the table that each is built from its template and wired.",
+  "why": "A test that presses, clicks or drags every instance of one template repeats the same behaviour hundreds of times and proves nothing more than one press does. Walk one instance of each template and every one-off; prove the rest with a read of the table that each is built from its template and wired. One every-instance pass that only proves each is hooked through its input path is allowed, and is not this: name it so, apart from the walks.",
   "rule": ".claude/rules/test-the-template-once.md",
   "globs": [
     "**/gates/**",

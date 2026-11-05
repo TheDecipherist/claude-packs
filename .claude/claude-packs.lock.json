@@ -3,7 +3,12 @@
   "packs": [
     "base"
   ],
-  "updated": "2026-11-05T19:22:21.678Z",
+  "installed": [
+    "base",
+    "writing",
+    "hook-proof"
+  ],
+  "updated": "2026-11-05T19:44:34.866Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "16045d42e0105f08c64286d46d259f2d6984a30750750927b364c5b8a1967ecd",
     ".claude/rules/behaviour-lives-with-its-kind.md": "e99ef5a6be927359d16a28f9d091fc57df05a870c93e6253a48e02f204c80c9e",
@@ -15,7 +20,7 @@
     ".claude/rules/lookup-over-if-chains.md": "8120fc0517b66ba91227992792316e78257b9f4078da49bd0d7ddbb75b92b0ca",
     ".claude/rules/making-line-first.md": "dacbf3eb9e0f47586b4f42485b46d26302f678492a79a79d5623e5c94f6bfcdc",
     ".claude/rules/open-items-tagged.md": "b5535a7ad55f3972177a4a2a12ecb2559d798239111ef1492ec728be87beee48",
-    ".claude/rules/plan-and-logs.md": "a7f7898f3e81b30353aca8d195a4898d7e1c74a2c01e5e6a3bec2bd6d2bd79d4",
+    ".claude/rules/plan-and-logs.md": "743a4e7fa7f06c4b2de67ad91bc41107b0b15372b18527f9f5fa14f5d94d266f",
     ".claude/rules/references-use-anchors.md": "a5fdcfdc2fa95d4f9a96e9c99e64f08502dd7bace29c1c91d7b30b0e4c800ccf",
     ".claude/rules/refusals-are-judged.md": "3046326abcacbb71bc2e1f4c0cbe4e5338a7592c9e5061fae363338fefe3c6cb",
     ".claude/rules/reuse-before-writing.md": "77b54d7b28a9372abdb0128bd12da572f7566b6a1630e908458d02643ff99570",
@@ -24,12 +29,13 @@
     ".claude/rules/split-before-the-limit.md": "94ba2cb59ecc2d90f4a9a5e5a71a44332fe95587a86b42bffbd4f5c39d336e68",
     ".claude/rules/subagent-dispatch.md": "e94c60baada3d6e6ee1215aad756c9cbb82e3e445820241bd5ca42b65775cf88",
     ".claude/rules/test-only-what-changed.md": "9bfc1450db334675b92b2cbf968339bedd193d9bc33f8ff5b506ff60d52a4d72",
-    ".claude/rules/test-the-template-once.md": "8d86bb7b56b3eb168dcf6056aeeb26a30a668713f75f32b71fdb9d2339573b89",
+    ".claude/rules/test-the-template-once.md": "fc4aca488f3da4ff0f416f4330b1160e98576fd4dbb97fbdd340f4191ca14d97",
+    ".claude/rules/unattended-runs.md": "598a2977c2596f4480a7d433b176d375d51344c2f9520adf8fa1ef3fde770da5",
     ".claude/rules/untrusted-content-boundary.md": "810a7efafbe193847bc1cf54ebdcf7f37583e864a8cb6145937a1d30f598e2d8",
     ".claude/checks/field-map-over-if-runs.json": "12e1a2c8650b9949df9e21f993a3a8a11d92cba4c820ee4e3847064b9b638970",
     ".claude/checks/lookup-over-if-chains.json": "49cec0241eeaf670cd0c82317fa2d99e6117223a5665f49ce692b8685130ba6d",
     ".claude/checks/no-code-after-midline-comment.json": "6689387457bd48e61e7f6442b3007e53b685ffcf852bc083e533f37bb016edb7",
-    ".claude/checks/one-walk-per-template.json": "621f70b0cebf054d8fd67f92e50f7b5cc186720be03cbf17e3caaa4db1e4004a",
+    ".claude/checks/one-walk-per-template.json": "a90d0098d0a1a1b20a8e66087bd102d9d5105e2a7124be8ba4bb53cc0f644464",
     ".claude/hooks/brief-guard.mjs": "14bc35e0fbf6bf0f862024913f9eae3611946effcc5d0b32968402076f956ffd",
     ".claude/hooks/code-shape.mjs": "445c533344422bd2d158f0c3c828d3e2e5511326b3003c971099b1d41bfade36",
     ".claude/hooks/dispatch-once.mjs": "310f80381c0dd7d5b9161a90f6456fa9f271619c8b0a717c12d3fa0e7f630604",

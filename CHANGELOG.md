@@ -27,6 +27,17 @@ False refusals, each held against the build's real refusals in both directions:
 - `dispatch-once` tells two kinds of one name apart by their cases, and refuses two switches on one kind in one new file (KF-35).
 - `protect-vendor`'s refusal names `buildOutput` (KF-2).
 
+New projects:
+
+- The kit ships the build queue `build-guard` sends every build to, `.claude/tools/buildq.mjs`: two jobs at a time, machine-wide, ending with the command's own status. `doctor` is red when it is gone, and for a `build.sh` that queues nothing, unless `guards.build.queue` declines with a reason (KF-1, KF-37).
+- `suggest` and `init --auto` read a project's notes when it has no source yet, and say so (KF-3).
+- The lock's new `installed` lists every pack whose files are there, the configuration's own included (KF-4).
+- `doctor --strict` can pass on a new project: a rule whose folder holds nothing yet waits for its first file, and is no longer dead (KF-9).
+- `scoped-no-denormals` and `timing-from-synthcore` agree on `processBlock`'s first two lines (KF-5). A reproduction may copy the artwork when `guards.instrument.artwork` says `verbatim` (KF-6).
+- New rule `unattended-runs`: with the user away, take the recommended choice, keep every law, record the choice (KF-7).
+- `straight-on-and-aligned` loads in `design/` and on panel and look tools, where the analysis happens, not only in `src/app`.
+- `gather-sources` covers a source that cannot be fetched (KF-11). `addresses-name-their-space` warns that a rising run may be pointers (KF-16). `cpu-worst-case-per-block` lists a program load and says how to measure on a shared machine (KF-29). `plan-and-logs` reads a licence before choosing a source (KF-38). `test-the-template-once` and `house-control-behaviours` ask for one cheap pass of every instance through its real input path (KF-41).
+
 ## 1.0.1 (2026-11-05)
 
 - `suggest` and `init --auto` no longer read `node_modules`. In a new project with no `.gitignore`, the kit's own installed files were taken as the project: it was called `node`, and `reverse-engineering` was missed.

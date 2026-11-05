@@ -3,11 +3,11 @@
 //
 // "nothing should be able to take the entire system". Five agents each compiling with -j18 at once put
 // ~90 jobs on 18 cores and every build took hours. Every compile and test run goes through the machine-wide queue
-// ~/.claude/bin/buildq (two at a time). This refuses (exit 2) a heavy command started any other way, a polling loop, an
+// .claude/tools/buildq.mjs (two at a time; the kit ships it, KF-1). This refuses (exit 2) a heavy command started any other way, a polling loop, an
 // agent's build or test run of everything, and any build from an agent started as `KIND: light`
 // (~/.claude/agent-cap-state.json keeps the kinds).
 //
-// Allowed: a command run as `buildq <cmd>` (or `~/.claude/bin/buildq <cmd>`), or through a project's own wrapper that
+// Allowed: a command run as `node .claude/tools/buildq.mjs <cmd>` (or a `buildq` on the path), or through a project's own wrapper that
 // calls buildq (for example `bash tools/build.sh ...`, the `build` and `test` commands in .claude/layout.json).
 // Configuring (`cmake -B build`) is light and allowed. Text that only MENTIONS a command (inside a heredoc, a quoted
 // string, a commit message) is never read as running it. A project with its own PreToolUse dispatcher
@@ -20,7 +20,7 @@ import { homedir, tmpdir } from 'node:os';
 import { isAbsolute, join } from 'node:path';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
-const WRAPPERS = ['buildq', 'build.sh'];
+const WRAPPERS = ['buildq', 'buildq.mjs', 'build.sh'];
 const base = (p) => p.split('/').pop();
 
 export function heavy(w) {
@@ -61,7 +61,7 @@ export function offending(cmd) {
       while (w.length && w[0].startsWith('-')) w = w.slice(1);
     }
     if (!w.length) continue;
-    if (WRAPPERS.includes(base(w[0])) || (['bash', 'sh', 'zsh'].includes(w[0]) && w.length > 1 && WRAPPERS.includes(base(w[1])))) continue;
+    if (WRAPPERS.includes(base(w[0])) || (['bash', 'sh', 'zsh', 'node'].includes(w[0]) && w.length > 1 && WRAPPERS.includes(base(w[1])))) continue;
     if (heavy(w)) return w.slice(0, 3).join(' ');
   }
   return null;
@@ -160,7 +160,7 @@ function main(text) {
   const poll = polling(cmd);
   if (poll) {
     return refuse(`polling refused (${poll}). Waiting in a sleep loop hides what you are doing and burns turns. Run the job in the FOREGROUND ` +
-      'through the queue (buildq / tools/build.sh wait for a slot themselves; the Bash tool allows up to 10 minutes), or start it with ' +
+      'through the queue (.claude/tools/buildq.mjs and tools/build.sh wait for a slot themselves; the Bash tool allows up to 10 minutes), or start it with ' +
       'run_in_background and you are notified when it ends.');
   }
   // A light agent may RUN an already-built program through the queue (a render), never compile or run a test suite
@@ -171,8 +171,8 @@ function main(text) {
   const what = offending(cmd);
   if (!what) return 0;
   return refuse(`\`${what}\` straight from the shell is refused. Nothing may take the whole machine. Run it through the ` +
-    `machine-wide build queue, which runs two at a time and waits for a free slot by itself:\n    buildq ${what} ...        ` +
-    '(~/.claude/bin/buildq; buildq --status shows the slots)\nor the project\'s own wrapper if it has one (the build and test commands in ' +
+    `machine-wide build queue, which runs two at a time and waits for a free slot by itself:\n    node .claude/tools/buildq.mjs ${what} ...        ` +
+    '(--status shows the slots)\nor the project\'s own wrapper if it has one (the build and test commands in ' +
     '.claude/layout.json). Do not wrap it in a loop.');
 }
 
