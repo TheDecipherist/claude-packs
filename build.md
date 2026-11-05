@@ -117,3 +117,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-04: 0.19.0 manifest (192 of 192). 0.20.0 install fixes, 0.21.0 custom packs, 0.22.0 ui-craft depth: the gate ran once in 257 s, 202 of 204; shape.test's message and CLAUDE_PID in the preload fixed, those files alone: 204 of 204.
 - 2026-11-04: 0.18.0 hook-proof: the gate ran once in 263 s, 188 of 189; the timing test's fakes are in no settings entry, as doctor now says; it passes alone: 189 of 189.
 - 2026-11-04: 0.15.0 writing (178 of 178), 0.16.0 scan and 0.17.0 ui-craft and landing: the gate ran once on 6b26cf0, 186 of 186 in 256 s; landed by land-branch.
+- 2026-11-04: 0.29.0 logging: the gate ran once on f64709c, 301 of 305; a rule's `**/*` paths hid doctor's coverage (KWB-46) and the ignore test needed the logs line; the four pass alone on ffc1e16. Cost measured: 12 hooks through the runner, median 76 ms per call.
