@@ -13,7 +13,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, writeSync 
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mjs';
+import { logCall } from './lib/event-log.mjs';
+import { appendRotated, isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const RUNNER = 'run-hooks';
@@ -51,10 +52,12 @@ export async function runAll(args, text, root = projectRoot()) {
   try { ev = JSON.parse(text) ?? {}; } catch { /* the hooks read it themselves */ }
   const outs = [];
   const err = [];
+  const judged = [];
   let code = 0;
   for (const arg of args) {
     const name = nameOf(arg);
     const out = [];
+    const before = err.length;
     const t0 = performance.now();
     const undo = [capture(process.stdout, out), capture(process.stderr, err)];
     let c;
@@ -70,10 +73,13 @@ export async function runAll(args, text, root = projectRoot()) {
     }
     c = Number.isInteger(c) ? c : 0;
     outs.push(out.join(''));
-    logHook(root, { event: ev.hook_event_name, hook: name, ms: performance.now() - t0, code: c, tool: ev.tool_name ?? ev.source });
+    const ms = performance.now() - t0;
+    logHook(root, { event: ev.hook_event_name, hook: name, ms, code: c, tool: ev.tool_name ?? ev.source });
+    judged.push({ hook: name, ms, code: c, reason: err.slice(before).join(''), out: out.join('') });
     if (c === 2) code = 2;
     else if (c !== 0 && code === 0) code = c;
   }
+  logCall(root, text, judged, appendRotated, performance.now());
   return { code, stdout: mergeOut(outs), stderr: err.join('') };
 }
 
@@ -98,6 +104,11 @@ async function selftest() {
   const rows = readHookLog(dir);
   cases.push(['one timing line per hook per call', rows.length === 7 && rows.filter((r) => r.hook === 'refuses').map((r) => r.code).join() === '2,0']);
   cases.push(['the line names the event and the tool', rows[0].event === 'PreToolUse' && rows[0].tool === 'Bash']);
+  const lines = (f) => readFileSync(join(dir, '.claude/logs', f), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  const refused = lines('refusals.jsonl');
+  cases.push(['every call is a line of events.jsonl', lines('events.jsonl').length === 3]);
+  cases.push(['a refusal keeps its reason and what was tried', refused[0].hook === 'refuses' && refused[0].reason.includes('BLOCKED by refuses') && refused[0].command === 'rm x']);
+  cases.push(['a crash is kept too', refused.some((r) => r.hook === 'throws' && r.code === 1)]);
   rmSync(dir, { recursive: true, force: true });
   const bad = cases.filter(([, good]) => !good);
   for (const [label] of bad) console.error(`run-hooks selftest FAILED: ${label}`);

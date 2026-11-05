@@ -71,7 +71,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 40 | 8 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 20 | 7 | 18 | 7 |
+| `base` | Universal engineering, in every configuration | 21 | 7 | 18 | 7 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
@@ -164,6 +164,7 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 | `remove <pack...>` | Remove packs; files you edited are kept |
 | `update` | Re-sync installed packs from this version |
 | `update-all <dir...>` | Update every listed project that has the kit |
+| `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"` |
 | `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing |
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
@@ -203,7 +204,7 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 
 Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
-Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
+Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. Nothing is ever cleared: a log past 1 MB moves to `.claude/logs/` under a dated name (`"guards": { "logs": { "maxKb": 1024 } }`). A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
 
 ## Instruments, proved in the audio
 
@@ -218,6 +219,12 @@ A project says what it is, in `"guards": { "instrument": { "kind": "reproduction
 A content folder (`articles/`, `blog/`, `posts/`, `content/`, `tutorials/`, `examples/`, `samples/`) holds text and samples. The writing laws read it. The code laws, `template-law`, `code-shape`, `once-only` and `file-size-guard` leave it alone, and `scan` lists what it finds there apart, so a tutorial's compose file is never a project fault and a sample key never heads the report. Under a code root the word means nothing: `src/app/blog/page.tsx` is code. `"guards": { "content": ["<glob>"] }` adds a project's own.
 
 Dates are facts in an article. The `no-time-or-date` check is opt-in, for an author who wants none in posts, and even then it leaves articles alone.
+
+## Knowing which hooks earn their place
+
+A bug log only records the refusals somebody complained about, so it cannot say whether a hook works. The kit records them all. Every call is a line of `.claude/logs/events.jsonl`: the session, the tool, the file or command, and each hook's time, exit code and reason. Every refusal and crash is also a line of `refusals.jsonl`, with an id, the branch and commit, the kit's version and the hash of the hook that decided. Secrets are masked, and file contents are not kept.
+
+`logs` adds it all up, over every rotated file. `logs mark <id> right|wrong "<why>"` records a verdict. The logs stay out of git by default.
 
 ## Where things apply
 

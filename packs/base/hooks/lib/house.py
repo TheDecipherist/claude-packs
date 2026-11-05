@@ -11,7 +11,7 @@ hook's default, so a project with no "guards" gets the house defaults.
 import json, os, re, time
 
 LOG = os.path.join(".claude", "hooks.log")
-LOG_MAX_BYTES = 256 * 1024
+LOG_MAX_BYTES = 1024 * 1024
 
 
 def project_root():
@@ -58,7 +58,7 @@ def folders_of_kind(lay, kind):
 
 def log_hook(hook, event, ms, code, tool="-", root=None):
     """One timing line per call in <project>/.claude/hooks.log, the same line lib/hook-log.mjs writes (KWB-24): ISO time,
-    event, hook, ms, exit code, tool, tab-separated; past LOG_MAX_BYTES cut to its newest half at a line. Never raises,
+    event, hook, ms, exit code, tool, tab-separated; past LOG_MAX_BYTES it moves whole to .claude/logs/, never cut. Never raises,
     never creates .claude. ms is from the hook's own start (python's start-up before it is not counted)."""
     try:
         base = root or project_root()
@@ -70,9 +70,8 @@ def log_hook(hook, event, ms, code, tool="-", root=None):
         with open(path, "a", encoding="utf-8") as f:
             f.write(f"{now}\t{clean(event)}\t{clean(hook)}\t{round(ms)}\t{code}\t{clean(tool)}\n")
         if os.path.getsize(path) > LOG_MAX_BYTES:
-            with open(path, encoding="utf-8") as f:
-                keep = f.read()[-(LOG_MAX_BYTES // 2):]
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(keep[keep.find("\n") + 1:])
+            logs = os.path.join(base, ".claude", "logs")
+            os.makedirs(logs, exist_ok=True)
+            os.rename(path, os.path.join(logs, "hooks-" + time.strftime("%Y%m%d-%H%M%S", time.gmtime()) + ".log"))
     except Exception:
         pass

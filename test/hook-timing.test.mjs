@@ -75,16 +75,17 @@ test('every installed hook writes one timing line per call: time, event, hook, m
   }
 });
 
-test('the timing log stays bounded', async () => {
+test('a full log rotates and nothing is lost', async () => {
   const { logHook, LOG_MAX_BYTES } = await import('../packs/base/hooks/lib/hook-log.mjs');
   const dir = mkdtempSync(join(tmpdir(), 'cpt-log-'));
   mkdirSync(join(dir, '.claude'));
-  for (let i = 0; i < 20000; i += 1) logHook(dir, { event: 'PreToolUse', hook: `h${i % 17}`, ms: i % 900, code: 0 });
-  const size = statSync(join(dir, '.claude/hooks.log')).size;
-  assert.ok(size <= LOG_MAX_BYTES, `${size} bytes, over ${LOG_MAX_BYTES}`);
-  assert.ok(size > LOG_MAX_BYTES / 4, 'recent lines kept');
-  const last = 19999;
-  assert.match(readFileSync(join(dir, '.claude/hooks.log'), 'utf8').split('\n').filter(Boolean).at(-1), new RegExp(`\\th${last % 17}\\t${last % 900}\\t0\\t`), 'the newest line is the last');
+  const n = 60000;
+  for (let i = 0; i < n; i += 1) logHook(dir, { event: 'PreToolUse', hook: `h${i % 17}`, ms: i % 900, code: 0 });
+  assert.ok(statSync(join(dir, '.claude/hooks.log')).size <= LOG_MAX_BYTES);
+  const rotated = readdirSync(join(dir, '.claude/logs')).filter((f) => /^hooks-.*\.log$/.test(f));
+  assert.ok(rotated.length >= 1, 'a full log moved to .claude/logs');
+  const lines = [...rotated.map((f) => join(dir, '.claude/logs', f)), join(dir, '.claude/hooks.log')].flatMap((f) => readFileSync(f, 'utf8').split('\n').filter(Boolean));
+  assert.equal(lines.length, n, 'every line is kept');
 });
 
 test('the python helper writes the same line', () => {

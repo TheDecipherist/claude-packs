@@ -16,6 +16,7 @@ import { judgeEvent } from './lib/writes.mjs';
 import { checkoutRoot } from './lib/project.mjs';
 import { bashOf, git, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { gitAdds } from './lib/git-adds.mjs';
+import { SECRETS } from './lib/secret-patterns.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ENV = /^\.env(\..+)?$/;
@@ -24,17 +25,7 @@ const KEY = /\.(pem|key|private|p12|pfx|jks|keystore)$|^id_(rsa|dsa|ecdsa|ed2551
 export const isSecretFile = (p) => { const b = basename(p); return (ENV.test(b) && !ENV_OK.test(b)) || KEY.test(b); };
 const isEnv = (p) => ENV.test(basename(p)) && !ENV_OK.test(basename(p));
 
-export const SECRETS = [
-  ['a GitHub token', /\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,})/g],
-  ['an Anthropic key', /\bsk-ant-[A-Za-z0-9_-]{20,}/g],
-  ['an OpenAI key', /\bsk-(?!ant-)(?:proj-)?[A-Za-z0-9_-]{32,}/g],
-  ['an AWS access key', /\bAKIA[0-9A-Z]{16}\b/g],
-  ['a Slack token', /\bxox[abprs]-[A-Za-z0-9-]{10,}/g],
-  ['a Stripe secret key', /\b[rs]k_live_[A-Za-z0-9]{20,}/g],
-  ['a private key', /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----\s+[A-Za-z0-9+/=\s]{64,}/g],
-  ['a prefixed API key', /\b(?!price_|prod_|pk_|[rs]k_live_|github_pat_|gh[pousr]_)(?=[a-z]{2,8}_)(?=[\w-]*[A-Z])(?=[\w-]*\d)[a-z]{2,8}_[A-Za-z0-9_-]{24,}\b/g],
-  ['a connection string with its password', /\b(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqp):\/\/[^\s:@/'"`]+:(?!\$\{|\$[A-Za-z_]|<|\*+@|[^\s@]*(?:[Pp]ass(?:word|wd)?|[Cc]hange|[Ee]xample|[Yy]our|[Ss]ecret|[Pp]laceholder|xxx|XXX))[^\s@/'"`]{3,}@/g],
-];
+export { SECRETS };
 const count = (text, re) => (text.match(re) ?? []).length;
 export const addedSecret = (before, after) => SECRETS.find(([, re]) => count(after, re) > count(before ?? '', re))?.[0] ?? null;
 

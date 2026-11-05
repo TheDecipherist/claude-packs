@@ -9,3 +9,4 @@ node_modules/
 .claude/hooks.log
 .claude-packs-lock
 .claude/kit-lock.log
+.claude/logs/

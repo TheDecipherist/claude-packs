@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.29.0 (2026-11-04)
+
+The kit could not say which of its hooks work. `hooks.log` cut itself to 16 hours, a refusal left no reason or file, and only the shape hooks counted what they refused: 89 refusals on one project against a handful ever written down.
+
+- Logs are never cleared. A log past 1 MB moves whole to `.claude/logs/` under a dated name, and stays there (`guards.logs.maxKb`). This holds for `hooks.log`, `usage.log` and the new logs, from Node and from Python.
+- Every call is a line of `.claude/logs/events.jsonl`: session, agent, working folder, event, tool, the file or command or prompt, and each hook's time, exit code, reason and output. Secrets are masked, and file contents are not kept, only their size.
+- Every refusal and crash is also a line of `refusals.jsonl`, with an id, branch, commit, kit version and the hash of the hook that decided.
+- New `logs` command: per hook, over all the history, calls, refusals, verdicts, and how often the same file then passed. `logs refusals [--hook <h>] [--open]` lists them, and `logs mark <id> right|wrong "<why>"` records a verdict.
+- New base rule `refusals-are-judged`.
+
 ## 0.28.0 (2026-11-04)
 
 Four packs from the playbook of rebuilding classic machines from their firmware. Most of their laws come from failures that passed every test: nine units deaf to the transport, 272 of 625 presets silently on defaults, 15 algorithms on one DSP path.

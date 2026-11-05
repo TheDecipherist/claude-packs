@@ -1,6 +1,6 @@
 // 0.18.0: whenever a hook is supposed to exit 2 and it exits 0, it is caught. Only exit 2 blocks, so a crash, a hook no
 // settings entry runs, and an `exit 1` all let the call through in silence.
-import { KIT, appendFileSync, assert, cli, fresh, holdToExamples, join, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, appendFileSync, assert, cli, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
 
 const installed = () => { const dir = fresh('hp-'); run(dir, 'init', '--config', 'base'); return dir; };
 
@@ -25,6 +25,15 @@ test('a hook that crashed is red until it changes; a refusal is not a crash', ()
   assert.match(r.stdout, /folder-law\.mjs crashed on 1 call\(s\)/);
   writeFileSync(log, `${new Date(Date.now() - 3_600_000).toISOString()}\tPreToolUse\tfolder-law\t3\t1\tWrite\n`);
   assert.equal(cli(dir, 'doctor').status, 0, 'a crash from before the hook last changed is history');
+});
+
+test('a crash stays red after its log line has rotated away', () => {
+  const dir = installed();
+  mkdirSync(join(dir, '.claude/logs'), { recursive: true });
+  writeFileSync(join(dir, '.claude/logs/hooks-20260101-000000.log'), `${new Date(Date.now() + 60_000).toISOString()}\tPreToolUse\tfolder-law\t3\t1\tWrite\n`);
+  const r = cli(dir, 'doctor');
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /folder-law\.mjs crashed on 1 call\(s\)/);
 });
 
 test('each fail-open form is refused through the hook, and its good form passes', () => {

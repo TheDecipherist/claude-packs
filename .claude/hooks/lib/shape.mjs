@@ -18,7 +18,8 @@
 // A row's "names" (optional, KWB-12) lists the identity names of a many concept's instances when each is a different KIND
 // (planet: DELAY, FILTER, REVERB): frozen IDs, not instance numbers. The role-name check ("the PAD slot") allows a listed
 // name before the concept word ("the DELAY planet"); an unlisted uppercase word is still a role. doctor: a list of strings.
-import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { logRefusal } from './hook-log.mjs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { matchesAny } from './glob.mjs';
 
@@ -290,11 +291,4 @@ export function quoteRow(name, shape) {
   return c ? `${SHAPE_FILE} "${name}": ${JSON.stringify(c.row)}` : `${SHAPE_FILE} has no row "${name}"`;
 }
 
-// One line per refused concept in .claude/usage.log: time, hook, concept (the shape hooks count what they refuse).
-export function logRefusal(root, hook, concepts) {
-  try {
-    mkdirSync(join(root, '.claude'), { recursive: true });
-    const t = new Date().toISOString();
-    appendFileSync(join(root, '.claude', 'usage.log'), [...new Set(concepts)].map((c) => `${t}\t${hook}\t${c}\n`).join(''));
-  } catch { /* the count is a report, never a reason to fail the hook */ }
-}
+export { logRefusal };

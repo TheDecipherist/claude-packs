@@ -16,6 +16,7 @@ import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '
 import { plannerSkills } from '../lib/planner.mjs';
 import { addCustomPack, loadCustomPacks, newPack } from '../lib/custom-packs.mjs';
 import { fixPlan } from '../lib/fix-plan.mjs';
+import { logsCommand } from '../lib/logs.mjs';
 import { scan } from '../lib/scan.mjs';
 import { suggest, suggestionOf } from '../lib/suggest.mjs';
 import { sync } from '../lib/sync.mjs';
@@ -54,6 +55,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      find; the project is never touched. scan --prompt prints the review brief for what checks cannot see
   suggest            which configuration and packs this project needs, read from its own files, with the evidence
   fix [--from <scan.json>] [--out <file>]  the last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none
+  logs               which hooks earn their place: calls, refusals and verdicts per hook, over all the history
+                     logs refusals [--hook <h>] [--open]; logs mark <id> right|wrong "<why>"
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
   symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
@@ -96,7 +99,7 @@ async function main() {
   const seedLayout = seed ? JSON.parse(readFileSync(seed, 'utf8')) : null;
   const installed = readLock(resolve(dir, '.claude')).packs;
   const fromUrl = rest.includes('--from') ? rest.splice(rest.indexOf('--from'), 2)[1] : null;
-  const fetched = ['new-pack', 'scan', 'suggest', 'fix', 'global'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
+  const fetched = ['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
 
   switch (command) {
     case 'new':
@@ -156,6 +159,8 @@ async function main() {
       if (rest.includes('--prompt')) { process.stdout.write(readFileSync(fileURLToPath(new URL('../prompts/scan-review.md', import.meta.url)), 'utf8')); return 0; }
       await scan(dir, { out: rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null });
       return 0;
+    case 'logs':
+      return logsCommand(dir, rest);
     case 'suggest':
       suggest(dir);
       break;

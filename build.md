@@ -104,6 +104,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: four packs and the firmware hook, measured on real synth repos; concepts: none (design/shape.json declares none); reuse: gitAdds (packs/base/hooks/lib/git-adds.mjs), hitsOf (packs/base/hooks/lesson-checks.mjs).
   done when: every check measured on real repos with its hits read; the whole suite green once, committed; landed.
 
+- 0.29.0, logging (work/0.29.0-logging), started 2026-11-04 (logs rotate and are never cleared; every refusal with its detail, so hooks are judged on evidence).
+  making: rotation, an event log, a refusal ledger and the logs command; concepts: none (design/shape.json declares none); reuse: logHook (packs/base/hooks/lib/hook-log.mjs), runAll (packs/base/hooks/run-hooks.mjs).
+  done when: no log is ever cut; a refusal keeps its reason and can be judged; the cost per call is measured; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log
