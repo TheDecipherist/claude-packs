@@ -164,6 +164,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the build's lessons as laws: a control is proved through its own input path, in a rule and in prove-control, and analyse-reference-look and the look gate hold what the MPX 500 panel had to work out alone; concepts: none (design/shape.json declares none); reuse: prove-control and analyse-reference-look (packs/audio-core/skills), ui-matches-reference-look (packs/audio-core/rules).
   done when: each law's test seen red then green; the whole suite green once, committed; landed; docs/1.1-report.md and docs/1.1-DONE written.
 
+- 1.1.0, no silent red (work/1.1.0-no-silent-red), started 2026-11-05 (update on a copy of mpx500 turned doctor red through 21 rules: a new law must not).
+  making: the ruleTests key is the choice, written on a first install; concepts: none (design/shape.json declares none); reuse: buildLayout (lib/layout.mjs).
+  done when: an installed project stays green with a note, a new one is held; the whole suite green once, committed; landed.
+
 ## Steps
 
 ## Log
