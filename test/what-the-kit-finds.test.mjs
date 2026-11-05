@@ -80,7 +80,7 @@ test('a unit cannot write a second clock, and a project that draws in code canno
   const write = (content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, 'src/Processor.cpp'), content } }).status;
   assert.equal(write('const auto pos = getPlayHead()->getPosition();\n'), 2);
   assert.equal(write('if (m.isMidiClock()) ++pulses;\n'), 2);
-  assert.equal(write('if (b == 0xF8) ++pulses;\n'), 2);
+  assert.equal(write('if (b == 0xF8) ++pulses;\n'), 0, 'a raw byte compare is the midi pack\'s own correct form: this law is about a second clock, not a byte');
   assert.equal(write('host.readTransport (getPlayHead(), midi, n);\n'), 0);
   const image = 'g.drawImageAt (knob, 0, 0);\n';
   assert.equal(write(image), 0, 'off until the project chooses it');

@@ -17,7 +17,7 @@
     "**/_deps/**",
     "**/JUCE/**"
   ],
-  "pattern": "\\bgetPlayHead\\s*\\(\\s*\\)\\s*(?:->|\\.)|\\bisMidiClock\\s*\\(|(?:==|!=|\\bcase)\\s*0x[fF][8aAbBcC]\\b",
+  "pattern": "\\bgetPlayHead\\s*\\(\\s*\\)\\s*(?:->|\\.)|\\bisMidiClock\\s*\\(",
   "code": true,
   "bad": "const auto pos = getPlayHead()->getPosition();",
   "good": "host.readTransport (getPlayHead(), midi, n);"
