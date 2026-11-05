@@ -157,3 +157,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 0.34.0 a new reverse-engineering project: the gate ran once on 3607534, 341 of 341. On the real MPX 500 ROM --banked found the system table at 0x3A568 and the program directory unaided.
 - 2026-11-05: 0.35.0 the foundation: the gate ran once on 6d788ad, 341 of 342: the timing check refused the raw byte compare the midi pack gives as correct, so it now judges only a second clock; the test passes alone on c00d581.
 - 2026-11-05: 0.35.1 a view is no override: the gate ran once on e78f52d, 342 of 342.
+- 2026-11-05: 0.36.0 straight on: the gate ran once on b21697b, 343 of 343.
