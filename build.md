@@ -230,3 +230,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.1.0 vst3host and bounce-a-plugin landed from work/1.1.0-vst3-host. The gate read 474 of 475 on 6f6e8d5: the kit's first C++ had no rule, so doctor --strict failed; the kit's layout now reads packs/**/*.cpp and *.h as cpp, and the failed test ran again green. Not published.
 - 2026-11-05: 1.1.0 rules follow the layout, a first install reads where the code is, and the new-project skill (KWB-83), landed from work/1.1.0-rules-follow-code; the gate 481 of 481 on d668fb1. Not published.
 - 2026-11-05: 1.1.0 work orders, the workflow on the front page and the web page landed from work/1.1.0-workorders; the gate 488 of 488 on 3938f98, then the tests the npm link and site/ reach. Not published, and the page is not deployed.
+- 2026-11-06: 1.2.0 compare-to-the-machine landed from work/1.2.0-compare-to-the-machine; the gate 493 of 493 on a9d72b7. Not published.
