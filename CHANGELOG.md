@@ -6,9 +6,10 @@ Two new packs, a kit that works outside C++ and JS, and the faults a real build 
 
 New:
 
-- `rust` pack and configuration: 5 rules, 8 lesson checks, 3 skills, a lint set for `Cargo.toml` and a `clippy.toml`. Each check was measured on ten crates (6,245 files) and its hits read. What clippy judges better stays with clippy: five candidates were dropped for it. The lint set was proved with real `cargo clippy` on planted faults. `rust-app` preset.
+- `rust` pack and configuration: 6 rules, 9 lesson checks, 3 skills, a lint set for `Cargo.toml` and a `clippy.toml`. Each check was measured on ten crates (6,245 files) and its hits read. What clippy judges better stays with clippy: five candidates were dropped for it. The lint set was proved with real `cargo clippy` on planted faults. `rust-app` preset.
 - `postgres` pack: 5 rules, 10 lesson checks, 1 hook, 1 skill. The checks were measured on 5,653 `.sql` files and 5,520 source files. Seven are on by default, and three that are right only on a large live table are opt-in (`pg-index-concurrently`, `pg-fk-not-valid`, `pg-timestamptz`). A line that is right anyway says so: `pg: allow <reason>`.
 - `db-wipe-guard` (`postgres`): a forced reset, `db:drop`, `flush` or `dropdb` runs only against a local database, read from the command, then the checkout's `.env`.
+- The repetition laws hold on Rust, in Rust's own terms. `once-only` and `dup` read `.rs`. `template-law` reads a method called six times as a table, and only a free function can be made again by name: a trait method must repeat, and a method lives in its type. `dispatch-once` refuses a second lookup table on an enum outside the enum, and leaves a `match` that does work alone: on eight crates, a port of the C++ law would have refused 7 to 12 in 100 of them, and the compiler already holds every match to every variant, which the lint set keeps true by denying `_ =>`. `rust-if-chain-is-a-match` refuses three branches on one value where a pattern can say it.
 - `suggest` reads Rust from `Cargo.toml`, and Postgres from a project's dependency files in any language.
 - A lesson check can read with a language's own blanker (`"language": "rust"`) and leave out tests in the same file (`"notInTests": true`).
 - `suite-once` knows `cargo test` and `cargo nextest run`.

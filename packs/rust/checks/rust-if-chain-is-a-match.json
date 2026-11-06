@@ -1,0 +1,32 @@
+{
+  "id": "rust-if-chain-is-a-match",
+  "why": "Three branches on one value are a match, which the compiler can hold to every case. A comparison a pattern cannot express is left alone.",
+  "rule": ".claude/rules/rust-repeats-become-templates.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/benches/**",
+    "**/examples/**",
+    "**/fixtures/**",
+    "**/test_data/**",
+    "**/testdata/**",
+    "**/fuzz/**",
+    "**/xtask/**",
+    "**/target/**",
+    "**/vendor/**",
+    "**/build.rs",
+    "**/tests.rs",
+    "**/test.rs",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    "**/test_*.rs"
+  ],
+  "language": "rust",
+  "notInTests": true,
+  "pattern": "\\bif\\s+([\\w.]+)\\s*==\\s*(?:[A-Z]\\w*::[A-Z]\\w*|\"\\s*\"|-?\\d[\\w.]*)\\s*\\{(?:[^{}]|\\{[^{}]*\\})*\\}\\s*else\\s+if\\s+\\1\\s*==\\s*(?:[A-Z]\\w*::[A-Z]\\w*|\"\\s*\"|-?\\d[\\w.]*)\\s*\\{(?:[^{}]|\\{[^{}]*\\})*\\}\\s*else\\s+if\\s+\\1\\s*==\\s*(?:[A-Z]\\w*::[A-Z]\\w*|\"\\s*\"|-?\\d[\\w.]*)\\s*\\{",
+  "bad": "if kind == Kind::A {\n    1\n} else if kind == Kind::B {\n    2\n} else if kind == Kind::C {\n    3\n}",
+  "good": "match kind {\n    Kind::A => 1,\n    Kind::B => 2,\n    Kind::C => 3,\n    _ => 0,\n}"
+}

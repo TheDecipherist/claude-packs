@@ -44,6 +44,7 @@ test('a new reader meets what it is before any command, and how to install one p
   assert.ok(README.indexOf('rules') < README.indexOf('npx'));
   for (const heading of ['## Install one pack', '## What is whose', '## Questions', '## Add your own rule', '## Words']) assert.ok(README.includes(heading), heading);
   for (const command of ['`init mongo`', '`add docker`', '`remove docker`', '`list`']) assert.ok(README.includes(command), command);
+  assert.match(README, /Hooks and rules don't work in Claude Desktop/);
 });
 
 test('every hook base installs is in the table', () => {

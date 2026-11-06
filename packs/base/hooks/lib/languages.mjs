@@ -2,7 +2,7 @@
 // to blank a file's comments and strings, where a statement ends, what is not code, and how a function is defined. A new language is one row.
 //   languageOf(ext) -> the row, or null                 ALL_CODE: every extension the table reads
 import { blankCode } from './cpp-scan.mjs';
-import { blankRust, withoutTests } from './rust-scan.mjs';
+import { blankRust, ownDefinitions, withoutTests } from './rust-scan.mjs';
 
 const spaces = (s) => s.replace(/[^\n]/g, ' ');
 
@@ -53,7 +53,7 @@ export const LANGUAGES = [
   { name: 'shell', exts: ['.sh', '.bash', '.zsh', '.ksh'], blank: blanker({ line: ['#'], hashWord: true, heredoc: true }), lines: true, commands: true, minTokens: 30,
     token: /"\s*"|'\s*'|[^\s;|&()<>{}]+|[;|&()<>{}]/g, notCode: /^[ \t]*(?:\.|source|set|shopt|trap|cd)\s.*$/gm, define: /^(?:function\s+)?([A-Za-z_][\w-]*)\s*(?:\(\s*\))?\s*\{/gm },
   { name: 'go', exts: ['.go'], blank: blanker({ ...SLASHES, raw: ['`'] }), lines: true, notCode: /^(?:package\b.*|import\s*\([^)]*\)|import\b.*)$/gm, minTokens: 50, define: /^func\s+([A-Za-z_]\w*)/gm },
-  { name: 'rust', exts: ['.rs'], blank: blankRust, withoutTests, notCode: lineStart('use|mod|extern|pub use'), minTokens: 60,
+  { name: 'rust', exts: ['.rs'], blank: blankRust, withoutTests, ownDefinitions, methodRows: true, notCode: lineStart('use|mod|extern|pub use'), minTokens: 60,
     define: /^[ \t]*(?:pub(?:\([^)]*\))?\s+)?(?:default\s+)?(?:const\s+)?(?:async\s+)?(?:unsafe\s+)?(?:extern\s+"[^"]*"\s+)?fn\s+([A-Za-z_]\w*)/gm },
   { name: 'java', exts: ['.java', '.cs', '.scala', '.dart'], blank: blanker(SLASHES), notCode: lineStart('import|package|using|namespace'), minTokens: 60,
     define: /^[ \t]*(?:public|private|protected|internal|static|final|async|override|virtual|\s)+[\w<>[\],\s]+\s([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:throws [\w, ]+)?\s*\{/gm },

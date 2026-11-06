@@ -176,6 +176,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a `postgres` pack: five rules, lesson checks measured on 1,937 real migrations and 2,903 source files, three opt-in checks that are right only on a live table, a `db-wipe-guard` hook, and suggest reading Postgres from a project; concepts: none (design/shape.json declares none); reuse: hitsOf (packs/base/hooks/lesson-checks.mjs) and its modes, judgeEvent (packs/base/hooks/lib/writes.mjs), holds and ROWS (lib/scan-detect.mjs), PRESETS (lib/packs.mjs).
   done when: every check measured on the corpus with its hits read; the hook's selftest seen red; doctor --strict passes on a Postgres project; npm test green once on committed work.
 
+- 1.1.0, Rust's DRY laws (work/1.1.0-rust-pack), started 2026-11-05 ("we also need DRY rules/skills/hooks for rust as well").
+  making: the repetition laws made true on Rust: a trait method is no function made again, `dispatch-once` reads `match`, rows read Rust calls, `once-only` and `dup` read `.rs`, the if-chain checks cover Rust, and a rule and skill say what a Rust repeat becomes; concepts: none (design/shape.json declares none); reuse: withoutTests and itemEnd (packs/base/hooks/lib/rust-scan.mjs), definesOf (near-copies.mjs), switchesOf (dispatch-once.mjs).
+  done when: each case met on the scratch crate gives the right answer through the real hooks; scan on ripgrep lists no trait method as made again; npm test green once on committed work.
+
 ## Steps
 
 ## Log

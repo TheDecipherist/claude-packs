@@ -23,9 +23,26 @@ Always do:
    impl_id!(UserId, OrderId);
    ```
 5. One call with other arguments: a `const` table and one loop.
-6. Fields that travel together: a struct, with `#[derive(...)]` in place of hand-written impls.
-7. The same code in two crates: move it to the crate both depend on.
-8. Run what the change reaches: `cargo test -p <crate>`. Then search for the old names: none is left.
+   ```rust
+   const ROUTES: &[(&str, Handler)] = &[("/users", users), ("/orders", orders)];
+   for (path, handler) in ROUTES {
+       app.route(path, *handler);
+   }
+   ```
+6. A table of values on an enum: a method on the enum, in its own impl, with every variant named. `dispatch-once` refuses a second table outside it.
+   ```rust
+   impl State {
+       pub fn colour(&self) -> u32 {
+           match self {
+               State::Open => 1,
+               State::Closed => 4,
+           }
+       }
+   }
+   ```
+7. Fields that travel together: a struct, with `#[derive(...)]` in place of hand-written impls. A run of `impl From<X> for MyError`: `thiserror`'s `#[from]`.
+8. The same code in two crates: move it to the crate both depend on.
+9. Run what the change reaches: `cargo test -p <crate>`. Then search for the old names: none is left.
 
 Never do:
 - Write a macro where a function or a generic does the job.

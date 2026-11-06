@@ -24,7 +24,7 @@ export function fingerprint(text, ext) {
 export function definesOf(text, ext) {
   const lang = languageOf(ext);
   if (!lang?.define) return [];
-  const code = lang.blank(text);
+  const code = (lang.ownDefinitions ?? ((c) => c))(lang.blank(text));
   return [...code.matchAll(lang.define)].map((m) => [m.slice(1).find(Boolean), code.slice(0, m.index).split('\n').length]).filter(([name]) => name);
 }
 

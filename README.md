@@ -111,7 +111,7 @@ Some of what you will see in `.claude/` is Claude Code's own, and some only work
 
 **Do I need a Node project?** No. Node 22 has to be on the machine, and that's all. The kit has configurations for C++, Go, Python, Rust and Node, and `base` for anything else.
 
-**Which Claude apps does it work in?** Claude Code: the terminal, the IDE extensions and the desktop app. A normal Claude chat doesn't read a project's `.claude/` folder.
+**Which Claude apps does it work in?** Claude Code, in the terminal and the IDE extensions. Hooks and rules don't work in Claude Desktop or a normal Claude chat: neither reads a project's `.claude/` folder.
 
 **What does it cost in tokens?** A Rust install loads about 3,300 tokens when a session starts: the `CLAUDE.md` block, 10 rules with no `paths:` and 22 skill descriptions. The `making` hook adds about 107 tokens to each prompt, and `doctor` prints that figure for your project. Rules with `paths:` and full skills load only when they are needed. The other hooks run outside the model, so they cost nothing unless they refuse.
 
@@ -209,6 +209,8 @@ A refusal names the copies and lists what differs between them, which are the te
 
 One language table reads C, C++, Objective-C++, JS, TS, Python, shell, Go, Rust, Java, C#, Scala, Dart, Kotlin, Swift, Ruby, PHP and Lua. A new language is one row in `packs/base/hooks/lib/languages.mjs`. A folder of kind `copy`, or a glob in `guards.templates.exclude`, is left alone.
 
+Each language keeps its own sense. In Rust a trait method must repeat, and a method lives in its type, so only a free function can be made again by name. A `match` that does work is good Rust in any number of files, since the compiler holds each to every variant: the lint set denies `_ =>` so it can, and `dispatch-once` refuses only a lookup table written outside its enum.
+
 Anything used more than once is one template, and it is tested once. `test-the-template-once` says how: test the behaviour on one instance, and prove the rest are that template with a read of the table. `one-walk-per-template` refuses a test that presses every instance.
 
 ## Code stays small in every direction
@@ -246,7 +248,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `postgres` | PostgreSQL: migrations that never stop traffic, values always bound, no database wiped by mistake | 5 | 10 | 1 | 1 |
 | `python` | Python: templates, errors, resources, safe subprocess calls | 2 | 11 | 0 | 1 |
 | `react` | React: failed requests, effects, accessible controls | 2 | 6 | 0 | 0 |
-| `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate | 5 | 8 | 0 | 3 |
+| `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate, every repeat one template | 6 | 9 | 0 | 3 |
 | `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 9 | 4 | 1 | 6 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
@@ -346,7 +348,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `once-only` | Write | Refuses a duplicate of code as written |
 | `code-shape` | Write | Refuses wide lines, packed lines, long functions, long parameter lists |
 | `file-size-guard` | Write | Refuses a source file past its line limit |
-| `dispatch-once` | Write | Refuses a `switch` on a kind already switched on in another file |
+| `dispatch-once` | Write | Refuses a `switch` on a kind already switched on in another file. In Rust, a second lookup table on an enum, outside the enum |
 | `folder-law` | Write | Refuses a new source file outside the layout |
 | `placement-law` | Write | Refuses a kind of thing in the wrong folder |
 | `shape-law` | Write | Refuses a literal instance of a many concept |
