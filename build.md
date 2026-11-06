@@ -206,3 +206,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.1.0 group 3, new projects, landed from work/1.1.0-new-projects at e7bf651; the gate 416 of 416.
 - 2026-11-05: 1.1.0 group 4, what the build taught, landed from work/1.1.0-build-laws at f4a3ab6; the gate 429 of 429. 1.1.0 finished, not published.
 - 2026-11-05: 1.1.0 no silent red: the gate ran once on e61cc57. Landed, not yet published.
+- 2026-11-05: 1.1.0 the rust and postgres packs, Rust's repetition laws, a kit that works outside C++ and JS (KWB-75 to KWB-82), and the README for a new reader, landed from work/1.1.0-rust-pack; the gate 469 of 469 on 613be1c. Not published.
