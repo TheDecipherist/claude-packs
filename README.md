@@ -1,5 +1,7 @@
 # @thedecipherist/claude-packs
 
+[![npm version](https://img.shields.io/npm/v/@thedecipherist/claude-packs)](https://www.npmjs.com/package/@thedecipherist/claude-packs) [View on npm](https://www.npmjs.com/package/@thedecipherist/claude-packs)
+
 AI coding agents make the same small mistakes again and again, and every fix costs a turn and tokens. claude-packs installs guardrails into a project's `.claude/` folder: **rules** that tell Claude Code how this kind of project is done, and **hooks** that refuse a bad write before it reaches the disk.
 
 You install once. From then on Claude Code reads the rules and meets the hooks in every session, with nothing to run or remember. The files live in the repo, so the whole team gets them.

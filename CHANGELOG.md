@@ -13,6 +13,7 @@ New:
 - `vst3host` (`sound-design`) and the `bounce-a-plugin` skill: an offline VST3 renderer with no DAW, no audio device and no JUCE, taken from a project where it ran on firmware emulators a JUCE host could not load. The plugin is an argument, it builds on macOS and Linux from the SDK inside a project's JUCE, and it writes 32-bit float. Measured on Linux with a real plugin: 2,200 parameters listed, two bounces byte-identical, a cutoff sweep rising at each step, a sysex file sent and `--dump-params` read. The macOS build and the Roland DT1 modes are ported but not run here.
 - `workorder <name>` and the `write-a-workorder` skill: a work order in `docs/workorders/<name>`, with the steps, the prompt that runs them with nobody there and a runner that starts session after session, from what two whole builds taught. The runner turns permission prompts off, and says so.
 - `new` with no packs takes base alone. It used to install a synth's laws on any project (KWB-84).
+- `site/`: a web page for the kit, kept out of the npm package, with its numbers held true by a test. Not deployed yet.
 - `suggest` reads Rust from `Cargo.toml`, and Postgres from a project's dependency files in any language.
 - A lesson check can read with a language's own blanker (`"language": "rust"`) and leave out tests in the same file (`"notInTests": true`).
 - `suite-once` knows `cargo test` and `cargo nextest run`.

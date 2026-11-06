@@ -99,6 +99,7 @@ Always do:
   - `profiles/`: tailored seed layouts shipped in the package
   - `prompts/`: prompts the command prints (survey.md, scan-review.md)
   - `scripts/`: the kit's own development scripts (test-changed.mjs); never shipped
+  - `site/`: the web page: the design, and the numbers a test holds true; never shipped in the npm package
 - Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.
 - When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.
 - When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.

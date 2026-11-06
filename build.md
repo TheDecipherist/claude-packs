@@ -192,6 +192,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a `workorder <name>` command that scaffolds a prompt, steps and a runner, a `write-a-workorder` skill, README sections on what a project keeps and how it is tested, and `new` no longer defaulting to a synth pack; concepts: none (design/shape.json declares none); reuse: the PROMPT.md and runner of the MPX 500 and Matrix-12 runs, prompts/ for what the command prints, readFileSync as `survey` does (bin/claude-packs.mjs).
   done when: the scaffold writes real files and never overwrites, run.sh passes `bash -n`, `new` on no packs installs no synth pack, the README's claims are each a file or a hook that exists, npm test green once on committed work.
 
+- 1.1.0, the web page (work/1.1.0-workorders), started 2026-11-05 ("add a github pages to claude-packs using this design").
+  making: site/ on the design of the author's own page, its stylesheet and particles reused, with the kit's numbers held true by a test, and no deploy until the repo's visibility is chosen; concepts: none (design/shape.json declares none); reuse: site/css/main.css and site/js/section-particles.js from that design.
+  done when: it renders at desktop and phone widths with no overflow, every file it loads exists, its counts match the kit, and it names no person.
+
 ## Steps
 
 ## Log
@@ -221,3 +225,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.1.0 the rust and postgres packs, Rust's repetition laws, a kit that works outside C++ and JS (KWB-75 to KWB-82), and the README for a new reader, landed from work/1.1.0-rust-pack; the gate 469 of 469 on 613be1c. Not published.
 - 2026-11-05: 1.1.0 vst3host and bounce-a-plugin landed from work/1.1.0-vst3-host. The gate read 474 of 475 on 6f6e8d5: the kit's first C++ had no rule, so doctor --strict failed; the kit's layout now reads packs/**/*.cpp and *.h as cpp, and the failed test ran again green. Not published.
 - 2026-11-05: 1.1.0 rules follow the layout, a first install reads where the code is, and the new-project skill (KWB-83), landed from work/1.1.0-rules-follow-code; the gate 481 of 481 on d668fb1. Not published.
+- 2026-11-05: 1.1.0 work orders, the workflow on the front page and the web page landed from work/1.1.0-workorders; the gate 488 of 488 on 3938f98, then the tests the npm link and site/ reach. Not published, and the page is not deployed.

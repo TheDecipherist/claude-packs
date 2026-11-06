@@ -41,6 +41,10 @@
     "docs": {
       "path": "docs",
       "purpose": "versions, notes and the history of earlier releases (the logs are at the root: CHANGELOG.md, workflow-bugs.md)"
+    },
+    "site": {
+      "path": "site",
+      "purpose": "the web page: the design, and the numbers a test holds true; never shipped in the npm package"
     }
   },
   "concepts": {

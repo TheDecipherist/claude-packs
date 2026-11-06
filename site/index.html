@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>claude-packs: rules and hooks that hold Claude Code to senior engineering</title>
+  <meta name="description" content="Install guardrails into a project's .claude folder. Rules tell Claude Code how the project is done, hooks refuse a bad write before it reaches the disk, and work orders let it build on its own.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/kit.css">
+  <script src="js/section-particles.js" defer></script>
+  <script src="js/page.js" defer></script>
+</head>
+<body>
+<main id="main-content">
+
+  <section id="top" class="section section--stats" aria-labelledby="page-title">
+    <div class="container">
+      <div class="page-identity">
+        <div class="cipher-stream" aria-hidden="true">
+          <div class="cipher-stream__inner">
+            <span>01 0F 3A 7C B2 E4 1D 8A 56 F9 2B 6E C0 44 9D 13 7F A1 38 D5 0C 82 EF 4B 91 2D B6 5E C3 70 1A F2</span>
+            <span>01 0F 3A 7C B2 E4 1D 8A 56 F9 2B 6E C0 44 9D 13 7F A1 38 D5 0C 82 EF 4B 91 2D B6 5E C3 70 1A F2</span>
+          </div>
+        </div>
+        <h1 id="page-title" class="page-identity__title" data-decode>claude-packs</h1>
+        <p class="lede">Claude Code is fast, and it forgets. This gives a project what a good team has: laws that hold, a memory that lasts, and proof that "done" means done.</p>
+        <div class="install">
+          <code>npx @thedecipherist/claude-packs init --auto</code>
+          <button type="button" data-copy="npx @thedecipherist/claude-packs init --auto">Copy</button>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn--dark" href="#start">Get started</a>
+          <a class="btn btn--outline" href="https://www.npmjs.com/package/@thedecipherist/claude-packs" rel="external noopener">View on npm</a>
+        </div>
+      </div>
+      <h2 class="visually-hidden">What the kit holds</h2>
+      <ul role="list" class="stats-bar">
+        <li class="stat-item"><strong class="stat-number" data-count="packs">39</strong><span class="stat-label">Packs</span></li>
+        <li class="stat-item"><strong class="stat-number" data-count="rules">261</strong><span class="stat-label">Rules</span></li>
+        <li class="stat-item"><strong class="stat-number" data-count="checks">349</strong><span class="stat-label">Lesson checks</span></li>
+        <li class="stat-item"><strong class="stat-number" data-count="hooks">36</strong><span class="stat-label">Hooks</span></li>
+        <li class="stat-item"><strong class="stat-number" data-count="skills">81</strong><span class="stat-label">Skills</span></li>
+        <li class="stat-item"><strong class="stat-number" data-count="configurations">8</strong><span class="stat-label">Project kinds</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="refusal" class="section section--void" aria-labelledby="refusal-heading">
+    <div class="container">
+      <div class="section__header-text">
+        <p class="category-label">See it work</p>
+        <h2 id="refusal-heading" class="section__heading">A mistake stops <em>at the write</em></h2>
+        <p class="section__subheading">Claude tries to write this into a Rust crate. The hook refuses it, the file is never written, and Claude gets the reason back. It returns a <code>Result</code>, and the write goes through. Nobody had to catch it in review.</p>
+      </div>
+      <div class="terminal">
+        <div class="terminal__bar">src/parser.rs</div>
+<pre>pub fn parse(text: &amp;str) -&gt; u32 {
+    text.parse::&lt;u32&gt;().unwrap()
+}
+
+<span class="refused">BLOCKED by lesson-checks in src/parser.rs: this edit brings back a known bug.</span>
+  <span class="why">[rust-unwrap-in-library]</span> A failure the caller could handle becomes a panic with no reason.
+  Return it with `?`, or say why it cannot happen with `.expect("...")`.
+      text.parse::&lt;u32&gt;().unwrap()
+      <span class="dim">see .claude/rules/rust-errors-are-returned.md</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="why" class="section section--repos" aria-labelledby="why-heading">
+    <canvas class="section-canvas" aria-hidden="true"></canvas>
+    <div class="container">
+      <div class="section__header-text">
+        <p class="category-label">Why use it</p>
+        <h2 id="why-heading" class="section__heading">The whole <em>workflow</em></h2>
+        <p class="section__subheading">Each session starts cold, the same mistakes come back, and code gets written twice. So the kit keeps what a session can't.</p>
+      </div>
+      <div class="repos-grid">
+        <article class="repo-card"><span class="repo-card__name">Mistakes stop at the write</span><p class="repo-card__desc">A hook refuses a bad write before it reaches the disk, and says why. It never lands, so it never needs finding.</p></article>
+        <article class="repo-card"><span class="repo-card__name">Nothing gets written twice</span><p class="repo-card__desc">Copies, near copies and functions made again are refused, with what differs between them, so repetition turns into one template.</p></article>
+        <article class="repo-card"><span class="repo-card__name">The project remembers</span><p class="repo-card__desc">The plan, the bugs and the decisions live in plain files in the repo, so a new session picks up where the last one stopped.</p></article>
+        <article class="repo-card"><span class="repo-card__name">Every bug makes it stronger</span><p class="repo-card__desc">A bug starts with a test that fails for it, and the fix can become a check that refuses that mistake from then on.</p></article>
+        <article class="repo-card"><span class="repo-card__name">"Done" gets measured</span><p class="repo-card__desc">A step finishes on a test or a number, and a gate is seen to fail on a planted fault before anyone trusts it.</p></article>
+        <article class="repo-card"><span class="repo-card__name">You can see what works</span><p class="repo-card__desc">Every call and refusal is logged and judged, so you know which hooks earn their place.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" class="section section--stats" aria-labelledby="start-heading">
+    <div class="container">
+      <div class="section__header-text">
+        <p class="category-label">Getting started</p>
+        <h2 id="start-heading" class="section__heading">Three <em>ways in</em></h2>
+        <p class="section__subheading">Your machine needs Node 22, because the hooks are Node scripts. The project can be in any language.</p>
+      </div>
+      <div class="ways">
+        <div class="way">
+          <h3>A brand new idea</h3>
+          <p>The folders, the plan, the bug logs, git and the kit, in one step.</p>
+          <pre>npx @thedecipherist/claude-packs new my-app</pre>
+        </div>
+        <div class="way">
+          <h3>An existing repo</h3>
+          <p>It reads what your project needs, installs that, then finds what is already wrong, on a copy.</p>
+          <pre>npx @thedecipherist/claude-packs suggest
+npx @thedecipherist/claude-packs init --auto
+npx @thedecipherist/claude-packs scan
+npx @thedecipherist/claude-packs fix</pre>
+        </div>
+        <div class="way">
+          <h3>A big job to hand over</h3>
+          <p>Write the steps once, and it builds session after session with nobody there.</p>
+          <pre>npx @thedecipherist/claude-packs workorder billing</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="keeps" class="section section--repos" aria-labelledby="keeps-heading">
+    <div class="container">
+      <div class="section__header-text">
+        <p class="category-label">Memory</p>
+        <h2 id="keeps-heading" class="section__heading">What a project <em>keeps</em></h2>
+        <p class="section__subheading">Claude forgets between sessions, so everything worth keeping lives in files. Logs are never cleared: a full one rotates, and the history stays.</p>
+      </div>
+      <table class="ledger">
+        <thead><tr><th scope="col">File</th><th scope="col">What it holds</th></tr></thead>
+        <tbody>
+          <tr><td>CLAUDE.md</td><td>How this project works, read at the start of every session</td></tr>
+          <tr><td>build.md</td><td>The plan: what is in progress, and a log of what landed</td></tr>
+          <tr><td>bugs.md</td><td>Every bug, logged before it is fixed, closed with its cause and the test that now catches it</td></tr>
+          <tr><td>workflow-bugs.md</td><td>Faults in the process itself, so the workflow improves too</td></tr>
+          <tr><td>docs/versions.md</td><td>Each dependency, with the latest version and when that was checked</td></tr>
+          <tr><td>.claude/logs/refusals.jsonl</td><td>Every refusal with its reason, then a verdict: right or wrong, and why</td></tr>
+          <tr><td>.claude/logs/events.jsonl</td><td>Every tool call, and what each hook said</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="proof" class="section section--void" aria-labelledby="proof-heading">
+    <div class="container">
+      <div class="section__header-text">
+        <p class="category-label">Testing</p>
+        <h2 id="proof-heading" class="section__heading">Strict about <em>proof</em></h2>
+      </div>
+      <ul role="list" class="proofs">
+        <li><strong>A bug fix starts red</strong><span>Show the bug with a test that fails for that reason, then fix the code.</span></li>
+        <li><strong>A test has to be able to fail</strong><span>A gate is shown red on a planted fault, a mistake put in on purpose.</span></li>
+        <li><strong>Tested once, on the template</strong><span>Anything used twice is one template. One quick pass proves the instances really are it.</span></li>
+        <li><strong>Only what the change reaches</strong><span>While working, a small change never costs a full test run.</span></li>
+        <li><strong>The whole suite, once</strong><span>It runs on committed work, as the gate before landing, and a hook refuses it any earlier.</span></li>
+        <li><strong>The guards are tested too</strong><span>Every hook has a selftest, every check proves its own examples, and <code>doctor</code> runs them all.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="workorders" class="section section--stats" aria-labelledby="workorders-heading">
+    <div class="container">
+      <div class="section__header-text">
+        <p class="category-label">Work orders</p>
+        <h2 id="workorders-heading" class="section__heading">Let it build <em>on its own</em></h2>
+        <p class="section__subheading">A work order is a written brief a project can build from with nobody there. It takes the recommended choice, writes down every decision so you can overturn it, and resumes from a file when a session ends. A whole plugin, firmware map to finished panel, was rebuilt this way overnight.</p>
+      </div>
+      <div class="terminal">
+        <div class="terminal__bar">docs/workorders/billing/workorder.md</div>
+<pre>## W2. The import
+
+1. Read every record in `data/orders.csv` into the schema of W1.
+2. Reject a bad row by name, with its line number. Never skip one silently.
+
+<span class="why">**Done when:**</span> all 41,206 rows of the sample load, the 12 known bad rows are each
+rejected with the right reason, and a planted bad row turns the test red.</pre>
+      </div>
+      <p class="section__subheading">Every step ends with a number or a test. "Works" can't be measured, so it can't finish.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer role="contentinfo" class="site-footer">
+  <div class="container">
+    <div class="footer__brand">
+      <p class="footer__tagline">claude-packs. MIT licence. Works in Claude Code, in the terminal and the IDE extensions.</p>
+      <p class="footer__tagline"><a href="https://www.npmjs.com/package/@thedecipherist/claude-packs" rel="external noopener">npm</a> &middot; <a href="https://thedecipherist.github.io/TheDecipherist/" rel="external noopener">TheDecipherist</a></p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

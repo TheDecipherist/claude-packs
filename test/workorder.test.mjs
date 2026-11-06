@@ -57,6 +57,7 @@ test('a new project with no packs named takes base alone, never a synth pack (KW
 });
 
 test('a new reader meets the benefits first, and every file the page says a project keeps is one the kit names', () => {
+  assert.ok(README.indexOf('https://www.npmjs.com/package/@thedecipherist/claude-packs') < README.indexOf('## Getting started'), 'the npm link is at the top');
   assert.ok(README.indexOf('## Getting started') < README.indexOf('## See it work'));
   for (const heading of ['## What a project keeps', '## How it is tested', '## Let it build on its own']) assert.ok(README.includes(heading), heading);
   const made = readFileSync(join(KIT, 'lib/new.mjs'), 'utf8');
