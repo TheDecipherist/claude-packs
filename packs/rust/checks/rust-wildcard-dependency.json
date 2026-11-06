@@ -1,0 +1,16 @@
+{
+  "id": "rust-wildcard-dependency",
+  "why": "A * version takes whatever is newest, and crates.io refuses it.",
+  "rule": ".claude/rules/rust-lints-are-the-gate.md",
+  "globs": [
+    "**/Cargo.toml"
+  ],
+  "exclude": [
+    "**/target/**",
+    "**/vendor/**"
+  ],
+  "pattern": "(?:^[ \\t]*[\\w-]+\\s*=\\s*|\\bversion\\s*=\\s*)\"\\*\"",
+  "flags": "m",
+  "bad": "serde = \"*\"",
+  "good": "serde = \"1.0\""
+}

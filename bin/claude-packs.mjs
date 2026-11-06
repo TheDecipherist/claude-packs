@@ -18,7 +18,7 @@ import { addCustomPack, loadCustomPacks, newPack } from '../lib/custom-packs.mjs
 import { fixPlan } from '../lib/fix-plan.mjs';
 import { logsCommand } from '../lib/logs.mjs';
 import { scan } from '../lib/scan.mjs';
-import { suggest, suggestionOf } from '../lib/suggest.mjs';
+import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
@@ -115,7 +115,7 @@ async function main() {
       }
       if (rest.length === 0 && !config) throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');
       const chosen = rest.length ? rest : readConfig(config).packs.default;
-      await sync(dir, chosen, { force, mkdirs: true, seedLayout, config });
+      await sync(dir, chosen, { force, mkdirs: true, seedLayout, config: config ?? detectedConfig(dir, chosen) });
       if (isSynth(chosen) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
       return doctor(dir, console.log, INSTALLING);
     }

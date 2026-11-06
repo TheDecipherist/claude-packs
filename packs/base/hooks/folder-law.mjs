@@ -52,6 +52,7 @@ function selftest() {
   const w = (file) => runHook(hook, dir, writeOf(join(dir, file)));
   const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir));
   const ts = scratchProject({}, { folders: { api: { path: 'api/src', purpose: 'the API' } }, concepts: {}, sourceFiles: '\\.(ts|tsx)$' });
+  const plain = scratchProject({}, { folders: { src: { path: 'src', purpose: 'the code' } }, concepts: {}, sourceFiles: '\\.py$' });
   return verdicts('folder-law', [
     ['TypeScript is not source where the layout does not say so', w('stray/x.ts'), 0],
     ['a layout whose sourceFiles name TypeScript: a new .ts outside its folders (KWB-37)', runHook(hook, ts, writeOf(join(ts, 'stray/x.ts'))), 2],
@@ -59,6 +60,8 @@ function selftest() {
     ['a new file in a layout folder', w('src/core/Svf.cpp'), 0],
     ['a new file outside the layout', w('stray/New.cpp'), 2],
     ['a new file loose in src/', w('src/Loose.cpp'), 2],
+    ['a layout that names nothing inside src/: a file in src/ (KWB-78)', runHook(hook, plain, writeOf(join(plain, 'src/app.py'))), 0],
+    ['and a file outside it', runHook(hook, plain, writeOf(join(plain, 'stray/app.py'))), 2],
     ['an existing file outside the layout', w('stray/Old.cpp'), 0],
     ['an edit is never a new file', runHook(hook, dir, editOf(join(dir, 'stray/New.cpp'))), 0],
     ['a doc is not source', w('stray/notes.md'), 0],

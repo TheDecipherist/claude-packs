@@ -29,6 +29,7 @@
       "websocket",
       "host-agent",
       "go",
+      "rust",
       "ci",
       "dynamic-data",
       "zod",
@@ -88,7 +89,7 @@
       "Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.",
       "When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.",
       "When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.",
-      "claude-packs (`~/projects/claude-packs`) is the source of truth for every rule, check, hook and skill this project's configuration installs. A fix to one of them is made there with its test, committed, pushed and released as a new version, then taken in with `npx --no-install @thedecipherist/claude-packs update`. A project edits its installed copy only to try a fix before it goes into the kit."
+      "claude-packs (`@thedecipherist/claude-packs`) is the source of truth for every rule, check, hook and skill this project's configuration installs. A fix to one of them is made in the kit, with its test, and comes here with `npx --no-install @thedecipherist/claude-packs update`. A project edits its installed copy only to try a fix before it goes into the kit."
     ],
     "never": [
       "Create source files outside these folders, or put a kind of thing anywhere but its place. The folder-law and placement-law hooks refuse both.",

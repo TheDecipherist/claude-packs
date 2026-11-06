@@ -41,9 +41,13 @@ export function globsForConcepts(layout, concepts) {
 }
 
 // Folders that may hold source code: every folder except docs/tools, deepest first.
+// src/ is a code folder unless the layout names folders inside it: then a file belongs in one of those (KWB-78: a Python project's src/new.py was refused).
 export function codeFolders(layout) {
-  return Object.entries(layout.folders ?? {})
-    .filter(([name]) => !['docs', 'tools', 'src'].includes(name))
+  const folders = Object.entries(layout.folders ?? {});
+  const src = layout.folders?.src?.path;
+  const split = folders.some(([, f]) => f.path.startsWith(`${src}/`));
+  return folders
+    .filter(([name]) => !['docs', 'tools'].includes(name) && !(name === 'src' && split))
     .map(([, f]) => f.path)
     .sort((a, b) => b.length - a.length);
 }

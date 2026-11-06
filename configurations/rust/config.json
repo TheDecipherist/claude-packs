@@ -1,0 +1,105 @@
+{
+  "name": "rust",
+  "description": "Rust projects: universal engineering and the rust pack.",
+  "packs": {
+    "always": [
+      "base",
+      "writing",
+      "hook-proof"
+    ],
+    "choose": [
+      "rust",
+      "go",
+      "shell",
+      "docker",
+      "http-api",
+      "multi-tenant",
+      "websocket",
+      "host-agent",
+      "ci",
+      "js-ts",
+      "python",
+      "dynamic-data",
+      "web",
+      "ui-craft",
+      "content-site"
+    ],
+    "default": [
+      "rust"
+    ]
+  },
+  "layout": {
+    "folders": {
+      "docs": {
+        "path": "docs",
+        "purpose": "spec, laws, licences, work orders, decisions"
+      },
+      "src": {
+        "path": "src",
+        "purpose": "the source of a single crate"
+      },
+      "tests": {
+        "path": "tests",
+        "purpose": "integration tests (unit tests live beside their code, in a #[cfg(test)] module)"
+      },
+      "tools": {
+        "path": "tools",
+        "purpose": "scripts and research tooling (not shipped)"
+      },
+      "crates": {
+        "path": "crates",
+        "purpose": "the crates of a workspace, each with its own src/ and tests/",
+        "planned": true
+      },
+      "benches": {
+        "path": "benches",
+        "purpose": "benchmarks",
+        "planned": true
+      },
+      "examples": {
+        "path": "examples",
+        "purpose": "runnable examples",
+        "planned": true
+      }
+    },
+    "kinds": {
+      "tests": {
+        "what": "integration tests",
+        "in": "tests",
+        "concepts": [
+          "tests"
+        ]
+      },
+      "docs": {
+        "what": "the spec, laws.md, decisions, research, work orders",
+        "in": "docs",
+        "concepts": [
+          "docs-folder"
+        ],
+        "files": [
+          "**/laws.md",
+          "**/*-spec.md"
+        ]
+      },
+      "tools": {
+        "what": "scripts and research tools that never ship",
+        "in": "tools"
+      }
+    }
+  },
+  "preamble": {
+    "always": [
+      "Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.",
+      "When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.",
+      "When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.",
+      "claude-packs (`@thedecipherist/claude-packs`) is the source of truth for every rule, check, hook and skill this project's configuration installs. A fix to one of them is made in the kit, with its test, and comes here with `npx --no-install @thedecipherist/claude-packs update`. A project edits its installed copy only to try a fix before it goes into the kit."
+    ],
+    "never": [
+      "Create source files outside these folders, or put a kind of thing anywhere but its place. The folder-law and placement-law hooks refuse both.",
+      "Edit files in `.claude/rules`, `.claude/checks` or `.claude/hooks` to get past a block. Fix the code, or ask the user to change the law.",
+      "Route around a block: no override variables, no writing through the shell after a refusal, no parking files in a scratchpad, no putting new code into an unrelated existing file.",
+      "Point at a document by line number. Cite a fixed anchor (`{#id}`) or a symbol name; lines move."
+    ]
+  },
+  "sourceFiles": "(?<!/build)\\.rs$"
+}
