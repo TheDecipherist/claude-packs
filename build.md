@@ -232,3 +232,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.1.0 work orders, the workflow on the front page and the web page landed from work/1.1.0-workorders; the gate 488 of 488 on 3938f98, then the tests the npm link and site/ reach. Not published, and the page is not deployed.
 - 2026-11-06: 1.2.0 compare-to-the-machine landed from work/1.2.0-compare-to-the-machine; the gate 493 of 493 on a9d72b7. Not published.
 - 2026-11-06: the on-screen keyboard and control-size laws, and window tests on a virtual display, on work/1.2.0-keyboard-laws.
+- 2026-11-06: 1.2.0 keyboard laws, one size per kind and test-quietly landed from work/1.2.0-keyboard-laws; the gate 501 of 501 on 9953386.
