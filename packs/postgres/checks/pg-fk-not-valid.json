@@ -1,0 +1,18 @@
+{
+  "id": "pg-fk-not-valid",
+  "why": "A foreign key locks both tables while it scans. Add it NOT VALID, then VALIDATE it in another transaction.",
+  "rule": ".claude/rules/postgres-migrations-never-stop-traffic.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)[ \\t]*ALTER\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?(?:ONLY\\s+)?(?:\"?\\w+\"?\\.)?\"?(\\w+)\\b\"?(?<!CREATE\\s+(?:UNLOGGED\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:\"?\\w+\"?\\.)?\"?\\1\"?[\\s(][\\s\\S]*)\\s+ADD\\s+(?:CONSTRAINT\\s+\\S+\\s+)?FOREIGN\\s+KEY\\b(?![^;]{0,400}\\bNOT\\s+VALID\\b)",
+  "flags": "im",
+  "bad": "ALTER TABLE t ADD FOREIGN KEY (a) REFERENCES u (id);",
+  "good": "ALTER TABLE t ADD FOREIGN KEY (a) REFERENCES u (id) NOT VALID;"
+}

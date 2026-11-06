@@ -1,0 +1,18 @@
+{
+  "id": "pg-not-exists",
+  "why": "NOT IN with a subquery returns no rows at all when the subquery holds one NULL, and plans badly.",
+  "rule": ".claude/rules/postgres-queries-are-null-safe-and-bounded.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)[^\\n]*\\bNOT\\s+IN\\s*\\(\\s*SELECT\\b",
+  "flags": "im",
+  "bad": "DELETE FROM a WHERE id NOT IN (SELECT a_id FROM b);",
+  "good": "DELETE FROM a WHERE NOT EXISTS (SELECT 1 FROM b WHERE b.a_id = a.id);"
+}

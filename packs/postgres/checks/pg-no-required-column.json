@@ -1,0 +1,18 @@
+{
+  "id": "pg-no-required-column",
+  "why": "A NOT NULL column with no default fails on any table that has rows. Add it nullable, backfill, then tighten.",
+  "rule": ".claude/rules/postgres-migrations-never-stop-traffic.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)[ \\t]*(?:ALTER\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?(?:ONLY\\s+)?(?:\"?\\w+\"?\\.)?\"?(\\w+)\\b\"?(?<!CREATE\\s+(?:UNLOGGED\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:\"?\\w+\"?\\.)?\"?\\1\"?[\\s(][\\s\\S]*)\\s+)ADD\\s+(?:COLUMN\\s+)?(?:IF\\s+NOT\\s+EXISTS\\s+)?(?!CONSTRAINT\\b|PRIMARY\\b|UNIQUE\\b|FOREIGN\\b|CHECK\\b|EXCLUDE\\b)\"?\\w+\"?\\s+(?![^,;]*\\b(?:DEFAULT|GENERATED)\\b)[^,;]*\\bNOT\\s+NULL\\b",
+  "flags": "im",
+  "bad": "ALTER TABLE t ADD COLUMN owner_id bigint NOT NULL;",
+  "good": "ALTER TABLE t ADD COLUMN owner_id bigint NOT NULL DEFAULT 0;"
+}

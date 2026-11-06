@@ -1,0 +1,18 @@
+{
+  "id": "pg-no-money",
+  "why": "The money type rounds to one locale's fraction and holds no currency.",
+  "rule": ".claude/rules/postgres-types-say-what-they-hold.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)(?:[^\\n]*[(,\\s])?\"?\\w+\"?\\s+MONEY\\b",
+  "flags": "im",
+  "bad": "price money NOT NULL",
+  "good": "price_cents bigint NOT NULL"
+}

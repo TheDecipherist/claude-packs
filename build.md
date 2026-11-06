@@ -172,6 +172,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: a `rust` pack and configuration (rules, lesson checks measured on real crates, skills, a lint template, suggest and scan reading Cargo.toml), what the language table and blankers need to read Rust right, an install that works in a project with no package.json, and a README that starts from what a new reader needs; concepts: none (design/shape.json declares none); reuse: blanker and LANGUAGES (packs/base/hooks/lib/languages.mjs), blankCode (packs/base/hooks/lib/cpp-scan.mjs), ROWS and LEADS (lib/scan-detect.mjs), PRESETS (lib/packs.mjs), fresh and hookRun (test/kit-cli.mjs).
   done when: every check measured on real crates with its hits read; `suggest`, `init --auto`, `doctor --strict` and `scan` work on a real crate with no package.json; a refusal in the README is the exact text of a real run; npm test green once on committed work.
 
+- 1.1.0, the postgres pack (work/1.1.0-rust-pack), started 2026-11-05 ("make a pack for that as well").
+  making: a `postgres` pack: five rules, lesson checks measured on 1,937 real migrations and 2,903 source files, three opt-in checks that are right only on a live table, a `db-wipe-guard` hook, and suggest reading Postgres from a project; concepts: none (design/shape.json declares none); reuse: hitsOf (packs/base/hooks/lesson-checks.mjs) and its modes, judgeEvent (packs/base/hooks/lib/writes.mjs), holds and ROWS (lib/scan-detect.mjs), PRESETS (lib/packs.mjs).
+  done when: every check measured on the corpus with its hits read; the hook's selftest seen red; doctor --strict passes on a Postgres project; npm test green once on committed work.
+
 ## Steps
 
 ## Log

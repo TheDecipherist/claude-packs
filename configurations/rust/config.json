@@ -12,6 +12,7 @@
       "go",
       "shell",
       "docker",
+      "postgres",
       "http-api",
       "multi-tenant",
       "websocket",

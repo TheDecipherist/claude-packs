@@ -23,6 +23,7 @@
       "ci",
       "dynamic-data",
       "mongo",
+      "postgres",
       "ai",
       "nginx",
       "content-site"

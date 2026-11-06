@@ -13,6 +13,7 @@
       "docker",
       "ai",
       "mongo",
+      "postgres",
       "js-ts",
       "cpp",
       "http-api",

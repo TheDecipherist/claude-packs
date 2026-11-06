@@ -15,7 +15,7 @@ for (const name of CONFIGS) {
     execFileSync('git', ['init', '-q'], { cwd: dir });
     const init = cli(dir, 'init', '--config', name);
     assert.equal(init.status, 0, init.stdout + init.stderr);
-    for (const f of Object.values(config(name).layout.folders)) assert.ok(existsSync(join(dir, f.path)), `${name}: ${f.path}/`);
+    for (const f of Object.values(config(name).layout.folders)) assert.equal(existsSync(join(dir, f.path)), !f.planned, `${name}: ${f.path}/`);
     const strict = cli(dir, 'doctor', '--strict');
     assert.equal(strict.status, 0, strict.stdout);
     assert.match(strict.stdout, new RegExp(`configuration: ${name}\\b`));

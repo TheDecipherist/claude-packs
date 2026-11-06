@@ -1,27 +1,179 @@
 # @thedecipherist/claude-packs
 
-Rules, checks, hooks and skills that hold Claude Code to what a senior engineer would accept, installed per project. A rule tells Claude the law, a hook refuses the write before it reaches the disk, and a skill walks the fix. Everything lives in the project's own `.claude/`, so a team gets it from the repo.
+AI coding agents make the same small mistakes again and again, and every fix costs a turn and tokens. claude-packs installs guardrails into a project's `.claude/` folder: **rules** that tell Claude Code how this kind of project is done, and **hooks** that refuse a bad write before it reaches the disk.
+
+You install once. From then on Claude Code reads the rules and meets the hooks in every session, with nothing to run or remember. The files live in the repo, so the whole team gets them.
+
+It works on a project in any language. The machine needs Node 22, because the hooks are Node scripts, and the project itself can be Rust, Python, Go, C++ or anything else.
+
+## See it work
+
+A new Rust crate, and one command:
+
+```
+$ npx @thedecipherist/claude-packs init --auto
+Packs: base, rust. 151 files managed, 22 rule paths refreshed.
+
+$ git status --short
+?? .claude/
+?? CLAUDE.md
+?? clippy.toml
+```
+
+Then Claude tries to write this into `src/parser.rs`:
+
+```rust
+pub fn parse(text: &str) -> u32 {
+    text.parse::<u32>().unwrap()
+}
+```
+
+The hook refuses it, and the file is never written. Claude gets this back:
+
+```
+BLOCKED by lesson-checks in src/parser.rs: this edit brings back a known bug.
+  [rust-unwrap-in-library] A failure the caller could handle becomes a panic with no reason. Return it with `?`, or say why it cannot happen with `.expect("...")`.
+      text.parse::<u32>().unwrap()
+      see .claude/rules/rust-errors-are-returned.md
+```
+
+Claude reads the reason, returns a `Result`, and the write goes through. Nobody had to catch it in review.
+
+## How you use it
+
+**1. Install, once.** One command writes the rules and hooks into `.claude/`. The npm package is only the installer and updater: what does the work is the files it leaves in your project.
+
+**2. Work as usual.** Use Claude Code the way you already do. It reads `.claude/` at the start of every session, and the hooks run on every write.
+
+When a new version comes out, `update` brings it in. Nothing new switches on unless you chose it.
 
 ## Start here
 
-Install the package in the project (Node 22+):
+In a Node project, add the kit as a dev dependency, so the team gets the same version:
 
 ```
 npm i -D @thedecipherist/claude-packs
-```
-
-Then four commands:
-
-```
 npx --no-install @thedecipherist/claude-packs suggest      # which packs this project needs, and why
 npx --no-install @thedecipherist/claude-packs init --auto  # install exactly that
 npx --no-install @thedecipherist/claude-packs scan         # everything already wrong, on a copy of the project
 npx --no-install @thedecipherist/claude-packs fix          # the scan as a work order: .claude/fix-plan.md
 ```
 
+In any other project there is no `package.json` to add it to, so leave out `--no-install` and npx fetches the kit:
+
+```
+npx @thedecipherist/claude-packs suggest
+npx @thedecipherist/claude-packs init --auto
+```
+
 Then tell Claude to work through `.claude/fix-plan.md`. The `fix-from-scan` skill says how.
 
-`scan` is safe to run before installing anything: it works on a copy in a temp folder and never writes to the project. `suggest` only reads file names and `package.json`.
+`scan` is safe to run before installing anything: it works on a copy in a temp folder and never writes to the project. `suggest` only reads file names and dependency files.
+
+## Install one pack
+
+You don't have to take what `suggest` finds. Name the pack yourself:
+
+| You want | Command |
+|---|---|
+| One pack, in a project with nothing installed yet | `init mongo` |
+| Several packs at once | `init rust docker ci` |
+| One more pack, in a project that already has the kit | `add docker` |
+| A pack out again | `remove docker` |
+| A stack's whole set | `init rust-app` (see [Presets](#presets)) |
+| To see what there is | `list` |
+
+Each of these goes after `npx @thedecipherist/claude-packs`, or `npx --no-install @thedecipherist/claude-packs` where the kit is a dev dependency.
+
+A few things are worth knowing:
+
+- **`base` always comes too.** It holds the hooks that run every pack's checks, so no pack works alone. `writing` and `hook-proof` come with every configuration as well.
+- **A pack has to fit the project's configuration.** `add` refuses one that doesn't, and lists what fits. `config <name>` switches.
+- **In a folder with no code yet,** name the configuration, or the kit has to guess it from the pack: `init mongo --config node`. In a project with code, `init <pack>` uses the configuration `suggest` finds.
+
+## What is whose
+
+Some of what you will see in `.claude/` is Claude Code's own, and some only works through the kit's hooks:
+
+| Part | Whose | What it does |
+|---|---|---|
+| `CLAUDE.md` | Claude Code | Read at the start of every session |
+| `.claude/rules/` | Claude Code | Short laws. One with `paths:` loads only when Claude touches a matching file |
+| `.claude/skills/` | Claude Code | Steps for one job. The description is always loaded, the body when it is needed |
+| `.claude/settings.json` | Claude Code | Registers the hooks |
+| `.claude/hooks/` | The kit | The scripts Claude Code runs on a tool call |
+| `.claude/checks/` | The kit | Patterns the `lesson-checks` hook reads |
+| `.claude/layout.json` | The kit | Which folder holds what |
+| `.claude/tools/` | The kit | Helpers its skills and gates run |
+| `.claude/claude-packs.lock.json` | The kit | What is installed, with a hash per file |
+
+## Questions
+
+**Do I need a Node project?** No. Node 22 has to be on the machine, and that's all. The kit has configurations for C++, Go, Python, Rust and Node, and `base` for anything else.
+
+**Which Claude apps does it work in?** Claude Code: the terminal, the IDE extensions and the desktop app. A normal Claude chat doesn't read a project's `.claude/` folder.
+
+**What does it cost in tokens?** A Rust install loads about 3,300 tokens when a session starts: the `CLAUDE.md` block, 10 rules with no `paths:` and 22 skill descriptions. The `making` hook adds about 107 tokens to each prompt, and `doctor` prints that figure for your project. Rules with `paths:` and full skills load only when they are needed. The other hooks run outside the model, so they cost nothing unless they refuse.
+
+**Global or per project?** Per project. Claude Code also reads `~/.claude` for every project and `CLAUDE.md` from parent folders, and the project's own files are the most specific. The kit writes to `~/.claude` only if you run `global add`, which installs [three shell pieces](#the-global-part-exactly-three-pieces).
+
+**Is it for one person or a team?** Both. The files live in the repo, a dev dependency pins the version, and a team can keep [its own packs](#custom-packs-share-your-own-with-your-team) in its own git repo.
+
+**Can I turn a check off?** Yes: name it in `layout.json` `"disable"`, as in `"disable": ["checks/rust-unwrap-in-library.json"]`, and run `update`.
+
+## Add your own rule
+
+Found a mistake Claude keeps making? Start in the project.
+
+**1. Write the rule.** A short file in `.claude/rules/`, and `paths:` says when it loads:
+
+```markdown
+---
+paths:
+  - "src/billing/**"
+---
+
+# Money is integer cents
+
+<constraints>
+Always do:
+- Store and pass money as `i64` cents.
+
+Never do:
+- Use `f32` or `f64` for an amount.
+</constraints>
+```
+
+**2. Enforce it, if you want a refusal.** A rule tells Claude. A lesson check stops the write. Add `.claude/checks/money-no-float.json`, with an example of each side, which `doctor` proves:
+
+```json
+{
+  "id": "money-no-float",
+  "why": "A float cannot hold 0.10 exactly, so amounts drift.",
+  "rule": ".claude/rules/money-is-integer-cents.md",
+  "globs": ["src/billing/**"],
+  "pattern": "\\b(?:amount|price|total)\\s*:\\s*f(?:32|64)\\b",
+  "bad": "pub struct Line { price: f64 }",
+  "good": "pub struct Line { price_cents: i64 }"
+}
+```
+
+**3. Share it when it applies everywhere.** Your own files survive every `update`. When a rule holds for every project you have, move it into [a pack of your own](#custom-packs-share-your-own-with-your-team).
+
+## Words
+
+| Word | What it means |
+|---|---|
+| Pack | A folder of rules, checks, hooks and skills for one subject: `rust`, `mongo`, `docker` |
+| Configuration | A kind of project: which packs fit it, its folders, and what counts as source. A project has one |
+| Preset | A named list of packs, so `init rust-app` installs four at once |
+| Profile | A ready-made `layout.json` for a known project shape, taken with `init --profile` |
+| Layout | `.claude/layout.json`: which folder holds what, and which rules apply where |
+| Rule | A short law in `.claude/rules/`. It tells Claude, and refuses nothing |
+| Lesson check | A pattern with a `bad` and a `good` example. It refuses an edit that adds a match |
+| Hook | A script Claude Code runs on a tool call. It can refuse the call |
+| Skill | The steps for one job, loaded when the job comes up |
+| Plant | A fault put in on purpose, to prove a hook or a gate catches it |
 
 ## What happens when Claude writes code
 
@@ -91,8 +243,10 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `mongo` | MongoDB with the native driver | 6 | 18 | 0 | 0 |
 | `multi-tenant` | One system, many customers: no role crosses a tenant | 1 | 2 | 0 | 1 |
 | `nginx` | NGINX in front of containers | 2 | 7 | 0 | 1 |
+| `postgres` | PostgreSQL: migrations that never stop traffic, values always bound, no database wiped by mistake | 5 | 10 | 1 | 1 |
 | `python` | Python: templates, errors, resources, safe subprocess calls | 2 | 11 | 0 | 1 |
 | `react` | React: failed requests, effects, accessible controls | 2 | 6 | 0 | 0 |
+| `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate | 5 | 8 | 0 | 3 |
 | `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 9 | 4 | 1 | 6 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
@@ -122,6 +276,7 @@ A project is one configuration: a kind of project, as data in `configurations/<n
 | `go` | Go projects | `go` |
 | `node` | A Node.js or TypeScript service, web app, CLI, library or MCP server | `js-ts` |
 | `python` | Python projects | `python` |
+| `rust` | Rust crates and workspaces | `rust` |
 | `full-stack` | A Fastify API and a Next.js web app, with one schemas folder and one database gateway. It fixes a folder layout, so it is offered and never assumed. It always takes `full-stack`, `http-api`, `fastify`, `zod` and `docker` | `js-ts`, `stored-text`, `ui-craft` |
 | `synth-creator` | JUCE synths and effects | `cpp`, `audio-core` |
 
@@ -149,10 +304,11 @@ npx --no-install @thedecipherist/claude-packs config <name> [--dry-run]   switch
 | `python-app` | `python`, `shell`, `docker` |
 | `shell-tools` | `shell` |
 | `go-app` | `go`, `shell`, `docker`, `ci` |
+| `rust-app` | `rust`, `shell`, `docker`, `ci` |
 
 ## Commands
 
-Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <project>` for another folder.
+Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thedecipherist/claude-packs <command>` with the kit as a dev dependency. `--dir <project>` runs it on another folder.
 
 | Command | What it does |
 |---|---|
@@ -202,7 +358,7 @@ Each is `npx --no-install @thedecipherist/claude-packs <command>`, with `--dir <
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
-Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
+Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
 Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. Nothing is ever cleared: a log past 1 MB moves to `.claude/logs/` under a dated name (`"guards": { "logs": { "maxKb": 1024 } }`). A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
 
@@ -313,7 +469,7 @@ Global by design: they fix this machine's shell for Claude, not any project's ru
 
 ## Credits
 
-The kit learned from [superpowers](https://github.com/obra/superpowers) (MIT), mddkit and MDD, Vercel's Web Interface Guidelines (MIT), Anthropic's frontend-design (Apache 2.0), Impeccable (Apache 2.0), taste-skill and imagegen-skills (MIT). [docs/ui-craft-sources.md](docs/ui-craft-sources.md) says what came from each UI source.
+The kit learned from [superpowers](https://github.com/obra/superpowers) (MIT), mddkit and MDD, Vercel's Web Interface Guidelines (MIT), Anthropic's frontend-design (Apache 2.0), Impeccable (Apache 2.0), taste-skill and imagegen-skills (MIT), for Rust from [BeautifulRust](https://github.com/morganlinton/BeautifulRust) (MIT) and [rust-skills](https://github.com/leonardomso/rust-skills) (MIT), and for Postgres from [squawk](https://squawkhq.com/docs/rules) (MIT and Apache 2.0), [strong_migrations](https://github.com/ankane/strong_migrations) (MIT), [pg-aiguide](https://github.com/timescale/pg-aiguide) (Apache 2.0) and the PostgreSQL wiki's [Don't Do This](https://wiki.postgresql.org/wiki/Don't_Do_This). [docs/ui-craft-sources.md](docs/ui-craft-sources.md) says what came from each UI source.
 
 ## License
 

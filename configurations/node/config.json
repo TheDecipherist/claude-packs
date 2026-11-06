@@ -10,6 +10,7 @@
     "choose": [
       "js-ts",
       "mongo",
+      "postgres",
       "fastify",
       "ai",
       "docker",

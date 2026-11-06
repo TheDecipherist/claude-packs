@@ -10,6 +10,8 @@ const CASES = [
   ['websocket', 'src/ws.ts', 'streamManager.updateHeartbeat(msg.agent_id, msg.status);\n', 'streamManager.updateHeartbeat(conn.agentId, msg.status);\n'],
   ['host-agent', 'src/update.ts', 'if (expectedSha256 && actual !== expectedSha256) return fail();\n', 'if (!expectedSha256 || actual !== expectedSha256) return fail();\n'],
   ['go', 'src/a.go', 'package a\n_ = json.Unmarshal(raw, &rows)\n', 'package a\nif err := json.Unmarshal(raw, &rows); err != nil { return err }\n'],
+  ['rust', 'src/a.rs', 'pub fn f(x: &str) -> u32 {\n    x.parse().unwrap()\n}\n', 'pub fn f(x: &str) -> Result<u32, E> {\n    Ok(x.parse()?)\n}\n'],
+  ['postgres', 'db/1.sql', 'ALTER TABLE t ADD COLUMN a uuid DEFAULT gen_random_uuid();\n', 'ALTER TABLE t ADD COLUMN a timestamptz DEFAULT now();\n'],
   ['dynamic-data', 'src/save.ts', 'await col.updateOne({ _id: id }, { $set: req.body });\n', 'await write(entity, id, patch, { role, scope });\n'],
   ['dynamic-data', 'src/filter.ts', 'const f = new Function("return " + text)();\n', 'const f = FilterTree.parse(text);\n'],
   ['http-api', 'src/mount.ts', "app.use('/api/orders', router);\n", "app.use('/api/v1/orders', router);\n"],

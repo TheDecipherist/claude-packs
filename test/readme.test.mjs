@@ -33,6 +33,19 @@ test('every command in the help is on the page', () => {
   for (const [, command] of help.matchAll(/^ {2}([a-z][a-z-]+)\b/gm)) assert.ok(README.includes(`\`${command}`), command);
 });
 
+test('the refusal on the page is the check\'s own words, so the first thing a reader sees is true', () => {
+  const check = JSON.parse(readFileSync(join(KIT, 'packs/rust/checks/rust-unwrap-in-library.json'), 'utf8'));
+  assert.ok(README.includes(`[${check.id}] ${check.why}`));
+  assert.ok(README.includes(`see ${check.rule}`));
+});
+
+test('a new reader meets what it is before any command, and how to install one pack', () => {
+  assert.ok(README.indexOf('## See it work') < README.indexOf('## Start here'));
+  assert.ok(README.indexOf('rules') < README.indexOf('npx'));
+  for (const heading of ['## Install one pack', '## What is whose', '## Questions', '## Add your own rule', '## Words']) assert.ok(README.includes(heading), heading);
+  for (const command of ['`init mongo`', '`add docker`', '`remove docker`', '`list`']) assert.ok(README.includes(command), command);
+});
+
 test('every hook base installs is in the table', () => {
   for (const c of hooksOf('base')) {
     const name = c.match(/hooks\/([\w-]+)\.mjs/)[1];

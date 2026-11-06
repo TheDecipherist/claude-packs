@@ -2,7 +2,26 @@
 
 ## 1.1.0 (2026-11-05)
 
-Faults a real build found: the MPX 500 rebuild ran 1.0.0 for a whole unit, and its report ranks them.
+Two new packs, a kit that works outside C++ and JS, and the faults a real build found: the MPX 500 rebuild ran 1.0.0 for a whole unit, and its report ranks them.
+
+New:
+
+- `rust` pack and configuration: 5 rules, 8 lesson checks, 3 skills, a lint set for `Cargo.toml` and a `clippy.toml`. Each check was measured on ten crates (6,245 files) and its hits read. What clippy judges better stays with clippy: five candidates were dropped for it. The lint set was proved with real `cargo clippy` on planted faults. `rust-app` preset.
+- `postgres` pack: 5 rules, 10 lesson checks, 1 hook, 1 skill. The checks were measured on 5,653 `.sql` files and 5,520 source files. Seven are on by default, and three that are right only on a large live table are opt-in (`pg-index-concurrently`, `pg-fk-not-valid`, `pg-timestamptz`). A line that is right anyway says so: `pg: allow <reason>`.
+- `db-wipe-guard` (`postgres`): a forced reset, `db:drop`, `flush` or `dropdb` runs only against a local database, read from the command, then the checkout's `.env`.
+- `suggest` reads Rust from `Cargo.toml`, and Postgres from a project's dependency files in any language.
+- A lesson check can read with a language's own blanker (`"language": "rust"`) and leave out tests in the same file (`"notInTests": true`).
+- `suite-once` knows `cargo test` and `cargo nextest run`.
+- The README starts from what a new reader needs: what the kit is, a real refusal, how to install one pack, what is whose, questions, how to add a rule, and the words.
+
+A project that is not C++ or JS (all of these were in 1.0.0):
+
+- `folder-law` refused `src/new.py` in a new Python project, and the same in Go and Rust. `src/` counts as a code folder unless the layout names folders inside it (KWB-78).
+- Seven universal rules, among them `bug-fix-starts-red`, loaded only for C++ and JS, and `doctor --strict` was red on a new project for it. They load on Python, Go and Rust now, and two on JS as well (KWB-79).
+- A project with no `package.json` was told `npx --no-install ...`, which cannot work there. `suggest`, `scan` and `fix` print the form that does, and its CLAUDE.md block says so (KWB-76).
+- `init <pack>` took the smallest configuration that fits: `init mongo` gave `python`. It takes the project's own now, where the project has code (KWB-80).
+- Every configuration's CLAUDE.md block named a folder on one machine, and release steps a project cannot take. An `update` rewrites that line (KWB-77).
+- The Rust row of the language table misread lifetimes, char literals, raw strings and nested comments, and read no method in an `impl` (KWB-75).
 
 What fails silently or fails open:
 

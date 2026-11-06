@@ -1,5 +1,5 @@
 ---
-# concepts: tests, cpp, python, go, rust
+# concepts: tests, cpp, python, go, rust, js
 paths:
   - "placeholder"
 ---

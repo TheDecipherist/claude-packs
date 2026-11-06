@@ -15,7 +15,7 @@ const FX = join(KIT, 'test/fixtures/noop');
 // 0.25.0: the person's name out of every file, a // in a string read right, and what the reviews changed.
 const REVIEWED = ['.claude/hooks/protect-vendor.mjs', '.claude/skills/analyse-reference-look/SKILL.md', '.claude/hooks/lib/house.py', '.claude/rules/oscillators-bandlimited.md', '.claude/hooks/secrets-guard.mjs', '.claude/rules/no-time-or-date.md', '.clang-tidy', '.claude/hooks/build-guard.mjs', '.claude/hooks/idle-wake.mjs', '.claude/hooks/lib/cpp-scan.mjs', '.claude/hooks/lib/hook-log.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/making-check.mjs', '.claude/hooks/run-hooks.mjs', '.claude/hooks/time-guard.mjs', '.claude/hooks/user-asks.mjs', '.claude/rules/clang-tidy-core-guidelines.md', '.claude/rules/hooks-and-gates.md', '.claude/rules/plan-and-logs.md', '.claude/skills/copy-and-prove/SKILL.md'];
 export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mjs', 'git-guard.mjs', 'making.mjs', 'once-only.mjs', 'placement-law.mjs',
-  'shape-law.mjs', 'stage-guard.mjs', 'lesson-checks.mjs', 'dispatch-once.mjs', 'lib/glob.mjs', 'lib/pushed.mjs', 'lib/git-guard-selftest.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
+  'shape-law.mjs', 'stage-guard.mjs', 'lesson-checks.mjs', 'dispatch-once.mjs', 'lib/layout.mjs', 'lib/glob.mjs', 'lib/pushed.mjs', 'lib/git-guard-selftest.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs']
   .map((f) => `.claude/hooks/${f}`).concat(['.claude/rules/instances-by-index-identities-by-id.md', '.claude/skills/prove-instances-identical/SKILL.md',
     '.claude/tools/shape-symmetry.mjs', '.claude/tools/shape-symmetry-selftest.mjs',
     '.claude/tools/freeze.mjs', '.claude/tools/lib/wav.mjs', '.claude/rules/subagent-dispatch.md', '.claude/rules/bug-fix-starts-red.md',
@@ -24,6 +24,7 @@ export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mj
 function updated(project, named = true) {
   const dir = fresh(`noop-${project}-`);
   mkdirSync(join(dir, '.claude'));
+  writeFileSync(join(dir, 'package.json'), '{}\n'); // these projects hold the kit as a dev dependency: a project with none is told another command (KWB-76)
   const b = (f) => join(FX, project, 'before', f);
   const layout = JSON.parse(readFileSync(b('layout.json'), 'utf8'));
   if (named) layout.configuration = 'synth-creator';
@@ -51,6 +52,7 @@ const LANDING = ['.claude/rules/test-the-template-once.md', '.claude/rules/finis
 // 1.1.0: what a crash does (KF-18), what no hook could read (KF-40) and how git-guard proves the account (KF-12)
 const FAIL_OPEN = ['crash-policy', 'unread-writes', 'git-auth', 'shape-prose', 'shape-lists'].map((f) => `.claude/hooks/lib/${f}.mjs`);
 const REPAIRED = ['.claude/hooks/lib/program-read.mjs', '.claude/hooks/param-id-lock.mjs', '.claude/hooks/lib/turn.mjs', '.claude/rules/cpu-worst-case-per-block.md', '.claude/rules/scoped-no-denormals.md', '.claude/rules/ui-matches-reference-look.md', '.claude/skills/prove-control/SKILL.md', '.claude/skills/analyse-reference-look/SKILL.md'];   // 1.1.0: the crash on a helper's path (KF-40), the lock from the first id (KF-15)
+const RUST = ['.claude/hooks/lib/rust-scan.mjs'];   // 1.1.0: what reads Rust right (KWB-75)
 const NEW_PROJECTS = ['.claude/rules/unattended-runs.md', '.claude/tools/buildq.mjs', '.claude/rules/a-control-is-proved-through-its-input.md'];   // 1.1.0: KF-7 and KF-1
 const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only where the project has time-guard: the rule goes where its hook goes
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
@@ -71,7 +73,7 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...NEW_PROJECTS, ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED].includes(f)), [], 'only the base files changed on purpose differ in content');
