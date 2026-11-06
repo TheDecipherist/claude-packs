@@ -180,6 +180,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: the repetition laws made true on Rust: a trait method is no function made again, `dispatch-once` reads `match`, rows read Rust calls, `once-only` and `dup` read `.rs`, the if-chain checks cover Rust, and a rule and skill say what a Rust repeat becomes; concepts: none (design/shape.json declares none); reuse: withoutTests and itemEnd (packs/base/hooks/lib/rust-scan.mjs), definesOf (near-copies.mjs), switchesOf (dispatch-once.mjs).
   done when: each case met on the scratch crate gives the right answer through the real hooks; scan on ripgrep lists no trait method as made again; npm test green once on committed work.
 
+- 1.1.0, the offline VST3 renderer (work/1.1.0-vst3-host), started 2026-11-05 ("add it to claude-packs with a skill on how to use it").
+  making: jp8000's tools/vst3host as a kit tool in the sound-design pack, split by job, on macOS and Linux, with the plugin an argument and no machine in it, and a `bounce-a-plugin` skill holding what it took to learn; concepts: none (design/shape.json declares none); reuse: the VST3 SDK inside a project's JUCE, found by build.sh; render.cpp's logic from jp8000 at 6c93a28.
+  done when: it builds on Linux from a JUCE checkout, a real plugin bounces to a WAV twice with the same bytes, a sweep, a sysex file and --dump-params run on it, doctor passes the skill, npm test green once on committed work.
+
 ## Steps
 
 ## Log
