@@ -6,6 +6,7 @@
 <constraints>
 Always do:
 - While working, run only the tests the change reaches (the `pick-tests` skill).
+- Run every test, by hand or not, through `node .claude/tools/quiet-test.mjs <command>`, so no window, browser or app reaches the user's desktop (the `test-quietly` skill).
 - Commit, then run the whole suite once, as the last step before landing. Fix what it finds, and run again only the tests that failed.
 - Let a run that has started finish. Read its output before starting another.
 - Keep the output of a long run in a file, so one failure never costs a second run.
