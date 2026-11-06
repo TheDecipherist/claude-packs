@@ -1,17 +1,10 @@
 // 0.32.0: six real repos read wrongly. A kit rule file taken for reverse-engineering notes, firmware findings not seen at all, a named configuration overruled, control names
 // reported as 11,410 secrets, and 1,663 tracked build files read as source.
-import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, hookRun, join, projectWith, readFileSync, test, writeFileSync } from './kit-cli.mjs';
 import { buildFolders } from '../lib/repo-weight.mjs';
 import { SECRETS, maskSecrets } from '../packs/base/hooks/lib/secret-patterns.mjs';
 
-function project(files) {
-  const dir = fresh('find-');
-  for (const [rel, text] of Object.entries(files)) {
-    mkdirSync(join(dir, rel, '..'), { recursive: true });
-    writeFileSync(join(dir, rel), text);
-  }
-  return dir;
-}
+const project = (files) => projectWith(files);
 const suggested = (dir) => cli(dir, 'suggest').stdout;
 const packLine = (pack) => new RegExp(`^ +${pack} `, 'm');
 const SYNTH = { 'src/PluginProcessor.cpp': 'void P::processBlock () {}\n', 'src/PluginEditor.cpp': '// x\n' };

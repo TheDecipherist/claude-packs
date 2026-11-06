@@ -68,6 +68,8 @@ npx @thedecipherist/claude-packs init --auto
 
 Then tell Claude to work through `.claude/fix-plan.md`. The `fix-from-scan` skill says how.
 
+A brand new project starts with `new <name>`: the house files, a git repo and the kit in one step. On an existing repo, the install adds the top-level folders your source is in to the layout, so the rules reach your code wherever it lives, and `folder-law` keeps new code inside those folders from then on.
+
 `scan` is safe to run before installing anything: it works on a copy in a temp folder and never writes to the project. `suggest` only reads file names and dependency files.
 
 ## Install one pack
@@ -225,7 +227,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 42 | 8 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 22 | 7 | 18 | 8 |
+| `base` | Universal engineering, in every configuration | 22 | 7 | 18 | 9 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |

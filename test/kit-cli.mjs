@@ -2,7 +2,7 @@
 // (throws on a non-zero exit, returns stdout), cli (returns the spawn result), a fresh folder, a hook fired as Claude Code fires it.
 import { execFileSync, spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -18,6 +18,15 @@ export const CLI = join(KIT, 'bin/claude-packs.mjs');
 export const run = (dir, ...args) => execFileSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 export const cli = (dir, ...args) => spawnSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 export const fresh = (prefix) => mkdtempSync(join(tmpdir(), prefix));
+// A fresh folder holding these files: { "rel/path": "text" }.
+export function projectWith(files, prefix = 'find-') {
+  const dir = fresh(prefix);
+  for (const [rel, text] of Object.entries(files)) {
+    mkdirSync(join(dir, rel, '..'), { recursive: true });
+    writeFileSync(join(dir, rel), text);
+  }
+  return dir;
+}
 export const hookRun = (dir, name, payload) =>
   spawnSync('node', [join(dir, '.claude/hooks', name)], { input: JSON.stringify(payload), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
 export const hookStatus = (dir, name, payload) => hookRun(dir, name, payload).status;

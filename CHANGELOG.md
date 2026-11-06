@@ -22,6 +22,7 @@ A project that is not C++ or JS (all of these were in 1.0.0):
 - Seven universal rules, among them `bug-fix-starts-red`, loaded only for C++ and JS, and `doctor --strict` was red on a new project for it. They load on Python, Go and Rust now, and two on JS as well (KWB-79).
 - A project with no `package.json` was told `npx --no-install ...`, which cannot work there. `suggest`, `scan` and `fix` print the form that does, and its CLAUDE.md block says so (KWB-76).
 - `init <pack>` took the smallest configuration that fits: `init mongo` gave `python`. It takes the project's own now, where the project has code (KWB-80).
+- A file could be legal and have no rules: `folder-law` allowed any layout folder, while base's `cpp` and `js` concepts meant only `src/` and `tests/`. On a new install the rules now follow the layout: a folder in it gets the rules for its code, and a stray file outside it is still reported by `doctor --strict`. A first install also adds the top-level folders a repo's source is in to its layout: before, `folder-law` refused a new file in the project's own `lib/`. An installed project keeps its layout, and takes this with `"followFolders": true`. A `new-project` skill says how to start (KWB-83).
 - Every configuration's CLAUDE.md block named a folder on one machine, and release steps a project cannot take. An `update` rewrites that line (KWB-77).
 - The Rust row of the language table misread lifetimes, char literals, raw strings and nested comments, and read no method in an `impl` (KWB-75).
 

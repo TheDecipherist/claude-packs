@@ -184,6 +184,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: jp8000's tools/vst3host as a kit tool in the sound-design pack, split by job, on macOS and Linux, with the plugin an argument and no machine in it, and a `bounce-a-plugin` skill holding what it took to learn; concepts: none (design/shape.json declares none); reuse: the VST3 SDK inside a project's JUCE, found by build.sh; render.cpp's logic from jp8000 at 6c93a28.
   done when: it builds on Linux from a JUCE checkout, a real plugin bounces to a WAV twice with the same bytes, a sweep, a sysex file and --dump-params run on it, doctor passes the skill, npm test green once on committed work.
 
+- 1.1.0, rules follow the code (work/1.1.0-rules-follow-code), started 2026-11-05 ("enforces folder structure from the beginning so rules work").
+  making: base's cpp and js concepts following the layout's code folders, by a `followFolders` key a first install writes, a first install that adds the folders a project's source already lives in to its layout, and a `new-project` skill; concepts: none (design/shape.json declares none); reuse: filesOf (lib/scan.mjs), SOURCE (packs/base/hooks/lib/dup.mjs), buildLayout's seed (lib/layout.mjs).
+  done when: a new install with C++ in lib/ passes doctor --strict with rules on it, folder-law takes a new file there and still refuses a stray one, an installed project's layout is unchanged by update, npm test green once on committed work.
+
 ## Steps
 
 ## Log
