@@ -188,6 +188,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: base's cpp and js concepts following the layout's code folders, by a `followFolders` key a first install writes, a first install that adds the folders a project's source already lives in to its layout, and a `new-project` skill; concepts: none (design/shape.json declares none); reuse: filesOf (lib/scan.mjs), SOURCE (packs/base/hooks/lib/dup.mjs), buildLayout's seed (lib/layout.mjs).
   done when: a new install with C++ in lib/ passes doctor --strict with rules on it, folder-law takes a new file there and still refuses a stray one, an installed project's layout is unchanged by update, npm test green once on committed work.
 
+- 1.1.0, work orders and the workflow on the front page (work/1.1.0-workorders), started 2026-11-05 ("a workorder.md template and tell people how they should write them").
+  making: a `workorder <name>` command that scaffolds a prompt, steps and a runner, a `write-a-workorder` skill, README sections on what a project keeps and how it is tested, and `new` no longer defaulting to a synth pack; concepts: none (design/shape.json declares none); reuse: the PROMPT.md and runner of the MPX 500 and Matrix-12 runs, prompts/ for what the command prints, readFileSync as `survey` does (bin/claude-packs.mjs).
+  done when: the scaffold writes real files and never overwrites, run.sh passes `bash -n`, `new` on no packs installs no synth pack, the README's claims are each a file or a hook that exists, npm test green once on committed work.
+
 ## Steps
 
 ## Log

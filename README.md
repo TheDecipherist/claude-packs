@@ -6,6 +6,28 @@ You install once. From then on Claude Code reads the rules and meets the hooks i
 
 It works on a project in any language. The machine needs Node 22, because the hooks are Node scripts, and the project itself can be Rust, Python, Go, C++ or anything else.
 
+## Getting started
+
+Claude Code on its own is fast, and it forgets. Each session starts cold, the same mistakes come back, code gets written twice, and "done" means it says it's done. The kit gives a project what a good team has:
+
+- **Mistakes stop at the write.** A hook refuses a bad write before it reaches the disk, and says why. You don't find it in review, because it never landed.
+- **Nothing gets written twice.** Copies, near copies and functions made again are refused, with what differs between them, so repetition turns into one template.
+- **The project remembers.** The plan, the bugs and the decisions live in plain files in the repo, so a new session picks up where the last one stopped.
+- **Every bug makes it stronger.** A bug starts with a test that fails for it, and the fix can become a check that refuses that mistake from then on.
+- **"Done" gets measured.** A step finishes on a test or a number. A gate is seen to fail on a planted fault before anyone trusts it.
+- **You can see what works.** Every call and refusal is logged, so you can tell which hooks earn their place.
+- **It can build on its own.** Give it a work order and it runs session after session with nobody there, deciding as it goes and writing down every choice. A whole plugin, firmware map to finished panel, was rebuilt this way overnight.
+
+There are three ways in:
+
+| You have | Do this |
+|---|---|
+| A brand new idea | `new <name>` sets up the folders, the plan, the bug logs, git and the kit |
+| An existing repo | `suggest`, then `init --auto`, then `scan` and `fix` for what is already wrong |
+| A big job to hand over | `workorder <name>`, write the steps, and [let it build on its own](#let-it-build-on-its-own) |
+
+The commands are in [Start here](#start-here).
+
 ## See it work
 
 A new Rust crate, and one command:
@@ -108,6 +130,75 @@ Some of what you will see in `.claude/` is Claude Code's own, and some only work
 | `.claude/layout.json` | The kit | Which folder holds what |
 | `.claude/tools/` | The kit | Helpers its skills and gates run |
 | `.claude/claude-packs.lock.json` | The kit | What is installed, with a hash per file |
+
+## What a project keeps
+
+Claude forgets between sessions, so everything worth keeping lives in files. `new <name>` starts them, and the rules keep them true:
+
+| File | What it holds | Why it helps |
+|---|---|---|
+| `CLAUDE.md` | How this project works, read at every session's start | Claude starts each session knowing the layout and the laws |
+| `build.md` | The plan: what is in progress, each step's `making:` line, and a log of what landed | Work resumes from the file, and a step is ticked only when it was measured |
+| `bugs.md` | Every bug, logged before it is fixed, then closed with its cause, its fix and the test that now catches it | The same bug can't quietly come back |
+| `workflow-bugs.md` | Faults in the process itself: a hook, a tool, a test run | The workflow improves too, with the evidence written down |
+| `docs/versions.md` | Each dependency, with its latest version and when that was checked | No pinned version comes from memory |
+| `design/shape.json` | Each concept, as one or many | "Slot 2" never gets hard-coded where there are four slots |
+| `.claude/hooks.log` | Each hook's time on every call | `doctor` goes red for a hook that got slow |
+| `.claude/logs/events.jsonl` | Every tool call and what each hook said | `logs` shows which hooks earn their place |
+| `.claude/logs/refusals.jsonl` | Every refusal with its reason, then a verdict: right or wrong, and why | Wrong refusals get found and fixed, so the laws improve on evidence |
+| `.claude/logs/crashes.jsonl` | Every hook that crashed | A broken guard can't fail quietly |
+
+Logs are never cleared: a full one moves to `.claude/logs/` under a dated name. So the project keeps its own history, and a lesson from one bug can become a [lesson check](#add-your-own-rule) that holds for good.
+
+## How it is tested
+
+The kit is strict about what counts as proof:
+
+- **A bug fix starts red.** Write the smallest test that shows the bug and see it fail for that reason, then fix the code (`bug-fix-starts-red`).
+- **A test has to be able to fail.** A gate is shown red on a planted fault, a mistake put in on purpose. A test that can't fail proves nothing.
+- **Anything used twice is tested once.** Behaviour is tested on the template, with one quick pass proving every instance really is that template (`test-the-template-once`).
+- **While working, run only what the change reaches.** The `pick-tests` skill picks them, so a small change never costs a full run.
+- **The whole suite runs once, on committed work, as the gate before landing.** `suite-once` refuses it on uncommitted work, so it can't be run again and again in place of thinking.
+- **Finished work lands.** Green work is merged to the trunk and pushed in the same turn (`land-branch`), and it isn't called landed until the remote agrees.
+- **The guards are tested too.** Every hook has a `--selftest`, every lesson check proves its `bad` and `good` example, and `doctor` runs them all.
+
+## Let it build on its own
+
+A work order is a written brief that a project can build from with nobody there. It suits anything that takes many sessions: a new product, a port, a big migration, a rebuild from a spec.
+
+```
+npx @thedecipherist/claude-packs workorder billing
+```
+
+That writes three files to `docs/workorders/billing/`:
+
+| File | What it is |
+|---|---|
+| `workorder.md` | The steps. This is the part you write |
+| `PROMPT.md` | How to run: take the recommended choice, never stop to ask, record every decision, resume from `progress.md` |
+| `run.sh` | Starts session after session until the work is done |
+
+Write the steps with Claude, and the `write-a-workorder` skill keeps them honest. What makes one work:
+
+- **Say what finished looks like,** and what is known and not known, so no report claims more than the work shows.
+- **List every source by path.** A run can't ask where something is.
+- **Put proof before what depends on it:** find out, prove it, then build on it.
+- **End every step with "Done when:"** and a number or a test. "Works" can't be measured, so it can't finish.
+
+```markdown
+## W2. The import
+
+1. Read every record in `data/orders.csv` into the schema of W1.
+2. Reject a bad row by name, with its line number. Never skip one silently.
+
+**Done when:** all 41,206 rows of the sample load, the 12 known bad rows are each rejected with the right reason, and a planted bad row turns the test red.
+```
+
+To run it, type `Run docs/workorders/billing/PROMPT.md` in Claude Code and watch, or leave it going with `bash docs/workorders/billing/run.sh`. Everything lands in files as it goes: `progress.md` line by line, `decisions.md` with each choice so you can overturn it, `bugs.md`, and a report with counts at the end. If a session ends, the next one picks up from `progress.md`, and it stops on a `DONE` file.
+
+**Read `run.sh` before you use it.** It runs Claude with permission prompts off, because nobody is there to answer. The hooks still judge every write, but use it only on a project you trust, in a repo you can roll back.
+
+To change a run in progress, edit its `PROMPT.md` and commit it. A run won't act on an instruction it can't trace to its order or to you, so a file dropped beside it is ignored on purpose.
 
 ## Questions
 
@@ -227,7 +318,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 42 | 8 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 22 | 7 | 18 | 9 |
+| `base` | Universal engineering, in every configuration | 22 | 7 | 18 | 10 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
@@ -327,6 +418,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"`, `logs crashes`, `logs clear <hook>\|all fixed\|superseded "<why>"` |
 | `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing, and that a test answers each rule whose Check names one |
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed |
+| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |
 | `configs` | The configurations |

@@ -19,6 +19,7 @@ import { fixPlan } from '../lib/fix-plan.mjs';
 import { logsCommand } from '../lib/logs.mjs';
 import { scan } from '../lib/scan.mjs';
 import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
+import { newWorkorder } from '../lib/workorder.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
@@ -28,7 +29,9 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
 
   new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
                      workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
-                     --packs <a,b>     the packs (default audio-core); --profile <name>, --config <name> as for init
+                     --packs <a,b>     the packs (default base alone); --profile <name>, --config <name> as for init
+  workorder <name>   a work order in docs/workorders/<name>: the steps, the prompt that runs them with nobody
+                     there, and a runner that starts session after session
   init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
                      and create the layout folders
                      --config <name>   the configuration (configs lists them; stored in layout.json
@@ -106,7 +109,9 @@ async function main() {
 
   switch (command) {
     case 'new':
-      return (await newProject(dir, rest[0], { packs: packs ?? (config ? readConfig(config).packs.default : ['audio-core']), seedLayout, config })).code;
+      return (await newProject(dir, rest[0], { packs: packs ?? (config ? readConfig(config).packs.default : ['base']), seedLayout, config })).code;
+    case 'workorder':
+      return newWorkorder(dir, rest[0]);
     case 'init': {
       if (rest.includes('--auto')) {
         const pick = suggestionOf(dir);
