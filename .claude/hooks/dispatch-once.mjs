@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { blankCode } from './lib/cpp-scan.mjs';
+import { lookupMatches } from './lib/rust-scan.mjs';
 import { CODE, TESTS, codeFiles } from './lib/elements.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -17,8 +18,9 @@ import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
 const SWITCH = /\bswitch\s*\(\s*([^()]*?(?:\([^()]*\))?)\s*\)\s*\{/g;
+const JUDGED = new Set([...CODE, '.rs']);
 const FIX = 'Give each kind its own object, table entry or class (rule: behaviour-lives-with-its-kind), and call it from both places,\n' +
-  'so a new kind is one new entry instead of an edit in every switch.\n';
+  'so a new kind is one new entry instead of an edit in every switch. In Rust, a table on an enum is a method on the enum.\n';
 
 // The last word of each `case` label of the switch body that opens at `open`: `Kind::line` -> line, `'line'` -> line.
 function labelsOf(code, text, open) {
@@ -37,7 +39,9 @@ function labelsOf(code, text, open) {
 }
 
 // Each switch: the kind it dispatches on, the last name in its expression (args.kind -> kind, p->mode() -> mode), and its case labels.
-export function switchesOf(text) {
+// Rust's `match` is held to every variant by the compiler, so only a lookup table on an enum counts there (lib/rust-scan.mjs).
+export function switchesOf(text, ext = '') {
+  if (ext === '.rs') return lookupMatches(text);
   const out = [];
   const code = blankCode(text);
   for (const m of code.matchAll(SWITCH)) {
@@ -53,9 +57,9 @@ const sameKind = (a, b) => a.kind === b.kind && (!a.labels.size || !b.labels.siz
 const count = (list) => list.reduce((m, s) => m.set(s.kind, (m.get(s.kind) ?? 0) + 1), new Map());
 
 // The switches on a kind a write switches on more often than before.
-export function newSwitches(before, after) {
-  const was = count(switchesOf(before));
-  const now = switchesOf(after);
+export function newSwitches(before, after, ext = '') {
+  const was = count(switchesOf(before, ext));
+  const now = switchesOf(after, ext);
   const grown = new Set([...count(now)].filter(([k, n]) => n > (was.get(k) ?? 0)).map(([k]) => k));
   return now.filter((s) => grown.has(s.kind));
 }
@@ -64,9 +68,9 @@ export function newSwitches(before, after) {
 export function elsewhere(root, selfRel, switches, layout = readLayout(root)) {
   const skip = [...TESTS, ...(layout.protected ?? [])];
   const found = new Map();
-  for (const rel of codeFiles(root, skip)) {
+  for (const rel of codeFiles(root, skip, JUDGED)) {
     if (rel === selfRel) continue;
-    const there = switchesOf(readFileSync(join(root, rel), 'utf8'));
+    const there = switchesOf(readFileSync(join(root, rel), 'utf8'), extname(rel));
     for (const s of switches) if (there.some((t) => sameKind(s, t)) && !found.get(s.kind)?.includes(rel)) found.set(s.kind, [...(found.get(s.kind) ?? []), rel]);
   }
   return found;
@@ -74,8 +78,8 @@ export function elsewhere(root, selfRel, switches, layout = readLayout(root)) {
 
 // One write: null when it adds no second place for a kind; else the refusal.
 function judgeWrite(w, rel) {
-  if (w.op === 'delete' || w.after === null || w.after === undefined || !CODE.has(extname(w.path)) || matchesAny(rel, TESTS)) return null;
-  const added = newSwitches(w.before ?? '', w.after);
+  if (w.op === 'delete' || w.after === null || w.after === undefined || !JUDGED.has(extname(w.path)) || matchesAny(rel, TESTS)) return null;
+  const added = newSwitches(w.before ?? '', w.after, extname(w.path)).filter((s) => !s.owned); // a method on the enum is where the table belongs
   if (added.length === 0) return null;
   const twice = added.find((s, i) => added.some((t, j) => i !== j && sameKind(s, t) && s.labels.size && t.labels.size));
   if (twice) return `${rel} branches on "${twice.kind}" twice in this file.\n${FIX}`;
@@ -89,7 +93,9 @@ const main = (text) => judgeEvent(text, { name: 'dispatch-once', write: judgeWri
 
 function selftest() {
   const hook = new URL(import.meta.url).pathname;
+  const rustTable = (kind, name) => `pub fn ${name}(s: &${kind}) -> u8 {\n    match s {\n        ${kind}::Open => 1,\n        ${kind}::Paid => 2,\n        ${kind}::Closed => 3,\n        ${kind}::Low => 4,\n        ${kind}::Mid => 5,\n    }\n}\n`;
   const dir = scratchProject({
+    'src/state.rs': `pub enum State { Open, Paid, Closed, Low, Mid }\n${rustTable('State', 'label')}`,
     'src/render.cpp': 'float draw (Shape& s) { switch (s.mode) { case Mode::line: return 1.0f; default: return 0.0f; } }\n',
     'tests/render_test.cpp': 'void t (Shape& s) { switch (s.format) { default: break; } }\n',
   });
@@ -107,6 +113,10 @@ function selftest() {
     ['one case shared is the same kind', w('src/other.cpp', 'void o (Shape& s) { switch (s.mode) { case Mode::line: break; } }\n'), 2],
     ['twice in one new file', w('src/twice.cpp', 'void a (S& s) { switch (s.pen) { case Pen::up: break; } }\nvoid b (S& s) { switch (s.pen) { case Pen::up: break; } }\n'), 2],
     ['another project is not ours', runHook(hook, dir, writeOf(join(dir, '..', 'elsewhere', 'x.cpp'), 'void x (S& s) { switch (s.mode) {} }\n')), 0],
+    ['Rust: a second lookup table on an enum, outside it', w('src/colour.rs', rustTable('State', 'colour')), 2],
+    ['Rust: the enum\'s own file keeps its tables', w('src/state2.rs', `pub enum Level { Low, Mid, High }\n${rustTable('Level', 'label')}${rustTable('Level', 'rank')}`), 0],
+    ['Rust: a match that does work is good Rust', w('src/step.rs', 'pub fn step(s: &State) {\n    match s {\n        State::Open => pay(),\n        State::Paid => ship(),\n        State::Closed => close(),\n    }\n}\n'), 0],
+    ['Rust: a table of true and false is a predicate', w('src/open.rs', 'pub fn open(s: &State) -> bool {\n    match s {\n        State::Open => true,\n        State::Paid => false,\n        State::Closed => false,\n    }\n}\n'), 0],
   ]);
 }
 

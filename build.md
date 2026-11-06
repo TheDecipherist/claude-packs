@@ -211,3 +211,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-05: 1.1.0 group 4, what the build taught, landed from work/1.1.0-build-laws at f4a3ab6; the gate 429 of 429. 1.1.0 finished, not published.
 - 2026-11-05: 1.1.0 no silent red: the gate ran once on e61cc57. Landed, not yet published.
 - 2026-11-05: 1.1.0 the rust and postgres packs, Rust's repetition laws, a kit that works outside C++ and JS (KWB-75 to KWB-82), and the README for a new reader, landed from work/1.1.0-rust-pack; the gate 469 of 469 on 613be1c. Not published.
+- 2026-11-05: 1.1.0 vst3host and bounce-a-plugin landed from work/1.1.0-vst3-host. The gate read 474 of 475 on 6f6e8d5: the kit's first C++ had no rule, so doctor --strict failed; the kit's layout now reads packs/**/*.cpp and *.h as cpp, and the failed test ran again green. Not published.

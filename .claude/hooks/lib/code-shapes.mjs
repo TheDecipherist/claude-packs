@@ -105,12 +105,14 @@ function runShapes(list, lang) {
 // One function called again and again on other arguments, in a row.
 function rowShapes(list, lang) {
   const out = [];
-  const callee = (s) => ((lang.commands || s.tokens[1]?.t === '(') && isName(s.tokens[0].t) ? `${s.tokens[0].t} ${s.shape}` : null);
+  // A language whose calls are methods says so: `app.route (...)` six times is a table too, on one receiver.
+  const method = (s) => lang.methodRows && ['.', '::'].includes(s.tokens[1]?.t) && s.tokens[3]?.t === '(' && isName(s.tokens[2].t);
+  const callee = (s) => ((lang.commands || s.tokens[1]?.t === '(' || method(s)) && isName(s.tokens[0].t) ? `${s.tokens.slice(0, method(s) ? 3 : 1).map((t) => t.t).join('')} ${s.shape}` : null);
   for (let i = 0; i < list.length;) {
     const key = callee(list[i]);
     let j = i + 1;
     while (key && j < list.length && callee(list[j]) === key) j += 1;
-    if (j - i >= MIN_ROWS) out.push({ id: `t:${j - i}:${key}`, kind: 'rows', line: list[i].line, end: list[j - 1].end, what: `${list[i].tokens[0].t} (...)`, nodes: j - i });
+    if (j - i >= MIN_ROWS) out.push({ id: `t:${j - i}:${key}`, kind: 'rows', line: list[i].line, end: list[j - 1].end, what: `${key.split(' ')[0]} (...)`, nodes: j - i });
     i = j;
   }
   return out;

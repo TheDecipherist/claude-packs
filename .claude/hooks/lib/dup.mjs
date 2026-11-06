@@ -20,8 +20,8 @@ import { fileURLToPath } from 'node:url';
 import { matchesAny } from './glob.mjs';
 
 export const LIMITS = { tokens: 50, lines: 6, gap: 2 };
-export const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|inl|mm|m|py|js|mjs|cjs|jsx|ts|tsx)$/i;
-const FORMATS = 'c,c-header,cpp,cpp-header,objectivec,python,javascript,jsx,typescript,tsx';
+export const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|inl|mm|m|py|js|mjs|cjs|jsx|ts|tsx|rs)$/i;
+const FORMATS = 'c,c-header,cpp,cpp-header,objectivec,python,javascript,jsx,typescript,tsx,rust';
 // A header and a source are one language: a function copied from a .cpp into a .h is a copy (jscpd compares within a format otherwise).
 const CROSS = 'c,c-header,cpp,cpp-header,objectivec;javascript,jsx,typescript,tsx';
 // Generated files, resources and vendored or built code are never judged (and never a match).

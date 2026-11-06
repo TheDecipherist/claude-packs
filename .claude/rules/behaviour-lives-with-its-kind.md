@@ -1,5 +1,5 @@
 ---
-# concepts: cpp, js
+# concepts: cpp, js, python, go, rust
 paths:
   - "src/**/*.cpp"
   - "src/**/*.h"
@@ -7,6 +7,8 @@ paths:
   - "src/**/*.mm"
   - "tests/**/*.cpp"
   - "tests/**/*.h"
+  - "packs/**/*.cpp"
+  - "packs/**/*.h"
   - "src/**/*.{js,mjs,cjs,jsx,ts,tsx}"
   - "tests/**/*.{js,mjs,cjs,ts,tsx}"
   - "test/**/*.{js,mjs,cjs,ts,tsx}"

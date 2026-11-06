@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // suite-once (PreToolUse, Bash): the whole test suite runs once, as the gate before landing, never while working (one
 // agent ran all 425 tests on 1 core; KWB-41: a session ran the kit's suite again and again, 12 minutes each, on code that had not
-// changed). A whole-suite command (`npm test`, `pnpm|yarn|bun test`, a bare `ctest`, the project's "commands".test in layout.json with any
+// changed). A whole-suite command (`npm test`, `pnpm|yarn|bun test`, a bare `ctest`, `cargo test` with no name, the project's "commands".test in layout.json with any
 // options after it, a build wrapper's `build.sh test`: KF-23, the wrapper is the route the kit's own build rule names) is refused while the checkout it runs in has uncommitted tracked changes: uncommitted means still working, and working runs only the
 // tests the change reaches (rule: test-only-what-changed; skill: pick-tests). Once the work is committed the gate passes. Named tests
 // (`npm test -- a.test.mjs`, `ctest -R x`) are always allowed. `--selftest` proves it.
@@ -13,7 +13,7 @@ import { bashOf, git, put, runHook, scratchProject, verdicts } from './lib/selft
 import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
-const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b)\S+)*)$/;
+const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b)\S+)*|cargo\s+(?:test|nextest\s+run)(?:\s+-\S+)*)$/;
 const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec|\S*buildq)\s+|timeout\s+\S+\s+)+/;
 const REDIRECT = /\s*(?:\d?>>?|&>)&?\s*\S+/g;
 const WRAPPER = /^\S*\bbuild\.sh\s+test(?:\s+-\S+)*$/;
@@ -74,6 +74,10 @@ function selftest() {
     ['pnpm, a run form and a prefix', sh('CI=1 timeout 300 pnpm run test'), 2],
     ['a redirect and a pipe change nothing', sh('npm test > /tmp/log 2>&1 | tail -3'), 2],
     ['a bare ctest', sh('ctest --output-on-failure'), 2],
+    ['cargo test of the whole workspace', sh('cargo test --workspace --all-features'), 2],
+    ['cargo nextest of everything', sh('cargo nextest run'), 2],
+    ['cargo test of one test', sh('cargo test parses_header'), 0],
+    ['cargo test of one crate', sh('cargo test -p core parses_header'), 0],
     ['the project\'s own whole-suite command', sh('bash tools/all.sh'), 2],
     ['its command with an option, in the background', sh('nohup tools/all.sh --full-gate > /tmp/log 2>&1 &'), 2],
     ['a build wrapper, with no command declared', sh('tools/build.sh test --full-gate'), 2],

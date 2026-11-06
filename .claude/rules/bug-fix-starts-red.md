@@ -1,5 +1,5 @@
 ---
-# concepts: tests, cpp
+# concepts: tests, cpp, python, go, rust, js
 paths:
   - "test/**"
   - "src/**/*.cpp"
@@ -8,6 +8,11 @@ paths:
   - "src/**/*.mm"
   - "tests/**/*.cpp"
   - "tests/**/*.h"
+  - "packs/**/*.cpp"
+  - "packs/**/*.h"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx}"
 ---
 
 # A bug fix starts with a test that fails for that bug

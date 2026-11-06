@@ -7,6 +7,8 @@
 //     "mode": "forbid" (default) | "require" | "needs",  "needs": ["<regex>", ...] }
 //   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals);
 //   "prose": true blanks what a reader does not read as prose in markdown: code, URLs, frontmatter (a check on public text)
+//   "language": "rust" blanks with that row of the language table instead, for a language C's blanker misreads (a Rust lifetime reads as a char
+//   literal there, KWB-75); "notInTests": true also leaves out what that language marks as a test, for a test that lives in the file it tests
 //   mode "needs": when the pattern appears, every regex in "needs" must appear as well (an entry file that listens also
 //   registers shutdown; a gateway that creates a MongoClient also caches and names it). A write is refused only for a need
 //   it newly leaves missing.
@@ -18,6 +20,7 @@ import { writesOf } from './lib/writes.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
 import { isContent } from './lib/content.mjs';
 import { blankProse } from './lib/prose.mjs';
+import { languageNamed } from './lib/languages.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
@@ -62,7 +65,12 @@ export function loadChecks(root = ROOT) {
 
 // What a check reads: one blanking per kind. strings: comments blanked, strings kept.
 const BLANKING = { prose: blankProse, code: blankCode, strings: (text) => blankCode(text, true) };
-const subjectOf = (c, text) => { const kind = Object.keys(BLANKING).find((k) => c[k]); return kind ? BLANKING[kind](text) : text; };
+function subjectOf(c, text) {
+  const row = c.language && languageNamed(c.language);
+  if (row) return c.notInTests && row.withoutTests ? row.withoutTests(row.blank(text)) : row.blank(text);
+  const kind = Object.keys(BLANKING).find((k) => c[k]);
+  return kind ? BLANKING[kind](text) : text;
+}
 
 // Every match: its line number and that line's text.
 function linesOf(check, text) {

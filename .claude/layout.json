@@ -56,7 +56,9 @@
       "src/**/*.hpp",
       "src/**/*.mm",
       "tests/**/*.cpp",
-      "tests/**/*.h"
+      "tests/**/*.h",
+      "packs/**/*.cpp",
+      "packs/**/*.h"
     ],
     "build": [
       "**/CMakeLists.txt",

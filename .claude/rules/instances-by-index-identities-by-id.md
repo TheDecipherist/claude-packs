@@ -1,5 +1,5 @@
 ---
-# concepts: cpp, tests, notes, plan
+# concepts: cpp, tests, notes, plan, python, go, rust, js
 paths:
   - "src/**/*.cpp"
   - "src/**/*.h"
@@ -7,6 +7,8 @@ paths:
   - "src/**/*.mm"
   - "tests/**/*.cpp"
   - "tests/**/*.h"
+  - "packs/**/*.cpp"
+  - "packs/**/*.h"
   - "test/**"
   - "bugs.md"
   - "workflow-bugs.md"
@@ -14,6 +16,9 @@ paths:
   - "docs/**/*.md"
   - "build.md"
   - "**/build.md"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx}"
 ---
 
 # Identical containers by index, different things by ID; never a literal of either in logic
