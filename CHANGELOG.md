@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `house-control-behaviours` (`audio-core`): an on-screen keyboard has DOUBLE and TRIPLE beside KB OCT, as Tabula's octave stops: a whole voice an octave up, and one an octave down.
+
 ## 1.2.0 (2026-11-05)
 
 - `test-quietly` skill and `.claude/tools/quiet-test.mjs` (`base`): every test goes through one script, so nothing reaches the user's desktop. A virtual display on Linux; on macOS, which has none, the user's app is sent back when something the run started comes to the front, and a project's rig reads `QUIET_TEST`. The macOS half has not been run on a Mac.

@@ -60,7 +60,7 @@ test('no law still asks to walk every instance: one per template, the rest by a 
 test('an on-screen keyboard lights what sounds and has KB OCT, a kind is one size, and a window test stays off the desktop', () => {
   const read = (rel) => readFileSync(join(KIT, 'packs', rel), 'utf8');
   const house = read('audio-core/rules/house-control-behaviours.md');
-  for (const law of [/whatever played it: MIDI, QWERTY/, /KB OCT header above the keyboard/, /reading 0, -12, \+12/, /never MIDI or a host's notes/, /Size every control of a kind the same/, /narrower than the tightest row/]) assert.match(house, law);
+  for (const law of [/whatever played it: MIDI, QWERTY/, /KB OCT header above the keyboard/, /reading 0, -12, \+12/, /never MIDI or a host's notes/, /Size every control of a kind the same/, /narrower than the tightest row/, /DOUBLE and TRIPLE beside KB OCT/, /a whole voice an octave up/, /a whole voice an octave down/, /note-off stops every voice its key started/]) assert.match(house, law);
   assert.match(read('audio-core/rules/a-control-is-proved-through-its-input.md'), /xvfb-run -a/);
 });
 

@@ -24,9 +24,10 @@ Always do:
   It never steps to the next value on a press. The ‹ › arrows beside a list may step, as their own controls.
 - Size every control of a kind the same, in whole pixels, at any window width: round the kind's size once and the place apart. A box rounded out from a fractional place comes out a pixel wider for some, and the row looks uneven though one class drew it.
 - Keep a kind narrower than the tightest row it sits in, and hold that with a gate: buttons wider than their row's pitch overlap.
-- Give any on-screen keyboard these two, as a project's own behaviour test proves:
+- Give any on-screen keyboard these three, as a project's own behaviour test proves:
   1. A key lights for every note sounding, whatever played it: MIDI, QWERTY, the mouse or the host. Read that from the one place every note passes, never from the mouse handler.
   2. A KB OCT header above the keyboard: a down button, a small display reading 0, -12, +12, and an up button. It moves what the on-screen keys and QWERTY play, never MIDI or a host's notes, and a key lets go of the note it started, wherever the octave has moved since.
+  3. DOUBLE and TRIPLE beside KB OCT, always the two together with it. DOUBLE adds a whole voice an octave up, TRIPLE a whole voice an octave down, and both can be on. Each extra voice has its own filter and envelopes and sounds as if that octave were played, equal pitches are never merged, and a note-off stops every voice its key started. They light their extra keys, a little dimmer.
 - Check a new or changed control against this list with the `new-panel-control` skill, and walk one control of each template through the real window in the behaviour gate.
 - Walk one control of each template in the real window, on a loaded patch and not only on INIT: it moves its value and the sound or
   the picture, and a choice control opens its list. Prove the rest by a read, not a walk (`test-the-template-once`), plus one cheap pass of every control through its real input path, since a read cannot see one unhooked (twelve controls on the MPX 500 were each caught only by working them): a table check that every
