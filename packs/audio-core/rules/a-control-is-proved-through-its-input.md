@@ -16,6 +16,7 @@ Always do:
 - Prove a press on its own: a recipe that also turns a knob moves the audio whatever the press did.
 - Prove the gate can fail: with one control's input handling taken out, the gate goes red while a gate that writes the parameter stays green. Keep both results.
 - Run a planted fault in each control in turn: one unhooked control leaves its row, class and binding intact, so nothing else sees it.
+- Run anything that opens a window on a virtual display (`xvfb-run -a <gate>`), by hand as well as in the suite, so it never takes focus from the user's desktop.
 
 Never do:
 - Call a control proved because its parameter moved when written, or because its row reads right.

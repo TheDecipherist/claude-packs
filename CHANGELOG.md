@@ -2,6 +2,7 @@
 
 ## 1.2.0 (2026-11-05)
 
+- `house-control-behaviours` (`audio-core`): every control of a kind is one size in whole pixels, and narrower than its tightest row. An on-screen keyboard lights every sounding note from any source, and has a KB OCT header above it. `a-control-is-proved-through-its-input`: anything that opens a window runs on a virtual display. From the Matrix-12 build, where a row of buttons was uneven and overlapping, and MIDI lit no keys.
 - `compare-to-the-machine` (`sound-design`): how to judge a build against a recording of the real instrument. Take the audio, read each patch off the machine's display, match by name and never by number, and compare what a performance can show, with the ear as the verdict. Learned on the Matrix-12, where a video of a real unit gave three same-patch references, and a well-reviewed plugin turned out not to be the benchmark.
 
 ## 1.1.0 (2026-11-05)
