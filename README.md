@@ -347,7 +347,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 9 | 4 | 1 | 6 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
-| `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first, and an offline VST3 renderer | 6 | 5 | 0 | 5 |
+| `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first, an offline VST3 renderer, and comparing with the real machine | 6 | 5 | 0 | 6 |
 | `stellix` | Laws of one synth project | 5 | 5 | 1 | 0 |
 | `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 0 | 1 |
 | `synth-creator` | The synth-creator configuration's own laws | 6 | 2 | 9 | 2 |
@@ -464,7 +464,7 @@ Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median ove
 
 Four packs carry what rebuilding classic machines from firmware taught, and most of it is about failures that pass every test: units deaf to the transport, presets silently on defaults, a list of algorithms behind one DSP path.
 
-`reverse-engineering` starts from the machine's own names: `names-sweep` searches an image for what the manual prints, in the forms a display uses and through every wrapping met so far, and reports the record size, the order, the pools and the tables; `menu-map` joins every parameter to the page that reaches it. It needs two sources before anything is named, a source tag on every law and a debt ledger for what was tuned by ear, and it keeps firmware out of git. `midi` holds the law of clock and sync, and treats a program as records that round-trip byte for byte. `sound-design` proves sound by measuring audio, and `vst3host` bounces any VST3 with no DAW or audio device, so a plugin can be measured from a script (`bounce-a-plugin` says how). `instrument-shell` keeps sessions loadable and panels reachable. `init synth-rebuild` takes them all.
+`reverse-engineering` starts from the machine's own names: `names-sweep` searches an image for what the manual prints, in the forms a display uses and through every wrapping met so far, and reports the record size, the order, the pools and the tables; `menu-map` joins every parameter to the page that reaches it. It needs two sources before anything is named, a source tag on every law and a debt ledger for what was tuned by ear, and it keeps firmware out of git. `midi` holds the law of clock and sync, and treats a program as records that round-trip byte for byte. `sound-design` proves sound by measuring audio, `vst3host` bounces any VST3 with no DAW or audio device, so a plugin can be measured from a script (`bounce-a-plugin` says how), and `compare-to-the-machine` sets a build beside a recording of the real thing, matching each patch by the name on its display. `instrument-shell` keeps sessions loadable and panels reachable. `init synth-rebuild` takes them all.
 
 A project says what it is, in `"guards": { "instrument": { "kind": "reproduction" } }` or `"original"`, because the laws differ: on a reproduction the machine is the spec, aliasing and all.
 

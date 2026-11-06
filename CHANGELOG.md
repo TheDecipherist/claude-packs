@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 (2026-11-05)
+
+- `compare-to-the-machine` (`sound-design`): how to judge a build against a recording of the real instrument. Take the audio, read each patch off the machine's display, match by name and never by number, and compare what a performance can show, with the ear as the verdict. Learned on the Matrix-12, where a video of a real unit gave three same-patch references, and a well-reviewed plugin turned out not to be the benchmark.
+
 ## 1.1.0 (2026-11-05)
 
 Two new packs, a kit that works outside C++ and JS, and the faults a real build found: the MPX 500 rebuild ran 1.0.0 for a whole unit, and its report ranks them.

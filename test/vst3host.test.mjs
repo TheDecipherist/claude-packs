@@ -39,6 +39,13 @@ test('build.sh says what is missing when no SDK can be found, and takes VST3_SDK
   assert.doesNotMatch(found.stderr, /no VST3 SDK found/, 'the JUCE 9 path is read');
 });
 
+test('comparing with the machine: a patch is matched by name, a recording stays out of git, and nothing claims a percentage', () => {
+  const skill = readFileSync(join(KIT, 'packs/sound-design/skills/compare-to-the-machine/SKILL.md'), 'utf8');
+  assert.ok(skill.length < 8000);
+  assert.match(skill, /^description: Use when/m);
+  for (const lesson of [/Match by \*\*name\*\*, never by number alone/, /A multi or combination's name is not the sound's/, /planted fault/, /give a percentage/, /Commit a recording/]) assert.match(skill, lesson);
+});
+
 test('the skill carries what it took to learn', () => {
   const skill = readFileSync(join(KIT, 'packs/sound-design/skills/bounce-a-plugin/SKILL.md'), 'utf8');
   assert.ok(skill.length < 8000);

@@ -196,6 +196,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
   making: site/ on the design of the author's own page, its stylesheet and particles reused, with the kit's numbers held true by a test, and no deploy until the repo's visibility is chosen; concepts: none (design/shape.json declares none); reuse: site/css/main.css and site/js/section-particles.js from that design.
   done when: it renders at desktop and phone widths with no overflow, every file it loads exists, its counts match the kit, and it names no person.
 
+- 1.2.0, comparing with a real machine (work/1.2.0-compare-to-the-machine), started 2026-11-05 ("thats what we usually do and why we made the vstplayer. so make that a skill in the kit").
+  making: a `compare-to-the-machine` skill in sound-design: find a recording of the real machine, take its audio, identify the patch by its name on the display, render the same patch, and compare what a performance can show; concepts: none (design/shape.json declares none); reuse: vst3host and bounce-a-plugin (packs/sound-design), measure-a-law (packs/sound-design/skills).
+  done when: doctor passes the skill, a test holds its lessons, the README counts are true, npm test green once on committed work.
+
 ## Steps
 
 ## Log
