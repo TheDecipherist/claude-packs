@@ -3,40 +3,11 @@
 // folder-law refused every new file in a worktree, and agents routed new code into unrelated files).
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
-
-const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
-const PIN_GUARD = fileURLToPath(new URL('../global/hooks/version-pin-guard.mjs', import.meta.url));
-const git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: 'ignore' });
-const put = (file, text) => { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, text); };
-
-// A real repo with the packs installed and committed, and one agent worktree under .claude/worktrees/.
-function project(initArgs, before = () => {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'cpw-'));
-  execFileSync('node', [CLI, 'init', ...initArgs, '--dir', dir], { encoding: 'utf8' });
-  before(dir);
-  git(dir, 'init', '-q');
-  git(dir, 'add', '-A');
-  git(dir, '-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'init');
-  git(dir, 'worktree', 'add', '-q', '.claude/worktrees/agent-x', '-b', 'work/x');
-  return { here: dir, wt: join(dir, '.claude/worktrees/agent-x') };
-}
-
-const stellix = () => project(['audio-core', 'gpu-painter', 'stellix', '--profile', 'stellix'], (dir) => {
-  for (const d of ['lib/app/src', 'lib/world/src', 'lib/engines/src', 'lib/painter/src']) mkdirSync(join(dir, d), { recursive: true });
-  writeFileSync(join(dir, 'lib/app/src/keep.h'), '// keep\n');
-});
-
-// Hooks run the way Claude Code runs them: the main checkout's copy, CLAUDE_PROJECT_DIR = main.
-// node runs a .mjs hook, python3 a .py one, as the settings entries do.
-const fireAs = (here, hook, payload, env = {}) =>
-  spawnSync(hook.endsWith('.py') ? 'python3' : 'node', [join(here, '.claude/hooks', hook)], { input: JSON.stringify(payload), env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: here, ...env }, encoding: 'utf8' });
-const fire = (here, hook, file, content = '// new\n') => fireAs(here, hook, { tool_name: 'Write', tool_input: { file_path: file, content } }).status;
-const bash = (here, hook, command) => fireAs(here, hook, { tool_name: 'Bash', tool_input: { command } }).status;
+import { CLI, PIN_GUARD, bash, fire, fireAs, git, project, put, stellix } from './worktree-rig.mjs';
+import { PACK_CASES } from './worktree-cases-packs.mjs';
 
 test('folder-law allows a new file in a right folder of a worktree and refuses a wrong one', () => {
   const { here, wt } = stellix();
@@ -63,8 +34,10 @@ const SVF = (name, k = '2.0f') => `float ${name}::process (float x) noexcept\n{\
 const SHAPE = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'] } }, exclude: [] };
 
 // One case per installed hook: the worktree file it must allow and the one it must refuse, judged
-// from the worktree's own checkout. A hook added to the packs without a case here fails the test.
+// from the worktree's own checkout. A hook added to the packs without a case here, or in worktree-cases-packs.mjs for a hook
+// a pack other than base adds, fails the test.
 const CASES = {
+  ...PACK_CASES,
   // the runner as settings.json runs it (KWB-24): the hooks it names judge a worktree file against the worktree, and the
   // timing lines go to the main checkout's log (CLAUDE_PROJECT_DIR)
   'run-hooks.mjs': ({ here, wt }) => {
@@ -86,44 +59,6 @@ const CASES = {
   'placement-law.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'placement-law.mjs', join(wt, 'src/painter/shaders/glow.wgsl'), '@fragment fn fs() {}'), 0);
     assert.equal(fire(here, 'placement-law.mjs', join(wt, 'src/dsp/glow.wgsl'), '@fragment fn fs() {}'), 2);
-  },
-  'protect-vendor.mjs': ({ here, wt }) => {
-    assert.equal(fire(here, 'protect-vendor.mjs', join(wt, 'src/dsp/Svf.cpp')), 0);
-    assert.equal(fire(here, 'protect-vendor.mjs', join(wt, 'third_party/lib/lib.h')), 2);
-    // the copy tree (a layout folder of kind "copy"), by a tool and by the shell; its sanctioned tool gets through
-    assert.equal(fire(here, 'protect-vendor.mjs', join(wt, 'src/engines/copied/Voice.h')), 2);
-    assert.equal(bash(here, 'protect-vendor.mjs', `sed -i '' s/a/b/ ${join(wt, 'src/engines/copied/Voice.h')}`), 2);
-    assert.equal(bash(here, 'protect-vendor.mjs', `python3 tools/copy_in.py ${join(wt, 'src/engines/copied/Voice.h')}`), 0);
-    assert.equal(bash(here, 'protect-vendor.mjs', `sed -i '' s/a/b/ ${join(wt, 'src/engines/Own.h')}`), 0);
-  },
-  'build-guard.mjs': ({ here, wt }) => {
-    assert.equal(bash(here, 'build-guard.mjs', `cd ${wt} && cmake --build build -j8`), 2, 'a build outside the queue');
-    assert.equal(bash(here, 'build-guard.mjs', `cd ${wt} && buildq cmake --build build -j8`), 0);
-  },
-  'time-guard.mjs': ({ here, wt }) => {
-    const pre = (command) => fireAs(here, 'time-guard.mjs', { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }).status;
-    const loop = (pattern) => ['until', '!', 'pgrep', '-f', pattern, '>/dev/null;', 'do', 'sleep', '5;', 'done'].join(' ');
-    assert.equal(pre(`cd ${wt} && ${loop('"cmake --build"')}`), 2);
-    assert.equal(pre(`cd ${wt} && ${loop("'[c]make --build'")}`), 0);
-  },
-  'user-asks.mjs': ({ here, wt }) => {
-    const t = join(wt, 'transcript.jsonl');
-    writeFileSync(t, `${JSON.stringify({ type: 'user', timestamp: new Date().toISOString(), message: { content: 'make the bank louder' } })}\n`);
-    const r = fireAs(here, 'user-asks.mjs', { hook_event_name: 'SessionStart', source: 'compact', transcript_path: t }, { TIMS_ASKS_LEDGER: join(wt, 'ledger.json') });
-    assert.equal(r.status, 0);
-    assert.match(r.stdout, /make the bank louder/);
-  },
-  'idle-wake.mjs': ({ here, wt }) => {
-    const t = join(wt, 'transcript.jsonl');
-    writeFileSync(t, '{}\n');
-    const env = { IDLE_WAKE_MIN: '0.0005', IDLE_WAKE_LOOK_S: '0.01', TIMS_ASKS_LEDGER: join(wt, 'ledger.json') };
-    assert.equal(fireAs(here, 'idle-wake.mjs', { hook_event_name: 'Stop', transcript_path: t, last_assistant_message: 'Next I would build P4.' }, env).status, 2);
-    assert.equal(fireAs(here, 'idle-wake.mjs', { hook_event_name: 'Stop', transcript_path: t, last_assistant_message: 'All done. NOTHING OPEN' }, env).status, 0);
-  },
-  'browser-guard.py': ({ here, wt }) => {
-    const launch = `import puppeteer from 'puppeteer';\nconst b = await puppeteer.${'launch'}();\n`;
-    assert.equal(fire(here, 'browser-guard.py', join(wt, 'tools/shot.mjs'), launch), 2);
-    assert.equal(fire(here, 'browser-guard.py', join(wt, 'src/painter/Draw.cpp'), 'void draw() {}\n'), 0);
   },
   'shape-law.mjs': ({ here, wt }) => {
     // the worktree's branch added a concept to its own manifest: its design/shape.json decides, not main's
@@ -249,15 +184,6 @@ const CASES = {
     assert.equal(add(wt), 0);
     assert.equal(add(here), 2);
   },
-  'firmware-out-of-git.mjs': ({ here, wt }) => {
-    // The worktree's layout names this fixture; main's does not. A git add is judged by the checkout it runs in.
-    put(join(wt, 'one.syx'), 'x');
-    put(join(here, 'one.syx'), 'x');
-    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards: { firmware: { fixtures: ['one.syx'] } } }));
-    const add = (cwd) => fireAs(here, 'firmware-out-of-git.mjs', { tool_name: 'Bash', tool_input: { command: 'git add one.syx' }, cwd }).status;
-    assert.equal(add(wt), 0);
-    assert.equal(add(here), 2);
-  },
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
     put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');
@@ -284,11 +210,6 @@ const CASES = {
     assert.equal(stop(here), 2, 'main has neither');
     // Stellix WB-86: a session sitting in the main checkout that writes into a worktree is judged by the worktree's build.md
     assert.equal(stop(here, wt), 0, 'a write into the worktree, from the main checkout, is judged by the worktree');
-  },
-  'no-shipped-images.mjs': ({ here, wt }) => {
-    assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'src/painter/logo.png')), 2);
-    assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'tests/goldens/panel.png')), 0);
-    assert.equal(bash(here, 'no-shipped-images.mjs', `cp /tmp/a.png ${join(wt, 'src/app/logo.png')}`), 2);
   },
 };
 

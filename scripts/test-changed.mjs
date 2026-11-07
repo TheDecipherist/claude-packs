@@ -22,8 +22,10 @@ import { PRESETS } from '../lib/packs.mjs';
 const SELF = fileURLToPath(import.meta.url);
 const posix = (p) => p.split(sep).join('/');
 
-// What no import or name shows. `tests` picks the test files by their text.
-const installs = (text) => (text.includes('bin/claude-packs.mjs') || text.includes('./kit-cli.mjs')) && /['"](init|new|add|update|update-all)['"]/.test(text);
+// What no import or name shows. `tests` picks the test files by their text. A test installs through the CLI itself or through
+// a test helper that runs it (kit-cli for most; worktree-rig, whose project() runs init, for the worktree tests).
+const INSTALLING_HELPERS = ['bin/claude-packs.mjs', './kit-cli.mjs', './worktree-rig.mjs'];
+const installs = (text) => INSTALLING_HELPERS.some((h) => text.includes(h)) && /['"](init|new|add|update|update-all)['"]/.test(text);
 
 // The text of a test that brings a pack in: its name, a preset that holds it, a configuration that takes it (by --config; a
 // configuration's own pack also comes with the packs it offers), or a walk over every configuration (KWB-41).

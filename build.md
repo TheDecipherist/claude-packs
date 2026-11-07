@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.3.0, circuit-skill-first (work/1.3.0-circuit-skill-hook), started 2026-11-07, after the user's "you need to make a hook for this to enforce the skill being used".
+  making: a reverse-engineering PreToolUse hook that refuses a Read of, or a shell command that renders, a schematic, service manual or data sheet image or PDF until the transcript shows read-a-circuit-diagram loaded (a Skill call, or a Read of its SKILL.md); concepts: none (design/shape.json declares none); reuse: readPayload and judgeEvent's refusal form (packs/base/hooks/lib/writes.mjs), readLayout (lib/layout.mjs) for layout guards, checkoutRoot and claudeRoot (lib/project.mjs), matchesAny (lib/glob.mjs), scratchProject, runHook and verdicts (lib/selftest.mjs), asHook and isMain (lib/hook-log.mjs).
+  done when: its selftest is red without the law and green with it (a sheet read with no skill refused; after a Skill call or a Read of SKILL.md passed; a render command naming a service manual refused; a plain source file passed; a layout glob honoured); its worktree case; README and CHANGELOG; the whole suite green.
+
 - 0.11.0, the v7 additions (work/0.10.0-v7-additions), started 2026-11-04 00:50 EST.
   making: the v7 additions merged into the kit without overwriting it (dispatch laws in base, the needs check mode, seven node packs under a node configuration, presets, per-service compose checks); concepts: none (design/shape.json declares no concept: packs, configurations, hooks and checks are each a different thing, addressed by name); reuse: judgeEvent (packs/base/hooks/lib/writes.mjs) for dispatch-once's write frame, hookRun (test/kit-cli.mjs) for the tests' hook calls, inferConfig (lib/configs.mjs) for a preset's configuration.
   done when: npm test all green; the node-api install's checks pass their selftest and doctor --strict is OK; the work branch is on GitHub (blocked: KWB-39).
