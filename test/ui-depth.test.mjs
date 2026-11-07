@@ -64,6 +64,13 @@ test('an on-screen keyboard lights what sounds and has KB OCT, a kind is one siz
   assert.match(read('audio-core/rules/a-control-is-proved-through-its-input.md'), /xvfb-run -a/);
 });
 
+test('a PDF is read with its pictures: figures exported, every page rendered, never a placeholder', () => {
+  const skill = readFileSync(join(KIT, 'packs/base/skills/pdf-to-md/SKILL.md'), 'utf8');
+  assert.ok(skill.length < 8000);
+  assert.match(skill, /^description: Use when/m);
+  for (const law of [/--image-export-mode referenced/, /Render every page to an image/, /Never do:[\s\S]*--image-export-mode placeholder/, /Count `<!-- image -->`/]) assert.match(skill, law);
+});
+
 test('scan names elements built by hand more than once, html and c++', () => {
   const dir = fresh('uid-scan-');
   const card = (t) => `<div class="card"><h3 class="t">${t}</h3><p>${t}</p><a href="/">more</a></div>\n`;

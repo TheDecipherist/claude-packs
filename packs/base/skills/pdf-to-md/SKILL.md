@@ -1,25 +1,28 @@
 ---
 name: pdf-to-md
-description: Use when a PDF has to be read or searched, when converting a PDF to Markdown, or when a manual, datasheet or spec arrives as a PDF.
+description: Use when a PDF has to be read or searched, when converting a PDF to Markdown, or when a manual, datasheet, schematic or spec arrives as a PDF.
 ---
 
-# Convert a PDF to Markdown with docling (one job: a PDF becomes text you can read, grep and cite)
+# Convert a PDF to Markdown with docling, its images with it (one job: nothing in the PDF is left unread)
 
-Use docling, not `pdftotext`, a Python PDF library or a hand-written extractor. It keeps tables as tables, and a manual's tables are usually what you came for.
+Use docling, not `pdftotext` or a hand-written extractor. It keeps tables as tables. A manual's graphs, drawings and schematics are pictures, though, and a Markdown file that only marks where they were has lost them. A service manual made of scanned sheets converts to almost nothing at all.
 
 <constraints>
 Always do:
 1. Check it is there: `docling --version`. If not, `pipx install docling` or `uv tool install docling`, and say the PDF is unread until that is done.
 2. Check the file is a PDF: `file manual.pdf`. A download can be an HTML error page with a `.pdf` name.
-3. Convert with images left out, into a folder of its own:
-   `docling manual.pdf --to md --no-ocr --image-export-mode placeholder --output out/`
-   On an 87-page manual this took 37 seconds and gave 79 KB. The default embeds every image, and took three times as long for 2.2 MB.
-4. Judge the result. Compare the text with the page count: pages with almost no text mean a scan.
-5. For a scan, run it again with `--ocr`, or `--force-ocr` when the text layer is bad, and treat the result as a lead: OCR drops symbols and shuffles columns.
-6. Read a table that matters from the page itself, and cite the printed page number. When the table is a picture, docling leaves an image placeholder there: render that page.
-7. Keep the Markdown out of git unless the project wants it there: a vendor's manual is not yours to publish.
+3. Convert with every image saved as its own file, beside the Markdown, in a folder of its own:
+   `docling manual.pdf --to md --image-export-mode referenced --output out/`
+   The Markdown then links each figure, so a reader finds the picture where the text refers to it.
+4. Render every page to an image as well, numbered by page, with an index of each page's first words, into `out/pages/`. docling's own Python has `pypdfium2`: `page.render(scale=dpi / 72)`, 150 dpi for text, 300 for a drawing or a schematic. A page with no text layer is still read this way.
+5. Judge the result. Count the pages, the images and the characters of text. Pages with almost no text are a scan or a drawing: read those from their images, and say so.
+6. For a scan, run docling again with `--force-ocr`, and treat the text as a lead only: OCR drops symbols, values and part numbers.
+7. Read whatever matters from the page image: a table, a graph, a schematic, a part's value. Cite the printed page or sheet number.
+8. Keep the Markdown and the images out of git unless the project wants them: a vendor's manual is not yours to publish.
 
 Never do:
-- Read a large PDF's Markdown whole. Grep its headings, then read the section.
-- Treat an empty search as absence before step 4: the text may not have converted.
+- Use `--image-export-mode placeholder`: it drops every figure, and a reader never learns they were there.
+- Call a PDF read when its images were not. Count `<!-- image -->` in the Markdown: each one is a picture still unread.
+- Read a large PDF's Markdown whole. Grep its headings, then read the section and its pictures.
+- Treat an empty search as absence: the answer may be in a picture.
 </constraints>

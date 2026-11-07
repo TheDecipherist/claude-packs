@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `pdf-to-md` (`base`): a PDF is read with its pictures. Every figure is exported beside the Markdown and every page rendered to an image, at 300 dpi for a drawing, and a placeholder is never used. The Matrix-12 build lost every graph of its owner's manual and nearly all of its service manual, which is scanned sheets.
 - `house-control-behaviours` (`audio-core`): an on-screen keyboard has DOUBLE and TRIPLE beside KB OCT, as Tabula's octave stops: a whole voice an octave up, and one an octave down.
 
 ## 1.2.0 (2026-11-05)
