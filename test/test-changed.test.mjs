@@ -66,6 +66,9 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   const rule = pick('packs/base/rules/instances-by-index-identities-by-id.md');
   assert.ok(rule.includes('test/install.test.mjs') && rule.includes('test/worktrees.test.mjs'), 'a pack file: the tests that install packs (the table)');
   assert.ok(!rule.includes('test/kit-lock.test.mjs') && !rule.includes('test/frame-bench.test.mjs'));
+  // 1.3.0: a new rule changed the counts on the README and the page, and a changed-only run missed the page's test
+  const counted = pick('packs/reverse-engineering/rules/circuits-through-the-skill.md');
+  assert.ok(counted.includes('test/site.test.mjs') && counted.includes('test/readme.test.mjs'), 'a pack\'s rules are counted on the front pages');
   assert.ok(!sym.includes('test/kit-lock.test.mjs') && !sym.includes('test/frame-bench.test.mjs'));
   assert.deepEqual(pick('packs/gpu-painter/skills/gpu-frame-bench/SKILL.md').includes('test/frame-bench.test.mjs'), true);
   const lock = pick('.claude/hooks/kit-lock.mjs');

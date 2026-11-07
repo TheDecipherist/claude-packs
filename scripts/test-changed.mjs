@@ -48,6 +48,8 @@ export const TABLE = [
     tests: (text, changed, root) => installs(text) && brings(root, changed.split('/')[1]).test(text) },
   { files: /^(packs\/base|profiles|prompts|configurations)\//, why: 'base, the seeds and the configurations reach every project: the tests that install packs', tests: (text) => installs(text) },
   { files: /^global\//, why: 'the global part: the tests that run `global`', tests: (text) => /['"]global['"]/.test(text) },
+  { files: /^packs\/[\w-]+\/(rules|checks|hooks|skills)\//, why: 'a pack\'s rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts',
+    tests: (text) => /true counts/.test(text) },
 ];
 const GENERIC = new Set(['SKILL.md', 'pack.json', 'package.json', 'layout.json', 'settings.json', 'README.md', 'CHANGELOG.md', 'selftest.mjs', 'index.mjs']);
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'worktrees', '.claude-packs-backup']);
