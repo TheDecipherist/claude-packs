@@ -28,6 +28,7 @@ Always do:
 6. Write `README.md`: a table of every report (image, sheet, title, one line), the chips with links, a Mermaid map of how the sheets join through their connectors, the netlists and what each simulates, and everything not read.
 7. Check the work. Every part on the image is in its table, so count them. Every connector pin is found on its other sheet. Every value in Laws and in a netlist is one the image shows.
 8. Last, set the reports against the code that rebuilds the circuit. Make a table of each law and value: where the code holds it, and whether it matches, differs or is missing. That table is the point of the whole exercise.
+9. Keep `change-order.md` beside the reports, from the first report on: one row for every finding that touches the code, a netlist, a test or a source not yet read. Each row has an ID, the finding, the report it comes from, an action (CHANGE, VERIFY, MEASURE, DECIDE, DOC or FIND), what the user heard that it may explain, and an evidence column. Add a report's rows the moment it lands, before the next agent starts. Order the rows by what is likely to be heard first. A row is closed only with its evidence: the test, the measurement or the commit. A finding left out stays in the list, with why, so nobody adds it back by mistake.
 
 Never do:
 - Guess a value, or fill one in from a "typical" circuit. Write `[?]` with the tile instead.
@@ -35,6 +36,7 @@ Never do:
 - Leave out a hand note, a part marked "not used" or an option: they explain units that differ.
 - Copy a datasheet, a manual page or an image into the repo. Link the source, and keep the file outside.
 - Call a sheet read while its "Not read" list has rows nobody followed up.
+- Drop a finding because it looks small, or leave it only inside its report: a finding not in the change order is lost by the time the code is changed.
 </constraints>
 
 A diagram, in the form the reports use:
