@@ -71,6 +71,13 @@ test('a PDF is read with its pictures: figures exported, every page rendered, ne
   for (const law of [/--image-export-mode referenced/, /Render every page to an image/, /Never do:[\s\S]*--image-export-mode placeholder/, /Count `<!-- image -->`/]) assert.match(skill, law);
 });
 
+test('a circuit diagram is read tile by tile, one report an image, and set against the code', () => {
+  const skill = readFileSync(join(KIT, 'packs/reverse-engineering/skills/read-a-circuit-diagram/SKILL.md'), 'utf8');
+  assert.ok(skill.length < 8000);
+  assert.match(skill, /^description: Use when/m);
+  for (const law of [/One image, one report/, /overlapping tiles/, /Mermaid `flowchart`/, /chips\/<part>\.md/, /Guess a value/, /set the reports against the code/]) assert.match(skill, law);
+});
+
 test('scan names elements built by hand more than once, html and c++', () => {
   const dir = fresh('uid-scan-');
   const card = (t) => `<div class="card"><h3 class="t">${t}</h3><p>${t}</p><a href="/">more</a></div>\n`;
