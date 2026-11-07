@@ -54,5 +54,5 @@ test('the skill names the tool and its laws', () => {
   const skill = readFileSync(join(KIT, 'packs/reverse-engineering/skills/source-checklist/SKILL.md'), 'utf8');
   assert.ok(skill.length < 8000);
   assert.match(skill, /^description: Use when/m);
-  for (const law of [/node \.claude\/tools\/source-ledger\.mjs/, /A ticked row with no evidence is not done/, /Call the sound, a stage or a step finished while the tool exits 1/]) assert.match(skill, law);
+  for (const law of [/node \.claude\/tools\/source-ledger\.mjs/, /A ticked row with no evidence is not done/, /Call the sound, a stage or a step finished while the tool exits 1/, /\| A schematic, a service sheet, a parts layout \| `read-a-circuit-diagram` \|/, /`chips\/<part>\.md`/, /`pdf-to-md`, figures exported/, /`bank-census`/, /`compare-to-the-machine`/]) assert.match(skill, law);
 });

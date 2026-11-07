@@ -14,7 +14,17 @@ Always do:
    List the folders it covers at the top. Paths are relative to the checklist's folder.
 2. List everything: firmware dumps, every manual, every service sheet and page image, every data sheet, the sysex document, banks, recordings, photos. A folder of images is one row an image.
 3. Add a row for each chip on the schematics as soon as it is found, for its data sheet, and one row for each test every analog stage needs, such as a netlist simulated against the code.
-4. Tick a row only when it is read in full and its facts are written down: the PDF converted with its images (`pdf-to-md`), each schematic image reported (`read-a-circuit-diagram`), each data sheet's report written. Put the reports in the evidence column. A ticked row with no evidence is not done.
+4. Read each kind of source with its own skill, and tick a row only when that skill's output exists. Put that output in the evidence column. A ticked row with no evidence is not done.
+
+   | Source | Read with | Evidence |
+   |---|---|---|
+   | Any PDF | `pdf-to-md`, figures exported and every page rendered | The Markdown with no `<!-- image -->` left, and the page images |
+   | A schematic, a service sheet, a parts layout | `read-a-circuit-diagram` | Its report, and a netlist for each analog stage |
+   | A chip found on a schematic | `read-a-circuit-diagram`, its chips step | `chips/<part>.md` |
+   | An analog stage | `read-a-circuit-diagram`, its netlist step | The netlist simulated and set against the code |
+   | The owner's manual | `names-first`, `menu-map` | The names and the menu map |
+   | A bank or sysex dump | `bank-census` | The census |
+   | A recording of the machine | `compare-to-the-machine` | The comparison with its cuts and numbers |
 5. Run the check after every change and before any claim that a step, the filter or the sound is finished:
    `node .claude/tools/source-ledger.mjs docs/sources-checklist.md <each sources folder>`
    It lists every file not on the ledger, every row not done, every tick without evidence, and every converted PDF still holding image placeholders. Exit 0 is the only state in which everything has been read.
