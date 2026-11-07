@@ -75,7 +75,7 @@ test('a circuit diagram is read tile by tile, one report an image, and set again
   const skill = readFileSync(join(KIT, 'packs/reverse-engineering/skills/read-a-circuit-diagram/SKILL.md'), 'utf8');
   assert.ok(skill.length < 8000);
   assert.match(skill, /^description: Use when/m);
-  for (const law of [/One image, one report/, /overlapping tiles/, /Mermaid `flowchart`/, /chips\/<part>\.md/, /Guess a value/, /set the reports against the code/]) assert.match(skill, law);
+  for (const law of [/One image, one report/, /overlapping tiles/, /Mermaid `flowchart`/, /chips\/<part>\.md/, /SPICE netlist for every analog stage/, /ngspice -b/, /Guess a value/, /set the reports against the code/]) assert.match(skill, law);
 });
 
 test('scan names elements built by hand more than once, html and c++', () => {

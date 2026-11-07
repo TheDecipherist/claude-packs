@@ -5,7 +5,7 @@ description: Use when a schematic, circuit diagram or service-manual sheet has t
 
 # Read a circuit diagram into a report (one job: every part, net and law on one image, written down)
 
-An image of a schematic is the most exact source a rebuild has, and the easiest to half-read: a value too small to see at full view, a hand note, a capacitor nobody modelled. Each image gets its own report, so several agents can work at once, and a README ties them together.
+Mermaid is the map and a SPICE netlist is the model. An image of a schematic is the most exact source a rebuild has, and the easiest to half-read: a value too small to see at full view, a hand note, a capacitor nobody modelled. Each image gets its own report, so several agents can work at once, and a README ties them together.
 
 <constraints>
 Always do:
@@ -22,10 +22,11 @@ Always do:
    - **Notes on the drawing:** hand notes, brackets, revision marks, "not used", jumpers and options.
    - **Not read:** what could not be read, the tile, and why.
    - **For the build:** what code that rebuilds this must hold, as a list of facts with their reference.
-4. Write `chips/<part>.md` once per part number, by one agent per chip. Find the datasheet from the maker first, then archives such as alldatasheet or datasheetarchive. Save it outside the repo, and read it with `pdf-to-md`, images included. Record its function, pinout, every figure in its tables with units and conditions, its equations, the curves read as numbers, its typical application, and what a model must hold that an ideal part would not: offsets, drift, temperature, distortion, noise, limits, leakage. Say which figures are typical and which are guaranteed.
-5. Write `README.md`: a table of every report (image, sheet, title, one line), the chips with links, a Mermaid map of how the sheets join through their connectors, and everything not read.
-6. Check the work. Every part on the image is in its table, so count them. Every connector pin is found on its other sheet. Every value in Laws is one the image shows.
-7. Last, set the reports against the code that rebuilds the circuit. Make a table of each law and value: where the code holds it, and whether it matches, differs or is missing. That table is the point of the whole exercise.
+4. Write a SPICE netlist for every analog stage, which is the exact model the Mermaid chart is not: `netlists/<NN>-<stage>.cir`, one stage a file. Every part with its reference, value and the two nodes it joins, nodes named by the sheet's nets and pins, a chip as a behavioural subcircuit from its datasheet and marked so, and a `.control` block that sweeps or steps what matters: a filter's response, a corner, a level, a gain. Digital logic needs none. Simulate with `ngspice -b`, and set the result against the code's own response at the same settings. A difference is a misread or a fault in the code, and either is worth finding.
+5. Write `chips/<part>.md` once per part number, by one agent per chip. Find the datasheet from the maker first, then archives such as alldatasheet or datasheetarchive. Save it outside the repo, and read it with `pdf-to-md`, images included. Record its function, pinout, every figure in its tables with units and conditions, its equations, the curves read as numbers, its typical application, and what a model must hold that an ideal part would not: offsets, drift, temperature, distortion, noise, limits, leakage. Say which figures are typical and which are guaranteed.
+6. Write `README.md`: a table of every report (image, sheet, title, one line), the chips with links, a Mermaid map of how the sheets join through their connectors, the netlists and what each simulates, and everything not read.
+7. Check the work. Every part on the image is in its table, so count them. Every connector pin is found on its other sheet. Every value in Laws and in a netlist is one the image shows.
+8. Last, set the reports against the code that rebuilds the circuit. Make a table of each law and value: where the code holds it, and whether it matches, differs or is missing. That table is the point of the whole exercise.
 
 Never do:
 - Guess a value, or fill one in from a "typical" circuit. Write `[?]` with the tile instead.
