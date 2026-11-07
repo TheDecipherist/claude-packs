@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `source-checklist` and `.claude/tools/source-ledger.mjs` (`reverse-engineering`): a ledger of every source on hand, one row a file, ticked only with the reports that read it. The tool lists every file not on it, every row not done, every tick without evidence, and every PDF still holding image placeholders, and exits 1 until all are read.
 - `read-a-circuit-diagram` (`reverse-engineering`): a schematic image becomes its own report, read tile by tile at full resolution: a Mermaid diagram, every part, chip, net and law, what was not read, and what the build must hold. One datasheet report per chip, a README over them all, and last a table of each law against the code.
 - `pdf-to-md` (`base`): a PDF is read with its pictures. Every figure is exported beside the Markdown and every page rendered to an image, at 300 dpi for a drawing, and a placeholder is never used. The Matrix-12 build lost every graph of its owner's manual and nearly all of its service manual, which is scanned sheets.
 - `house-control-behaviours` (`audio-core`): an on-screen keyboard has DOUBLE and TRIPLE beside KB OCT, as Tabula's octave stops: a whole voice an octave up, and one an octave down.

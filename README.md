@@ -344,7 +344,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `python` | Python: templates, errors, resources, safe subprocess calls | 2 | 11 | 0 | 1 |
 | `react` | React: failed requests, effects, accessible controls | 2 | 6 | 0 | 0 |
 | `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate, every repeat one template | 6 | 9 | 0 | 3 |
-| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 9 | 4 | 1 | 7 |
+| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 9 | 4 | 1 | 8 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
 | `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first, an offline VST3 renderer, and comparing with the real machine | 6 | 5 | 0 | 6 |
