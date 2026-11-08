@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.1 (2026-11-07)
 
 - `skill-first` (`base`) replaces `circuit-skill-first`: one hook from a table, refusing a read of a source until its skill is loaded. A schematic, a service manual or a data sheet needs `read-a-circuit-diagram`, and a design reference (a mock-up or anything under a `reference/` folder) needs `analyse-reference-look`, which two pages of a plugin's editor skipped, landing far plainer than their mock-ups. A row applies only where its skill is installed, and a project adds its own rows in `guards.skillFirst`. `ui-matches-reference-look` and `circuits-through-the-skill` name it.
 - The README states the 1.3.0 gate: the tests a branch reaches, and the whole suite only on the user's request.
