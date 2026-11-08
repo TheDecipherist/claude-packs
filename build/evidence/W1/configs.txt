@@ -1,0 +1,6 @@
+full-stack
+  A web service: a Fastify API and a Next.js web app in one repo, Zod 4 schemas in one shared folder, one database gateway, one error contract.
+  packs: base, full-stack, http-api, fastify, zod, docker, writing, hook-proof (always); js-ts, go, stored-text, ui-craft, shell, shell-hooks, react, web, multi-tenant, websocket, ci, host-agent, dynamic-data, mongo, postgres, ai, nginx, content-site (to choose); init takes js-ts, stored-text, ui-craft
+  with every pack: rules 147, hooks 24, checks 261, skills 46
+  folders: packages/core/src/ packages/core/src/schemas/ api/src/ api/src/routes/ api/src/handlers/ api/src/adapters/ api/src/auth/ api/test/ channel/ docs/ tools/
+

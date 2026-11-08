@@ -22,6 +22,28 @@ for (const name of CONFIGS) {
   });
 }
 
+// admiral-fleet W1: full-stack chooses web, go, host-agent and shell-hooks (a Go agent on the hosts, pages beside the API).
+// Each lands whole: every rule and check of the pack in .claude/, every hook its pack.json names merged into settings.json.
+const FLEET = ['web', 'go', 'host-agent', 'shell-hooks'];
+test('full-stack installs web, go, host-agent and shell-hooks when chosen: their rules, checks and hooks land', () => {
+  const dir = fresh('cfgs-fleet-');
+  execFileSync('git', ['init', '-q'], { cwd: dir });
+  const init = cli(dir, 'init', '--config', 'full-stack', ...FLEET);
+  assert.equal(init.status, 0, init.stdout + init.stderr);
+  const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
+  const settings = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
+  for (const pack of FLEET) {
+    assert.ok(lock.packs.includes(pack), `${pack} in the lock`);
+    const src = join(KIT, 'packs', pack);
+    for (const kind of ['rules', 'checks']) {
+      const files = existsSync(join(src, kind)) ? readdirSync(join(src, kind)) : [];
+      for (const f of files) assert.equal(readFileSync(join(dir, '.claude', kind, f), 'utf8').length > 0, true, `${pack}: ${kind}/${f}`);
+    }
+    const hooks = JSON.stringify(JSON.parse(readFileSync(join(src, 'pack.json'), 'utf8')).hooks ?? {}).match(/hooks\/[\w.-]+\.(?:mjs|py|sh)/g) ?? [];
+    for (const h of hooks) assert.ok(settings.includes(`.claude/${h}`) && existsSync(join(dir, '.claude', h)), `${pack}: ${h} merged into settings.json`);
+  }
+});
+
 test('planner-skills: one project-layout body per configuration, from its layout template', () => {
   const out = fresh('planner-');
   execFileSync('node', [CLI, 'planner-skills', '--out', out], { encoding: 'utf8' });

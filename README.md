@@ -374,7 +374,7 @@ A project is one configuration: a kind of project, as data in `configurations/<n
 | `node` | A Node.js or TypeScript service, web app, CLI, library or MCP server | `js-ts` |
 | `python` | Python projects | `python` |
 | `rust` | Rust crates and workspaces | `rust` |
-| `full-stack` | A Fastify API and a Next.js web app, with one schemas folder and one database gateway. It fixes a folder layout, so it is offered and never assumed. It always takes `full-stack`, `http-api`, `fastify`, `zod` and `docker` | `js-ts`, `stored-text`, `ui-craft` |
+| `full-stack` | A Fastify API and a Next.js web app, with one schemas folder and one database gateway. It fixes a folder layout, so it is offered and never assumed. It always takes `full-stack`, `http-api`, `fastify`, `zod` and `docker`; a project can choose `go`, `web`, `host-agent` and `shell-hooks` too, for a Go agent on its hosts and web pages beside the API | `js-ts`, `stored-text`, `ui-craft` |
 | `synth-creator` | JUCE synths and effects | `cpp`, `audio-core` |
 
 ```
