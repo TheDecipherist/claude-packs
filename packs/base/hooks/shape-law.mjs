@@ -65,6 +65,7 @@ const SELFTEST_SHAPE = {
     },
     mixer: { shape: 'one', id: 'mixer', words: ['mixer'] },
     planet: { shape: 'many', generator: 'planetId(kind, field)', words: ['planet', 'planets'], names: ['DELAY', 'FILTER'] },
+    padBank: { shape: 'many', count: 4, generator: 'padBankAt(i)', words: ['padBank', 'padBanks'] },
   },
   exclude: ['build/**', 'third_party/**'],
   values: ['Cell'],
