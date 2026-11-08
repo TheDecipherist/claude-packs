@@ -8,16 +8,18 @@ import { buildLayout } from '../lib/layout.mjs';
 
 test('an update keeps buildOutput, and adds none where the project set none', () => {
   const dir = mkdtempSync(join(tmpdir(), 'layout-owned-'));
-  writeFileSync(join(dir, 'layout.json'), JSON.stringify({ folders: {}, concepts: {}, buildOutput: ['out/**'], keepWorktrees: ['night'], protected: ['design/**'], writeOnce: ['build/evidence/**'] }));
+  writeFileSync(join(dir, 'layout.json'), JSON.stringify({ folders: {}, concepts: {}, buildOutput: ['out/**'], keepWorktrees: ['night'], protected: ['design/**'], writeOnce: ['build/evidence/**'], looks: [{ name: 'home', reference: 'design/reference/home.webp', code: ['src/app/home/**'] }] }));
   const kept = buildLayout(dir, []);
   assert.deepEqual(kept.buildOutput, ['out/**']);
   assert.deepEqual(kept.protected, ['design/**']);
   assert.deepEqual(kept.keepWorktrees, ['night']);   // 0.9.1: build-sweep's kept worktrees survive an update
   assert.deepEqual(kept.writeOnce, ['build/evidence/**']);   // 0.9.8 (KWB-21)
+  assert.deepEqual(kept.looks, [{ name: 'home', reference: 'design/reference/home.webp', code: ['src/app/home/**'] }]);   // 1.3.2 (KWB-92): look-gate's pages
   const bare = mkdtempSync(join(tmpdir(), 'layout-owned-'));
   writeFileSync(join(bare, 'layout.json'), JSON.stringify({ folders: {}, concepts: {} }));
   assert.equal(buildLayout(bare, []).buildOutput, undefined);
   assert.equal(buildLayout(bare, []).keepWorktrees, undefined);
+  assert.equal(buildLayout(bare, []).looks, undefined);
 });
 
 // 0.9.1: a layout key a hook or tool reads, and that the layout builder does not write, must be project-owned (OWNED), or the
@@ -34,6 +36,8 @@ test('every layout key the kit reads survives an update', () => {
     const t = readText(f, 'utf8');
     for (const m of t.matchAll(/\blayout\??\.([a-zA-Z_]+)\b/g)) read.add(m[1]);
     for (const m of t.matchAll(/layout\.json'\), 'utf8'\)\)\.([a-zA-Z_]+)/g)) read.add(m[1]);
+    // KWB-92: a key read straight off the hooks' reader, readLayout(claudeRoot(join(root, 'x'))).looks, two calls deep
+    for (const m of t.matchAll(/\breadLayout\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)\??\.([a-zA-Z_]+)/g)) read.add(m[1]);
   }
   const builder = readText(join(kit, 'lib/layout.mjs'), 'utf8');
   const owned = JSON.parse(builder.match(/const OWNED = (\[[^\]]*\])/)[1].replace(/'/g, '"'));
