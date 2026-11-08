@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 export const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
 export const PIN_GUARD = fileURLToPath(new URL('../global/hooks/version-pin-guard.mjs', import.meta.url));
-export const git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: 'ignore' });
+const git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: 'ignore' });
 export const put = (file, text) => { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, text); };
 
 export function project(initArgs, before = () => {}) {

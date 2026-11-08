@@ -11,8 +11,8 @@ The kit is for everyone: no file names one person (`test/no-personal-name.test.m
 ## Commands
 
 ```
-npm test                       # the full suite: the gate before landing, once, on committed work (suite-once refuses it on uncommitted work). Always via npm: it preloads test/fresh-tmp.mjs
-npm run test:changed           # what to run while working: only the tests covering files changed since the base (prints why each was picked)
+npm test                       # the full suite: only when the user asks for a full run (suite-once refuses it otherwise). Always via npm: it preloads test/fresh-tmp.mjs
+npm run test:changed           # while working: the tests covering files changed since the base (prints why each was picked); with -- --base origin/main, the gate before landing and before a release
 node scripts/test-changed.mjs --dry-run [--base <ref>]
 node --import ./test/fresh-tmp.mjs --test test/shape.test.mjs                     # one file
 node --import ./test/fresh-tmp.mjs --test --test-name-pattern "<name>" test/*.test.mjs   # one test
@@ -78,7 +78,7 @@ Never run `node --test` without the `fresh-tmp.mjs` preload: tests then share th
 - **Kit lock:** one session lands work on the kit at a time. `.claude/hooks/kit-lock.mjs` (this repo's own hook, not part of any pack; on every tool call) takes `.claude-packs-lock` on a session's first write or commit, and refuses another session's commits, merges and releases (`npm version`/`publish`/`pack`, `git tag`) while its lease is live in any checkout; edits and pushes of existing commits pass (KWB-30). The lock is a lease (KWB-29): `started_at` and `last_seen`, renewed at most once a minute by the holder's hook calls, or by its transcript when the holder's hooks are another project's (a Stellix lead: take it with `lock take`); 30 min without renewal and it is stale, and the next session's work takes it over, logged in `.claude/kit-lock.log`. A live lease is never deleted: `lock release --force` is the only way. The lock and the log are runtime state, ignored by git.
 - **Branches:** work goes on `work/<version>-<topic>` branches started from the *fetched* `origin/main`, pushed from the first commit. A release fast-forwards both local and remote `main` (KWB-11, KWB-26).
 - **Workflow faults:** log a fault in a hook, tool or test run in `workflow-bugs.md` (`KWB-n`, with a timestamp) *before* fixing it, and close it with cause, fix and the test that catches it. Tests and code comments cite the KWB/WB ids they lock in.
-- **Release:** bump `package.json`, add a `CHANGELOG.md` entry, keep the README a current front page (it describes the kit as it is; release history goes in `CHANGELOG.md` and `docs/history.md`), and gate it with the full `npm test`.
+- **Release:** bump `package.json`, add a `CHANGELOG.md` entry, keep the README a current front page (it describes the kit as it is; release history goes in `CHANGELOG.md` and `docs/history.md`), and gate it with `npm run test:changed -- --base origin/main` on the committed work; the full `npm test` runs only when the user asks.
 - **Pins:** a dependency added or pinned needs a fresh row in `docs/versions.md` (the global `version-pin-guard` enforces this).
 
 <!-- claude-packs:start -->

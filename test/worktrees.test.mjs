@@ -6,7 +6,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, PIN_GUARD, bash, fire, fireAs, git, project, put, stellix } from './worktree-rig.mjs';
+import { CLI, PIN_GUARD, bash, fire, fireAs, project, put, stellix } from './worktree-rig.mjs';
 import { PACK_CASES } from './worktree-cases-packs.mjs';
 
 test('folder-law allows a new file in a right folder of a worktree and refuses a wrong one', () => {
@@ -139,13 +139,13 @@ const CASES = {
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
   },
-  'suite-once.mjs': ({ here }) => {
-    // The checkout the suite runs in decides: a clean worktree may run the gate, the same worktree with uncommitted work may not.
-    git(here, 'worktree', 'add', '-q', '.claude/worktrees/agent-suite', '-b', 'work/suite');
-    const own = join(here, '.claude/worktrees/agent-suite');
-    assert.equal(bash(here, 'suite-once.mjs', `cd ${own} && npm test`), 0);
-    put(join(own, 'CLAUDE.md'), 'changed\n');
-    assert.equal(bash(here, 'suite-once.mjs', `cd ${own} && npm test`), 2);
+  'suite-once.mjs': ({ here, wt }) => {
+    // The checkout the command runs in decides what is the whole suite: the worktree's layout names its own suite command, main's
+    // does not. Nobody asked for a full run (1.3.0: the gate is the changed tests; a full run only on the user's request).
+    const layout = JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8'));
+    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...layout, commands: { ...layout.commands, test: 'bash tools/all.sh' } }));
+    assert.equal(bash(here, 'suite-once.mjs', `cd ${wt} && bash tools/all.sh`), 2);
+    assert.equal(bash(here, 'suite-once.mjs', `cd ${here} && bash tools/all.sh`), 0);
   },
   'template-law.mjs': ({ here, wt }) => {
     // The worktree's branch already has this element; main does not. Each checkout is read on its own.

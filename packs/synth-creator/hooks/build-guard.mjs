@@ -153,7 +153,7 @@ function main(text) {
     const scope = tooWide(cmd, ev.cwd ?? process.cwd());
     if (scope) {
       return refuse(`${scope} Build only the targets your change needs (\`--target X --target Y\`), and run only its tests (\`-R 'pattern'\`, at most 30). ` +
-        'The whole suite runs once, as the gate before landing, never while working.');
+        'The whole suite runs only when the user asks for a full run; the gate before landing is the tests the branch reaches.');
     }
   }
   // NO POLLING (agents ran `until grep -q done log; do sleep 10` for minutes on end)

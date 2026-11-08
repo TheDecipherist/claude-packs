@@ -14,7 +14,7 @@ Always do:
 5. Fix one law everywhere at once: every box under one check, then commit, by name.
 6. A bug starts with a failing test (`bug-fix-starts-red`). Copies go through `make-it-a-template`.
 7. Tick the box when the fix is committed, and commit the plan with it, so the work can be picked up by anyone.
-8. Run only the tests a change reaches (`pick-tests`). At the end of a section run the whole suite once, then land it (`land-branch`).
+8. Run only the tests a change reaches (`pick-tests`). At the end of a section run the tests the section's changes reach, against the trunk, then land it (`land-branch`).
 9. When every box is ticked, scan again. What is new goes in the plan.
 
 Never do:

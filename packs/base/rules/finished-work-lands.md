@@ -5,7 +5,7 @@
 
 <constraints>
 Always do:
-- When a work branch's "done when" is measured and the whole suite is green, land it in the same turn with the `land-branch` skill. The trunk is always up to date.
+- When a work branch's "done when" is measured and the tests its changes reach are green, picked against the trunk, land it in the same turn with the `land-branch` skill. The trunk is always up to date.
 - Land stacked branches in order, or land the top one when it holds them all.
 - Say what landed, and the commit the remote now has.
 
