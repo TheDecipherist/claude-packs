@@ -5,11 +5,15 @@
 //   findUnknownTypes(text, file, shape) -> [{ line, text, concept: null, name, why, kind: 'type' }]
 //     a new class/struct/enum whose name holds no concept's word and that looks like an instance container (an index
 //     member, or it is made N times in an array): its concept has no row yet; a type in the manifest's "values" is skipped
+import { extname } from 'node:path';
+import { languageOf } from './languages.mjs';
 import { conceptOfName, parts, SHAPE_FILE } from './shape.mjs';
 
 export const CODE = /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|inl|mm|m|js|mjs|cjs|ts|tsx|jsx|py|swift|rs|go|java|kt|cs)$/i;
 const KEYWORDS = new Set(['if', 'for', 'while', 'switch', 'catch', 'return', 'sizeof', 'else', 'new', 'delete', 'case', 'throw', 'co_return', 'do', 'function', 'await', 'typeof']);
-const PICKS = [(p) => p.startsWith('pick'), (p) => p.startsWith('select'), (p) => p.startsWith('owner') || p === 'owning', (p) => p === 'for', (p) => p === 'first'];
+// The act of picking, never the thing that picks: a "picker" or "selector" is a component, and its accessor picks nothing (KWB-91).
+const COMPONENT = /^(?:picker|selector)s?$/;
+const PICKS = [(p) => p.startsWith('pick') && !COMPONENT.test(p), (p) => p.startsWith('select') && !COMPONENT.test(p),(p) => p.startsWith('owner') || p === 'owning', (p) => p === 'for', (p) => p === 'first'];
 const ITERATES = new Set(['each', 'all', 'every', 'count', 'num', 'size']);
 
 function definitions(text) {
@@ -104,7 +108,9 @@ function madeN(text, name, shape) {
 export function findUnknownTypes(text, file, shape) {
   if (!shape || !CODE.test(file ?? '')) return [];
   const python = /\.py$/i.test(file);
-  const lines = text.split('\n');
+  // A type is defined in code, never in a string or a comment: a fixture in a string is data (KWB-94). Blanking keeps every offset.
+  const code = languageOf(extname(file).toLowerCase())?.blank(text) ?? text;
+  const lines = code.split('\n');
   const out = [];
   lines.forEach((l, i) => {
     const m = python ? l.match(/^\s*class\s+([A-Za-z_]\w*)/) : l.match(/\b(?:class|struct|enum(?:\s+class|\s+struct)?)\s+(?:\[\[\w+\]\]\s+)?(?:alignas\([^)]*\)\s+)?([A-Za-z_]\w*)\s*(?:final\s*)?(?:extends\s+[\w.]+\s*)?(?::[^;{]*)?(?:\{|$)/);
@@ -112,7 +118,7 @@ export function findUnknownTypes(text, file, shape) {
     const name = m[1];
     if (conceptOfName(name, shape) || shape.values?.has(name)) return; // a listed value type is not a container (KWB-10)
     const body = bodyOf(lines, i, python);
-    const inArray = madeN(text, name, shape);
+    const inArray = madeN(code, name, shape);
     if (!INDEX_MEMBER.some((re) => re.test(body)) && !inArray) return;
     out.push({ line: i + 1, text: l.trim(), concept: null, name, kind: 'type', why: `defines ${name}, a container of instances whose concept has no row in ${SHAPE_FILE} — add the row to ${SHAPE_FILE} first (one or many, its generator, its selectors), then build the type` });
   });

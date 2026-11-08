@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { git, put } from './selftest.mjs';
-import { remoteHeads } from './pushed.mjs';
+import { pushCommand, remoteHeads } from './pushed.mjs';
 
 const RUNNER = fileURLToPath(new URL('../run-hooks.mjs', import.meta.url));
 
@@ -66,10 +66,13 @@ export function pushedCases(hookFile) {
   git(other, 'commit', '-q', '--allow-empty', '-m', 'b');
   const foreign = spawnSync(process.execPath, [RUNNER, hookFile], { cwd: other, encoding: 'utf8', input: JSON.stringify({ session_id: session, cwd: other, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }), env: { ...process.env, CLAUDE_PROJECT_DIR: lone } });
   cases.push(["a repo with no remote is not judged against the project's guards.git.repo", foreign.status, 0]);
-  // Stop: work/x is ahead, work/y was never pushed
+  // Stop: work/x is ahead, work/y was never pushed; work/w, never pushed, is another session's: checked out in its worktree (KWB-88)
+  git(dir, 'worktree', 'add', '-q', '-b', 'work/w', join(dir, '.claude/worktrees/M9'));
   git(dir, 'switch', '-q', '-c', 'work/y');
   const s1 = stop();
   cases.push(['Stop with a branch ahead and one missing: refused', s1.status, 2]);
+  cases.push(["a branch checked out in another session's worktree is that session's, not this one's (KWB-88)", /work\/w/.test(s1.stderr), false]);
+  cases.push(['an SSH remote is pushed as itself, whatever the owner (KWB-88)', pushCommand('git@github.com:Any/app.git', ['work/x'], {}), 'git push git@github.com:Any/app.git work/x']);
   cases.push(['the Stop refusal lists both with the push', /work\/x.*1 commit/.test(s1.stderr) && /work\/y.*not on/.test(s1.stderr) && /git push https:\/\/x-access-token:\$PERSONAL_GITHUB_TOKEN@\S+ work\/x work\/y/.test(s1.stderr), true]);
   cases.push(['the Stop refusal never offers deleting a branch', /branch -[dD]|--delete|delete the branch/.test(s1.stderr), false]);
   cases.push(['the same refusal again: still refused', stop().status, 2]);

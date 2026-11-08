@@ -24,6 +24,7 @@ import { join } from 'node:path';
 import { matchesAny } from './glob.mjs';
 import { blankMessages, isFirstMatch, isKnownName, isLibraryCall, isLongerName, isSourceRole, isSum } from './shape-prose.mjs';
 import { handLists } from './shape-lists.mjs';
+import { withRuns } from './identifier-runs.mjs';
 
 export const SHAPE_FILE = 'design/shape.json';
 export const ASK = 'example, rule, or constant?';
@@ -125,9 +126,9 @@ export function classify(line, concept, shape) {
   return null;
 }
 
-// The concept an identifier names: a part equal to one of a concept's words.
+// The concept an identifier names: a part, or a run of parts, equal to one of a concept's words (KWB-93).
 export function conceptOfName(name, shape, { singleOnly = false } = {}) {
-  const ps = parts(name);
+  const ps = withRuns(parts(name));
   for (const c of Object.values(shape?.concepts ?? {})) if (ps.some((p) => (singleOnly ? c.single : c.words).includes(p))) return c.name;
   return null;
 }
