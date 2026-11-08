@@ -256,3 +256,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-06: DOUBLE and TRIPLE beside KB OCT in house-control-behaviours, on work/1.3.0-keyboard-stops.
 - 2026-11-08: 1.3.2 the overnight runs' hook faults (KWB-87 to KWB-91: time-guard judges its own session's processes, git-guard's SSH push and others' worktrees, build-guard's for lists and keywords, suite-once's listing flags, shape-law's picker accessor) landed from work/1.3.2-overnight-faults at 949b75c; the gate 485 of 487 on e42e08a, the two noop reds green run again on the listed change. Not published.
 - 2026-11-08: 1.3.2 update keeps a project's looks (KWB-92), found by the Matrix-12 update, landed from work/1.3.2-layout-looks; the gate 124 of 124 on 4e11d3c. Not published.
+- 2026-11-08: 1.3.2 shape-law's camelCase concepts and types in strings (KWB-93, KWB-94; Matrix-12 KF-32) landed from work/1.3.2-camel-concepts; the gate 487 of 487 on 4159896. Not published.

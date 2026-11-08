@@ -11,6 +11,7 @@
 - `suite-once` lets `ctest -N`, `--show-only` and `--print-labels` through: they list tests and run none (KWB-90).
 - `shape-law` takes an accessor for a picker or selector component for what it is, not a selector of the concept (KWB-91).
 - `update` keeps a project's `looks` in `layout.json`; it dropped them, and look-gate then gated no page (KWB-92).
+- `shape-law` matches a camelCase concept word (`patternSlot`) to its own type and selectors (KWB-93), and reads a type only from code, never from a string or a comment (KWB-94).
 
 ## 1.3.1 (2026-11-07)
 
