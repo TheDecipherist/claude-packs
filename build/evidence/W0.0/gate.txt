@@ -1,0 +1,847 @@
+
+> @thedecipherist/claude-packs@1.3.1 test:changed
+> node scripts/test-changed.mjs --base origin/main
+
+test:changed: base origin/main (0866039), 33 changed file(s)
+  .claude/claude-packs.lock.json
+  .claude/hooks/git-guard.mjs
+  .claude/hooks/lib/git-guard-selftest.mjs
+  .claude/hooks/lib/hub-rig.mjs
+  .claude/hooks/lib/pushed.mjs
+  .claude/hooks/lib/trunk-lag-selftest.mjs
+  .claude/hooks/lib/trunk-lag.mjs
+  .claude/hooks/shape-law.mjs
+  .claude/skills/land-branch/SKILL.md
+  build.md
+  build/evidence/W0.0/doctor-strict.txt
+  build/evidence/W0.0/gate.txt
+  build/evidence/W0.0/git-guard-selftest.txt
+  build/evidence/W0.0/selftest-green-with-fix.txt
+  build/evidence/W0.0/selftest-red-before-fix.txt
+  build/evidence/W0.0/worktree-case-red-old-hook.txt
+  docs/workorders/admiral-fleet/decisions.md
+  docs/workorders/admiral-fleet/logs/runner.log
+  docs/workorders/admiral-fleet/logs/session-1.err
+  docs/workorders/admiral-fleet/logs/session-1.jsonl
+  docs/workorders/admiral-fleet/progress.md
+  package-lock.json
+  packs/base/hooks/git-guard.mjs
+  packs/base/hooks/lib/git-guard-selftest.mjs
+  packs/base/hooks/lib/hub-rig.mjs
+  packs/base/hooks/lib/pushed.mjs
+  packs/base/hooks/lib/trunk-lag-selftest.mjs
+  packs/base/hooks/lib/trunk-lag.mjs
+  packs/base/skills/land-branch/SKILL.md
+  test/noop.test.mjs
+  test/worktree-rig.mjs
+  test/worktrees.test.mjs
+  workflow-bugs.md
+chose 63 of 70 test files:
+  test/base-laws.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/ (holds .claude/hooks/git-guard.mjs)
+    names .claude/ (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    (+13 more)
+  test/configs.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/custom-packs.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/skills/ (holds .claude/skills/land-branch/SKILL.md)
+    names packs/ (holds packs/base/hooks/git-guard.mjs)
+    (+13 more)
+  test/every-language.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/house.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    (+20 more)
+  test/install-fixes.test.mjs
+    names .claude/claude-packs.lock.json
+    names git-guard.mjs (.claude/hooks/git-guard.mjs)
+    names .claude/hooks/shape-law.mjs
+    (+13 more)
+  test/kf-new-projects.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/kit-guards.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    (+13 more)
+  test/lookup.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/new.test.mjs
+    names .claude/claude-packs.lock.json
+    names build.md (build.md)
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+8 more)
+  test/noop.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/hooks/ (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks/ (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    (+17 more)
+  test/review-packs.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/shape.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/hooks/ (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks/ (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    (+13 more)
+  test/stored-text.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/ui-craft.test.mjs
+    names .claude/ (holds .claude/claude-packs.lock.json)
+    names .claude/ (holds .claude/hooks/git-guard.mjs)
+    names .claude/ (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    (+13 more)
+  test/workorder.test.mjs
+    names claude-packs.lock.json (.claude/claude-packs.lock.json)
+    names build.md (build.md)
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+7 more)
+  test/fix-plan.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+5 more)
+  test/full-stack.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+11 more)
+  test/hook-timing.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+18 more)
+  test/kf-fail-open.test.mjs
+    names .claude/hooks/ (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks/ (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks/ (holds .claude/hooks/lib/hub-rig.mjs)
+    (+12 more)
+  test/kf-refusals.test.mjs
+    names git-guard.mjs (.claude/hooks/git-guard.mjs)
+    names shape-law.mjs (.claude/hooks/shape-law.mjs)
+    names build.md (build.md)
+    (+8 more)
+  test/once-only.test.mjs
+    names .claude/hooks/ (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks/ (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks/ (holds .claude/hooks/lib/hub-rig.mjs)
+    (+12 more)
+  test/other-projects.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+13 more)
+  test/routes.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+16 more)
+  test/structure.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+13 more)
+  test/sub37-wb.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+19 more)
+  test/worktrees.test.mjs
+    names .claude/hooks (holds .claude/hooks/git-guard.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/git-guard-selftest.mjs)
+    names .claude/hooks (holds .claude/hooks/lib/hub-rig.mjs)
+    (+16 more)
+  test/instances.test.mjs
+    names .claude/hooks/shape-law.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+6 more)
+  test/file-size.test.mjs
+    reaches packs/base/hooks/git-guard.mjs
+    reaches packs/base/hooks/lib/git-guard-selftest.mjs
+    reaches packs/base/hooks/lib/hub-rig.mjs
+    (+4 more)
+  test/base-neutral.test.mjs
+    names packs/base (holds packs/base/hooks/git-guard.mjs)
+    names packs/base (holds packs/base/hooks/lib/git-guard-selftest.mjs)
+    names packs/base (holds packs/base/hooks/lib/hub-rig.mjs)
+    (+4 more)
+  test/pack-manifest.test.mjs
+    names packs/ (holds packs/base/hooks/git-guard.mjs)
+    names packs/ (holds packs/base/hooks/lib/git-guard-selftest.mjs)
+    names packs/ (holds packs/base/hooks/lib/hub-rig.mjs)
+    (+4 more)
+  test/audio-packs.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/configurations.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/content-sites.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/cpp-pack.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/doctor-cache.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/doctor-timeout.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/gitignore.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/global.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/hook-proof.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/hover.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/install.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/kf-build-laws.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/lock-release.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/logging.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/micro.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/names-sweep.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/postgres-pack.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/rule-tests.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/rules-follow-the-code.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/rust-dry.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/rust-pack.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/scan.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/symmetry.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+5 more)
+  test/ui-depth.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/vst3host.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/what-the-kit-finds.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/writing.test.mjs
+    packs/base/hooks/git-guard.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/git-guard-selftest.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/base/hooks/lib/hub-rig.mjs: base, the seeds and the configurations reach every project: the tests that install packs
+    (+4 more)
+  test/readme.test.mjs
+    packs/base/hooks/git-guard.mjs: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/base/hooks/lib/git-guard-selftest.mjs: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/base/hooks/lib/hub-rig.mjs: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    (+4 more)
+  test/site.test.mjs
+    packs/base/hooks/git-guard.mjs: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/base/hooks/lib/git-guard-selftest.mjs: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/base/hooks/lib/hub-rig.mjs: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    (+4 more)
+  test/layout-owned.test.mjs
+    reaches packs/base/hooks/lib/pushed.mjs through lib/layout.mjs → packs/base/hooks/lib/git-auth.mjs
+  test/test-changed.test.mjs
+    names test/noop.test.mjs
+    names test/worktrees.test.mjs
+  test/npx-name.test.mjs
+    names workflow-bugs.md (workflow-bugs.md)
+no test covers: build/evidence/W0.0/doctor-strict.txt, build/evidence/W0.0/gate.txt, build/evidence/W0.0/git-guard-selftest.txt, build/evidence/W0.0/selftest-green-with-fix.txt, build/evidence/W0.0/selftest-red-before-fix.txt, build/evidence/W0.0/worktree-case-red-old-hook.txt, docs/workorders/admiral-fleet/decisions.md, docs/workorders/admiral-fleet/logs/runner.log, docs/workorders/admiral-fleet/logs/session-1.err, docs/workorders/admiral-fleet/logs/session-1.jsonl, docs/workorders/admiral-fleet/progress.md, package-lock.json
+running: node --import ./test/fresh-tmp.mjs --test test/base-laws.test.mjs test/configs.test.mjs test/custom-packs.test.mjs test/every-language.test.mjs test/house.test.mjs test/install-fixes.test.mjs test/kf-new-projects.test.mjs test/kit-guards.test.mjs test/lookup.test.mjs test/new.test.mjs test/noop.test.mjs test/review-packs.test.mjs test/shape.test.mjs test/stored-text.test.mjs test/ui-craft.test.mjs test/workorder.test.mjs test/fix-plan.test.mjs test/full-stack.test.mjs test/hook-timing.test.mjs test/kf-fail-open.test.mjs test/kf-refusals.test.mjs test/once-only.test.mjs test/other-projects.test.mjs test/routes.test.mjs test/structure.test.mjs test/sub37-wb.test.mjs test/worktrees.test.mjs test/instances.test.mjs test/file-size.test.mjs test/base-neutral.test.mjs test/pack-manifest.test.mjs test/audio-packs.test.mjs test/configurations.test.mjs test/content-sites.test.mjs test/cpp-pack.test.mjs test/doctor-cache.test.mjs test/doctor-timeout.test.mjs test/gitignore.test.mjs test/global.test.mjs test/hook-proof.test.mjs test/hover.test.mjs test/install.test.mjs test/kf-build-laws.test.mjs test/lock-release.test.mjs test/logging.test.mjs test/micro.test.mjs test/names-sweep.test.mjs test/postgres-pack.test.mjs test/rule-tests.test.mjs test/rules-follow-the-code.test.mjs test/rust-dry.test.mjs test/rust-pack.test.mjs test/scan.test.mjs test/symmetry.test.mjs test/ui-depth.test.mjs test/vst3host.test.mjs test/what-the-kit-finds.test.mjs test/writing.test.mjs test/readme.test.mjs test/site.test.mjs test/layout-owned.test.mjs test/test-changed.test.mjs test/npx-name.test.mjs
+✔ midi: src/in.cpp is refused its fault and takes the fix (27896.530788ms)
+✔ midi: src/rt.cpp is refused its fault and takes the fix (2602.345177ms)
+✔ midi: src/host.cpp is refused its fault and takes the fix (2892.472516ms)
+✔ midi: src/load.cpp is refused its fault and takes the fix (2794.633432ms)
+✔ sound-design: src/noise.cpp is refused its fault and takes the fix (3905.899524ms)
+✔ sound-design: src/voice.cpp is refused its fault and takes the fix (2861.144087ms)
+✔ sound-design: src/fx.cpp is refused its fault and takes the fix (3039.631919ms)
+✔ reverse-engineering: src/law.cpp is refused its fault and takes the fix (3073.111887ms)
+✔ reverse-engineering: src/rom.cpp is refused its fault and takes the fix (2793.181481ms)
+✔ instrument-shell: src/state.cpp is refused its fault and takes the fix (2550.420744ms)
+✔ cpp: src/a.h is refused its fault and takes the fix (2495.004265ms)
+✔ cpp: src/b.cpp is refused its fault and takes the fix (3051.316382ms)
+✔ the full law of the clock travels with its skill, in neutral words (0.3711ms)
+✔ firmware stays out of git, a named fixture may stay in (22166.005419ms)
+✔ a download marker that breaks a Windows checkout is refused (3371.437101ms)
+✔ the synth-rebuild preset takes all four, and suggest finds them from a project (25525.583189ms)
+✔ reproduction or original decides the aliasing law (0.2302ms)
+✔ a new project of every configuration gets both laws, and both selftests pass (49094.686498ms)
+✔ a project that had base before 0.10.0 gets neither law until it enables it; the rule waits with its hook (7918.275253ms)
+✔ base and the base configuration name no synth word (11.476597ms)
+✔ what left base is in the synth-creator pack, and only the synth-creator configuration installs that pack (6.055699ms)
+✔ configs lists every configuration with what it installs (194.477348ms)
+✔ init --config stores the configuration, update applies it, doctor prints it (34186.392881ms)
+✔ init --config base: base alone, its own preamble, no synth folders or lines (17524.64832ms)
+✔ a pack outside the configuration is refused, naming the ones it takes (172.09952ms)
+✔ init without --config takes the configuration its packs belong to (2939.007464ms)
+✔ a layout without the key (an install before 0.10.0) gets the configuration of its packs on update (5827.839904ms)
+✔ config <name> lists what changes and switches; --dry-run changes nothing (7319.873539ms)
+✔ doctor fails on a configuration the kit does not have, and on a pack outside it (10686.825131ms)
+✔ the kit ships its configurations (1.461699ms)
+✔ base: installs into a fresh repo and doctor --strict passes (26075.875294ms)
+✔ cpp: installs into a fresh repo and doctor --strict passes (5361.29711ms)
+✔ full-stack: installs into a fresh repo and doctor --strict passes (8919.211811ms)
+✔ go: installs into a fresh repo and doctor --strict passes (5500.722384ms)
+✔ node: installs into a fresh repo and doctor --strict passes (5121.647224ms)
+✔ python: installs into a fresh repo and doctor --strict passes (4656.903086ms)
+✔ rust: installs into a fresh repo and doctor --strict passes (5483.957457ms)
+✔ synth-creator: installs into a fresh repo and doctor --strict passes (30082.926465ms)
+✔ planner-skills: one project-layout body per configuration, from its layout template (478.278957ms)
+✔ a content folder is content; the same word under a code root is code; a project can add its own (1.9488ms)
+✔ a date in an article is a fact: the check is opt-in, and even switched on leaves articles alone (26610.772245ms)
+✔ the writing laws still read an article; the code laws do not (3102.444439ms)
+✔ a placeholder password is no secret; a real-looking one is (0.5745ms)
+✔ scan and suggest: samples are left out, public text comes last, and the weight of the repo is reported (600.248633ms)
+✔ a real bug still fires beside it: a failure that looks empty, a CSP switched off, a constant captcha (3182.444309ms)
+✔ repo-litter comes with base and judges a git add (2664.482992ms)
+✔ the cpp pack installs its rules, skill and check; the configuration is the smallest that takes it (26148.219473ms)
+✔ the synth preset takes the cpp pack too (22170.425986ms)
+✔ a hand-written search is refused; the library call passes (2846.203063ms)
+✔ a gate that presses every control is refused; a walk of one, and a read of them all, pass (2398.837792ms)
+✔ template-law refuses a copied helper and names what differs: the parameters of the template (5158.170157ms)
+✔ template-law: an exact copy says to move it; a marked one-off passes; a data table passes (7233.858873ms)
+✔ scan on C++: the cpp configuration, and every repeat with what it becomes and what differs (373.399219ms)
+✔ new-pack makes a repository that add --from installs, in any configuration; its check fires (26997.570137ms)
+✔ a custom hook stays off until the project enables it (8104.906653ms)
+✔ update pulls the newest; a teammate restores the locked commit; remove drops the source (15013.241683ms)
+✔ a repository without a real manifest is refused before anything is installed (2828.640843ms)
+✔ a second doctor runs no selftest whose hook has not changed, and a changed hook is proved again (46104.340018ms)
+✔ a failing selftest is never remembered, and --fresh runs them all (45753.017107ms)
+✔ a selftest that hangs is reported as timed out (30700.334572ms)
+✔ .py: a copy with other names has the original's shape, and a function is seen by name (9.694794ms)
+✔ .py: code in comments is nothing (0.390999ms)
+✔ .sh: a copy with other names has the original's shape, and a function is seen by name (1.655599ms)
+✔ .sh: code in comments is nothing (0.1991ms)
+✔ .go: a copy with other names has the original's shape, and a function is seen by name (3.763498ms)
+✔ .go: code in comments is nothing (0.1596ms)
+✔ .rs: a copy with other names has the original's shape, and a function is seen by name (3.661597ms)
+✔ .rs: code in comments is nothing (0.1913ms)
+✔ .java: a copy with other names has the original's shape, and a function is seen by name (3.604498ms)
+✔ .java: code in comments is nothing (0.2561ms)
+✔ .cs: a copy with other names has the original's shape, and a function is seen by name (1.375899ms)
+✔ .cs: code in comments is nothing (0.615499ms)
+✔ .kt: a copy with other names has the original's shape, and a function is seen by name (0.8733ms)
+✔ .kt: code in comments is nothing (0.1749ms)
+✔ .swift: a copy with other names has the original's shape, and a function is seen by name (0.571199ms)
+✔ .swift: code in comments is nothing (0.0937ms)
+✔ .rb: a copy with other names has the original's shape, and a function is seen by name (1.221899ms)
+✔ .rb: code in comments is nothing (0.1378ms)
+✔ .php: a copy with other names has the original's shape, and a function is seen by name (0.788ms)
+✔ .php: code in comments is nothing (0.1177ms)
+✔ .lua: a copy with other names has the original's shape, and a function is seen by name (2.371298ms)
+✔ .lua: code in comments is nothing (0.1101ms)
+✔ every language in the table has its sample here, or is a family already sampled (0.1472ms)
+✔ shell: the command and its flags are the shape; other commands are not a copy (2.449698ms)
+✔ suggest reads the project and init --auto installs exactly that (20391.531141ms)
+✔ the python and shell packs refuse what they say they refuse (3468.749174ms)
+✔ every installed hook, check and tool file fits in 300 lines (18.328891ms)
+✔ fix after a scan: a plan in the order to work it, every finding a box (751.836036ms)
+✔ fix with no scan yet scans first; the project gets only the plan (657.312582ms)
+✔ the plan orders secrets before everything, and leaves out what is empty (0.6522ms)
+✔ init --config full-stack: its folders, its laws and no synth law (31790.489042ms)
+✔ the full-stack hooks refuse express, a schema in a route and a .env git does not ignore, in the installed project (4560.05129ms)
+✔ doctor --strict counts TypeScript as source in a full-stack project (KWB-32) (9848.370925ms)
+✔ an install ignores .claude/usage.log and .claude/hooks.log (27450.348066ms)
+✔ global add keeps existing settings and user files, remove undoes only ours (792.434401ms)
+✔ malformed global settings.json stops before anything changes (93.523253ms)
+✔ the guard blocks an unchecked pin and passes once versions.md has a fresh row (311.527443ms)
+✔ global add installs exactly latest-versions, gnu-shell and shell-traps, and nothing else (646.006175ms)
+✔ version-pin-guard never reads a shell redirection as a package (237.38368ms)
+✔ a clean install is green; a hook no settings entry runs is red (28344.901556ms)
+✔ a hook that crashed is red until it changes; a refusal is not a crash (11798.655596ms)
+✔ a crash stays red after its log line has rotated away (6153.778177ms)
+✔ each fail-open form is refused through the hook, and its good form passes (4102.690621ms)
+✔ every installed hook writes one timing line per call: time, event, hook, ms, exit code (26206.040263ms)
+✔ a full log rotates and nothing is lost (1628.780848ms)
+✔ the python helper writes the same line (4169.450457ms)
+✔ doctor: a hook whose median is over 500 ms is a red check, with its median and worst (8580.554758ms)
+✔ settings run the kit node hooks through run-hooks.mjs, and every such hook exports hook(text) (3222.885763ms)
+✔ the house hooks install where they belong, project-neutral, and pass their selftests (38429.579106ms)
+✔ git-guard takes the project's owner, token, trunk and commands from layout.json (28623.254221ms)
+✔ a copy tree is read-only by its kind; the copy-trees rule loads there and in layout.json (26949.233917ms)
+✔ the build-step and copy-and-prove skills install, triggered by "Use when", under 8,000 characters (25774.251822ms)
+✔ a project's own hook entries stay; a kit hook already registered by hand is not doubled (6496.390635ms)
+✔ a Node hook is on in a project that ran its Python forerunner, and the forerunner's entry goes (5997.781784ms)
+✔ the house git laws judge a commit by the checkout it runs in, inside a real worktree (3128.721347ms)
+✔ update takes over a file that is the pack's own version instead of writing .pack-new again (27962.355444ms)
+✔ doctor --strict skips git-ignored files and folders (12482.804768ms)
+✔ doctor fails when a hook fails its selftest (11739.551601ms)
+✔ a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable, and update prints the list (33339.543823ms)
+✔ gpu-painter and ui-craft carry the hover rule, scoped to UI code, naming the cursor, the effect and the one hit test (1.262399ms)
+✔ the skill hover-state: "Use when", under 8,000 characters, names the hover walk and the worked example (0.5534ms)
+✔ an installed synth gets the rule and the skill; full-stack gets its rule loaded on the web app (44935.785257ms)
+✔ doctor: UI code and no hover gate is a PROBLEM; the gate named (and its file there) is OK; a fresh project with no UI code is not (20635.134257ms)
+✔ doctor: the web app (channel) with a page and no hover gate is a PROBLEM too (6598.333528ms)
+✔ doctor: a node web project with UI code and no hover gate is a PROBLEM too (ui-craft) (6103.587953ms)
+✔ the Stellix profile declares its hover gate (0.4133ms)
+✔ layout.json "gates" is the project's own: an update keeps it (5748.65503ms)
+✔ the lock says which kit wrote it (18917.827076ms)
+✔ entry-registers-shutdown reads its signal names, which are strings (3357.387399ms)
+✔ git-guard: gh logged in needs no token named; trunkNeedsYes leaves the trunk to its owner (72.812663ms)
+✔ a kit-lock lease held by this same process under an old session id is this session's (KWB-40) (48.275875ms)
+✔ the shape ids is valid and judged by nothing; senses blank a word used another way (KWB-16, KWB-20) (4190.90093ms)
+✔ audio-core alone installs without Stellix concepts (24742.752713ms)
+✔ full Stellix install: nested GPU skills, CLAUDE.md block, hooks (5358.582918ms)
+✔ an edited rule survives repeated updates (16527.18533ms)
+✔ moving a folder in layout.json re-points every rule (5743.089516ms)
+✔ folder law refuses new source files outside the layout (3177.018886ms)
+✔ removing a pack removes its rules and hooks (5493.163565ms)
+✔ an existing .claude and CLAUDE.md are updated, never overwritten (6399.354685ms)
+✔ a malformed settings.json stops the install before anything changes (109.130445ms)
+✔ the Stellix profile installs onto the real lib/ layout without touching house files (23558.87622ms)
+✔ the rule and shape-law install with every project; the engine-scoped instance checks are gone (30021.976998ms)
+✔ an instance index compared with a number, or an instance array indexed by one, is refused in code, in every folder (3934.980649ms)
+✔ not instances: buffer[1], channel == 1, pos[0], a loop to kSlots, a seen-in comment, all pass (3417.516584ms)
+✔ an instance ID written in a code string is refused; generated from the index, on a seen-in line or in excluded data, it passes (3189.105496ms)
+✔ a brief never names a fixed instance: the subagent rule says so (2672.983326ms)
+✔ CLAUDE.md names claude-packs as the source of truth: a fix goes into the kit, and comes back with update (2649.605833ms)
+✔ the rule: a gate that writes the parameter proves nothing about the control (2.538898ms)
+✔ the rule installs with audio-core and loads on UI code (25827.820672ms)
+✔ prove-control starts from the input path, and goes red with the hook taken out (0.327199ms)
+✔ analyse-reference-look asks for a control and a confidence per measure (0.2768ms)
+✔ analyse-reference-look asks for seed boxes for a dark part on a dark panel (0.1799ms)
+✔ analyse-reference-look asks for rectify against a known anchor (0.2193ms)
+✔ analyse-reference-look asks for how to rank sources that disagree (0.1622ms)
+✔ analyse-reference-look asks for typeface as a scored choice (0.1503ms)
+✔ analyse-reference-look asks for planted faults diffed against the unplanted result (0.5463ms)
+✔ analyse-reference-look asks for the render measured by the code that measured the target (0.4827ms)
+✔ analyse-reference-look asks for geometry exact, and a whole-picture score never a pass (0.4159ms)
+✔ the skill stays under the limit and names the rule as required reading (0.1755ms)
+✔ ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass (0.662399ms)
+✔ KF-40: an inline edit through a local helper is read, not crashed on, and names the files it writes (13.131193ms)
+✔ KF-40: the same edit passes through every base hook with no crash logged (20281.173282ms)
+✔ KF-40: a write whose text no hook could read says so where the author sees it (3115.932065ms)
+✔ KF-40: a command that writes what the hooks can read adds nothing (2764.108636ms)
+✔ KF-18: a crash on a tool call refuses once and says so; the same call again goes through, logged (2715.659843ms)
+✔ KF-40: a crash is its own kind of entry, not a refusal (2682.106153ms)
+✔ KF-18: a crash at Stop or at a prompt refuses nothing, and tells the author (2868.529957ms)
+✔ KF-18: a crash left in the old form, in refusals.jsonl, reads as a crash (2661.311733ms)
+✔ KF-18: a crash fixed by hand clears with a stated reason, and a later crash is red again (11052.385486ms)
+✔ KF-18: a crash older than a file in hooks/lib is history: an update that fixes a shared lib clears it (8458.592775ms)
+✔ KF-18: a config regex param-id-lock cannot compile is reported by name, and is no crash (24857.214634ms)
+✔ KF-15: param-id-lock protects from the first id it sees, with no --init (2666.378918ms)
+✔ KF-15: ids under the build output are not the unit's, whatever the folder is called (3332.22257ms)
+✔ KF-15: doctor is red for a unit with parameters the lock cannot see (8355.228198ms)
+✔ KF-23: suite-once sees the whole suite through the project's own wrapper (3909.053748ms)
+✔ KF-8: a new install has the house laws: a force push is refused on its first day (3610.511073ms)
+✔ KF-8: an update never switches them on; `enable` does (21391.461782ms)
+✔ KF-8: a re-init of an installed project leaves its guards alone (5943.570702ms)
+✔ KF-12: with no owner, a push over SSH or through git's own login is not refused for naming no token (3236.206663ms)
+✔ KF-12: GH_TOKEN naming a variable nothing sets is refused, and the refusal names the way out (3037.780468ms)
+✔ KF-1: the kit ships the queue build-guard sends you to (23547.77366ms)
+✔ KF-1, KF-37: the queue runs the command and ends with its status, never a later one (3104.550542ms)
+✔ KF-1: doctor is red when the queue is gone, and for a wrapper that queues nothing (37959.628201ms)
+✔ KF-3: a project at its start is read from its notes, and is told it was (99.780749ms)
+✔ KF-3: source decides once it exists: a word in the notes adds nothing (108.615546ms)
+✔ KF-4: the lock records every pack installed (3089.534938ms)
+✔ KF-5: one first line of processBlock, in both rules (0.3287ms)
+✔ KF-6: artwork: an original never copies it, and a reproduction may when the brief says so (0.2543ms)
+✔ KF-7: an unattended run has a law, in every install (3172.418691ms)
+✔ KF-9: doctor --strict passes on a new project, with no code and with its first file (12417.088968ms)
+✔ KF-9: a rule whose folder holds files and none it matches is still dead (5748.841782ms)
+✔ straight-on-and-aligned loads where the analysis happens (2888.520982ms)
+✔ KF-11: gather-sources says what to do with a source that cannot be fetched (0.1971ms)
+✔ KF-16: a rising run may be pointers (0.139ms)
+✔ KF-29: the worst-block rule can be met on a shared machine, and lists a program load (0.1687ms)
+✔ KF-37: the queue skill says a background job's status is its last command's (0.1147ms)
+✔ KF-38: a licence is read before a source is chosen (0.4703ms)
+✔ KF-41: one cheap pass of every instance is asked for, kept apart from the behaviour walks (0.2249ms)
+✔ the fixture is the whole log: 14 marked wrong, 15 marked right (1.421199ms)
+✔ shape-law: every real refusal marked wrong passes (17779.866784ms)
+✔ shape-law: every real refusal marked right is still refused, on at least one of its lines (3175.38726ms)
+✔ shape-law: the two marks KF-36 overturns are the only right refusals that now pass, and each says why (0.3868ms)
+✔ KF-17: a count passed to a call is told from an instance by the declared parameter (3452.470851ms)
+✔ KF-13, KF-20: a hex address and arithmetic are not instances; the bare forms are (2856.216175ms)
+✔ KF-17: a sentence in a string is text; a short key is not (3209.653596ms)
+✔ KF-17: first as a search or a part of something is English; the first of the concept is an instance (3173.968771ms)
+✔ KF-28: a role the machine gives, quoted from a source, stands; a number in a source note does not (2932.415286ms)
+✔ KF-36: a concept's own name or a listed selector is no role name; an unknown word is (3756.645774ms)
+✔ KF-20: a library's call and a longer proper name are not this project's instances (3782.763647ms)
+✔ KF-19, KF-39: a making line that names a camelCase concept names it, by row or by word (1.096099ms)
+✔ KF-24: the shape word after a concept is no concept, and a second list after ; is read (0.4806ms)
+✔ KF-34: what a turn landed is over: only the writes after its last landing are this step's (4.831498ms)
+✔ KF-33: a write once-only already judged is not judged again at Stop; a shell write still is (3864.558583ms)
+✔ KF-14: a Python brace is data, not a statement end (2813.352278ms)
+✔ KF-27: a one-statement lambda counts the same in a list as in a call (3227.663467ms)
+✔ code-shape reports every line at fault at once, so one resend answers them all (3131.558187ms)
+✔ KF-10: a dry run stages nothing, in both hooks (22464.031056ms)
+✔ KF-21: --theirs during a merge resolves it; outside a merge it is an undo (3972.086779ms)
+✔ git rev-parse x^{commit} is no commit: the word in an argument is not the subcommand (3369.952302ms)
+✔ KF-25: a test's stub may advance its play head; the code may not (3883.536656ms)
+✔ KF-26: a filter is no search: it needs a return or break on the match (3448.441683ms)
+✔ KF-32: a block of using declarations is no copy; code after it still is (2851.780051ms)
+✔ KF-35: a switch on another type's kind is another kind, told by its cases (3134.957614ms)
+✔ KF-35: two switches on one kind in one new file are refused, with a true reason (3403.136361ms)
+✔ KF-2: protect-vendor's refusal names the setting that answers it (27146.566334ms)
+✔ a project's own node hook with no hook(text) export keeps its own settings entry; one with it joins the runner (25273.446931ms)
+✔ the kit repo has its own base pack installed: kit-lock and every base hook registered, git-guard on Bash and Stop (20468.792144ms)
+✔ no kit command, hook, skill or doc deletes a branch (43.155177ms)
+✔ an update keeps buildOutput, and adds none where the project set none (5.907797ms)
+✔ every layout key the kit reads survives an update (26.831487ms)
+✔ lock status names the holder, the branch, the start, the last renewal and whether the lease is live (422.550896ms)
+✔ lock release: its own lock and a stale lease go; another live lease stays unless --force (519.570249ms)
+✔ a lock in the old form (session, branch, time) is read: a session with a fresh transcript, or a subagent's, is live (530.975244ms)
+✔ the kit-lock hook writes the extensible form and still reads both (295.812457ms)
+✔ (a) a lease last seen 31 minutes ago is taken over by the next session's work, and the take-over is logged; 29 minutes is not (661.375077ms)
+✔ (b) the holder's own activity renews last_seen, at most once a minute (286.65576ms)
+✔ (c) nothing prints "since undefined": a lock with no start reads "start unknown"; every writer sets started_at and last_seen (612.5246ms)
+✔ (d) a push of committed branches passes while another live session holds the lock; a commit, a merge and a release are refused (1172.525726ms)
+✔ every call is logged with what it tried; a refusal keeps its reason and where it happened (19700.579449ms)
+✔ a command is logged with its secrets masked, and file contents are never kept (2525.821291ms)
+✔ logs: every hook, over rotated files too, and a verdict is added without rewriting anything (3827.257813ms)
+✔ a project sets its own rotation size, and every rotated file stays (3772.230051ms)
+✔ the logs stay out of git, and a hook is never stopped by its log (2561.054344ms)
+✔ the branch and commit are read from the checkout, a worktree too (2533.718156ms)
+✔ every install gets the lookup rule and check, with real paths (22415.74441ms)
+✔ the check refuses a new if/else chain in C++ (a synth) and TS (a node project), and passes a switch or a lookup (22493.3595ms)
+✔ ifs in a row that each return on the same value are a chain too (the act-line renderer) (2475.856448ms)
+✔ the js-ts pack brings all 17 JS/TS rules, scoped to JS/TS files (6247.170701ms)
+✔ a run of ifs on one object's fields is refused; a field table passes (3105.636082ms)
+✔ dispatch-once: a second switch on the same kind in another file is refused (3541.394271ms)
+✔ raw JSON.parse / JSON.stringify are refused outside lib/json.ts (3566.168303ms)
+✔ async callbacks nobody awaits, and swallowed errors, are refused (3513.282527ms)
+✔ mongo pack: one client in the gateway, driver only there, safe deletes (4271.530462ms)
+✔ an entry file that listens must register shutdown on all four paths (4168.880497ms)
+✔ presets install the packs a stack needs; docker, fastify, ai, shell-hooks and html-ui checks fire (5837.192535ms)
+✔ v8: web, tui, nginx packs and the fastify security switch (5367.91463ms)
+✔ new rules resolve to real paths and doctor passes (23282.663702ms)
+✔ file-size-guard refuses growth past 300 lines, allows splitting (3705.377649ms)
+✔ freeze, red gate and frozen-files work together (3623.911822ms)
+✔ stage-guard is on by default and off in the Stellix profile (24947.646181ms)
+✔ doctor flags a skill whose description summarizes steps (6635.677051ms)
+✔ a bank as stored: the stride is the record size, and the manual order holds (80.46476ms)
+✔ a name reads through high bit set, and names the wrapping (33.672184ms)
+✔ a name reads through 16-bit words swapped, and names the wrapping (32.179384ms)
+✔ a name reads through 24-bit words stored low byte first, and names the wrapping (42.923279ms)
+✔ a name reads through 32-bit words swapped, and names the wrapping (36.277082ms)
+✔ a name reads through 7-bit packed sysex, and names the wrapping (16.032892ms)
+✔ a name reads through nibbles, and names the wrapping (14.893292ms)
+✔ an OS update: packing restarts at every sysex message, so each one is opened behind its own header (82.24436ms)
+✔ Roland's bit order: the high bits byte first, its bit k for data byte k (14.979093ms)
+✔ a short last group and a checksum: every byte comes back, so nothing after them shifts (0.564299ms)
+✔ a display does not print what a manual prints: squeezed, and cut to a column (33.692384ms)
+✔ firmware drops vowels and stops early: the misses are tried loosely, and said to be (25.181887ms)
+✔ a common word elsewhere does not hide the table: the densest place is reported (18.261991ms)
+✔ a table's first entry stays in it when its name comes again further down (22.369789ms)
+✔ two gaps agreeing among many are no stride (18.783491ms)
+✔ flat high entropy with no name reading says to stop and read the loader (326.35144ms)
+✔ three bytes per 16-bit word, marker first, inside one sysex message (72.823364ms)
+✔ names in one unbroken run are a pool, to be read whole (15.892792ms)
+✔ one name reading proves nothing: chance does that (61.73177ms)
+✔ an EPROM pair: neither half reads alone, the interleave does (39.10018ms)
+✔ a custom character set: the letters keep their distances (20.131591ms)
+✔ a table of pointers is found, and the entries past the manual list are shown (20.078491ms)
+✔ a banked ROM: --banked finds the table a plain search cannot, and a negative base does not crash (1788.76391ms)
+✔ no name reads: it fails, and says what it searched rather than that the machine has no text (67.926664ms)
+✔ the names file keeps groups, and a name too short to mean anything is dropped (47.189775ms)
+✔ the tool, the skill and the rule install with the pack, and a project can run it (20253.263873ms)
+✔ reverse-engineering rules load where the work is: research notes and tools as well as code, and only the first step at launch (3287.265135ms)
+✔ new <name> scaffolds the project, installs the kit and starts it on a work/ branch (22560.523831ms)
+✔ new takes a profile, and the new-project skill is no longer a global piece (18136.762311ms)
+✔ stellix: update in synth-creator makes what 0.9.15 made, but for the configuration key (19226.453281ms)
+✔ sub37: update in synth-creator makes what 0.9.15 made, but for the configuration key (17016.143846ms)
+✔ an install that names no configuration gets synth-creator from its packs, and the same result (3236.477028ms)
+✔ nothing in the kit names the bare `npx claude-packs` (it resolves to someone else's package) (51.654774ms)
+✔ the bare-name reader finds a planted line (0.3333ms)
+✔ once-only, making and making-check are installed and wired where they fire (25130.943625ms)
+✔ doctor prints the making cost and the duplicate count; a count that went up is a problem (9387.363838ms)
+✔ dup scan lists every duplicate by file, both sides (167.561513ms)
+✔ no hook of this project blocks an edit in another project (41991.255774ms)
+✔ sibling projects are readable and editable: layout.siblings becomes additionalDirectories (3493.430686ms)
+✔ update-all updates every project that has claude-packs and skips the rest (28407.8471ms)
+✔ every pack the kit ships is a stock pack with a full manifest (4.942297ms)
+✔ a custom pack passes with an author and a git url, and each missing field is named (0.3924ms)
+✔ list shows each pack's version, type and author (171.60131ms)
+✔ suggest finds Postgres in a dependency, and init --auto installs the pack and its hook (23435.172354ms)
+✔ suggest reads Postgres from a project in any language, and a tool that speaks several databases says nothing alone (631.587272ms)
+✔ the checks that need a live table stay off until the project chooses them (6282.856632ms)
+✔ a default is refused only where it rewrites the table (3627.742516ms)
+✔ a required column needs a default, wherever the default sits, and a new table is exempt (3049.918214ms)
+✔ money, NULL traps and CONCURRENTLY in a transaction are refused, and a comment is not code (3567.939651ms)
+✔ a value in SQL text is refused in each language; a bound value, a tag and a table name are not (3392.482947ms)
+✔ a wipe is judged against the worktree it runs in, by that checkout's .env (2671.319717ms)
+✔ every pack has its row, with its true counts (20.726389ms)
+✔ every configuration and preset is named (5.536997ms)
+✔ every command in the help is on the page (194.777498ms)
+✔ the refusal on the page is the check's own words, so the first thing a reader sees is true (0.3528ms)
+✔ a new reader meets what it is before any command, and how to install one pack (0.2268ms)
+✔ every hook base installs is in the table (1.174799ms)
+✔ http-api: src/routes/segments.ts is refused its fault and takes the fix (19016.616968ms)
+✔ http-api: src/app.ts is refused its fault and takes the fix (2914.824586ms)
+✔ react: src/Row.tsx is refused its fault and takes the fix (3254.852607ms)
+✔ multi-tenant: src/routes/company.ts is refused its fault and takes the fix (2654.597819ms)
+✔ websocket: src/ws.ts is refused its fault and takes the fix (3224.045825ms)
+✔ host-agent: src/update.ts is refused its fault and takes the fix (2798.711145ms)
+✔ go: src/a.go is refused its fault and takes the fix (2994.551248ms)
+✔ rust: src/a.rs is refused its fault and takes the fix (2419.72545ms)
+✔ postgres: db/1.sql is refused its fault and takes the fix (4065.407597ms)
+✔ dynamic-data: src/save.ts is refused its fault and takes the fix (3123.089213ms)
+✔ dynamic-data: src/filter.ts is refused its fault and takes the fix (2665.828845ms)
+✔ http-api: src/mount.ts is refused its fault and takes the fix (2712.457117ms)
+✔ http-api: src/app/api/orders/route.ts is refused its fault and takes the fix (2525.180503ms)
+✔ http-api: src/ui/orders.ts is refused its fault and takes the fix (2822.85435ms)
+✔ ci: .github/workflows/test.yml is refused its fault and takes the fix (2695.908129ms)
+✔ a check for one major version leaves a project on an older one alone (3899.905298ms)
+✔ a url inside a string is no comment, so what follows it is still read (1.053599ms)
+✔ a key under a custom prefix is a secret, and a private key file by its name (15.859892ms)
+✔ the stack choice is the full-stack configuration's, not every node project's (3049.467211ms)
+✔ a route file under a version folder passes (2733.508505ms)
+✔ a wider check replaces a narrower one, so a project with both packs sees a hit once (3101.610802ms)
+✔ full-stack is a composition: the stack choice is its own pack, and the rest is packs any project can take (7172.935018ms)
+✔ folder-law refuses a new source file outside the layout by every route that creates a file (22461.950558ms)
+✔ placement-law refuses audio code added outside its folder by every route (4014.567213ms)
+✔ protect-vendor refuses vendored code and a copy tree by every route (4635.5789ms)
+✔ frozen-files refuses a frozen file by every route (3896.555084ms)
+✔ spec-lock refuses a locked spec by every route (4011.161652ms)
+✔ file-size-guard refuses growth past the limit by every route (3590.439274ms)
+✔ lesson-checks refuses a known bug brought back by every route (3699.239008ms)
+✔ realtime-guard refuses realtime-unsafe code by every route (3577.576862ms)
+✔ no-shipped-images refuses an image in the code by every route (4105.010437ms)
+✔ browser-guard refuses code that starts a browser by every route (5045.917337ms)
+✔ once-only refuses a near-copy of existing code by every route (4749.684585ms)
+✔ param-id-lock refuses a lost parameter id by every route (4387.342639ms)
+✔ version-pin-guard refuses an unchecked pin by every route that can write a dependency file (590.042098ms)
+✔ the shell route reader is one file: global add installs base's, and the kit holds no copy (8.566696ms)
+✔ the shell route reader proves each route and program form (KWB-8) (62.790768ms)
+✔ shape-law refuses an instance literal by every route (3941.777482ms)
+✔ brief-guard refuses a doc that names an instance by every route, and an agent brief (3954.359268ms)
+✔ a shell write to a path in a variable is judged where the variable points (5.022003ms)
+✔ a Check that names a test is told from one that does not (13.561093ms)
+✔ doctor is red for a live rule whose named test nothing answers to (25127.984648ms)
+✔ a test that names the rule answers it (5452.571382ms)
+✔ a mention outside the test folders answers nothing (5665.643904ms)
+✔ ruleTests points a rule at its test, and a pointer to nothing is red (7775.794427ms)
+✔ a rule may be declined only with a stated reason (9435.56388ms)
+✔ a rule that matches no file yet is not asked for a test: a new project is not red for this (5878.511154ms)
+✔ a new law never turns an installed project red: without the ruleTests key it is a note, and adding the key is the choice (8552.832104ms)
+✔ a first install adds the folders a repo's source is in, and folder-law then takes a new file there (17277.437725ms)
+✔ C++ outside src/ has rules on it, and doctor --strict passes (4903.627164ms)
+✔ what is fetched, built or another project's is no source folder of the project (2588.232477ms)
+✔ a folder added to the layout later gets its rules on update; test/structure.test.mjs holds that a stray file is still reported (5451.921727ms)
+✔ an installed project keeps its own concepts and folders on update: a new law never moves under it (4684.207099ms)
+✔ the new-project skill comes with every install (2584.936772ms)
+✔ only a free function can be made again by name: a method lives in its type (2.968299ms)
+✔ template-law: a trait method on a second type passes, a free function made again does not (KWB-81) (16398.924004ms)
+✔ template-law: a copy with other names is refused, and a real exception says so above it (3061.339445ms)
+✔ template-law: one method called six times is a table, and the refusal names the call (2519.241819ms)
+✔ dispatch-once: a lookup table on an enum outside it is refused; real work, and the enum's own methods, are not (KWB-82) (2798.297373ms)
+✔ a table on the standard library's own enums, a true-false table and a two-variant table are no kind (0.769199ms)
+✔ three branches on one value are a match, and two are not (2630.83215ms)
+✔ a lifetime is no char literal: the code after it is read (KWB-75) (2.350399ms)
+✔ a quote in a char literal opens no string, and an escape closes it (KWB-75) (0.4819ms)
+✔ a raw string and a nested comment are read to their real end (KWB-75) (0.2936ms)
+✔ blanking keeps every offset, so a match reports the file's own line (0.2252ms)
+✔ what a test attribute marks goes, and the code after it stays (1.395299ms)
+✔ a method in an impl is a definition, in every form a function takes (KWB-75) (0.4825ms)
+✔ suggest reads a new crate, and init --auto installs the rust configuration (15954.479847ms)
+✔ a new crate passes doctor --strict: no planned folder is missing, and no universal rule is dead (KWB-78, KWB-79) (6636.287462ms)
+✔ a project's own clippy.toml is never replaced (2713.441636ms)
+✔ .unwrap() is refused in library code, and left alone in a test, in main.rs and behind a lifetime is no hiding place (3154.434076ms)
+✔ a SAFETY comment may run over lines, sit above a let, or name the block on its own line (3150.841876ms)
+✔ blocking in an async fn is refused, and handing it off is not (3092.610716ms)
+✔ a public function returns an error a caller can match on; a generic that holds a String is no error type (2964.804981ms)
+✔ a stub, a lint off with no reason, a static mut and a * version are refused (3074.340236ms)
+✔ a plain src/ takes new files, in every configuration that names nothing inside it (KWB-78) (6881.856328ms)
+✔ a project with no package.json is told the command that works there (KWB-76) (3422.623931ms)
+✔ a project with the kit in node_modules keeps the --no-install form, and no extra line (3895.490989ms)
+✔ `init <pack>` takes the project's own configuration when it takes that pack (KWB-80) (3573.320065ms)
+✔ no configuration names a folder on one machine (KWB-77) (2915.744106ms)
+✔ the scan changes nothing in the project, its .git included, with or without git (1214.773375ms)
+✔ a secret file is never copied, and no secret value reaches the report (1135.111017ms)
+✔ the report recommends with evidence, leaves out what is not there, and lists every check hit by file and line (506.03314ms)
+✔ --out writes the report there; --prompt prints the review brief (597.162892ms)
+✔ a project with no JS scans too: C++ only, plain HTML only (1077.073346ms)
+✔ new writes an empty design/shape.json and commits it; doctor passes (17889.307704ms)
+✔ doctor fails a synth with no manifest, one that does not parse, and rows that break the contract (45953.315314ms)
+✔ a project that is not a synth needs no manifest (22829.937485ms)
+✔ shape scan lists every finding by file and concept, with a count, in code, tests, docs and inbox briefs (224.818389ms)
+✔ the shape hooks are the law: on in a new install and switched on by update in a project that had the kit (5181.4721ms)
+✔ the numbers on the page are the kit's true counts (4.409898ms)
+✔ every file the page loads is in the site, by a relative path, so it works under any repo name (0.5098ms)
+✔ the page carries no analytics, and the refusal it shows is the check's own words (1.491099ms)
+✔ the site is not shipped in the npm package (0.2247ms)
+✔ the UI presets and the full-stack configuration bring the pack; the rule reaches markup (25467.734687ms)
+✔ stored text in markup is refused in JSX and in server templates; the renderer, labels and marked plain fields pass (4449.975351ms)
+✔ raw HTML and a second markdown path are refused; the one renderer must do all four jobs (3564.443029ms)
+✔ CLAUDE.md states where every kind of thing goes (20547.74814ms)
+✔ placement-law refuses audio, GPU and shader code in the wrong folder (3767.606067ms)
+✔ doctor --strict fails while a source file sits outside every rule, passes once it moves (9554.941959ms)
+✔ the Stellix profile carries its own kinds (23537.207104ms)
+✔ the block, control, look and anchor laws and their skills install (2993.230094ms)
+✔ the Sub37 profile fits the template tree: laws, kinds and the id lock (6298.48565ms)
+✔ the Stellix profile refuses both paint forms outside the UI (3956.512838ms)
+✔ an install that copied the old paint pattern gets the new one; a project pattern is kept (10382.691053ms)
+✔ WB-2: a nested clone under build/_deps is still judged by the project, a worktree by itself (24645.508602ms)
+✔ WB-1: coverage sees the kit's own skills and rules, never a worktree's copy (3572.931168ms)
+✔ WB-3: git-guard refuses a command that writes a token URL into git config (4098.635024ms)
+✔ WB-3: doctor finds a token in any repo's .git/config and never prints it (12108.089915ms)
+✔ WB-4: every hook in every pack has a passing --selftest, and doctor runs them all (41536.490776ms)
+✔ symmetry run: green on identical instances, every pair printed (6 for N = 4) (452.707168ms)
+✔ symmetry run: a planted missing member is red and named by instance (509.473039ms)
+✔ symmetry run: a planted swap difference is red, the pair named, every other pair still checked (428.08588ms)
+✔ a many concept with no symmetry block gets a test that is red until it has one; a one concept gets none (181.357407ms)
+✔ symmetry gen --cmake: add_test per many concept, the manifest a configure dependency; no manifest is an error (223.133086ms)
+✔ the selftest plants a missing member and a swap difference and sees both red (2058.643637ms)
+✔ configure time, for real: CMake generates the tests from the manifest, ctest runs them, red on a plant (1625.67864ms)
+✔ the skill points at shape_symmetry, the rule takes its scope from shape.json, init installs the tool and doctor proves it (28564.675021ms)
+✔ a planted change runs only the tests that reach it, an untracked test runs, the release gate is named (203.927993ms)
+✔ a change the failing test covers runs it, and the run fails; --dry-run only prints (375.772171ms)
+✔ the kit's own map: imports, names, the packs table, the preload (266.742522ms)
+✔ a pack that is not base: only the tests that bring it in, by name, preset or configuration (KWB-41) (263.66452ms)
+✔ a version bump alone chooses no test; any other package.json change still chooses them all (KWB-41) (284.139629ms)
+✔ the UI presets and full-stack bring the pack; every check names a rule that is there, and every rule names checks that are (20994.612537ms)
+✔ each check refuses its bad example and passes its good one through the hook, in a real install (8598.662863ms)
+✔ doctor is red for UI code with no page gate, and green with one or with a reason (15708.83355ms)
+✔ finished work lands: the rule and the skill come with git-guard, in every install (5572.416174ms)
+✔ page-measure in real Chrome: a sound page passes, and each planted fault is named (8233.995758ms)
+✔ every ui-craft check holds to its examples through the hook; every skill fits (23538.217309ms)
+✔ one template: a thousand instances cost one read and a handful of swaps, not half a million (6569.489241ms)
+✔ no law still asks to walk every instance: one per template, the rest by a read (0.7412ms)
+✔ an on-screen keyboard lights what sounds and has KB OCT, a kind is one size, and a window test stays off the desktop (0.2998ms)
+✔ a PDF is read with its pictures: figures exported, every page rendered, never a placeholder (0.293699ms)
+✔ a circuit diagram is read tile by tile, one report an image, and set against the code (0.4539ms)
+✔ scan names elements built by hand more than once, html and c++ (340.895527ms)
+✔ sound-design installs the renderer and its skill (20806.907124ms)
+✔ the plugin is an argument: no machine is built in (0.6374ms)
+✔ it links no JUCE: that is why it can load what a JUCE host cannot (0.42ms)
+✔ a host that hands a plugin fewer buses than it declares gets silence: every output bus has a buffer (0.674399ms)
+✔ build.sh says what is missing when no SDK can be found, and takes VST3_SDK (122.04114ms)
+✔ comparing with the machine: a patch is matched by name, a recording stays out of git, and nothing claims a percentage (0.2973ms)
+✔ the skill carries what it took to learn (0.1762ms)
+✔ the kit's own files in a project are no evidence about it (103.786856ms)
+✔ a reverse-engineering project is known by firmware findings in its research (90.578562ms)
+✔ a reverse-engineering project is known by a disassembler in its tools (92.81306ms)
+✔ a reverse-engineering project is known by notes named for a machine (102.715156ms)
+✔ MIDI is known by what the code does, not only by a file name (198.383916ms)
+✔ a project that names its configuration is read as that (104.854455ms)
+✔ a long identifier is no secret, and a real key still is (1.239299ms)
+✔ a build folder is known by what the build leaves, and scan neither reads it nor hides it (610.5596ms)
+✔ a new reverse-engineering project with no code yet gets the pack, from its notes alone (19483.618434ms)
+✔ a unit cannot write a second clock, and a project that draws in code cannot add an image (22198.567898ms)
+✔ a UI is drawn straight on and aligned, and the image skill separates the object from the photograph (2122.990211ms)
+✔ installed dependencies are no evidence about a project, even before it has a .gitignore (85.891256ms)
+✔ workorder writes the steps, the prompt and the runner, with its name in them (100.54425ms)
+✔ workorder never writes over a work order that exists (202.069199ms)
+✔ a work order needs a plain name (165.593418ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (84.695958ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.223ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.2995ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (19120.280242ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.2748ms)
+✔ folder-law allows a new file in a right folder of a worktree and refuses a wrong one (20425.193023ms)
+✔ file-size-guard measures a worktree file by its own checkout (2262.587537ms)
+✔ every hook judges a worktree file against the worktree, inside a real git worktree (34335.43217ms)
+✔ git-guard at Stop, fired from a worktree, refuses while its landing left the main checkout behind (KWB-96) (2332.339821ms)
+✔ version-pin-guard reads docs/versions.md from the worktree the pin is written in (2056.119828ms)
+✔ every configuration brings the pack; nothing of it is named in the lock, and doctor --strict passes (56714.563168ms)
+✔ each skill has one job and fits: Use when, under 8,000 characters (0.5207ms)
+✔ the measured data came across: the sub table, the templates and the registers (0.2138ms)
+✔ the tells are refused in public text, by id; code, URLs and other files are left alone (2440.672557ms)
+ℹ tests 489
+ℹ suites 0
+ℹ pass 489
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 481594.795749
+This is a changed-only run. With --base origin/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks.
+exit 0
