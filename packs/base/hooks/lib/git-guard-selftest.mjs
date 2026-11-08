@@ -4,31 +4,16 @@
 //   commit passes; a push earlier in the same command counts; the remote out of reach lets it through with a warning;
 //   Stop is refused while a local branch is ahead of the remote or missing there, and passes once all are pushed;
 //   the refusals name the push and never offer deleting a branch; three identical Stop refusals end the session.
-import { spawnSync } from 'node:child_process';
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { git, put } from './selftest.mjs';
+import { hubRepo } from './hub-rig.mjs';
+import { lagCases } from './trunk-lag-selftest.mjs';
 import { pushCommand, remoteHeads } from './pushed.mjs';
 
-const RUNNER = fileURLToPath(new URL('../run-hooks.mjs', import.meta.url));
-
 export function pushedCases(hookFile) {
-  const top = realpathSync(mkdtempSync(join(process.env.TMPDIR ?? tmpdir(), 'git-guard-pushed-')));
-  const dir = join(top, 'repo');
-  const hub = join(top, 'hub.git');
-  const session = `selftest-${process.pid}-${Date.now()}`;
-  put(join(dir, '.claude/layout.json'), JSON.stringify({ folders: {}, guards: { git: { house: true } } }));
-  git(top, 'init', '-q', '--bare', '-b', 'main', hub);
-  git(top, 'init', '-q', '-b', 'main', dir);
-  git(dir, 'remote', 'add', 'origin', hub);
-  const commit = (msg) => { writeFileSync(join(dir, `${msg}.txt`), msg); git(dir, 'add', `${msg}.txt`); git(dir, 'commit', '-q', '-m', msg); };
-  const push = (...b) => git(dir, 'push', '-q', 'origin', ...b);
-  const run = (payload) => spawnSync(process.execPath, [RUNNER, hookFile], {
-    cwd: dir, encoding: 'utf8', input: JSON.stringify({ session_id: session, cwd: dir, ...payload }),
-    env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
-  });
+  const { top, dir, hub, commit, push, run: runAt } = hubRepo('git-guard-pushed-');
+  const run = (payload) => runAt(hookFile, payload);
   const bash = (command) => run({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } });
   const stop = () => run({ hook_event_name: 'Stop', stop_hook_active: false });
   const cases = [];
@@ -56,7 +41,7 @@ export function pushedCases(hookFile) {
   cases.push(['a repo with no remote has nothing to push to: passes', bash(`git -C ${lone} commit --allow-empty -m c`).status, 0]);
   // a repo that pushes by URL only names its GitHub repo in the layout (guards.git.repo): judged against it
   put(join(lone, '.claude/layout.json'), JSON.stringify({ folders: {}, guards: { git: { house: true, repo: hub } } }));
-  const byUrl = spawnSync(process.execPath, [RUNNER, hookFile], { cwd: lone, encoding: 'utf8', input: JSON.stringify({ session_id: session, cwd: lone, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }), env: { ...process.env, CLAUDE_PROJECT_DIR: lone } });
+  const byUrl = runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }, lone, lone);
   cases.push(['no remote, guards.git.repo named: its unpushed commits refuse the next commit', byUrl.status, 2]);
 
   // KWB-48: another repo with no remote, the project's layout naming the project's own repo: nothing to compare with
@@ -64,7 +49,7 @@ export function pushedCases(hookFile) {
   git(top, 'init', '-q', '-b', 'work/o', other);
   git(other, 'commit', '-q', '--allow-empty', '-m', 'a');
   git(other, 'commit', '-q', '--allow-empty', '-m', 'b');
-  const foreign = spawnSync(process.execPath, [RUNNER, hookFile], { cwd: other, encoding: 'utf8', input: JSON.stringify({ session_id: session, cwd: other, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }), env: { ...process.env, CLAUDE_PROJECT_DIR: lone } });
+  const foreign = runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }, other, lone);
   cases.push(["a repo with no remote is not judged against the project's guards.git.repo", foreign.status, 0]);
   // Stop: work/x is ahead, work/y was never pushed; work/w, never pushed, is another session's: checked out in its worktree (KWB-88)
   git(dir, 'worktree', 'add', '-q', '-b', 'work/w', join(dir, '.claude/worktrees/M9'));
@@ -189,7 +174,10 @@ export async function selftest(hookFile, { problem, house }) {
   // the pushed laws (KWB-26), on a real repo and a bare "GitHub" beside it
   const pushed = pushedCases(hookFile);
   for (const [label, got, want] of pushed) if (got !== want) bad.push(`pushed law: ${label} (got ${got}, wanted ${want})`);
+  // the trunk a landing leaves behind in the main checkout (KWB-96)
+  const lag = lagCases(hookFile);
+  for (const [label, got, want] of lag) if (got !== want) bad.push(`trunk law: ${label} (got ${got}, wanted ${want})`);
   for (const b of bad) console.error(`git-guard selftest FAILED: ${b}`);
-  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases)`);
+  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases, ${lag.length} trunk-law cases)`);
   return bad.length ? 1 : 0;
 }

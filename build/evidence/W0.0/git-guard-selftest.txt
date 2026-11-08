@@ -1,0 +1,1 @@
+git-guard selftest: OK (14 token cases, 43 house refusals, 28 passes, 25 pushed-law cases, 9 trunk-law cases)

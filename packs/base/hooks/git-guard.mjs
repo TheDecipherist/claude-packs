@@ -19,6 +19,8 @@
 //   9. No commit while the branch's earlier commits are not on GitHub (a new branch's first commit passes; a push earlier
 //      in the same command counts), and at Stop no local branch ahead of GitHub or missing there (KWB-26; lib/pushed.mjs:
 //      GitHub's heads looked up at most once a minute, out of reach means a warning, never a refusal).
+//  10. At Stop, no landing leaves the main checkout's trunk behind the remote's (KWB-96, lib/trunk-lag.mjs): refused while the
+//      main checkout holds the trunk with nothing uncommitted; with uncommitted work or another branch there, the user is told.
 // Only a real git or gh call is judged: heredoc bodies and quoted text are blanked, and a part counts only when its
 // first word (after VAR=value) is git or gh. `cd` and `git -C` move the folder the dirty-tree and trunk checks look at.
 // The laws hold in every repo a command reaches. `--selftest` proves both halves.
@@ -31,6 +33,7 @@ import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { NEW_INSTALL_GIT, ghLaw, pushLaw } from './lib/git-auth.mjs';
 import { forRepo, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
+import { trunkLag } from './lib/trunk-lag.mjs';
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -173,7 +176,7 @@ function main(text) {
   const cfg = { ...DEFAULTS, ...(layout.enable?.includes('guards/git-house') ? NEW_INSTALL_GIT : {}), ...(layout.guards?.git ?? {}) }; // KF-8: an existing project opts in
   if (payload.hook_event_name === 'Stop') {
     if (!cfg.house) return 0;
-    const v = stopVerdict(resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), cfg, payload.session_id);
+    const v = stopVerdict(resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), cfg, payload.session_id, undefined, { lag: trunkLag }); // KWB-96: and the main checkout's trunk
     if (v.stdout) process.stdout.write(v.stdout);
     if (v.stderr) process.stderr.write(v.stderr);
     return v.code;

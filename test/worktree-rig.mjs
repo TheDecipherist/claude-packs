@@ -22,6 +22,21 @@ export function project(initArgs, before = () => {}) {
   return { here: dir, wt: join(dir, '.claude/worktrees/agent-x') };
 }
 
+// A landing from the worktree, as land-branch makes one there (KWB-96): a bare "GitHub" beside the repo, the trunk and the
+// worktree's branch pushed, and the worktree's new commit pushed to the trunk. Returns the trunk's name.
+export function landFromWorktree({ here, wt }) {
+  const hub = mkdtempSync(join(tmpdir(), 'cpw-hub-'));
+  git(hub, 'init', '-q', '--bare');
+  git(here, 'remote', 'add', 'origin', hub);
+  const trunk = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: here, encoding: 'utf8' }).trim();
+  git(here, 'push', '-q', 'origin', trunk);
+  writeFileSync(join(wt, 'landed.txt'), 'landed\n');
+  git(wt, 'add', 'landed.txt');
+  git(wt, '-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'landed');
+  git(wt, 'push', '-q', 'origin', 'work/x', `HEAD:refs/heads/${trunk}`);
+  return trunk;
+}
+
 export const stellix = () => project(['audio-core', 'gpu-painter', 'stellix', '--profile', 'stellix'], (dir) => {
   for (const d of ['lib/app/src', 'lib/world/src', 'lib/engines/src', 'lib/painter/src']) mkdirSync(join(dir, d), { recursive: true });
   writeFileSync(join(dir, 'lib/app/src/keep.h'), '// keep\n');

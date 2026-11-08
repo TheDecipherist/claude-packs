@@ -26,14 +26,14 @@ import { join, resolve } from 'node:path';
 
 const CACHE = 'claude-packs-heads.json';
 
-const git = (cwd, args, env = {}, input = undefined) => {
+export const git = (cwd, args, env = {}, input = undefined) => {
   try {
     return execFileSync('git', args, { cwd, encoding: 'utf8', input, stdio: [input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'], timeout: 15000, env: { ...process.env, GIT_TERMINAL_PROMPT: '0', ...env } });
   } catch (e) {
     return { error: (e.signal ? 'no answer in 15 s' : String(e.stderr ?? e.message).trim().split('\n').pop()) || 'git failed' };
   }
 };
-const out = (r) => (typeof r === 'string' ? r.trim() : null);
+export const out = (r) => (typeof r === 'string' ? r.trim() : null);
 
 export function tokenFor(tokenVar) {
   if (process.env[tokenVar]) return process.env[tokenVar];
@@ -76,7 +76,7 @@ export function remoteHeads(cwd, remote, { tokenVar = 'PERSONAL_GITHUB_TOKEN', r
 }
 
 // The remote a branch pushes to and its name there: its upstream, else origin and the same name.
-function target(cwd, branch) {
+export function target(cwd, branch) {
   const remote = out(git(cwd, ['config', `branch.${branch}.remote`]));
   const merge = out(git(cwd, ['config', `branch.${branch}.merge`]));
   if (remote && remote !== '.') return { remote, name: merge ? merge.replace(/^refs\/heads\//, '') : branch };
@@ -96,7 +96,7 @@ const ownCommits = (cwd, ref, heads, have = known(cwd, heads)) => {
 };
 
 // Looks with the cache first; anything it would refuse is looked up again live.
-function withHeads(cwd, remote, cfg, judge) {
+export function withHeads(cwd, remote, cfg, judge) {
   let h = remoteHeads(cwd, remote, cfg);
   if (h.error) return { error: `${h.url ?? remote} could not be reached (${h.error})` };
   let found = judge(h);
@@ -198,22 +198,34 @@ export function unpushedMessage(u, cfg = {}) {
     `Every branch is pushed from its first commit (KWB-26): push, then commit:\n  ${pushCommand(u.url, [u.branch], cfg)}\n${NEVER_DELETE}`;
 }
 
-// Stop: -> { code, stdout, stderr }. Three refusals with the same list end the session, the list going to the user.
+// Stop: -> { code, stdout, stderr }. Refused: a local branch not on GitHub, and the main checkout's trunk a landing left behind
+// (`lag`, lib/trunk-lag.mjs, KWB-96). What could not be judged, or cannot be fixed by the session, goes to the user as a message.
+// Three refusals with the same list end the session, the list going to the user.
 export const MAX_SENDS = 3;
-export function stopVerdict(root, cfg = {}, session = 'session', stateDir = process.env.TMPDIR ?? '/tmp') {
+export function stopVerdict(root, cfg = {}, session = 'session', stateDir = process.env.TMPDIR ?? '/tmp', { lag = () => null } = {}) {
   const found = localBranches(root, cfg);
-  if (found?.error) return { code: 0, stdout: JSON.stringify({ systemMessage: `git-guard: GitHub was not checked at the end of this session: ${found.error}. Check by hand that every branch is pushed (KWB-26).` }) };
+  const behind = lag(root, cfg);
+  const notes = [];
+  if (found?.error) notes.push(`git-guard: GitHub was not checked at the end of this session: ${found.error}. Check by hand that every branch is pushed (KWB-26).`);
+  if (behind?.error) notes.push(`git-guard: the main checkout's trunk was not compared with the remote's: ${behind.error} (KWB-96).`);
+  if (behind?.warn) notes.push(`git-guard: ${behind.warn}`);
+  const parts = [];
+  if (!found?.error && found?.length) {
+    const byUrl = new Map();
+    for (const f of found) byUrl.set(f.url, [...(byUrl.get(f.url) ?? []), f.branch]);
+    parts.push(`${found.length} local branch(es) are not on GitHub:\n` +
+      found.map((f) => `    ${f.branch}: ${f.missing ? 'not on GitHub at all' : `${f.ahead} commit(s) ahead of GitHub`}`).join('\n') +
+      `\nPush them before the session ends (KWB-26):\n${[...byUrl].map(([url, b]) => `  ${pushCommand(url, b, cfg)}`).join('\n')}\n${NEVER_DELETE}`);
+  }
+  if (behind?.refuse) parts.push(behind.refuse);
   const file = join(stateDir, `git-guard-stop-${String(session).replace(/[^\w-]/g, '')}.json`);
-  if (!found?.length) { try { writeFileSync(file, '{}'); } catch { /* nothing to count */ } return { code: 0 }; }
-  const byUrl = new Map();
-  for (const f of found) byUrl.set(f.url, [...(byUrl.get(f.url) ?? []), f.branch]);
-  const text = `${found.length} local branch(es) are not on GitHub:\n` +
-    found.map((f) => `    ${f.branch}: ${f.missing ? 'not on GitHub at all' : `${f.ahead} commit(s) ahead of GitHub`}`).join('\n') +
-    `\nPush them before the session ends (KWB-26):\n${[...byUrl].map(([url, b]) => `  ${pushCommand(url, b, cfg)}`).join('\n')}\n${NEVER_DELETE}`;
+  const said = notes.length ? JSON.stringify({ systemMessage: notes.join('\n') }) : undefined;
+  if (!parts.length) { try { writeFileSync(file, '{}'); } catch { /* nothing to count */ } return { code: 0, stdout: said }; }
+  const text = parts.join('\n');
   let st = {};
   try { st = JSON.parse(readFileSync(file, 'utf8')); } catch { /* first */ }
   const count = st.text === text ? (st.count ?? 0) + 1 : 1;
   try { writeFileSync(file, JSON.stringify({ text, count })); } catch { /* still refused */ }
-  if (count > MAX_SENDS) return { code: 0, stdout: JSON.stringify({ systemMessage: `git-guard refused the end of this session ${MAX_SENDS} times; it ends here for you to decide.\n${text}` }) };
-  return { code: 2, stderr: `git-guard: ${text}\n` };
+  if (count > MAX_SENDS) return { code: 0, stdout: JSON.stringify({ systemMessage: [`git-guard refused the end of this session ${MAX_SENDS} times; it ends here for you to decide.\n${text}`, ...notes].join('\n') }) };
+  return { code: 2, stderr: `git-guard: ${[text, ...notes].join('\n')}\n` };
 }

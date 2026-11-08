@@ -1,0 +1,10 @@
+FAIL a landing from a worktree left the main checkout behind: Stop is refused (got 0, wanted 2)
+FAIL the refusal names the main checkout and its fast-forward (got false, wanted true)
+FAIL the same, the Stop from the main checkout itself: refused (got 0, wanted 2)
+ok   the main checkout has uncommitted work: Stop goes ahead, nothing touched (got 0, wanted 0)
+FAIL and the user is told why the landing is not done (got false, wanted true)
+FAIL an untracked file is not uncommitted work: refused (got 0, wanted 2)
+FAIL the main checkout holds another branch: Stop goes ahead, the user told (got false, wanted true)
+ok   fast-forwarded: Stop passes, nothing said about the trunk (got true, wanted true)
+ok   a trunk commit pushed from another clone, which this repo lacks: not judged (got 0, wanted 0)
+RED: 6 of 9 wrong

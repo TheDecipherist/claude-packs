@@ -6,7 +6,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, PIN_GUARD, bash, fire, fireAs, project, put, stellix } from './worktree-rig.mjs';
+import { CLI, PIN_GUARD, bash, fire, fireAs, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
 import { COMMAND_CASES } from './worktree-cases-commands.mjs';
 import { PACK_CASES } from './worktree-cases-packs.mjs';
 
@@ -217,6 +217,20 @@ test('every hook judges a worktree file against the worktree, inside a real git 
     try { check(p); } catch (e) { failed.push(`${hook}: ${e.message.split('\n')[0]}`); }
   }
   assert.deepEqual(failed, []);
+});
+
+test('git-guard at Stop, fired from a worktree, refuses while its landing left the main checkout behind (KWB-96)', () => {
+  const p = project(['audio-core'], (dir) => {
+    const lf = join(dir, '.claude/layout.json');
+    writeFileSync(lf, JSON.stringify({ ...JSON.parse(readFileSync(lf, 'utf8')), guards: { git: { house: true } } }, null, 2));
+  });
+  const trunk = landFromWorktree(p);
+  const stop = () => fireAs(p.here, 'git-guard.mjs', { hook_event_name: 'Stop', cwd: p.wt, session_id: `wt-lag-${process.pid}` });
+  const s = stop();
+  assert.equal(s.status, 2, s.stderr);
+  assert.ok(s.stderr.includes(`git -C ${p.here} merge --ff-only origin/${trunk}`), s.stderr);
+  execFileSync('git', ['-C', p.here, 'merge', '-q', '--ff-only', `origin/${trunk}`]);
+  assert.equal(stop().status, 0, 'fast-forwarded, the turn ends');
 });
 
 test('version-pin-guard reads docs/versions.md from the worktree the pin is written in', () => {
