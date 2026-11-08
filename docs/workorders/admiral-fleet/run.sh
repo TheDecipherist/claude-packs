@@ -22,7 +22,7 @@ for session in $(seq 1 "$max_sessions"); do
     exit 0
   fi
   before="$(moved)"
-  echo "$(date -Is) session $session starts" | tee -a "$logs/runner.log"
+  echo "$(date +%Y-%m-%dT%H:%M:%S%z) session $session starts" | tee -a "$logs/runner.log"
   claude -p "Run docs/workorders/admiral-fleet/PROMPT.md" --permission-mode bypassPermissions --output-format stream-json --verbose \
     < /dev/null > "$logs/session-$session.jsonl" 2> "$logs/session-$session.err" || true
   if [[ "$(moved)" == "$before" ]]; then still=$((still + 1)); else still=0; fi

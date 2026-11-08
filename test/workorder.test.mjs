@@ -49,6 +49,13 @@ test('the runner says what it switches off, and stops when nothing moves', () =>
   assert.match(README, /It runs Claude with permission prompts off/);
 });
 
+test('the runner dates its log with a format BSD and GNU date both take (KWB-95)', () => {
+  // The user starts run.sh from their own terminal, which on a Mac has the BSD tools: GNU-only flags leave the log undated
+  const run = readFileSync(join(KIT, 'prompts/workorder/run.sh'), 'utf8');
+  for (const call of run.match(/\bdate\b[^)"|]*/g) ?? []) assert.doesNotMatch(call, /\s-(I|-iso|d\b|-date|R\b|-rfc)/, `GNU-only: ${call}`);
+  assert.match(run, /date \+%Y-%m-%dT%H:%M:%S%z/);
+});
+
 test('a new project with no packs named takes base alone, never a synth pack (KWB-84)', () => {
   const parent = fresh('new-');
   const r = spawnSync('node', [CLI, 'new', 'shop', '--dir', parent], { encoding: 'utf8' });

@@ -37,7 +37,41 @@ Never do:
 - Run the whole suite to land or release; the gate is `npm run test:changed -- --base origin/main` on committed work.
 </constraints>
 
+**Changes on review (the user's decisions, 2026-11-08, before the first run):**
+- **W0.0 added:** `land-branch` is fixed first, so that the order's own landings leave the main checkout up to date.
+- **W4 gains depth measures** (shadow, bevel, edge light). They are added measures of the same law, not a new skill.
+- **KWB-95 fixed on this branch before the run.**
+  - The runner template's log time was `date -Is`, which is GNU's alone, so on macOS the log lines had no time.
+  - It is now `date +%Y-%m-%dT%H:%M:%S%z`, in `prompts/workorder/run.sh`, the template `lib/workorder.mjs` copies.
+  - This order's `run.sh` was regenerated from it.
+  - `test/workorder.test.mjs` "the runner dates its log with a format BSD and GNU date both take", red before the fix.
+- **This order is the user's yes for `npm publish` of 1.4.0.** W5 publishes as written, once its gate is green on committed work and the branch has landed.
+- **Left out on purpose:**
+  - The README-screenshots law gets an order of its own, next.
+  - The kit's `xvfb-run` advice for macOS stays on matrix12's list; the fleet proves on WSL first.
+  - matrix12's KF-35 and B-71 and vst3host on Windows stay where they are.
+
 ---
+
+## W0.0 `land-branch` brings the main checkout up to date
+
+The fault: a landing done from a worktree pushes the branch's commit to the remote trunk (`git push origin HEAD:refs/heads/main`, since the worktree cannot switch to a trunk the main checkout holds), proves it with `ls-remote`, and stops. The main checkout, the folder the user reads, is never fast-forwarded.
+- On matrix12, 2026-11-08, it stayed about 30 commits behind GitHub all day, and the user saw none of the day's work.
+- The user: "WHY ON EARTH would you only update things on github and not locally? thats a dissater waiting to happen".
+- matrix12's `CLAUDE.md` carries the step by hand (its landing step 5b) until the kit has it.
+
+1. Log the fault in `workflow-bugs.md` (the next `KWB-n`) before any fix. This step does W0's `npm install` and takes the lock first.
+2. The `land-branch` skill, after its `ls-remote` proof, does three things:
+   - fast-forwards the main checkout: `git -C <main checkout> fetch origin`, then `git -C <main checkout> merge --ff-only origin/<trunk>`;
+   - proves `git -C <main checkout> rev-parse HEAD` equals the remote trunk;
+   - says it did. Where the main checkout has uncommitted work, or holds another branch, it touches nothing, says exactly that, and the landing is not reported done.
+3. A hook enforces it. Choose which one, existing or new, and record the choice as `d-n`: a turn that pushed to the trunk is refused at its end while the main checkout's trunk lags the remote's. Its selftest builds a scratch repo with a main checkout and a worktree, lands from the worktree, and sees the refusal. It sees the same turn pass once the main checkout is fast-forwarded. It is red with the hook as it was. It has its worktree case in `test/worktrees.test.mjs`.
+
+**Done when:**
+- the `KWB-n` entry is dated before the fix's first commit;
+- the hook's selftest is seen red without the fix and green with it;
+- doctor's skill limits still pass for `land-branch`;
+- this step's own landing leaves the kit's main checkout equal to `origin/main`, proved by `rev-parse`.
 
 ## W0. Set up
 
@@ -73,11 +107,18 @@ Never do:
 ## W4. `analyse-reference-look` for any page drawn from a picture
 
 1. Move `analyse-reference-look` from `packs/audio-core/skills` to `packs/base/skills` (the precedent is `pdf-to-md`). Read its first line: if `straight-on-and-aligned` is needed by a web page too, move the rule with it, trimmed of synth words; if not, trim the line and leave the rule in `audio-core`. Record the choice as d-1 in `decisions.md`.
-2. Add a `ui-craft` rule `page-matches-reference-look`, under 40 lines, stating the law for web pages: regions, colours sampled by script against the picture's own white and black, type scored and its licence recorded, glow and spacing measured, one look report per page, and `look-gate` named. `ui-matches-reference-look` stays in `audio-core` for synth editors.
+2. Add a `ui-craft` rule `page-matches-reference-look`, under 40 lines, stating the law for web pages: regions, colours sampled by script against the picture's own white and black, type scored and its licence recorded, glow and spacing measured, depth measured, one look report per page, and `look-gate` named. `ui-matches-reference-look` stays in `audio-core` for synth editors.
+2b. **Depth, as added measures of the same law** (no new skill). `analyse-reference-look` and the look report it writes measure, for each raised or recessed element, against the reference's own:
+   - **shadow:** its offset, blur width and darkness against the ground;
+   - **bevel:** the widths and contrast of the light and dark edges;
+   - **edge light:** the lit edge's brightness and width.
+
+   Today they measure glow and colour, so a flat render passes beside a raised reference. That is what matrix12's pages did on 2026-11-08: flat cards, knobs and screens beside mock-ups with shadows and bevels. Add the measures to `ui-matches-reference-look` (audio-core) and to `page-matches-reference-look` both, as rows of the law each already states.
+   - The proof: a reference card with a drop shadow and a bevel, a flat render of it judged red on the depth rows, and the same render with the depth drawn judged green. Keep both reports in `build/evidence/W4/`.
 3. On a scratch `full-stack` install: a Read of `design/reference/x.webp` is refused by `skill-first` until the Skill call, and allowed after; a `looks` entry in `layout.json`, a write under its glob, `look-gate` naming the look as due, a landing refused without a passing report and allowed with one. Keep both transcripts as evidence.
 4. `test/noop.test.mjs`: an existing `audio-core` install keeps the skill after `update` (moved, not lost), and its lists name the moved files; `test/base-neutral.test.mjs` passes with the skill in `base`.
 
-**Done when:** a `full-stack` init installs the skill; the two scratch refusals and two allowances of item 3 are in `build/evidence/W4/`; the audio-core noop test and the base-neutral test are green; the README counts for `base`, `ui-craft` and `audio-core` are true.
+**Done when:** a `full-stack` init installs the skill; the flat render is red and the drawn one green on the depth rows (item 2b), both reports in `build/evidence/W4/`; the two scratch refusals and two allowances of item 3 are in `build/evidence/W4/`; the audio-core noop test and the base-neutral test are green; the README counts for `base`, `ui-craft` and `audio-core` are true.
 
 ## W5. Release
 
