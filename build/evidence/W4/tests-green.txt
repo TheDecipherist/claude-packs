@@ -1,0 +1,80 @@
+✔ midi: src/in.cpp is refused its fault and takes the fix (16636.006232ms)
+✔ midi: src/rt.cpp is refused its fault and takes the fix (1933.776891ms)
+✔ midi: src/host.cpp is refused its fault and takes the fix (1833.232742ms)
+✔ midi: src/load.cpp is refused its fault and takes the fix (1831.581743ms)
+✔ sound-design: src/noise.cpp is refused its fault and takes the fix (1832.889842ms)
+✔ sound-design: src/voice.cpp is refused its fault and takes the fix (1847.341833ms)
+✔ sound-design: src/fx.cpp is refused its fault and takes the fix (1956.019476ms)
+✔ reverse-engineering: src/law.cpp is refused its fault and takes the fix (2201.753046ms)
+✔ reverse-engineering: src/rom.cpp is refused its fault and takes the fix (2013.541982ms)
+✔ instrument-shell: src/state.cpp is refused its fault and takes the fix (1841.375873ms)
+✔ cpp: src/a.h is refused its fault and takes the fix (1822.836682ms)
+✔ cpp: src/b.cpp is refused its fault and takes the fix (1793.576696ms)
+✔ the full law of the clock travels with its skill, in neutral words (0.4296ms)
+✔ firmware stays out of git, a named fixture may stay in (11285.631339ms)
+✔ a download marker that breaks a Windows checkout is refused (1698.365583ms)
+✔ the synth-rebuild preset takes all four, and suggest finds them from a project (12394.029102ms)
+✔ reproduction or original decides the aliasing law (0.2344ms)
+✔ base and the base configuration name no synth word (10.487994ms)
+✔ what left base is in the synth-creator pack, and only the synth-creator configuration installs that pack (4.339398ms)
+✔ the rule: a gate that writes the parameter proves nothing about the control (1.829499ms)
+✔ the rule installs with audio-core and loads on UI code (16980.705052ms)
+✔ prove-control starts from the input path, and goes red with the hook taken out (0.3097ms)
+✔ analyse-reference-look asks for depth: each element's shadow, bevel and edge light, measured against the reference (0.2266ms)
+✔ analyse-reference-look asks for a control and a confidence per measure (0.1898ms)
+✔ analyse-reference-look asks for seed boxes for a dark part on a dark panel (0.1486ms)
+✔ analyse-reference-look asks for rectify against a known anchor (0.137ms)
+✔ analyse-reference-look asks for how to rank sources that disagree (0.161099ms)
+✔ analyse-reference-look asks for typeface as a scored choice (0.1835ms)
+✔ analyse-reference-look asks for planted faults diffed against the unplanted result (0.2144ms)
+✔ analyse-reference-look asks for the render measured by the code that measured the target (0.898ms)
+✔ analyse-reference-look asks for geometry exact, and a whole-picture score never a pass (0.1301ms)
+✔ the skill stays under the limit and names the rule as required reading where the project has it (admiral-fleet d-1) (0.187099ms)
+✔ ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass (0.1178ms)
+✔ stellix: update in synth-creator makes what 0.9.15 made, but for the configuration key (14285.828359ms)
+✔ sub37: update in synth-creator makes what 0.9.15 made, but for the configuration key (9311.940737ms)
+✔ an install that names no configuration gets synth-creator from its packs, and the same result (1794.628061ms)
+✔ full-stack: an update keeps an existing project's own layout, and changes only the listed files (11985.301765ms)
+✔ every pack has its row, with its true counts (10.954794ms)
+✔ every configuration and preset is named (3.817698ms)
+✔ every command in the help is on the page (69.362364ms)
+✔ the refusal on the page is the check's own words, so the first thing a reader sees is true (0.1991ms)
+✔ a new reader meets what it is before any command, and how to install one pack (0.2017ms)
+✔ every hook base installs is in the table (0.962399ms)
+✖ the numbers on the page are the kit's true counts (2.648599ms)
+✔ every file the page loads is in the site, by a relative path, so it works under any repo name (0.664399ms)
+✔ the page carries no analytics, and the refusal it shows is the check's own words (0.4791ms)
+✔ the site is not shipped in the npm package (0.2513ms)
+✔ the UI presets and full-stack bring the pack; every check names a rule that is there, and every rule names checks that are (13919.833649ms)
+✔ each check refuses its bad example and passes its good one through the hook, in a real install (5712.820118ms)
+✔ doctor is red for UI code with no page gate, and green with one or with a reason (9429.812967ms)
+✔ finished work lands: the rule and the skill come with git-guard, in every install (3578.455273ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 50
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 63069.180997
+
+✖ failing tests:
+
+test at test/site.test.mjs:9:1
+✖ the numbers on the page are the kit's true counts (2.648599ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  263 !== 264
+  
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/site.test.mjs:11:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 263,
+    expected: 264,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

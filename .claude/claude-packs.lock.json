@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-08T23:00:00.943Z",
+  "updated": "2026-11-08T23:35:58.502Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/behaviour-lives-with-its-kind.md": "77b22577be4e86bdac9b558d21bcfe9215d027a90c97458e315b6ad45fa032a9",
@@ -107,6 +107,7 @@
     ".claude/tools/shape-symmetry.mjs": "5d9a29ef79d765288a38662165f178ea4c8fadf10fb0f7e90f78f7dd4a4e851c",
     ".claude/tools/test-verdict.mjs": "cbd803d2816c15f757bd2f81f6dc2d63131534362a34de7b18d56f694e5d286f",
     ".claude/skills/add-lesson-check/SKILL.md": "1a0d8c0a0a54d86683132cc575f9b8d0ec8adafb7ccd665fddd4e69130db238c",
+    ".claude/skills/analyse-reference-look/SKILL.md": "ec39803cd5003eb5222dd448ddb0cc0968783b5f63bd598e77e8df6b8cf0cde3",
     ".claude/skills/fix-from-scan/SKILL.md": "66382d2d7e2bb787e8e04afe087374f5824910ba15d458f38c307100de33760d",
     ".claude/skills/land-branch/SKILL.md": "265f57b3879c314cac8ff9d2e7bc5b9fe996ceb923b26fb4f90640fec31dd616",
     ".claude/skills/make-it-a-template/SKILL.md": "d22ec5a5db71a3a820641f773c830333c59e6aee9ad7f32fd87db720801dab11",

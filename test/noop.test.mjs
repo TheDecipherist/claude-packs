@@ -60,6 +60,8 @@ const NEW_PROJECTS = ['.claude/rules/unattended-runs.md', '.claude/tools/buildq.
 const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only where the project has time-guard: the rule goes where its hook goes
 const OWN = ['.claude/hooks/lib/own-processes.mjs', '.claude/hooks/lib/time-guard-selftest.mjs', '.claude/hooks/lib/identifier-runs.mjs'];   // 1.3.2 (KWB-87): which processes a session started; time-guard's selftest in its own file; (KWB-93) a camelCase concept's runs of parts
 const TRUNK = ['trunk-lag', 'trunk-lag-selftest', 'hub-rig'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.4.0 (KWB-96): git-guard's Stop sees the main checkout a landing left behind; its selftest's scratch repo shared
+// 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
+const MOVED = { '.claude/skills/analyse-reference-look/SKILL.md': 'packs/base/skills/analyse-reference-look/SKILL.md' };
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
 
 for (const project of ['stellix', 'sub37']) {
@@ -82,6 +84,10 @@ for (const project of ['stellix', 'sub37']) {
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
+    for (const [file, from] of Object.entries(MOVED)) {
+      assert.ok(was.files[file] && lock.files[file], `${file}: kept in the lock after the move`);
+      assert.equal(readFileSync(join(dir, file), 'utf8'), readFileSync(join(KIT, from), 'utf8'), `${file}: moved, not lost`);
+    }
   });
 }
 
@@ -94,8 +100,9 @@ test('an install that names no configuration gets synth-creator from its packs, 
 // admiral-fleet W3 (KWB-97): full-stack's template moved under packages/ and gained a web folder. A project installed with the
 // template before it (test/fixtures/noop/full-stack/before/: the kit at f747567, the web app in channel/, the API in api/src)
 // keeps its own layout on update: no template folder or concept added, the same CLAUDE.md, the same files. A file the kit
-// changes on purpose later goes in FULL_STACK_CHANGED, with why.
+// changes on purpose later goes in FULL_STACK_CHANGED, and a new one in FULL_STACK_ADDED, with why.
 const FULL_STACK_CHANGED = [];
+const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md'];   // W4: the skill in base, the page law in ui-craft
 test('full-stack: an update keeps an existing project\'s own layout, and changes only the listed files', () => {
   const { dir } = updated('full-stack', 'full-stack');
   const before = (f) => readFileSync(join(FX, 'full-stack', 'before', f), 'utf8');
@@ -106,6 +113,6 @@ test('full-stack: an update keeps an existing project\'s own layout, and changes
   assert.equal(readFileSync(join(dir, 'CLAUDE.md'), 'utf8'), before('claude-md.txt'), 'CLAUDE.md');
   const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
   const old = JSON.parse(before('lock.json'));
-  assert.deepEqual(Object.keys(lock.files).sort(), Object.keys(old.files).sort(), 'the same files');
+  assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(old.files), ...FULL_STACK_ADDED].sort(), 'the same files, and the listed new ones');
   assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && !FULL_STACK_CHANGED.includes(f)), [], 'only the listed files changed');
 });

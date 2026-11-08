@@ -1,0 +1,80 @@
+{
+  "reference": "reference.png",
+  "render": "drawn.png",
+  "commit": "8ba6525",
+  "verdict": "pass",
+  "measures": {
+    "face": {
+      "reference": 185.4,
+      "render": 185.4,
+      "tolerance": 4,
+      "pass": true
+    },
+    "ground": {
+      "reference": 131.7,
+      "render": 131.7,
+      "tolerance": 4,
+      "pass": true
+    },
+    "shadow.darkness": {
+      "reference": 44.1,
+      "render": 40.1,
+      "tolerance": 15.4,
+      "pass": true
+    },
+    "shadow.blur": {
+      "reference": 11,
+      "render": 13,
+      "tolerance": 4.4,
+      "pass": true
+    },
+    "shadow.offset_x": {
+      "reference": 0.0,
+      "render": 0.0,
+      "tolerance": 2,
+      "pass": true
+    },
+    "shadow.offset_y": {
+      "reference": 6.0,
+      "render": 6.0,
+      "tolerance": 2,
+      "pass": true
+    },
+    "bevel.light_width": {
+      "reference": 3,
+      "render": 3,
+      "tolerance": 1,
+      "pass": true
+    },
+    "bevel.light_contrast": {
+      "reference": 26.0,
+      "render": 26.0,
+      "tolerance": 10.4,
+      "pass": true
+    },
+    "bevel.dark_width": {
+      "reference": 4,
+      "render": 4,
+      "tolerance": 1,
+      "pass": true
+    },
+    "bevel.dark_contrast": {
+      "reference": 38.9,
+      "render": 38.9,
+      "tolerance": 15.6,
+      "pass": true
+    },
+    "edge_light.brightness": {
+      "reference": 62.4,
+      "render": 62.4,
+      "tolerance": 25.0,
+      "pass": true
+    },
+    "edge_light.width": {
+      "reference": 1,
+      "render": 1,
+      "tolerance": 0,
+      "pass": true
+    }
+  }
+}

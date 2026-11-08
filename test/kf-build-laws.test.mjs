@@ -31,8 +31,9 @@ test('prove-control starts from the input path, and goes red with the hook taken
   assert.ok(text.indexOf('real input path') < text.indexOf('**Host:**'), 'before the surfaces it does not prove');
 });
 
-const LOOK = 'audio-core/skills/analyse-reference-look/SKILL.md';
+const LOOK = 'base/skills/analyse-reference-look/SKILL.md';   // 1.4.0 (admiral-fleet W4): moved from audio-core, for any page drawn from a picture
 for (const [what, words] of [
+  ['depth: each element\'s shadow, bevel and edge light, measured against the reference', /\*\*shadow:\*\*[\s\S]*\*\*bevel:\*\*[\s\S]*\*\*edge light:\*\*/],
   ['a control and a confidence per measure', /a control and a confidence/i],
   ['seed boxes for a dark part on a dark panel', /seed box/i],
   ['rectify against a known anchor', /known anchor/i],
@@ -43,10 +44,10 @@ for (const [what, words] of [
   ['geometry exact, and a whole-picture score never a pass', /never a pass/i],
 ]) test(`analyse-reference-look asks for ${what}`, () => assert.match(pack(LOOK), words));
 
-test('the skill stays under the limit and names the rule as required reading', () => {
+test('the skill stays under the limit and names the rule as required reading where the project has it (admiral-fleet d-1)', () => {
   const text = pack(LOOK);
   assert.ok(text.length < 8000, `${text.length} characters`);
-  assert.match(text, /Read `straight-on-and-aligned` first/);
+  assert.match(text, /Where the project has the rule `straight-on-and-aligned`[^.]*, read it first/);
 });
 
 test('ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass', () => {

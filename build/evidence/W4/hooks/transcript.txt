@@ -1,0 +1,24 @@
+installed: base, js-ts, stored-text, ui-craft; the skill at .claude/skills/analyse-reference-look/SKILL.md
+
+== skill-first: a reference picture is read only through its skill
+skill-first.mjs PreToolUse Read {"file_path":"/tmp/af/w4s/project/design/reference/x.webp"}
+  -> exit 2: BLOCKED by skill-first: /tmp/af/w4s/project/design/reference/x.webp is a design reference (a mock-up or a reference picture). Load the analyse-reference-look skill first: the Skill tool, or Read its SKILL.md (.claude/skills/analyse-reference-look/SKILL.md). Then read it the way that skill says, step by step. A first look says only what kind of file it is, and nothing from it is a finding.
+  (the transcript now holds the Skill call for analyse-reference-look)
+skill-first.mjs PreToolUse Read {"file_path":"/tmp/af/w4s/project/design/reference/x.webp"}
+  -> exit 0
+
+== look-gate: a look declared, its code changed on a branch, the report missing then passing
+look-gate.mjs PostToolUse Bash {"command":"npm run build"}
+  -> exit 0: {"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"look-gate: this branch changed the code that draws dashboard (design/reference/x.webp). Compare the render with each reference now, with the analyse-reference-look skill's gate, and commit its passing report: look-gate refuses the landing without it."}}
+look-gate.mjs PreToolUse Bash {"command":"git merge --ff-only work/dashboard"}
+  -> exit 2: BLOCKED by look-gate: this branch changed the code that draws a reference look, and the look is not proved: |   dashboard (design/reference/x.webp): no look report at build/evidence/looks/dashboard.json on work/dashboard | Run the look gate (the analyse-reference-look skill: render, measure against the reference, plant a fault) and commit its passing report on the branch, then land.
+  (the branch now holds a passing report for the page's last change)
+look-gate.mjs PreToolUse Bash {"command":"git merge --ff-only work/dashboard"}
+  -> exit 0
+
+yes skill-first refused the read
+yes skill-first allowed it after the Skill call
+yes look-gate named the look as due after a build
+yes look-gate refused the landing without a report
+yes look-gate allowed the landing with a passing report
+PROVED

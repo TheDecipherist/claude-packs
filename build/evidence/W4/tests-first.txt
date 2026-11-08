@@ -1,0 +1,365 @@
+✔ midi: src/in.cpp is refused its fault and takes the fix (16462.945106ms)
+✔ midi: src/rt.cpp is refused its fault and takes the fix (1975.964385ms)
+✔ midi: src/host.cpp is refused its fault and takes the fix (1855.904665ms)
+✔ midi: src/load.cpp is refused its fault and takes the fix (1856.430496ms)
+✔ sound-design: src/noise.cpp is refused its fault and takes the fix (1815.724439ms)
+✔ sound-design: src/voice.cpp is refused its fault and takes the fix (1859.641613ms)
+✔ sound-design: src/fx.cpp is refused its fault and takes the fix (1948.623661ms)
+✔ reverse-engineering: src/law.cpp is refused its fault and takes the fix (2190.001658ms)
+✔ reverse-engineering: src/rom.cpp is refused its fault and takes the fix (1876.758121ms)
+✔ instrument-shell: src/state.cpp is refused its fault and takes the fix (1894.225411ms)
+✔ cpp: src/a.h is refused its fault and takes the fix (1810.370854ms)
+✔ cpp: src/b.cpp is refused its fault and takes the fix (1817.97925ms)
+✔ the full law of the clock travels with its skill, in neutral words (0.3646ms)
+✔ firmware stays out of git, a named fixture may stay in (11300.671084ms)
+✔ a download marker that breaks a Windows checkout is refused (1701.525701ms)
+✔ the synth-rebuild preset takes all four, and suggest finds them from a project (12382.554044ms)
+✔ reproduction or original decides the aliasing law (0.2546ms)
+✔ base and the base configuration name no synth word (7.260596ms)
+✔ what left base is in the synth-creator pack, and only the synth-creator configuration installs that pack (3.112899ms)
+✔ the rule: a gate that writes the parameter proves nothing about the control (1.621699ms)
+✔ the rule installs with audio-core and loads on UI code (16920.087001ms)
+✔ prove-control starts from the input path, and goes red with the hook taken out (0.278699ms)
+✖ analyse-reference-look asks for a control and a confidence per measure (0.3363ms)
+✖ analyse-reference-look asks for seed boxes for a dark part on a dark panel (0.1397ms)
+✖ analyse-reference-look asks for rectify against a known anchor (0.1133ms)
+✖ analyse-reference-look asks for how to rank sources that disagree (0.1185ms)
+✖ analyse-reference-look asks for typeface as a scored choice (0.516699ms)
+✖ analyse-reference-look asks for planted faults diffed against the unplanted result (0.5246ms)
+✖ analyse-reference-look asks for the render measured by the code that measured the target (0.4477ms)
+✖ analyse-reference-look asks for geometry exact, and a whole-picture score never a pass (0.202399ms)
+✖ the skill stays under the limit and names the rule as required reading (0.195ms)
+✔ ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass (0.1619ms)
+✔ stellix: update in synth-creator makes what 0.9.15 made, but for the configuration key (14338.901017ms)
+✔ sub37: update in synth-creator makes what 0.9.15 made, but for the configuration key (9279.850978ms)
+✔ an install that names no configuration gets synth-creator from its packs, and the same result (1810.714442ms)
+✖ full-stack: an update keeps an existing project's own layout, and changes only the listed files (11946.771118ms)
+✔ every pack has its row, with its true counts (10.325195ms)
+✔ every configuration and preset is named (1.795999ms)
+✔ every command in the help is on the page (73.740166ms)
+✔ the refusal on the page is the check's own words, so the first thing a reader sees is true (0.2092ms)
+✔ a new reader meets what it is before any command, and how to install one pack (0.1868ms)
+✔ every hook base installs is in the table (0.991ms)
+✔ the UI presets and full-stack bring the pack; every check names a rule that is there, and every rule names checks that are (13834.519852ms)
+✔ each check refuses its bad example and passes its good one through the hook, in a real install (5675.276526ms)
+✔ doctor is red for UI code with no page gate, and green with one or with a reason (9459.398088ms)
+✔ finished work lands: the rule and the skill come with git-guard, in every install (3567.534616ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 36
+ℹ fail 10
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62892.011216
+
+✖ failing tests:
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for a control and a confidence per measure (0.3363ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for seed boxes for a dark part on a dark panel (0.1397ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for rectify against a known anchor (0.1133ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for how to rank sources that disagree (0.1185ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for typeface as a scored choice (0.516699ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for planted faults diffed against the unplanted result (0.5246ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for the render measured by the code that measured the target (0.4477ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:44:4
+✖ analyse-reference-look asks for geometry exact, and a whole-picture score never a pass (0.202399ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:44:71)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/kf-build-laws.test.mjs:46:1
+✖ the skill stays under the limit and names the rule as required reading (0.195ms)
+  Error: ENOENT: no such file or directory, open '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+      at readFileSync (node:fs:440:20)
+      at pack (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:6:23)
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/kf-build-laws.test.mjs:47:16)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '~/projects/claude-packs/packs/audio-core/skills/analyse-reference-look/SKILL.md'
+  }
+
+test at test/noop.test.mjs:105:1
+✖ full-stack: an update keeps an existing project's own layout, and changes only the listed files (11946.771118ms)
+  AssertionError [ERR_ASSERTION]: the same files
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      '.claude/checks/alpine-with-native-build.json',
+      '.claude/checks/api-path-versioned.json',
+      '.claude/checks/api-routes-versioned.json',
+      '.claude/checks/ascii-no-em-dash.json',
+  ...
+      '.claude/rules/page-holds-its-frame.md',
+  +   '.claude/rules/page-matches-reference-look.md',
+      '.claude/rules/page-proved-rendered.md',
+      '.claude/rules/parallel-independent-awaits.md',
+      '.claude/rules/pictures-do-a-job.md',
+      '.claude/rules/plan-and-logs.md',
+      '.claude/rules/pointer-feedback.md',
+  ...
+      '.claude/skills/add-lesson-check/SKILL.md',
+  +   '.claude/skills/analyse-reference-look/SKILL.md',
+      '.claude/skills/app-screen/SKILL.md',
+      '.claude/skills/argument-post/SKILL.md',
+      '.claude/skills/build-from-reference/SKILL.md',
+      '.claude/skills/change-an-api/SKILL.md',
+      '.claude/skills/chart-choice/SKILL.md',
+  
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/noop.test.mjs:115:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [
+      '.claude/checks/alpine-with-native-build.json',       '.claude/checks/api-path-versioned.json',
+      '.claude/checks/api-routes-versioned.json',           '.claude/checks/ascii-no-em-dash.json',
+      '.claude/checks/async-callback-unguarded.json',       '.claude/checks/authz-from-request-body.json',
+      '.claude/checks/background-loop-needs-stop.json',     '.claude/checks/child-process-error-handler.json',
+      '.claude/checks/client-calls-a-version.json',         '.claude/checks/client-ip-not-leftmost-xff.json',
+      '.claude/checks/compose-db-needs-auth.json',          '.claude/checks/compose-image-pinned.json',
+      '.claude/checks/compose-no-hardcoded-ip.json',        '.claude/checks/compose-no-host-bind-for-data.json',
+      '.claude/checks/compose-no-plaintext-secret.json',    '.claude/checks/compose-no-swarm-ignored-keys.json',
+      '.claude/checks/compose-overlay-not-bridge.json',     '.claude/checks/compose-service-needs-healthcheck.json',
+      '.claude/checks/compose-service-needs-init.json',     '.claude/checks/cookie-host-prefix.json',
+      '.claude/checks/copy-needs-chown-with-user.json',     '.claude/checks/copy-source-before-deps.json',
+      '.claude/checks/cors-needs-origin.json',              '.claude/checks/csp-not-switched-off.json',
+      '.claude/checks/debug-route-not-shipped.json',        '.claude/checks/docker-exec-form.json',
+      '.claude/checks/dockerfile-needs-healthcheck.json',   '.claude/checks/dockerfile-needs-user.json',
+      '.claude/checks/dockerignore-has-the-basics.json',    '.claude/checks/encrypted-name-plaintext-value.json',
+      '.claude/checks/entry-registers-shutdown.json',       '.claude/checks/err-text-stays-server-side.json',
+      '.claude/checks/failure-is-not-empty.json',           '.claude/checks/fetch-needs-timeout.json',
+      '.claude/checks/field-map-over-if-runs.json',         '.claude/checks/gate-is-not-a-todo.json',
+      '.claude/checks/gitattributes-forces-lf.json',        '.claude/checks/guard-fails-open.json',
+      '.claude/checks/health-checks-nothing.json',          '.claude/checks/hijack-needs-try.json',
+      '.claude/checks/hmac-over-reserialised-body.json',    '.claude/checks/hook-catch-must-not-allow.json',
+      '.claude/checks/hook-command-no-pipe.json',           '.claude/checks/hook-exit-1-does-not-block.json',
+      '.claude/checks/hook-no-or-true.json',                '.claude/checks/hook-refusal-on-stderr.json',
+      '.claude/checks/job-only-in-memory.json',             '.claude/checks/json-only-through-helper.json',
+      '.claude/checks/jwt-verify-pins-algorithm.json',      '.claude/checks/line-under-200-chars.json',
+      '.claude/checks/localhost-default-in-server.json',    '.claude/checks/lookup-over-if-chains.json',
+      '.claude/checks/lookup-over-ternary-chains.json',     '.claude/checks/middleware-skips-without-user.json',
+      '.claude/checks/next-api-route-versioned.json',       '.claude/checks/no-any.json',
+      '.claude/checks/no-cast-at-route-boundary.json',      '.claude/checks/no-cast-escape-hatches.json',
+      '.claude/checks/no-code-after-midline-comment.json',  '.claude/checks/no-console-in-app.json',
+      '.claude/checks/no-copula-dodging.json',              '.claude/checks/no-crlf-in-scripts.json',
+      '.claude/checks/no-db-in-route-file.json',            '.claude/checks/no-dramatic-colon.json',
+      '.claude/checks/no-dynamic-import-node-builtin.json', '.claude/checks/no-err-message-to-client.json',
+      '.claude/checks/no-express-no-vite.json',             '.claude/checks/no-inline-binary.json',
+      '.claude/checks/no-inline-zod-outside-schemas.json',  '.claude/checks/no-latest-base.json',
+      '.claude/checks/no-local-sleep.json',                 '.claude/checks/no-nested-ternary.json',
+      '.claude/checks/no-not-x-but-y.json',                 '.claude/checks/no-participial-opener.json',
+      '.claude/checks/no-pseudo-wisdom.json',               '.claude/checks/no-raw-html-from-data.json',
+      '.claude/checks/no-regexp-from-input.json',           '.claude/checks/no-secret-in-image.json',
+      '.claude/checks/no-secret-in-log.json',               '.claude/checks/no-security-off-switch.json',
+      '.claude/checks/no-sensitive-file-copy.json',         '.claude/checks/no-shell-string-interpolation.json',
+      '.claude/checks/no-slop-words.json',                  '.claude/checks/no-stock-connectors.json',
+      '.claude/checks/no-swallowed-errors.json',            '.claude/checks/no-trailing-ing.json',
+      '.claude/checks/no-trust-proxy-true.json',            '.claude/checks/no-ts-enum.json',
+      '.claude/checks/no-vague-attribution.json',           '.claude/checks/node-env-before-install.json',
+      '.claude/checks/npm-ci-not-install.json',             '.claude/checks/oauth-state-signed.json',
+      '.claude/checks/one-error-body.json',                 '.claude/checks/one-time-code-compared-raw.json',
+      '.claude/checks/one-walk-per-template.json',          '.claude/checks/origin-from-config-not-host.json',
+      '.claude/checks/password-needs-slow-hash.json',       '.claude/checks/process-env-only-in-config.json',
+      '.claude/checks/query-cast-is-not-validation.json',   '.claude/checks/queue-action-from-client.json',
+      ... 265 more items
+    ],
+    expected: [
+      '.claude/checks/alpine-with-native-build.json',       '.claude/checks/api-path-versioned.json',
+      '.claude/checks/api-routes-versioned.json',           '.claude/checks/ascii-no-em-dash.json',
+      '.claude/checks/async-callback-unguarded.json',       '.claude/checks/authz-from-request-body.json',
+      '.claude/checks/background-loop-needs-stop.json',     '.claude/checks/child-process-error-handler.json',
+      '.claude/checks/client-calls-a-version.json',         '.claude/checks/client-ip-not-leftmost-xff.json',
+      '.claude/checks/compose-db-needs-auth.json',          '.claude/checks/compose-image-pinned.json',
+      '.claude/checks/compose-no-hardcoded-ip.json',        '.claude/checks/compose-no-host-bind-for-data.json',
+      '.claude/checks/compose-no-plaintext-secret.json',    '.claude/checks/compose-no-swarm-ignored-keys.json',
+      '.claude/checks/compose-overlay-not-bridge.json',     '.claude/checks/compose-service-needs-healthcheck.json',
+      '.claude/checks/compose-service-needs-init.json',     '.claude/checks/cookie-host-prefix.json',
+      '.claude/checks/copy-needs-chown-with-user.json',     '.claude/checks/copy-source-before-deps.json',
+      '.claude/checks/cors-needs-origin.json',              '.claude/checks/csp-not-switched-off.json',
+      '.claude/checks/debug-route-not-shipped.json',        '.claude/checks/docker-exec-form.json',
+      '.claude/checks/dockerfile-needs-healthcheck.json',   '.claude/checks/dockerfile-needs-user.json',
+      '.claude/checks/dockerignore-has-the-basics.json',    '.claude/checks/encrypted-name-plaintext-value.json',
+      '.claude/checks/entry-registers-shutdown.json',       '.claude/checks/err-text-stays-server-side.json',
+      '.claude/checks/failure-is-not-empty.json',           '.claude/checks/fetch-needs-timeout.json',
+      '.claude/checks/field-map-over-if-runs.json',         '.claude/checks/gate-is-not-a-todo.json',
+      '.claude/checks/gitattributes-forces-lf.json',        '.claude/checks/guard-fails-open.json',
+      '.claude/checks/health-checks-nothing.json',          '.claude/checks/hijack-needs-try.json',
+      '.claude/checks/hmac-over-reserialised-body.json',    '.claude/checks/hook-catch-must-not-allow.json',
+      '.claude/checks/hook-command-no-pipe.json',           '.claude/checks/hook-exit-1-does-not-block.json',
+      '.claude/checks/hook-no-or-true.json',                '.claude/checks/hook-refusal-on-stderr.json',
+      '.claude/checks/job-only-in-memory.json',             '.claude/checks/json-only-through-helper.json',
+      '.claude/checks/jwt-verify-pins-algorithm.json',      '.claude/checks/line-under-200-chars.json',
+      '.claude/checks/localhost-default-in-server.json',    '.claude/checks/lookup-over-if-chains.json',
+      '.claude/checks/lookup-over-ternary-chains.json',     '.claude/checks/middleware-skips-without-user.json',
+      '.claude/checks/next-api-route-versioned.json',       '.claude/checks/no-any.json',
+      '.claude/checks/no-cast-at-route-boundary.json',      '.claude/checks/no-cast-escape-hatches.json',
+      '.claude/checks/no-code-after-midline-comment.json',  '.claude/checks/no-console-in-app.json',
+      '.claude/checks/no-copula-dodging.json',              '.claude/checks/no-crlf-in-scripts.json',
+      '.claude/checks/no-db-in-route-file.json',            '.claude/checks/no-dramatic-colon.json',
+      '.claude/checks/no-dynamic-import-node-builtin.json', '.claude/checks/no-err-message-to-client.json',
+      '.claude/checks/no-express-no-vite.json',             '.claude/checks/no-inline-binary.json',
+      '.claude/checks/no-inline-zod-outside-schemas.json',  '.claude/checks/no-latest-base.json',
+      '.claude/checks/no-local-sleep.json',                 '.claude/checks/no-nested-ternary.json',
+      '.claude/checks/no-not-x-but-y.json',                 '.claude/checks/no-participial-opener.json',
+      '.claude/checks/no-pseudo-wisdom.json',               '.claude/checks/no-raw-html-from-data.json',
+      '.claude/checks/no-regexp-from-input.json',           '.claude/checks/no-secret-in-image.json',
+      '.claude/checks/no-secret-in-log.json',               '.claude/checks/no-security-off-switch.json',
+      '.claude/checks/no-sensitive-file-copy.json',         '.claude/checks/no-shell-string-interpolation.json',
+      '.claude/checks/no-slop-words.json',                  '.claude/checks/no-stock-connectors.json',
+      '.claude/checks/no-swallowed-errors.json',            '.claude/checks/no-trailing-ing.json',
+      '.claude/checks/no-trust-proxy-true.json',            '.claude/checks/no-ts-enum.json',
+      '.claude/checks/no-vague-attribution.json',           '.claude/checks/node-env-before-install.json',
+      '.claude/checks/npm-ci-not-install.json',             '.claude/checks/oauth-state-signed.json',
+      '.claude/checks/one-error-body.json',                 '.claude/checks/one-time-code-compared-raw.json',
+      '.claude/checks/one-walk-per-template.json',          '.claude/checks/origin-from-config-not-host.json',
+      '.claude/checks/password-needs-slow-hash.json',       '.claude/checks/process-env-only-in-config.json',
+      '.claude/checks/query-cast-is-not-validation.json',   '.claude/checks/queue-action-from-client.json',
+      ... 263 more items
+    ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

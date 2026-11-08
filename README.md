@@ -319,8 +319,8 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | Pack | For | Rules | Checks | Hooks | Skills |
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
-| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 43 | 9 | 2 | 8 |
-| `base` | Universal engineering, in every configuration | 22 | 7 | 20 | 11 |
+| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 43 | 9 | 2 | 7 |
+| `base` | Universal engineering, in every configuration | 22 | 7 | 20 | 12 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
@@ -352,7 +352,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 0 | 1 |
 | `synth-creator` | The synth-creator configuration's own laws | 6 | 2 | 9 | 2 |
 | `tui` | Terminal UIs | 1 | 5 | 0 | 1 |
-| `ui-craft` | Application and page design in any web stack | 16 | 24 | 0 | 9 |
+| `ui-craft` | Application and page design in any web stack | 17 | 24 | 0 | 9 |
 | `web` | Web UI: Next.js, HTML, CSS, Tailwind | 8 | 22 | 0 | 5 |
 | `websocket` | WebSocket services: identity from the connection | 1 | 3 | 0 | 0 |
 | `writing` | Text that goes public reads like a person wrote it | 9 | 11 | 0 | 10 |

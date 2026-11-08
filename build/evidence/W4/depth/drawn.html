@@ -1,0 +1,13 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>drawn</title>
+<style>
+  html, body { margin: 0; width: 480px; height: 320px; background: rgb(128, 132, 140); overflow: hidden; }
+  /* the same card with its depth drawn, from the analysis: a drop shadow, a bevel, a lit top edge */
+  .card {
+    position: absolute; left: 120px; top: 80px; width: 240px; height: 140px; box-sizing: border-box;
+    background: rgb(180, 186, 196);
+    border-top: 1px solid rgb(246, 248, 252);
+    box-shadow: 0 6px 12px rgba(20, 22, 28, 0.45), inset 0 3px 0 0 rgb(206, 212, 222), inset 0 -4px 0 0 rgb(142, 147, 156);
+  }
+</style></head>
+<body><div class="card"></div></body></html>

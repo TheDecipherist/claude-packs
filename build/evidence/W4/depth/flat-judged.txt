@@ -1,0 +1,15 @@
+== flat.png against reference.png (python3 look_depth.py reference.png flat.png flat-report.json 8ba6525)
+ok   face: reference 185.4, render 185.4, tolerance 4
+ok   ground: reference 131.7, render 131.7, tolerance 4
+FAIL shadow.darkness: reference 44.1, render 0, tolerance 15.4
+FAIL shadow.blur: reference 11, render 0, tolerance 4.4
+ok   shadow.offset_x: reference 0.0, render 0.0, tolerance 2
+FAIL shadow.offset_y: reference 6.0, render 0.0, tolerance 2
+FAIL bevel.light_width: reference 3, render 0, tolerance 1
+FAIL bevel.light_contrast: reference 26.0, render 0, tolerance 10.4
+FAIL bevel.dark_width: reference 4, render 0, tolerance 1
+FAIL bevel.dark_contrast: reference 38.9, render 0, tolerance 15.6
+FAIL edge_light.brightness: reference 62.4, render 0, tolerance 25.0
+FAIL edge_light.width: reference 1, render 0, tolerance 0
+verdict: fail
+exit 1

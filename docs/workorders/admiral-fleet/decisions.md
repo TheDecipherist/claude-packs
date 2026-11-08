@@ -43,3 +43,10 @@ Decided in W4 (the work order names this one d-1).
 
 - Question: the no-personal-name test failed on this run's own files: the evidence printed the home path, and the runner's session logs (whole transcripts) sat untracked in the order's folder.
 - Chosen: the evidence is written with the home folder as `~` (the same path without the user's name), the files already kept rewritten the same way, nothing else in them changed. The runner template now ignores its logs (KWB-98). This order's run.sh is the script running this session, and bash reads a running script as it goes, so it is not regenerated mid-run; its logs folder gets the same one-line `.gitignore` by hand.
+
+## d-1: does straight-on-and-aligned travel with analyse-reference-look into base?
+
+- Question: the skill's first line said "Read `straight-on-and-aligned` first: it governs every decision below". Is that rule needed by a web page too?
+- Options: move the rule to base, trimmed of synth words; or trim the skill's line and leave the rule in audio-core.
+- Chosen: trim the line, the rule stays in audio-core. Read whole, the rule is about drawing hardware from a photograph: a panel is a flat rectangle, rack ears and screw holes mirror, a knob's cap, skirt, pointer and ticks share a centre, one bend moves everything near it. A web mock-up is already drawn straight on. What a page needs of it is already in the skill (separate the object from the picture, rectify against an anchor, snap to the grid, a measured offset smaller than the spacing is error, geometry checked on its own), and in ui-craft's page rules. The line now reads: where the project has the rule (an editor drawn from a photograph of hardware), read it first. Easiest to reverse: moving the rule later is one file.
+- What else the move changes: skill-first's design-reference row applies wherever the skill is installed, so from this release every project that installs base has it. A project with pictures under a `reference/` or `mock-ups/` folder is refused a read of one until the skill is loaded. That is W4's purpose; the CHANGELOG says so.
