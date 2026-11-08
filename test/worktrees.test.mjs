@@ -7,6 +7,7 @@ import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { CLI, PIN_GUARD, bash, fire, fireAs, project, put, stellix } from './worktree-rig.mjs';
+import { COMMAND_CASES } from './worktree-cases-commands.mjs';
 import { PACK_CASES } from './worktree-cases-packs.mjs';
 
 test('folder-law allows a new file in a right folder of a worktree and refuses a wrong one', () => {
@@ -34,10 +35,11 @@ const SVF = (name, k = '2.0f') => `float ${name}::process (float x) noexcept\n{\
 const SHAPE = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'] } }, exclude: [] };
 
 // One case per installed hook: the worktree file it must allow and the one it must refuse, judged
-// from the worktree's own checkout. A hook added to the packs without a case here, or in worktree-cases-packs.mjs for a hook
-// a pack other than base adds, fails the test.
+// from the worktree's own checkout. A hook added to the packs without a case here, in worktree-cases-commands.mjs (a base hook
+// that judges a command by its checkout's layout) or in worktree-cases-packs.mjs (a hook a pack other than base adds) fails the test.
 const CASES = {
   ...PACK_CASES,
+  ...COMMAND_CASES,
   // the runner as settings.json runs it (KWB-24): the hooks it names judge a worktree file against the worktree, and the
   // timing lines go to the main checkout's log (CLAUDE_PROJECT_DIR)
   'run-hooks.mjs': ({ here, wt }) => {
@@ -139,14 +141,6 @@ const CASES = {
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
   },
-  'suite-once.mjs': ({ here, wt }) => {
-    // The checkout the command runs in decides what is the whole suite: the worktree's layout names its own suite command, main's
-    // does not. Nobody asked for a full run (1.3.0: the gate is the changed tests; a full run only on the user's request).
-    const layout = JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8'));
-    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...layout, commands: { ...layout.commands, test: 'bash tools/all.sh' } }));
-    assert.equal(bash(here, 'suite-once.mjs', `cd ${wt} && bash tools/all.sh`), 2);
-    assert.equal(bash(here, 'suite-once.mjs', `cd ${here} && bash tools/all.sh`), 0);
-  },
   'template-law.mjs': ({ here, wt }) => {
     // The worktree's branch already has this element; main does not. Each checkout is read on its own.
     const el = (t) => `<div class="tile"><h3 class="name">${t}</h3><p>${t}</p></div>\n`;
@@ -174,28 +168,6 @@ const CASES = {
     put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards: { codeShape: { maxStatementsPerLine: 9 } } }));
     assert.equal(fire(here, 'code-shape.mjs', join(wt, 'src/app/one.cpp'), packed), 0);
     assert.equal(fire(here, 'code-shape.mjs', join(here, 'src/app/one.cpp'), packed), 2);
-  },
-  'repo-litter.mjs': ({ here, wt }) => {
-    // The worktree's layout allows this asset; main's does not. A git add is judged by the checkout it runs in.
-    put(join(wt, 'hero.png'), 'x');
-    put(join(here, 'hero.png'), 'x');
-    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards: { repoLitter: { allow: ['hero.png'] } } }));
-    const add = (cwd) => fireAs(here, 'repo-litter.mjs', { tool_name: 'Bash', tool_input: { command: 'git add hero.png' }, cwd }).status;
-    assert.equal(add(wt), 0);
-    assert.equal(add(here), 2);
-  },
-  'skill-first.mjs': ({ here, wt }) => {
-    // The worktree's layout names its sheets as circuit material; main's does not. The transcript has no skill loaded, and the
-    // project installs read-a-circuit-diagram (reverse-engineering), so the row applies.
-    put(join(wt, 'sheets/board.png'), 'x');
-    put(join(here, 'sheets/board.png'), 'x');
-    const layout = JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8'));
-    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...layout, guards: { ...layout.guards, circuitSkill: { sources: ['sheets/**'] } } }));
-    const transcript = join(here, 'unloaded.jsonl');
-    put(transcript, '{"type":"user"}\n');
-    const read = (root) => fireAs(here, 'skill-first.mjs', { tool_name: 'Read', tool_input: { file_path: join(root, 'sheets/board.png') }, cwd: root, transcript_path: transcript }).status;
-    assert.equal(read(wt), 2);
-    assert.equal(read(here), 0);
   },
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.

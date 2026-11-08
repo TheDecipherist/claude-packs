@@ -36,8 +36,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/suite-once.mjs .claude/hooks/repo-litter.mjs",
-            "timeout": 35
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/suite-once.mjs .claude/hooks/repo-litter.mjs .claude/hooks/look-gate.mjs",
+            "timeout": 55
           }
         ]
       },
@@ -69,6 +69,18 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/making.mjs .claude/hooks/reuse-hint.mjs",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/look-gate.mjs",
             "timeout": 20
           }
         ]

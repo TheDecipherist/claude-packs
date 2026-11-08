@@ -31,5 +31,6 @@ Then write the gate:
 - Measure the render with the same code that measured the target, so the gate compares like with like.
 - Plant a fault for each thing the gate claims, and diff each planted run against the unplanted result. An exit code proves nothing: the first run of the MPX 500's gate showed three plants "failing", and two had changed nothing, because the gate was already red.
 - A meter changed while the gate is red is suspect: say so, and show the thresholds stayed put.
+- Declare the look in `.claude/layout.json` `looks` (its name, the reference, and the code globs that draw it), and have the gate write its verdict to `build/evidence/looks/<name>.json`: `{ "reference", "commit": <the commit it judged>, "verdict": "pass" | "fail", "measures": {...} }`. Commit the report on the branch. `look-gate` refuses to land a branch whose look code changed without a passing report for that code's last change, and names the look after every build that touched it.
 
 Report the analysis file's path and the list of open items.

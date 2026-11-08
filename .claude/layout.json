@@ -160,7 +160,8 @@
     "hooks/reuse-hint.mjs",
     "hooks/code-shape.mjs",
     "hooks/repo-litter.mjs",
-    "hooks/skill-first.mjs"
+    "hooks/skill-first.mjs",
+    "hooks/look-gate.mjs"
   ],
   "commands": {
     "test": "npm test",

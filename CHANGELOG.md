@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `look-gate` (`base`): a page drawn from a reference picture lands only with a passing look report for the code that draws it. A project declares its looks in `layout.json` `looks` (name, reference, the code's globs); after a build whose branch changed a look's code, the hook names the looks that are due, and at a landing it refuses a branch whose look code changed unless each look's report, committed on the branch, says "pass" for a commit at or after that code's last change. `analyse-reference-look` writes the report. Three pages of a plugin's editor had landed far plainer than their mock-ups, judged by eye, and nothing stopped them.
+
 ## 1.3.1 (2026-11-07)
 
 - `skill-first` (`base`) replaces `circuit-skill-first`: one hook from a table, refusing a read of a source until its skill is loaded. A schematic, a service manual or a data sheet needs `read-a-circuit-diagram`, and a design reference (a mock-up or anything under a `reference/` folder) needs `analyse-reference-look`, which two pages of a plugin's editor skipped, landing far plainer than their mock-ups. A row applies only where its skill is installed, and a project adds its own rows in `guards.skillFirst`. `ui-matches-reference-look` and `circuits-through-the-skill` name it.

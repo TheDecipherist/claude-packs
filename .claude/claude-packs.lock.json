@@ -1,5 +1,5 @@
 {
-  "kit": "1.3.0",
+  "kit": "1.3.1",
   "packs": [
     "base"
   ],
@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-08T01:57:34.515Z",
+  "updated": "2026-11-08T02:43:45.973Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/behaviour-lives-with-its-kind.md": "77b22577be4e86bdac9b558d21bcfe9215d027a90c97458e315b6ad45fa032a9",
@@ -61,6 +61,7 @@
     ".claude/hooks/lib/house.py": "0c8a2e113eec53c48caa8e11f5dd8f1d611ed239cc137c246d8d7bab8e4aa661",
     ".claude/hooks/lib/languages.mjs": "0b2cc7fec808abfa0f3119697feb0c9d8372ce6b9a62d34dc59ac3cbb8476922",
     ".claude/hooks/lib/layout.mjs": "bf89194380915b8ca0407a071bc4682c45245c37a885f624596ab29e17ab8b4e",
+    ".claude/hooks/lib/look-gate-selftest.mjs": "4da547070c7d859a7352a3a3751577934e933d3bff4fb6160898c379b6f67f9a",
     ".claude/hooks/lib/making-check-selftest.mjs": "5948e7bdf1b5d28c3bd8e8c827555dc0277a695e326ff20dcfe3a54c4c69043c",
     ".claude/hooks/lib/near-copies.mjs": "01d9b17900b3471f60b11113974fe5444b97d085c551f51b32b265353d0f8bcb",
     ".claude/hooks/lib/program-read.mjs": "eb0d5b4684508576b215aecfbcca15332a694eded29ea2a9df170118565c8d4e",
@@ -82,6 +83,7 @@
     ".claude/hooks/lib/turn.mjs": "f8d858950deff6dd9e60a8fc8e9387b18ae19a790f017d456095b44280f6004d",
     ".claude/hooks/lib/unread-writes.mjs": "b49d9d93da9787cc9e68e9e18532da95c350db998146f7012f6690e460272086",
     ".claude/hooks/lib/writes.mjs": "f35e72aa4ca8a0f26d46c57173fc2f561376ac341c3f96d5155d4cde6fc8fc5f",
+    ".claude/hooks/look-gate.mjs": "efbffdf8f6cf872224f94eb128c55a39319b8c8fce174d504e7e7943a2ff9043",
     ".claude/hooks/making-check.mjs": "9e2a9c8f07f8d4e254b688e615145c4f4056bc2a8e0fe4cce76dff601eec76a3",
     ".claude/hooks/making.mjs": "d523b6766af26f4ec66f786c4cd094941fc00eb2260d72835efafe5d35c77c1d",
     ".claude/hooks/once-only.mjs": "92018b82227abe6e4487df479779800779ae19b60d9e9a1aa791407dd36a59f7",

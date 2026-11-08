@@ -320,7 +320,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 42 | 8 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 22 | 7 | 19 | 11 |
+| `base` | Universal engineering, in every configuration | 22 | 7 | 20 | 11 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
@@ -453,6 +453,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `untrusted-boundary` | Write | Refuses a model call with outside text and no per-call boundary |
 | `git-guard` | Bash | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
 | `suite-once` | Bash | Refuses the whole test suite unless the user's prompt asks for a full run |
+| `look-gate` | Bash, after a build | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
 | `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
