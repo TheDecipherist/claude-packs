@@ -1,0 +1,22 @@
+✔ no file names a person (32.734582ms)
+✔ nothing in the kit names the bare `npx claude-packs` (it resolves to someone else's package) (30.635183ms)
+✔ the bare-name reader finds a planted line (0.2888ms)
+✔ recorded run output under evidence/ is left out, and the same line anywhere else is found (KWB-99) (1.949199ms)
+✔ workorder writes the steps, the prompt and the runner, with its name in them (73.699658ms)
+✔ workorder never writes over a work order that exists (127.093829ms)
+✔ a work order needs a plain name (132.686026ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (66.441263ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.2061ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.2488ms)
+✔ the runner keeps its session logs out of git (KWB-98) (88.477351ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (10688.983441ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.3313ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11253.414027
+exit 0

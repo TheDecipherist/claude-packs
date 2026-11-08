@@ -8,7 +8,7 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - [x] W0 set up
 - [x] W1 full-stack chooses web, go, host-agent, shell-hooks
 - [x] W2 the tenant law judges Go
-- [ ] W3 one consistent full-stack layout, with a web folder
+- [x] W3 one consistent full-stack layout, with a web folder
 - [ ] W4 analyse-reference-look for any page drawn from a picture
 - [ ] W5 release
 - [ ] W6 prove the consumer's install
@@ -38,3 +38,4 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - 2026-11-08 W3.2: planner-skills prints the web folders, read as a new reader (planner-web-folders.txt, planner-full-stack-SKILL.md); the preamble names no folder, unchanged
 - 2026-11-08 W3.3: KWB-97 found proving the contract (update wrote the new web folders into an old project), logged at dd7427a before the fix; noop test on an install by the kit at f747567, red before (noop-red-before-fix.txt) and green after; full-stack, hover, configurations, layout-owned green (tests-green.txt, 28 of 28)
 - 2026-11-08 W3.4: a page.tsx under packages/web/app gets the web pack's pages rules (ui-primitives-one-module, web-performance) live, doctor --strict OK (coverage-page.txt)
+- 2026-11-08 W3 gate: test:changed --base origin/main on ab9ea59, 482 of 484 (build/evidence/W3/gate.txt): no-personal-name failed on this run's evidence and the runner's untracked logs, npx-name on a kept gate log quoting its title. KWB-98 and KWB-99 logged (af6c927), fixed with tests red first (356d4b0), the evidence written with ~ (d-7); the failed tests and the fix's run again, 13 of 13 (gate-rerun.txt). W3 done.
