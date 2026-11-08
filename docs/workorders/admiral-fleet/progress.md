@@ -7,7 +7,7 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - [x] W0.0 land-branch brings the main checkout up to date
 - [x] W0 set up
 - [x] W1 full-stack chooses web, go, host-agent, shell-hooks
-- [ ] W2 the tenant law judges Go
+- [x] W2 the tenant law judges Go
 - [ ] W3 one consistent full-stack layout, with a web folder
 - [ ] W4 analyse-reference-look for any page drawn from a picture
 - [ ] W5 release
@@ -32,3 +32,4 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - 2026-11-08 W2.1: the multi-tenant rule's paths take **/*.go, and it says the tenant comes from the session or connection in Go too; a scratch `init --config go multi-tenant` shows it live on internal/api/handlers.go, doctor --strict OK (build/evidence/W2/coverage-go.txt)
 - 2026-11-08 W2.2: both tenant checks take Go (d-5): an `examples` list proved by the lesson-checks selftest; measured on daemon-go, HitKeep and go-saas/kit, 0 hits in 1,130 files, the 15 HitKeep role comparisons read (build/evidence/W2/measure.txt)
 - 2026-11-08 W2.3: Go samples in check-speed (green, check-speed.txt) and every-language (the Go pairs refused and taken through the installed hook; the selftest names a planted miss in examples[1]); red on the old kit (tests-red-old-kit.txt) and the planted test red with the old lesson-checks (selftest-red-old-lesson-checks.txt, 0 !== 1)
+- 2026-11-08 W2 gate: test:changed --base origin/main on a2bbe6e, 484 of 484 (build/evidence/W2/gate.txt). W2 done: doctor proves each check's Go pairs (the lesson-checks selftest, doctor OK in the scratch go install); the measurement in a2bbe6e's message; the rule live on a .go file.
