@@ -22,7 +22,7 @@ Always do:
 - Before touching the code, write the smallest test or probe that reproduces the bug: a render, a parameter sequence, a MIDI file, a state load.
 - Run it and see it fail for the reported reason: `node .claude/tools/test-verdict.mjs --red <test-name>` must say `RED_CONFIRMED`.
 - Freeze what defines "fixed" before the fix, where the project has `freeze.mjs`: `node .claude/tools/freeze.mjs on "bug <id>" <test file> <golden files>`.
-- Fix the code until the same test passes, then run the full suite once, then unfreeze.
+- Fix the code until the same test passes, then run the tests the fix reaches (`pick-tests`), then unfreeze.
 - Keep the test in the suite forever. That is what stops the bug coming back.
 
 Never do:

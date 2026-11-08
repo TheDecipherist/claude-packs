@@ -160,7 +160,7 @@ The kit is strict about what counts as proof:
 - **A test has to be able to fail.** A gate is shown red on a planted fault, a mistake put in on purpose. A test that can't fail proves nothing.
 - **Anything used twice is tested once.** Behaviour is tested on the template, with one quick pass proving every instance really is that template (`test-the-template-once`).
 - **While working, run only what the change reaches.** The `pick-tests` skill picks them, so a small change never costs a full run.
-- **The whole suite runs once, on committed work, as the gate before landing.** `suite-once` refuses it on uncommitted work, so it can't be run again and again in place of thinking.
+- **The gate before landing is the tests the branch's changes reach; the whole suite runs only when the user asks.** `suite-once` refuses a whole-suite run otherwise, so it can't be run again and again in place of thinking.
 - **Finished work lands.** Green work is merged to the trunk and pushed in the same turn (`land-branch`), and it isn't called landed until the remote agrees.
 - **The guards are tested too.** Every hook has a `--selftest`, every lesson check proves its `bad` and `good` example, and `doctor` runs them all.
 
@@ -320,7 +320,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 42 | 8 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 22 | 7 | 18 | 11 |
+| `base` | Universal engineering, in every configuration | 22 | 7 | 19 | 11 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
@@ -344,7 +344,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `python` | Python: templates, errors, resources, safe subprocess calls | 2 | 11 | 0 | 1 |
 | `react` | React: failed requests, effects, accessible controls | 2 | 6 | 0 | 0 |
 | `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate, every repeat one template | 6 | 9 | 0 | 3 |
-| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 10 | 4 | 2 | 8 |
+| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 10 | 4 | 1 | 8 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
 | `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first, an offline VST3 renderer, and comparing with the real machine | 6 | 5 | 0 | 6 |
@@ -452,11 +452,12 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `secrets-guard` | Write | Refuses a secret in code, or a secret file in git |
 | `untrusted-boundary` | Write | Refuses a model call with outside text and no per-call boundary |
 | `git-guard` | Bash | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
-| `suite-once` | Bash | Refuses the whole test suite on uncommitted work |
+| `suite-once` | Bash | Refuses the whole test suite unless the user's prompt asks for a full run |
+| `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
-Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` and `circuit-skill-first` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
+Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
 Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. Nothing is ever cleared: a log past 1 MB moves to `.claude/logs/` under a dated name (`"guards": { "logs": { "maxKb": 1024 } }`). A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
 
@@ -464,7 +465,7 @@ Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median ove
 
 Four packs carry what rebuilding classic machines from firmware taught, and most of it is about failures that pass every test: units deaf to the transport, presets silently on defaults, a list of algorithms behind one DSP path.
 
-`reverse-engineering` starts from the machine's own names: `names-sweep` searches an image for what the manual prints, in the forms a display uses and through every wrapping met so far, and reports the record size, the order, the pools and the tables; `menu-map` joins every parameter to the page that reaches it. It needs two sources before anything is named, a source tag on every law and a debt ledger for what was tuned by ear, and it keeps firmware out of git. A schematic, a service manual or a data sheet is read through `read-a-circuit-diagram`, and `circuit-skill-first` refuses a read of one until that skill is loaded. `midi` holds the law of clock and sync, and treats a program as records that round-trip byte for byte. `sound-design` proves sound by measuring audio, `vst3host` bounces any VST3 with no DAW or audio device, so a plugin can be measured from a script (`bounce-a-plugin` says how), and `compare-to-the-machine` sets a build beside a recording of the real thing, matching each patch by the name on its display. `instrument-shell` keeps sessions loadable and panels reachable. `init synth-rebuild` takes them all.
+`reverse-engineering` starts from the machine's own names: `names-sweep` searches an image for what the manual prints, in the forms a display uses and through every wrapping met so far, and reports the record size, the order, the pools and the tables; `menu-map` joins every parameter to the page that reaches it. It needs two sources before anything is named, a source tag on every law and a debt ledger for what was tuned by ear, and it keeps firmware out of git. A schematic, a service manual or a data sheet is read through `read-a-circuit-diagram`, and `skill-first` refuses a read of one until that skill is loaded. `midi` holds the law of clock and sync, and treats a program as records that round-trip byte for byte. `sound-design` proves sound by measuring audio, `vst3host` bounces any VST3 with no DAW or audio device, so a plugin can be measured from a script (`bounce-a-plugin` says how), and `compare-to-the-machine` sets a build beside a recording of the real thing, matching each patch by the name on its display. `instrument-shell` keeps sessions loadable and panels reachable. `init synth-rebuild` takes them all.
 
 A project says what it is, in `"guards": { "instrument": { "kind": "reproduction" } }` or `"original"`, because the laws differ: on a reproduction the machine is the spec, aliasing and all.
 

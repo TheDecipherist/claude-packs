@@ -184,6 +184,19 @@ const CASES = {
     assert.equal(add(wt), 0);
     assert.equal(add(here), 2);
   },
+  'skill-first.mjs': ({ here, wt }) => {
+    // The worktree's layout names its sheets as circuit material; main's does not. The transcript has no skill loaded, and the
+    // project installs read-a-circuit-diagram (reverse-engineering), so the row applies.
+    put(join(wt, 'sheets/board.png'), 'x');
+    put(join(here, 'sheets/board.png'), 'x');
+    const layout = JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8'));
+    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...layout, guards: { ...layout.guards, circuitSkill: { sources: ['sheets/**'] } } }));
+    const transcript = join(here, 'unloaded.jsonl');
+    put(transcript, '{"type":"user"}\n');
+    const read = (root) => fireAs(here, 'skill-first.mjs', { tool_name: 'Read', tool_input: { file_path: join(root, 'sheets/board.png') }, cwd: root, transcript_path: transcript }).status;
+    assert.equal(read(wt), 2);
+    assert.equal(read(here), 0);
+  },
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
     put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');

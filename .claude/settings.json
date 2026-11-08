@@ -40,6 +40,16 @@
             "timeout": 35
           }
         ]
+      },
+      {
+        "matcher": "Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/skill-first.mjs",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Stop": [

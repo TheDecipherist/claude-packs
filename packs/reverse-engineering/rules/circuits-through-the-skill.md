@@ -1,6 +1,6 @@
 ---
 # concepts: cpp, js, notes, tooling
-# hook: circuit-skill-first.mjs
+# hook: skill-first.mjs
 ---
 # A schematic, a service manual or a data sheet is read through read-a-circuit-diagram, never at a glance
 
@@ -13,6 +13,6 @@ Always do:
 - Brief an agent with the skill's path and "follow it step by step" when the skill is not installed where it works.
 
 Never do:
-- Report a figure from a page read at screen size, or before the skill's report holds it; `circuit-skill-first` refuses the read.
+- Report a figure from a page read at screen size, or before the skill's report holds it; `skill-first` refuses the read.
 - Count a path named in a brief as the skill loaded: only the tool call counts.
 </constraints>

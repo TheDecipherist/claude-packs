@@ -57,17 +57,6 @@ export const PACK_CASES = {
     assert.equal(add(wt), 0);
     assert.equal(add(here), 2);
   },
-  'circuit-skill-first.mjs': ({ here, wt }) => {
-    // The worktree's layout names its sheets as circuit material; main's does not. Neither transcript has the skill loaded.
-    put(join(wt, 'sheets/board.png'), 'x');
-    put(join(here, 'sheets/board.png'), 'x');
-    withGuards(wt, { circuitSkill: { sources: ['sheets/**'] } });
-    const transcript = join(here, 'unloaded.jsonl');
-    put(transcript, '{"type":"user"}\n');
-    const payload = (root) => ({ tool_name: 'Read', tool_input: { file_path: join(root, 'sheets/board.png') }, cwd: root, transcript_path: transcript });
-    assert.equal(fireAs(here, 'circuit-skill-first.mjs', payload(wt)).status, 2);
-    assert.equal(fireAs(here, 'circuit-skill-first.mjs', payload(here)).status, 0);
-  },
   'no-shipped-images.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'src/painter/logo.png')), 2);
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'tests/goldens/panel.png')), 0);

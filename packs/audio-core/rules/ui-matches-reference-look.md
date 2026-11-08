@@ -6,7 +6,7 @@ paths:
 
 # A UI built from a reference matches its look, not only its layout
 
-Stellix's layers landed flat and without glow (B-161): the analysis measured positions, the side-by-sides compared positions, no gate measured the look, and the brief said "not widget details".
+Stellix's layers landed flat and without glow (B-161): the analysis measured positions, the side-by-sides compared positions, no gate measured the look, and the brief said "not widget details". The Matrix-12's editor pages landed far plainer than their mock-ups (1.3.1): this rule was installed, the skill was never run, and the renders were judged by eye. Now `skill-first` refuses a read of a reference picture until the skill is loaded.
 
 <constraints>
 Always do:
@@ -19,5 +19,6 @@ Always do:
 - End every drawn page with the user's picture stop on the side by side. A page is not done before that.
 
 Never do:
+- Open a reference picture, a mock-up or anything under a `reference/` folder before the `analyse-reference-look` skill is loaded; `skill-first` refuses it.
 - Treat a reference drawing as "layout and control list only". Where a drawing is inconsistent with itself, the written spec picks the right version; it is never a reason to drop the look.
 - Report a side by side as passing from positions alone.

@@ -48,6 +48,12 @@ function tailEntries(path) {
   }
 }
 
+// The user's own words that started the current turn, or '' (no transcript, or no prompt in it).
+export function lastPrompt(path) {
+  const { entries, start } = tailEntries(path);
+  return (start > 0 && promptText(entries[start - 1])) || ''; // tailEntries starts the turn just after its prompt
+}
+
 export function lastTurn(path) {
   const { entries, start } = tailEntries(path);
   const refused = new Set();

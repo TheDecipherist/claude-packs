@@ -7,7 +7,7 @@ description: Use when a work branch is finished, when its gate went green, or wh
 
 <constraints>
 Always do:
-1. Check it is finished: everything committed and pushed, the "done when" measured, the whole suite green on committed work.
+1. Check it is finished: everything committed and pushed, the "done when" measured, and the tests the branch's changes reach green on committed work, picked against the trunk (`pick-tests`). The whole suite is not the gate: it runs only when the user asks.
 2. Fetch, and see whether the trunk moved: `git rev-list --count HEAD..origin/<trunk>`.
 3. The trunk has not moved: go to step 5.
 4. The trunk moved: merge it into the branch, never rebase. Resolve conflicts keeping both sides' work: both CHANGELOG entries, the higher version. Run only the tests the merge reaches, commit, push the branch.
