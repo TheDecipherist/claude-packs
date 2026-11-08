@@ -4,8 +4,8 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 
 ## Steps
 
-- [ ] W0.0 land-branch brings the main checkout up to date
-- [ ] W0 set up
+- [x] W0.0 land-branch brings the main checkout up to date
+- [x] W0 set up
 - [ ] W1 full-stack chooses web, go, host-agent, shell-hooks
 - [ ] W2 the tenant law judges Go
 - [ ] W3 one consistent full-stack layout, with a web folder
@@ -22,3 +22,6 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - 2026-11-08 W0.0.2: land-branch step 9 fast-forwards the main checkout (fetch, merge --ff-only, rev-parse proof; touches nothing with uncommitted work or another branch held); skill 2,183 characters, doctor --strict OK (build/evidence/W0.0/doctor-strict.txt); 25bb50d
 - 2026-11-08 W0.0.3: git-guard's Stop enforces it (d-3; lib/trunk-lag.mjs); selftest red 6 of 9 without the fix, 9 of 9 green with it, the full selftest OK (build/evidence/W0.0/selftest-red-before-fix.txt, selftest-green-with-fix.txt, git-guard-selftest.txt); worktree case red with the old hook (worktree-case-red-old-hook.txt) and green; 25bb50d
 - 2026-11-08 W0.0 gate: test:changed --base origin/main on 25bb50d, 489 of 489 (build/evidence/W0.0/gate.txt)
+- 2026-11-08 W0.0.landing: landed from work/W0.0-main-checkout at 194a20f; ls-remote, HEAD and the main checkout's rev-parse all 194a20f (build/evidence/W0.0/landing-proof.txt). W0.0 done: KWB-96 dated 17:20, before the fix's first commit 25bb50d; selftest red then green; land-branch within doctor's skill limits; this landing leaves the main checkout equal to origin/main.
+- 2026-11-08 W0.1: npm install (up to date); doctor --strict OK on the kit (build/evidence/W0/doctor-strict.txt); swarmk main cloned to ../swarmk-ro at 1f46aaf, 81 .go files under daemon-go/ (build/evidence/W0/swarmk.txt)
+- 2026-11-08 W0.2: lock status names this session, 494639ba (build/evidence/W0/lock-status.txt). W0 done.

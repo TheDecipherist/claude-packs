@@ -1,0 +1,7 @@
+  configuration: base
+  selftests: 21 of 21 unchanged, not run again (doctor --fresh runs them all)
+  making: 62 words, about 107 tokens added to every prompt (77 words, about 129 tokens when it echoes a named instance); an estimate (word pieces of up to 6 letters, each mark one token), not the model's tokenizer
+  duplicates: 20 (jscpd, 223 sources, 79 ms; `npx --no-install @thedecipherist/claude-packs dup scan` lists them), lowest seen 20
+  hook timing (ms, each hook's last 100 calls at most): run-hooks 62/542, reuse-hint 37/89, making-check 32/32, suite-once 19/51, kit-lock 13/28, lesson-checks 6/13, git-guard 5/459, making 5/6, shape-law 5/15, skill-first 4/18, look-gate 3/15, once-only 3/117, code-shape 2/13, dispatch-once 2/11, file-size-guard 2/7, repo-litter 2/12, secrets-guard 2/12, template-law 2/47, brief-guard 1/7, folder-law 1/6, placement-law 1/7, untrusted-boundary 1/8 (median/worst)
+OK: base
+exit 0
