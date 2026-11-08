@@ -10,6 +10,7 @@
 - `build-guard` reads the words after a `$(...)` as arguments, and judges a command after `do`, `then` or `else` (KWB-89).
 - `suite-once` lets `ctest -N`, `--show-only` and `--print-labels` through: they list tests and run none (KWB-90).
 - `shape-law` takes an accessor for a picker or selector component for what it is, not a selector of the concept (KWB-91).
+- `update` keeps a project's `looks` in `layout.json`; it dropped them, and look-gate then gated no page (KWB-92).
 
 ## 1.3.1 (2026-11-07)
 
