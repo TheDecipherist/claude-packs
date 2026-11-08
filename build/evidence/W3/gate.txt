@@ -1,0 +1,1092 @@
+
+> @thedecipherist/claude-packs@1.3.1 test:changed
+> node scripts/test-changed.mjs --base origin/main
+
+test:changed: base origin/main (f747567), 26 changed file(s)
+  build.md
+  build/evidence/W2/landing-proof.txt
+  build/evidence/W3/coverage-page.txt
+  build/evidence/W3/gate.txt
+  build/evidence/W3/noop-red-before-fix.txt
+  build/evidence/W3/planner-full-stack-SKILL.md
+  build/evidence/W3/planner-web-folders.txt
+  build/evidence/W3/scratch-init.txt
+  build/evidence/W3/tests-green.txt
+  configurations/full-stack/config.json
+  docs/workorders/admiral-fleet/decisions.md
+  docs/workorders/admiral-fleet/logs/runner.log
+  docs/workorders/admiral-fleet/logs/session-1.err
+  docs/workorders/admiral-fleet/logs/session-1.jsonl
+  docs/workorders/admiral-fleet/progress.md
+  lib/layout.mjs
+  package-lock.json
+  packs/full-stack/pack.json
+  test/fixtures/noop/full-stack/before/claude-md.txt
+  test/fixtures/noop/full-stack/before/layout.json
+  test/fixtures/noop/full-stack/before/lock.json
+  test/fixtures/noop/full-stack/before/settings.json
+  test/full-stack.test.mjs
+  test/hover.test.mjs
+  test/noop.test.mjs
+  workflow-bugs.md
+chose 62 of 70 test files:
+  test/kf-refusals.test.mjs
+    names build.md (build.md)
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/new.test.mjs
+    names build.md (build.md)
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+    (+1 more)
+  test/workorder.test.mjs
+    names build.md (build.md)
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    names workflow-bugs.md (workflow-bugs.md)
+  test/worktrees.test.mjs
+    names build.md (build.md)
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through test/worktree-rig.mjs → bin/claude-packs.mjs → lib/sync.mjs
+    (+1 more)
+  test/base-neutral.test.mjs
+    names config.json (configurations/full-stack/config.json)
+  test/configs.test.mjs
+    names config.json (configurations/full-stack/config.json)
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/configurations.test.mjs
+    names config.json (configurations/full-stack/config.json)
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/audio-packs.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/base-laws.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/content-sites.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/cpp-pack.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/custom-packs.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    names packs/ (holds packs/full-stack/pack.json)
+  test/doctor-cache.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/doctor-timeout.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/every-language.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/full-stack.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+    changed
+  test/gitignore.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/global.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/hook-proof.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/hook-timing.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+    reaches packs/full-stack/pack.json
+  test/house.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+    reaches packs/full-stack/pack.json
+  test/hover.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+    changed
+  test/install-fixes.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/install.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/instances.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/kf-build-laws.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/kf-fail-open.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/kf-new-projects.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/kit-guards.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/lock-release.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/logging.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/lookup.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/micro.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/names-sweep.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/noop.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    names lib/layout.mjs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+    (+5 more)
+  test/once-only.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/other-projects.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/postgres-pack.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/review-packs.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/routes.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/rule-tests.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/rules-follow-the-code.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/rust-dry.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/rust-pack.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/scan.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/shape.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/stored-text.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/structure.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/sub37-wb.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    names workflow-bugs.md (workflow-bugs.md)
+  test/symmetry.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    reaches lib/layout.mjs through bin/claude-packs.mjs → lib/sync.mjs
+  test/ui-craft.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/ui-depth.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/vst3host.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/what-the-kit-finds.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+  test/writing.test.mjs
+    configurations/full-stack/config.json: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/full-stack/pack.json: a pack reaches a project through an install: the tests that bring this pack in
+  test/fix-plan.test.mjs
+    reaches lib/layout.mjs through lib/fix-plan.mjs → lib/scan.mjs → lib/sync.mjs
+  test/layout-owned.test.mjs
+    reaches lib/layout.mjs
+  test/file-size.test.mjs
+    reaches packs/full-stack/pack.json
+  test/pack-manifest.test.mjs
+    names packs/ (holds packs/full-stack/pack.json)
+  test/no-personal-name.test.mjs
+    names test/fixtures/ (holds test/fixtures/noop/full-stack/before/claude-md.txt)
+    names test/fixtures/ (holds test/fixtures/noop/full-stack/before/layout.json)
+    names test/fixtures/ (holds test/fixtures/noop/full-stack/before/lock.json)
+    (+1 more)
+  test/test-changed.test.mjs
+    names test/noop.test.mjs
+  test/npx-name.test.mjs
+    names workflow-bugs.md (workflow-bugs.md)
+no test covers: build/evidence/W2/landing-proof.txt, build/evidence/W3/coverage-page.txt, build/evidence/W3/gate.txt, build/evidence/W3/noop-red-before-fix.txt, build/evidence/W3/planner-full-stack-SKILL.md, build/evidence/W3/planner-web-folders.txt, build/evidence/W3/scratch-init.txt, build/evidence/W3/tests-green.txt, docs/workorders/admiral-fleet/decisions.md, docs/workorders/admiral-fleet/logs/runner.log, docs/workorders/admiral-fleet/logs/session-1.err, docs/workorders/admiral-fleet/logs/session-1.jsonl, docs/workorders/admiral-fleet/progress.md, package-lock.json
+running: node --import ./test/fresh-tmp.mjs --test test/kf-refusals.test.mjs test/new.test.mjs test/workorder.test.mjs test/worktrees.test.mjs test/base-neutral.test.mjs test/configs.test.mjs test/configurations.test.mjs test/audio-packs.test.mjs test/base-laws.test.mjs test/content-sites.test.mjs test/cpp-pack.test.mjs test/custom-packs.test.mjs test/doctor-cache.test.mjs test/doctor-timeout.test.mjs test/every-language.test.mjs test/full-stack.test.mjs test/gitignore.test.mjs test/global.test.mjs test/hook-proof.test.mjs test/hook-timing.test.mjs test/house.test.mjs test/hover.test.mjs test/install-fixes.test.mjs test/install.test.mjs test/instances.test.mjs test/kf-build-laws.test.mjs test/kf-fail-open.test.mjs test/kf-new-projects.test.mjs test/kit-guards.test.mjs test/lock-release.test.mjs test/logging.test.mjs test/lookup.test.mjs test/micro.test.mjs test/names-sweep.test.mjs test/noop.test.mjs test/once-only.test.mjs test/other-projects.test.mjs test/postgres-pack.test.mjs test/review-packs.test.mjs test/routes.test.mjs test/rule-tests.test.mjs test/rules-follow-the-code.test.mjs test/rust-dry.test.mjs test/rust-pack.test.mjs test/scan.test.mjs test/shape.test.mjs test/stored-text.test.mjs test/structure.test.mjs test/sub37-wb.test.mjs test/symmetry.test.mjs test/ui-craft.test.mjs test/ui-depth.test.mjs test/vst3host.test.mjs test/what-the-kit-finds.test.mjs test/writing.test.mjs test/fix-plan.test.mjs test/layout-owned.test.mjs test/file-size.test.mjs test/pack-manifest.test.mjs test/no-personal-name.test.mjs test/test-changed.test.mjs test/npx-name.test.mjs
+✔ midi: src/in.cpp is refused its fault and takes the fix (27483.934867ms)
+✔ midi: src/rt.cpp is refused its fault and takes the fix (2873.822549ms)
+✔ midi: src/host.cpp is refused its fault and takes the fix (2651.287598ms)
+✔ midi: src/load.cpp is refused its fault and takes the fix (2998.257466ms)
+✔ sound-design: src/noise.cpp is refused its fault and takes the fix (3785.688102ms)
+✔ sound-design: src/voice.cpp is refused its fault and takes the fix (3130.715888ms)
+✔ sound-design: src/fx.cpp is refused its fault and takes the fix (3010.950941ms)
+✔ reverse-engineering: src/law.cpp is refused its fault and takes the fix (3228.824803ms)
+✔ reverse-engineering: src/rom.cpp is refused its fault and takes the fix (2657.565103ms)
+✔ instrument-shell: src/state.cpp is refused its fault and takes the fix (2551.011257ms)
+✔ cpp: src/a.h is refused its fault and takes the fix (2592.041304ms)
+✔ cpp: src/b.cpp is refused its fault and takes the fix (2888.45169ms)
+✔ the full law of the clock travels with its skill, in neutral words (0.419099ms)
+✔ firmware stays out of git, a named fixture may stay in (22231.956129ms)
+✔ a download marker that breaks a Windows checkout is refused (2754.075935ms)
+✔ the synth-rebuild preset takes all four, and suggest finds them from a project (26967.814223ms)
+✔ reproduction or original decides the aliasing law (0.2515ms)
+✔ a new project of every configuration gets both laws, and both selftests pass (49418.040721ms)
+✔ a project that had base before 0.10.0 gets neither law until it enables it; the rule waits with its hook (7990.611604ms)
+✔ base and the base configuration name no synth word (7.761297ms)
+✔ what left base is in the synth-creator pack, and only the synth-creator configuration installs that pack (2.687399ms)
+✔ configs lists every configuration with what it installs (195.190515ms)
+✔ init --config stores the configuration, update applies it, doctor prints it (33672.154105ms)
+✔ init --config base: base alone, its own preamble, no synth folders or lines (17831.941844ms)
+✔ a pack outside the configuration is refused, naming the ones it takes (163.925438ms)
+✔ init without --config takes the configuration its packs belong to (2894.527341ms)
+✔ a layout without the key (an install before 0.10.0) gets the configuration of its packs on update (5707.617111ms)
+✔ config <name> lists what changes and switches; --dry-run changes nothing (7506.003707ms)
+✔ doctor fails on a configuration the kit does not have, and on a pack outside it (10672.177628ms)
+✔ the kit ships its configurations (1.5631ms)
+✔ base: installs into a fresh repo and doctor --strict passes (25840.228752ms)
+✔ cpp: installs into a fresh repo and doctor --strict passes (5210.922231ms)
+✔ full-stack: installs into a fresh repo and doctor --strict passes (8602.657973ms)
+✔ go: installs into a fresh repo and doctor --strict passes (6050.643641ms)
+✔ node: installs into a fresh repo and doctor --strict passes (5201.538066ms)
+✔ python: installs into a fresh repo and doctor --strict passes (4870.625129ms)
+✔ rust: installs into a fresh repo and doctor --strict passes (5595.954441ms)
+✔ synth-creator: installs into a fresh repo and doctor --strict passes (30218.126967ms)
+✔ full-stack installs web, go, host-agent and shell-hooks when chosen: their rules, checks and hooks land (4217.115831ms)
+✔ planner-skills: one project-layout body per configuration, from its layout template (314.59409ms)
+✔ a content folder is content; the same word under a code root is code; a project can add its own (1.529099ms)
+✔ a date in an article is a fact: the check is opt-in, and even switched on leaves articles alone (26455.995297ms)
+✔ the writing laws still read an article; the code laws do not (3289.52083ms)
+✔ a placeholder password is no secret; a real-looking one is (0.765ms)
+✔ scan and suggest: samples are left out, public text comes last, and the weight of the repo is reported (625.986288ms)
+✔ a real bug still fires beside it: a failure that looks empty, a CSP switched off, a constant captcha (3154.379125ms)
+✔ repo-litter comes with base and judges a git add (3003.531061ms)
+✔ the cpp pack installs its rules, skill and check; the configuration is the smallest that takes it (26414.445013ms)
+✔ the synth preset takes the cpp pack too (22442.221217ms)
+✔ a hand-written search is refused; the library call passes (2695.32499ms)
+✔ a gate that presses every control is refused; a walk of one, and a read of them all, pass (2563.815443ms)
+✔ template-law refuses a copied helper and names what differs: the parameters of the template (5142.794115ms)
+✔ template-law: an exact copy says to move it; a marked one-off passes; a data table passes (7155.422523ms)
+✔ scan on C++: the cpp configuration, and every repeat with what it becomes and what differs (507.802989ms)
+✔ new-pack makes a repository that add --from installs, in any configuration; its check fires (26349.514341ms)
+✔ a custom hook stays off until the project enables it (8474.713955ms)
+✔ update pulls the newest; a teammate restores the locked commit; remove drops the source (15331.266752ms)
+✔ a repository without a real manifest is refused before anything is installed (2703.376481ms)
+✔ a second doctor runs no selftest whose hook has not changed, and a changed hook is proved again (46600.506433ms)
+✔ a failing selftest is never remembered, and --fresh runs them all (48588.195314ms)
+✔ a selftest that hangs is reported as timed out (30472.63564ms)
+✔ .py: a copy with other names has the original's shape, and a function is seen by name (5.726198ms)
+✔ .py: code in comments is nothing (0.4948ms)
+✔ .sh: a copy with other names has the original's shape, and a function is seen by name (2.700499ms)
+✔ .sh: code in comments is nothing (0.2067ms)
+✔ .go: a copy with other names has the original's shape, and a function is seen by name (3.080099ms)
+✔ .go: code in comments is nothing (0.1847ms)
+✔ .rs: a copy with other names has the original's shape, and a function is seen by name (1.637399ms)
+✔ .rs: code in comments is nothing (0.1526ms)
+✔ .java: a copy with other names has the original's shape, and a function is seen by name (1.0802ms)
+✔ .java: code in comments is nothing (0.272099ms)
+✔ .cs: a copy with other names has the original's shape, and a function is seen by name (3.717599ms)
+✔ .cs: code in comments is nothing (0.1405ms)
+✔ .kt: a copy with other names has the original's shape, and a function is seen by name (0.8189ms)
+✔ .kt: code in comments is nothing (0.1323ms)
+✔ .swift: a copy with other names has the original's shape, and a function is seen by name (0.5681ms)
+✔ .swift: code in comments is nothing (0.128499ms)
+✔ .rb: a copy with other names has the original's shape, and a function is seen by name (8.447498ms)
+✔ .rb: code in comments is nothing (0.125799ms)
+✔ .php: a copy with other names has the original's shape, and a function is seen by name (3.227299ms)
+✔ .php: code in comments is nothing (0.1473ms)
+✔ .lua: a copy with other names has the original's shape, and a function is seen by name (2.1898ms)
+✔ .lua: code in comments is nothing (0.283499ms)
+✔ every language in the table has its sample here, or is a family already sampled (0.2289ms)
+✔ shell: the command and its flags are the shape; other commands are not a copy (2.0827ms)
+✔ suggest reads the project and init --auto installs exactly that (20525.189707ms)
+✔ the python and shell packs refuse what they say they refuse (3462.710605ms)
+✔ go: the tenant checks refuse their Go faults and take the fixes, and the tenant rule loads on .go (3080.022622ms)
+✔ the lesson-checks selftest proves every examples pair of a check, and names the one that fails (4005.319117ms)
+✔ every installed hook, check and tool file fits in 300 lines (30.491094ms)
+✔ fix after a scan: a plan in the order to work it, every finding a box (725.346141ms)
+✔ fix with no scan yet scans first; the project gets only the plan (629.072162ms)
+✔ the plan orders secrets before everything, and leaves out what is empty (0.6609ms)
+✔ init --config full-stack: its folders, its laws and no synth law (31164.868715ms)
+✔ the full-stack hooks refuse express, a schema in a route and a .env git does not ignore, in the installed project (5198.984545ms)
+✔ doctor --strict counts TypeScript as source in a full-stack project (KWB-32) (10643.107977ms)
+✔ an install ignores .claude/usage.log and .claude/hooks.log (27083.09895ms)
+✔ global add keeps existing settings and user files, remove undoes only ours (543.546609ms)
+✔ malformed global settings.json stops before anything changes (81.252472ms)
+✔ the guard blocks an unchecked pin and passes once versions.md has a fresh row (345.717978ms)
+✔ global add installs exactly latest-versions, gnu-shell and shell-traps, and nothing else (622.532081ms)
+✔ version-pin-guard never reads a shell redirection as a package (391.929761ms)
+✔ a clean install is green; a hook no settings entry runs is red (29780.122583ms)
+✔ a hook that crashed is red until it changes; a refusal is not a crash (12882.125674ms)
+✔ a crash stays red after its log line has rotated away (6088.145537ms)
+✔ each fail-open form is refused through the hook, and its good form passes (4267.06353ms)
+✔ every installed hook writes one timing line per call: time, event, hook, ms, exit code (28699.4727ms)
+✔ a full log rotates and nothing is lost (1792.06898ms)
+✔ the python helper writes the same line (2912.69833ms)
+✔ doctor: a hook whose median is over 500 ms is a red check, with its median and worst (8931.282568ms)
+✔ settings run the kit node hooks through run-hooks.mjs, and every such hook exports hook(text) (3881.537596ms)
+✔ the house hooks install where they belong, project-neutral, and pass their selftests (40090.720545ms)
+✔ git-guard takes the project's owner, token, trunk and commands from layout.json (28310.268336ms)
+✔ a copy tree is read-only by its kind; the copy-trees rule loads there and in layout.json (27958.205597ms)
+✔ the build-step and copy-and-prove skills install, triggered by "Use when", under 8,000 characters (27023.368399ms)
+✔ a project's own hook entries stay; a kit hook already registered by hand is not doubled (6197.398995ms)
+✔ a Node hook is on in a project that ran its Python forerunner, and the forerunner's entry goes (6421.734819ms)
+✔ the house git laws judge a commit by the checkout it runs in, inside a real worktree (3592.956141ms)
+✔ update takes over a file that is the pack's own version instead of writing .pack-new again (31597.541189ms)
+✔ doctor --strict skips git-ignored files and folders (12297.116854ms)
+✔ doctor fails when a hook fails its selftest (12679.61146ms)
+✔ a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable, and update prints the list (34878.451189ms)
+✔ gpu-painter and ui-craft carry the hover rule, scoped to UI code, naming the cursor, the effect and the one hit test (1.8518ms)
+✔ the skill hover-state: "Use when", under 8,000 characters, names the hover walk and the worked example (0.5401ms)
+✔ an installed synth gets the rule and the skill; full-stack gets its rule loaded on the web app (46865.633515ms)
+✔ doctor: UI code and no hover gate is a PROBLEM; the gate named (and its file there) is OK; a fresh project with no UI code is not (21538.899242ms)
+✔ doctor: the web app (packages/web) with a page and no hover gate is a PROBLEM too (6249.865071ms)
+✔ doctor: a node web project with UI code and no hover gate is a PROBLEM too (ui-craft) (6456.010491ms)
+✔ the Stellix profile declares its hover gate (0.375199ms)
+✔ layout.json "gates" is the project's own: an update keeps it (6305.26568ms)
+✔ the lock says which kit wrote it (19332.531492ms)
+✔ entry-registers-shutdown reads its signal names, which are strings (3348.83447ms)
+✔ git-guard: gh logged in needs no token named; trunkNeedsYes leaves the trunk to its owner (116.313563ms)
+✔ a kit-lock lease held by this same process under an old session id is this session's (KWB-40) (76.410576ms)
+✔ the shape ids is valid and judged by nothing; senses blank a word used another way (KWB-16, KWB-20) (3556.833758ms)
+✔ audio-core alone installs without Stellix concepts (24832.728538ms)
+✔ full Stellix install: nested GPU skills, CLAUDE.md block, hooks (5621.100222ms)
+✔ an edited rule survives repeated updates (16873.052885ms)
+✔ moving a folder in layout.json re-points every rule (5600.271874ms)
+✔ folder law refuses new source files outside the layout (2933.288899ms)
+✔ removing a pack removes its rules and hooks (5738.528534ms)
+✔ an existing .claude and CLAUDE.md are updated, never overwritten (6976.436185ms)
+✔ a malformed settings.json stops the install before anything changes (128.671526ms)
+✔ the Stellix profile installs onto the real lib/ layout without touching house files (23579.148299ms)
+✔ the rule and shape-law install with every project; the engine-scoped instance checks are gone (30464.973399ms)
+✔ an instance index compared with a number, or an instance array indexed by one, is refused in code, in every folder (3807.715566ms)
+✔ not instances: buffer[1], channel == 1, pos[0], a loop to kSlots, a seen-in comment, all pass (3473.537688ms)
+✔ an instance ID written in a code string is refused; generated from the index, on a seen-in line or in excluded data, it passes (3006.231466ms)
+✔ a brief never names a fixed instance: the subagent rule says so (2848.987338ms)
+✔ CLAUDE.md names claude-packs as the source of truth: a fix goes into the kit, and comes back with update (2782.644531ms)
+✔ the rule: a gate that writes the parameter proves nothing about the control (1.4533ms)
+✔ the rule installs with audio-core and loads on UI code (25274.007626ms)
+✔ prove-control starts from the input path, and goes red with the hook taken out (0.2893ms)
+✔ analyse-reference-look asks for a control and a confidence per measure (0.2549ms)
+✔ analyse-reference-look asks for seed boxes for a dark part on a dark panel (0.1793ms)
+✔ analyse-reference-look asks for rectify against a known anchor (0.3513ms)
+✔ analyse-reference-look asks for how to rank sources that disagree (0.1688ms)
+✔ analyse-reference-look asks for typeface as a scored choice (0.1404ms)
+✔ analyse-reference-look asks for planted faults diffed against the unplanted result (0.4379ms)
+✔ analyse-reference-look asks for the render measured by the code that measured the target (0.588299ms)
+✔ analyse-reference-look asks for geometry exact, and a whole-picture score never a pass (0.2734ms)
+✔ the skill stays under the limit and names the rule as required reading (0.146ms)
+✔ ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass (0.6725ms)
+✔ KF-40: an inline edit through a local helper is read, not crashed on, and names the files it writes (8.263397ms)
+✔ KF-40: the same edit passes through every base hook with no crash logged (20019.888133ms)
+✔ KF-40: a write whose text no hook could read says so where the author sees it (2718.106924ms)
+✔ KF-40: a command that writes what the hooks can read adds nothing (2953.97462ms)
+✔ KF-18: a crash on a tool call refuses once and says so; the same call again goes through, logged (2634.503285ms)
+✔ KF-40: a crash is its own kind of entry, not a refusal (2824.26885ms)
+✔ KF-18: a crash at Stop or at a prompt refuses nothing, and tells the author (2382.739923ms)
+✔ KF-18: a crash left in the old form, in refusals.jsonl, reads as a crash (3024.873069ms)
+✔ KF-18: a crash fixed by hand clears with a stated reason, and a later crash is red again (11730.599717ms)
+✔ KF-18: a crash older than a file in hooks/lib is history: an update that fixes a shared lib clears it (8905.936023ms)
+✔ KF-18: a config regex param-id-lock cannot compile is reported by name, and is no crash (25551.818263ms)
+✔ KF-15: param-id-lock protects from the first id it sees, with no --init (3381.496073ms)
+✔ KF-15: ids under the build output are not the unit's, whatever the folder is called (3470.404057ms)
+✔ KF-15: doctor is red for a unit with parameters the lock cannot see (9499.391676ms)
+✔ KF-23: suite-once sees the whole suite through the project's own wrapper (5667.732425ms)
+✔ KF-8: a new install has the house laws: a force push is refused on its first day (3197.474555ms)
+✔ KF-8: an update never switches them on; `enable` does (22582.075403ms)
+✔ KF-8: a re-init of an installed project leaves its guards alone (6222.776133ms)
+✔ KF-12: with no owner, a push over SSH or through git's own login is not refused for naming no token (2972.085217ms)
+✔ KF-12: GH_TOKEN naming a variable nothing sets is refused, and the refusal names the way out (3736.096481ms)
+✔ KF-1: the kit ships the queue build-guard sends you to (24290.753922ms)
+✔ KF-1, KF-37: the queue runs the command and ends with its status, never a later one (2845.219095ms)
+✔ KF-1: doctor is red when the queue is gone, and for a wrapper that queues nothing (37649.519514ms)
+✔ KF-3: a project at its start is read from its notes, and is told it was (151.666469ms)
+✔ KF-3: source decides once it exists: a word in the notes adds nothing (161.660767ms)
+✔ KF-4: the lock records every pack installed (3667.695413ms)
+✔ KF-5: one first line of processBlock, in both rules (0.3664ms)
+✔ KF-6: artwork: an original never copies it, and a reproduction may when the brief says so (0.355401ms)
+✔ KF-7: an unattended run has a law, in every install (3635.274126ms)
+✔ KF-9: doctor --strict passes on a new project, with no code and with its first file (12931.564917ms)
+✔ KF-9: a rule whose folder holds files and none it matches is still dead (6268.475805ms)
+✔ straight-on-and-aligned loads where the analysis happens (2927.439063ms)
+✔ KF-11: gather-sources says what to do with a source that cannot be fetched (0.204ms)
+✔ KF-16: a rising run may be pointers (0.1064ms)
+✔ KF-29: the worst-block rule can be met on a shared machine, and lists a program load (0.3488ms)
+✔ KF-37: the queue skill says a background job's status is its last command's (0.1238ms)
+✔ KF-38: a licence is read before a source is chosen (0.525499ms)
+✔ KF-41: one cheap pass of every instance is asked for, kept apart from the behaviour walks (0.2528ms)
+✔ the fixture is the whole log: 14 marked wrong, 15 marked right (1.960099ms)
+✔ shape-law: every real refusal marked wrong passes (17100.59394ms)
+✔ shape-law: every real refusal marked right is still refused, on at least one of its lines (3873.75366ms)
+✔ shape-law: the two marks KF-36 overturns are the only right refusals that now pass, and each says why (0.4133ms)
+✔ KF-17: a count passed to a call is told from an instance by the declared parameter (3246.031006ms)
+✔ KF-13, KF-20: a hex address and arithmetic are not instances; the bare forms are (3349.89067ms)
+✔ KF-17: a sentence in a string is text; a short key is not (3726.717059ms)
+✔ KF-17: first as a search or a part of something is English; the first of the concept is an instance (2934.424762ms)
+✔ KF-28: a role the machine gives, quoted from a source, stands; a number in a source note does not (3446.236335ms)
+✔ KF-36: a concept's own name or a listed selector is no role name; an unknown word is (3940.209511ms)
+✔ KF-20: a library's call and a longer proper name are not this project's instances (3797.119623ms)
+✔ KF-19, KF-39: a making line that names a camelCase concept names it, by row or by word (1.1857ms)
+✔ KF-24: the shape word after a concept is no concept, and a second list after ; is read (0.432399ms)
+✔ KF-34: what a turn landed is over: only the writes after its last landing are this step's (2.2961ms)
+✔ KF-33: a write once-only already judged is not judged again at Stop; a shell write still is (3566.751613ms)
+✔ KF-14: a Python brace is data, not a statement end (3379.892939ms)
+✔ KF-27: a one-statement lambda counts the same in a list as in a call (3251.993542ms)
+✔ code-shape reports every line at fault at once, so one resend answers them all (3163.478388ms)
+✔ KF-10: a dry run stages nothing, in both hooks (25867.319866ms)
+✔ KF-21: --theirs during a merge resolves it; outside a merge it is an undo (3699.071677ms)
+✔ git rev-parse x^{commit} is no commit: the word in an argument is not the subcommand (4455.351995ms)
+✔ KF-25: a test's stub may advance its play head; the code may not (3870.103848ms)
+✔ KF-26: a filter is no search: it needs a return or break on the match (2689.976079ms)
+✔ KF-32: a block of using declarations is no copy; code after it still is (3403.382798ms)
+✔ KF-35: a switch on another type's kind is another kind, told by its cases (4027.91336ms)
+✔ KF-35: two switches on one kind in one new file are refused, with a true reason (2939.779003ms)
+✔ KF-2: protect-vendor's refusal names the setting that answers it (27928.672725ms)
+✔ a project's own node hook with no hook(text) export keeps its own settings entry; one with it joins the runner (26418.614786ms)
+✔ the kit repo has its own base pack installed: kit-lock and every base hook registered, git-guard on Bash and Stop (20758.527613ms)
+✔ no kit command, hook, skill or doc deletes a branch (29.037391ms)
+✔ an update keeps buildOutput, and adds none where the project set none (3.640699ms)
+✔ every layout key the kit reads survives an update (20.927695ms)
+✔ lock status names the holder, the branch, the start, the last renewal and whether the lease is live (282.675728ms)
+✔ lock release: its own lock and a stale lease go; another live lease stays unless --force (502.066474ms)
+✔ a lock in the old form (session, branch, time) is read: a session with a fresh transcript, or a subagent's, is live (519.754168ms)
+✔ the kit-lock hook writes the extensible form and still reads both (327.422917ms)
+✔ (a) a lease last seen 31 minutes ago is taken over by the next session's work, and the take-over is logged; 29 minutes is not (370.845606ms)
+✔ (b) the holder's own activity renews last_seen, at most once a minute (144.229364ms)
+✔ (c) nothing prints "since undefined": a lock with no start reads "start unknown"; every writer sets started_at and last_seen (642.989336ms)
+✔ (d) a push of committed branches passes while another live session holds the lock; a commit, a merge and a release are refused (1238.423783ms)
+✔ every call is logged with what it tried; a refusal keeps its reason and where it happened (20736.254376ms)
+✔ a command is logged with its secrets masked, and file contents are never kept (3267.760346ms)
+✔ logs: every hook, over rotated files too, and a verdict is added without rewriting anything (3406.137779ms)
+✔ a project sets its own rotation size, and every rotated file stays (4050.417479ms)
+✔ the logs stay out of git, and a hook is never stopped by its log (2668.576661ms)
+✔ the branch and commit are read from the checkout, a worktree too (2992.412237ms)
+✔ every install gets the lookup rule and check, with real paths (23361.085986ms)
+✔ the check refuses a new if/else chain in C++ (a synth) and TS (a node project), and passes a switch or a lookup (25598.059266ms)
+✔ ifs in a row that each return on the same value are a chain too (the act-line renderer) (2712.770569ms)
+✔ the js-ts pack brings all 17 JS/TS rules, scoped to JS/TS files (6499.073868ms)
+✔ a run of ifs on one object's fields is refused; a field table passes (3144.190843ms)
+✔ dispatch-once: a second switch on the same kind in another file is refused (3051.305719ms)
+✔ raw JSON.parse / JSON.stringify are refused outside lib/json.ts (4221.991641ms)
+✔ async callbacks nobody awaits, and swallowed errors, are refused (3582.123769ms)
+✔ mongo pack: one client in the gateway, driver only there, safe deletes (4490.426439ms)
+✔ an entry file that listens must register shutdown on all four paths (4279.288337ms)
+✔ presets install the packs a stack needs; docker, fastify, ai, shell-hooks and html-ui checks fire (5079.413596ms)
+✔ v8: web, tui, nginx packs and the fastify security switch (5795.004482ms)
+✔ new rules resolve to real paths and doctor passes (26314.778497ms)
+✔ file-size-guard refuses growth past 300 lines, allows splitting (3937.432534ms)
+✔ freeze, red gate and frozen-files work together (3257.657066ms)
+✔ stage-guard is on by default and off in the Stellix profile (26102.738825ms)
+✔ doctor flags a skill whose description summarizes steps (7014.24077ms)
+✔ a bank as stored: the stride is the record size, and the manual order holds (103.924967ms)
+✔ a name reads through high bit set, and names the wrapping (33.112889ms)
+✔ a name reads through 16-bit words swapped, and names the wrapping (28.213491ms)
+✔ a name reads through 24-bit words stored low byte first, and names the wrapping (37.693888ms)
+✔ a name reads through 32-bit words swapped, and names the wrapping (51.313883ms)
+✔ a name reads through 7-bit packed sysex, and names the wrapping (19.520594ms)
+✔ a name reads through nibbles, and names the wrapping (15.696695ms)
+✔ an OS update: packing restarts at every sysex message, so each one is opened behind its own header (77.206375ms)
+✔ Roland's bit order: the high bits byte first, its bit k for data byte k (22.613193ms)
+✔ a short last group and a checksum: every byte comes back, so nothing after them shifts (0.751499ms)
+✔ a display does not print what a manual prints: squeezed, and cut to a column (30.609891ms)
+✔ firmware drops vowels and stops early: the misses are tried loosely, and said to be (36.381088ms)
+✔ a common word elsewhere does not hide the table: the densest place is reported (18.727094ms)
+✔ a table's first entry stays in it when its name comes again further down (20.014993ms)
+✔ two gaps agreeing among many are no stride (20.284894ms)
+✔ flat high entropy with no name reading says to stop and read the loader (264.662714ms)
+✔ three bytes per 16-bit word, marker first, inside one sysex message (79.500775ms)
+✔ names in one unbroken run are a pool, to be read whole (19.702993ms)
+✔ one name reading proves nothing: chance does that (56.162782ms)
+✔ an EPROM pair: neither half reads alone, the interleave does (69.885878ms)
+✔ a custom character set: the letters keep their distances (27.379891ms)
+✔ a table of pointers is found, and the entries past the manual list are shown (28.610791ms)
+✔ a banked ROM: --banked finds the table a plain search cannot, and a negative base does not crash (1544.857799ms)
+✔ no name reads: it fails, and says what it searched rather than that the machine has no text (85.365372ms)
+✔ the names file keeps groups, and a name too short to mean anything is dropped (26.212792ms)
+✔ the tool, the skill and the rule install with the pack, and a project can run it (23166.319025ms)
+✔ reverse-engineering rules load where the work is: research notes and tools as well as code, and only the first step at launch (2690.159472ms)
+✔ new <name> scaffolds the project, installs the kit and starts it on a work/ branch (25091.752465ms)
+✔ new takes a profile, and the new-project skill is no longer a global piece (18792.134745ms)
+✖ no file names a person (80.225656ms)
+✔ stellix: update in synth-creator makes what 0.9.15 made, but for the configuration key (19840.834468ms)
+✔ sub37: update in synth-creator makes what 0.9.15 made, but for the configuration key (17242.902514ms)
+✔ an install that names no configuration gets synth-creator from its packs, and the same result (4312.46618ms)
+✔ full-stack: an update keeps an existing project's own layout, and changes only the listed files (21282.695388ms)
+✖ nothing in the kit names the bare `npx claude-packs` (it resolves to someone else's package) (42.479862ms)
+✔ the bare-name reader finds a planted line (0.2301ms)
+✔ once-only, making and making-check are installed and wired where they fire (27650.853098ms)
+✔ doctor prints the making cost and the duplicate count; a count that went up is a problem (10745.941992ms)
+✔ dup scan lists every duplicate by file, both sides (148.573914ms)
+✔ no hook of this project blocks an edit in another project (45033.227371ms)
+✔ sibling projects are readable and editable: layout.siblings becomes additionalDirectories (3906.60008ms)
+✔ update-all updates every project that has claude-packs and skips the rest (30485.653094ms)
+✔ every pack the kit ships is a stock pack with a full manifest (6.009996ms)
+✔ a custom pack passes with an author and a git url, and each missing field is named (0.3577ms)
+✔ list shows each pack's version, type and author (113.33144ms)
+✔ suggest finds Postgres in a dependency, and init --auto installs the pack and its hook (26715.220626ms)
+✔ suggest reads Postgres from a project in any language, and a tool that speaks several databases says nothing alone (720.215503ms)
+✔ the checks that need a live table stay off until the project chooses them (5748.990112ms)
+✔ a default is refused only where it rewrites the table (3568.474342ms)
+✔ a required column needs a default, wherever the default sits, and a new table is exempt (3873.988584ms)
+✔ money, NULL traps and CONCURRENTLY in a transaction are refused, and a comment is not code (3985.840867ms)
+✔ a value in SQL text is refused in each language; a bound value, a tag and a table name are not (3624.523242ms)
+✔ a wipe is judged against the worktree it runs in, by that checkout's .env (3240.054556ms)
+✔ http-api: src/routes/segments.ts is refused its fault and takes the fix (21231.218859ms)
+✔ http-api: src/app.ts is refused its fault and takes the fix (2818.185342ms)
+✔ react: src/Row.tsx is refused its fault and takes the fix (2794.455248ms)
+✔ multi-tenant: src/routes/company.ts is refused its fault and takes the fix (3408.48542ms)
+✔ websocket: src/ws.ts is refused its fault and takes the fix (3675.425665ms)
+✔ host-agent: src/update.ts is refused its fault and takes the fix (3046.411145ms)
+✔ go: src/a.go is refused its fault and takes the fix (3130.193129ms)
+✔ rust: src/a.rs is refused its fault and takes the fix (2952.124322ms)
+✔ postgres: db/1.sql is refused its fault and takes the fix (4436.456277ms)
+✔ dynamic-data: src/save.ts is refused its fault and takes the fix (3162.477635ms)
+✔ dynamic-data: src/filter.ts is refused its fault and takes the fix (2477.996527ms)
+✔ http-api: src/mount.ts is refused its fault and takes the fix (2945.218977ms)
+✔ http-api: src/app/api/orders/route.ts is refused its fault and takes the fix (2630.179024ms)
+✔ http-api: src/ui/orders.ts is refused its fault and takes the fix (2717.140434ms)
+✔ ci: .github/workflows/test.yml is refused its fault and takes the fix (2505.177708ms)
+✔ a check for one major version leaves a project on an older one alone (3518.054477ms)
+✔ a url inside a string is no comment, so what follows it is still read (1.130499ms)
+✔ a key under a custom prefix is a secret, and a private key file by its name (10.775895ms)
+✔ the stack choice is the full-stack configuration's, not every node project's (3399.616273ms)
+✔ a route file under a version folder passes (3226.180917ms)
+✔ a wider check replaces a narrower one, so a project with both packs sees a hit once (2920.318957ms)
+✔ full-stack is a composition: the stack choice is its own pack, and the rest is packs any project can take (8762.527342ms)
+✔ folder-law refuses a new source file outside the layout by every route that creates a file (24605.198886ms)
+✔ placement-law refuses audio code added outside its folder by every route (4631.198279ms)
+✔ protect-vendor refuses vendored code and a copy tree by every route (5531.476937ms)
+✔ frozen-files refuses a frozen file by every route (4373.839323ms)
+✔ spec-lock refuses a locked spec by every route (4225.12875ms)
+✔ file-size-guard refuses growth past the limit by every route (4292.978719ms)
+✔ lesson-checks refuses a known bug brought back by every route (3946.504539ms)
+✔ realtime-guard refuses realtime-unsafe code by every route (3819.172853ms)
+✔ no-shipped-images refuses an image in the code by every route (3740.431549ms)
+✔ browser-guard refuses code that starts a browser by every route (3912.004682ms)
+✔ once-only refuses a near-copy of existing code by every route (5861.211959ms)
+✔ param-id-lock refuses a lost parameter id by every route (4534.813238ms)
+✔ version-pin-guard refuses an unchecked pin by every route that can write a dependency file (590.167877ms)
+✔ the shell route reader is one file: global add installs base's, and the kit holds no copy (6.279097ms)
+✔ the shell route reader proves each route and program form (KWB-8) (56.851172ms)
+✔ shape-law refuses an instance literal by every route (4914.280561ms)
+✔ brief-guard refuses a doc that names an instance by every route, and an agent brief (4076.357712ms)
+✔ a shell write to a path in a variable is judged where the variable points (18.950489ms)
+✔ a Check that names a test is told from one that does not (1.330099ms)
+✔ doctor is red for a live rule whose named test nothing answers to (25688.114212ms)
+✔ a test that names the rule answers it (6114.801574ms)
+✔ a mention outside the test folders answers nothing (5411.696803ms)
+✔ ruleTests points a rule at its test, and a pointer to nothing is red (7678.788444ms)
+✔ a rule may be declined only with a stated reason (9859.231919ms)
+✔ a rule that matches no file yet is not asked for a test: a new project is not red for this (6754.764946ms)
+✔ a new law never turns an installed project red: without the ruleTests key it is a note, and adding the key is the choice (9037.214489ms)
+✔ a first install adds the folders a repo's source is in, and folder-law then takes a new file there (18988.398312ms)
+✔ C++ outside src/ has rules on it, and doctor --strict passes (5718.955254ms)
+✔ what is fetched, built or another project's is no source folder of the project (2543.849382ms)
+✔ a folder added to the layout later gets its rules on update; test/structure.test.mjs holds that a stray file is still reported (5265.120548ms)
+✔ an installed project keeps its own concepts and folders on update: a new law never moves under it (5043.171318ms)
+✔ the new-project skill comes with every install (3358.355859ms)
+✔ only a free function can be made again by name: a method lives in its type (11.570196ms)
+✔ template-law: a trait method on a second type passes, a free function made again does not (KWB-81) (19025.880486ms)
+✔ template-law: a copy with other names is refused, and a real exception says so above it (3120.314953ms)
+✔ template-law: one method called six times is a table, and the refusal names the call (2567.68537ms)
+✔ dispatch-once: a lookup table on an enum outside it is refused; real work, and the enum's own methods, are not (KWB-82) (2877.035709ms)
+✔ a table on the standard library's own enums, a true-false table and a two-variant table are no kind (0.819099ms)
+✔ three branches on one value are a match, and two are not (2970.121156ms)
+✔ a lifetime is no char literal: the code after it is read (KWB-75) (3.873698ms)
+✔ a quote in a char literal opens no string, and an escape closes it (KWB-75) (0.436099ms)
+✔ a raw string and a nested comment are read to their real end (KWB-75) (0.2387ms)
+✔ blanking keeps every offset, so a match reports the file's own line (0.3196ms)
+✔ what a test attribute marks goes, and the code after it stays (1.2515ms)
+✔ a method in an impl is a definition, in every form a function takes (KWB-75) (0.45ms)
+✔ suggest reads a new crate, and init --auto installs the rust configuration (16424.211108ms)
+✔ a new crate passes doctor --strict: no planned folder is missing, and no universal rule is dead (KWB-78, KWB-79) (5972.014454ms)
+✔ a project's own clippy.toml is never replaced (3425.108559ms)
+✔ .unwrap() is refused in library code, and left alone in a test, in main.rs and behind a lifetime is no hiding place (3345.639585ms)
+✔ a SAFETY comment may run over lines, sit above a let, or name the block on its own line (3233.815447ms)
+✔ blocking in an async fn is refused, and handing it off is not (3865.046877ms)
+✔ a public function returns an error a caller can match on; a generic that holds a String is no error type (3398.708926ms)
+✔ a stub, a lint off with no reason, a static mut and a * version are refused (3386.786736ms)
+✔ a plain src/ takes new files, in every configuration that names nothing inside it (KWB-78) (7255.439287ms)
+✔ a project with no package.json is told the command that works there (KWB-76) (3082.959386ms)
+✔ a project with the kit in node_modules keeps the --no-install form, and no extra line (3768.12598ms)
+✔ `init <pack>` takes the project's own configuration when it takes that pack (KWB-80) (3406.060486ms)
+✔ no configuration names a folder on one machine (KWB-77) (4425.60441ms)
+✔ the scan changes nothing in the project, its .git included, with or without git (1064.533453ms)
+✔ a secret file is never copied, and no secret value reaches the report (1128.514319ms)
+✔ the report recommends with evidence, leaves out what is not there, and lists every check hit by file and line (522.479031ms)
+✔ --out writes the report there; --prompt prints the review brief (594.387293ms)
+✔ a project with no JS scans too: C++ only, plain HTML only (1166.088298ms)
+✔ new writes an empty design/shape.json and commits it; doctor passes (19253.684332ms)
+✔ doctor fails a synth with no manifest, one that does not parse, and rows that break the contract (49562.570772ms)
+✔ a project that is not a synth needs no manifest (23457.530426ms)
+✔ shape scan lists every finding by file and concept, with a count, in code, tests, docs and inbox briefs (195.443893ms)
+✔ the shape hooks are the law: on in a new install and switched on by update in a project that had the kit (5299.294971ms)
+✔ the UI presets and the full-stack configuration bring the pack; the rule reaches markup (27976.130552ms)
+✔ stored text in markup is refused in JSX and in server templates; the renderer, labels and marked plain fields pass (4773.652455ms)
+✔ raw HTML and a second markdown path are refused; the one renderer must do all four jobs (3710.472164ms)
+✔ CLAUDE.md states where every kind of thing goes (21769.635571ms)
+✔ placement-law refuses audio, GPU and shader code in the wrong folder (5090.156486ms)
+✔ doctor --strict fails while a source file sits outside every rule, passes once it moves (10199.823754ms)
+✔ the Stellix profile carries its own kinds (25872.27839ms)
+✔ the block, control, look and anchor laws and their skills install (2896.718611ms)
+✔ the Sub37 profile fits the template tree: laws, kinds and the id lock (7897.692942ms)
+✔ the Stellix profile refuses both paint forms outside the UI (3126.559324ms)
+✔ an install that copied the old paint pattern gets the new one; a project pattern is kept (10838.212923ms)
+✔ WB-2: a nested clone under build/_deps is still judged by the project, a worktree by itself (26834.332012ms)
+✔ WB-1: coverage sees the kit's own skills and rules, never a worktree's copy (4612.463351ms)
+✔ WB-3: git-guard refuses a command that writes a token URL into git config (4809.310419ms)
+✔ WB-3: doctor finds a token in any repo's .git/config and never prints it (12118.830783ms)
+✔ WB-4: every hook in every pack has a passing --selftest, and doctor runs them all (43345.172808ms)
+✔ symmetry run: green on identical instances, every pair printed (6 for N = 4) (512.198918ms)
+✔ symmetry run: a planted missing member is red and named by instance (520.830413ms)
+✔ symmetry run: a planted swap difference is red, the pair named, every other pair still checked (633.372751ms)
+✔ a many concept with no symmetry block gets a test that is red until it has one; a one concept gets none (195.103693ms)
+✔ symmetry gen --cmake: add_test per many concept, the manifest a configure dependency; no manifest is an error (197.880491ms)
+✔ the selftest plants a missing member and a swap difference and sees both red (2310.304524ms)
+✔ configure time, for real: CMake generates the tests from the manifest, ctest runs them, red on a plant (1887.900755ms)
+✔ the skill points at shape_symmetry, the rule takes its scope from shape.json, init installs the tool and doctor proves it (31080.966821ms)
+✔ a planted change runs only the tests that reach it, an untracked test runs, the release gate is named (236.868569ms)
+✔ a change the failing test covers runs it, and the run fails; --dry-run only prints (352.764605ms)
+✔ the kit's own map: imports, names, the packs table, the preload (255.661558ms)
+✔ a pack that is not base: only the tests that bring it in, by name, preset or configuration (KWB-41) (205.557787ms)
+✔ a version bump alone chooses no test; any other package.json change still chooses them all (KWB-41) (236.710669ms)
+✔ the UI presets and full-stack bring the pack; every check names a rule that is there, and every rule names checks that are (22751.550659ms)
+✔ each check refuses its bad example and passes its good one through the hook, in a real install (9643.923133ms)
+✔ doctor is red for UI code with no page gate, and green with one or with a reason (16135.791494ms)
+✔ finished work lands: the rule and the skill come with git-guard, in every install (5672.048146ms)
+✔ page-measure in real Chrome: a sound page passes, and each planted fault is named (8738.313713ms)
+✔ every ui-craft check holds to its examples through the hook; every skill fits (25081.083766ms)
+✔ one template: a thousand instances cost one read and a handful of swaps, not half a million (7317.376108ms)
+✔ no law still asks to walk every instance: one per template, the rest by a read (0.5391ms)
+✔ an on-screen keyboard lights what sounds and has KB OCT, a kind is one size, and a window test stays off the desktop (8.643096ms)
+✔ a PDF is read with its pictures: figures exported, every page rendered, never a placeholder (0.342599ms)
+✔ a circuit diagram is read tile by tile, one report an image, and set against the code (0.2799ms)
+✔ scan names elements built by hand more than once, html and c++ (420.755588ms)
+✔ sound-design installs the renderer and its skill (22903.05192ms)
+✔ the plugin is an argument: no machine is built in (0.734499ms)
+✔ it links no JUCE: that is why it can load what a JUCE host cannot (0.3493ms)
+✔ a host that hands a plugin fewer buses than it declares gets silence: every output bus has a buffer (0.1972ms)
+✔ build.sh says what is missing when no SDK can be found, and takes VST3_SDK (115.082044ms)
+✔ comparing with the machine: a patch is matched by name, a recording stays out of git, and nothing claims a percentage (0.2816ms)
+✔ the skill carries what it took to learn (0.1769ms)
+✔ the kit's own files in a project are no evidence about it (102.618343ms)
+✔ a reverse-engineering project is known by firmware findings in its research (123.84783ms)
+✔ a reverse-engineering project is known by a disassembler in its tools (184.876797ms)
+✔ a reverse-engineering project is known by notes named for a machine (190.019495ms)
+✔ MIDI is known by what the code does, not only by a file name (219.295079ms)
+✔ a project that names its configuration is read as that (113.477037ms)
+✔ a long identifier is no secret, and a real key still is (6.804396ms)
+✔ a build folder is known by what the build leaves, and scan neither reads it nor hides it (589.683074ms)
+✔ a new reverse-engineering project with no code yet gets the pack, from its notes alone (19858.326498ms)
+✔ a unit cannot write a second clock, and a project that draws in code cannot add an image (23202.73984ms)
+✔ a UI is drawn straight on and aligned, and the image skill separates the object from the photograph (2257.209754ms)
+✔ installed dependencies are no evidence about a project, even before it has a .gitignore (83.118953ms)
+✔ workorder writes the steps, the prompt and the runner, with its name in them (116.034744ms)
+✔ workorder never writes over a work order that exists (207.2451ms)
+✔ a work order needs a plain name (229.744889ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (84.994959ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.233999ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.4184ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (20443.7202ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.8018ms)
+✔ folder-law allows a new file in a right folder of a worktree and refuses a wrong one (21365.367568ms)
+✔ file-size-guard measures a worktree file by its own checkout (2266.107781ms)
+✔ every hook judges a worktree file against the worktree, inside a real git worktree (34915.278757ms)
+✔ git-guard at Stop, fired from a worktree, refuses while its landing left the main checkout behind (KWB-96) (2354.970128ms)
+✔ version-pin-guard reads docs/versions.md from the worktree the pin is written in (2111.223448ms)
+✔ every configuration brings the pack; nothing of it is named in the lock, and doctor --strict passes (59150.718303ms)
+✔ each skill has one job and fits: Use when, under 8,000 characters (0.574399ms)
+✔ the measured data came across: the sub table, the templates and the registers (0.2411ms)
+✔ the tells are refused in public text, by id; code, URLs and other files are left alone (2517.511036ms)
+ℹ tests 484
+ℹ suites 0
+ℹ pass 482
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 505960.22433
+
+✖ failing tests:
+
+test at test/no-personal-name.test.mjs:8:1
+✖ no file names a person (80.225656ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:3: {"type":"system","subtype":"init","cwd":"~/projects/claude-packs","sessio',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:5: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrECYj5T4vCbzk3ai1q',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:7: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VW9wZpU8xiWzs9C',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:8: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrECpqgjytSx6vSwCBE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:9: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01MuqLE1tktcgj9Ng',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:13: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrED4UEcoQwwzUUdFQD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:14: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01ES4m9TeR5hNExBW',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:15: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEDSRaYg8HDShu5ksw',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:16: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_012r5XFwcWY68hoR5',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:21: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEDhdt2LzBZnLuGbJt',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:44: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEE8ikUrgurX4ZK7wd',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:51: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEEpbMgQVm5ZutXsSz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:56: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEFNxXcPWUW16njN8U',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:59: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01PgbmpFDp43RCrEi',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:63: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEFjPMiG5kNHiyd6sT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:65: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEG1LJtJcUEuCQQPyt',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:82: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEGETbM7imekbg2uKd',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:99: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEHnJmq2x1YnT4DvbJ',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:145: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEJA2Vdhv99yLGbagn',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:150: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrENbLN2pdzM1Y1VsbU',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:158: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEPHCErNEi2QzFX7bW',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:186: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrERN1kkKBuV7JCAjsd',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:208: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018iPVs1qFsCZL5Lq',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:213: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEVACyBPBwZ4GQKHym',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:214: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_015UKC9brFHDhrLZa',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:216: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEVf9WW9mXcGq49z2Y',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:222: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEVwRYdK8EwpwLzqvC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:239: {"type":"system","subtype":"task_notification","task_id":"b8a9980xe","run_id":"0mw8e1p5c-d',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:242: {"type":"system","subtype":"task_notification","task_id":"bmk4nize0","run_id":"0mw8e5loq-f',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:245: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018bTq1oFUgUBkTDU',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:251: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrErUgYVJdR27UxZUjy',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:253: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrErxVP3mcmCRBmF2Re',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:254: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:259: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsJ3MoE1uxqScw6iK',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:260: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VF1Kw6uMZZyT5Pg',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:264: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsfmq63m1jEX18XLE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:269: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsx28JGRBinj5zqRC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:270: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_0122pishbvzCfywUY',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:271: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsx28JGRBinj5zqRC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:273: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEtKn4zJ9VA6kK5ydi',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:274: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01E4UiGxnLS7KisbK',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:277: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEtmkWqpnVmkvptqbf',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:283: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEu2ToCpkzqvaFp96m',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:284: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:285: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01MSNgrEbX9Xzd8a2',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:290: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEvjGzsmJR7zGKtdkx',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:297: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEwBWZvb7MomL1kZnb',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:299: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEwhgH9uVDbg5tJ2Yg',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:301: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEwvirdrXMhuvBSg2L',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:303: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrExEk4Y2igPpX9dufi',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:311: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrExaWxAGPjBwceRLL3',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:312: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01SAckdRpQnHfwhFh',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:316: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyE9P4sqCGshp4Rqh',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:321: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01YWaDstqGXv4jDvg',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:326: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyxpAvm8TudG9tQ8R',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:327: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UvaaqVq3Mixnn9G',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:328: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyxpAvm8TudG9tQ8R',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:329: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018EMxZVw9oZBGYej',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:330: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyxpAvm8TudG9tQ8R',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:332: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEzk3zhfKhydyWwHYb',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:333: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01FU39v5QZSbL78CD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:334: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEzk3zhfKhydyWwHYb',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:335: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01X5CCH4o3cP2vREw',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:339: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF1UMhNYvAh2DL2p4N',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:340: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VeomM7ky8RGVLDT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:346: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF2Rf1tTxgSBocTFsy',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:347: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01QNcG9EBicLvXvM3',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:352: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF362amKpMGAY1njcP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:354: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3PJu6V8cDqhCvbgX',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:357: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:358: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01JDQv5igsSJdKTXf',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:359: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:360: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01RNNC82tehQcmop7',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:361: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:362: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_017DcxKUgKCP9BYdP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:363: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:364: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01GwcG7HQTGjQbZHF',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:365: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:366: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01U94Ro4PWoYToDjP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:368: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF4HpXgyR4c3MbFQ8b',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:370: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01SPfb8c71cUMZWdv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:377: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF4ggxFB9J1cCvxxA5',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:378: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01NftTV5UUGW5HA4R',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:380: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF6ERh1566VfUYnbW3',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:382: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF6WGSbaAqLaJRGeSc',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:383: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VPs8Nzu48ZkjoFw',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:384: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:385: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01J3fwzh7bkTMhhrF',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:386: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:387: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Ks78vpLnuQby9eP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:388: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:389: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Nw2jxbiJDj2PEw2',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:390: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:393: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01MFEBSyeXrQguXuH',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:399: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF8TXJMVnMaWpCxSCT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:400: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01HZZ7kzuVk1DcdtH',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:401: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF8TXJMVnMaWpCxSCT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:402: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_019thpua8eRkrsJ5M',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:403: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF8TXJMVnMaWpCxSCT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:406: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01QGbnKiKm4gJBG3C',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:412: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF9Q5D7yuwSFe15brS',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:413: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01BwbMaqFHsWofZkm',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:414: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF9Q5D7yuwSFe15brS',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:420: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFAFUYnDu7Zj2EUCFA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:421: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Tn7dkDd4xT2wufj',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:422: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFAFUYnDu7Zj2EUCFA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:423: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01AadBysnGJdgFfY5',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:429: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFAo9ZSatfEXe846Yv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:431: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFBJJjrE8k7WBN4pVH',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:442: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFBWnpusRPPpYhQq1M',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:449: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFCRWc4MFk7oy5z5nu',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:459: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFCxTwfNWSDLwEPuoR',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:460: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018FLpEGWga23uVDw',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:461: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFCxTwfNWSDLwEPuoR',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:462: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_014VRQg7phxiJzt5n',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:463: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFCxTwfNWSDLwEPuoR',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:464: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_0186J8EzHqsmNTU4M',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:465: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFCxTwfNWSDLwEPuoR',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:468: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_013oLHRRwd2eHzVug',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:473: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFFabPrh6dpxo6QzxC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:476: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Td3wjMp8tX6krF9',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:482: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFH8AxNKrYbSNYD4HS',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:485: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_012JmZGmgFjyngbBk',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:490: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFJMq1vzjUKkP19ZNM',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:510: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFJmDwkXhBETcahNQY',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:511: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01YZYjCeXv3KxnP7J',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:516: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFKGsPfh9Qy4pKYeno',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:517: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:524: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFL7enUYu8w3fXoiQv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:527: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01U495UMzSDzwuXKk',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:530: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFLYX1xG4LQF1qCXAX',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:535: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFLrXVCq8he1bR4fma',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:541: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFMHQwdthEcRY6ZfPk',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:546: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFMmtxGcd45tugjKcr',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:551: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFN8UDB3NWSh9XFzVY',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:569: {"type":"system","subtype":"task_notification","task_id":"bh7hd7out","run_id":"0mw8ejynj-9',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:572: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Mzs8N6cWNbaVSrm',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:577: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFx9ApmkV9qCCGmfN9',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:578: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:579: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01RUMRQvjkdtjH57x',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:583: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFy8VBK5QreAuuLYud',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:585: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrFyWpMXJYbTdSa5sXc',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:593: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01RCauzc5ANeZJD9S',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:595: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrG8kuBeAVXqSQSDBpq',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:605: {"type":"system","subtype":"task_notification","task_id":"bkj7fbdt5","run_id":"0mw8euvwa-4',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:608: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01JizihjC4cHm1141',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:613: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGRHLhbxXXtC21N473',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:614: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_016yneoS7ep9M9nan',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:620: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGRi2WX4QP9zH7rGcY',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:621: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01E83J7S1yGdH7Tck',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:625: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGSauRNvRNgWbQnqc7',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:626: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:627: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_017N9cFUhH8DGinYd',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:635: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGTcNzWMVPPZBmt7X7',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:636: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:639: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGURo31wTd1zc1kzXy',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:640: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01SsmzUNqH42Gua7b',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:641: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGURo31wTd1zc1kzXy',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:642: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01U3DBmFfqjtSsf5P',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:647: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGUpmevrZEYk94FNoo',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:648: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01NkL1fWoWYKeXvyC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:653: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGVD4bejP3Rkn9YivB',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:654: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Lj4ZZdiy1CxfiBQ',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:658: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGVcfuSCLvjZCHz6R3',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:664: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGVxAvGUnUPnY6QEnw',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:665: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Sgq2yZq387QXvLi',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:669: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGWkZSxskpYsYivVVP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:672: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_015i5L3BVcpZwAmtv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:677: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGY3ELUtSxtZvdgLgb',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:678: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01YDhsZgTV92Pok1y',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:679: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGYXjqJdD7LFaiRY9f',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:682: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_017SNYWJWV791GeYB',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:687: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGa5xr7wLKkhE9XECN',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:688: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:689: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01GWwJnvxM62gQzKd',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:694: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGayxxrkkdzbSFBmzP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:696: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGbMCukp6u2RSBoykE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:702: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGbeg8F8rLsd6g4Qmp',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:704: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGc6o1VHuzgZpZSVmA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:714: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01AGwUPqARok6jRQz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:716: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01A4D8ox3veZgXnxD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:743: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGddspGq1oqbjET5Sb',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:748: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGf3knMvSgVaQYHNjM',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:757: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrGfjnp5aSTyPMPZMBz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:776: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_014jfDffsTeg5P8RM',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:781: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHJg4sSqFD6uEohciu',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:782: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:783: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_011EVGdfi8ycKNqXA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:784: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHKRgwhdMLUqtzsgzV',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:789: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:790: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01WGEgrdkktKGFTP4',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:791: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHQGdd6qr47GiXnC6a',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:798: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHQZZ7Gqrsc9czB48b',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:799: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01PQy3jghwZfFnT78',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:805: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHRCVsZF9sdFqDSSeK',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:806: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Xt49sZY6oe6UPJ7',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:808: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHRwQY9yN2VXJ9ypen',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:809: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018PjH5peW1ppYMrM',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:811: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHSRWEjb9KKUGvNz9p',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:812: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01YFCWLudhiBBZYGq',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:820: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHTikbLZNjHMZ5hYyj',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:821: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01KBzBsSRJXC92Y53',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:829: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01WscU9c96ENbV5Sm',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:860: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01QtXVBWuniemEQLk',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:866: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHXNiCKquFQ2ev9bxD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:869: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01RDjt2sHHmFYNBip',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:889: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHYbmHiqYJQHmQddSR',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:890: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01HyXSmns29YByFZm',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:916: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHZEcafM4qEA5d5dPq',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:920: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHaJ3FPa7MYRLmyjmU',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:921: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01PWMbxyXJsQrKJ5d',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:926: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHapN8o3Csie8o74dD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:927: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_012BzRE6Zh1zcsUTv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:928: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHapN8o3Csie8o74dD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:929: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01QXPYgC7JqJRZRx9',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:938: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHbV2Zjg3s59XcAMq3',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:939: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_016AxsPMgYBmeB5D9',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:945: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHcj4T4zFuq9YHwekW',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:946: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01TckDccUAJnySwhi',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:947: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHcj4T4zFuq9YHwekW',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:948: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01JKb6UjAys45wWyT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:954: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHdF6DU63G9ZbL8jTr',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:955: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_015ExomATNDPMqqMz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:956: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHdF6DU63G9ZbL8jTr',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:957: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Wj5cmhGrjtwK2NZ',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:958: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHdF6DU63G9ZbL8jTr',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:963: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHeAGYKTcC3cctKEUK',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:965: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHeXbRpXdsTDSH2MiE',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:968: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01D187o3BXhu3oNWz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:973: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHfz8tBGo8cN5iJBKD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:975: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHgPekC6by1V94EgYu',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:980: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHgeZgXf7gPnPQVMH1',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:983: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_011JLR93KJdZ2pfcC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:988: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHiNKgTPAzdnkqSg6d',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:991: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_0148H5hMhFPtSXiVM',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:996: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHjqmiTqWkhJzCQA32',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:999: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01KhEr7vzMdx78U8h',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1000: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHmCZPn8YjNFSkWBwg',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1006: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHmRfgimD5MPe4rPdg',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1009: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UZ7qcbHCwQzzLBC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1010: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHnCN1gaLJnUwpmqBn',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1012: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHnUJhzygdW8W4uQrA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1017: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHnhu2bfhLP5Hq9csA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1019: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHnyi3ZJMTDpAuqMSh',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1020: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01BGiNuMsZR3ZhzPz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1026: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHoPGP2FKuxaBV27nD',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1027: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01KdCpQ3BBndAHG5i',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1033: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHpGikp3ZZxdim3bpX',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1034: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01BibSvjSij99Tsvv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1038: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHpk7neuasFdNP9468',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1039: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01GJoMRV2BTU3NBDg',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1045: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHqC6UJ4cMjPAkGEyA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1046: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01AjpD4BHZAXjJ2Bi',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1047: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHqjjFA993xSPyUSF1',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1048: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018foMxLYb5i4o2BP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1053: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHrBLcASMNGTHm3xNz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1054: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01ReP6gW5nojqQXES',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1059: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHrhW5U21Pqz4eEtax',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1060: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1061: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01ERbvYrr8BqfQDE3',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1066: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHtTuKpFjB4ZH2cUNU',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1067: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_016DbmmAw1EK6AJUd',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1071: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHtvWit285BXVDZySJ',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1073: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHuHpsqN6bEZQe5j6T',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1082: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHukp64UYVKichrQVC',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1084: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHvVfYgpVEfJdQ4Doz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1086: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHvm9Tdq2gJd3NR3kG',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1093: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHw21fccoeBVoXqBbs',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1095: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHwc8kmJQY3uDjVGVc',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1128: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHwr4RCELPrjXjaciW',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1134: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrHyMq5pD3Qyt7B8AGy',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1153: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01B8cgfoUhj1frpKg',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1156: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJbuoCWyh5aVpwopnV',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1157: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1158: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Mv8FfJmZfV9j2G4',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1161: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJcnC5wQ6717CemprL',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1162: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Wzt5kcJEzakBTZZ',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1164: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJdNR8CNHF6oo2be4h',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1165: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01EczRTkn5hYLeVu2',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1169: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJe5xgnFrhvvDYjFM3',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1177: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJeVgDMW6dvPG4jkuk',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1180: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJf5QjaosHVpQUppED',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1185: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01RMCwD6RHJQdhViT',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1190: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJfwE95bgA6PFLp6Fx',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1191: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VhidPX8pYxcg5k4',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1205: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJgGfvP6divz5baZou',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1208: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01XbeXumwcaAao71s',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1241: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJio6pFkigv81Zg6yv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1269: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJjZ4EwaCj2ZqsPW5X',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1270: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1271: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01JTgMbEdCU8EFipL',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1277: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJkhq89BMbp8C4ZUaz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1287: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJmDbWxAuUBZighFxc',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1288: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01NPL64d1q3ZWKiUA',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1292: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJn13Vkx7JNo4vUwLF',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1293: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01T4zw6wCWZzD49f9',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1294: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJn13Vkx7JNo4vUwLF',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1295: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01CC8ccbpUZbGeZHH',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1296: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJn13Vkx7JNo4vUwLF',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1298: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJnUmrgGP4t23dt3JV',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1301: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01DhpzeH8BQdiYWWv',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1302: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJp3vSDNL5apzecUNs',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1305: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJpHHMYiEdDyC5cxU9',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1307: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01G6i373aMK1iQwVy',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1312: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJpWMfFgt6ExdUtSaP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1313: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01YW1BbsumFdmqeBk',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1314: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJpWMfFgt6ExdUtSaP',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1316: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJqAFiSu1XrSiGcDpB',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1317: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01TCZeXhWyeDQVD6K',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1318: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJqQYx19mwcArAE4ou',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1319: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01L9ySg4WLa4KNFLb',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1320: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJqQYx19mwcArAE4ou',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1321: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_012jFZ7tw6ajAMXyz',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1322: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJqQYx19mwcArAE4ou',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1326: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Uhi5ywtLS7VWKtM',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1332: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJvBtL3xBtcUmogZ6J',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1333: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01DV9KrXfrZU62iWR',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1334: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJvx1vnGsNgKYQAv6g',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1337: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VJMaEEf1Ydeh5AZ',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1342: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJwo3hyHGFNRhcWoKj',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1346: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJxBttXEXoAF5YPBKK',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1347: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1348: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Y4vVthLohDXLWA8',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1353: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJyiRhrHVToebVGLxq',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1375: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJz7fCGA3xgb66dU7K',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1385: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrJzjo5HieRqUwZHG6G',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1390: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrK1SNcLNBV541nPRwG',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1402: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrK1qEHMocYztVUa6ZN',
+  +   'docs/workorders/admiral-fleet/logs/session-1.jsonl:1404: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrK2yrj9PvJCRLqj1Bi',
+  +   'build/evidence/W0.0/landing-proof.txt:3: main checkout (~/projects/claude-packs): 194a20fa696e515ce07f9de1f287c460',
+  +   'build/evidence/W0/lock-status.txt:1: ~/projects/claude-packs/.claude-packs-lock: held by session 494639ba-5fcd',
+  +   'build/evidence/W1/fixture-red-host-agent-removed.txt:20: at TestContext.<anonymous> (file://~/projects/claude-packs/test/configura',
+  +   'build/evidence/W1/landing-proof.txt:3: main checkout (~/projects/claude-packs): ecde48cded51da63171a9c76ff1ad61f',
+  +   'build/evidence/W2/landing-proof.txt:3: main checkout (~/projects/claude-packs): f747567c8faf6e6a0b04882db28d4725',
+  +   'build/evidence/W2/measure.txt:1: == ~/projects/swarmk-ro/daemon-go (1f46aaf)',
+  +   'build/evidence/W2/measure.txt:6: == ~/projects/go-measure/hitkeep (34a6d0f)',
+  +   'build/evidence/W2/measure.txt:11: == ~/projects/go-measure/kit (8e55a6f)',
+  +   'build/evidence/W2/measure.txt:18: == ~/projects/swarmk-ro/daemon-go',
+  +   'build/evidence/W2/measure.txt:23: == ~/projects/go-measure/kit',
+  +   'build/evidence/W3/noop-red-before-fix.txt:45: at TestContext.<anonymous> (file://~/projects/claude-packs/test/noop.test'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/no-personal-name.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'docs/workorders/admiral-fleet/logs/session-1.jsonl:3: {"type":"system","subtype":"init","cwd":"~/projects/claude-packs","sessio', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:5: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrECYj5T4vCbzk3ai1q', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:7: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VW9wZpU8xiWzs9C', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:8: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrECpqgjytSx6vSwCBE', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:9: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01MuqLE1tktcgj9Ng', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:13: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrED4UEcoQwwzUUdFQD', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:14: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01ES4m9TeR5hNExBW', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:15: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEDSRaYg8HDShu5ksw', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:16: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_012r5XFwcWY68hoR5', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:21: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEDhdt2LzBZnLuGbJt', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:44: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEE8ikUrgurX4ZK7wd', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:51: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEEpbMgQVm5ZutXsSz', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:56: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEFNxXcPWUW16njN8U', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:59: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01PgbmpFDp43RCrEi', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:63: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEFjPMiG5kNHiyd6sT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:65: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEG1LJtJcUEuCQQPyt', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:82: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEGETbM7imekbg2uKd', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:99: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEHnJmq2x1YnT4DvbJ', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:145: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEJA2Vdhv99yLGbagn', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:150: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrENbLN2pdzM1Y1VsbU', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:158: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEPHCErNEi2QzFX7bW', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:186: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrERN1kkKBuV7JCAjsd', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:208: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018iPVs1qFsCZL5Lq', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:213: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEVACyBPBwZ4GQKHym', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:214: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_015UKC9brFHDhrLZa', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:216: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEVf9WW9mXcGq49z2Y', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:222: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEVwRYdK8EwpwLzqvC', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:239: {"type":"system","subtype":"task_notification","task_id":"b8a9980xe","run_id":"0mw8e1p5c-d', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:242: {"type":"system","subtype":"task_notification","task_id":"bmk4nize0","run_id":"0mw8e5loq-f', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:245: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018bTq1oFUgUBkTDU', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:251: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrErUgYVJdR27UxZUjy', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:253: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrErxVP3mcmCRBmF2Re', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:254: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:259: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsJ3MoE1uxqScw6iK', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:260: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VF1Kw6uMZZyT5Pg', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:264: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsfmq63m1jEX18XLE', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:269: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsx28JGRBinj5zqRC', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:270: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_0122pishbvzCfywUY', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:271: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEsx28JGRBinj5zqRC', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:273: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEtKn4zJ9VA6kK5ydi', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:274: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01E4UiGxnLS7KisbK', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:277: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEtmkWqpnVmkvptqbf', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:283: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEu2ToCpkzqvaFp96m', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:284: {"type":"system","subtype":"vcs_state_changed","kind":"push","cwd":"~/pro', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:285: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01MSNgrEbX9Xzd8a2', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:290: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEvjGzsmJR7zGKtdkx', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:297: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEwBWZvb7MomL1kZnb', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:299: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEwhgH9uVDbg5tJ2Yg', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:301: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEwvirdrXMhuvBSg2L', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:303: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrExEk4Y2igPpX9dufi', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:311: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrExaWxAGPjBwceRLL3', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:312: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01SAckdRpQnHfwhFh', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:316: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyE9P4sqCGshp4Rqh', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:321: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01YWaDstqGXv4jDvg', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:326: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyxpAvm8TudG9tQ8R', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:327: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UvaaqVq3Mixnn9G', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:328: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyxpAvm8TudG9tQ8R', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:329: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_018EMxZVw9oZBGYej', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:330: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEyxpAvm8TudG9tQ8R', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:332: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEzk3zhfKhydyWwHYb', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:333: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01FU39v5QZSbL78CD', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:334: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrEzk3zhfKhydyWwHYb', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:335: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01X5CCH4o3cP2vREw', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:339: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF1UMhNYvAh2DL2p4N', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:340: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VeomM7ky8RGVLDT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:346: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF2Rf1tTxgSBocTFsy', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:347: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01QNcG9EBicLvXvM3', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:352: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF362amKpMGAY1njcP', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:354: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3PJu6V8cDqhCvbgX', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:357: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:358: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01JDQv5igsSJdKTXf', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:359: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:360: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01RNNC82tehQcmop7', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:361: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:362: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_017DcxKUgKCP9BYdP', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:363: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:364: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01GwcG7HQTGjQbZHF', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:365: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF3hDAsqfDjoYQQzXT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:366: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01U94Ro4PWoYToDjP', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:368: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF4HpXgyR4c3MbFQ8b', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:370: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01SPfb8c71cUMZWdv', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:377: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF4ggxFB9J1cCvxxA5', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:378: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01NftTV5UUGW5HA4R', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:380: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF6ERh1566VfUYnbW3', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:382: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF6WGSbaAqLaJRGeSc', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:383: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01VPs8Nzu48ZkjoFw', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:384: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:385: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01J3fwzh7bkTMhhrF', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:386: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:387: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Ks78vpLnuQby9eP', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:388: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:389: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Nw2jxbiJDj2PEw2', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:390: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF7VGBpotX2rPZqvaE', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:393: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01MFEBSyeXrQguXuH', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:399: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF8TXJMVnMaWpCxSCT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:400: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01HZZ7kzuVk1DcdtH', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:401: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF8TXJMVnMaWpCxSCT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:402: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_019thpua8eRkrsJ5M', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:403: {"type":"assistant","message":{"model":"claude-opus-5-5","id":"msg_011CgrF8TXJMVnMaWpCxSCT', 'docs/workorders/admiral-fleet/logs/session-1.jsonl:406: {"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01QGbnKiKm4gJBG3C', ... 240 more items ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/npx-name.test.mjs:32:1
+✖ nothing in the kit names the bare `npx claude-packs` (it resolves to someone else's package) (42.479862ms)
+  AssertionError [ERR_ASSERTION]: use `npx --no-install @thedecipherist/claude-packs ...` or the installed path
+  + actual - expected
+  
+  + [
+  +   'build/evidence/W0.0/gate.txt:642'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/npx-name.test.mjs:33:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'build/evidence/W0.0/gate.txt:642' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+This is a changed-only run. With --base origin/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks.
+exit 1

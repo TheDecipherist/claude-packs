@@ -1,3 +1,3 @@
 remote: 194a20fa696e515ce07f9de1f287c460961215eb	refs/heads/main
 HEAD:   194a20fa696e515ce07f9de1f287c460961215eb
-main checkout (/home/tim_carter81/projects/claude-packs): 194a20fa696e515ce07f9de1f287c460961215eb on main
+main checkout (~/projects/claude-packs): 194a20fa696e515ce07f9de1f287c460961215eb on main

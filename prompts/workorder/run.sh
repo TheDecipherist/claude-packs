@@ -11,6 +11,8 @@ order="$root/docs/workorders/{{name}}"
 logs="$order/logs"
 max_sessions="${MAX_SESSIONS:-30}"
 mkdir -p "$logs"
+# each session's transcript holds this machine's paths and the user's name: it never reaches git (KWB-98)
+[[ -f "$logs/.gitignore" ]] || printf '*\n' > "$logs/.gitignore"
 cd "$root"
 
 moved() { git rev-parse HEAD; wc -c < "$order/progress.md" 2> /dev/null || true; }

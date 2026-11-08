@@ -1,0 +1,17 @@
+✔ workorder writes the steps, the prompt and the runner, with its name in them (66.217464ms)
+✔ workorder never writes over a work order that exists (124.891431ms)
+✔ a work order needs a plain name (120.037934ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (58.994467ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.2054ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.2493ms)
+✔ the runner keeps its session logs out of git (KWB-98) (87.198652ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (10481.778176ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.3241ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11008.507286

@@ -38,3 +38,8 @@ Decided in W4 (the work order names this one d-1).
 - Found: `update` wrote the new template's web folders into such a project, beside its own `channel/` (KWB-97). Chosen: a configuration's template seeds folders and concepts on a first install, or when a project takes that configuration; a project already of it owns its layout (lib/layout.mjs `buildLayout`). The other option, listing the three new folders as expected in the noop test, would have shipped the fault.
 - The concept keeps its name, `channel`, and now names the `web` folder (so does `ui`). Renamed, an existing project's own `channel` row (pointing at its `channel/`) would no longer be read by the stack rule, and the rule would fall to a folder it does not have. The name is internal; the folder is what a reader sees.
 - `pages`, `components` and `client` map onto `web-app`, `web-components` and `web`; the web pack's own globs are added to them, so `**/app/**/page.tsx` still holds anywhere.
+
+## d-7: evidence that names the machine, and this order's own runner logs
+
+- Question: the no-personal-name test failed on this run's own files: the evidence printed the home path, and the runner's session logs (whole transcripts) sat untracked in the order's folder.
+- Chosen: the evidence is written with the home folder as `~` (the same path without the user's name), the files already kept rewritten the same way, nothing else in them changed. The runner template now ignores its logs (KWB-98). This order's run.sh is the script running this session, and bash reads a running script as it goes, so it is not regenerated mid-run; its logs folder gets the same one-line `.gitignore` by hand.

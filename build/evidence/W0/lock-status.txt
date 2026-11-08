@@ -1,2 +1,2 @@
-/home/tim_carter81/projects/claude-packs/.claude-packs-lock: held by session 494639ba-5fcd-4a5c-9956-6693bf8a4108 (branch work/1.4.0-admiral-fleet, held since 2026-11-08T22:20:45.875Z; last seen 2026-11-08T22:41:26.910Z, 0 min ago, by its transcript): live
+~/projects/claude-packs/.claude-packs-lock: held by session 494639ba-5fcd-4a5c-9956-6693bf8a4108 (branch work/1.4.0-admiral-fleet, held since 2026-11-08T22:20:45.875Z; last seen 2026-11-08T22:41:26.910Z, 0 min ago, by its transcript): live
 session: 494639ba-5fcd-4a5c-9956-6693bf8a4108

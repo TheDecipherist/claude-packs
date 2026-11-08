@@ -1,0 +1,35 @@
+✖ the runner keeps its session logs out of git (KWB-98) (96.29515ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 155.52072
+
+✖ failing tests:
+
+test at test/workorder.test.mjs:61:1
+✖ the runner keeps its session logs out of git (KWB-98) (96.29515ms)
+  AssertionError [ERR_ASSERTION]: ?? .bin/claude
+  ?? docs/workorders/billing/DONE
+  ?? docs/workorders/billing/PROMPT.md
+  ?? docs/workorders/billing/logs/runner.log
+  ?? docs/workorders/billing/logs/session-1.err
+  ?? docs/workorders/billing/logs/session-1.jsonl
+  ?? docs/workorders/billing/run.sh
+  ?? docs/workorders/billing/workorder.md
+  
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/workorder.test.mjs:72:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '?? .bin/claude\n?? docs/workorders/billing/DONE\n?? docs/workorders/billing/PROMPT.md\n?? docs/workorders/billing/logs/runner.log\n?? docs/workorders/billing/logs/session-1.err\n?? docs/workorders/billing/logs/session-1.jsonl\n?? docs/workorders/billing/run.sh\n?? docs/workorders/billing/workorder.md\n',
+    expected: /logs\//,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
