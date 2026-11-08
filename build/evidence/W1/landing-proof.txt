@@ -1,0 +1,3 @@
+remote: ecde48cded51da63171a9c76ff1ad61f6df38f9c	refs/heads/main (ls-remote, second try: the first was reset by the network)
+HEAD:   ecde48cded51da63171a9c76ff1ad61f6df38f9c
+main checkout (/home/tim_carter81/projects/claude-packs): ecde48cded51da63171a9c76ff1ad61f6df38f9c on main

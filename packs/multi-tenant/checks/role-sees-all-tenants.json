@@ -6,7 +6,8 @@
     "**/*.ts",
     "**/*.js",
     "**/*.mjs",
-    "**/*.cjs"
+    "**/*.cjs",
+    "**/*.go"
   ],
   "exclude": [
     "**/tests/**",
@@ -17,10 +18,17 @@
     "**/node_modules/**",
     "**/dist/**",
     "**/build/**",
-    "**/.next/**"
+    "**/.next/**",
+    "**/*_test.go"
   ],
-  "pattern": "role\\s*===\\s*(?:UserRole\\.)?['\"]?[Oo]wner['\"]?\\s*\\?\\s*\\[\\]|role\\s*!==\\s*(?:UserRole\\.)?['\"]?[Oo]wner['\"]?\\s*&&\\s*\\w+\\._id",
+  "pattern": "role\\s*===\\s*(?:UserRole\\.)?['\"]?[Oo]wner['\"]?\\s*\\?\\s*\\[\\]|role\\s*!==\\s*(?:UserRole\\.)?['\"]?[Oo]wner['\"]?\\s*&&\\s*\\w+\\._id|\\bif\\s+[\\w.]*[Rr]ole\\s*==\\s*(?:[\\w.]*\\.)?(?:\"[Oo]wner\"|Role[Oo]wner|[Oo]wner)\\s*\\{\\s*\\w+\\s*:?=\\s*bson\\.[MD]\\{\\s*\\}|\\bif\\s+[\\w.]*[Rr]ole\\s*!=\\s*(?:[\\w.]*\\.)?(?:\"[Oo]wner\"|Role[Oo]wner|[Oo]wner)\\s*\\{\\s*\\w+\\[\\s*\"_id\"\\s*\\]\\s*=",
   "bad": "const pipeline = user.role === UserRole.Owner\n  ? []\n  : [{ $match: { _id: id } }];",
   "good": "const pipeline = [{ $match: { _id: new ObjectId(user.company_id) } }];",
-  "kind": "security"
+  "kind": "security",
+  "examples": [
+    {
+      "bad": "filter := bson.M{\"_id\": id}\nif user.Role == RoleOwner {\n\tfilter = bson.M{}\n}",
+      "good": "filter := bson.M{\"company_id\": user.CompanyID, \"_id\": id}\nif user.Role != RoleOwner {\n\treturn errForbidden\n}"
+    }
+  ]
 }

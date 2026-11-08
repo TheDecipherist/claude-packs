@@ -4,6 +4,8 @@
 //   { "id", "why", "rule", "globs": [...], "exclude": [...], "pattern": "<regex>", "flags": "",
 //     "code": true,            // match against code with comments/strings blanked (C/C++/JS)
 //     "bad": "<snippet the check must catch>", "good": "<fixed snippet it must pass>",
+//     "examples": [{ "bad", "good" }, ...],   // more pairs, each proved like the first: a pattern widened to another language
+//                                              // brings that language's pair (admiral-fleet W2: the tenant checks in Go)
 //     "mode": "forbid" (default) | "require" | "needs",  "needs": ["<regex>", ...] }
 //   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals);
 //   "prose": true blanks what a reader does not read as prose in markdown: code, URLs, frontmatter (a check on public text)
@@ -125,10 +127,11 @@ export function hitsOf(c, text) {
 function selftest(checks) {
   const problems = [];
   for (const c of checks) {
-    if (!c.bad || !c.good) problems.push(`${c.file}: needs both "bad" and "good" examples`);
-    else {
-      if (!violates(c, c.bad)) problems.push(`${c.file}: does not catch its "bad" example`);
-      if (violates(c, c.good)) problems.push(`${c.file}: wrongly flags its "good" example`);
+    for (const [i, pair] of [c, ...(c.examples ?? [])].entries()) {
+      const which = i ? ` (examples[${i - 1}])` : '';
+      if (!pair.bad || !pair.good) { problems.push(`${c.file}: needs both "bad" and "good" examples${which}`); continue; }
+      if (!violates(c, pair.bad)) problems.push(`${c.file}: does not catch its "bad" example${which}`);
+      if (violates(c, pair.good)) problems.push(`${c.file}: wrongly flags its "good" example${which}`);
     }
     for (const k of ['id', 'why', 'globs', 'pattern']) if (!c[k]) problems.push(`${c.file}: missing "${k}"`);
     if (!modeOf(c)) problems.push(`${c.file}: unknown mode "${c.mode}" (forbid, require or needs)`);

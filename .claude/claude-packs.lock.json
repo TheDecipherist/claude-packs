@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-08T22:26:19.245Z",
+  "updated": "2026-11-08T23:00:00.943Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/behaviour-lives-with-its-kind.md": "77b22577be4e86bdac9b558d21bcfe9215d027a90c97458e315b6ad45fa032a9",
@@ -42,7 +42,7 @@
     ".claude/hooks/file-size-guard.mjs": "0e31aa45abf03db12e3e41c6b8925aa7a9b2a966882c704098416ec07c4ae149",
     ".claude/hooks/folder-law.mjs": "0567170a82fdc5449a8148b17c08aa314ca44289ab0f1fd19aeff8be14737c51",
     ".claude/hooks/git-guard.mjs": "1f7a249a57f8f57dac73ad43e9291d654604698132fc9e4ec23d8b262b2ed4bb",
-    ".claude/hooks/lesson-checks.mjs": "6a1234b1b575d576d9a716943b0949e119ef052de32a7d98884c10619643e59d",
+    ".claude/hooks/lesson-checks.mjs": "7eba41217838f3ef16f3de1e540944ca92684dda25ab24f5a224b6cbafd08383",
     ".claude/hooks/lib/apply-edit.mjs": "b5ba751ef1b21a32430592091b2dc795f64697afc6ca39443faa1c8b539af9f5",
     ".claude/hooks/lib/code-shapes.mjs": "271d3aa2f7e95e826ab8631c3581d6cf2faca3b399d27a260de63103839e36dd",
     ".claude/hooks/lib/content.mjs": "fc3705570a710e7dac2b7b6dc5faaecc908e532d872c6bae72104f4f8b90cac7",

@@ -1,0 +1,12 @@
+project: /tmp/af/s3 (init --config go multi-tenant), source .go files: 1
+live rules (govern a .go file the project wrote): no-role-crosses-a-tenant.md
+the tenant rule live on internal/api/handlers.go: true
+uncovered .go: none
+--- doctor --strict in /tmp/af/s3
+  configuration: go
+  selftests: 20 of 20 unchanged, not run again (doctor --fresh runs them all)
+  making: 62 words, about 107 tokens added to every prompt (77 words, about 129 tokens when it echoes a named instance); an estimate (word pieces of up to 6 letters, each mark one token), not the model's tokenizer
+  duplicates: 0 (jscpd, 0 sources, 35 ms; `npx --no-install @thedecipherist/claude-packs dup scan` lists them), lowest seen 0
+  hook timing: no calls logged yet (.claude/hooks.log fills as the hooks run)
+  note: 19 rule(s) wait for their first file: their folders hold nothing yet
+OK: base, multi-tenant

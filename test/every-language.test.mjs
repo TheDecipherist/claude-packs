@@ -1,6 +1,6 @@
 // 0.25.0: every language has repetition and template things, because AI writes the same thing over and over. One row per language: a copy with
 // other names has the shape of the original, and a comment or a data table has none. The language table is packs/base/hooks/lib/languages.mjs.
-import { assert, cli, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, selftest, test, writeFileSync } from './kit-cli.mjs';
 import { codeShapes } from '../packs/base/hooks/lib/code-shapes.mjs';
 import { definesOf } from '../packs/base/hooks/lib/near-copies.mjs';
 import { LANGUAGES } from '../packs/base/hooks/lib/languages.mjs';
@@ -80,4 +80,36 @@ test('the python and shell packs refuse what they say they refuse', () => {
   assert.equal(write('src/b.py', 'try:\n    run()\nexcept ValueError:\n    log()\n'), 0);
   assert.equal(write('src/a.sh', '#!/usr/bin/env bash\nset -euo pipefail\nnow=`date`\n'), 2);
   assert.equal(write('src/b.sh', '#!/usr/bin/env bash\nset -euo pipefail\nnow=$(date)\n'), 0);
+});
+
+// admiral-fleet W2: the tenant law judges Go. Each Go pair of the two tenant checks, written into a .go file of an installed
+// go project with multi-tenant: the bad refused by that check, the good taken; and the rule loads on .go files.
+test('go: the tenant checks refuse their Go faults and take the fixes, and the tenant rule loads on .go', () => {
+  const dir = fresh('tenant-go-');
+  assert.equal(cli(dir, 'init', '--config', 'go', 'multi-tenant').status, 0);
+  mkdirSync(join(dir, 'internal/api'), { recursive: true });
+  for (const id of ['tenant-filter-from-url', 'role-sees-all-tenants']) {
+    const check = JSON.parse(readFileSync(join(dir, '.claude/checks', `${id}.json`), 'utf8'));
+    assert.ok(check.examples?.length, `${id}: a Go pair`);
+    for (const [i, { bad, good }] of check.examples.entries()) {
+      const r = hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, `internal/api/bad${i}.go`), content: `package api\n\n${bad}\n` } });
+      assert.ok(r.status === 2 && r.stderr.includes(id), `${id} examples[${i}]: the bad refused (${r.status})`);
+      assert.equal(hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, `internal/api/good${i}.go`), content: `package api\n\n${good}\n` } }).status, 0, `${id} examples[${i}]: the good taken`);
+    }
+  }
+  assert.match(readFileSync(join(dir, '.claude/rules/no-role-crosses-a-tenant.md'), 'utf8'), /"\*\*\/\*\.go"/);
+});
+
+// A check's "examples" pairs are proved like its first (doctor runs the lesson-checks selftest): a Go bad the pattern misses is named.
+test('the lesson-checks selftest proves every examples pair of a check, and names the one that fails', () => {
+  const dir = fresh('examples-');
+  assert.equal(cli(dir, 'init', '--config', 'go', 'multi-tenant').status, 0);
+  assert.equal(selftest(dir, 'lesson-checks.mjs').status, 0, 'as shipped');
+  const file = join(dir, '.claude/checks/tenant-filter-from-url.json');
+  const check = JSON.parse(readFileSync(file, 'utf8'));
+  check.examples[1].bad = 'row := db.QueryRowContext(ctx, "SELECT name FROM sites WHERE tenant_id = $1", sess.TenantID)';   // planted: a bad the pattern misses
+  writeFileSync(file, JSON.stringify(check, null, 2));
+  const s = selftest(dir, 'lesson-checks.mjs');
+  assert.equal(s.status, 1);
+  assert.match(s.stderr, /tenant-filter-from-url\.json: does not catch its "bad" example \(examples\[1\]\)/);
 });

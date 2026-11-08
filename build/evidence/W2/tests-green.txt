@@ -1,0 +1,10 @@
+✔ go: the tenant checks refuse their Go faults and take the fixes, and the tenant rule loads on .go (10997.524241ms)
+✔ the lesson-checks selftest proves every examples pair of a check, and names the one that fails (1822.001425ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12898.077939
