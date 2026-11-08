@@ -1,0 +1,36 @@
+✔ the kit ships its configurations (1.337ms)
+✔ base: installs into a fresh repo and doctor --strict passes (15735.894858ms)
+✔ cpp: installs into a fresh repo and doctor --strict passes (4262.947259ms)
+✔ full-stack: installs into a fresh repo and doctor --strict passes (5491.198037ms)
+✔ go: installs into a fresh repo and doctor --strict passes (3731.208299ms)
+✔ node: installs into a fresh repo and doctor --strict passes (3535.550751ms)
+✔ python: installs into a fresh repo and doctor --strict passes (3565.547409ms)
+✔ rust: installs into a fresh repo and doctor --strict passes (3422.80162ms)
+✔ synth-creator: installs into a fresh repo and doctor --strict passes (15560.893332ms)
+✔ full-stack installs web, go, host-agent and shell-hooks when chosen: their rules, checks and hooks land (1903.668029ms)
+✔ planner-skills: one project-layout body per configuration, from its layout template (213.376719ms)
+✔ init --config full-stack: its folders, its laws and no synth law (19985.77691ms)
+✔ the full-stack hooks refuse express, a schema in a route and a .env git does not ignore, in the installed project (2539.868574ms)
+✔ doctor --strict counts TypeScript as source in a full-stack project (KWB-32) (6055.361678ms)
+✔ gpu-painter and ui-craft carry the hover rule, scoped to UI code, naming the cursor, the effect and the one hit test (1.0614ms)
+✔ the skill hover-state: "Use when", under 8,000 characters, names the hover walk and the worked example (0.4109ms)
+✔ an installed synth gets the rule and the skill; full-stack gets its rule loaded on the web app (29638.10011ms)
+✔ doctor: UI code and no hover gate is a PROBLEM; the gate named (and its file there) is OK; a fresh project with no UI code is not (13942.422923ms)
+✔ doctor: the web app (packages/web) with a page and no hover gate is a PROBLEM too (3927.11522ms)
+✔ doctor: a node web project with UI code and no hover gate is a PROBLEM too (ui-craft) (3772.29843ms)
+✔ the Stellix profile declares its hover gate (0.4025ms)
+✔ layout.json "gates" is the project's own: an update keeps it (3487.072367ms)
+✔ an update keeps buildOutput, and adds none where the project set none (3.053699ms)
+✔ every layout key the kit reads survives an update (15.481795ms)
+✔ stellix: update in synth-creator makes what 0.9.15 made, but for the configuration key (14582.945617ms)
+✔ sub37: update in synth-creator makes what 0.9.15 made, but for the configuration key (10278.06675ms)
+✔ an install that names no configuration gets synth-creator from its packs, and the same result (1928.248394ms)
+✔ full-stack: an update keeps an existing project's own layout, and changes only the listed files (12229.249983ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57535.970535

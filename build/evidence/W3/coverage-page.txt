@@ -1,0 +1,14 @@
+project: /tmp/af/s5 (init --config full-stack web), file packages/web/app/dashboard/page.tsx
+the pages concept in layout.json: ["web-app","**/app/**/page.tsx","**/app/**/layout.tsx","**/app/**/template.tsx","**/pages/**/*.tsx","**/pages/**/*.jsx","**/routes/**/*.tsx"]
+live rules: 15 a-control-is-seen-to-fire.md, accessibility.md, behaviour-lives-with-its-kind.md, bug-fix-starts-red.md, client-boundaries.md, field-map-over-if-runs.md, instances-by-index-identities-by-id.md, lookup-over-if-chains.md, production-build.md, secrets-not-in-the-browser.md, stack-is-fastify-and-nextjs.md, styles-live-in-stylesheets.md, test-the-template-once.md, ui-primitives-one-module.md, web-performance.md
+web pages rule ui-primitives-one-module.md live on the page: true
+web pages rule web-performance.md live on the page: true
+uncovered: none
+  configuration: full-stack
+  selftests: 22 of 22 unchanged, not run again (doctor --fresh runs them all)
+  making: 62 words, about 107 tokens added to every prompt (77 words, about 129 tokens when it echoes a named instance); an estimate (word pieces of up to 6 letters, each mark one token), not the model's tokenizer
+  duplicates: 0 (jscpd, 0 sources, 33 ms; `npx --no-install @thedecipherist/claude-packs dup scan` lists them), lowest seen 0
+  hook timing: no calls logged yet (.claude/hooks.log fills as the hooks run)
+  note: 35 rule(s) wait for their first file: their folders hold nothing yet
+OK: base, web
+doctor exit 0

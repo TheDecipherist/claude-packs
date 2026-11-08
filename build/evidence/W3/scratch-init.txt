@@ -1,0 +1,20 @@
+OK: base, js-ts, stored-text, ui-craft
+--- the tree (find -type d, no .claude/.git)
+.
+./docs
+./packages
+./packages/api
+./packages/api/src
+./packages/api/src/adapters
+./packages/api/src/auth
+./packages/api/src/handlers
+./packages/api/src/routes
+./packages/api/test
+./packages/core
+./packages/core/src
+./packages/core/src/schemas
+./packages/web
+./packages/web/app
+./packages/web/components
+./tools
+--- at the root: api/ absent, channel/ absent

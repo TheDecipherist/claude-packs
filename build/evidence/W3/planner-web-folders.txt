@@ -1,0 +1,3 @@
+- `packages/web/`: the Next.js web app
+- `packages/web/app/`: the web app's routes: pages, layouts and their loading and error states (the App Router)
+- `packages/web/components/`: the web app's components, built from the one set of UI primitives

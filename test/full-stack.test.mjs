@@ -15,10 +15,12 @@ function fullStack() {
 
 test('init --config full-stack: its folders, its laws and no synth law', () => {
   const dir = fullStack();
-  for (const f of ['packages/core/src/schemas', 'api/src/routes', 'api/src/handlers', 'api/src/adapters', 'api/src/auth', 'channel']) assert.ok(existsSync(join(dir, f)), f);
+  // admiral-fleet W3: one packages/ tree, the web app in it; nothing of the API or a channel at the root
+  for (const f of ['packages/core/src/schemas', 'packages/api/src/routes', 'packages/api/src/handlers', 'packages/api/src/adapters', 'packages/api/src/auth', 'packages/api/test', 'packages/web/app', 'packages/web/components']) assert.ok(existsSync(join(dir, f)), f);
+  for (const f of ['api', 'channel']) assert.ok(!existsSync(join(dir, f)), `no ${f}/ at the root`);
   assert.ok(!existsSync(join(dir, 'src')), 'no synth src/ folder');
   const rule = readFileSync(join(dir, '.claude/rules/routes-are-thin.md'), 'utf8');
-  assert.match(rule, /"api\/src\/routes\/\*\*"/);
+  assert.match(rule, /"packages\/api\/src\/routes\/\*\*"/);
   assert.match(readFileSync(join(dir, '.claude/rules/zod-4-schemas.md'), 'utf8'), /"packages\/core\/src\/schemas\/\*\*"/);
   for (const r of ['math-domain-guards.md', 'debug-by-measurement.md']) assert.ok(!existsSync(join(dir, '.claude/rules', r)), r);
   for (const h of ['build-guard.mjs', 'realtime-guard.mjs', 'time-guard.mjs']) assert.ok(!existsSync(join(dir, '.claude/hooks', h)), h);
@@ -38,14 +40,14 @@ test('init --config full-stack: its folders, its laws and no synth law', () => {
 test('the full-stack hooks refuse express, a schema in a route and a .env git does not ignore, in the installed project', () => {
   const dir = fullStack();
   const run = (name, rel, content) => hook(dir, name, { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
-  assert.equal(run('stack-guard.mjs', 'api/package.json', '{"dependencies":{"express":"5.1.0"}}\n'), 2);
-  assert.equal(run('stack-guard.mjs', 'api/package.json', '{"dependencies":{"fastify":"5.6.1"}}\n'), 0);
-  assert.equal(run('schemas-only.mjs', 'api/src/routes/user.ts', 'const B = z.object({});\n'), 2);
+  assert.equal(run('stack-guard.mjs', 'packages/api/package.json', '{"dependencies":{"express":"5.1.0"}}\n'), 2);
+  assert.equal(run('stack-guard.mjs', 'packages/api/package.json', '{"dependencies":{"fastify":"5.6.1"}}\n'), 0);
+  assert.equal(run('schemas-only.mjs', 'packages/api/src/routes/user.ts', 'const B = z.object({});\n'), 2);
   assert.equal(run('schemas-only.mjs', 'packages/core/src/schemas/user.ts', 'export const B = z.object({});\n'), 0);
-  assert.equal(run('placement-law.mjs', 'api/src/handlers/user.ts', "import { MongoClient } from 'mongodb';\n"), 2, 'the driver only in the adapters');
-  assert.equal(run('placement-law.mjs', 'api/src/adapters/db.ts', "import { MongoClient } from 'mongodb';\n"), 0);
+  assert.equal(run('placement-law.mjs', 'packages/api/src/handlers/user.ts', "import { MongoClient } from 'mongodb';\n"), 2, 'the driver only in the adapters');
+  assert.equal(run('placement-law.mjs', 'packages/api/src/adapters/db.ts', "import { MongoClient } from 'mongodb';\n"), 0);
   assert.equal(run('secrets-guard.mjs', '.env', 'A=1\n'), 2, 'a .env git does not ignore');
-  assert.equal(run('schemas-only.mjs', 'api/src/routes/ok.ts', "import { User } from '../../../packages/core/src/schemas/user';\n"), 0);
+  assert.equal(run('schemas-only.mjs', 'packages/api/src/routes/ok.ts', "import { User } from '../../../core/src/schemas/user';\n"), 0);
 });
 
 test('doctor --strict counts TypeScript as source in a full-stack project (KWB-32)', () => {
@@ -56,6 +58,6 @@ test('doctor --strict counts TypeScript as source in a full-stack project (KWB-3
   const red = cli(dir, 'doctor', '--strict');
   assert.equal(red.status, 1);
   assert.match(red.stdout, /1 source file\(s\) no rule covers .*stray\/util\.ts/);
-  renameSync(join(dir, 'stray/util.ts'), join(dir, 'api/src/util.ts'));
+  renameSync(join(dir, 'stray/util.ts'), join(dir, 'packages/api/src/util.ts'));
   assert.doesNotMatch(cli(dir, 'doctor', '--strict').stdout, /no rule covers/, 'a file in the API folder is covered');
 });

@@ -71,9 +71,9 @@ test('doctor: UI code and no hover gate is a PROBLEM; the gate named (and its fi
   assert.equal(cli(fresh1, 'doctor', '--strict').status, 0, 'no UI code yet');
 });
 
-test('doctor: the web app (channel) with a page and no hover gate is a PROBLEM too', () => {
+test('doctor: the web app (packages/web) with a page and no hover gate is a PROBLEM too', () => {
   const dir = init(['--config', 'full-stack'], 'hov-web-');
-  writeFileSync(join(dir, 'channel/page.tsx'), 'export default function P() { return null; }\n');
+  writeFileSync(join(dir, 'packages/web/app/page.tsx'), 'export default function P() { return null; }\n');
   const red = cli(dir, 'doctor');
   assert.equal(red.status, 1, red.stdout);
   assert.match(red.stdout, /PROBLEM: .*hover gate/);

@@ -41,7 +41,7 @@
       "schemas"
     ],
     "channel": [
-      "channel"
+      "web"
     ],
     "manifests": [
       "**/package.json"
@@ -55,7 +55,7 @@
       "**/*.test.tsx"
     ],
     "ui": [
-      "channel"
+      "web"
     ]
   },
   "skillsIn": null,

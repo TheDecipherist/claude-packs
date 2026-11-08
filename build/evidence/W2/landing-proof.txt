@@ -1,0 +1,3 @@
+remote: f747567c8faf6e6a0b04882db28d4725268dcdb7	refs/heads/main
+HEAD:   f747567c8faf6e6a0b04882db28d4725268dcdb7
+main checkout (/home/tim_carter81/projects/claude-packs): f747567c8faf6e6a0b04882db28d4725268dcdb7 on main

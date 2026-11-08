@@ -1,0 +1,56 @@
+✖ full-stack: an update keeps an existing project's own layout, and changes only the listed files (11426.33373ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11493.694911
+
+✖ failing tests:
+
+test at test/noop.test.mjs:99:1
+✖ full-stack: an update keeps an existing project's own layout, and changes only the listed files (11426.33373ms)
+  AssertionError [ERR_ASSERTION]: its folders, no more, no fewer
+  + actual - expected
+  ... Skipped lines
+  
+    {
+      'api-tests': {
+        path: 'api/test',
+        purpose: 'API tests through inject()'
+      },
+  +   'web-app': {
+  +     path: 'packages/web/app',
+  +     purpose: "the web app's routes: pages, layouts and their loading and error states (the App Router)"
+  +   },
+  +   'web-components': {
+  +     path: 'packages/web/components',
+  +     purpose: "the web app's components, built from the one set of UI primitives"
+  +   },
+      adapters: {
+        path: 'api/src/adapters',
+        purpose: 'the one database gateway and every other outside service'
+      },
+      api: {
+  ...
+      },
+  +   web: {
+  +     path: 'packages/web',
+  +     purpose: 'the Next.js web app'
+  +   }
+    }
+  
+      at TestContext.<anonymous> (file:///home/tim_carter81/projects/claude-packs/test/noop.test.mjs:104:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { core: { path: 'packages/core/src', purpose: 'shared code the API and the web app both import' }, schemas: { path: 'packages/core/src/schemas', purpose: 'every Zod 4 schema: requests, responses, records, forms, the error contract' }, api: { path: 'api/src', purpose: 'the Fastify API: buildServer(), env.ts, the error handler, plugins' }, routes: { path: 'api/src/routes', purpose: 'thin routes: method, path, schemas, one handler call' }, handlers: { path: 'api/src/handlers', purpose: 'the work of each route, through adapters' }, adapters: { path: 'api/src/adapters', purpose: 'the one database gateway and every other outside service' }, auth: { path: 'api/src/auth', purpose: "authentication and the request's identity (the chain keys come from here)" }, 'api-tests': { path: 'api/test', purpose: 'API tests through inject()' }, channel: { path: 'channel', purpose: 'the Next.js web app' }, docs: { path: 'docs', purpose: 'the spec, decisions, versions.md' }, tools: { path: 'tools', purpose: 'scripts that never ship' }, web: { path: 'packages/web', purpose: 'the Next.js web app' }, 'web-app': { path: 'packages/web/app', purpose: "the web app's routes: pages, layouts and their loading and error states (the App Router)" }, 'web-components': { path: 'packages/web/components', purpose: "the web app's components, built from the one set of UI primitives" } },
+    expected: { core: { path: 'packages/core/src', purpose: 'shared code the API and the web app both import' }, schemas: { path: 'packages/core/src/schemas', purpose: 'every Zod 4 schema: requests, responses, records, forms, the error contract' }, api: { path: 'api/src', purpose: 'the Fastify API: buildServer(), env.ts, the error handler, plugins' }, routes: { path: 'api/src/routes', purpose: 'thin routes: method, path, schemas, one handler call' }, handlers: { path: 'api/src/handlers', purpose: 'the work of each route, through adapters' }, adapters: { path: 'api/src/adapters', purpose: 'the one database gateway and every other outside service' }, auth: { path: 'api/src/auth', purpose: "authentication and the request's identity (the chain keys come from here)" }, 'api-tests': { path: 'api/test', purpose: 'API tests through inject()' }, channel: { path: 'channel', purpose: 'the Next.js web app' }, docs: { path: 'docs', purpose: 'the spec, decisions, versions.md' }, tools: { path: 'tools', purpose: 'scripts that never ship' } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

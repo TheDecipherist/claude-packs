@@ -21,13 +21,13 @@ export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mj
     '.claude/tools/freeze.mjs', '.claude/tools/lib/wav.mjs', '.claude/rules/subagent-dispatch.md', '.claude/rules/bug-fix-starts-red.md',
     '.claude/rules/house-control-behaviours.md', '.claude/skills/prove-control/SKILL.md', '.claude/skills/build-step/SKILL.md']);   // 0.22.1: one control per template, the rest by a read   // 0.11.0: their if-chains are tables (lookup-over-if-chains)
 
-function updated(project, named = true) {
+function updated(project, config = 'synth-creator') {
   const dir = fresh(`noop-${project}-`);
   mkdirSync(join(dir, '.claude'));
   writeFileSync(join(dir, 'package.json'), '{}\n'); // these projects hold the kit as a dev dependency: a project with none is told another command (KWB-76)
   const b = (f) => join(FX, project, 'before', f);
   const layout = JSON.parse(readFileSync(b('layout.json'), 'utf8'));
-  if (named) layout.configuration = 'synth-creator';
+  if (config) layout.configuration = config;
   writeFileSync(join(dir, '.claude/layout.json'), JSON.stringify(layout, null, 2));
   copyFileSync(b('settings.json'), join(dir, '.claude/settings.json'));
   copyFileSync(b('lock.json'), join(dir, '.claude/claude-packs.lock.json'));
@@ -89,4 +89,23 @@ test('an install that names no configuration gets synth-creator from its packs, 
   const { dir, out } = updated('sub37', false);
   assert.match(out, /configuration: synth-creator \(from its packs: base, audio-core\)/);
   assert.equal(readFileSync(join(dir, '.claude/settings.json'), 'utf8'), expected('sub37', 'settings.json'));
+});
+
+// admiral-fleet W3 (KWB-97): full-stack's template moved under packages/ and gained a web folder. A project installed with the
+// template before it (test/fixtures/noop/full-stack/before/: the kit at f747567, the web app in channel/, the API in api/src)
+// keeps its own layout on update: no template folder or concept added, the same CLAUDE.md, the same files. A file the kit
+// changes on purpose later goes in FULL_STACK_CHANGED, with why.
+const FULL_STACK_CHANGED = [];
+test('full-stack: an update keeps an existing project\'s own layout, and changes only the listed files', () => {
+  const { dir } = updated('full-stack', 'full-stack');
+  const before = (f) => readFileSync(join(FX, 'full-stack', 'before', f), 'utf8');
+  const was = JSON.parse(before('layout.json'));
+  const layout = JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
+  assert.deepEqual(layout.folders, was.folders, 'its folders, no more, no fewer');
+  assert.deepEqual(layout.concepts, was.concepts, 'its concepts');
+  assert.equal(readFileSync(join(dir, 'CLAUDE.md'), 'utf8'), before('claude-md.txt'), 'CLAUDE.md');
+  const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
+  const old = JSON.parse(before('lock.json'));
+  assert.deepEqual(Object.keys(lock.files).sort(), Object.keys(old.files).sort(), 'the same files');
+  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && !FULL_STACK_CHANGED.includes(f)), [], 'only the listed files changed');
 });
