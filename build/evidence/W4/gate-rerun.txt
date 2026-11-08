@@ -1,0 +1,41 @@
+✔ base and the base configuration name no synth word (6.732698ms)
+✔ what left base is in the synth-creator pack, and only the synth-creator configuration installs that pack (1.4656ms)
+✔ the rule: a gate that writes the parameter proves nothing about the control (1.4605ms)
+✔ the rule installs with audio-core and loads on UI code (15167.376847ms)
+✔ prove-control starts from the input path, and goes red with the hook taken out (0.2961ms)
+✔ analyse-reference-look asks for depth: each element's shadow, bevel and edge light, measured against the reference (0.277ms)
+✔ analyse-reference-look asks for a control and a confidence per measure (0.2342ms)
+✔ analyse-reference-look asks for seed boxes for a dark part on a dark panel (0.1662ms)
+✔ analyse-reference-look asks for rectify against a known anchor (0.148ms)
+✔ analyse-reference-look asks for how to rank sources that disagree (0.141ms)
+✔ analyse-reference-look asks for typeface as a scored choice (0.3129ms)
+✔ analyse-reference-look asks for planted faults diffed against the unplanted result (0.2669ms)
+✔ analyse-reference-look asks for the render measured by the code that measured the target (0.932999ms)
+✔ analyse-reference-look asks for geometry exact, and a whole-picture score never a pass (0.133ms)
+✔ the skill stays under the limit and names the rule as required reading where the project has it (admiral-fleet d-1) (0.2032ms)
+✔ ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass (0.1428ms)
+✔ stellix: update in synth-creator makes what 0.9.15 made, but for the configuration key (12595.406553ms)
+✔ sub37: update in synth-creator makes what 0.9.15 made, but for the configuration key (9360.30591ms)
+✔ an install that names no configuration gets synth-creator from its packs, and the same result (1835.494231ms)
+✔ full-stack: an update keeps an existing project's own layout, and changes only the listed files (12536.168818ms)
+✔ the kit's own files in a project are no evidence about it (78.760578ms)
+✔ a reverse-engineering project is known by firmware findings in its research (82.573378ms)
+✔ a reverse-engineering project is known by a disassembler in its tools (100.119473ms)
+✔ a reverse-engineering project is known by notes named for a machine (82.865477ms)
+✔ MIDI is known by what the code does, not only by a file name (151.424559ms)
+✔ a project that names its configuration is read as that (73.79038ms)
+✔ a long identifier is no secret, and a real key still is (1.1099ms)
+✔ a build folder is known by what the build leaves, and scan neither reads it nor hides it (333.85361ms)
+✔ a new reverse-engineering project with no code yet gets the pack, from its notes alone (12833.245905ms)
+✔ a unit cannot write a second clock, and a project that draws in code cannot add an image (16542.591604ms)
+✔ a UI is drawn straight on and aligned, and the image skill separates the object from the photograph (2508.629714ms)
+✔ installed dependencies are no evidence about a project, even before it has a .gitignore (81.671274ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 36417.535077
+exit 0

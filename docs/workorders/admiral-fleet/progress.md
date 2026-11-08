@@ -9,7 +9,7 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - [x] W1 full-stack chooses web, go, host-agent, shell-hooks
 - [x] W2 the tenant law judges Go
 - [x] W3 one consistent full-stack layout, with a web folder
-- [ ] W4 analyse-reference-look for any page drawn from a picture
+- [x] W4 analyse-reference-look for any page drawn from a picture
 - [ ] W5 release
 - [ ] W6 prove the consumer's install
 - [ ] W7 before calling it finished
@@ -45,3 +45,4 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - 2026-11-08 W4.2b: depth rows in the skill, its report, ui-matches-reference-look and page-matches-reference-look; the proof: a reference card (make_reference.py) and two headless-Chrome renders measured by one script (look_depth.py): flat red on 9 depth rows with its colours passing, drawn green on all 12; edge_light.width's tolerance tightened to 0 first, since 1 px passed a missing 1 px edge; side by side read by eye (build/evidence/W4/depth/)
 - 2026-11-08 W4.3: scratch full-stack install, the events through run-hooks.mjs: skill-first refused the reference read and allowed it after the Skill call; look-gate named the look after a build, refused the landing without a report and allowed it with a passing one (build/evidence/W4/hooks/transcript.txt)
 - 2026-11-08 W4.4: noop: stellix and sub37 keep the skill after update (MOVED, same place, base's text); full-stack lists the two new files; base-neutral, readme (base 12 skills, audio-core 7, ui-craft 17 rules), site (264 rules), ui-craft, audio-packs, kf-build-laws green, 51 of 51 (tests-green.txt, site run after)
+- 2026-11-08 W4 gate: test:changed --base origin/main on abd75c9, 490 of 491 (build/evidence/W4/gate.txt): what-the-kit-finds holds "separate the object from the photograph", which the neutral rewrite had made "from the picture"; the phrase put back in the skill (the test unchanged); that test and the skill's run again, 32 of 32 (gate-rerun.txt). W4 done: full-stack init installs the skill; flat red, drawn green on the depth rows; the two refusals and two allowances; the noop and base-neutral tests green; README counts true.

@@ -1,0 +1,847 @@
+
+> @thedecipherist/claude-packs@1.3.1 test:changed
+> node scripts/test-changed.mjs --base origin/main
+
+test:changed: base origin/main (8ba6525), 32 changed file(s)
+  .claude/claude-packs.lock.json
+  .claude/skills/analyse-reference-look/SKILL.md
+  README.md
+  build.md
+  build/evidence/W3/landing-proof.txt
+  build/evidence/W4/depth/drawn-judged.txt
+  build/evidence/W4/depth/drawn-report.json
+  build/evidence/W4/depth/drawn.html
+  build/evidence/W4/depth/drawn.png
+  build/evidence/W4/depth/flat-judged.txt
+  build/evidence/W4/depth/flat-report.json
+  build/evidence/W4/depth/flat.html
+  build/evidence/W4/depth/flat.png
+  build/evidence/W4/depth/look_depth.py
+  build/evidence/W4/depth/make_reference.py
+  build/evidence/W4/depth/reference.png
+  build/evidence/W4/depth/side-by-side.png
+  build/evidence/W4/gate.txt
+  build/evidence/W4/hooks/drive.mjs
+  build/evidence/W4/hooks/transcript.txt
+  build/evidence/W4/tests-first.txt
+  build/evidence/W4/tests-green.txt
+  docs/workorders/admiral-fleet/decisions.md
+  docs/workorders/admiral-fleet/progress.md
+  package-lock.json
+  packs/audio-core/rules/ui-matches-reference-look.md
+  packs/audio-core/skills/analyse-reference-look/SKILL.md
+  packs/base/skills/analyse-reference-look/SKILL.md
+  packs/ui-craft/rules/page-matches-reference-look.md
+  site/index.html
+  test/kf-build-laws.test.mjs
+  test/noop.test.mjs
+chose 61 of 70 test files:
+  test/base-laws.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/ (holds .claude/skills/analyse-reference-look/SKILL.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+2 more)
+  test/configs.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+2 more)
+  test/configurations.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/ (holds .claude/skills/analyse-reference-look/SKILL.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+3 more)
+  test/custom-packs.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/skills/ (holds .claude/skills/analyse-reference-look/SKILL.md)
+    names packs/ (holds packs/audio-core/rules/ui-matches-reference-look.md)
+    (+5 more)
+  test/every-language.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/house.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/skills (holds .claude/skills/analyse-reference-look/SKILL.md)
+    reaches packs/audio-core/rules/ui-matches-reference-look.md
+    (+6 more)
+  test/install-fixes.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/kf-new-projects.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+1 more)
+  test/kit-guards.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/lookup.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+2 more)
+  test/new.test.mjs
+    names .claude/claude-packs.lock.json
+    names build.md (build.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+2 more)
+  test/noop.test.mjs
+    names .claude/claude-packs.lock.json
+    names .claude/skills/analyse-reference-look/SKILL.md
+    names ui-matches-reference-look.md (packs/audio-core/rules/ui-matches-reference-look.md)
+    (+6 more)
+  test/review-packs.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/shape.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+1 more)
+  test/stored-text.test.mjs
+    names .claude/claude-packs.lock.json
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/ui-craft.test.mjs
+    names .claude/ (holds .claude/claude-packs.lock.json)
+    names .claude/ (holds .claude/skills/analyse-reference-look/SKILL.md)
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    (+2 more)
+  test/workorder.test.mjs
+    names claude-packs.lock.json (.claude/claude-packs.lock.json)
+    names build.md (build.md)
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/structure.test.mjs
+    names .claude/skills (holds .claude/skills/analyse-reference-look/SKILL.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+1 more)
+  test/what-the-kit-finds.test.mjs
+    names .claude/skills/analyse-reference-look/SKILL.md
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+1 more)
+  test/global.test.mjs
+    reaches README.md
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/kf-refusals.test.mjs
+    names build.md (build.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+2 more)
+  test/worktrees.test.mjs
+    names build.md (build.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+1 more)
+  test/npx-name.test.mjs
+    names gate.txt (build/evidence/W4/gate.txt)
+  test/file-size.test.mjs
+    reaches packs/audio-core/rules/ui-matches-reference-look.md
+    reaches packs/base/skills/analyse-reference-look/SKILL.md
+    reaches packs/ui-craft/rules/page-matches-reference-look.md
+  test/hook-timing.test.mjs
+    reaches packs/audio-core/rules/ui-matches-reference-look.md
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    names packs/ (holds packs/audio-core/skills/analyse-reference-look/SKILL.md)
+    (+4 more)
+  test/kf-build-laws.test.mjs
+    names ui-matches-reference-look.md (packs/audio-core/rules/ui-matches-reference-look.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    (+2 more)
+  test/pack-manifest.test.mjs
+    names packs/ (holds packs/audio-core/rules/ui-matches-reference-look.md)
+    names packs/ (holds packs/audio-core/skills/analyse-reference-look/SKILL.md)
+    names packs/ (holds packs/base/skills/analyse-reference-look/SKILL.md)
+    (+1 more)
+  test/sub37-wb.test.mjs
+    names packs/audio-core (holds packs/audio-core/rules/ui-matches-reference-look.md)
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    names packs/audio-core (holds packs/audio-core/skills/analyse-reference-look/SKILL.md)
+    (+3 more)
+  test/audio-packs.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    (+1 more)
+  test/cpp-pack.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/doctor-timeout.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/gitignore.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/hover.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    (+1 more)
+  test/install.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/instances.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/kf-fail-open.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    (+1 more)
+  test/micro.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/once-only.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/other-projects.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/routes.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/rule-tests.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/symmetry.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/vst3host.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/writing.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack reaches a project through an install: the tests that bring this pack in
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    (+1 more)
+  test/readme.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/base/skills/analyse-reference-look/SKILL.md: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    (+1 more)
+  test/site.test.mjs
+    packs/audio-core/rules/ui-matches-reference-look.md: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/audio-core/skills/analyse-reference-look/SKILL.md: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    packs/base/skills/analyse-reference-look/SKILL.md: a pack's rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts
+    (+2 more)
+  test/base-neutral.test.mjs
+    names packs/base (holds packs/base/skills/analyse-reference-look/SKILL.md)
+  test/content-sites.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+    names index.html (site/index.html)
+  test/doctor-cache.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/full-stack.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/hook-proof.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/lock-release.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/logging.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/names-sweep.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/postgres-pack.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/rules-follow-the-code.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/rust-dry.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/rust-pack.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+  test/scan.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    names index.html (site/index.html)
+  test/ui-depth.test.mjs
+    packs/base/skills/analyse-reference-look/SKILL.md: base, the seeds and the configurations reach every project: the tests that install packs
+    packs/ui-craft/rules/page-matches-reference-look.md: a pack reaches a project through an install: the tests that bring this pack in
+  test/test-changed.test.mjs
+    names test/noop.test.mjs
+no test covers: build/evidence/W3/landing-proof.txt, build/evidence/W4/depth/drawn-judged.txt, build/evidence/W4/depth/drawn-report.json, build/evidence/W4/depth/drawn.html, build/evidence/W4/depth/drawn.png, build/evidence/W4/depth/flat-judged.txt, build/evidence/W4/depth/flat-report.json, build/evidence/W4/depth/flat.html, build/evidence/W4/depth/flat.png, build/evidence/W4/depth/look_depth.py, build/evidence/W4/depth/make_reference.py, build/evidence/W4/depth/reference.png, build/evidence/W4/depth/side-by-side.png, build/evidence/W4/hooks/drive.mjs, build/evidence/W4/hooks/transcript.txt, build/evidence/W4/tests-first.txt, build/evidence/W4/tests-green.txt, docs/workorders/admiral-fleet/decisions.md, docs/workorders/admiral-fleet/progress.md, package-lock.json
+running: node --import ./test/fresh-tmp.mjs --test test/base-laws.test.mjs test/configs.test.mjs test/configurations.test.mjs test/custom-packs.test.mjs test/every-language.test.mjs test/house.test.mjs test/install-fixes.test.mjs test/kf-new-projects.test.mjs test/kit-guards.test.mjs test/lookup.test.mjs test/new.test.mjs test/noop.test.mjs test/review-packs.test.mjs test/shape.test.mjs test/stored-text.test.mjs test/ui-craft.test.mjs test/workorder.test.mjs test/structure.test.mjs test/what-the-kit-finds.test.mjs test/global.test.mjs test/kf-refusals.test.mjs test/worktrees.test.mjs test/npx-name.test.mjs test/file-size.test.mjs test/hook-timing.test.mjs test/kf-build-laws.test.mjs test/pack-manifest.test.mjs test/sub37-wb.test.mjs test/audio-packs.test.mjs test/cpp-pack.test.mjs test/doctor-timeout.test.mjs test/gitignore.test.mjs test/hover.test.mjs test/install.test.mjs test/instances.test.mjs test/kf-fail-open.test.mjs test/micro.test.mjs test/once-only.test.mjs test/other-projects.test.mjs test/routes.test.mjs test/rule-tests.test.mjs test/symmetry.test.mjs test/vst3host.test.mjs test/writing.test.mjs test/readme.test.mjs test/site.test.mjs test/base-neutral.test.mjs test/content-sites.test.mjs test/doctor-cache.test.mjs test/full-stack.test.mjs test/hook-proof.test.mjs test/lock-release.test.mjs test/logging.test.mjs test/names-sweep.test.mjs test/postgres-pack.test.mjs test/rules-follow-the-code.test.mjs test/rust-dry.test.mjs test/rust-pack.test.mjs test/scan.test.mjs test/ui-depth.test.mjs test/test-changed.test.mjs
+✔ midi: src/in.cpp is refused its fault and takes the fix (27361.642066ms)
+✔ midi: src/rt.cpp is refused its fault and takes the fix (2917.335785ms)
+✔ midi: src/host.cpp is refused its fault and takes the fix (2722.398034ms)
+✔ midi: src/load.cpp is refused its fault and takes the fix (2755.258423ms)
+✔ sound-design: src/noise.cpp is refused its fault and takes the fix (3900.980153ms)
+✔ sound-design: src/voice.cpp is refused its fault and takes the fix (2959.480452ms)
+✔ sound-design: src/fx.cpp is refused its fault and takes the fix (3011.996522ms)
+✔ reverse-engineering: src/law.cpp is refused its fault and takes the fix (3129.123664ms)
+✔ reverse-engineering: src/rom.cpp is refused its fault and takes the fix (2865.701649ms)
+✔ instrument-shell: src/state.cpp is refused its fault and takes the fix (2426.356111ms)
+✔ cpp: src/a.h is refused its fault and takes the fix (2639.28045ms)
+✔ cpp: src/b.cpp is refused its fault and takes the fix (3015.754929ms)
+✔ the full law of the clock travels with its skill, in neutral words (0.3716ms)
+✔ firmware stays out of git, a named fixture may stay in (22202.743167ms)
+✔ a download marker that breaks a Windows checkout is refused (2882.287697ms)
+✔ the synth-rebuild preset takes all four, and suggest finds them from a project (25585.0587ms)
+✔ reproduction or original decides the aliasing law (0.2718ms)
+✔ a new project of every configuration gets both laws, and both selftests pass (49100.158986ms)
+✔ a project that had base before 0.10.0 gets neither law until it enables it; the rule waits with its hook (8154.353743ms)
+✔ base and the base configuration name no synth word (7.362299ms)
+✔ what left base is in the synth-creator pack, and only the synth-creator configuration installs that pack (4.602399ms)
+✔ configs lists every configuration with what it installs (281.052449ms)
+✔ init --config stores the configuration, update applies it, doctor prints it (34213.079558ms)
+✔ init --config base: base alone, its own preamble, no synth folders or lines (17420.823442ms)
+✔ a pack outside the configuration is refused, naming the ones it takes (160.599546ms)
+✔ init without --config takes the configuration its packs belong to (2857.103477ms)
+✔ a layout without the key (an install before 0.10.0) gets the configuration of its packs on update (5969.856391ms)
+✔ config <name> lists what changes and switches; --dry-run changes nothing (7754.156047ms)
+✔ doctor fails on a configuration the kit does not have, and on a pack outside it (11084.686169ms)
+✔ the kit ships its configurations (1.448899ms)
+✔ base: installs into a fresh repo and doctor --strict passes (25933.972538ms)
+✔ cpp: installs into a fresh repo and doctor --strict passes (5329.853399ms)
+✔ full-stack: installs into a fresh repo and doctor --strict passes (9181.930871ms)
+✔ go: installs into a fresh repo and doctor --strict passes (5377.192563ms)
+✔ node: installs into a fresh repo and doctor --strict passes (5260.660656ms)
+✔ python: installs into a fresh repo and doctor --strict passes (4819.021536ms)
+✔ rust: installs into a fresh repo and doctor --strict passes (5550.458243ms)
+✔ synth-creator: installs into a fresh repo and doctor --strict passes (29753.265677ms)
+✔ full-stack installs web, go, host-agent and shell-hooks when chosen: their rules, checks and hooks land (4337.417129ms)
+✔ planner-skills: one project-layout body per configuration, from its layout template (352.239289ms)
+✔ a content folder is content; the same word under a code root is code; a project can add its own (1.4322ms)
+✔ a date in an article is a fact: the check is opt-in, and even switched on leaves articles alone (26545.063889ms)
+✔ the writing laws still read an article; the code laws do not (3218.838223ms)
+✔ a placeholder password is no secret; a real-looking one is (0.649599ms)
+✔ scan and suggest: samples are left out, public text comes last, and the weight of the repo is reported (622.919902ms)
+✔ a real bug still fires beside it: a failure that looks empty, a CSP switched off, a constant captcha (3145.6424ms)
+✔ repo-litter comes with base and judges a git add (2714.089336ms)
+✔ the cpp pack installs its rules, skill and check; the configuration is the smallest that takes it (26336.00177ms)
+✔ the synth preset takes the cpp pack too (22251.12638ms)
+✔ a hand-written search is refused; the library call passes (2725.065096ms)
+✔ a gate that presses every control is refused; a walk of one, and a read of them all, pass (2311.980045ms)
+✔ template-law refuses a copied helper and names what differs: the parameters of the template (5099.744058ms)
+✔ template-law: an exact copy says to move it; a marked one-off passes; a data table passes (6765.906782ms)
+✔ scan on C++: the cpp configuration, and every repeat with what it becomes and what differs (433.151874ms)
+✔ new-pack makes a repository that add --from installs, in any configuration; its check fires (26863.697439ms)
+✔ a custom hook stays off until the project enables it (8353.706224ms)
+✔ update pulls the newest; a teammate restores the locked commit; remove drops the source (15032.203923ms)
+✔ a repository without a real manifest is refused before anything is installed (2800.189278ms)
+✔ a second doctor runs no selftest whose hook has not changed, and a changed hook is proved again (47165.197984ms)
+✔ a failing selftest is never remembered, and --fresh runs them all (45946.41159ms)
+✔ a selftest that hangs is reported as timed out (30825.364711ms)
+✔ .py: a copy with other names has the original's shape, and a function is seen by name (4.784099ms)
+✔ .py: code in comments is nothing (0.5874ms)
+✔ .sh: a copy with other names has the original's shape, and a function is seen by name (1.606099ms)
+✔ .sh: code in comments is nothing (0.1899ms)
+✔ .go: a copy with other names has the original's shape, and a function is seen by name (7.657597ms)
+✔ .go: code in comments is nothing (0.1367ms)
+✔ .rs: a copy with other names has the original's shape, and a function is seen by name (1.7271ms)
+✔ .rs: code in comments is nothing (0.1595ms)
+✔ .java: a copy with other names has the original's shape, and a function is seen by name (9.569497ms)
+✔ .java: code in comments is nothing (0.2879ms)
+✔ .cs: a copy with other names has the original's shape, and a function is seen by name (1.259299ms)
+✔ .cs: code in comments is nothing (0.1662ms)
+✔ .kt: a copy with other names has the original's shape, and a function is seen by name (0.817ms)
+✔ .kt: code in comments is nothing (1.5424ms)
+✔ .swift: a copy with other names has the original's shape, and a function is seen by name (0.6802ms)
+✔ .swift: code in comments is nothing (0.1035ms)
+✔ .rb: a copy with other names has the original's shape, and a function is seen by name (4.245998ms)
+✔ .rb: code in comments is nothing (0.1169ms)
+✔ .php: a copy with other names has the original's shape, and a function is seen by name (0.8305ms)
+✔ .php: code in comments is nothing (0.1104ms)
+✔ .lua: a copy with other names has the original's shape, and a function is seen by name (2.401699ms)
+✔ .lua: code in comments is nothing (0.1123ms)
+✔ every language in the table has its sample here, or is a family already sampled (0.282ms)
+✔ shell: the command and its flags are the shape; other commands are not a copy (5.335398ms)
+✔ suggest reads the project and init --auto installs exactly that (20923.229844ms)
+✔ the python and shell packs refuse what they say they refuse (3405.595936ms)
+✔ go: the tenant checks refuse their Go faults and take the fixes, and the tenant rule loads on .go (3169.822708ms)
+✔ the lesson-checks selftest proves every examples pair of a check, and names the one that fails (3577.061674ms)
+✔ every installed hook, check and tool file fits in 300 lines (18.138395ms)
+✔ init --config full-stack: its folders, its laws and no synth law (30157.002127ms)
+✔ the full-stack hooks refuse express, a schema in a route and a .env git does not ignore, in the installed project (5010.125513ms)
+✔ doctor --strict counts TypeScript as source in a full-stack project (KWB-32) (10266.806533ms)
+✔ an install ignores .claude/usage.log and .claude/hooks.log (25257.278531ms)
+✔ global add keeps existing settings and user files, remove undoes only ours (614.409707ms)
+✔ malformed global settings.json stops before anything changes (92.827371ms)
+✔ the guard blocks an unchecked pin and passes once versions.md has a fresh row (371.878583ms)
+✔ global add installs exactly latest-versions, gnu-shell and shell-traps, and nothing else (838.135836ms)
+✔ version-pin-guard never reads a shell redirection as a package (348.953591ms)
+✔ a clean install is green; a hook no settings entry runs is red (28098.60769ms)
+✔ a hook that crashed is red until it changes; a refusal is not a crash (11491.213221ms)
+✔ a crash stays red after its log line has rotated away (5504.458432ms)
+✔ each fail-open form is refused through the hook, and its good form passes (3884.18595ms)
+✔ every installed hook writes one timing line per call: time, event, hook, ms, exit code (26924.844655ms)
+✔ a full log rotates and nothing is lost (1550.115705ms)
+✔ the python helper writes the same line (2910.367769ms)
+✔ doctor: a hook whose median is over 500 ms is a red check, with its median and worst (8290.609641ms)
+✔ settings run the kit node hooks through run-hooks.mjs, and every such hook exports hook(text) (3357.845921ms)
+✔ the house hooks install where they belong, project-neutral, and pass their selftests (37860.16521ms)
+✔ git-guard takes the project's owner, token, trunk and commands from layout.json (28161.510999ms)
+✔ a copy tree is read-only by its kind; the copy-trees rule loads there and in layout.json (27265.929509ms)
+✔ the build-step and copy-and-prove skills install, triggered by "Use when", under 8,000 characters (25543.335513ms)
+✔ a project's own hook entries stay; a kit hook already registered by hand is not doubled (5721.580314ms)
+✔ a Node hook is on in a project that ran its Python forerunner, and the forerunner's entry goes (5978.676929ms)
+✔ the house git laws judge a commit by the checkout it runs in, inside a real worktree (3354.033294ms)
+✔ update takes over a file that is the pack's own version instead of writing .pack-new again (28293.149042ms)
+✔ doctor --strict skips git-ignored files and folders (12088.674414ms)
+✔ doctor fails when a hook fails its selftest (12047.720415ms)
+✔ a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable, and update prints the list (33396.052837ms)
+✔ gpu-painter and ui-craft carry the hover rule, scoped to UI code, naming the cursor, the effect and the one hit test (1.342799ms)
+✔ the skill hover-state: "Use when", under 8,000 characters, names the hover walk and the worked example (0.4455ms)
+✔ an installed synth gets the rule and the skill; full-stack gets its rule loaded on the web app (44458.302434ms)
+✔ doctor: UI code and no hover gate is a PROBLEM; the gate named (and its file there) is OK; a fresh project with no UI code is not (21371.142763ms)
+✔ doctor: the web app (packages/web) with a page and no hover gate is a PROBLEM too (5859.63889ms)
+✔ doctor: a node web project with UI code and no hover gate is a PROBLEM too (ui-craft) (6598.854446ms)
+✔ the Stellix profile declares its hover gate (0.8613ms)
+✔ layout.json "gates" is the project's own: an update keeps it (5695.731037ms)
+✔ the lock says which kit wrote it (18834.79627ms)
+✔ entry-registers-shutdown reads its signal names, which are strings (3917.148141ms)
+✔ git-guard: gh logged in needs no token named; trunkNeedsYes leaves the trunk to its owner (82.047274ms)
+✔ a kit-lock lease held by this same process under an old session id is this session's (KWB-40) (71.147877ms)
+✔ the shape ids is valid and judged by nothing; senses blank a word used another way (KWB-16, KWB-20) (2925.738858ms)
+✔ audio-core alone installs without Stellix concepts (24218.015236ms)
+✔ full Stellix install: nested GPU skills, CLAUDE.md block, hooks (6004.978465ms)
+✔ an edited rule survives repeated updates (16584.483136ms)
+✔ moving a folder in layout.json re-points every rule (5664.644461ms)
+✔ folder law refuses new source files outside the layout (3112.043588ms)
+✔ removing a pack removes its rules and hooks (5531.069199ms)
+✔ an existing .claude and CLAUDE.md are updated, never overwritten (6368.908323ms)
+✔ a malformed settings.json stops the install before anything changes (104.576066ms)
+✔ the Stellix profile installs onto the real lib/ layout without touching house files (22805.655534ms)
+✔ the rule and shape-law install with every project; the engine-scoped instance checks are gone (29634.595834ms)
+✔ an instance index compared with a number, or an instance array indexed by one, is refused in code, in every folder (3889.514337ms)
+✔ not instances: buffer[1], channel == 1, pos[0], a loop to kSlots, a seen-in comment, all pass (3239.591747ms)
+✔ an instance ID written in a code string is refused; generated from the index, on a seen-in line or in excluded data, it passes (3032.383813ms)
+✔ a brief never names a fixed instance: the subagent rule says so (2843.770874ms)
+✔ CLAUDE.md names claude-packs as the source of truth: a fix goes into the kit, and comes back with update (2557.566467ms)
+✔ the rule: a gate that writes the parameter proves nothing about the control (1.506699ms)
+✔ the rule installs with audio-core and loads on UI code (24582.910466ms)
+✔ prove-control starts from the input path, and goes red with the hook taken out (0.296ms)
+✔ analyse-reference-look asks for depth: each element's shadow, bevel and edge light, measured against the reference (0.2403ms)
+✔ analyse-reference-look asks for a control and a confidence per measure (0.3466ms)
+✔ analyse-reference-look asks for seed boxes for a dark part on a dark panel (0.1615ms)
+✔ analyse-reference-look asks for rectify against a known anchor (0.141ms)
+✔ analyse-reference-look asks for how to rank sources that disagree (0.1619ms)
+✔ analyse-reference-look asks for typeface as a scored choice (0.1686ms)
+✔ analyse-reference-look asks for planted faults diffed against the unplanted result (1.422899ms)
+✔ analyse-reference-look asks for the render measured by the code that measured the target (0.1814ms)
+✔ analyse-reference-look asks for geometry exact, and a whole-picture score never a pass (0.9402ms)
+✔ the skill stays under the limit and names the rule as required reading where the project has it (admiral-fleet d-1) (1.990799ms)
+✔ ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass (0.2051ms)
+✔ KF-40: an inline edit through a local helper is read, not crashed on, and names the files it writes (10.287297ms)
+✔ KF-40: the same edit passes through every base hook with no crash logged (20293.462847ms)
+✔ KF-40: a write whose text no hook could read says so where the author sees it (3089.186898ms)
+✔ KF-40: a command that writes what the hooks can read adds nothing (2654.664438ms)
+✔ KF-18: a crash on a tool call refuses once and says so; the same call again goes through, logged (2466.471599ms)
+✔ KF-40: a crash is its own kind of entry, not a refusal (2951.96244ms)
+✔ KF-18: a crash at Stop or at a prompt refuses nothing, and tells the author (2607.102151ms)
+✔ KF-18: a crash left in the old form, in refusals.jsonl, reads as a crash (2714.575516ms)
+✔ KF-18: a crash fixed by hand clears with a stated reason, and a later crash is red again (11984.07949ms)
+✔ KF-18: a crash older than a file in hooks/lib is history: an update that fixes a shared lib clears it (8009.678479ms)
+✔ KF-18: a config regex param-id-lock cannot compile is reported by name, and is no crash (24680.875791ms)
+✔ KF-15: param-id-lock protects from the first id it sees, with no --init (2525.009868ms)
+✔ KF-15: ids under the build output are not the unit's, whatever the folder is called (3396.53968ms)
+✔ KF-15: doctor is red for a unit with parameters the lock cannot see (8918.24356ms)
+✔ KF-23: suite-once sees the whole suite through the project's own wrapper (4303.068982ms)
+✔ KF-8: a new install has the house laws: a force push is refused on its first day (2849.487265ms)
+✔ KF-8: an update never switches them on; `enable` does (20904.321411ms)
+✔ KF-8: a re-init of an installed project leaves its guards alone (5973.629396ms)
+✔ KF-12: with no owner, a push over SSH or through git's own login is not refused for naming no token (2753.537026ms)
+✔ KF-12: GH_TOKEN naming a variable nothing sets is refused, and the refusal names the way out (3392.536511ms)
+✔ KF-1: the kit ships the queue build-guard sends you to (24712.395511ms)
+✔ KF-1, KF-37: the queue runs the command and ends with its status, never a later one (2693.478725ms)
+✔ KF-1: doctor is red when the queue is gone, and for a wrapper that queues nothing (37235.006237ms)
+✔ KF-3: a project at its start is read from its notes, and is told it was (173.015643ms)
+✔ KF-3: source decides once it exists: a word in the notes adds nothing (180.345341ms)
+✔ KF-4: the lock records every pack installed (3609.806815ms)
+✔ KF-5: one first line of processBlock, in both rules (0.270899ms)
+✔ KF-6: artwork: an original never copies it, and a reproduction may when the brief says so (0.3044ms)
+✔ KF-7: an unattended run has a law, in every install (3257.657529ms)
+✔ KF-9: doctor --strict passes on a new project, with no code and with its first file (12242.739268ms)
+✔ KF-9: a rule whose folder holds files and none it matches is still dead (5730.74571ms)
+✔ straight-on-and-aligned loads where the analysis happens (3018.138205ms)
+✔ KF-11: gather-sources says what to do with a source that cannot be fetched (0.195ms)
+✔ KF-16: a rising run may be pointers (0.456ms)
+✔ KF-29: the worst-block rule can be met on a shared machine, and lists a program load (0.417099ms)
+✔ KF-37: the queue skill says a background job's status is its last command's (0.1312ms)
+✔ KF-38: a licence is read before a source is chosen (0.419ms)
+✔ KF-41: one cheap pass of every instance is asked for, kept apart from the behaviour walks (0.2192ms)
+✔ the fixture is the whole log: 14 marked wrong, 15 marked right (1.373ms)
+✔ shape-law: every real refusal marked wrong passes (17250.622992ms)
+✔ shape-law: every real refusal marked right is still refused, on at least one of its lines (3685.428798ms)
+✔ shape-law: the two marks KF-36 overturns are the only right refusals that now pass, and each says why (0.383ms)
+✔ KF-17: a count passed to a call is told from an instance by the declared parameter (3145.068473ms)
+✔ KF-13, KF-20: a hex address and arithmetic are not instances; the bare forms are (3531.057447ms)
+✔ KF-17: a sentence in a string is text; a short key is not (3324.985513ms)
+✔ KF-17: first as a search or a part of something is English; the first of the concept is an instance (2984.615123ms)
+✔ KF-28: a role the machine gives, quoted from a source, stands; a number in a source note does not (3128.696675ms)
+✔ KF-36: a concept's own name or a listed selector is no role name; an unknown word is (3846.54944ms)
+✔ KF-20: a library's call and a longer proper name are not this project's instances (3419.687978ms)
+✔ KF-19, KF-39: a making line that names a camelCase concept names it, by row or by word (3.859298ms)
+✔ KF-24: the shape word after a concept is no concept, and a second list after ; is read (0.487ms)
+✔ KF-34: what a turn landed is over: only the writes after its last landing are this step's (1.7828ms)
+✔ KF-33: a write once-only already judged is not judged again at Stop; a shell write still is (3737.161272ms)
+✔ KF-14: a Python brace is data, not a statement end (2743.941299ms)
+✔ KF-27: a one-statement lambda counts the same in a list as in a call (3690.220887ms)
+✔ code-shape reports every line at fault at once, so one resend answers them all (3027.663103ms)
+✔ KF-10: a dry run stages nothing, in both hooks (22856.481566ms)
+✔ KF-21: --theirs during a merge resolves it; outside a merge it is an undo (3241.652638ms)
+✔ git rev-parse x^{commit} is no commit: the word in an argument is not the subcommand (3313.020514ms)
+✔ KF-25: a test's stub may advance its play head; the code may not (3837.537348ms)
+✔ KF-26: a filter is no search: it needs a return or break on the match (2750.999806ms)
+✔ KF-32: a block of using declarations is no copy; code after it still is (2671.590331ms)
+✔ KF-35: a switch on another type's kind is another kind, told by its cases (3608.502585ms)
+✔ KF-35: two switches on one kind in one new file are refused, with a true reason (3115.614241ms)
+✔ KF-2: protect-vendor's refusal names the setting that answers it (26804.335545ms)
+✔ a project's own node hook with no hook(text) export keeps its own settings entry; one with it joins the runner (25648.79451ms)
+✔ the kit repo has its own base pack installed: kit-lock and every base hook registered, git-guard on Bash and Stop (19947.583436ms)
+✔ no kit command, hook, skill or doc deletes a branch (38.194487ms)
+✔ lock status names the holder, the branch, the start, the last renewal and whether the lease is live (344.062187ms)
+✔ lock release: its own lock and a stale lease go; another live lease stays unless --force (410.513466ms)
+✔ a lock in the old form (session, branch, time) is read: a session with a fresh transcript, or a subagent's, is live (386.608373ms)
+✔ the kit-lock hook writes the extensible form and still reads both (216.29533ms)
+✔ (a) a lease last seen 31 minutes ago is taken over by the next session's work, and the take-over is logged; 29 minutes is not (393.334271ms)
+✔ (b) the holder's own activity renews last_seen, at most once a minute (150.89285ms)
+✔ (c) nothing prints "since undefined": a lock with no start reads "start unknown"; every writer sets started_at and last_seen (449.882453ms)
+✔ (d) a push of committed branches passes while another live session holds the lock; a commit, a merge and a release are refused (999.462473ms)
+✔ every call is logged with what it tried; a refusal keeps its reason and where it happened (19764.154509ms)
+✔ a command is logged with its secrets masked, and file contents are never kept (3420.927973ms)
+✔ logs: every hook, over rotated files too, and a verdict is added without rewriting anything (3220.995039ms)
+✔ a project sets its own rotation size, and every rotated file stays (3837.253835ms)
+✔ the logs stay out of git, and a hook is never stopped by its log (2553.363758ms)
+✔ the branch and commit are read from the checkout, a worktree too (2586.146546ms)
+✔ every install gets the lookup rule and check, with real paths (22786.433198ms)
+✔ the check refuses a new if/else chain in C++ (a synth) and TS (a node project), and passes a switch or a lookup (23035.537837ms)
+✔ ifs in a row that each return on the same value are a chain too (the act-line renderer) (2663.637334ms)
+✔ the js-ts pack brings all 17 JS/TS rules, scoped to JS/TS files (6058.980398ms)
+✔ a run of ifs on one object's fields is refused; a field table passes (3175.721522ms)
+✔ dispatch-once: a second switch on the same kind in another file is refused (3232.604568ms)
+✔ raw JSON.parse / JSON.stringify are refused outside lib/json.ts (3861.584715ms)
+✔ async callbacks nobody awaits, and swallowed errors, are refused (3307.765753ms)
+✔ mongo pack: one client in the gateway, driver only there, safe deletes (4093.215105ms)
+✔ an entry file that listens must register shutdown on all four paths (4142.638534ms)
+✔ presets install the packs a stack needs; docker, fastify, ai, shell-hooks and html-ui checks fire (4761.957368ms)
+✔ v8: web, tui, nginx packs and the fastify security switch (6154.589264ms)
+✔ new rules resolve to real paths and doctor passes (23412.792396ms)
+✔ file-size-guard refuses growth past 300 lines, allows splitting (3510.821457ms)
+✔ freeze, red gate and frozen-files work together (2919.781851ms)
+✔ stage-guard is on by default and off in the Stellix profile (24867.748317ms)
+✔ doctor flags a skill whose description summarizes steps (6916.266917ms)
+✔ a bank as stored: the stride is the record size, and the manual order holds (92.15227ms)
+✔ a name reads through high bit set, and names the wrapping (52.261983ms)
+✔ a name reads through 16-bit words swapped, and names the wrapping (37.166587ms)
+✔ a name reads through 24-bit words stored low byte first, and names the wrapping (55.616082ms)
+✔ a name reads through 32-bit words swapped, and names the wrapping (62.002579ms)
+✔ a name reads through 7-bit packed sysex, and names the wrapping (110.511864ms)
+✔ a name reads through nibbles, and names the wrapping (36.224988ms)
+✔ an OS update: packing restarts at every sysex message, so each one is opened behind its own header (121.21986ms)
+✔ Roland's bit order: the high bits byte first, its bit k for data byte k (22.816492ms)
+✔ a short last group and a checksum: every byte comes back, so nothing after them shifts (0.8996ms)
+✔ a display does not print what a manual prints: squeezed, and cut to a column (23.069692ms)
+✔ firmware drops vowels and stops early: the misses are tried loosely, and said to be (23.583292ms)
+✔ a common word elsewhere does not hide the table: the densest place is reported (27.972991ms)
+✔ a table's first entry stays in it when its name comes again further down (27.044591ms)
+✔ two gaps agreeing among many are no stride (35.092189ms)
+✔ flat high entropy with no name reading says to stop and read the loader (317.162195ms)
+✔ three bytes per 16-bit word, marker first, inside one sysex message (58.685081ms)
+✔ names in one unbroken run are a pool, to be read whole (35.294088ms)
+✔ one name reading proves nothing: chance does that (48.424284ms)
+✔ an EPROM pair: neither half reads alone, the interleave does (44.289986ms)
+✔ a custom character set: the letters keep their distances (22.332992ms)
+✔ a table of pointers is found, and the entries past the manual list are shown (21.005894ms)
+✔ a banked ROM: --banked finds the table a plain search cannot, and a negative base does not crash (1968.198952ms)
+✔ no name reads: it fails, and says what it searched rather than that the machine has no text (57.552181ms)
+✔ the names file keeps groups, and a name too short to mean anything is dropped (26.875291ms)
+✔ the tool, the skill and the rule install with the pack, and a project can run it (19943.188471ms)
+✔ reverse-engineering rules load where the work is: research notes and tools as well as code, and only the first step at launch (2510.918604ms)
+✔ new <name> scaffolds the project, installs the kit and starts it on a work/ branch (22428.697755ms)
+✔ new takes a profile, and the new-project skill is no longer a global piece (17835.09032ms)
+✔ stellix: update in synth-creator makes what 0.9.15 made, but for the configuration key (19125.334097ms)
+✔ sub37: update in synth-creator makes what 0.9.15 made, but for the configuration key (16818.60128ms)
+✔ an install that names no configuration gets synth-creator from its packs, and the same result (3790.222422ms)
+✔ full-stack: an update keeps an existing project's own layout, and changes only the listed files (20141.559211ms)
+✔ nothing in the kit names the bare `npx claude-packs` (it resolves to someone else's package) (57.556683ms)
+✔ the bare-name reader finds a planted line (0.3345ms)
+✔ recorded run output under evidence/ is left out, and the same line anywhere else is found (KWB-99) (1.834799ms)
+✔ once-only, making and making-check are installed and wired where they fire (25063.359704ms)
+✔ doctor prints the making cost and the duplicate count; a count that went up is a problem (9682.928425ms)
+✔ dup scan lists every duplicate by file, both sides (130.735581ms)
+✔ no hook of this project blocks an edit in another project (43487.905723ms)
+✔ sibling projects are readable and editable: layout.siblings becomes additionalDirectories (3898.467869ms)
+✔ update-all updates every project that has claude-packs and skips the rest (29167.775295ms)
+✔ every pack the kit ships is a stock pack with a full manifest (4.099999ms)
+✔ a custom pack passes with an author and a git url, and each missing field is named (0.3002ms)
+✔ list shows each pack's version, type and author (97.182869ms)
+✔ suggest finds Postgres in a dependency, and init --auto installs the pack and its hook (25474.216213ms)
+✔ suggest reads Postgres from a project in any language, and a tool that speaks several databases says nothing alone (674.676705ms)
+✔ the checks that need a live table stay off until the project chooses them (5677.592676ms)
+✔ a default is refused only where it rewrites the table (3554.862036ms)
+✔ a required column needs a default, wherever the default sits, and a new table is exempt (3647.067595ms)
+✔ money, NULL traps and CONCURRENTLY in a transaction are refused, and a comment is not code (3779.028043ms)
+✔ a value in SQL text is refused in each language; a bound value, a tag and a table name are not (3451.667049ms)
+✔ a wipe is judged against the worktree it runs in, by that checkout's .env (3155.059465ms)
+✔ every pack has its row, with its true counts (22.295894ms)
+✔ every configuration and preset is named (7.952998ms)
+✔ every command in the help is on the page (152.045462ms)
+✔ the refusal on the page is the check's own words, so the first thing a reader sees is true (0.2708ms)
+✔ a new reader meets what it is before any command, and how to install one pack (0.1932ms)
+✔ every hook base installs is in the table (1.0146ms)
+✔ http-api: src/routes/segments.ts is refused its fault and takes the fix (20298.011004ms)
+✔ http-api: src/app.ts is refused its fault and takes the fix (2836.452685ms)
+✔ react: src/Row.tsx is refused its fault and takes the fix (2649.755942ms)
+✔ multi-tenant: src/routes/company.ts is refused its fault and takes the fix (3141.038501ms)
+✔ websocket: src/ws.ts is refused its fault and takes the fix (3569.674212ms)
+✔ host-agent: src/update.ts is refused its fault and takes the fix (2989.805598ms)
+✔ go: src/a.go is refused its fault and takes the fix (3381.748323ms)
+✔ rust: src/a.rs is refused its fault and takes the fix (2763.067618ms)
+✔ postgres: db/1.sql is refused its fault and takes the fix (4261.704631ms)
+✔ dynamic-data: src/save.ts is refused its fault and takes the fix (3210.937679ms)
+✔ dynamic-data: src/filter.ts is refused its fault and takes the fix (2611.665686ms)
+✔ http-api: src/mount.ts is refused its fault and takes the fix (2756.830041ms)
+✔ http-api: src/app/api/orders/route.ts is refused its fault and takes the fix (2375.475966ms)
+✔ http-api: src/ui/orders.ts is refused its fault and takes the fix (2685.173771ms)
+✔ ci: .github/workflows/test.yml is refused its fault and takes the fix (2314.650184ms)
+✔ a check for one major version leaves a project on an older one alone (3228.251069ms)
+✔ a url inside a string is no comment, so what follows it is still read (1.216599ms)
+✔ a key under a custom prefix is a secret, and a private key file by its name (30.93659ms)
+✔ the stack choice is the full-stack configuration's, not every node project's (3338.770929ms)
+✔ a route file under a version folder passes (3115.471644ms)
+✔ a wider check replaces a narrower one, so a project with both packs sees a hit once (2794.844201ms)
+✔ full-stack is a composition: the stack choice is its own pack, and the rest is packs any project can take (7637.660254ms)
+✔ folder-law refuses a new source file outside the layout by every route that creates a file (23399.0869ms)
+✔ placement-law refuses audio code added outside its folder by every route (4689.400823ms)
+✔ protect-vendor refuses vendored code and a copy tree by every route (5195.741027ms)
+✔ frozen-files refuses a frozen file by every route (4193.777839ms)
+✔ spec-lock refuses a locked spec by every route (4058.735911ms)
+✔ file-size-guard refuses growth past the limit by every route (3932.227438ms)
+✔ lesson-checks refuses a known bug brought back by every route (3937.325972ms)
+✔ realtime-guard refuses realtime-unsafe code by every route (3666.272162ms)
+✔ no-shipped-images refuses an image in the code by every route (3563.0038ms)
+✔ browser-guard refuses code that starts a browser by every route (3740.439431ms)
+✔ once-only refuses a near-copy of existing code by every route (5671.29588ms)
+✔ param-id-lock refuses a lost parameter id by every route (4436.916445ms)
+✔ version-pin-guard refuses an unchecked pin by every route that can write a dependency file (566.928319ms)
+✔ the shell route reader is one file: global add installs base's, and the kit holds no copy (5.896299ms)
+✔ the shell route reader proves each route and program form (KWB-8) (60.452891ms)
+✔ shape-law refuses an instance literal by every route (4479.509427ms)
+✔ brief-guard refuses a doc that names an instance by every route, and an agent brief (3814.077378ms)
+✔ a shell write to a path in a variable is judged where the variable points (4.524498ms)
+✔ a Check that names a test is told from one that does not (1.4465ms)
+✔ doctor is red for a live rule whose named test nothing answers to (25602.263498ms)
+✔ a test that names the rule answers it (5863.280974ms)
+✔ a mention outside the test folders answers nothing (5386.841522ms)
+✔ ruleTests points a rule at its test, and a pointer to nothing is red (7375.17372ms)
+✔ a rule may be declined only with a stated reason (9657.172913ms)
+✔ a rule that matches no file yet is not asked for a test: a new project is not red for this (6245.38383ms)
+✔ a new law never turns an installed project red: without the ruleTests key it is a note, and adding the key is the choice (8312.469529ms)
+✔ a first install adds the folders a repo's source is in, and folder-law then takes a new file there (18187.629474ms)
+✔ C++ outside src/ has rules on it, and doctor --strict passes (5833.75953ms)
+✔ what is fetched, built or another project's is no source folder of the project (2506.615518ms)
+✔ a folder added to the layout later gets its rules on update; test/structure.test.mjs holds that a stray file is still reported (4964.611166ms)
+✔ an installed project keeps its own concepts and folders on update: a new law never moves under it (4611.59496ms)
+✔ the new-project skill comes with every install (3204.946272ms)
+✔ only a free function can be made again by name: a method lives in its type (3.031199ms)
+✔ template-law: a trait method on a second type passes, a free function made again does not (KWB-81) (17949.951152ms)
+✔ template-law: a copy with other names is refused, and a real exception says so above it (3247.170387ms)
+✔ template-law: one method called six times is a table, and the refusal names the call (2706.786556ms)
+✔ dispatch-once: a lookup table on an enum outside it is refused; real work, and the enum's own methods, are not (KWB-82) (2713.960358ms)
+✔ a table on the standard library's own enums, a true-false table and a two-variant table are no kind (7.404798ms)
+✔ three branches on one value are a match, and two are not (2749.134051ms)
+✔ a lifetime is no char literal: the code after it is read (KWB-75) (1.358899ms)
+✔ a quote in a char literal opens no string, and an escape closes it (KWB-75) (0.399ms)
+✔ a raw string and a nested comment are read to their real end (KWB-75) (0.2664ms)
+✔ blanking keeps every offset, so a match reports the file's own line (0.3382ms)
+✔ what a test attribute marks goes, and the code after it stays (1.137599ms)
+✔ a method in an impl is a definition, in every form a function takes (KWB-75) (0.3959ms)
+✔ suggest reads a new crate, and init --auto installs the rust configuration (15841.981006ms)
+✔ a new crate passes doctor --strict: no planned folder is missing, and no universal rule is dead (KWB-78, KWB-79) (5616.312812ms)
+✔ a project's own clippy.toml is never replaced (3062.520917ms)
+✔ .unwrap() is refused in library code, and left alone in a test, in main.rs and behind a lifetime is no hiding place (3280.71965ms)
+✔ a SAFETY comment may run over lines, sit above a let, or name the block on its own line (3160.588049ms)
+✔ blocking in an async fn is refused, and handing it off is not (3446.311274ms)
+✔ a public function returns an error a caller can match on; a generic that holds a String is no error type (3116.348501ms)
+✔ a stub, a lint off with no reason, a static mut and a * version are refused (3316.968236ms)
+✔ a plain src/ takes new files, in every configuration that names nothing inside it (KWB-78) (6691.36502ms)
+✔ a project with no package.json is told the command that works there (KWB-76) (3053.582764ms)
+✔ a project with the kit in node_modules keeps the --no-install form, and no extra line (3395.675377ms)
+✔ `init <pack>` takes the project's own configuration when it takes that pack (KWB-80) (3466.011859ms)
+✔ no configuration names a folder on one machine (KWB-77) (3505.402675ms)
+✔ the scan changes nothing in the project, its .git included, with or without git (1015.218186ms)
+✔ a secret file is never copied, and no secret value reaches the report (1047.083276ms)
+✔ the report recommends with evidence, leaves out what is not there, and lists every check hit by file and line (494.040548ms)
+✔ --out writes the report there; --prompt prints the review brief (610.970411ms)
+✔ a project with no JS scans too: C++ only, plain HTML only (973.865893ms)
+✔ new writes an empty design/shape.json and commits it; doctor passes (17915.477199ms)
+✔ doctor fails a synth with no manifest, one that does not parse, and rows that break the contract (45323.762173ms)
+✔ a project that is not a synth needs no manifest (22259.043869ms)
+✔ shape scan lists every finding by file and concept, with a count, in code, tests, docs and inbox briefs (163.964333ms)
+✔ the shape hooks are the law: on in a new install and switched on by update in a project that had the kit (5100.751736ms)
+✔ the numbers on the page are the kit's true counts (5.715299ms)
+✔ every file the page loads is in the site, by a relative path, so it works under any repo name (0.5431ms)
+✔ the page carries no analytics, and the refusal it shows is the check's own words (1.8123ms)
+✔ the site is not shipped in the npm package (0.258ms)
+✔ the UI presets and the full-stack configuration bring the pack; the rule reaches markup (25585.583291ms)
+✔ stored text in markup is refused in JSX and in server templates; the renderer, labels and marked plain fields pass (4521.871956ms)
+✔ raw HTML and a second markdown path are refused; the one renderer must do all four jobs (3633.014628ms)
+✔ CLAUDE.md states where every kind of thing goes (19893.738155ms)
+✔ placement-law refuses audio, GPU and shader code in the wrong folder (4991.774897ms)
+✔ doctor --strict fails while a source file sits outside every rule, passes once it moves (9519.739429ms)
+✔ the Stellix profile carries its own kinds (23072.488848ms)
+✔ the block, control, look and anchor laws and their skills install (2804.302207ms)
+✔ the Sub37 profile fits the template tree: laws, kinds and the id lock (7718.668875ms)
+✔ the Stellix profile refuses both paint forms outside the UI (3094.145943ms)
+✔ an install that copied the old paint pattern gets the new one; a project pattern is kept (10186.315798ms)
+✔ WB-2: a nested clone under build/_deps is still judged by the project, a worktree by itself (24129.194318ms)
+✔ WB-1: coverage sees the kit's own skills and rules, never a worktree's copy (4127.306902ms)
+✔ WB-3: git-guard refuses a command that writes a token URL into git config (3768.697483ms)
+✔ WB-3: doctor finds a token in any repo's .git/config and never prints it (11850.482026ms)
+✔ WB-4: every hook in every pack has a passing --selftest, and doctor runs them all (41248.780966ms)
+✔ symmetry run: green on identical instances, every pair printed (6 for N = 4) (566.744118ms)
+✔ symmetry run: a planted missing member is red and named by instance (537.171728ms)
+✔ symmetry run: a planted swap difference is red, the pair named, every other pair still checked (399.817672ms)
+✔ a many concept with no symmetry block gets a test that is red until it has one; a one concept gets none (191.161338ms)
+✔ symmetry gen --cmake: add_test per many concept, the manifest a configure dependency; no manifest is an error (191.166639ms)
+✔ the selftest plants a missing member and a swap difference and sees both red (2156.551697ms)
+✔ configure time, for real: CMake generates the tests from the manifest, ctest runs them, red on a plant (1443.512107ms)
+✔ the skill points at shape_symmetry, the rule takes its scope from shape.json, init installs the tool and doctor proves it (28196.470224ms)
+✔ a planted change runs only the tests that reach it, an untracked test runs, the release gate is named (205.52763ms)
+✔ a change the failing test covers runs it, and the run fails; --dry-run only prints (362.621376ms)
+✔ the kit's own map: imports, names, the packs table, the preload (243.412717ms)
+✔ a pack that is not base: only the tests that bring it in, by name, preset or configuration (KWB-41) (176.75894ms)
+✔ a version bump alone chooses no test; any other package.json change still chooses them all (KWB-41) (190.499835ms)
+✔ the UI presets and full-stack bring the pack; every check names a rule that is there, and every rule names checks that are (20609.3929ms)
+✔ each check refuses its bad example and passes its good one through the hook, in a real install (8559.34682ms)
+✔ doctor is red for UI code with no page gate, and green with one or with a reason (15712.610938ms)
+✔ finished work lands: the rule and the skill come with git-guard, in every install (5799.404941ms)
+✔ page-measure in real Chrome: a sound page passes, and each planted fault is named (8088.061221ms)
+✔ every ui-craft check holds to its examples through the hook; every skill fits (23562.058543ms)
+✔ one template: a thousand instances cost one read and a handful of swaps, not half a million (6696.33296ms)
+✔ no law still asks to walk every instance: one per template, the rest by a read (0.5197ms)
+✔ an on-screen keyboard lights what sounds and has KB OCT, a kind is one size, and a window test stays off the desktop (1.959099ms)
+✔ a PDF is read with its pictures: figures exported, every page rendered, never a placeholder (0.3316ms)
+✔ a circuit diagram is read tile by tile, one report an image, and set against the code (0.2626ms)
+✔ scan names elements built by hand more than once, html and c++ (414.633072ms)
+✔ sound-design installs the renderer and its skill (20885.694877ms)
+✔ the plugin is an argument: no machine is built in (0.595699ms)
+✔ it links no JUCE: that is why it can load what a JUCE host cannot (0.3472ms)
+✔ a host that hands a plugin fewer buses than it declares gets silence: every output bus has a buffer (0.1909ms)
+✔ build.sh says what is missing when no SDK can be found, and takes VST3_SDK (110.542669ms)
+✔ comparing with the machine: a patch is matched by name, a recording stays out of git, and nothing claims a percentage (7.315697ms)
+✔ the skill carries what it took to learn (0.1988ms)
+✔ the kit's own files in a project are no evidence about it (86.531675ms)
+✔ a reverse-engineering project is known by firmware findings in its research (126.671263ms)
+✔ a reverse-engineering project is known by a disassembler in its tools (92.398172ms)
+✔ a reverse-engineering project is known by notes named for a machine (100.443571ms)
+✔ MIDI is known by what the code does, not only by a file name (201.04624ms)
+✔ a project that names its configuration is read as that (92.399972ms)
+✔ a long identifier is no secret, and a real key still is (1.4602ms)
+✔ a build folder is known by what the build leaves, and scan neither reads it nor hides it (419.169576ms)
+✔ a new reverse-engineering project with no code yet gets the pack, from its notes alone (19048.696334ms)
+✔ a unit cannot write a second clock, and a project that draws in code cannot add an image (22762.312397ms)
+✖ a UI is drawn straight on and aligned, and the image skill separates the object from the photograph (2161.493569ms)
+✔ installed dependencies are no evidence about a project, even before it has a .gitignore (81.49578ms)
+✔ workorder writes the steps, the prompt and the runner, with its name in them (125.092664ms)
+✔ workorder never writes over a work order that exists (197.892944ms)
+✔ a work order needs a plain name (186.521846ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (118.360066ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.2275ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.3329ms)
+✔ the runner keeps its session logs out of git (KWB-98) (148.472457ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (18988.474887ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.29ms)
+✔ folder-law allows a new file in a right folder of a worktree and refuses a wrong one (20246.139074ms)
+✔ file-size-guard measures a worktree file by its own checkout (2198.72525ms)
+✔ every hook judges a worktree file against the worktree, inside a real git worktree (34003.607966ms)
+✔ git-guard at Stop, fired from a worktree, refuses while its landing left the main checkout behind (KWB-96) (2333.999917ms)
+✔ version-pin-guard reads docs/versions.md from the worktree the pin is written in (2064.605555ms)
+✔ every configuration brings the pack; nothing of it is named in the lock, and doctor --strict passes (57099.076204ms)
+✔ each skill has one job and fits: Use when, under 8,000 characters (0.526299ms)
+✔ the measured data came across: the sub table, the templates and the registers (0.252ms)
+✔ the tells are refused in public text, by id; code, URLs and other files are left alone (2438.360905ms)
+ℹ tests 491
+ℹ suites 0
+ℹ pass 490
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 485256.689019
+
+✖ failing tests:
+
+test at test/what-the-kit-finds.test.mjs:87:1
+✖ a UI is drawn straight on and aligned, and the image skill separates the object from the photograph (2161.493569ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /separate the object from the photograph/. Input:
+  
+  '---\n' +
+    'name: analyse-reference-look\n' +
+    'description: Use before building or rebuilding a page, a screen, an editor or a layer from a reference picture, a mock-up or an existing screenshot. Also /analyse-reference-look.\n' +
+    '---\n' +
+    '\n' +
+    '# Analyse a reference picture into numbers\n' +
+    '\n' +
+    'Where the project has the rule `straight-on-and-aligned` (an editor drawn from a photograph of hardware), read it first. Write one analysis file per reference, in the design reference folder, or in `design/analysis/` if that folder is git-ignored. Measure by script, never by eye.\n' +
+    '\n' +
+    "First, separate the object from the picture. You are learning a design, to draw it straight on. A mock-up is usually that already; a photograph is not. List what belongs to the picture: the camera's angle, the lens, the lighting, bends, wear, missing parts, compression, and note the source. Start from what is known of the object, its true proportions from a specification if one exists, and rectify before measuring:\n" +
+    '\n' +
+    "- **Rectify against a known anchor:** something placed by a standard, not an edge that may be worn: a device frame's known size, a design system's grid, rack slots where EIA-310 puts them. One such anchor took out a bias of 4 units that the object's own edges left in.\n" +
+    "- **When sources disagree:** rank them, and record each one's reading. A flat, frontal picture of the real thing outranks a drawing for places, since a drawing can be wrong about layout while it looks authoritative. A specification outranks both for proportions. A drawing is good for what is even by design: pitch, and the ratio of parts. Where two independent sources agree against a third, the third is the outlier. Two pictures from one shoot are one source.\n" +
+    '\n' +
+    'For each measure, give **a control and a confidence**. The control is the same measurement on something whose answer is known. The confidence says how far to trust the number: a part that fills its search box exactly was not measured at all.\n' +
+    '\n' +
+    "1. **Layout:** every region and every element's centre and size as fractions of the picture. Then find the grid: which elements share a row or a column, which look grouped, and the one size of each kind. Snap to it, and record what the snap moved and why. A measured offset smaller than the design's own spacing is error.\n" +
+    '2. **Dark on dark:** a dark part on a dark ground cannot be found by a threshold. Give each one a seed box by hand, from the grid or the neighbouring parts, and measure inside it. Say which parts were seeded.\n' +
+    "3. **Colour:** sample the background, surfaces, borders, text levels, accents, lit and unlit states. Read a colour against the picture's own white and black, which takes out exposure and white balance.\n" +
+    '4. **Glow:** for every glowing part, the colour, radius and strength, measured from the falloff.\n' +
+    "5. **Depth:** for every raised or recessed element (a card, a button, a field, a screen, a control), against the reference's own:\n" +
+    '   - **shadow:** its offset (x and y), its blur width (where the falloff goes from 90% to 10% of its darkness) and its darkness against the ground beside it;\n' +
+    "   - **bevel:** the width of the light edge and of the dark edge, and each one's contrast against the face;\n" +
+    "   - **edge light:** the lit edge's brightness against the face, and its width.\n" +
+    '   An element with none of them says so, measured: a flat reference is a result too. A flat render beside a raised reference fails here, whatever its colours and glow score.\n' +
+    '6. **Surfaces:** gradients across a face, textures, and how the light falls over the whole.\n' +
+    "7. **Type:** font, size, weight and letter spacing of every text style, and how they relate. The typeface is a stated item and a scored choice: render each candidate in the reference's own words, score it against them, and record the scores and the licence. When the real face is not to be had, say so.\n" +
+    "8. **Components:** each kind's parts (for a dial: track, value arc, pointer, ticks, cap; for a field: border, label, value, hint), where its label and value sit, and any shape's real ends: a band's end may be slanted or square, and the eye gets it wrong.\n" +
+    '9. **Spacing:** the gaps between elements and rows, and the dividers.\n' +
+    '10. **Unclear:** what the picture leaves open, or shows damaged: decide from the object, and say so.\n' +
+    '\n' +
+    'Then write the gate:\n' +
+    '\n' +
+    '- List the tolerances for each measure, and mask what is damaged.\n' +
+    '- Check geometry exactly, on its own: rows, columns, spacing, sizes and shared centres, read from the drawn page. A whole-picture score passes while every element is wrong, so it is never a pass: it is a likeness, to read beside the rest. One gate passed at 0.868 with its controls on four rows.\n' +
+    "- Measure the render with the same code that measured the target, so the gate compares like with like: the depth rows too, the shadow, the bevel and the edge light of each element against the reference's.\n" +
+    `- Plant a fault for each thing the gate claims, and diff each planted run against the unplanted result: depth off (no shadow, no bevel) is one of them. An exit code proves nothing: one gate's first run showed three plants "failing", and two had changed nothing, because the gate was already red.\n` +
+    '- A measure changed while the gate is red is suspect: say so, and show the thresholds stayed put.\n' +
+    '- Declare the look in `.claude/layout.json` `looks` (its name, the reference, and the code globs that draw it), and have the gate write its verdict to `build/evidence/looks/<name>.json`: `{ "reference", "commit": <the commit it judged>, "verdict": "pass" | "fail", "measures": {...} }`, the depth rows among the measures. Commit the report on the branch. `look-gate` refuses to land a branch whose look code changed without a passing report for that code\'s last change, and names the look after every build that touched it.\n' +
+    '\n' +
+    "Report the analysis file's path and the list of open items.\n"
+  
+      at TestContext.<anonymous> (file://~/projects/claude-packs/test/what-the-kit-finds.test.mjs:95:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '---\nname: analyse-reference-look\ndescription: Use before building or rebuilding a page, a screen, an editor or a layer from a reference picture, a mock-up or an existing screenshot. Also /analyse-reference-look.\n---\n\n# Analyse a reference picture into numbers\n\nWhere the project has the rule `straight-on-and-aligned` (an editor drawn from a photograph of hardware), read it first. Write one analysis file per reference, in the design reference folder, or in `design/analysis/` if that folder is git-ignored. Measure by script, never by eye.\n\nFirst, separate the object from the picture. You are learning a design, to draw it straight on. A mock-up is usually that already; a photograph is not. List what belongs to the picture: the camera\'s angle, the lens, the lighting, bends, wear, missing parts, compression, and note the source. Start from what is known of the object, its true proportions from a specification if one exists, and rectify before measuring:\n\n- **Rectify against a known anchor:** something placed by a standard, not an edge that may be worn: a device frame\'s known size, a design system\'s grid, rack slots where EIA-310 puts them. One such anchor took out a bias of 4 units that the object\'s own edges left in.\n- **When sources disagree:** rank them, and record each one\'s reading. A flat, frontal picture of the real thing outranks a drawing for places, since a drawing can be wrong about layout while it looks authoritative. A specification outranks both for proportions. A drawing is good for what is even by design: pitch, and the ratio of parts. Where two independent sources agree against a third, the third is the outlier. Two pictures from one shoot are one source.\n\nFor each measure, give **a control and a confidence**. The control is the same measurement on something whose answer is known. The confidence says how far to trust the number: a part that fills its search box exactly was not measured at all.\n\n1. **Layout:** every region and every element\'s centre and size as fractions of the picture. Then find the grid: which elements share a row or a column, which look grouped, and the one size of each kind. Snap to it, and record what the snap moved and why. A measured offset smaller than the design\'s own spacing is error.\n2. **Dark on dark:** a dark part on a dark ground cannot be found by a threshold. Give each one a seed box by hand, from the grid or the neighbouring parts, and measure inside it. Say which parts were seeded.\n3. **Colour:** sample the background, surfaces, borders, text levels, accents, lit and unlit states. Read a colour against the picture\'s own white and black, which takes out exposure and white balance.\n4. **Glow:** for every glowing part, the colour, radius and strength, measured from the falloff.\n5. **Depth:** for every raised or recessed element (a card, a button, a field, a screen, a control), against the reference\'s own:\n   - **shadow:** its offset (x and y), its blur width (where the falloff goes from 90% to 10% of its darkness) and its darkness against the ground beside it;\n   - **bevel:** the width of the light edge and of the dark edge, and each one\'s contrast against the face;\n   - **edge light:** the lit edge\'s brightness against the face, and its width.\n   An element with none of them says so, measured: a flat reference is a result too. A flat render beside a raised reference fails here, whatever its colours and glow score.\n6. **Surfaces:** gradients across a face, textures, and how the light falls over the whole.\n7. **Type:** font, size, weight and letter spacing of every text style, and how they relate. The typeface is a stated item and a scored choice: render each candidate in the reference\'s own words, score it against them, and record the scores and the licence. When the real face is not to be had, say so.\n8. **Components:** each kind\'s parts (for a dial: track, value arc, pointer, ticks, cap; for a field: border, label, value, hint), where its label and value sit, and any shape\'s real ends: a band\'s end may be slanted or square, and the eye gets it wrong.\n9. **Spacing:** the gaps between elements and rows, and the dividers.\n10. **Unclear:** what the picture leaves open, or shows damaged: decide from the object, and say so.\n\nThen write the gate:\n\n- List the tolerances for each measure, and mask what is damaged.\n- Check geometry exactly, on its own: rows, columns, spacing, sizes and shared centres, read from the drawn page. A whole-picture score passes while every element is wrong, so it is never a pass: it is a likeness, to read beside the rest. One gate passed at 0.868 with its controls on four rows.\n- Measure the render with the same code that measured the target, so the gate compares like with like: the depth rows too, the shadow, the bevel and the edge light of each element against the reference\'s.\n- Plant a fault for each thing the gate claims, and diff each planted run against the unplanted result: depth off (no shadow, no bevel) is one of them. An exit code proves nothing: one gate\'s first run showed three plants "failing", and two had changed nothing, because the gate was already red.\n- A measure changed while the gate is red is suspect: say so, and show the thresholds stayed put.\n- Declare the look in `.claude/layout.json` `looks` (its name, the reference, and the code globs that draw it), and have the gate write its verdict to `build/evidence/looks/<name>.json`: `{ "reference", "commit": <the commit it judged>, "verdict": "pass" | "fail", "measures": {...} }`, the depth rows among the measures. Commit the report on the branch. `look-gate` refuses to land a branch whose look code changed without a passing report for that code\'s last change, and names the look after every build that touched it.\n\nReport the analysis file\'s path and the list of open items.\n',
+    expected: /separate the object from the photograph/,
+    operator: 'match',
+    diff: 'simple'
+  }
+This is a changed-only run. With --base origin/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks.
+exit 1
