@@ -254,3 +254,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-06: the on-screen keyboard and control-size laws, and window tests on a virtual display, on work/1.2.0-keyboard-laws.
 - 2026-11-06: 1.2.0 keyboard laws, one size per kind and test-quietly landed from work/1.2.0-keyboard-laws; the gate 501 of 501 on 9953386.
 - 2026-11-06: DOUBLE and TRIPLE beside KB OCT in house-control-behaviours, on work/1.3.0-keyboard-stops.
+- 2026-11-08: 1.3.2 the overnight runs' hook faults (KWB-87 to KWB-91: time-guard judges its own session's processes, git-guard's SSH push and others' worktrees, build-guard's for lists and keywords, suite-once's listing flags, shape-law's picker accessor) landed from work/1.3.2-overnight-faults at 949b75c; the gate 485 of 487 on e42e08a, the two noop reds green run again on the listed change. Not published.
