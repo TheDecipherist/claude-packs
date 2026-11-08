@@ -9,7 +9,9 @@ import { conceptOfName, parts, SHAPE_FILE } from './shape.mjs';
 
 export const CODE = /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|inl|mm|m|js|mjs|cjs|ts|tsx|jsx|py|swift|rs|go|java|kt|cs)$/i;
 const KEYWORDS = new Set(['if', 'for', 'while', 'switch', 'catch', 'return', 'sizeof', 'else', 'new', 'delete', 'case', 'throw', 'co_return', 'do', 'function', 'await', 'typeof']);
-const PICKS = [(p) => p.startsWith('pick'), (p) => p.startsWith('select'), (p) => p.startsWith('owner') || p === 'owning', (p) => p === 'for', (p) => p === 'first'];
+// The act of picking, never the thing that picks: a "picker" or "selector" is a component, and its accessor picks nothing (KWB-91).
+const COMPONENT = /^(?:picker|selector)s?$/;
+const PICKS = [(p) => p.startsWith('pick') && !COMPONENT.test(p), (p) => p.startsWith('select') && !COMPONENT.test(p),(p) => p.startsWith('owner') || p === 'owning', (p) => p === 'for', (p) => p === 'first'];
 const ITERATES = new Set(['each', 'all', 'every', 'count', 'num', 'size']);
 
 function definitions(text) {
