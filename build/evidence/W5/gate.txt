@@ -1,0 +1,81 @@
+
+> @thedecipherist/claude-packs@1.4.0 test:changed
+> node scripts/test-changed.mjs --base origin/main
+
+test:changed: base origin/main (e08dba9), 6 changed file(s)
+  CHANGELOG.md
+  build.md
+  build/evidence/W4/landing-proof.txt
+  build/evidence/W5/gate.txt
+  docs/workorders/admiral-fleet/progress.md
+  package-lock.json
+version bump only: package.json (no test reads a version)
+chose 5 of 70 test files:
+  test/kf-refusals.test.mjs
+    names build.md (build.md)
+  test/new.test.mjs
+    names build.md (build.md)
+  test/workorder.test.mjs
+    names build.md (build.md)
+  test/worktrees.test.mjs
+    names build.md (build.md)
+  test/npx-name.test.mjs
+    names gate.txt (build/evidence/W5/gate.txt)
+no test covers: CHANGELOG.md, build/evidence/W4/landing-proof.txt, docs/workorders/admiral-fleet/progress.md, package-lock.json
+running: node --import ./test/fresh-tmp.mjs --test test/kf-refusals.test.mjs test/new.test.mjs test/workorder.test.mjs test/worktrees.test.mjs test/npx-name.test.mjs
+✔ the fixture is the whole log: 14 marked wrong, 15 marked right (1.1377ms)
+✔ shape-law: every real refusal marked wrong passes (16105.064847ms)
+✔ shape-law: every real refusal marked right is still refused, on at least one of its lines (2264.221562ms)
+✔ shape-law: the two marks KF-36 overturns are the only right refusals that now pass, and each says why (0.4267ms)
+✔ KF-17: a count passed to a call is told from an instance by the declared parameter (2045.817133ms)
+✔ KF-13, KF-20: a hex address and arithmetic are not instances; the bare forms are (2159.992396ms)
+✔ KF-17: a sentence in a string is text; a short key is not (1958.811854ms)
+✔ KF-17: first as a search or a part of something is English; the first of the concept is an instance (2227.433155ms)
+✔ KF-28: a role the machine gives, quoted from a source, stands; a number in a source note does not (2098.514297ms)
+✔ KF-36: a concept's own name or a listed selector is no role name; an unknown word is (1883.87707ms)
+✔ KF-20: a library's call and a longer proper name are not this project's instances (1930.659684ms)
+✔ KF-19, KF-39: a making line that names a camelCase concept names it, by row or by word (0.928199ms)
+✔ KF-24: the shape word after a concept is no concept, and a second list after ; is read (0.3935ms)
+✔ KF-34: what a turn landed is over: only the writes after its last landing are this step's (1.9533ms)
+✔ KF-33: a write once-only already judged is not judged again at Stop; a shell write still is (1849.071636ms)
+✔ KF-14: a Python brace is data, not a statement end (1826.583643ms)
+✔ KF-27: a one-statement lambda counts the same in a list as in a call (1849.694836ms)
+✔ code-shape reports every line at fault at once, so one resend answers them all (1766.280261ms)
+✔ KF-10: a dry run stages nothing, in both hooks (14084.352358ms)
+✔ KF-21: --theirs during a merge resolves it; outside a merge it is an undo (1917.627857ms)
+✔ git rev-parse x^{commit} is no commit: the word in an argument is not the subcommand (1830.451258ms)
+✔ KF-25: a test's stub may advance its play head; the code may not (1973.578716ms)
+✔ KF-26: a filter is no search: it needs a return or break on the match (1866.808048ms)
+✔ KF-32: a block of using declarations is no copy; code after it still is (1885.279842ms)
+✔ KF-35: a switch on another type's kind is another kind, told by its cases (1804.838855ms)
+✔ KF-35: two switches on one kind in one new file are refused, with a true reason (1709.360482ms)
+✔ KF-2: protect-vendor's refusal names the setting that answers it (15219.666666ms)
+✔ new <name> scaffolds the project, installs the kit and starts it on a work/ branch (16989.96526ms)
+✔ new takes a profile, and the new-project skill is no longer a global piece (11684.063249ms)
+✔ nothing in the kit names the bare `npx claude-packs` (it resolves to someone else's package) (31.12319ms)
+✔ the bare-name reader finds a planted line (0.1933ms)
+✔ recorded run output under evidence/ is left out, and the same line anywhere else is found (KWB-99) (1.6162ms)
+✔ workorder writes the steps, the prompt and the runner, with its name in them (74.221877ms)
+✔ workorder never writes over a work order that exists (148.280755ms)
+✔ a work order needs a plain name (191.359141ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (125.883861ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.2047ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.2498ms)
+✔ the runner keeps its session logs out of git (KWB-98) (143.870156ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (14799.032363ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.3848ms)
+✔ folder-law allows a new file in a right folder of a worktree and refuses a wrong one (17488.078197ms)
+✔ file-size-guard measures a worktree file by its own checkout (2269.76076ms)
+✔ every hook judges a worktree file against the worktree, inside a real git worktree (33752.821328ms)
+✔ git-guard at Stop, fired from a worktree, refuses while its landing left the main checkout behind (KWB-96) (2312.331547ms)
+✔ version-pin-guard reads docs/versions.md from the worktree the pin is written in (2055.893892ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 82444.240103
+This is a changed-only run. With --base origin/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks.
+exit 0
