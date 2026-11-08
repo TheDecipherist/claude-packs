@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0 (2026-11-07)
 
 - The gate before landing and before a release is the tests the branch's changes reach, picked against the trunk, no longer the whole suite. `suite-once` refuses a whole-suite command unless the user's prompt that turn asks for a full run ("run the full suite"), committed or not. `test-only-what-changed`, `finished-work-lands`, `land-branch`, `pick-tests`, `fix-from-scan`, `bug-fix-starts-red`, the fix plan and `build-guard` say so. A UI change that touched neither a voice engine nor its oracle had waited over an hour on a C++ project's whole suite to land.
 - `suite-once` reads a worktree's own `commands.test`, not the main checkout's (KWB-85).

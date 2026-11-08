@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // The changed-only test run for working runs ("the kit's test suite should only test things that have changed?").
-// The full `npm test` stays the release gate; this one says so every time it runs.
+// Run against the trunk (--base origin/<trunk>), it is the gate before landing and before a release (1.3.0); the full `npm test`
+// runs only when the user asks for a full run, and this run says so every time.
 //
 //   npm run test:changed            or   node scripts/test-changed.mjs [--base <ref>] [--dry-run] [--root <repo>]
 //
@@ -159,7 +160,7 @@ export function main(argv) {
   const bumped = touched.filter((f) => versionBumpOnly(o.root, base.ref, f));
   const changed = touched.filter((f) => !bumped.includes(f));
   const { chosen, uncovered, tests } = choose(o.root, changed);
-  const gate = 'This is a changed-only working run. The release gate is the full `npm test`, run before every release.';
+  const gate = 'This is a changed-only run. With --base origin/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks.';
   console.log(`test:changed: base ${base.label} (${git(o.root, 'rev-parse', '--short', base.ref).stdout.trim()}), ${changed.length} changed file(s)`);
   for (const c of changed) console.log(`  ${c}`);
   if (bumped.length) console.log(`version bump only: ${bumped.join(', ')} (no test reads a version)`);

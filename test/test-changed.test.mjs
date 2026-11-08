@@ -1,6 +1,6 @@
 // 0.9.0, The owner: "the kit's test suite should only test things that have changed?" `npm run test:changed` maps the files changed since
 // the base (git diff plus untracked) to the tests that cover them (imports, names, the packs table), always with the fresh-tmp
-// preload, and says the full `npm test` is the release gate.
+// preload, and says that against the trunk it is the gate, and the full `npm test` runs only when the user asks.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
@@ -42,7 +42,7 @@ test('a planted change runs only the tests that reach it, an untracked test runs
   assert.match(r.stdout, /test\/c\.test\.mjs\n {4}changed/);
   assert.doesNotMatch(r.stdout, /b\.test\.mjs/);
   assert.match(r.stdout, /running: node --import \.\/test\/fresh-tmp\.mjs --test /);
-  assert.match(r.stdout, /The release gate is the full `npm test`/);
+  assert.match(r.stdout, /With --base origin\/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks/);
 });
 
 test('a change the failing test covers runs it, and the run fails; --dry-run only prints', () => {
