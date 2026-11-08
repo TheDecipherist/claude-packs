@@ -17,7 +17,8 @@
 //   forRepo(cwd, projectDir, cfg) -> cfg, without guards.git.repo when cwd is another repo
 //   unpushed(cwd, branch, cfg) -> null | { error } | { branch, remote, url, commits: [{ sha, subject }] }
 //   localBranches(cwd, cfg) -> null | { error } | [{ branch, url, missing, ahead }]   (only the ones not on GitHub)
-//   pushCommand(url, branches, cfg) -> the push form with the token named
+//   othersBranches(cwd) -> Set of branches checked out in another checkout of this repo (not judged here)
+//   pushCommand(url, branches, cfg) -> the push form: an SSH remote as itself, else with the token named
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -124,13 +125,29 @@ export function unpushed(cwd, branch, cfg = {}) {
   });
 }
 
+// The branches checked out in another checkout of this repo: each is its own session's to push (KWB-88: unattended sessions
+// were charged at Stop for each other's branches). An agent's worktree (.claude/worktrees/agent-*) cannot push, so its lead keeps it.
+export function othersBranches(cwd) {
+  const top = out(git(cwd, ['rev-parse', '--show-toplevel']));
+  const list = out(git(cwd, ['worktree', 'list', '--porcelain']));
+  const others = new Set();
+  for (const entry of (list ?? '').split('\n\n')) {
+    const path = entry.match(/^worktree (.+)$/m)?.[1];
+    const branch = entry.match(/^branch refs\/heads\/(.+)$/m)?.[1];
+    if (path && branch && path !== top && !/\/\.claude\/worktrees\/agent-[^/]+$/.test(path)) others.add(branch);
+  }
+  return others;
+}
+
 export function localBranches(cwd, cfg = {}) {
   // every branch, its commit and its upstream in one call
   const r = out(git(cwd, ['for-each-ref', '--format=%(refname:short)%09%(objectname)%09%(upstream:remotename)%09%(upstream:remoteref)', 'refs/heads']));
   if (r === null) return null;
   const byRemote = new Map();
+  const others = othersBranches(cwd);
   for (const [branch, sha, up, ref] of r.split('\n').filter(Boolean).map((l) => l.split('\t'))) {
     if (cfg.trunkNeedsYes && (cfg.trunks ?? []).includes(branch)) continue; // only the owner pushes it
+    if (others.has(branch)) continue;
     const remote = up && up !== '.' ? up : 'origin';
     const name = up && up !== '.' && ref ? ref.replace(/^refs\/heads\//, '') : branch;
     if (!byRemote.has(remote)) byRemote.set(remote, []);
@@ -166,7 +183,8 @@ export function sshOwner(url) {
 }
 
 export function pushCommand(url, branches, { owner, tokenVar = 'PERSONAL_GITHUB_TOKEN' } = {}) {
-  if (owner && sshOwner(url) === owner) return `git push ${url} ${branches.join(' ')}`;
+  const ssh = sshOwner(url);
+  if (ssh && (!owner || ssh === owner)) return `git push ${url} ${branches.join(' ')}`; // the key picks the account (KWB-88: no owner named)
   const m = (url ?? '').match(/github\.com[:/]([^/]+)\/([^/\s]+?)(?:\.git)?\/?$/);
   const repo = m ? `${m[1]}/${m[2]}` : `${owner ?? '<owner>'}/${(url ?? 'repo').split('/').pop().replace(/\.git$/, '')}`;
   return `source ~/.env && git push https://x-access-token:$${tokenVar}@github.com/${repo}.git ${branches.join(' ')}`;

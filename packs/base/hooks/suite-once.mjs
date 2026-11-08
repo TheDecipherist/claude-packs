@@ -16,7 +16,7 @@ import { lastPrompt } from './lib/turn.mjs';
 import { judgeEvent, readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
-const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b)\S+)*|cargo\s+(?:test|nextest\s+run)(?:\s+-\S+)*)$/;
+const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b|-N\b|--show-only\b|--print-labels\b)\S+)*|cargo\s+(?:test|nextest\s+run)(?:\s+-\S+)*)$/;
 const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec|\S*buildq)\s+|timeout\s+\S+\s+)+/;
 const REDIRECT = /\s*(?:\d?>>?|&>)&?\s*\S+/g;
 const WRAPPER = /^\S*\bbuild\.sh\s+test(?:\s+-\S+)*$/;
@@ -120,6 +120,8 @@ function selftest() {
     ['named tests', sh('npm test -- a.test.mjs'), 0],
     ['the changed-only run', sh('npm run test:changed'), 0],
     ['ctest of one pattern', sh("ctest -R 'svf'"), 0],
+    ['ctest -N lists the tests and runs none (KWB-90)', sh('ctest --test-dir build -N'), 0],
+    ['ctest --show-only and --print-labels run none (KWB-90)', sh('ctest --test-dir build --show-only=json-v1 && ctest --print-labels'), 0],
     ['words about the suite', sh("echo 'npm test'"), 0],
     ['a heredoc body', sh("cat <<'EOF'\nnpm test\nEOF"), 0],
     ['another project', sh('cd /tmp && npm test'), 0],

@@ -52,9 +52,15 @@ const blankQuotes = (s) => s.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
 const maskQuotes = (s) => s.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, (q) => q[0] + ' '.repeat(q.length - 2) + q[q.length - 1]);
 const words = (part) => part.replace(/(^|\s)#.*$/, '').trim().split(/\s+/).filter(Boolean);
 
+// The shell's own words before a command: `do make` runs make (KWB-89)
+const KEYWORDS = ['do', 'then', 'else', 'elif', 'if', 'while', 'until', '!', '{', '}'];
+
 export function offending(cmd) {
-  for (const part of blankQuotes(stripHeredocs(cmd)).split(/&&|\|\||;|\||\n|\(|\)|`|\$\(/)) {
-    let w = words(part);
+  const pieces = blankQuotes(stripHeredocs(cmd)).split(/(&&|\|\||;|\||\n|\(|\)|`|\$\()/);
+  for (let i = 0; i < pieces.length; i += 2) {
+    if (pieces[i - 1] === ')') continue; // the words after a `$(...)` or `(...)` are its command's arguments, never a new command (KWB-89)
+    let w = words(pieces[i]);
+    while (w.length && KEYWORDS.includes(w[0])) w = w.slice(1);
     if ((w.length >= 2 && ['command', 'type', 'which', 'whence', 'hash'].includes(w[0]) && ['-v', '-V', '-p', '-a'].includes(w[1])) || ['which', 'type', 'whence'].includes(w[0])) continue;
     while (w.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(w[0]) || ['env', 'time', 'nice', 'caffeinate', 'exec', 'nohup', 'command', 'sudo'].includes(w[0]))) {
       w = w.slice(1);
@@ -193,6 +199,9 @@ function selftest() {
     ['which ninja', false], ['cargo fmt', false], ['go vet ./...', false], ["grep -n 'cmake --build' f.md", false], ["git commit -m 'make it'", false],
     ["cat > f.py <<'EOF'\ncases = [(\"cmake --build b\", True)]\nmake -j8\nEOF\npython3 f.py", false],
     ['python3 - <<EOF\nctest --test-dir b\nEOF', false], ['echo "run ctest later"', false],
+    ['for f in $(git diff --name-only a b) build/evidence/M17/differences.txt; do [ -f "$f" ] && grep -l x "$f"; done', false], // KWB-89: a list's word
+    ['ls $(pwd)/x build/notes.txt', false], ['for i in 1 2; do ./build/A_artefacts/Release/AProbe --x; done', true], // a command after do
+    ['if true; then make -j8; fi', true], ['while read x; do ninja -C out; done < l', true], ['true || { ctest --test-dir b; }', true],
   ]);
   check('polling', polling, [
     ["until grep -qE 'done' log; do sleep 10; done", true], ['for i in $(seq 1 55); do grep -q x f && break; sleep 20; done', true],
