@@ -1,0 +1,3 @@
+remote: e08dba90e077a9efc4d0b987a0ae176340224bf6	refs/heads/main
+HEAD:   e08dba90e077a9efc4d0b987a0ae176340224bf6
+main checkout (~/projects/claude-packs): e08dba90e077a9efc4d0b987a0ae176340224bf6 on main
