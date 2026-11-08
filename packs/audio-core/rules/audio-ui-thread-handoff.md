@@ -9,7 +9,7 @@ paths:
 <constraints>
 Always do:
 - UI → audio: write plain values to `std::atomic<T>` (with `is_always_lock_free` true), or go through the parameter system.
-- Audio → UI (meters, playheads, matrix position, scope data): the audio thread writes atomics or pushes into a pre-sized `juce::AbstractFifo` ring; a `juce::Timer` on the message thread polls and repaints.
+- Audio → UI (meters, playheads, matrix position, scope data): the audio thread writes atomics or pushes into a pre-sized `juce::AbstractFifo` ring; the message thread polls them, paced to the display (`juce::VBlankAttachment`), and repaints only what changed (`editor-paints-what-changed`).
 - Pass complex objects (a rebuilt wavetable, a new route list) by building them on the message thread and handing over a pointer through a lock-free swap or FIFO. Free the old one on the message thread.
 
 Never do:

@@ -16,9 +16,13 @@ Always do:
 - Measure the render with the code that measured the target, and diff each planted fault against the unplanted result: an exit code proves nothing when the gate is already red.
 - Keep repeated components identical: one component, one size (cards, tabs, knobs). A component never shrinks to fit; the container scrolls.
 - Keep text readable: at least 4.5 : 1 contrast for small text, measured, on every fill it can sit on.
+- Draw every word in the typeface the analysis chose and scored, embedded in the build with its licence row, at the sizes it measured, written as tokens read by name.
+- Make live what the reference shows live: a meter, a scope or a screen of the engine's state reads it as it moves. A drawn stand-in that never moves is a fault, not a detail.
 - End every drawn page with the user's picture stop on the side by side. A page is not done before that.
 
 Never do:
 - Open a reference picture, a mock-up or anything under a `reference/` folder before the `analyse-reference-look` skill is loaded; `skill-first` refuses it.
+- Show the toolkit's default font anywhere a reference names a face, or size a control by eye.
+- Land a page drawn from a reference without a passing look report for its code; `look-gate` refuses it.
 - Treat a reference drawing as "layout and control list only". Where a drawing is inconsistent with itself, the written spec picks the right version; it is never a reason to drop the look.
 - Report a side by side as passing from positions alone.

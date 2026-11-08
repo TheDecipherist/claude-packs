@@ -54,6 +54,7 @@ const FAIL_OPEN = ['crash-policy', 'unread-writes', 'git-auth', 'shape-prose', '
 const REPAIRED = ['.claude/hooks/lib/program-read.mjs', '.claude/hooks/param-id-lock.mjs', '.claude/hooks/lib/turn.mjs', '.claude/rules/cpu-worst-case-per-block.md', '.claude/rules/scoped-no-denormals.md', '.claude/rules/ui-matches-reference-look.md', '.claude/skills/prove-control/SKILL.md', '.claude/skills/analyse-reference-look/SKILL.md'];   // 1.1.0: the crash on a helper's path (KF-40), the lock from the first id (KF-15)
 const RUST = ['.claude/hooks/lib/rust-scan.mjs'];   // 1.1.0: what reads Rust right (KWB-75)
 const QUIET = ['.claude/skills/test-quietly/SKILL.md', '.claude/tools/quiet-test.mjs'];   // 1.2.0: every test through one script, off the desktop
+const EDITOR = ['.claude/rules/editor-paints-what-changed.md', '.claude/skills/editor-frame-bench/SKILL.md'];   // 1.3.2: an editor paints what changed, and its frame time is measured (audio-core)
 const SKILL_FIRST = ['.claude/hooks/lib/skill-first-selftest.mjs', '.claude/hooks/lib/look-gate-selftest.mjs'];   // 1.3.1, 1.3.2: the selftests of skill-first and look-gate; the hooks themselves are new, so they are held back
 const NEW_PROJECTS = ['.claude/rules/unattended-runs.md', '.claude/tools/buildq.mjs', '.claude/rules/a-control-is-proved-through-its-input.md'];   // 1.1.0: KF-7 and KF-1
 const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only where the project has time-guard: the rule goes where its hook goes
@@ -75,10 +76,10 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...(lock.packs.includes('audio-core') ? EDITOR : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
-    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, '.claude/rules/test-only-what-changed.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
+    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
   });
 }
 

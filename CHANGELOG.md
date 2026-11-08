@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `editor-paints-what-changed` (`audio-core`), with the lesson check `editor-repaint-on-change` and the skill `editor-frame-bench`: a plugin's editor repaints only what changed, paced to the display (about 60 updates a second idle, up to 120 while dragging, none when nothing moves), computes only the screen whose input moved, caches what does not move, names its renderer, and has its frame time measured at p99 against a budget, never judged by eye. The check refuses a `timerCallback` that calls `repaint()` without testing for a change. An editor felt sluggish with five 30 Hz timers repainting everything, a flow chart rebuilt every wire each tick, and the engine re-run on every knob step, while the toolkit already drew through the GPU.
+- `audio-ui-thread-handoff` says the message thread repaints only what changed, paced to the display; `ui-matches-reference-look` asks for the scored typeface at measured sizes, live meters that move, and names `look-gate`.
 - `look-gate` (`base`): a page drawn from a reference picture lands only with a passing look report for the code that draws it. A project declares its looks in `layout.json` `looks` (name, reference, the code's globs); after a build whose branch changed a look's code, the hook names the looks that are due, and at a landing it refuses a branch whose look code changed unless each look's report, committed on the branch, says "pass" for a commit at or after that code's last change. `analyse-reference-look` writes the report. Three pages of a plugin's editor had landed far plainer than their mock-ups, judged by eye, and nothing stopped them.
 
 ## 1.3.1 (2026-11-07)

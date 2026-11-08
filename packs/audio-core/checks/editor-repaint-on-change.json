@@ -1,0 +1,21 @@
+{
+  "id": "editor-repaint-on-change",
+  "why": "This timer repaints whether or not anything changed: every tick redraws the component, and a page of them redraws everything many times a second while nothing moves. Read the value, compare it with what is shown, and repaint only when it moved (better, pace what moves with juce::VBlankAttachment).",
+  "rule": ".claude/rules/editor-paints-what-changed.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.h",
+    "**/*.hpp"
+  ],
+  "exclude": [
+    "**/third_party/**",
+    "**/build/**",
+    "**/_deps/**",
+    "**/JUCE/**"
+  ],
+  "code": true,
+  "kind": "performance",
+  "pattern": "\\btimerCallback\\s*\\(\\s*\\)\\s*(?:override\\s*)?\\{(?:[^{}]*?;)?\\s*(?:\\w+\\s*(?:->|\\.)\\s*)?repaint\\s*\\(\\s*\\)\\s*;",
+  "bad": "void FlowCanvas::timerCallback()\n{\n    if (! isShowing())\n        return;\n    frame = live.read();\n    repaint();\n}",
+  "good": "void FlowCanvas::timerCallback()\n{\n    const auto now = live.read();\n    if (now != frame)\n    {\n        frame = now;\n        repaint();\n    }\n}"
+}
