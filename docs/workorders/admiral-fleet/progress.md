@@ -6,7 +6,7 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 
 - [x] W0.0 land-branch brings the main checkout up to date
 - [x] W0 set up
-- [ ] W1 full-stack chooses web, go, host-agent, shell-hooks
+- [x] W1 full-stack chooses web, go, host-agent, shell-hooks
 - [ ] W2 the tenant law judges Go
 - [ ] W3 one consistent full-stack layout, with a web folder
 - [ ] W4 analyse-reference-look for any page drawn from a picture
@@ -25,3 +25,6 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - 2026-11-08 W0.0.landing: landed from work/W0.0-main-checkout at 194a20f; ls-remote, HEAD and the main checkout's rev-parse all 194a20f (build/evidence/W0.0/landing-proof.txt). W0.0 done: KWB-96 dated 17:20, before the fix's first commit 25bb50d; selftest red then green; land-branch within doctor's skill limits; this landing leaves the main checkout equal to origin/main.
 - 2026-11-08 W0.1: npm install (up to date); doctor --strict OK on the kit (build/evidence/W0/doctor-strict.txt); swarmk main cloned to ../swarmk-ro at 1f46aaf, 81 .go files under daemon-go/ (build/evidence/W0/swarmk.txt)
 - 2026-11-08 W0.2: lock status names this session, 494639ba (build/evidence/W0/lock-status.txt). W0 done.
+- 2026-11-08 W1.1: web, go, host-agent, shell-hooks in full-stack's choose list (d-4 for their places); `configs` lists them under "to choose" (build/evidence/W1/configs.txt); bbbe033
+- 2026-11-08 W1.2: README full-stack row names the four; readme test green in the gate (build/evidence/W1/gate.txt); bbbe033
+- 2026-11-08 W1.3: configurations fixture, green (fixture-green.txt), red with host-agent removed from choose (fixture-red-host-agent-removed.txt); scratch `init --config full-stack web go host-agent shell-hooks` and doctor --strict OK there (scratch-init-doctor.txt); gate 469 of 469 on bbbe033. W1 done.
