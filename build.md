@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.4.6, inside-the-project leaves sibling projects alone (work/1.4.6-inside-siblings), started 2026-11-09 (KWB-104).
+  making: inside-the-project judges a worktree command's target only when the git command acts on this project's repo; concepts: none; reuse: the hook's own gitFolder and insideProject.
+  done when: the selftest's two sibling cases red without the fix and green with it; the real refused command passes from the claude-packs session; the tests the branch reaches green.
+
 - 1.4.4, inside the project (work/1.4.4-inside-the-project), started 2026-11-09, after the user's "claude-packs needs an explicit hook that makes sure that can never ever happen" and "the hook needs to be explicit that work for a project happens in that project always" (KWB-103).
   making: a base hook, inside-the-project: refuses `git worktree add`/`move` to a path outside the project, and any write, `cd`, `git -C` or `make -C` into a checkout of this repo (a worktree, or a clone of the same origin) that lies outside it; a base rule stating the law; concepts: none (design/shape.json declares none); reuse: project.mjs `ROOT`, `insideProject`, its common-dir reader (exported), writes.mjs `writesOf`/`readPayload`, command-prefix.mjs `bareWords`.
   done when: the selftest red on each planted escape without the law and green with it; its worktree case; README and page counts; the tests the branch reaches green.
