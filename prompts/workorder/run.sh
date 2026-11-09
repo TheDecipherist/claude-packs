@@ -15,7 +15,11 @@ mkdir -p "$logs"
 [[ -f "$logs/.gitignore" ]] || printf '*\n' > "$logs/.gitignore"
 cd "$root"
 
-moved() { git rev-parse HEAD; wc -c < "$order/progress.md" 2> /dev/null || true; }
+# before the first commit and the first progress.md there is nothing to read, and nothing is said (KWB-100)
+moved() {
+  git rev-parse -q --verify HEAD || true
+  if [[ -f "$order/progress.md" ]]; then wc -c < "$order/progress.md"; fi
+}
 
 still=0
 for session in $(seq 1 "$max_sessions"); do

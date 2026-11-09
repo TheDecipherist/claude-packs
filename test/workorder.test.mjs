@@ -67,6 +67,8 @@ test('the runner keeps its session logs out of git (KWB-98)', () => {
   writeFileSync(join(bin, 'claude'), `#!/usr/bin/env bash\necho '{"type":"system","cwd":"/home/someone"}'\ntouch "${join(dir, FOLDER, 'DONE')}"\n`, { mode: 0o755 });
   const run = spawnSync('bash', [join(dir, FOLDER, 'run.sh')], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}` } });
   assert.equal(run.status, 0, run.stdout + run.stderr);
+  // KWB-100: the first session starts before progress.md exists, and the runner says nothing about it
+  assert.equal(run.stderr, '', run.stderr);
   assert.ok(existsSync(join(dir, FOLDER, 'logs/session-1.jsonl')), 'the session was logged');
   const seen = execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], { cwd: dir, encoding: 'utf8' });
   assert.doesNotMatch(seen, /logs\//, seen);
