@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `container-hover-includes-children` catches a hover told through a call (`hovered (std::nullopt)` in `mouseExit`) as well as one set as a flag, the shape of the bug it was written for (KWB-119).
+
 - A `cd` inside `( )`, `$( )` or backticks no longer moves the paths of the commands after it, so the hooks that read a command's writes judge the file it really writes (KWB-118).
 - `editor-paints-what-changed` (`audio-core`) says where a state change's look is applied: a paint only draws, and a switch, a bypass or a mode sets the look of everything it governs in one function and repaints exactly those. Hover on a container counts its children. Two lesson checks hold it, `no-state-change-in-paint` and `container-hover-includes-children`, and `new-panel-control` step 7 with `switch-gate-harness.md` tests an on/off control through the region the toolkit was asked to redraw, never a fresh snapshot, which repaints everything and hides the fault (KWB-105).
 - `tests-never-touch-user-files` (`base`): a test gets copies of the user's files in a fresh temporary folder made by the harness's one helper, and the lesson check `tests-run-in-a-temp-folder` refuses a test target whose environment names a path under the user's home (KWB-106).

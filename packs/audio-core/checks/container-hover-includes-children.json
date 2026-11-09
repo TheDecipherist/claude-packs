@@ -15,10 +15,14 @@
   ],
   "code": true,
   "kind": "correctness",
-  "pattern": "\\bvoid\\s+(?:\\w+::)?(?<=\\baddAndMakeVisible\\s*\\([\\s\\S]*)(?<!isMouseOver\\s*\\(\\s*true[\\s\\S]*)(?<!addMouseListener\\s*\\([^)]*,\\s*true[\\s\\S]*)(?![\\s\\S]*isMouseOver\\s*\\(\\s*true)(?![\\s\\S]*addMouseListener\\s*\\([^)]*,\\s*true)mouseExit\\s*\\([^)]*\\)\\s*(?:override\\s*)?\\{[^{}]*?\\b\\w*(?:[hH]over|[hH]ot|[oO]ver)\\w*\\s*=",
+  "pattern": "\\bvoid\\s+(?:\\w+::)?(?<=\\baddAndMakeVisible\\s*\\([\\s\\S]*)(?<!isMouseOver\\s*\\(\\s*true[\\s\\S]*)(?<!addMouseListener\\s*\\([^)]*,\\s*true[\\s\\S]*)(?![\\s\\S]*isMouseOver\\s*\\(\\s*true)(?![\\s\\S]*addMouseListener\\s*\\([^)]*,\\s*true)mouseExit\\s*\\([^)]*\\)\\s*(?:override\\s*)?\\{[^{}]*?\\b\\w*(?:[hH]over|[hH]ot|[oO]ver)\\w*\\s*(?:=|\\()",
   "bad": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n}\n\nvoid RouteRow::mouseEnter (const juce::MouseEvent&)\n{\n    hovered = true;\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    hovered = false;\n    previewOff();\n}",
   "good": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n    addMouseListener (this, true);\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    hovered = isMouseOver (true);\n    previewOff();\n}",
   "examples": [
+    {
+      "bad": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    if (hovered)\n        hovered (std::nullopt);\n}",
+      "good": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n    addMouseListener (this, true);\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    if (hovered && ! isMouseOver (true))\n        hovered (std::nullopt);\n}"
+    },
     {
       "bad": "Row::Row()\n{\n    addAndMakeVisible (knob);\n}\n\nvoid Row::mouseExit (const juce::MouseEvent&)\n{\n    isHot = false;\n}",
       "good": "Knob::Knob() {}\n\nvoid Knob::mouseExit (const juce::MouseEvent&)\n{\n    isHot = false;\n}"
