@@ -18,6 +18,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { coreBudget, projectLayout } from '../packs/base/hooks/lib/core-budget.mjs';
 import { PRESETS } from '../lib/packs.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
@@ -171,7 +172,10 @@ export function main(argv) {
   }
   if (uncovered.length) console.log(`no test covers: ${uncovered.join(', ')}`);
   if (!chosen.size || o.dry) { console.log(gate); return 0; }
-  const args = ['--import', './test/fresh-tmp.mjs', '--test', ...chosen.keys()];
+  // KWB-111: node runs test files at one less than the core count by default (17 here), and each file installs the kit and
+  // runs its selftests: the gate timed out on load. It takes the machine's core budget instead.
+  const concurrency = coreBudget(process.env, projectLayout(o.root));
+  const args = ['--import', './test/fresh-tmp.mjs', '--test', `--test-concurrency=${concurrency}`, ...chosen.keys()];
   console.log(`running: node ${args.join(' ')}`);
   // NODE_TEST_CONTEXT is set when this runs under a test runner; passed on, the nested run reports to it and exits 0 on a failure.
   const { NODE_TEST_CONTEXT, ...env } = process.env;

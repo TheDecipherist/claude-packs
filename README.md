@@ -323,7 +323,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `base` | Universal engineering, in every configuration | 23 | 7 | 21 | 12 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
-| `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
+| `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
 | `docker` | Dockerfiles, Compose and Swarm | 5 | 24 | 0 | 1 |
 | `dynamic-data` | Definition-driven systems: a CMS, an admin generator, a low-code platform | 10 | 9 | 0 | 1 |
 | `fastify` | Fastify servers | 6 | 15 | 0 | 0 |
