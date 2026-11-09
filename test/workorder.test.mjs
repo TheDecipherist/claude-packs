@@ -76,9 +76,9 @@ test('the runner keeps its session logs out of git (KWB-98)', () => {
   assert.doesNotMatch(seen, /logs\//, seen);
 });
 
-// KWB-122: a session refused for the account's usage limit moved nothing because it could not run, not because the work is stuck.
+// KWB-125: a session refused for the account's usage limit moved nothing because it could not run, not because the work is stuck.
 // The stand-in `claude` is refused four times, more than the three still sessions that stop a run, then finishes the order.
-test('the runner waits out a usage limit and carries on, never counting it as a still session (KWB-122)', () => {
+test('the runner waits out a usage limit and carries on, never counting it as a still session (KWB-125)', () => {
   const dir = fresh('wo-limit-');
   execFileSync('git', ['init', '-q'], { cwd: dir });
   assert.equal(cli(dir, 'workorder', 'billing').status, 0);

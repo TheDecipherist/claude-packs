@@ -106,6 +106,15 @@ export function selftest(hookUrl) {
     ['mixer code with a making line naming the mixer', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: the mixer level; concepts: mixer (one); reuse: none' }), 0],
     ['what a turn landed is over (KF-34)', turn([W('src/mix/level.cpp', mixerCode), use('Bash', { command: 'git merge --ff-only work/s1' })]), 0],
     ['a write after the landing is judged (KF-34)', turn([use('Bash', { command: 'git merge --ff-only work/s1' }), W('src/mix/level.cpp', mixerCode)]), 2],
+    // KWB-122: one edit put "mixer" in, a later edit of the same turn took it out: the file holds no mixer, so none is written
+    ['a concept word the turn put in and took out again is not written (KWB-122)', (() => {
+      const before = readFileSync(at('src/slot/filter.cpp'), 'utf8');
+      try { return turn([use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: 'x', new_string: '// the mixer\n' }), use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: '// the mixer', new_string: '// the sum' })], { making: good }); } finally { put(at('src/slot/filter.cpp'), before); }
+    })(), 0],
+    ['a concept word the turn put in and kept is written (KWB-122)', (() => {
+      const before = readFileSync(at('src/slot/filter.cpp'), 'utf8');
+      try { put(at('src/slot/filter.cpp'), `${before}// the mixer\n`); return turn([use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: 'x', new_string: '// the mixer\n' })], { making: good }); } finally { put(at('src/slot/filter.cpp'), before); }
+    })(), 2],
     ['the shape word the rule asks for is no concept (KF-24)', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: x; concepts: slot, many; mixer, one; reuse: none' }), 0],
   ];
   return verdicts('making-check', cases);

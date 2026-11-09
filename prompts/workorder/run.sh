@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs work order {{name}} to its end with nobody there: one fresh Claude Code session after another, each resuming from progress.md.
 # It ends on the DONE file the work order writes, or after three sessions in a row that move nothing. A session the account's usage
-# limit refused ran nothing: the runner waits LIMIT_WAIT seconds (15 min) and tries again, and the refusal is never a session (KWB-122).
+# limit refused ran nothing: the runner waits LIMIT_WAIT seconds (15 min) and tries again, and the refusal is never a session (KWB-125).
 #
 # This runs Claude with permission prompts off, so nothing stops to ask. Read PROMPT.md and workorder.md first, and run it only on a project you trust,
 # in a repo you can roll back. The kit's hooks still judge every write, but a permission prompt no longer stands between a command and your machine.
