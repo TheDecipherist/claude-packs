@@ -12,8 +12,8 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - [x] W4 analyse-reference-look for any page drawn from a picture
 - [x] W5 release
 - [x] W6 prove the consumer's install
-- [ ] W7 before calling it finished
-- [ ] W8 the report
+- [x] W7 before calling it finished
+- [x] W8 the report
 
 ## Log
 
@@ -52,3 +52,5 @@ One line per finished item: `- YYYY-MM-DD W<n>.<item>: what was done, evidence p
 - 2026-11-08 W5.3: landed from work/W5-release-1.4.0 at 9056bec (ls-remote, HEAD, main checkout: build/evidence/W5/landing-proof.txt); tag v1.4.0 on 9056bec pushed; npm publish 1.4.0, dist-tag latest (npm-publish.txt, registry-and-tag.txt); from a clean folder the published 1.4.0 lists go, shell-hooks, web, host-agent under full-stack's "to choose" (npx-clean-folder.txt; the literal --no-install form refuses in an empty folder by design, d-8). W5 done.
 - 2026-11-08 W6.1: admiralmcp cloned at work/fleet-spec (f18b336) into a scratch folder; the install block as written installs the project's own stand-in, not 1.4.0 (1-install-block-as-written.txt, 2-standin-out-of-the-workspace.txt; d-9, the project's); docs/layout.admiral.json written from the spec's folder table (layout.admiral.json); the published 1.4.0 run with the block's exact init arguments (3-init-and-doctor-strict.txt)
 - 2026-11-08 W6.2: doctor --strict read: two problems, both the project's (no a11y or hover gate for its retiring server-rendered UI), declared "none: <reason>" (d-9); doctor --strict --fresh OK with all 14 packs (4-doctor-strict-fresh-ok.txt); nothing committed to the clone, 0 commits on f18b336 (5-clone-state.txt). No finding was the kit's. W6 done.
+- 2026-11-08 W7: open-items.md, 12 items, each tagged [deferred] or [gap] with why: d-1, skill-first reaching existing projects, KWB-97's new update behaviour, the Go patterns never seen to catch a real fault, the agent's Go websocket gap, no shipped depth tool, the consumer's stand-in and gates, template folders the project needs. W7 done.
+- 2026-11-08 W8: report.md, every section with counts or a stated reason (refusals 2, both right; 1,440 hook calls, 0 crashes; 9 tests seen red; 4 KWBs). W8 done.
