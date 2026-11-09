@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.4.5, two conversions at once (work/1.4.5-pdf-cap), started 2026-11-09, after the user's "add that to our pdf skill so its capped at 2" (seven docling runs at once loaded the PC to 16).
+  making: pdf-to-md step 3 caps docling at two runs per machine at low priority, with one wait-for-a-slot command form for the lead and every agent; concepts: none; reuse: the skill's own step 3 command.
+  done when: doctor's skill checks pass (under 8,000 characters, "Use when"); the command form waits while two run and starts at the third's turn, measured; the tests the branch reaches green.
+
 - 1.4.4, inside the project (work/1.4.4-inside-the-project), started 2026-11-09, after the user's "claude-packs needs an explicit hook that makes sure that can never ever happen" and "the hook needs to be explicit that work for a project happens in that project always" (KWB-103).
   making: a base hook, inside-the-project: refuses `git worktree add`/`move` to a path outside the project, and any write, `cd`, `git -C` or `make -C` into a checkout of this repo (a worktree, or a clone of the same origin) that lies outside it; a base rule stating the law; concepts: none (design/shape.json declares none); reuse: project.mjs `ROOT`, `insideProject`, its common-dir reader (exported), writes.mjs `writesOf`/`readPayload`, command-prefix.mjs `bareWords`.
   done when: the selftest red on each planted escape without the law and green with it; its worktree case; README and page counts; the tests the branch reaches green.
