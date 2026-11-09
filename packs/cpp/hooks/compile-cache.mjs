@@ -32,6 +32,9 @@ function selftest() {
   put(`${dir}/bare/CMakeCache.txt`, 'CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++\n');
   put(`${dir}/cached/CMakeCache.txt`, 'CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++\nCMAKE_CXX_COMPILER_LAUNCHER:STRING=/opt/homebrew/bin/ccache\n');
   put(`${dir}/plain-c/CMakeCache.txt`, 'CMAKE_C_COMPILER:FILEPATH=/usr/bin/cc\n');
+  // A launcher set in the CMakeLists is only in the generated rules, never in CMakeCache.txt (the Matrix-12, Stellix, Tabula)
+  put(`${dir}/set-in-lists/CMakeCache.txt`, 'CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++\n');
+  put(`${dir}/set-in-lists/CMakeFiles/rules.ninja`, 'rule CXX_COMPILER__x\n  command = /opt/homebrew/bin/ccache /usr/bin/c++ $DEFINES -c $in\n');
   const run = (cmd, have) => {
     process.env.COMPILE_CACHE_INSTALLED = have;
     return runHook(self, dir, bashOf(cmd, dir)) === 2;
@@ -40,6 +43,7 @@ function selftest() {
     ['a build of an uncached folder, through the queue', run('node .claude/tools/buildq.mjs cmake --build bare --target X', 'yes'), true],
     ['ninja in an uncached folder', run('node .claude/tools/buildq.mjs ninja -C bare X', 'yes'), true],
     ['a cached folder builds', run('node .claude/tools/buildq.mjs cmake --build cached --target X', 'yes'), false],
+    ['a launcher set in the CMakeLists builds', run('node .claude/tools/buildq.mjs cmake --build set-in-lists --target X', 'yes'), false],
     ['configuring is not building', run('cmake -B bare -DX=1', 'yes'), false],
     ['a folder not configured yet', run('node .claude/tools/buildq.mjs cmake --build fresh --target X', 'yes'), false],
     ['no C++ in it', run('node .claude/tools/buildq.mjs cmake --build plain-c', 'yes'), false],

@@ -29,13 +29,17 @@ export function buildFolders(cmd, cwd) {
   return found.map((m) => at(m[1]));
 }
 
-/** Whether a configured build folder compiles C++ without the cache: its CMakeCache.txt names no ccache launcher. */
+/** Whether a configured build folder compiles C++ without the cache. A launcher set in the CMakeLists (`set(...)`, the
+    usual way) is not in CMakeCache.txt, only in the generated build rules, so both are read. */
 export function uncached(dir) {
   const cache = join(dir, 'CMakeCache.txt');
   if (!existsSync(cache)) return false; // not configured yet: nothing to judge
   const text = readFileSync(cache, 'utf8');
   if (!/^CMAKE_CXX_COMPILER:/m.test(text)) return false; // no C++ here
-  return !/^CMAKE_CXX_COMPILER_LAUNCHER:[A-Z]+=.*ccache/m.test(text);
+  if (/^CMAKE_CXX_COMPILER_LAUNCHER:[A-Z]+=.*ccache/m.test(text)) return false;
+  const rules = ['CMakeFiles/rules.ninja', 'build.ninja'].map((rel) => join(dir, rel)).find(existsSync);
+  if (rules && /^\s*command = .*ccache/m.test(readFileSync(rules, 'utf8'))) return false;
+  return true;
 }
 
 /** The first build folder of a command that compiles without the cache, or null. */
@@ -45,14 +49,18 @@ export function uncachedBuild(cmd, cwd, installed = ccacheInstalled) {
   return dirs.find(uncached) ?? null;
 }
 
+// The launcher is one word: JUCE configures its juceaide tool as a nested project and passes the launcher down, and a
+// launcher list (`cmake -E env CCACHE_BASEDIR=... ccache`) broke that configure ("Unknown argument -E"). Worktrees share
+// entries through ccache's own base_dir, set once on the machine to the folder that holds the projects.
 export const cacheFix = [
   'Add this to the top-level CMakeLists.txt, after project(), then configure again (cmake -B <dir> ...):',
   '    find_program (CCACHE_PROGRAM ccache)',
   '    if (CCACHE_PROGRAM)  # a shared cache: a file compiled in one worktree is reused by every other',
-  '        set (cache "${CMAKE_COMMAND}" -E env "CCACHE_BASEDIR=${CMAKE_SOURCE_DIR}" CCACHE_NOHASHDIR=1 "${CCACHE_PROGRAM}")',
-  '        set (CMAKE_C_COMPILER_LAUNCHER ${cache})',
-  '        set (CMAKE_CXX_COMPILER_LAUNCHER ${cache})',
-  '        set (CMAKE_OBJCXX_COMPILER_LAUNCHER ${cache})',
+  '        set (CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")',
+  '        set (CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")',
+  '        set (CMAKE_OBJCXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")',
   '    endif ()',
-  'The rule builds-share-one-compiler-cache says why, and the build-through-the-queue skill how to prove it hits.',
+  'And once on the machine, so every worktree of every project shares entries: ccache --set-config base_dir=<the folder',
+  'that holds the projects> (with hash_dir = false), and a size for them all: ccache -M 100G.',
+  'The rule cpp-builds-share-one-compiler-cache says why, and the build-preflight skill how to prove it hits.',
 ].join('\n');
