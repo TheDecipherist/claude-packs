@@ -1,0 +1,32 @@
+{
+  "id": "no-state-change-in-paint",
+  "why": "A paint draws and never changes state. A look applied inside a parent's paint (setAlpha, setVisible, setEnabled, setBounds, setColour on a component, adding or removing a child, a resized call) only happens when that paint runs, and an editor that repaints only what changed does not run it when a switch flips: the switch redraws, its card does not, and the children it governs keep their old look until something else repaints the card (a hover). Apply the state where it happens, in one function that names every component it governs and repaints exactly those.",
+  "rule": ".claude/rules/editor-paints-what-changed.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.h",
+    "**/*.hpp"
+  ],
+  "exclude": [
+    "**/third_party/**",
+    "**/build/**",
+    "**/_deps/**",
+    "**/JUCE/**"
+  ],
+  "code": true,
+  "kind": "correctness",
+  "pattern": "^([ \\t]*)void\\s+(?:\\w+::)?paint(?:OverChildren)?\\s*\\(\\s*(?:juce::)?Graphics\\s*&[^)]*\\)\\s*(?:const\\s*)?(?:override\\s*)?\\{[ \\t]*\\n(?:(?!\\n\\1\\})[\\s\\S])*?(?:\\b(?:setAlpha|setVisible|setEnabled|setBounds|setBoundsRelative|setBoundsInset|setSize|setTopLeftPosition|setTooltip|setInterceptsMouseClicks|addAndMakeVisible|addChildComponent|removeChildComponent|resized)|(?<!\\bg\\s*\\.\\s*)\\bsetColour)\\s*\\(",
+  "bad": "void EffectUnitCard::paint (juce::Graphics& g)\n{\n    g.fillAll (juce::Colours::black);\n    for (auto* each : built)\n        each->setAlpha (lit ? 1.0f : dimmed);\n}",
+  "good": "void EffectUnitCard::paint (juce::Graphics& g)\n{\n    g.setColour (juce::Colours::white);\n    g.fillAll (juce::Colours::black);\n}\n\nvoid EffectUnitCard::setLit (bool on)\n{\n    lit = on;\n    for (auto* each : built)\n    {\n        each->setAlpha (on ? 1.0f : dimmed);\n        each->repaint();\n    }\n}",
+  "examples": [
+    {
+      "bad": "void Panel::paintOverChildren (juce::Graphics& g) const\n{\n    if (bypassed)\n    {\n        for (auto* c : getChildren())\n            c->setEnabled (false);\n    }\n    g.fillAll (veil);\n}",
+      "good": "void Panel::paintOverChildren (juce::Graphics& g) const\n{\n    if (bypassed)\n        g.fillAll (veil);\n}"
+    },
+    {
+      "bad": "void Meter::paint (juce::Graphics& g)\n{\n    g.setColour (juce::Colours::red);\n    label.setColour (juce::Label::textColourId, juce::Colours::white);\n}",
+      "good": "void Meter::setLevel (float v)\n{\n    level = v;\n    label.setColour (juce::Label::textColourId, juce::Colours::white);\n    label.repaint();\n}"
+    }
+  ],
+  "flags": "m"
+}

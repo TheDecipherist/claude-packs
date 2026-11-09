@@ -15,7 +15,8 @@ Always do:
 4. Render to an image off-screen where a test only needs pixels, with no window at all.
 5. Run browser tests headless, and pass the tool's own flag as well when it has one.
 6. Keep a long run's output in a file, and run it in the background.
-7. Fix the test when it still reaches the desktop through the script: a test that interrupts the user is a fault, so log it.
+7. Keep a test off the user's files as well as their screen (`tests-never-touch-user-files`): the harness's one helper makes a fresh temporary folder, copies in what the test needs, and names it in place of the user's paths (environment variable, setting, constructor argument) before the code under test starts. A test target's environment never names a path under the user's home. The project's check hashes the user's files before and after a run and shows the processor's paths are not theirs; its planted fault, a test left on the user's path, goes red.
+8. Fix the test when it still reaches the desktop through the script: a test that interrupts the user is a fault, so log it.
 
 Never do:
 - Launch the app the user may have open to try something, or start one on their display, without being asked.
