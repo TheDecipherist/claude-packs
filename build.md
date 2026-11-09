@@ -14,6 +14,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - KWB-100, the runner reads progress.md before it exists (work/1.4.1-runner-progress), started 2026-11-08, seen in admiral-fleet's runner log.
   making: prompts/workorder/run.sh `moved` reads progress.md only when it exists, and the KWB-98 runner test asserts the runner's stderr is clean; concepts: none (design/shape.json declares none); reuse: the KWB-98 test's stand-in claude run (test/workorder.test.mjs).
   done when: the test is red on the old run.sh and green on the new; the tests the branch reaches green.
+- KWB-101, a wrapper in front of git hid a token push -u from git-guard (same branch), found by the KWB-100 gate's doctor token sweep.
+  making: hooks/lib/command-prefix.mjs `bareWords`, the one reader of command wrappers, used by git-guard `problem` and shell-writes `judge`; concepts: none; reuse: shell-writes' wrapper list, moved into the new lib and widened.
+  done when: git-guard's selftest red on the wrapped token pushes without the fix, green with it; shell-writes' selftest green; the gate green.
 
 - 1.3.2, the editor's frame laws (work/1.3.2-look-gate), started 2026-11-07, after the user's "update the skills so we get a handle on all ui related things that were missed".
   making: audio-core laws for a plugin's editor drawn with the toolkit: editor-paints-what-changed (paint only what changed, paced to the display at 60 Hz idle and up to 120 while dragging, 0 when static, compute only the moved screen, cache what does not move, the renderer named, a frame budget measured), the lesson check editor-repaint-on-change, the skill editor-frame-bench, audio-ui-thread-handoff corrected, ui-matches-reference-look given the typeface and live-means-live; concepts: none (design/shape.json declares none); reuse: gpu-frame-budget and gpu-frame-pacing-and-power (packs/gpu-painter/rules) for the pacing law, the lesson-check format and its bad/good proof.
