@@ -37,9 +37,9 @@ export function uncached(dir) {
   const text = readFileSync(cache, 'utf8');
   if (!/^CMAKE_CXX_COMPILER:/m.test(text)) return false; // no C++ here
   if (/^CMAKE_CXX_COMPILER_LAUNCHER:[A-Z]+=.*ccache/m.test(text)) return false;
-  const rules = ['CMakeFiles/rules.ninja', 'build.ninja'].map((rel) => join(dir, rel)).find(existsSync);
-  if (rules && /^\s*command = .*ccache/m.test(readFileSync(rules, 'utf8'))) return false;
-  return true;
+  // Ninja puts the launcher in rules.ninja or, as a LAUNCHER variable, in build.ninja: either one is enough
+  const generated = ['CMakeFiles/rules.ninja', 'build.ninja'].map((rel) => join(dir, rel)).filter(existsSync);
+  return !generated.some((file) => /ccache/.test(readFileSync(file, 'utf8')));
 }
 
 /** The first build folder of a command that compiles without the cache, or null. */
