@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.4.2, screen images (work/1.4.2-screen-images), started 2026-11-09, after the user's "we need to update the circuit reader skill to also include screen/images ... its important we replicate screen/panel menues exactly".
+  making: a reverse-engineering skill, read-a-screen-image (one screen, one report: every string exactly, its position, font, colour and state, the gesture that reaches it, the firmware's copy of each string, and a side-by-side against the rebuilt screen); read-a-circuit-diagram routes a screen page to it; menu-map takes its reports as the manual's display drawings; concepts: none (design/shape.json declares none); reuse: read-a-circuit-diagram's tiling and report form, menu-map's [FW]/[MAN] join.
+  done when: doctor's skill checks pass (under 8,000 characters, "Use when"); README and page counts; the tests the branch reaches green.
+
 - KWB-100, the runner reads progress.md before it exists (work/1.4.1-runner-progress), started 2026-11-08, seen in admiral-fleet's runner log.
   making: prompts/workorder/run.sh `moved` reads progress.md only when it exists, and the KWB-98 runner test asserts the runner's stderr is clean; concepts: none (design/shape.json declares none); reuse: the KWB-98 test's stand-in claude run (test/workorder.test.mjs).
   done when: the test is red on the old run.sh and green on the new; the tests the branch reaches green.
@@ -272,3 +276,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-08: W4 of admiral-fleet (analyse-reference-look in base with depth measured; page-matches-reference-look) landed from work/W4-reference-look at e08dba9; the gate 490 of 491 on abd75c9, its failure fixed and run again 32 of 32; the main checkout equal to origin/main. Not published.
 - 2026-11-08: 1.4.0 (admiral-fleet W5) landed from work/W5-release-1.4.0 at 9056bec; the gate 46 of 46 on d4403a2; tagged v1.4.0 and published to npm, dist-tag latest.
 - 2026-11-08: W6 to W8 of admiral-fleet (admiralmcp's install proved on 1.4.0; the open items; the report) landed from work/W6-consumer-install at 5fc558f; the gate 48 of 48. The order's final checks: the full suite 517 of 517, doctor --strict --fresh OK, scan and logs kept in build/evidence/final. admiral-fleet DONE.
+- 2026-11-09: KWB-100 and KWB-101 landed from work/1.4.1-runner-progress at 7a37c08; the gate 490 of 495 on ff6b7d9, its five failures fixed (global add's lib list, noop's lists) and their files run again, 9 of 9 and 3 of 3. Recorded here late, with the next branch.

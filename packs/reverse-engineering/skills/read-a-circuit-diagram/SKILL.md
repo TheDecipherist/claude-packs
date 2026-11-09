@@ -7,6 +7,8 @@ description: Use when a schematic, circuit diagram or service-manual sheet has t
 
 Mermaid is the map and a SPICE netlist is the model. An image of a schematic is the most exact source a rebuild has, and the easiest to half-read: a value too small to see at full view, a hand note, a capacitor nobody modelled. Each image gets its own report, so several agents can work at once, and a README ties them together.
 
+A page that shows the machine's own screen (a test-mode page, a menu, an LCD) is not a circuit, but it is read with the same care: its report comes from `read-a-screen-image`, by the same tiling, in `screens/` beside the circuit reports.
+
 <constraints>
 Always do:
 1. One image, one report: `<out>/<NN>-<what it shows>.md`, numbered in the images' order. Never two images in one report, and never two agents on one image.

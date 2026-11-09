@@ -11,7 +11,7 @@ A patch map says what byte N means. A menu map says how you reach byte N from th
 Always do:
 1. Write the tree from the manual's own section order, page by page, with the printed page number each page is cited from, one tree per algorithm or mode where the pages differ. This is the only part edited by hand: a script looks up everything else and regenerates the table.
 2. Tag each name by its source: `[FW]` in the firmware's display pools (`names-first`), `[MAN]` printed. Page membership and page order are usually `[MAN]` alone, and the map says so.
-3. Join the two with the manual's own display drawings: the page name on the top line, the parameter on the bottom. Find each half in the firmware's pools. That is the two-source check for the whole tree.
+3. Join the two with the manual's own display drawings: the page name on the top line, the parameter on the bottom. Find each half in the firmware's pools. That is the two-source check for the whole tree. Each drawing or screen picture is read by `read-a-screen-image` first, so every page in the tree has its report, its exact text and the gesture that reaches it.
 4. Give every parameter its home: patch, multi or performance, global, or stored nowhere.
 5. Print both mismatch lists, because they are the point of the file:
    - on a page but not in the patch map: multi and global parameters, and anything with no published index;
