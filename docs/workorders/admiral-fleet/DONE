@@ -1,0 +1,5 @@
+admiral-fleet: done 2026-11-08
+final commit: ec0e40b (the final checks' evidence; this file lands on top of it)
+released: @thedecipherist/claude-packs 1.4.0 on npm (dist-tag latest), tag v1.4.0 on 9056bec
+every step's "done when" measured: progress.md; choices: decisions.md (d-1 to d-9); left open: open-items.md (12, tagged); report.md
+final checks: full suite 517/517, doctor --strict --fresh OK, scan and logs in build/evidence/final
