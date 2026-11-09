@@ -1,0 +1,127 @@
+# claude-packs scan
+
+~/projects/claude-packs: 1035 files read, on a copy. Nothing in the project was changed.
+
+**Look at this first: 1 possible secret(s) in the code, listed below. Any that is real is leaked: rotate it.**
+
+34 check hits in 21 files. A hit is a candidate, not a confirmed bug: someone has to read it. The worst bugs are usually the ones no check can see, so the review step at the end matters more than this list.
+
+## What to install
+
+Configuration `base` (named in its layout.json), packs: base, writing, hook-proof, shell, web, ui-craft, reverse-engineering.
+
+- `shell`: shell script: docs/workorders/admiral-fleet/run.sh
+- `web`: web UI: site/index.html
+- `ui-craft`: web UI: site/index.html
+- `reverse-engineering`: reverse-engineering notes: packs/reverse-engineering/rules/firmware-stays-out.md
+
+Left out, nothing found for them: ci, docker, content-site.
+
+```
+npx @thedecipherist/claude-packs init shell web ui-craft reverse-engineering --config base
+```
+
+## Secrets
+
+Values are never shown. Secret-shaped text in test files and content folders is usually an example, and is listed apart.
+
+- packs/base/hooks/secrets-guard.mjs:81: a connection string with its password
+
+## Check hits
+
+Grouped by a keyword match on what each check is for, so the groups are rough.
+
+### failures and lost data
+
+**hook-catch-must-not-allow** (hook-proof): 12. A catch that returns 0 turns a crashed guard into a passed call. Only an event that cannot be parsed may be let through.
+
+- global/hooks/gnu-shell.mjs:32: `try { return Number(execFileSync(path, ['--version'], { encoding: 'utf8', timeout: 5000 }).match(/version (\d+`
+- packs/audio-core/hooks/realtime-guard.mjs:19: `} catch {`
+- packs/base/hooks/brief-guard.mjs:72: `const n = () => { try { return readFileSync(join(dir, '.claude/usage.log'), 'utf8').split('\n').filter((l) => `
+- packs/base/hooks/lesson-checks.mjs:155: `} catch {`
+- packs/base/hooks/making-check.mjs:139: `const lines = (f) => { try { return readFileSync(f, 'utf8').split('\n').length; } catch { return 0; } };`
+- and 7 more (all in claude-packs-scan.json)
+
+### quality
+
+**lookup-over-if-chains** (base): 5. Three or more branches on one value (if/else if, or ifs in a row that each return) are a lookup table (JS/TS) or an object per kind (C++; an exhaustive switch over an enum class only in a hot inner loop): one place to add a case, and a missing case is a compile error. The chain hides a missing case and grows forever.
+
+- lib/logs.mjs:92: `if (sub === 'crashes') return listCrashes(dir, log);`
+- packs/base/hooks/lib/shell-writes.mjs:68: `if (c === "'") {`
+- packs/base/hooks/lib/shell-writes.mjs:133: `if (r.op === '<<') input = bodies[r.doc] ?? null;`
+- packs/base/hooks/lib/shell-writes.mjs:142: `if (exe === 'echo') {`
+- packs/base/hooks/lib/shell-writes.mjs:202: `if (exe === 'dd') for (const a of args) if (a.startsWith('of=')) add(at(a.slice(3)), 'write', null);`
+
+**lookup-over-ternary-chains** (base): 5. A ternary chain is a lookup table written as control flow: adding a kind means finding every chain, and the compiler checks none of them.
+
+- packs/base/hooks/lib/code-shapes.mjs:22: `const stripped = (t) => (KEYWORDS.has(t) ? t : /^[A-Za-z_]/.test(t) ? 'i' : /^\d/.test(t) ? 'n' : /^["']/.test`
+- packs/base/hooks/lib/program-writes.mjs:23: `const lang = /^python(\d+(\.\d+)*)?$|^pypy3?$/.test(exe) ? 'python' : /^(node|nodejs|bun)$/.test(exe) ? 'node'`
+- packs/base/hooks/lib/program-writes.mjs:59: `const modeOp = (m) => (m === null ? 'write' : /^\+?>>|a/.test(m) ? 'append' : /^\+</.test(m) || /r\+/.test(m) `
+- packs/base/hooks/lib/writes.mjs:30: `const after = input.edit_mode === 'delete' ? before : '${before}${before && !before.endsWith('\n') ? '\n' : ''`
+- packs/full-stack/hooks/stack-guard.mjs:61: `write: (w) => (w.after === null ? null : basename(w.path) === 'package.json' ? judgeManifest(w.before, w.after`
+
+**ui-no-gradient-text** (ui-craft): 4. Gradient text is decoration, not meaning, and fails contrast at its light end.
+
+- site/css/main.css:601: `-webkit-background-clip: text;`
+- site/css/main.css:603: `background-clip: text;`
+- site/css/main.css:794: `-webkit-background-clip: text;`
+- site/css/main.css:795: `background-clip: text;`
+
+**prodbuild-no-remote-fonts** (web): 3. A third-party font host is an extra DNS + TLS round trip on the critical path, a privacy leak and an availability dependency. Self-host: next/font or @fontsource, woff2, font-display: swap.
+
+- site/index.html:9: `<link rel="preconnect" href="https://fonts.googleapis.com">`
+- site/index.html:10: `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`
+- site/index.html:12: `<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="styles`
+
+**a11y-no-bare-outline-none** (web): 1. outline: none removes the only focus indicator keyboard users have. Replace it with a :focus-visible style, never remove it bare.
+
+- site/css/main.css:291: `outline: none;`
+
+**field-map-over-if-runs** (base): 1. Three or more ifs in a row on fields of the same object (if (args.filter?.flag !== undefined) filter.flags = …) grow by one line per field forever. A field table plus one loop keeps every field in one place and makes the next field one table row.
+
+- packs/reverse-engineering/tools/names-sweep.mjs:204: `if (!g.found) return '  ${g.group}: 0 of ${g.of}';`
+
+**ui-no-animate-layout** (ui-craft): 1. Animating width, height, top, left, margin or padding forces layout on every frame. Use transform and opacity.
+
+- site/css/main.css:275: `transition: top var(--transition-fast);`
+
+**ui-no-bounce-easing** (ui-craft): 1. Bounce and elastic easing read dated. Real things decelerate smoothly.
+
+- site/css/main.css:189: `--transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);`
+
+**ui-no-stock-labels** (ui-craft): 1. "Get started" and "Learn more" say nothing about what happens. Name the button for what it does.
+
+- site/index.html:38: `<a class="btn btn--dark" href="#start">Get started</a>`
+
+## Structure
+
+- 0 source file(s) over 300 lines
+- duplicates: 20 (jscpd, 223 sources, 68 ms; `npx --no-install @thedecipherist/claude-packs dup scan` lists them)
+- 2 repeat(s) written by hand, each of which should be one template:
+  - 2x this code: docs/workorders/admiral-fleet/run.sh:16, prompts/workorder/run.sh:18. Make it one function, with the differences as parameters
+  - 1x put (...): packs/synth-creator/hooks/build-sweep.mjs:128. Make it one table of the arguments, and one loop
+- 0 near cop(ies), the same code with lines changed
+- 13 function(s) made again under the same name:
+  - layoutOf: lib/config-cli.mjs:11, lib/once-only-report.mjs:11
+  - branchOf: lib/kit-lock.mjs:24, packs/base/hooks/making-check.mjs:99
+  - readLock: lib/kit-lock.mjs:34, lib/manifest.mjs:11
+  - linesOf: lib/logs.mjs:15, packs/base/hooks/lesson-checks.mjs:78
+  - isSource: packs/base/hooks/file-size-guard.mjs:21, packs/base/hooks/folder-law.mjs:20, packs/base/hooks/lib/dup.mjs:34
+  - hashOf: packs/base/hooks/lib/code-shapes.mjs:27, packs/base/hooks/lib/near-copies.mjs:16
+  - lineAt: packs/base/hooks/lib/code-shapes.mjs:28, packs/base/hooks/lib/cpp-scan.mjs:90
+  - fileOf: packs/base/hooks/lib/dup-index.mjs:70, packs/base/hooks/lib/repo-index.mjs:36, packs/base/hooks/run-hooks.mjs:25
+- 4 MB tracked; 0 file(s) over 10 MB
+- 0 source file(s) no rule covers yet; the layout is fitted to the project at install
+
+Not read: 202 file(s), secret files, symlinks or over 1 MB. 0 of them are secret files, left out on purpose.
+
+## Next step
+
+The checks find patterns. For runaway loops, security holes between files and work that disappears silently, run the review on the copy:
+
+```
+cd /tmp/claude-packs-scan-<copy>
+npx @thedecipherist/claude-packs scan --prompt   # give what it prints to Claude Code here
+```
+
+The copy holds your code: delete /tmp/claude-packs-scan-<copy> when you are done.

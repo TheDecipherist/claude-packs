@@ -1,0 +1,6 @@
+  configuration: base
+  making: 62 words, about 107 tokens added to every prompt (77 words, about 129 tokens when it echoes a named instance); an estimate (word pieces of up to 6 letters, each mark one token), not the model's tokenizer
+  duplicates: 20 (jscpd, 223 sources, 69 ms; `npx --no-install @thedecipherist/claude-packs dup scan` lists them), lowest seen 20
+  hook timing (ms, each hook's last 100 calls at most): suite-once 86/123, run-hooks 55/640, reuse-hint 38/299, making-check 24/32, kit-lock 14/29, lesson-checks 6/21, making 6/15, git-guard 5/15052, shape-law 5/14, skill-first 4/9, look-gate 3/8, once-only 3/77, code-shape 2/10, dispatch-once 2/7, file-size-guard 2/8, folder-law 2/10, repo-litter 2/8, secrets-guard 2/9, template-law 2/41, brief-guard 1/6, placement-law 1/7, untrusted-boundary 1/8 (median/worst)
+OK: base
+exit 0

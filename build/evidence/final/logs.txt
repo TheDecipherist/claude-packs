@@ -1,0 +1,39 @@
+21406 calls, 2026-11-05T04:23:46.869Z to 2026-11-09T00:27:40.385Z
+hook                      calls refused right wrong  open fixed crash    ms
+git-guard                  4977      25     2     3    20     0     0     7
+template-law               5683       6     3     0     3     4     0     3
+code-shape                 5683       6     4     0     2     5     0     2
+once-only                  5683       4     3     0     1     2     0     4
+file-size-guard            5683       3     2     0     1     3     0     2
+making-check                352       3     0     1     2     0     0    43
+secrets-guard              5683       2     1     1     0     2     0     2
+shape-law                  5683       1     0     1     0     1     0     6
+kit-lock                   7399       0     0     0     0     0     0    15
+brief-guard                5726       0     0     0     0     0     0     2
+lesson-checks              5683       0     0     0     0     0     0     8
+placement-law              5683       0     0     0     0     0     0     1
+folder-law                 5683       0     0     0     0     0     0     2
+untrusted-boundary         5683       0     0     0     0     0     0     1
+dispatch-once              5683       0     0     0     0     0     0     3
+suite-once                 4625       0     0     0     0     0     0     5
+repo-litter                4625       0     0     0     0     0     0     2
+look-gate                  2534       0     0     0     0     0     2     3
+skill-first                1400       0     0     0     0     0     1     5
+making                      656       0     0     0     0     0     0     7
+reuse-hint                  656       0     0     0     0     0     0    38
+fixed: the same file passed the same hook later in that session. Judge the open ones: `logs refusals --open`, then `logs mark <id> right|wrong "<why>"`.
+
+  cd ~/projects/matrix12/.claude/worktrees/M21; git diff --stat build/evidence/M17 | tail -2; git checkout -- build/evidence/M17 build/evidence/looks; A=~/projects/midi_firmware/archives; export MATRIX12_ROMS="$A/Oberheim Matrix12 US" MATRIX12_VOICE16="$A/Oberheim Matrix 12 Voice board v1.6" MATRIX12_BANK="$A/Oberheim Matrix 12 Patches and Sysex/Matrix_12.syx"; node .claude/tools/quiet-test.mjs ctest --test-dir out/dev -j2 -R '^matrix12\.edit_look' --output-on-failure > build/evidence/ui-2/looks-again.txt 2>&1; grep -E "tests passed|\(Failed\)" build/evidence/ui-2/looks-again.txt; git status --short | head
+  git-guard: `git checkout` on a tree with uncommitted work. Two days of work were lost this way. Uncommitted now:
+29 refusal(s)
+
+f38b40e0 2026-11-08T01:58:38.135Z skill-first cleared
+  cd ~/projects/claude-packs && git merge -q --ff-only origin/main && git merge -q --ff-only work/1.3.1-skill-first && for i in 1 2 3; do timeout 120 git push -q origin main && { echo push=ok; break; }; echo "try $i failed"; done; git tag -a v1.3.1 -m "1.3.1" && for i in 1 2 3; do timeout 120 git push -q origin v1.3.1 && { echo tag=ok; break; }; echo "tag try $i failed"; done; for i in 1 2 3; do r=$(timeout 60 git ls-remote origin refs/heads/main | cut -c1-12); [ -n "$r" ] && break; done; echo "remote: $r local: $(git rev-parse --short=12 HEAD)"
+  run-hooks: skill-first failed: Error [ERR_MODULE_NOT_FOUND]: Cannot find module '~/projects/claude-packs/.claude/hooks/skill-first.mjs' imported from ~/projects/claude-packs/.claude/hooks/run-hooks.mjs
+e63ac3cd 2026-11-08T03:01:18.593Z look-gate cleared
+  cd ~/projects/claude-packs && timeout 90 git fetch -q origin; echo "trunk moved: $(git rev-list --count HEAD..origin/main)"; git switch -q main && git branch --show-current
+  run-hooks: look-gate failed: Error [ERR_MODULE_NOT_FOUND]: Cannot find module '~/projects/claude-packs/.claude/hooks/look-gate.mjs' imported from ~/projects/claude-packs/.claude/hooks/run-hooks.mjs
+60b81c58 2026-11-08T03:01:19.400Z look-gate cleared
+  cd ~/projects/claude-packs && git merge -q --ff-only origin/main && git merge -q --ff-only work/1.3.2-look-gate && for i in 1 2 3; do timeout 120 git push -q origin main && { echo push=ok; break; }; echo "try $i failed"; done; for i in 1 2 3; do r=$(timeout 60 git ls-remote origin refs/heads/main | cut -c1-12); [ -n "$r" ] && break; done; echo "remote: $r local: $(git rev-parse --short=12 HEAD)"
+  run-hooks: look-gate failed: Error [ERR_MODULE_NOT_FOUND]: Cannot find module '~/projects/claude-packs/.claude/hooks/look-gate.mjs' imported from ~/projects/claude-packs/.claude/hooks/run-hooks.mjs
+3 crash(es)

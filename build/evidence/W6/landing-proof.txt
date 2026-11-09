@@ -1,0 +1,3 @@
+remote: 5fc558f2e1e193b69e1fa9e7671035e435d172b3	refs/heads/main
+HEAD:   5fc558f2e1e193b69e1fa9e7671035e435d172b3
+main checkout (~/projects/claude-packs): 5fc558f2e1e193b69e1fa9e7671035e435d172b3 on main

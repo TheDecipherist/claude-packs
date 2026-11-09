@@ -11,8 +11,6 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
-- W6 to W8 of work order admiral-fleet (work/W6-consumer-install), 2026-11-08: making: the evidence of W5's release and W6's consumer install (admiralmcp at work/fleet-spec, scratch clone, published 1.4.0, doctor --strict OK), the open items read as a senior engineer would (W7), and the report with counts from logs (W8); concepts: none (design/shape.json declares none); reuse: node bin/claude-packs.mjs logs for the counts.
-
 - 1.3.2, the editor's frame laws (work/1.3.2-look-gate), started 2026-11-07, after the user's "update the skills so we get a handle on all ui related things that were missed".
   making: audio-core laws for a plugin's editor drawn with the toolkit: editor-paints-what-changed (paint only what changed, paced to the display at 60 Hz idle and up to 120 while dragging, 0 when static, compute only the moved screen, cache what does not move, the renderer named, a frame budget measured), the lesson check editor-repaint-on-change, the skill editor-frame-bench, audio-ui-thread-handoff corrected, ui-matches-reference-look given the typeface and live-means-live; concepts: none (design/shape.json declares none); reuse: gpu-frame-budget and gpu-frame-pacing-and-power (packs/gpu-painter/rules) for the pacing law, the lesson-check format and its bad/good proof.
   done when: the check refuses its bad example and passes its good one; the skill under 8,000 characters and starting "Use when"; README and page counts; the tests the branch reaches green.
@@ -266,3 +264,4 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2026-11-08: W3 of admiral-fleet (one full-stack layout under packages/; KWB-97, KWB-98, KWB-99) landed from work/W3-packages-layout at 8ba6525; the gate 482 of 484 on ab9ea59, its two failures fixed and run again 13 of 13; the main checkout equal to origin/main. Not published.
 - 2026-11-08: W4 of admiral-fleet (analyse-reference-look in base with depth measured; page-matches-reference-look) landed from work/W4-reference-look at e08dba9; the gate 490 of 491 on abd75c9, its failure fixed and run again 32 of 32; the main checkout equal to origin/main. Not published.
 - 2026-11-08: 1.4.0 (admiral-fleet W5) landed from work/W5-release-1.4.0 at 9056bec; the gate 46 of 46 on d4403a2; tagged v1.4.0 and published to npm, dist-tag latest.
+- 2026-11-08: W6 to W8 of admiral-fleet (admiralmcp's install proved on 1.4.0; the open items; the report) landed from work/W6-consumer-install at 5fc558f; the gate 48 of 48. The order's final checks: the full suite 517 of 517, doctor --strict --fresh OK, scan and logs kept in build/evidence/final. admiral-fleet DONE.

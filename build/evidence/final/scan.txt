@@ -1,0 +1,7 @@
+Scanned 1035 files on a copy; the project was not changed.
+  base: base, writing, hook-proof, shell, web, ui-craft, reverse-engineering
+  34 check hits, 1 possible secret(s)
+Report: /tmp/af/final-scan-report.md
+Copy:   /tmp/claude-packs-scan-<copy> (delete it when you are done; it holds your code)
+Next:   `fix` turns this into a work order for Claude; `init --auto` installs what it suggests.
+exit 0
