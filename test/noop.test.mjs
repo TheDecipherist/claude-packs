@@ -102,7 +102,7 @@ test('an install that names no configuration gets synth-creator from its packs, 
 // template before it (test/fixtures/noop/full-stack/before/: the kit at f747567, the web app in channel/, the API in api/src)
 // keeps its own layout on update: no template folder or concept added, the same CLAUDE.md, the same files. A file the kit
 // changes on purpose later goes in FULL_STACK_CHANGED, and a new one in FULL_STACK_ADDED, with why.
-const FULL_STACK_CHANGED = ['.claude/hooks/git-guard.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/lib/git-guard-selftest.mjs', '.claude/hooks/lib/project.mjs', '.claude/skills/pdf-to-md/SKILL.md'];   // 1.4.4 (KWB-103): project.mjs exports its common-dir reader; 1.4.5: pdf-to-md caps docling at two runs   // 1.4.1 (KWB-101): both read a command past its wrappers
+const FULL_STACK_CHANGED = ['.claude/hooks/git-guard.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/lib/git-guard-selftest.mjs', '.claude/hooks/lib/project.mjs', '.claude/skills/pdf-to-md/SKILL.md', '.claude/hooks/brief-guard.mjs', '.claude/hooks/lib/shape-prose.mjs', '.claude/hooks/lib/shape.mjs'];   // 1.4.7 (KWB-105): a path names a file; 1.4.4 (KWB-103): project.mjs exports its common-dir reader; 1.4.5: pdf-to-md caps docling at two runs   // 1.4.1 (KWB-101): both read a command past its wrappers
 const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md', ...PREFIX];   // W4: the skill in base, the page law in ui-craft
 test('full-stack: an update keeps an existing project\'s own layout, and changes only the listed files', () => {
   const { dir } = updated('full-stack', 'full-stack');
