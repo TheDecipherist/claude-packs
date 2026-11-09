@@ -84,11 +84,11 @@ test('global add installs exactly latest-versions, gnu-shell and shell-traps, an
   assert.match(out, /latest-versions .*gnu-shell and shell-traps/);
   const list = (dir, base = '') => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? list(join(dir, e.name), `${base}${e.name}/`) : [`${base}${e.name}`]));
   assert.deepEqual(list(claude).sort(), [
-    'claude-packs-global.json', 'hooks/build-guard.py', 'hooks/claude-packs/lib/command-prefix.mjs', 'hooks/claude-packs/lib/program-read.mjs', 'hooks/claude-packs/lib/program-writes.mjs', 'hooks/claude-packs/lib/shell-writes.mjs', 'hooks/claude-packs/version-pin-guard.mjs',
+    'claude-packs-global.json', 'hooks/build-guard.py', 'hooks/claude-packs/lib/command-prefix.mjs', 'hooks/claude-packs/lib/program-read.mjs', 'hooks/claude-packs/lib/program-writes.mjs', 'hooks/claude-packs/lib/shell-lex.mjs', 'hooks/claude-packs/lib/shell-writes.mjs', 'hooks/claude-packs/version-pin-guard.mjs',
     'hooks/gnu-shell.mjs', 'hooks/gnu-shell.py', 'hooks/shell-traps.mjs', 'settings.json', 'skills/latest-versions/SKILL.md',
   ], 'the three pieces; the hand-kept build-guard and the Python forerunner left as they were');
   assert.deepEqual(Object.keys(JSON.parse(readFileSync(join(claude, 'claude-packs-global.json'), 'utf8')).files).sort(), [
-    'hooks/claude-packs/lib/command-prefix.mjs', 'hooks/claude-packs/lib/program-read.mjs', 'hooks/claude-packs/lib/program-writes.mjs', 'hooks/claude-packs/lib/shell-writes.mjs', 'hooks/claude-packs/version-pin-guard.mjs', 'hooks/gnu-shell.mjs', 'hooks/shell-traps.mjs', 'skills/latest-versions/SKILL.md',
+    'hooks/claude-packs/lib/command-prefix.mjs', 'hooks/claude-packs/lib/program-read.mjs', 'hooks/claude-packs/lib/program-writes.mjs', 'hooks/claude-packs/lib/shell-lex.mjs', 'hooks/claude-packs/lib/shell-writes.mjs', 'hooks/claude-packs/version-pin-guard.mjs', 'hooks/gnu-shell.mjs', 'hooks/shell-traps.mjs', 'skills/latest-versions/SKILL.md',
   ]);
   assert.equal(readFileSync(join(hooks, 'build-guard.py'), 'utf8'), '# the hand-kept one\n');
   const s = JSON.parse(readFileSync(join(claude, 'settings.json'), 'utf8'));
