@@ -1,0 +1,26 @@
+{
+  "id": "tests-run-in-a-temp-folder",
+  "why": "A test target whose run environment names a path under the user's home reads and may write the user's own files, so it passes or fails by what this user has done in the app. Give the test copies in a fresh temporary folder, made by the test harness's one helper, and name that folder in place of the user's paths before the code under test starts.",
+  "rule": ".claude/rules/tests-never-touch-user-files.md",
+  "globs": [
+    "**/CMakeLists.txt",
+    "**/*.cmake"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/node_modules/**"
+  ],
+  "flags": "m",
+  "kind": "correctness",
+  "pattern": "^[^#\\n]*(?:\\bENVIRONMENT(?:_MODIFICATION)?\\b|-E\\s+env\\b)[^#\\n]*(?:/Users/|/home/|\\$ENV\\{(?:HOME|USERPROFILE)\\}|\"~/|=~/|[A-Za-z]:[/\\\\]Users[/\\\\])",
+  "bad": "set_tests_properties (gate PROPERTIES ENVIRONMENT \"APP_BANK=/Users/someone/Documents/app/bank.dat\")",
+  "good": "set_tests_properties (gate PROPERTIES ENVIRONMENT \"APP_BANK=${CMAKE_CURRENT_BINARY_DIR}/sandbox/bank.dat\")",
+  "examples": [
+    {
+      "bad": "add_test (NAME gate COMMAND ${CMAKE_COMMAND} -E env APP_DATA=$ENV{HOME}/Library/App $<TARGET_FILE:gate>)",
+      "good": "# APP_DATA=/Users/someone is what the harness replaces\nadd_test (NAME gate COMMAND gate)"
+    }
+  ]
+}
