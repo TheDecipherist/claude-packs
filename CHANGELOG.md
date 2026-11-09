@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- A `cd` inside `( )`, `$( )` or backticks no longer moves the paths of the commands after it, so the hooks that read a command's writes judge the file it really writes (KWB-117).
 - The build queue and the test runners share the machine's cores (`hooks/lib/core-budget.mjs`): `BUILDQ_CORES`, else `guards.buildq.cores` in `layout.json`, else a third of the cores, split between the slots. The queue cuts a `-j` asked for to its share and sets the parallel levels; builds run at background priority on macOS and under `nice` elsewhere; `quiet-test` and `test:changed --test-concurrency` take the same share (KWB-111).
 - `compile-cache` (`cpp`): a build of a folder configured without the shared compiler cache is refused while ccache is installed, read from `CMakeCache.txt`, `rules.ninja` and `build.ninja`. The fix it names is a one-word launcher (a list breaks JUCE's nested juceaide configure) and ccache's `base_dir` at the projects folder, so worktrees share hits. The rule `cpp-builds-share-one-compiler-cache` and the skill `build-preflight` (what is built, what it costs, what is compiled more than once) come with it (KWB-112).
 

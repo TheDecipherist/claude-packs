@@ -212,6 +212,8 @@ export function shellWrites(command = '', cwd = process.cwd()) {
   const { text, bodies } = cutHeredocs(command);
   const writes = [];
   let here = cwd;
+  const folders = [];   // the folder each open child shell started in (KWB-117)
+  let ticked = false;   // inside a backtick substitution
   let cmd = { words: [], redirs: [] };
   let pipeIn = null;
   const tokens = lex(text);
@@ -244,6 +246,17 @@ export function shellWrites(command = '', cwd = process.cwd()) {
     }
     if (t.op === '<<') { cmd.redirs.push({ op: '<<', doc: t.doc }); continue; }
     if (t.op === '>&') continue;
+    // ( ), $( ) and backticks run in a child shell: a cd inside ends with it (KWB-117)
+    const opens = t.op === '(' || t.op === '$(' || (t.op === '`' && !ticked);
+    const closes = t.op === ')' || (t.op === '`' && ticked);
+    if (opens || closes) {
+      flush();
+      pipeIn = null;
+      if (t.op === '`') ticked = opens;
+      if (opens) folders.push(here);
+      else if (folders.length) here = folders.pop();
+      continue;
+    }
     if (t.op === '|') { flush(); continue; } // the next command reads this one's output
     flush();
     pipeIn = null;
