@@ -456,6 +456,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `look-gate` | Bash, after a build | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
 | `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
+| `inside-the-project` | Write, Bash | Refuses work for the project done outside it: a worktree added or moved beside the project, and any write, `cd` or `git -C` into a checkout of the same repo kept outside it, where no other hook can see |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
 Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.

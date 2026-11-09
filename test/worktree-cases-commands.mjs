@@ -14,6 +14,15 @@ const withLayout = (wt, keys) => {
 };
 
 export const COMMAND_CASES = {
+  'inside-the-project.mjs': ({ here, wt }) => {
+    // A worktree inside the project (.claude/worktrees/) is the project's, and work there passes; a worktree of the same repo
+    // kept beside the project is outside the kit, and a write into it is refused (KWB-103).
+    const write = (file) => fireAs(here, 'inside-the-project.mjs', { tool_name: 'Write', tool_input: { file_path: file, content: 'x' }, cwd: here }).status;
+    assert.equal(write(join(wt, 'src/n.ts')), 0);
+    const beside = `${here}-beside`;
+    spawnSync('git', ['-C', here, 'worktree', 'add', '-q', beside, '-b', 'beside-case'], { stdio: 'ignore' });
+    assert.equal(write(join(beside, 'src/n.ts')), 2);
+  },
   'suite-once.mjs': ({ here, wt }) => {
     // The worktree's layout names its own suite command, main's does not. Nobody asked for a full run (1.3.0: the gate is the
     // changed tests; a full run only on the user's request).
