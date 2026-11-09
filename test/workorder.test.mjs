@@ -74,6 +74,26 @@ test('the runner keeps its session logs out of git (KWB-98)', () => {
   assert.doesNotMatch(seen, /logs\//, seen);
 });
 
+// KWB-122: a session refused for the account's usage limit moved nothing because it could not run, not because the work is stuck.
+// The stand-in `claude` is refused four times, more than the three still sessions that stop a run, then finishes the order.
+test('the runner waits out a usage limit and carries on, never counting it as a still session (KWB-122)', () => {
+  const dir = fresh('wo-limit-');
+  execFileSync('git', ['init', '-q'], { cwd: dir });
+  assert.equal(cli(dir, 'workorder', 'billing').status, 0);
+  const bin = join(dir, '.bin');
+  execFileSync('mkdir', ['-p', bin]);
+  const calls = join(dir, '.calls');
+  const refused = `{"type":"result","is_error":true,"api_error_status":429,"api_error":"usage_limit_reached","result":"You've hit your weekly limit"}`;
+  writeFileSync(join(bin, 'claude'), `#!/usr/bin/env bash\necho x >> "${calls}"\nif [ "$(wc -l < "${calls}")" -le 4 ]; then echo '${refused}'; exit 1; fi\ntouch "${join(dir, FOLDER, 'DONE')}"\n`, { mode: 0o755 });
+  const run = spawnSync('bash', [join(dir, FOLDER, 'run.sh')], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, LIMIT_WAIT: '0' } });
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+  assert.ok(existsSync(join(dir, FOLDER, 'DONE')), 'the order finished after the limit');
+  const log = readFileSync(join(dir, FOLDER, 'logs/runner.log'), 'utf8');
+  assert.equal(log.match(/usage limit/g)?.length, 4, log);
+  assert.ok(existsSync(join(dir, FOLDER, 'logs/session-1.jsonl')), 'the session that ran is logged under its own number');
+  assert.ok(!existsSync(join(dir, FOLDER, 'logs/session-2.jsonl')), 'a refused try is not a session');
+});
+
 test('a new project with no packs named takes base alone, never a synth pack (KWB-84)', () => {
   const parent = fresh('new-');
   const r = spawnSync('node', [CLI, 'new', 'shop', '--dir', parent], { encoding: 'utf8' });
