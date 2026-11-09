@@ -5,13 +5,19 @@
 //   "looks": [{ "name": "home", "reference": "design/reference/home.webp", "code": ["src/app/home/**"],
 //               "report": "build/evidence/looks/home.json" }]      (report defaults to build/evidence/looks/<name>.json)
 // The report is what the project's look gate writes (the analyse-reference-look skill's gate), committed on the branch:
-//   { "reference": "...", "commit": "<sha it judged>", "verdict": "pass" | "fail", "measures": { ... } }
+//   { "reference": "...", "code": "<node .claude/hooks/look-gate.mjs --key <name>>", "verdict": "pass" | "fail", "measures": { ... } }
+// "code" is a hash of the files that draw the look (what the report is "for"), so a report changes only when that code or the
+// verdict does: two branches that each ran the gate on a page they left alone write the same bytes and merge with no conflict
+// (KWB-121; a "commit" field changed on every run and conflicted at every merge). A report with "commit" and no "code" still
+// counts the old way: its commit must be at or after the last commit that changed the code.
 // After a build command, a branch whose look code changed since the trunk is told which looks are due (no refusal: a render
 // takes longer than a hook may). At a landing (`git merge <branch>` on a trunk), each look whose code the branch changed needs
-// its report on that branch with verdict "pass" and a commit at or after the last commit that changed the look's code;
+// its report on that branch with verdict "pass" and a "code" equal to the key of the code on that branch;
 // missing, failing or stale refuses the landing. `--selftest` proves it.
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
+import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readPayload } from './lib/writes.mjs';
@@ -32,6 +38,12 @@ const looksOf = (root) => (readLayout(claudeRoot(join(root, 'x'))).looks ?? []).
 // The looks whose code changed between two commits.
 const touched = (root, looks, from, to) => looks.filter((l) => (git(root, 'diff', '--name-only', `${from}...${to}`, '--', ...pathspecs(l.code ?? [])) ?? '') !== '');
 
+// The key of a look's drawing code at `ref`: a hash of each file's mode, blob and path, so it moves only when that code does.
+export function codeKey(root, look, ref) {
+  const rows = (git(root, 'ls-tree', '-r', ref) ?? '').split('\n').filter((r) => matchesAny(r.slice(r.indexOf('\t') + 1), look.code ?? []));
+  return createHash('sha256').update(rows.join('\n')).digest('hex').slice(0, 16);
+}
+
 // Why a look may not land on `ref`, or null: its report must be on the branch, pass, and judge the code's last change.
 function verdictOf(root, look, ref) {
   const last = git(root, 'log', '-1', '--format=%H', ref, '--', ...pathspecs(look.code ?? []));
@@ -40,6 +52,10 @@ function verdictOf(root, look, ref) {
   let report;
   try { report = JSON.parse(text); } catch { return `${look.report} is not JSON`; }
   if (report.verdict !== 'pass') return `${look.report} says "${report.verdict}"`;
+  if (report.code !== undefined) {
+    const key = codeKey(root, look, ref);
+    return report.code === key ? null : `${look.report} judged code ${String(report.code).slice(0, 8)}, but the look's code on ${ref} is ${key.slice(0, 8)}`;
+  }
   if (!report.commit || git(root, 'merge-base', '--is-ancestor', last, report.commit) === null) {
     return `${look.report} judged ${String(report.commit ?? 'no commit').slice(0, 8)}, before the look's code last changed in ${String(last).slice(0, 8)}`;
   }
@@ -83,5 +99,14 @@ function main(text) {
   return payload.hook_event_name === 'PostToolUse' ? afterBuild(payload) : landing(payload);
 }
 
+function printKey(name) {
+  const root = checkoutRoot(join(process.cwd(), 'x'));
+  const look = looksOf(root).find((l) => l.name === name);
+  if (!look) { process.stderr.write(`look-gate: no look named "${name}" in layout.json\n`); return 1; }
+  process.stdout.write(`${codeKey(root, look, 'HEAD')}\n`);
+  return 0;
+}
+
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest(new URL(import.meta.url).pathname) : await asHook('look-gate', main));
+const keyAt = process.argv.indexOf('--key');
+if (isMain(import.meta.url)) process.exit(keyAt > 0 ? printKey(process.argv[keyAt + 1]) : process.argv.includes('--selftest') ? selftest(new URL(import.meta.url).pathname) : await asHook('look-gate', main));
