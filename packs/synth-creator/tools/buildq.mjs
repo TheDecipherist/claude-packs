@@ -5,10 +5,13 @@
 //   node .claude/tools/buildq.mjs <command> [args...]    run it in the next free slot
 //   node .claude/tools/buildq.mjs --status               how many slots are taken
 // BUILDQ_DIR: where the slots live (default: the machine's temp folder). BUILDQ_SLOTS: how many (default 2).
+// KWB-111: every job takes its share of one core budget (BUILDQ_CORES, layout guards.buildq.cores, or a third of the
+// machine): its -j or --jobs is cut to it and CMake, CTest and make are told it; it runs at a low priority (BUILDQ_PRIORITY=normal: not).
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { budgetEnv, capJobs, coreBudget, gentle, projectLayout, shareOf } from '../hooks/lib/core-budget.mjs';
 
 const DIR = process.env.BUILDQ_DIR ?? join(tmpdir(), 'claude-packs-buildq');
 const SLOTS = Number(process.env.BUILDQ_SLOTS ?? 2);
@@ -53,11 +56,15 @@ function status() {
   return 0;
 }
 
-function run(command) {
+function run(asked) {
   let slot = claim();
   for (; slot === null; slot = claim()) nap(WAIT_MS);
   try {
-    const r = spawnSync(command[0], command.slice(1), { stdio: 'inherit' });
+    // KWB-111: the job takes its share of the machine's core budget, at a low priority
+    const root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
+    const most = shareOf(coreBudget(process.env, projectLayout(root)), SLOTS);
+    const command = gentle(capJobs(asked, most));
+    const r = spawnSync(command[0], command.slice(1), { stdio: 'inherit', env: budgetEnv(process.env, most) });
     if (r.error) console.error(`buildq: ${command[0]}: ${r.error.message}`);
     return r.status ?? 1;
   } finally {
