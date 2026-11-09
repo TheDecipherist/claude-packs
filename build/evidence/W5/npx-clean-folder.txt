@@ -1,0 +1,14 @@
+$ npx --no-install @thedecipherist/claude-packs@1.4.0 configs   (an empty folder)
+npm error npx canceled due to missing packages and no YES option: ["@thedecipherist/claude-packs@1.4.0"]
+
+$ npm init -y && npm install -D @thedecipherist/claude-packs@1.4.0
+added 10 packages in 1s
+installed: 1.4.0
+
+$ npx --no-install @thedecipherist/claude-packs configs
+full-stack
+  A web service: a Fastify API and a Next.js web app in one repo, Zod 4 schemas in one shared folder, one database gateway, one error contract.
+  packs: base, full-stack, http-api, fastify, zod, docker, writing, hook-proof (always); js-ts, go, stored-text, ui-craft, shell, shell-hooks, react, web, multi-tenant, websocket, ci, host-agent, dynamic-data, mongo, postgres, ai, nginx, content-site (to choose); init takes js-ts, stored-text, ui-craft
+  with every pack: rules 148, hooks 24, checks 261, skills 47
+  folders: packages/core/src/ packages/core/src/schemas/ packages/api/src/ packages/api/src/routes/ packages/api/src/handlers/ packages/api/src/adapters/ packages/api/src/auth/ packages/api/test/ packages/web/ packages/web/app/ packages/web/components/ docs/ tools/
+

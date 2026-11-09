@@ -1,0 +1,138 @@
+{
+  "configuration": "full-stack",
+  "maxFileLines": 300,
+  "folders": {
+    "core": {
+      "path": "packages/core/src",
+      "purpose": "shared code the API, the channel and the web app import"
+    },
+    "schemas": {
+      "path": "packages/core/src/schemas",
+      "purpose": "every Zod 4 schema: fleet records, the /agent protocol messages, the agent config; the one source for both languages"
+    },
+    "gateway": {
+      "path": "packages/core/src/gateway",
+      "purpose": "gateway functions for every collection, chain keys (org, host) first"
+    },
+    "api": {
+      "path": "packages/api/src",
+      "purpose": "the Fastify API"
+    },
+    "routes": {
+      "path": "packages/api/src/routes",
+      "purpose": "the /agent upgrade route, /api/v1/fleet/* and /api/v1/projects/*: method, path, schemas, one handler call"
+    },
+    "handlers": {
+      "path": "packages/api/src/handlers",
+      "purpose": "pairing, commands, outbox replay, state upserts, offline monitor, the planner wake sender; project creation"
+    },
+    "adapters": {
+      "path": "packages/api/src/adapters",
+      "purpose": "the database gateway's client and every other outside service"
+    },
+    "auth": {
+      "path": "packages/api/src/auth",
+      "purpose": "authentication and the request's identity (the chain keys come from here)"
+    },
+    "api-tests": {
+      "path": "packages/api/test",
+      "purpose": "API tests through inject()"
+    },
+    "channel": {
+      "path": "packages/channel/src",
+      "purpose": "the executor channel: ChannelTransport, atlas.ts, relay.ts"
+    },
+    "web": {
+      "path": "packages/web",
+      "purpose": "the Next.js web app"
+    },
+    "web-app": {
+      "path": "packages/web/app",
+      "purpose": "the App Router: Simple mode, the chat, the Fleet, Agent, Host and New-project pages, Settings"
+    },
+    "web-components": {
+      "path": "packages/web/components",
+      "purpose": "one Panel, Bubble, DataTable, Console"
+    },
+    "web-charts": {
+      "path": "packages/web/charts",
+      "purpose": "charts with visx in one folder: theme.ts, Sparkline, AreaChart, Gauge, Topology"
+    },
+    "agent-cmd": {
+      "path": "packages/agent/cmd",
+      "purpose": "the Go agent's entry points (stdlib only)"
+    },
+    "agent-internal": {
+      "path": "packages/agent/internal",
+      "purpose": "the Go agent: the relay, the services, the socket to the API"
+    },
+    "agent-tests": {
+      "path": "packages/agent/tests",
+      "purpose": "the Go agent's tests and the config parity test"
+    },
+    "containers": {
+      "path": "containers",
+      "purpose": "Dockerfiles (executor, agent, egress), the proxy allow-list, fleet.compose.yml"
+    },
+    "planner": {
+      "path": "planner",
+      "purpose": "the planner's standing prompt"
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "the spec, decisions, versions.md"
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": "scripts that never ship"
+    }
+  },
+  "concepts": {
+    "schemas": [
+      "schemas"
+    ],
+    "db-gateway": [
+      "gateway",
+      "adapters"
+    ],
+    "routes": [
+      "routes"
+    ],
+    "handlers": [
+      "handlers"
+    ],
+    "adapters": [
+      "adapters"
+    ],
+    "pages": [
+      "web-app",
+      "**/app/**/page.tsx",
+      "**/app/**/layout.tsx"
+    ],
+    "components": [
+      "web-components",
+      "web-charts"
+    ],
+    "client": [
+      "web"
+    ],
+    "ai": [
+      "planner",
+      "**/ai/**",
+      "**/prompts/**",
+      "**/*prompt*",
+      "**/*anthropic*"
+    ]
+  },
+  "commands": {
+    "test": "npm test",
+    "test-one": "npx vitest run <file>",
+    "doctor": "npx --no-install @thedecipherist/claude-packs doctor --strict",
+    "build": "npm run build",
+    "generate": "make -C packages/agent generate"
+  },
+  "gates": {
+    "a11y": "none: the server-rendered pages in packages/api/src/ui retire (the fleet spec leaves html-ui out for that); the Next.js app in packages/web brings its own gate in the work order that builds it",
+    "hover": "none: the server-rendered pages in packages/api/src/ui retire (the fleet spec leaves html-ui out for that); the Next.js app in packages/web brings its own gate in the work order that builds it"
+  }
+}

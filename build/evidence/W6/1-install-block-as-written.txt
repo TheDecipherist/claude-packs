@@ -1,0 +1,10 @@
+$ npm install -D @thedecipherist/claude-packs@1.4.0
+
+added 295 packages in 4s
+exit 0
+installed: 0.0.0-standin
+
+$ npx --no-install @thedecipherist/claude-packs init --config full-stack --layout docs/layout.admiral.json js-ts stored-text ui-craft react web mongo zod websocket multi-tenant host-agent ai shell-hooks ci go
+npm error could not determine executable to run
+npm error A complete log of this run can be found in: ~/.npm/_logs/2026-11-09T00_04_06_110Z-debug-0.log
+exit 1

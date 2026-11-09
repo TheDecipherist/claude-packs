@@ -1,0 +1,5 @@
+$ npm view @thedecipherist/claude-packs dist-tags
+{ latest: '1.4.0' }
+$ git ls-remote origin refs/tags/v1.4.0
+2de31232b9ad70062db49535caa8071b8735439a	refs/tags/v1.4.0
+9056bec3262a5ac25abb4789c12173d55efa9cea	refs/tags/v1.4.0^{}

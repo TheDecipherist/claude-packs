@@ -1,0 +1,17 @@
+clone: work/fleet-spec at f18b336
+HEAD now: f18b336 on work/kit-install-scratch
+commits on top of work/fleet-spec: 0
+uncommitted (never committed, never pushed):
+ M .gitignore
+ M package-lock.json
+ M package.json
+?? .claude/checks/
+?? .claude/claude-packs.lock.json
+?? .claude/hooks/
+?? .claude/layout.json
+?? .claude/rules/
+?? .claude/settings.json
+?? .claude/skills/
+?? .claude/tools/
+?? CLAUDE.md
+?? docs/

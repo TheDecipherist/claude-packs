@@ -1,0 +1,9 @@
+(the project's gates declared in .claude/layout.json and docs/layout.admiral.json: "none: <reason>" for the retiring server-rendered pages, d-9)
+$ claude-packs doctor --strict --fresh
+  configuration: full-stack
+  making: 62 words, about 107 tokens added to every prompt (77 words, about 129 tokens when it echoes a named instance); an estimate (word pieces of up to 6 letters, each mark one token), not the model's tokenizer
+  duplicates: 2 (jscpd, 222 sources, 55 ms; `npx --no-install @thedecipherist/claude-packs dup scan` lists them), lowest seen 2
+  hook timing: no calls logged yet (.claude/hooks.log fills as the hooks run)
+  note: 20 rule(s) wait for their first file: their folders hold nothing yet
+OK: base, js-ts, stored-text, ui-craft, react, web, mongo, websocket, multi-tenant, host-agent, ai, shell-hooks, ci, go
+exit 0
