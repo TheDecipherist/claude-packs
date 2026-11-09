@@ -30,6 +30,15 @@ There are three ways in:
 
 The commands are in [Start here](#start-here).
 
+### From an idea to a finished app
+
+Write the plan first, then the design, then hand both to Claude Code.
+
+1. **Add the walkthrough to claude.ai, once.** `npx @thedecipherist/claude-packs claude-ai-skill` writes `workorder-writer.zip`. Upload it in claude.ai under Settings, Capabilities, Skills. It belongs to no pack and no project installs it: it is the planning half, and it lives in claude.ai.
+2. **Write the work order in claude.ai, with Fable on High.** Say "I want to make a work order". The walkthrough interviews you stage by stage: what you are making, what it does, what you have, how it looks, how it is built. It researches between questions and gives a recommendation with every choice. It starts from the kit's template (a rebuild of a hardware instrument gets the rebuild template), and holds the order to the kit's laws while you write it, so the build is never refused for something the plan asked for. Get your app, idea or product as finished as you can. Plan in claude.ai, not Claude Code: claude.ai is great at research, and Claude Code is eager to start coding.
+3. **Make the design once the work order is complete.** The walkthrough writes an AI image prompt for each screen. With the OpenArt connector in claude.ai, it offers to make the mock-ups for you; without it, take the prompts to [openart.ai](https://openart.ai). Use the Nano Banana Pro model, which works very well for this, and make every mock-up 16:9, so every screen resizes and scales the same way. Go again until each one looks right.
+4. **Hand both to Claude Code.** `npx @thedecipherist/claude-packs new <name>`, then `workorder <name>` inside it (with `--template rebuild` for a rebuild) for the runner files. Save the finished order over `docs/workorders/<name>/workorder.md` and the pictures in `design/reference/`, named for the screen each shows. Then tell Claude Code: `Start from docs/workorders/<name>/workorder.md and the design in design/reference/`. The `start-from-a-workorder` skill reads the order the way the run will and lists any gaps before a line of code is written. It measures each picture with `analyse-reference-look`, and then the build starts: you can watch it, or [let it run on its own](#let-it-build-on-its-own).
+
 ## See it work
 
 A new Rust crate, and one command:
@@ -180,6 +189,8 @@ That writes three files to `docs/workorders/billing/`:
 | `PROMPT.md` | How to run: take the recommended choice, never stop to ask, record every decision, resume from `progress.md` |
 | `run.sh` | Starts session after session until the work is done |
 
+`workorder <name> --template rebuild` writes the steps of a hardware instrument rebuilt as a plugin in place of the blank ones: the sources, the firmware map, a blind second pass in Ghidra, the firmware run as the oracle, the parameter layer, the engine, the panel drawn in code, the gates and a report. Four rebuilds taught it, and its `[if ...]` steps fit an analogue voice, a digital engine or a real unit you can record.
+
 Write the steps with Claude, and the `write-a-workorder` skill keeps them honest. What makes one work:
 
 - **Say what finished looks like,** and what is known and not known, so no report claims more than the work shows.
@@ -320,7 +331,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 44 | 11 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 12 |
+| `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 13 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
@@ -420,7 +431,8 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"`, `logs crashes`, `logs clear <hook>\|all fixed\|superseded "<why>"` |
 | `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing, and that a test answers each rule whose Check names one |
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed |
-| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner |
+| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template rebuild` for a hardware rebuild |
+| `claude-ai-skill` | `workorder-writer.zip`: the guided work order interview, a skill to upload to claude.ai |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |
 | `configs` | The configurations |

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- From an idea to an app: `claude-ai-skill` writes `workorder-writer.zip`, a skill to upload to claude.ai that interviews the user stage by stage into a finished work order, starting from the kit's templates and holding it to the kit's laws, then makes or writes the 16:9 mock-ups (Nano Banana Pro, through the OpenArt connector when it is there). `workorder <name> --template rebuild` writes the steps four hardware rebuilds taught. Base's `start-from-a-workorder` skill takes the finished order and its design into the run, and `write-a-workorder` always starts from a template. The README's Getting Started walks the whole way.
 - A work order's `run.sh` waits out the account's usage limit: a session refused with `usage_limit_reached` is tried again every `LIMIT_WAIT` seconds (15 min) under the same number and never counts as a session that moved nothing, so a run left overnight no longer stops for good at the first limit (KWB-125, logged first as KWB-122).
 - `making-check` no longer sends a turn back for a concept word the turn took out: a concept counts as written only if the file still holds the word at Stop, so a comment reworded after its first edit is judged by what it now says (KWB-122).
 

@@ -1,6 +1,6 @@
 // 1.1.0: a project can build itself, and a reader can find out how. The templates come from two whole builds run with nobody there. KWB-84: `new` used to
 // install a synth's laws on any project.
-import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readFileSync, spawnSync, statSync, test, writeFileSync } from './kit-cli.mjs';
+import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, statSync, test, writeFileSync } from './kit-cli.mjs';
 
 const FOLDER = 'docs/workorders/billing';
 const README = readFileSync(join(KIT, 'README.md'), 'utf8');
@@ -94,6 +94,38 @@ test('the runner waits out a usage limit and carries on, never counting it as a 
   assert.equal(log.match(/usage limit/g)?.length, 4, log);
   assert.ok(existsSync(join(dir, FOLDER, 'logs/session-1.jsonl')), 'the session that ran is logged under its own number');
   assert.ok(!existsSync(join(dir, FOLDER, 'logs/session-2.jsonl')), 'a refused try is not a session');
+});
+
+// 1.5.11: a rebuild of a hardware instrument starts from the steps four rebuilds taught, not a blank order.
+test('workorder --template rebuild writes the rebuild steps; an unknown template writes nothing', () => {
+  const dir = fresh('wo-rebuild-');
+  assert.equal(cli(dir, 'workorder', 'rebuild', '--template', 'rebuild').status, 0);
+  const order = readFileSync(join(dir, 'docs/workorders/rebuild/workorder.md'), 'utf8');
+  assert.match(order, /^# Work order: the <maker> <machine>, rebuilt/);
+  assert.match(order, /## W5\. The oracle/);
+  assert.doesNotMatch(order, /\{\{(name|date)\}\}/, 'the name and the date are filled in');
+  assert.ok(existsSync(join(dir, 'docs/workorders/rebuild/PROMPT.md')) && existsSync(join(dir, 'docs/workorders/rebuild/run.sh')));
+  const plain = fresh('wo-plain-');
+  assert.equal(cli(plain, 'workorder', 'billing').status, 0);
+  assert.match(readFileSync(join(plain, FOLDER, 'workorder.md'), 'utf8'), /^# Work order: billing/, 'the plain form keeps the blank steps');
+  const bad = fresh('wo-bad-');
+  const r = cli(bad, 'workorder', 'x', '--template', 'nope');
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr + r.stdout, /rebuild/, 'the refusal names the templates there are');
+  assert.ok(!existsSync(join(bad, 'docs/workorders/x')), 'nothing was written');
+});
+
+// Every skill, rule and tool the rebuild template names is one the kit has, so a run never looks for one that is not there.
+test('the rebuild template names only skills, rules and tools the kit has', () => {
+  const text = readFileSync(join(KIT, 'prompts/workorder/workorder-rebuild.md'), 'utf8');
+  // **The foundation** lists them as "its skills `a`, `b`; its tool `c`; and its rules `d` and `e`."
+  const named = (kind) => [...text.matchAll(new RegExp(`its ${kind} ([^;.]*)`, 'g'))].flatMap((m) => [...m[1].matchAll(/`([\w-]+)`/g)].map((n) => n[1]));
+  const have = (kind, name) => readdirSync(join(KIT, 'packs')).some((p) => existsSync(join(KIT, 'packs', p, kind, name)));
+  const skills = named('skills');
+  assert.ok(skills.length >= 10, `the foundation names its skills: ${skills}`);
+  for (const s of skills) assert.ok(have('skills', s), `skill ${s}`);
+  for (const r of [...named('rules'), 'test-the-template-once']) assert.ok(have('rules', `${r}.md`), `rule ${r}`);
+  for (const t of named('tool')) assert.ok(have('tools', `${t}.mjs`), `tool ${t}`);
 });
 
 test('a new project with no packs named takes base alone, never a synth pack (KWB-84)', () => {

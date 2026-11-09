@@ -5,7 +5,7 @@ description: Use when a project or a large piece of work should be built with no
 
 # Write a work order (one job: a brief that needs nobody to answer anything)
 
-`workorder <name>` writes `docs/workorders/<name>/`: `workorder.md` (the steps), `PROMPT.md` (how to run with nobody there) and `run.sh` (session after session). You write the steps.
+`workorder <name>` writes `docs/workorders/<name>/`: `workorder.md` (the steps), `PROMPT.md` (how to run with nobody there) and `run.sh` (session after session). You write the steps, always starting from the kit's template: `workorder <name>` gives the general one, and `--template rebuild` the one four instrument rebuilds taught. Never start from a blank page. The `start-from-a-workorder` skill takes a finished order and its design into the run.
 
 <constraints>
 Always do:

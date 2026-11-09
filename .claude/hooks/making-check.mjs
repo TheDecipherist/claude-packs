@@ -170,7 +170,10 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
       const written = new Map();
       // only code is judged for its concepts: a note, a brief, a doc or a log names concepts in words ("Status line"), and that is no
       // undeclared use (KWB-19)
-      for (const w of mine) if (isCode(rel(w.path), lay)) for (const c of conceptsIn(w.text ?? '', sh)) if (!written.has(c)) written.set(c, rel(w.path));
+      // and only a word the file still holds at Stop: an edit that put a word in and a later one that took it out leave none written (KWB-122)
+      const standing = new Map();
+      const holds = (p) => { if (!standing.has(p)) { try { standing.set(p, conceptsIn(readFileSync(p, 'utf8'), sh)); } catch { standing.set(p, null); } } return standing.get(p); };
+      for (const w of mine) if (isCode(rel(w.path), lay)) for (const c of conceptsIn(w.text ?? '', sh)) if (!written.has(c) && (holds(w.path)?.has(c) ?? true)) written.set(c, rel(w.path));
       const making = makingLines(r).join('\n');
       const wroteSource = mine.filter((w) => isSource(w.path)).map((w) => rel(w.path));
       // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
