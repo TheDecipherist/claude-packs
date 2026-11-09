@@ -20,8 +20,9 @@ function twoBranches(writeReport) {
   for (const name of ['a', 'b']) {
     git(dir, 'switch', '-q', '-c', `work/${name}`, 'main');
     put(join(dir, `src/core/Engine${name}.cpp`), `${name}\n`); // each branch changes only the engine, never the page
+    commit(`${name}: engine change`);
     put(join(dir, REPORT), writeReport({ key: key(), head: head() }));
-    commit(`${name}: engine change, look gate run on home`);
+    commit(`${name}: look gate run on home`);
   }
   git(dir, 'switch', '-q', 'work/a');
   return spawnSync('git', ['-C', dir, 'merge', '--no-edit', 'work/b'], { encoding: 'utf8' });

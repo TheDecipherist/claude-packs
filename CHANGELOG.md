@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A look report is keyed by the drawing code, not the commit: `"code"` is the hash `node .claude/hooks/look-gate.mjs --key <name>` prints (mode, blob and path of each file the look's globs match), and `look-gate` refuses a landing whose report's `code` is not the code's current key. A report now changes only when that code or the verdict does, so two branches that each ran the gate on a page they left alone write the same bytes and merge with no conflict (the `commit` field changed on every run and conflicted at every merge). A report with `commit` and no `code` still counts the old way (KWB-121).
+
 - `container-hover-includes-children` catches a hover told through a call (`hovered (std::nullopt)` in `mouseExit`) as well as one set as a flag, the shape of the bug it was written for (KWB-119).
 
 - A `cd` inside `( )`, `$( )` or backticks no longer moves the paths of the commands after it, so the hooks that read a command's writes judge the file it really writes (KWB-118).
