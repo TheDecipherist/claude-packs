@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkoutRoot, insideProject, relInCheckout, ROOT } from './lib/project.mjs';
 import { addedFindings, ASK, findInstanceLiterals, isExcluded, logRefusal, quoteRow, readShape } from './lib/shape.mjs';
+import { addressedOutside } from './lib/audience.mjs';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
@@ -28,7 +29,8 @@ function refuse(where, findings, shape) {
     return `  ${quoteRow(c, shape)}\n    fix: name the shape and the generator (every ${c}: ${how}); the instance is the example, on its own "seen in:" or "example:" line`;
   });
   logRefusal(ROOT, 'brief-guard', findings.map((f) => f.concept));
-  process.stderr.write(`BLOCKED by brief-guard: ${where} names one instance of a concept outside a "seen in:" or "example:" line — ${ASK}\n${lines.join('\n')}${findings.length > 8 ? `\n  ... and ${findings.length - 8} more` : ''}\n${rows.join('\n')}\n`);
+  process.stderr.write(`BLOCKED by brief-guard: ${where} names one instance of a concept outside a "seen in:" or "example:" line — ${ASK}\n${lines.join('\n')}${findings.length > 8 ? `\n  ... and ${findings.length - 8} more` : ''}\n${rows.join('\n')}\n` +
+    'A page for a person outside the project, about the real machine\'s own named controls (never a spec, brief or recipe), says so in its first 5 lines: <!-- audience: outside --> (.md or .txt only).\n');
   return 2;
 }
 
@@ -48,7 +50,7 @@ function main(text) {
     const rel = relInCheckout(w.path);
     if (!BRIEFS.test(rel)) continue;
     const shape = readShape(checkoutRoot(w.path)) ?? readShape(ROOT);
-    if (!shape || shape.error || isExcluded(rel, shape)) continue;
+    if (!shape || shape.error || isExcluded(rel, shape) || addressedOutside(rel, w.after)) continue;
     const hits = addedFindings(w.before, w.after, find(shape));
     if (hits.length) return refuse(rel, hits, shape);
   }
@@ -90,7 +92,11 @@ function selftest() {
     ['agent: files named for the machine\'s pages are paths, not instances (KWB-117)', agent('Check these reports: docs/screens/om-112-slot2-formant.md, om-113-slot3-pitch.md and screens/slot4.png.'), 0],
     ['agent: a path beside it never excuses an instruction (KWB-117)', agent('Read docs/notes.md, then drive slot 2.'), 2],
   ];
-  cases.push(['usage.log counts each refusal per concept', n(), 8]);
+  cases.push(['doc: addressed outside, marker in the first lines (KWB-127)', doc('docs/sample-request.md', '<!-- audience: outside -->\n# Recording\nRoute LFO 1 to VCO1 FREQ; drive slot 2 triangle.\n'), 0]);
+  cases.push(['doc: the same text with no marker is still refused (KWB-127)', doc('docs/sample-request.md', '# Recording\nDrive slot 2 triangle.\n'), 2]);
+  cases.push(['doc: a marker below the first 5 lines exempts nothing (KWB-127)', doc('docs/sample-request.md', '# Recording\n\n\n\n\n<!-- audience: outside -->\nDrive slot 2.\n'), 2]);
+  cases.push(['inbox brief: the marker exempts a .md brief too, by its declared audience (KWB-127)', doc('inbox/brief-8.md', '<!-- audience: outside -->\nDrive slot 2.\n'), 0]);
+  cases.push(['usage.log counts each refusal per concept', n(), 10]);
   return verdicts('brief-guard', cases);
 }
 

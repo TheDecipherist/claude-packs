@@ -47,6 +47,7 @@ Never do:
   the engine-scoped `no-instance-index-literal` and `no-instance-id-literal` checks, which let the world and the space code through.
   `buffer[1]`, `channel == 1` and `pos[0]` are not instances and never fire.
 - The `brief-guard` hook refuses a brief, spec or recipe that names an instance outside a `seen in:` or `example:` line.
+- A document addressed to a person outside the project, whose subject is the real machine's own named controls (a page of recording instructions for someone at the hardware, who sets "LFO 1" or "VCO1 FREQ" by their printed names), declares it with `<!-- audience: outside -->` in its first 5 lines (KWB-127). Both guards then skip it. The marker is decided once per document and visible to a reader; it works only in `.md` and `.txt` files, so a marker in source exempts nothing; and it is wrong for a spec, a brief, a recipe or code, whose instances are the project's own.
 - `npx --no-install @thedecipherist/claude-packs shape scan` lists every instance literal already in the repo.
 - `shape_symmetry` (generated at configure time by `npx --no-install @thedecipherist/claude-packs symmetry gen`, run by `.claude/tools/shape-symmetry.mjs`): for each many
   concept, the members of every instance are the same set, and every one of the N·(N-1)/2 pairs swaps the same. Its selftest plants a
