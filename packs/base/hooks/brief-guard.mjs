@@ -87,8 +87,10 @@ function selftest() {
     ['inbox brief "example: slot 2"', doc('inbox/brief-7.md', 'Build the swap for all slots.\nexample: slot 2 lost its delay\n'), 0],
     ['bash heredoc into docs/', runHook(hook, dir, bashOf("cat >> docs/recipes.md <<'EOF'\n## Slot 2, the pad\nEOF", dir)), 2],
     ['not a brief: src/ is shape-law\'s', doc('src/world/x.md', 'slot 2\n'), 0],
+    ['agent: files named for the machine\'s pages are paths, not instances (KWB-117)', agent('Check these reports: docs/screens/om-112-slot2-formant.md, om-113-slot3-pitch.md and screens/slot4.png.'), 0],
+    ['agent: a path beside it never excuses an instruction (KWB-117)', agent('Read docs/notes.md, then drive slot 2.'), 2],
   ];
-  cases.push(['usage.log counts each refusal per concept', n(), 7]);
+  cases.push(['usage.log counts each refusal per concept', n(), 8]);
   return verdicts('brief-guard', cases);
 }
 

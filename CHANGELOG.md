@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- A `cd` inside `( )`, `$( )` or backticks no longer moves the paths of the commands after it, so the hooks that read a command's writes judge the file it really writes (KWB-117).
+- A `cd` inside `( )`, `$( )` or backticks no longer moves the paths of the commands after it, so the hooks that read a command's writes judge the file it really writes (KWB-118).
 - `editor-paints-what-changed` (`audio-core`) says where a state change's look is applied: a paint only draws, and a switch, a bypass or a mode sets the look of everything it governs in one function and repaints exactly those. Hover on a container counts its children. Two lesson checks hold it, `no-state-change-in-paint` and `container-hover-includes-children`, and `new-panel-control` step 7 with `switch-gate-harness.md` tests an on/off control through the region the toolkit was asked to redraw, never a fresh snapshot, which repaints everything and hides the fault (KWB-105).
 - `tests-never-touch-user-files` (`base`): a test gets copies of the user's files in a fresh temporary folder made by the harness's one helper, and the lesson check `tests-run-in-a-temp-folder` refuses a test target whose environment names a path under the user's home (KWB-106).
 - The build queue and the test runners share the machine's cores (`hooks/lib/core-budget.mjs`): `BUILDQ_CORES`, else `guards.buildq.cores` in `layout.json`, else a third of the cores, split between the slots. The queue cuts a `-j` asked for to its share and sets the parallel levels; builds run at background priority on macOS and under `nice` elsewhere; `quiet-test` and `test:changed --test-concurrency` take the same share (KWB-111).

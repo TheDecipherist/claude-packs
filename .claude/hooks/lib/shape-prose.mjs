@@ -17,6 +17,11 @@ const LIBRARIES = new Set(['juce', 'std', 'boost', 'absl', 'Qt']);
 const AMOUNT = /^(?:steps?|detents?|clicks?|notches|ticks?|amount|delta|by|count|n|offset|increment|distance)$/i;
 const SOURCE_FILES = ['*.h', '*.hh', '*.hpp', '*.c', '*.cc', '*.cpp', '*.mm', '*.js', '*.mjs', '*.ts', '*.tsx', '*.py', '*.go', '*.rs', '*.java', '*.cs', '*.swift', '*.kt'];
 
+// A path or a file name names a file, never an instance (KWB-105): a brief listing `docs/screens/om-112-osc1-formant.md`
+// hands over a file named for the machine's own page. Each is blanked to the same length, so lines and columns hold.
+const PATH = /(?<![\w/])(?:[\w.~@-]*\/)+[\w.@-]+\/?|(?<![\w/])[\w@-]+(?:\.[\w-]+)*\.(?:md|png|jpe?g|gif|webp|svg|pdf|txt|json|csv|ya?ml|html?|wav|bin|rom|syx|mjs|js|ts|tsx|py|cpp|cc|hh?|hpp|cir|log)(?![\w])/g;
+export const blankPaths = (text) => text.replace(PATH, (p) => ' '.repeat(p.length));
+
 export function blankMessages(line, file) {
   if (!languageOf(extname(file ?? ''))) return line;
   return line.replace(/"(?:[^"\\]|\\.)*"/g, (s) => (s.trim().split(/\s+/).length >= SENTENCE_WORDS ? ' '.repeat(s.length) : s));

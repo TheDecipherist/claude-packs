@@ -22,7 +22,7 @@ import { logRefusal } from './hook-log.mjs';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { matchesAny } from './glob.mjs';
-import { blankMessages, isFirstMatch, isKnownName, isLibraryCall, isLongerName, isSourceRole, isSum } from './shape-prose.mjs';
+import { blankMessages, blankPaths, isFirstMatch, isKnownName, isLibraryCall, isLongerName, isSourceRole, isSum } from './shape-prose.mjs';
 import { handLists } from './shape-lists.mjs';
 import { withRuns } from './identifier-runs.mjs';
 
@@ -223,7 +223,7 @@ function lineHits(line, c, shape, aliases, inSwitch, file) {
 export function findInstanceLiterals(text, file, shape, { only = null } = {}) {
   if (!shape || !text) return [];
   const concepts = Object.values(shape.concepts).filter((c) => c.shape === 'many' || (c.shape === 'one' && c.id));
-  let body = text;
+  let body = only === 'brief' ? blankPaths(text) : text; // in a brief, a path names a file (KWB-117)
   for (const c of concepts) for (const q of c.quotes) body = body.split(q).join(' '.repeat(q.length));
   const lines = body.split('\n');
   const shown = text.split('\n');

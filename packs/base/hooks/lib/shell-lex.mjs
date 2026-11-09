@@ -1,5 +1,5 @@
 // shell-lex: a shell command's text as words and operators, for shell-writes. Split out of shell-writes.mjs when it
-// passed the 300-line limit (KWB-117); its one job is reading the text, never judging what the command does.
+// passed the 300-line limit (KWB-118); its one job is reading the text, never judging what the command does.
 //
 //   cutHeredocs(command) -> { text, bodies }   each heredoc's body cut out, in order, its marker left as <<HEREDOCn
 //   lex(text) -> [{ w } | { op, fd?, doc? }]  words with their quotes removed, and the operators: redirections,

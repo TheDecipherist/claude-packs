@@ -12,7 +12,7 @@ const CASES = [
   ['echo >>', 'echo hi >> a.txt', [['a.txt', 'append', 'hi\n']]],
   ['a variable set earlier names its folder (KWB-18)', "S=d; cat > $S/v.md <<'EOF'\nx\nEOF", [['d/v.md', 'write', 'x\n']]],
   ['${VAR} too, set from another variable', 'A=d; B=$A/e; echo hi > ${B}.txt', [['d/e.txt', 'write', 'hi\n']]],
-  // a cd inside a child shell ends with it (KWB-117)
+  // a cd inside a child shell ends with it (KWB-118)
   ['a cd in $( ) stays inside it', 'T=$(cd d && ls); echo hi > e.txt', [['e.txt', 'write', 'hi\n']]],
   ['a cd in ( ) stays inside it', '(cd d && echo in > i.txt); echo hi > e.txt', [['d/i.txt', 'write', 'in\n'], ['e.txt', 'write', 'hi\n']]],
   ['a cd in backticks stays inside them', 'T=`cd d && ls`; echo hi > e.txt', [['e.txt', 'write', 'hi\n']]],
