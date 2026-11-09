@@ -3,6 +3,8 @@
 //   wrappings() -> [{ name, open(buffer) -> buffer }]     interleave(a, b) -> one image from an even and an odd EPROM
 //   entropyOf(buffer) -> bits per byte
 //   shiftedHits(buffer, text) -> [{ at, shift }]           a custom character set: the letters keep their distances, whatever the code of 'A'
+//   shiftedHitsMany(buffer, texts) -> one such list per text, in one pass over the buffer
+import { findAll } from './multi-find.mjs';
 
 const eachByte = (b, fn) => Buffer.from(b.map(fn));
 
@@ -99,14 +101,16 @@ export function interleave(even, odd) {
 }
 
 const distances = (b) => { const out = Buffer.alloc(Math.max(0, b.length - 1)); for (let i = 1; i < b.length; i += 1) out[i - 1] = (b[i] - b[i - 1]) & 255; return out; };
+const SHIFTED_CAP = 64;
 
-export function shiftedHits(buffer, text) {
+// Every text's hits in one pass over the buffer's distances, made once (KWB-120: they were made again for every name).
+export function shiftedHitsMany(buffer, texts) {
   const hay = distances(buffer);
-  const needle = distances(Buffer.from(text, 'latin1'));
-  const hits = [];
-  for (let at = hay.indexOf(needle); at !== -1 && hits.length < 64; at = hay.indexOf(needle, at + 1)) hits.push({ at, shift: (buffer[at] - text.charCodeAt(0)) & 255 });
-  return hits;
+  const found = findAll(hay, texts.map((t) => distances(Buffer.from(t, 'latin1'))), SHIFTED_CAP);
+  return found.map((offsets, i) => offsets.map((at) => ({ at, shift: (buffer[at] - texts[i].charCodeAt(0)) & 255 })));
 }
+
+export const shiftedHits = (buffer, text) => shiftedHitsMany(buffer, [text])[0];
 
 export function entropyOf(b) {
   const counts = new Array(256).fill(0);

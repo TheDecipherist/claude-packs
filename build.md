@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.4.8, names-sweep in one pass (work/1.4.8-sweep-speed), started 2026-11-09 (KWB-120), after the user's "so fix them when needed".
+  making: one multi-pattern finder (tools/lib/multi-find.mjs: an index of every needle's first four bytes, one pass over the image, the full needle checked where four match) used by names-sweep's exact and shifted searches; the distance buffer made once per image; the results the same; concepts: none; reuse: unwrap.mjs `shiftedHits` and names-sweep `found` keep their contracts.
+  done when: a planted 8 MB image with thousands of names sweeps in seconds, red against the old search under the same budget; every existing names-sweep test unchanged and green; the tests the branch reaches green.
+
 - 1.4.7, a path names a file (work/1.4.7-paths-name-files), started 2026-11-09 (KWB-117, first logged as KWB-105, a number another branch took first), after the user's "so fix them when needed".
   making: in brief mode the instance reader blanks paths and file names before judging, so a brief listing files named for the machine's pages passes; concepts: none; reuse: shape-prose.mjs, where blankMessages lives.
   done when: brief-guard's KWB-117 case red without the fix and green with it, a path never excusing the instruction beside it; shape-law's selftest unchanged; the tests the branch reaches green.

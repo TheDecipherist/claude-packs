@@ -7,7 +7,8 @@
 // Names reading prove the unwrapping. Exit 1 when too few read under any wrapping, and the report says what was searched.
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
-import { entropyOf, interleave, shiftedHits, wrappings } from './lib/unwrap.mjs';
+import { findAll } from './lib/multi-find.mjs';
+import { entropyOf, interleave, shiftedHitsMany, wrappings } from './lib/unwrap.mjs';
 
 const MAX_HITS = 2048; // a common word is everywhere, and the cap must not cut off the one hit in the table
 const SPAN_PER_NAME = 640; // bytes a name may take: a preset record's stride can be 512
@@ -26,12 +27,6 @@ export function readNames(text, min = 4) {
     const [group, name] = l.includes('\t') ? l.split('\t').map((s) => s.trim()) : ['name', l];
     return { group, name };
   }).filter((n) => n.name.length >= min);
-}
-
-function hitsIn(view, text) {
-  const hits = [];
-  for (let at = view.indexOf(text); at !== -1 && hits.length < MAX_HITS; at = view.indexOf(text, at + 1)) hits.push(at);
-  return hits;
 }
 
 // A display does not print what a manual prints: it changes case, drops spaces and cuts a name to its column ("Decay Time" is `Decaytime`, "Filter Balance" `FilterBalanc`).
@@ -65,16 +60,23 @@ function abbreviated(view, names) {
 }
 
 const folded = (view) => Buffer.from(view.toString('latin1').toLowerCase(), 'latin1');
+// Every form of every name in one pass over the view (KWB-120); a name keeps the first of its forms that reads.
 function found(names, view) {
-  const low = folded(view);
-  const hitsOf = (n) => { for (const form of displayForms(n.name)) { const hits = hitsIn(low, Buffer.from(form, 'latin1')); if (hits.length) return { hits, form }; } return null; };
-  return names.map((n) => ({ ...n, ...hitsOf(n) })).filter((n) => n.hits?.length);
+  const forms = names.map((n) => displayForms(n.name));
+  const needles = [...new Set(forms.flat())];
+  const index = new Map(needles.map((form, i) => [form, i]));
+  const hits = findAll(folded(view), needles.map((form) => Buffer.from(form, 'latin1')), MAX_HITS);
+  const first = (k) => forms[k].map((form) => ({ form, hits: hits[index.get(form)] })).find((f) => f.hits.length);
+  return names.map((n, k) => ({ ...n, ...first(k) })).filter((n) => n.hits?.length);
 }
 
 // A custom character set: only names long enough for the letters' distances to mean anything, in each case the display might use.
 function foundShifted(names, view) {
-  const shifted = names.filter((n) => n.name.length >= 6).map((n) => {
-    const all = [n.name, n.name.toUpperCase(), n.name.toLowerCase()].flatMap((form) => shiftedHits(view, form));
+  const long = names.filter((n) => n.name.length >= 6);
+  const forms = long.map((n) => [n.name, n.name.toUpperCase(), n.name.toLowerCase()]);
+  const hits = shiftedHitsMany(view, forms.flat()); // one pass for every form of every name (KWB-120)
+  const shifted = long.map((n, k) => {
+    const all = hits.slice(k * 3, k * 3 + 3).flat();
     return { ...n, hits: all.map((h) => h.at), shift: all[0]?.shift };
   }).filter((n) => n.hits.length);
   const counts = new Map();
@@ -126,7 +128,8 @@ function withNeighbours(all, { names, first, last }) {
 // Every place an address of one of the hits is stored, in this pointer format.
 function seatsOf(view, offsets, base, kind) {
   const encoded = (o) => { const b = Buffer.alloc(kind.width); b[kind.write](o + base); return b; };
-  return offsets.filter((o) => o + base >= 0 && o + base <= kind.top).flatMap((o) => hitsIn(view, encoded(o))).sort((a, b) => a - b);
+  const needles = offsets.filter((o) => o + base >= 0 && o + base <= kind.top).map(encoded);
+  return findAll(view, needles, MAX_HITS).flat().sort((a, b) => a - b); // every address in one pass (KWB-120)
 }
 
 // Where addresses of the hits sit close together: that run is the table the code indexes.

@@ -224,6 +224,19 @@ test('no name reads: it fails, and says what it searched rather than that the ma
   assert.match(r.stdout, /says nothing about what the machine holds/);
 });
 
+// KWB-120: on a modern image (megabytes, thousands of names) the sweep searched once per name form per wrapping and took hours.
+test('a megabyte image with thousands of names sweeps in seconds, and still finds its bank', () => {
+  const image = Buffer.concat([imageWithBank(96, 0x1000, 0x4000), imageWithBank(96, 0x400, 2 * 1024 * 1024)]);
+  const many = [...names, ...Array.from({ length: 2000 }, (_, i) => ({ group: 'menu', name: `Param ${i} Level` }))];
+  const started = Date.now();
+  const r = sweep(image, many);
+  const seconds = (Date.now() - started) / 1000;
+  assert.ok(seconds < 30, `took ${seconds} s`);
+  assert.equal(r.reads, PATCHES.length);
+  assert.equal(r.missing.length, 2000, 'none of the planted noise names reads');
+  assert.ok(PATCHES.every((p) => !r.missing.includes(p)), 'every patch of the bank reads');
+});
+
 test('the names file keeps groups, and a name too short to mean anything is dropped', () => {
   assert.deepEqual(readNames('# x\npatch\tSuper Saw\nSaw\nreverb\tGold Plate\nDelay\n'), [{ group: 'patch', name: 'Super Saw' }, { group: 'reverb', name: 'Gold Plate' }, { group: 'name', name: 'Delay' }]);
   assert.match(report('rom', sweep(imageWithBank(), names)), /6 of 6 names read as stored.*\n {2}patch: 6 of 6, 0x400\.\.0x5E0; densest 6 names at 0x400\.\.0x5E0; stride 96 \(5 of 5 gaps\)/);
