@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `making-check` no longer sends a turn back for a concept word the turn took out: a concept counts as written only if the file still holds the word at Stop, so a comment reworded after its first edit is judged by what it now says (KWB-122).
+
 - A look report is keyed by the drawing code, not the commit: `"code"` is the hash `node .claude/hooks/look-gate.mjs --key <name>` prints (mode, blob and path of each file the look's globs match), and `look-gate` refuses a landing whose report's `code` is not the code's current key. A report now changes only when that code or the verdict does, so two branches that each ran the gate on a page they left alone write the same bytes and merge with no conflict (the `commit` field changed on every run and conflicted at every merge). A report with `commit` and no `code` still counts the old way (KWB-121).
 
 - `container-hover-includes-children` catches a hover told through a call (`hovered (std::nullopt)` in `mouseExit`) as well as one set as a flag, the shape of the bug it was written for (KWB-119).
