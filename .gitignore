@@ -10,3 +10,4 @@ node_modules/
 .claude-packs-lock
 .claude/kit-lock.log
 .claude/logs/
+.env
