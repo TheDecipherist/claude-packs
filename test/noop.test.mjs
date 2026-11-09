@@ -63,6 +63,7 @@ const OWN = ['.claude/hooks/lib/own-processes.mjs', '.claude/hooks/lib/time-guar
 const TRUNK = ['trunk-lag', 'trunk-lag-selftest', 'hub-rig'].map((f) => `.claude/hooks/lib/${f}.mjs`);
 const PREFIX = ['.claude/hooks/lib/command-prefix.mjs'];   // 1.4.1 (KWB-101): one reader of the wrappers in front of a command, for git-guard and shell-writes   // 1.4.0 (KWB-96): git-guard's Stop sees the main checkout a landing left behind; its selftest's scratch repo shared
 const SHELL_LEX = ['.claude/hooks/lib/shell-lex.mjs'];   // 1.5.6 (KWB-117): shell-writes' reader of the text, split out of it at the line limit
+const SHELL_CHANGED = ['.claude/hooks/lib/shell-writes-selftest.mjs'];   // 1.5.6 (KWB-117): its cases for a cd inside a child shell
 const USER_FILES = ['.claude/rules/tests-never-touch-user-files.md'];   // 1.5.2 (KWB-106): a test gets copies of the user's files, in base, so in every project
 const BUDGET = ['core-budget', 'compile-cache'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.5.4 (KWB-111, KWB-112): the machine's core share for the queue and the tests; whether a build folder compiles through the shared cache
 // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
@@ -88,7 +89,7 @@ for (const project of ['stellix', 'sub37']) {
     const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...USER_FILES, ...SHELL_LEX, ...(lock.packs.includes('audio-core') ? EDITOR : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
-    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
+    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
     for (const [file, from] of Object.entries(MOVED)) {
       assert.ok(was.files[file] && lock.files[file], `${file}: kept in the lock after the move`);
       assert.equal(readFileSync(join(dir, file), 'utf8'), readFileSync(join(KIT, from), 'utf8'), `${file}: moved, not lost`);
@@ -119,5 +120,5 @@ test('full-stack: an update keeps an existing project\'s own layout, and changes
   const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
   const old = JSON.parse(before('lock.json'));
   assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(old.files), ...FULL_STACK_ADDED].sort(), 'the same files, and the listed new ones');
-  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && !FULL_STACK_CHANGED.includes(f)), [], 'only the listed files changed');
+  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && ![...FULL_STACK_CHANGED, ...SHELL_CHANGED].includes(f)), [], 'only the listed files changed');
 });
