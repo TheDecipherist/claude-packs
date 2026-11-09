@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.5.10, agents held (work/1.5.10-agents-held, stacked on work/1.5.9-runner-waits), started 2026-11-09 (KWB-122, KWB-124), after the user's "so fix them when needed" and "go".
+  making: run.sh waits out a usage limit (KWB-122) and says it runs unattended (`CLAUDE_PACKS_UNATTENDED=1`); a base hook, agents-held: refuses an Agent or Task call with `run_in_background: true` in a session with nobody there (that variable, or a `claude -p` parent), whose end stops every background agent; a base rule stating the law; concepts: none (design/shape.json declares none); reuse: selftest.mjs `scratchProject`, `runHook`, `verdicts`, `put`; writes.mjs `readPayload`; hook-log.mjs `asHook`.
+  done when: the runner test red on the old runner and green; the hook's selftest red with a planted hook that refuses nothing and green; its worktree case; README counts; the tests the branch reaches green; vsynthgt updated and its layout enabling the hook.
+
 - 1.4.8, names-sweep in one pass (work/1.4.8-sweep-speed), started 2026-11-09 (KWB-120), after the user's "so fix them when needed".
   making: one multi-pattern finder (tools/lib/multi-find.mjs: an index of every needle's first four bytes, one pass over the image, the full needle checked where four match) used by names-sweep's exact and shifted searches; the distance buffer made once per image; the results the same; concepts: none; reuse: unwrap.mjs `shiftedHits` and names-sweep `found` keep their contracts.
   done when: a planted 8 MB image with thousands of names sweeps in seconds, red against the old search under the same budget; every existing names-sweep test unchanged and green; the tests the branch reaches green.

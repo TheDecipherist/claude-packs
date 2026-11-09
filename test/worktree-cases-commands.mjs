@@ -23,6 +23,12 @@ export const COMMAND_CASES = {
     spawnSync('git', ['-C', here, 'worktree', 'add', '-q', beside, '-b', 'beside-case'], { stdio: 'ignore' });
     assert.equal(write(join(beside, 'src/n.ts')), 2);
   },
+  'agents-held.mjs': ({ here, wt }) => {
+    // A session with nobody there, working in a worktree, is refused a background agent as on main; a foreground one passes (KWB-124).
+    const agent = (cwd, background) => fireAs(here, 'agents-held.mjs', { tool_name: 'Agent', tool_input: { prompt: 'x', run_in_background: background }, cwd }, { CLAUDE_PACKS_UNATTENDED: '1' }).status;
+    assert.equal(agent(wt, true), 2);
+    assert.equal(agent(wt, false), 0);
+  },
   'suite-once.mjs': ({ here, wt }) => {
     // The worktree's layout names its own suite command, main's does not. Nobody asked for a full run (1.3.0: the gate is the
     // changed tests; a full run only on the user's request).

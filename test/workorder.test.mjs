@@ -46,6 +46,8 @@ test('the runner says what it switches off, and stops when nothing moves', () =>
   const run = readFileSync(join(KIT, 'prompts/workorder/run.sh'), 'utf8');
   assert.match(run, /permission prompts off/);
   assert.match(run, /three sessions moved nothing/);
+  // KWB-124: its sessions say nobody is there, so agents-held keeps their agents in the foreground
+  assert.match(run, /^export CLAUDE_PACKS_UNATTENDED=1$/m);
   assert.match(README, /It runs Claude with permission prompts off/);
 });
 

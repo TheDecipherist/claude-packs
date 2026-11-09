@@ -97,7 +97,8 @@
       "no-shipped-images.mjs"
     ],
     "PreToolUse Agent|Task": [
-      "brief-guard.mjs"
+      "brief-guard.mjs",
+      "agents-held.mjs"
     ],
     "PreToolUse Bash": [
       "stage-guard.mjs",
