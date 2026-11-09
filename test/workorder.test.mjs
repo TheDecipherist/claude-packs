@@ -83,7 +83,7 @@ test('the runner waits out a usage limit and carries on, never counting it as a 
   const bin = join(dir, '.bin');
   execFileSync('mkdir', ['-p', bin]);
   const calls = join(dir, '.calls');
-  const refused = `{"type":"result","is_error":true,"api_error_status":429,"api_error":"usage_limit_reached","result":"You've hit your weekly limit"}`;
+  const refused = `{"type":"result","is_error":true,"api_error_status":429,"api_error":"usage_limit_reached","result":"You have hit your weekly limit"}`;
   writeFileSync(join(bin, 'claude'), `#!/usr/bin/env bash\necho x >> "${calls}"\nif [ "$(wc -l < "${calls}")" -le 4 ]; then echo '${refused}'; exit 1; fi\ntouch "${join(dir, FOLDER, 'DONE')}"\n`, { mode: 0o755 });
   const run = spawnSync('bash', [join(dir, FOLDER, 'run.sh')], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, LIMIT_WAIT: '0' } });
   assert.equal(run.status, 0, run.stdout + run.stderr);

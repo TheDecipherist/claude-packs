@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A work order's `run.sh` waits out the account's usage limit: a session refused with `usage_limit_reached` is tried again every `LIMIT_WAIT` seconds (15 min) under the same number and never counts as a session that moved nothing, so a run left overnight no longer stops for good at the first limit (KWB-122).
+
 - A look report is keyed by the drawing code, not the commit: `"code"` is the hash `node .claude/hooks/look-gate.mjs --key <name>` prints (mode, blob and path of each file the look's globs match), and `look-gate` refuses a landing whose report's `code` is not the code's current key. A report now changes only when that code or the verdict does, so two branches that each ran the gate on a page they left alone write the same bytes and merge with no conflict (the `commit` field changed on every run and conflicted at every merge). A report with `commit` and no `code` still counts the old way (KWB-121).
 
 - `container-hover-includes-children` catches a hover told through a call (`hovered (std::nullopt)` in `mouseExit`) as well as one set as a flag, the shape of the bug it was written for (KWB-119).
