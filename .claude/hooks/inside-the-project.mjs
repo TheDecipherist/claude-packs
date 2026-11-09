@@ -99,7 +99,8 @@ function judgeCommand(command, cwd) {
     } else if (words[0] === 'git') {
       const { dir, next } = gitFolder(words, here);
       if (besideTheProject(dir)) return why(dir);
-      const target = worktreeTarget(words, next);
+      // A worktree command on another project's repo is that project's business (KWB-104): judge the target only here.
+      const target = insideProject(dir) ? worktreeTarget(words, next) : null;
       if (target && !insideProject(resolve(dir, home(target)))) return why(resolve(dir, home(target)));
     }
   }
@@ -147,6 +148,8 @@ function selftest() {
     ['work inside the project', run(writeOf(join(proj, 'src/b.ts'))), 0],
     ['a write in another project', run(writeOf(join(parent, 'other/c.ts'))), 0],
     ['a cd into another project', sh('cd ../other && ls'), 0],
+    ['a worktree added inside another project (KWB-104)', sh('cd ../other && git worktree add -q .claude/worktrees/w -b w main'), 0],
+    ['a worktree added in another project with git -C (KWB-104)', sh('git -C ../other worktree add .claude/worktrees/w -b w'), 0],
     ['a plain command', sh('git status'), 0],
   ]);
 }
