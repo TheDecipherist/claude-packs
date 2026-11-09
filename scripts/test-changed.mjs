@@ -175,7 +175,7 @@ export function main(argv) {
   // KWB-111: node runs test files at one less than the core count by default (17 here), and each file installs the kit and
   // runs its selftests: the gate timed out on load. It takes the machine's core budget instead.
   const concurrency = coreBudget(process.env, projectLayout(o.root));
-  const args = ['--import', './test/fresh-tmp.mjs', `--test-concurrency=${concurrency}`, '--test', ...chosen.keys()];
+  const args = ['--import', './test/fresh-tmp.mjs', '--test', `--test-concurrency=${concurrency}`, ...chosen.keys()];
   console.log(`running: node ${args.join(' ')}`);
   // NODE_TEST_CONTEXT is set when this runs under a test runner; passed on, the nested run reports to it and exits 0 on a failure.
   const { NODE_TEST_CONTEXT, ...env } = process.env;

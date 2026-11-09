@@ -61,6 +61,7 @@ const TIME_GUARD = ['.claude/rules/long-work-in-the-background.md'];   // only w
 const OWN = ['.claude/hooks/lib/own-processes.mjs', '.claude/hooks/lib/time-guard-selftest.mjs', '.claude/hooks/lib/identifier-runs.mjs'];   // 1.3.2 (KWB-87): which processes a session started; time-guard's selftest in its own file; (KWB-93) a camelCase concept's runs of parts
 const TRUNK = ['trunk-lag', 'trunk-lag-selftest', 'hub-rig'].map((f) => `.claude/hooks/lib/${f}.mjs`);
 const PREFIX = ['.claude/hooks/lib/command-prefix.mjs'];   // 1.4.1 (KWB-101): one reader of the wrappers in front of a command, for git-guard and shell-writes   // 1.4.0 (KWB-96): git-guard's Stop sees the main checkout a landing left behind; its selftest's scratch repo shared
+const BUDGET = ['core-budget', 'compile-cache'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.5.4 (KWB-111, KWB-112): the machine's core share for the queue and the tests; whether a build folder compiles through the shared cache
 // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
 const MOVED = { '.claude/skills/analyse-reference-look/SKILL.md': 'packs/base/skills/analyse-reference-look/SKILL.md' };
 const expected = (project, f) => readFileSync(join(FX, project, 'expected', f), 'utf8');
@@ -81,7 +82,7 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...(lock.packs.includes('audio-core') ? EDITOR : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...(lock.packs.includes('audio-core') ? EDITOR : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
@@ -103,7 +104,7 @@ test('an install that names no configuration gets synth-creator from its packs, 
 // keeps its own layout on update: no template folder or concept added, the same CLAUDE.md, the same files. A file the kit
 // changes on purpose later goes in FULL_STACK_CHANGED, and a new one in FULL_STACK_ADDED, with why.
 const FULL_STACK_CHANGED = ['.claude/hooks/git-guard.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/lib/git-guard-selftest.mjs', '.claude/hooks/lib/project.mjs'];   // 1.4.4 (KWB-103): project.mjs exports its common-dir reader   // 1.4.1 (KWB-101): both read a command past its wrappers
-const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md', ...PREFIX];   // W4: the skill in base, the page law in ui-craft
+const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md', ...PREFIX, ...BUDGET];   // W4: the skill in base, the page law in ui-craft
 test('full-stack: an update keeps an existing project\'s own layout, and changes only the listed files', () => {
   const { dir } = updated('full-stack', 'full-stack');
   const before = (f) => readFileSync(join(FX, 'full-stack', 'before', f), 'utf8');

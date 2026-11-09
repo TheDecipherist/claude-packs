@@ -52,8 +52,10 @@ test('the queue runs a command with its share: a -j asked for is cut, and the sh
   const now = JSON.parse(readFileSync(layout, 'utf8'));
   writeFileSync(layout, JSON.stringify({ ...now, guards: { ...now.guards, buildq: { cores: 4 } } }));
   const probe = 'console.log(process.argv.slice(1).join(" ") + "|" + process.env.CMAKE_BUILD_PARALLEL_LEVEL)';
+  // The layout's cores are what is tested: a BUILDQ_CORES of whoever runs the suite would win over them
+  const { BUILDQ_CORES: _caller, ...outer } = process.env;
   const r = spawnSync('node', [join(dir, '.claude/tools/buildq.mjs'), 'node', '-e', probe, '--', '-j', '18'], {
-    cwd: dir, encoding: 'utf8', env: { ...process.env, BUILDQ_DIR: fresh('buildq-slots-'), BUILDQ_SLOTS: '2', BUILDQ_PRIORITY: 'normal' },
+    cwd: dir, encoding: 'utf8', env: { ...outer, BUILDQ_DIR: fresh('buildq-slots-'), BUILDQ_SLOTS: '2', BUILDQ_PRIORITY: 'normal' },
   });
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /-j 2\|2/, 'two slots share four cores: two each');
