@@ -28,6 +28,7 @@ import { execFileSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { bareWords } from './lib/command-prefix.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
@@ -44,7 +45,7 @@ export const mask = (url) => url.replace(/:\/\/[^@]+@/, '://***@');
 
 export function problem(command) {
   for (const raw of command.split(/&&|\|\||;|\||\n/)) {
-    const m = raw.trim().match(/^(?:\w+=\S*\s+)*git((?:\s+(?:-C|-c)\s+\S+)*)\s+([\w-]+)(.*)$/);
+    const m = bareWords(raw.trim().split(/\s+/)).join(' ').match(/^git((?:\s+(?:-C|-c)\s+\S+)*)\s+([\w-]+)(.*)$/);
     if (!m) continue;
     const [, , sub, args] = m;
     const urls = tokenUrls(args);
