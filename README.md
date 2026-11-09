@@ -319,8 +319,8 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | Pack | For | Rules | Checks | Hooks | Skills |
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
-| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 44 | 9 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 22 | 7 | 20 | 12 |
+| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 44 | 11 | 2 | 7 |
+| `base` | Universal engineering, in every configuration | 23 | 8 | 20 | 12 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
