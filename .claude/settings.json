@@ -26,8 +26,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/brief-guard.mjs",
-            "timeout": 10
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/brief-guard.mjs .claude/hooks/agents-held.mjs",
+            "timeout": 20
           }
         ]
       },

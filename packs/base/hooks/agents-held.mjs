@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // PreToolUse (Agent, Task): a session with nobody there holds its agents in the foreground. A `claude -p` session ends when its
-// lead ends its turn, and every agent it started in the background is stopped with it (KWB-124: the V-Synth GT run's session
+// lead ends its turn, and every agent it started in the background is stopped with it (KWB-124: a rebuild run's session
 // launched four agents with run_in_background, ended its turn 15 minutes later, and all four were stopped mid-work, two with
 // work uncommitted). Agents started in the foreground, all in one message, run side by side and the lead waits for them.
 // Unattended means CLAUDE_PACKS_UNATTENDED=1 (a work order's run.sh sets it), or a `claude -p` / `claude --print` among the

@@ -223,7 +223,7 @@ function lineHits(line, c, shape, aliases, inSwitch, file) {
 export function findInstanceLiterals(text, file, shape, { only = null } = {}) {
   if (!shape || !text) return [];
   const concepts = Object.values(shape.concepts).filter((c) => c.shape === 'many' || (c.shape === 'one' && c.id));
-  let body = only === 'brief' ? blankPaths(text) : text; // in a brief, a path names a file (KWB-105)
+  let body = only === 'brief' ? blankPaths(text) : text; // in a brief, a path names a file (KWB-117)
   for (const c of concepts) for (const q of c.quotes) body = body.split(q).join(' '.repeat(q.length));
   const lines = body.split('\n');
   const shown = text.split('\n');
