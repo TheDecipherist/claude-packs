@@ -6,8 +6,10 @@
 // started comes to the front, and a project's rig reads QUIET_TEST to stay out of the Dock (the test-quietly skill).
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { budgetEnv, capJobs, coreBudget, projectLayout, shareOf } from '../hooks/lib/core-budget.mjs';
 
 const REFUSED = 2;
+const SLOTS = Number(process.env.BUILDQ_SLOTS ?? 2);  // the build queue's slots: a test run takes one slot's share
 const CHECK_EVERY_MS = 300;
 
 /** What every run is told, for each tool that reads its own switch. */
@@ -28,10 +30,12 @@ const WRAPPERS = {
   },
 };
 
-/** How to run a command here: the wrapped command and its environment, or why it may not run. */
+/** How to run a command here: the wrapped command and its environment, or why it may not run. KWB-111: the run takes a
+    build slot's share of the machine's core budget (its --jobs or -j cut to it, and CTest told it), beside the build queue. */
 export function plan(command, env = process.env, platform = process.platform) {
-  const quiet = { ...env, ...QUIET_ENV };
-  return (WRAPPERS[platform] ?? ((c, e) => ({ command: low(c, e), env: e })))(command, quiet);
+  const most = shareOf(coreBudget(env, projectLayout(env.CLAUDE_PROJECT_DIR ?? process.cwd())), SLOTS);
+  const quiet = budgetEnv({ ...env, ...QUIET_ENV }, most);
+  return (WRAPPERS[platform] ?? ((c, e) => ({ command: low(c, e), env: e })))(capJobs(command, most), quiet);
 }
 
 const lines = (tool, args) => execFileSync(tool, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });

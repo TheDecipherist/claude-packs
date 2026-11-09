@@ -97,6 +97,11 @@ export async function selftest(hookFile, { problem, house }) {
     ['git remote add o https://u:${T}@github.com/a/b.git', true],
     ['git clone https://x-access-token:abc@github.com/a/b.git', true],
     ['git config remote.origin.url https://u:t@github.com/a/b.git', true],
+    // KWB-101: a wrapper in front of git hid the call
+    ['T=$(gh auth token) && timeout 100 git push -q -u "https://x-access-token:$T@github.com/a/b.git" work/x', true],
+    ['nice -n 5 git clone https://u:p@github.com/a/b.git', true],
+    ['sudo -u me timeout -k 5 60 git remote add o https://u:${T}@github.com/a/b.git', true],
+    ['timeout 100 git push https://x-access-token:$T@github.com/a/b.git work/x', false],
     ['git push https://x-access-token:$T@github.com/a/b.git work/x', false],
     ['git push -u origin work/x', false],
     ['git remote set-url origin https://github.com/a/b.git', false],

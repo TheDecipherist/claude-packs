@@ -31,7 +31,7 @@ export function commandLeavesProject(command = '') {
 // build/_deps/juce-src escape protect-vendor (Sub37 WB-2).
 const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
 
-function commonGitDir(root) {
+export function commonGitDir(root) {
   const dotGit = resolve(root, '.git');
   try {
     if (statSync(dotGit).isDirectory()) return real(dotGit);

@@ -161,7 +161,8 @@
     "hooks/code-shape.mjs",
     "hooks/repo-litter.mjs",
     "hooks/skill-first.mjs",
-    "hooks/look-gate.mjs"
+    "hooks/look-gate.mjs",
+    "hooks/inside-the-project.mjs"
   ],
   "commands": {
     "test": "npm test",

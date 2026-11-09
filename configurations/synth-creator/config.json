@@ -79,6 +79,7 @@
   },
   "hookOrder": {
     "PreToolUse Write|Edit|MultiEdit|NotebookEdit|Bash": [
+      "inside-the-project.mjs",
       "lesson-checks.mjs",
       "file-size-guard.mjs",
       "frozen-files.mjs",

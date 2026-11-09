@@ -11,6 +11,18 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.4.6, inside-the-project leaves sibling projects alone (work/1.4.6-inside-siblings), started 2026-11-09 (KWB-104).
+  making: inside-the-project judges a worktree command's target only when the git command acts on this project's repo; concepts: none; reuse: the hook's own gitFolder and insideProject.
+  done when: the selftest's two sibling cases red without the fix and green with it; the real refused command passes from the claude-packs session; the tests the branch reaches green.
+
+- 1.4.5, two conversions at once (work/1.4.5-pdf-cap), started 2026-11-09, after the user's "add that to our pdf skill so its capped at 2" (seven docling runs at once loaded the PC to 16).
+  making: pdf-to-md step 3 caps docling at two runs per machine at low priority, with one wait-for-a-slot command form for the lead and every agent; concepts: none; reuse: the skill's own step 3 command.
+  done when: doctor's skill checks pass (under 8,000 characters, "Use when"); the command form waits while two run and starts at the third's turn, measured; the tests the branch reaches green.
+
+- 1.4.4, inside the project (work/1.4.4-inside-the-project), started 2026-11-09, after the user's "claude-packs needs an explicit hook that makes sure that can never ever happen" and "the hook needs to be explicit that work for a project happens in that project always" (KWB-103).
+  making: a base hook, inside-the-project: refuses `git worktree add`/`move` to a path outside the project, and any write, `cd`, `git -C` or `make -C` into a checkout of this repo (a worktree, or a clone of the same origin) that lies outside it; a base rule stating the law; concepts: none (design/shape.json declares none); reuse: project.mjs `ROOT`, `insideProject`, its common-dir reader (exported), writes.mjs `writesOf`/`readPayload`, command-prefix.mjs `bareWords`.
+  done when: the selftest red on each planted escape without the law and green with it; its worktree case; README and page counts; the tests the branch reaches green.
+
 - 1.4.2, screen images (work/1.4.2-screen-images), started 2026-11-09, after the user's "we need to update the circuit reader skill to also include screen/images ... its important we replicate screen/panel menues exactly".
   making: a reverse-engineering skill, read-a-screen-image (one screen, one report: every string exactly, its position, font, colour and state, the gesture that reaches it, the firmware's copy of each string, and a side-by-side against the rebuilt screen); read-a-circuit-diagram routes a screen page to it; menu-map takes its reports as the manual's display drawings; concepts: none (design/shape.json declares none); reuse: read-a-circuit-diagram's tiling and report form, menu-map's [FW]/[MAN] join.
   done when: doctor's skill checks pass (under 8,000 characters, "Use when"); README and page counts; the tests the branch reaches green.

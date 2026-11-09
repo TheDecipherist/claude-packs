@@ -18,6 +18,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { bareWords } from './command-prefix.mjs';
 import { programOf, programWrites } from './program-writes.mjs';
 
 const HOME = process.env.HOME ?? '';
@@ -107,8 +108,6 @@ function lex(text) {
   return tokens;
 }
 
-const PREFIX = new Set(['sudo', 'env', 'command', 'builtin', 'nohup', 'time', 'exec', 'nice']);
-
 function printf(args) {
   if (!args.length) return '';
   const esc = (s) => s.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\\\/g, '\\');
@@ -125,8 +124,7 @@ function printf(args) {
 
 // One simple command: its words, redirections and stdin, and what it writes.
 function judge(cmd, cwd, stdin, writes, bodies) {
-  let words = [...cmd.words];
-  while (words.length && (PREFIX.has(words[0]) || /^[A-Za-z_]\w*=/.test(words[0]) || (words[0] === 'timeout' && words.length > 1))) words = words[0] === 'timeout' ? words.slice(2) : words.slice(1);
+  const words = bareWords(cmd.words);
   const at = (p) => resolve(cwd, expand(p));
   let input = stdin;
   for (const r of cmd.redirs) {

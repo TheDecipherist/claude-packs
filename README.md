@@ -320,10 +320,10 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 44 | 11 | 2 | 7 |
-| `base` | Universal engineering, in every configuration | 23 | 8 | 20 | 12 |
+| `base` | Universal engineering, in every configuration | 24 | 8 | 21 | 12 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
-| `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 10 | 14 | 0 | 1 |
+| `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
 | `docker` | Dockerfiles, Compose and Swarm | 5 | 24 | 0 | 1 |
 | `dynamic-data` | Definition-driven systems: a CMS, an admin generator, a low-code platform | 10 | 9 | 0 | 1 |
 | `fastify` | Fastify servers | 6 | 15 | 0 | 0 |
@@ -456,6 +456,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `look-gate` | Bash, after a build | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
 | `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
+| `inside-the-project` | Write, Bash | Refuses work for the project done outside it: a worktree added or moved beside the project, and any write, `cd` or `git -C` into a checkout of the same repo kept outside it, where no other hook can see |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
 Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
