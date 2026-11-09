@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.4.7, a path names a file (work/1.4.7-paths-name-files), started 2026-11-09 (KWB-105), after the user's "so fix them when needed".
+  making: in brief mode the instance reader blanks paths and file names before judging, so a brief listing files named for the machine's pages passes; concepts: none; reuse: shape-prose.mjs, where blankMessages lives.
+  done when: brief-guard's KWB-105 case red without the fix and green with it, a path never excusing the instruction beside it; shape-law's selftest unchanged; the tests the branch reaches green.
+
 - 1.4.6, inside-the-project leaves sibling projects alone (work/1.4.6-inside-siblings), started 2026-11-09 (KWB-104).
   making: inside-the-project judges a worktree command's target only when the git command acts on this project's repo; concepts: none; reuse: the hook's own gitFolder and insideProject.
   done when: the selftest's two sibling cases red without the fix and green with it; the real refused command passes from the claude-packs session; the tests the branch reaches green.
