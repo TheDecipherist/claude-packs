@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.6.1, faults (work/1.6.1-faults), started 2026-11-09: KWB-138 and KWB-139 logged before they are fixed.
+  making: two rows in workflow-bugs.md (git-guard suggests pushing a branch to a remote it shares no history with; a pack rule that never applies makes doctor --strict red and stops every run); the fixes, each with a selftest seen red, come next on this branch; concepts: none (design/shape.json declares none); reuse: lib/pushed.mjs `unpushed`, lib/coverage.mjs `coverage`.
+  done when: both faults fixed with a test each, red without the fix; the tests the branch reaches green against main.
+
 - 1.6.0, the planner (work/1.6.0-planner), started 2026-11-09, from the user's brief: the order docs/workorders/planner/ (W0-W9) run to its release, in the public repo.
   making: the order's PROMPT held to the kit's laws and the user's holds (one branch, no agents while the GT run holds the slots, the changed-tests gate, evidence under the order, release 1.6.0 since research-gaps took 1.5.0, W0.2 already in the first public commit); then its steps W0-W9 as workorder.md says; concepts: none (design/shape.json declares none); reuse: as each step names (lib/workorder.mjs `newWorkorder`, lib/claude-ai-skill.mjs `zipOf`, the pack skills design-a-preset and synth-cost).
   done when: as each step of docs/workorders/planner/workorder.md says; 1.6.0 published and installed clean with doctor --strict green.
