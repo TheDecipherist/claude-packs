@@ -17,6 +17,7 @@ Always do:
 - Build the benchmark with the plugin's exact compile and link flags (including LTO), constructing the engine the same way it ships (heap, not stack).
 - Touch every pre-allocated buffer once in `prepareToPlay` so the first callbacks don't stall on page faults.
 - Look at the curve across voice counts. Anything worse than linear growth is a bug.
+- Replace a work order's cost-ledger estimate (`synth-cost`) with the W0 measurement of one INIT voice, worst block, at 44.1 kHz and 48 kHz, and hold the gate to the measured figure from then on.
 
 Never do:
 - Report average CPU as the performance figure.

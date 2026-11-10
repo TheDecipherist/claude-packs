@@ -1,0 +1,12 @@
+$ init --config synth-creator (scratch)
+OK: base, cpp, audio-core
+$ ls .claude/skills/synth-cost/
+SKILL.md
+cost-ledger.md
+$ doctor --strict
+OK: base, cpp, audio-core
+$ wc -c SKILL.md
+3650
+$ readme, site, noop tests
+ℹ pass 14
+ℹ fail 0

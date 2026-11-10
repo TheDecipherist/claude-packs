@@ -70,6 +70,7 @@ const RESEARCH = ['editor-destruction-order', 'panel-surface-and-sections', 'kno
 const DRAWN = ['.claude/rules/ui-drawn-in-code.md'];   // 1.5.0 research-gaps: the rule ui-drawn-in-code and no-html-prototype point at (synth-creator); chart-first and its rule, and both checks, are held back
 const USER_FILES = ['.claude/rules/tests-never-touch-user-files.md'];
 const START = ['.claude/skills/start-from-a-workorder/SKILL.md'];   // 1.5.11: a build starts from a finished work order and its design, in base   // 1.5.2 (KWB-106): a test gets copies of the user's files, in base, so in every project
+const COST = ['SKILL.md', 'cost-ledger.md'].map((f) => `.claude/skills/synth-cost/${f}`);   // 1.6.0 planner W4: audio-core's cost ledger, which the planner and the build share; its one line in cpu-worst-case-per-block (in REPAIRED)
 const AUDIENCE = ['.claude/hooks/lib/audience.mjs'];   // 1.5.13 (KWB-127): the marker for a page addressed outside the project, read by shape-law and brief-guard
 const BUDGET = ['core-budget', 'compile-cache'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.5.4 (KWB-111, KWB-112): the machine's core share for the queue and the tests; whether a build folder compiles through the shared cache
 // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
@@ -92,7 +93,7 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, ...SMOOTHING_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
