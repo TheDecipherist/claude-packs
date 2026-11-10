@@ -209,3 +209,21 @@ test('a new reader meets the benefits first, and every file the page says a proj
   const logged = readFileSync(join(KIT, 'packs/base/hooks/lib/event-log.mjs'), 'utf8') + readFileSync(join(KIT, 'packs/base/hooks/lib/hook-log.mjs'), 'utf8');
   for (const file of ['events.jsonl', 'refusals.jsonl', 'crashes.jsonl', 'hooks.log']) assert.ok(logged.includes(file), file);
 });
+
+test('every template ends its build with the README, written by its skill, before the last review (1.7.1)', () => {
+  // the user: "a final step when the UI is completed that a full pro README.md is made with a screnshot of the unit on top"
+  for (const name of ['plugin', 'rebuild', 'generic']) {
+    const text = readFileSync(join(KIT, TEMPLATES, `${name}.md`), 'utf8');
+    const steps = [...text.matchAll(/^## W(\d+)\. (.+)$/gm)].map((m) => ({ n: Number(m[1]), title: m[2] }));
+    const readme = steps.find((s) => s.title === 'The README');
+    assert.ok(readme, `${name}: a README step`);
+    const review = steps.find((s) => /^Before (you call it|calling it) finished/.test(s.title));
+    assert.equal(review.n, readme.n + 1, `${name}: the README comes right before the last review`);
+    assert.deepEqual(steps.map((s) => s.n), steps.map((_, i) => i), `${name}: the steps are numbered in order, none skipped`);
+    const body = text.slice(text.indexOf(`## W${readme.n}. The README`), text.indexOf(`## W${review.n}.`));
+    assert.match(body, /`write-the-readme`/, `${name}: names the skill`);
+    assert.match(body, /renders of itself/, `${name}: screenshots of the product itself`);
+    assert.match(body, /never a mock-up/, `${name}: never a mock-up`);
+  }
+  assert.ok(existsSync(join(KIT, 'packs/base/skills/write-the-readme/SKILL.md')), 'the skill it names is in base');
+});

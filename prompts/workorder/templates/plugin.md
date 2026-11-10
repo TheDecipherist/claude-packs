@@ -154,13 +154,19 @@ The DAW list: the hosts this order names, each one tested, because no single hos
 
 **Done when:** pluginval passes on every format; in each host on the list, the plugin loads, plays, automates a parameter, saves and reopens a session with every value back; the results are a table in `build/evidence/W12/`.
 
-## W13. Before you call it finished
+## W13. The README
+
+Use `write-the-readme`. Written last, when the UI is finished: `README.md` at the project's root is the project's front page. Its name and what it is in its first lines, a screenshot of the product itself on top, then what it does, install, first use, build from source, requirements, what is not done yet, and the licence. Every screenshot is one the product renders of itself through its real code path, never a mock-up or a reference render: the main panel, each theme or mode it has, and the settings or other screens worth seeing; made by a script the build runs, saved compressed in `docs/images/`, and made again whenever the look changes.
+
+**Done when:** the README has every section `write-the-readme` names; each image in it was made by the script from this commit's build (the run and the images' hashes in the evidence); 0 broken links or missing images; every command in it runs as written; the `humanize` pass is recorded.
+
+## W14. Before you call it finished
 
 Read the finished work as a senior engineer would, down the house's list, line by line. An item that cannot be answered is listed open, never ticked. Where only a person can judge (how it sounds), say so.
 
 **Done when:** every line has an answer or is listed open (0 lines left blank), and what it found is in `bugs.md`.
 
-## W14. The report
+## W15. The report
 
 Write `docs/workorders/{{name}}/report.md` and `summary.md`: what was built, what is proved and how, what is not; `logs` in full, with calls, refusals, right and wrong per hook; the ledger's estimate against the measurement.
 

@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.7.1, the README step (work/1.7.1-readme-step), started 2026-11-10, from the user: "a final step when the UI is completed that a full pro README.md is made with a screnshot of the unit on top".
+  making: base's skill `write-the-readme` (a front page written last, the product's own screenshot on top, never a mock-up); a README step in the plugin, rebuild and generic work-order templates, after the UI and before the last review; concepts: none (design/shape.json declares none); reuse: the `humanize` skill for the last pass, the templates' step form.
+  done when: every template has the README step naming the skill, test/workorder.test.mjs holds it (red without it); the skill passes doctor's form (Use when, under 8,000 characters) and base-neutral; the tests the branch reaches green against main.
 - 1.6.1, quoted words in image prompts (work/1.6.1-quoted-labels, stacked on work/1.6.1-release), started 2026-11-10, from a mock-up that came back with invented labels: every word an image prompt wants drawn exactly goes in double quotes.
   and: a misspelled word is never a reason to render again; the build draws every word from the order, in code (the user, 2026-11-10).
   making: a law in planner/ui-mockup, the same in the walkthrough's 5.1 and start-from-a-workorder's image prompt; concepts: none (design/shape.json declares none); reuse: the planner test's file readers.

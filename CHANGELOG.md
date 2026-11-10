@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Every work order ends its build with the README (`base`'s new skill `write-the-readme`, and a README step in the plugin, rebuild and generic templates, right before the last review): written last, when the UI is finished, the product's own screenshot on top (rendered by the product through its real code path, never a mock-up), what it does, install, first use, build, requirements, what is not done yet, the licence; every link and command checked, the `humanize` pass recorded. `test/workorder.test.mjs`.
 - KWB-143: `npm run release` reaches GitHub over HTTPS with `$GH_TOKEN` (through a credential helper, never on a command line), never through an SSH origin, and refuses to start without the token.
 
 ## 1.7.0 (2026-11-10)

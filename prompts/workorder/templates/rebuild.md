@@ -220,13 +220,19 @@ Every gate the house keeps applies; add one for each law this machine has. Show 
 
 **Done when:** the suite is green, every gate has been seen red, and the `asan-ubsan` and `tsan` builds pass.
 
-## W17. Before you call it finished
+## W17. The README
+
+Use `write-the-readme`. Written last, when the UI is finished: `README.md` at the project's root is the project's front page. Its name and what it is in its first lines, a screenshot of the product itself on top, then what it does, install, first use, build from source, requirements, what is not done yet, and the licence. Every screenshot is one the product renders of itself through its real code path, never a mock-up or a reference render: the panel and its display, and each screen or mode worth seeing; made by a script the build runs, saved compressed in `docs/images/`, and made again whenever the look changes.
+
+**Done when:** the README has every section `write-the-readme` names; each image in it was made by the script from this commit's build (the run and the images' hashes in the evidence); 0 broken links or missing images; every command in it runs as written; the `humanize` pass is recorded.
+
+## W18. Before you call it finished
 
 Read the finished work as a senior engineer would, down the house's before-you-call-it-finished list line by line. An item that cannot be answered is listed open, never ticked. Where only a person can judge (how it sounds against a real unit), say so.
 
 **Done when:** every line has an answer or is listed open, and what it found is in `bugs.md`.
 
-## W18. The kit report
+## W19. The kit report
 
 Write `docs/workorders/{{name}}/kit-report.md`, compared with the last rebuild's, on evidence and with counts.
 1. **Did it hold?** `logs` in full: calls, refusals, right and wrong per hook, what is still open.

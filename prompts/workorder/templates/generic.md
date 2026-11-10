@@ -54,13 +54,19 @@ packs: base
 
 **Done when:** <A number or a test.>
 
-## W3. Before calling it finished
+## W3. The README
+
+Use `write-the-readme`. Written last, when the UI is finished: `README.md` at the project's root is the project's front page. Its name and what it is in its first lines, a screenshot of the product itself on top, then what it does, install, first use, build from source, requirements, what is not done yet, and the licence. Every screenshot is one the product renders of itself through its real code path, never a mock-up or a reference render: the main screen and each one worth seeing, when it has a UI; a command line shows a real run of its main command instead; made by a script the build runs, saved compressed in `docs/images/`, and made again whenever the look changes.
+
+**Done when:** the README has every section `write-the-readme` names; each image in it was made by the script from this commit's build (the run and the images' hashes in the evidence); 0 broken links or missing images; every command in it runs as written; the `humanize` pass is recorded.
+
+## W4. Before calling it finished
 
 Read the finished work as a senior engineer would. List what is left, what is unproved and what a person must judge.
 
 **Done when:** every open item is written down, with why.
 
-## W4. The report
+## W5. The report
 
 Write `docs/workorders/{{name}}/report.md`: what was built, what is proved and how, what is not, and what the kit did well and badly, with counts from `logs`.
 

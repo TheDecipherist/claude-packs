@@ -356,7 +356,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, a settings layer with the standard settings | 53 | 12 | 3 | 8 |
-| `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 14 |
+| `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 15 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
