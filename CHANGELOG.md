@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- `DISCLAIMER.md` (shipped in the package) and a Disclaimer section in the README: no warranty, the user answers for what they build and for having the right to every source a project reads (firmware, manuals, recordings), reverse engineering is for learning and interoperability and the law and licences that apply must be checked before using what it finds, tools the kit points to (Ghidra among them) are their makers' and their output is a claim to prove, product names belong to their owners, and none of it is legal advice.
+- The README's first line links GitHub and its releases beside npm, so npm's page leads to the repo.
+- `npm run release` (`scripts/release.mjs`, the kit's own, not shipped): one release the same way every time: npm, the tag, and a GitHub release whose notes are the version's CHANGELOG section. It refuses off `main`, on a dirty tree, or when `main` is not GitHub's, and skips each step already done. `test/release.test.mjs`.
+
 ## 1.6.0 (2026-11-09)
 
 The kit's claude.ai side: the planner a person uses to get from "I want to build a synth" to a finished work order, and the kit commands that make its hand-over true. Work order `planner`.

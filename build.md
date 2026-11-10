@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.6.1, release and disclaimer (work/1.6.1-release), started 2026-11-10, from the user's notes on the public GitHub and npm pages: a disclaimer on both, the GitHub link on npm's front page, and a GitHub release made at every publish by one script.
+  making: DISCLAIMER.md (shipped) and a README section; the README's GitHub link at the top; scripts/release.mjs (`npm run release`: the checks, npm publish, the tag, the GitHub release from the CHANGELOG's section, each step skipped when already done so a stopped release resumes); concepts: none (design/shape.json declares none); reuse: scripts/test-changed.mjs's form for a kit script, package.json `scripts`.
+  done when: the README and the npm package carry the disclaimer; test/release.test.mjs proves the notes taken from the CHANGELOG, the checks that refuse (not on main, a dirty tree, no CHANGELOG section, a tag already pushed) and the order of the steps in a dry run, each refusal seen red with its check taken out; the tests the branch reaches green against main.
+
 - 1.6.0, the planner (work/1.6.0-planner), started 2026-11-09, from the user's brief: the order docs/workorders/planner/ (W0-W9) run to its release, in the public repo.
   making: the order's PROMPT held to the kit's laws and the user's holds (one branch, no agents while the GT run holds the slots, the changed-tests gate, evidence under the order, release 1.6.0 since research-gaps took 1.5.0, W0.2 already in the first public commit); then its steps W0-W9 as workorder.md says; concepts: none (design/shape.json declares none); reuse: as each step names (lib/workorder.mjs `newWorkorder`, lib/claude-ai-skill.mjs `zipOf`, the pack skills design-a-preset and synth-cost).
   done when: as each step of docs/workorders/planner/workorder.md says; 1.6.0 published and installed clean with doctor --strict green.

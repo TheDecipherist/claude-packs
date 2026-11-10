@@ -1,6 +1,6 @@
 # @thedecipherist/claude-packs
 
-[![npm version](https://img.shields.io/npm/v/@thedecipherist/claude-packs)](https://www.npmjs.com/package/@thedecipherist/claude-packs) [View on npm](https://www.npmjs.com/package/@thedecipherist/claude-packs)
+[![npm version](https://img.shields.io/npm/v/@thedecipherist/claude-packs)](https://www.npmjs.com/package/@thedecipherist/claude-packs) [View on npm](https://www.npmjs.com/package/@thedecipherist/claude-packs) | [GitHub](https://github.com/TheDecipherist/claude-packs) | [Releases](https://github.com/TheDecipherist/claude-packs/releases)
 
 AI coding agents make the same small mistakes again and again, and every fix costs a turn and tokens. claude-packs installs guardrails into a project's `.claude/` folder: **rules** that tell Claude Code how this kind of project is done, and **hooks** that refuse a bad write before it reaches the disk.
 
@@ -610,6 +610,10 @@ Global by design: they fix this machine's shell for Claude, not any project's ru
 ## Credits
 
 The kit learned from [superpowers](https://github.com/obra/superpowers) (MIT), mddkit and MDD, Vercel's Web Interface Guidelines (MIT), Anthropic's frontend-design (Apache 2.0), Impeccable (Apache 2.0), taste-skill and imagegen-skills (MIT), for Rust from [BeautifulRust](https://github.com/morganlinton/BeautifulRust) (MIT) and [rust-skills](https://github.com/leonardomso/rust-skills) (MIT), and for Postgres from [squawk](https://squawkhq.com/docs/rules) (MIT and Apache 2.0), [strong_migrations](https://github.com/ankane/strong_migrations) (MIT), [pg-aiguide](https://github.com/timescale/pg-aiguide) (Apache 2.0) and the PostgreSQL wiki's [Don't Do This](https://wiki.postgresql.org/wiki/Don't_Do_This). [docs/ui-craft-sources.md](docs/ui-craft-sources.md) says what came from each UI source.
+
+## Disclaimer
+
+The kit is provided as is, with no warranty, and what you build with it is yours to answer for. It ships no firmware, manuals or recordings: you must have the right to use every source a project reads. Reverse engineering in the kit is for learning and interoperability; check the law and the licences that apply to you before you use anything you learn from someone else's code, and never copy it. Tools the kit points to, Ghidra among them, are other people's projects under their own licences, and their output is a claim to prove, not a fact. Product names belong to their owners. This is not legal advice. The full text is in [DISCLAIMER.md](DISCLAIMER.md).
 
 ## License
 
