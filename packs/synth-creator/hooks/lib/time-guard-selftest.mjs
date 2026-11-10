@@ -34,6 +34,17 @@ export function selftest({ run, CFG, DEFAULTS }) {
   run(A('cd /x/.claude/worktrees/handed && ls', 'first'), { now: 5000, state: s4, rows: [], commitMin: 1 });
   expect('a successor after the first agent has been quiet 16 min takes the worktree', run(A('cd /x/.claude/worktrees/handed && ls', 'next'), { now: 5000 + 16 * 60, state: s4, rows: [], commitMin: 1 }), false);
   expect('and the first agent coming back finds it taken', run(A('cd /x/.claude/worktrees/handed && ls', 'first'), { now: 5000 + 17 * 60, state: s4, rows: [], commitMin: 1 }), true);
+  // KWB-140: the worktree a call works in, not the one remembered from before
+  const age = (m) => (wt) => (wt.endsWith('/stale') ? 1259 : m);
+  const s5 = {};
+  run(A('cd /x/.claude/worktrees/stale && make', 'w'), { now: 5000, state: s5, rows: [], commitMin: age(1) });
+  expect('KWB-140: a look at another, fresh worktree while a stale one is remembered', run(A('cd /x/.claude/worktrees/fresh && ls && grep -n x f', 'w'), { now: 5000 + 1200, state: s5, rows: [], commitMin: age(3) }), false);
+  expect('KWB-140: and its write, in the fresh worktree', run(A('cd /x/.claude/worktrees/fresh && make', 'w'), { now: 5000 + 1260, state: s5, rows: [], commitMin: age(3) }), false);
+  expect('KWB-140: a write in the stale worktree it names still says it', run(A('cd /x/.claude/worktrees/stale && make', 'w'), { now: 5000 + 1320, state: s5, rows: [], commitMin: age(3) }), true);
+  const s6 = {};
+  expect('KWB-140: a look at a stale worktree this session has not written to says nothing', run(A('cd /x/.claude/worktrees/stale && ls | head', 'v'), { now: 5000, state: s6, rows: [], commitMin: 1259 }), false);
+  expect('KWB-140: a git status there says nothing either', run(A('cd /x/.claude/worktrees/stale && git status --short', 'v'), { now: 5000 + 700, state: s6, rows: [], commitMin: 1259 }), false);
+  expect('KWB-140: the first write there says it', run(A('cd /x/.claude/worktrees/stale && touch f', 'v'), { now: 5000 + 1400, state: s6, rows: [], commitMin: 1259 }), true);
   expect('the controller told of a worktree unsaved for 45 min', run(post(), at([], { worktrees: { '/x/.claude/worktrees/guide': 45 } })), true);
   expect('the controller, nothing unsaved', run(post(), at([], { worktrees: { '/x/.claude/worktrees/guide': 5 } })), false);
   expect('a session working inside a worktree is not the controller (KWB-87)', run(post(), at([], { worktrees: { '/x/.claude/worktrees/guide': 45 }, inWorktree: true })), false);

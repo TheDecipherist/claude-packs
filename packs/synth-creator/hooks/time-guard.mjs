@@ -72,6 +72,16 @@ export function machineFindings(rows, own = null) {
   return f;
 }
 
+// A command that only looks: every segment starts with a read-only program (a `cd` first is only where), no redirect.
+const LOOKS = new Set(['ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'stat', 'pwd', 'echo', 'file', 'diff', 'du', 'tree', 'sort', 'cut', 'awk']);
+const GIT_LOOKS = new Set(['status', 'log', 'diff', 'show', 'branch', 'rev-parse', 'ls-files', 'ls-remote', 'worktree', 'remote', 'blame']);
+export function readOnlyCommand(cmd) {
+  const body = cmd.replace(/<<-?\s*['"]?(\w+)['"]?[^\n]*\n[\s\S]*?\n\s*\1\s*(?:\n|$)/g, '\n');
+  if (/(?:^|[^-=])>|\btee\b|\$\(|`/.test(body.replace(/2>&1|>\s*\/dev\/null/g, ''))) return false;
+  const segs = body.split(/&&|\|\||;|\||\n/).map((x) => x.trim()).filter((x) => x && !/^cd(\s|$)/.test(x));
+  return segs.length > 0 && segs.every((x) => { const w = x.split(/\s+/); return LOOKS.has(w[0]) || (w[0] === 'git' && GIT_LOOKS.has(w.find((a, i) => i && !a.startsWith('-') && !(w[i - 1] === '-C')) ?? '')); });
+}
+
 function lastCommitMin(cwd) {
   const out = sh('git', ['log', '-1', '--format=%ct'], cwd)?.trim();
   return out ? (Date.now() / 1000 - Number(out)) / 60 : null;
@@ -145,7 +155,10 @@ export function run(event, { now = Date.now() / 1000, rows = null, own, commitMi
   const who = event.agent_id ?? 'main';
   if (who !== 'main') (st.seen ??= {})[who] = now; // when each agent last ran anything: a finished agent's claim lapses (below)
   const text = `${input.command ?? ''} ${input.file_path ?? ''}`;
-  for (const m of text.matchAll(/(\/[^\s'"]*?\/\.claude\/worktrees\/([\w.-]+))/g)) {
+  const WT = /(\/[^\s'"]*?\/\.claude\/worktrees\/([\w.-]+))/;
+  const lead = /^\s*cd\s+["']?([^\s'";&|]+)/.exec(String(input.command ?? ''))?.[1];
+  const here = (lead && WT.exec(lead)) || WT.exec(text); // KWB-140: the worktree THIS call works in: its leading cd, else the first it names
+  for (const m of text.matchAll(new RegExp(WT.source, 'g'))) {
     if (who === 'main') continue;
     st.owner ??= {};
     let prev = st.owner[m[2]];
@@ -161,12 +174,19 @@ export function run(event, { now = Date.now() / 1000, rows = null, own, commitMi
       (st.wt ??= {})[who] = m[1];
     }
   }
-  const mine = who !== 'main' ? st.wt?.[who] : null;
+  const readOnly = typeof input.command === 'string' && readOnlyCommand(String(input.command ?? ''));
+  let mine = who !== 'main' ? st.wt?.[who] : null;
+  if (mine && here && who !== 'main') { // the call's own worktree, never the remembered one (KWB-140); another agent's is its own guard's
+    mine = st.owner?.[here[2]] === who ? here[1] : null;
+    if (mine) st.wt[who] = mine;
+  }
+  if (mine && !readOnly) ((st.wrote ??= {})[who] ??= {})[mine] = true;
+  if (mine && readOnly && !st.wrote?.[who]?.[mine]) mine = null; // a look at a worktree this session has not written to says nothing
   // its git status at most once a minute (KWB-24: two git commands on every call of every agent)
   if (mine && (rows !== null || now - (st.checked?.[mine] ?? 0) >= LOOK_EVERY_S)) {
     if (rows === null) (st.checked ??= {})[mine] = now;
     const u = rows === null ? unsavedMin(mine) : null; // a selftest case: never git on a made-up path
-    const cmn = commitMin ?? lastCommitMin(mine);
+    const cmn = typeof commitMin === 'function' ? commitMin(mine) : commitMin ?? lastCommitMin(mine);
     if (u !== null && u > SAVE_MIN) {
       const s = sayOnce(`unsaved-${mine}`, `your worktree (${mine.split('/').pop()}) holds work unsaved for ${u.toFixed(0)} min (more than ${SAVE_MIN}). Save it now: ${CFG.saveCommand}`, now, st);
       if (s) said.push(s);
