@@ -226,7 +226,7 @@ To run it, type `Run docs/workorders/billing/PROMPT.md` in Claude Code and watch
 
 **Read `run.sh` before you use it.** It runs Claude with permission prompts off, because nobody is there to answer. The hooks still judge every write, but use it only on a project you trust, in a repo you can roll back.
 
-To change a run in progress, edit its `PROMPT.md` and commit it. A run won't act on an instruction it can't trace to its order or to you, so a file dropped beside it is ignored on purpose.
+The `run-a-workorder` skill holds the run's half: the check before the first session, how to start it and leave it, what to watch, and how to change it. To change a run in progress, edit its `PROMPT.md` and commit it. A run won't act on an instruction it can't trace to its order or to you, so a file dropped beside it is ignored on purpose.
 
 ## Installing the skills in claude.ai
 
@@ -356,7 +356,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 52 | 12 | 2 | 8 |
-| `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 13 |
+| `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 14 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |

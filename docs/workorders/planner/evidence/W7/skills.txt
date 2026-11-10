@@ -1,0 +1,15 @@
+3372 packs/base/skills/write-a-workorder/SKILL.md
+2429 packs/base/skills/run-a-workorder/SKILL.md
+5801 total
+$ init --config base (scratch); ls .claude/skills | grep workorder
+run-a-workorder
+start-from-a-workorder
+write-a-workorder
+$ doctor --strict
+OK: base
+$ grep README
+1
+1
+$ readme, site, noop, base-neutral tests
+ℹ pass 12
+ℹ fail 0
