@@ -23,9 +23,26 @@ export function notesFor(changelog, version) {
   return notes;
 }
 
+// GitHub over HTTPS with the token from the environment (KWB-143: origin in the main checkout is the SSH URL, and port 22 timed
+// out while the token sat unused). git gets the token from a credential helper that reads the variable when it runs, so the
+// token is never on a command line, in the process list or in an error message.
+const TOKEN = 'GH_TOKEN';
+
+/** The HTTPS address of a GitHub remote, from origin's URL in either form. */
+export function githubRemote(originUrl) {
+  const m = /github\.com[:/]([^/\s]+\/[^/\s]+?)(?:\.git)?\/?$/.exec(String(originUrl).trim());
+  if (!m) throw new Error(`origin (${originUrl}) is not a GitHub remote`);
+  return `https://github.com/${m[1]}.git`;
+}
+
+/** A git command that authenticates with $GH_TOKEN, by name. */
+export const gitWithToken = (...args) =>
+  ['-c', 'credential.helper=', '-c', `credential.helper=!f() { echo username=x-access-token; echo "password=$${TOKEN}"; }; f`, ...args];
+
 // Why the repo is not ready to release, one line per reason; an empty list means it is.
-export function refusals({ branch, dirty, local, remote }) {
+export function refusals({ branch, dirty, local, remote, token }) {
   return [
+    !token && `${TOKEN} is not set: the release reaches GitHub over HTTPS with it (\`${TOKEN}=$YOUR_TOKEN_VARIABLE npm run release\`)`,
     branch !== 'main' && `on ${branch}: a release is made from main, after the landing`,
     dirty && 'the tree has uncommitted changes',
     local !== remote && `main (${local.slice(0, 7)}) is not GitHub's main (${(remote || 'none').slice(0, 7)}): land and push first`,
@@ -49,15 +66,18 @@ const out = (cmd, args) => { const r = sh(cmd, args); return r.status === 0 ? r.
 function state() {
   const pkg = JSON.parse(readFileSync(join(KIT, 'package.json'), 'utf8'));
   const tag = `v${pkg.version}`;
+  const github = githubRemote(out('git', ['remote', 'get-url', 'origin']));
   return {
+    github,
+    token: Boolean(process.env[TOKEN]),
     name: pkg.name,
     version: pkg.version,
     branch: out('git', ['rev-parse', '--abbrev-ref', 'HEAD']),
     dirty: out('git', ['status', '--porcelain', '--untracked-files=no']) !== '',
     local: out('git', ['rev-parse', 'HEAD']),
-    remote: out('git', ['ls-remote', 'origin', 'refs/heads/main']).split(/\s/)[0],
+    remote: out('git', gitWithToken('ls-remote', github, 'refs/heads/main')).split(/\s/)[0],
     published: out('npm', ['view', `${pkg.name}@${pkg.version}`, 'version']) === pkg.version,
-    tagged: out('git', ['ls-remote', '--tags', 'origin', `refs/tags/${tag}`]) !== '',
+    tagged: out('git', gitWithToken('ls-remote', '--tags', github, `refs/tags/${tag}`)) !== '',
     released: sh('gh', ['release', 'view', tag]).status === 0,
   };
 }
@@ -70,7 +90,7 @@ const run = (cmd, args) => {
 // What each step does, by its name in the plan.
 const ACTS = {
   publish: () => run('npm', ['publish']),
-  tag: ({ name, version }) => { run('git', ['tag', '-a', `v${version}`, '-m', `${name} ${version}`]); run('git', ['push', 'origin', `v${version}`]); },
+  tag: ({ name, version, github }) => { run('git', ['tag', '-a', `v${version}`, '-m', `${name} ${version}`]); run('git', gitWithToken('push', github, `v${version}`)); },
   release: ({ version }, notes) => run('gh', ['release', 'create', `v${version}`, '--title', version, '--notes', notes, '--latest']),
 };
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- KWB-143: `npm run release` reaches GitHub over HTTPS with `$GH_TOKEN` (through a credential helper, never on a command line), never through an SSH origin, and refuses to start without the token.
+
 ## 1.7.0 (2026-11-10)
 
 - A menu is one route table (`instrument-shell`): the rule `menu-is-one-route-table` and the tool `route-table.mjs`. `check` judges the table a project writes from its own: one outcome for each page, input and condition, every page reached from the start, a way back to the start from every page, every input routed or declared inert with its reason, every pulldown and window closing back to the page beneath, and no route to a page or input that does not exist. `mermaid` draws one diagram per branch from the table, for a person to read; the table stays the source. Each law is seen to catch its planted fault (`--selftest`, `test/route-table.test.mjs`).
