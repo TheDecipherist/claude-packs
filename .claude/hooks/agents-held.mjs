@@ -3,8 +3,8 @@
 // lead ends its turn, and every agent it started in the background is stopped with it (KWB-124: a rebuild run's session
 // launched four agents with run_in_background, ended its turn 15 minutes later, and all four were stopped mid-work, two with
 // work uncommitted). Agents started in the foreground, all in one message, run side by side and the lead waits for them.
-// Unattended means CLAUDE_PACKS_UNATTENDED=1 (a work order's run.sh sets it), or a `claude -p` / `claude --print` among the
-// hook's parent processes. CLAUDE_PACKS_UNATTENDED=0 says someone is there, and the parents are not read.
+// Unattended means CLAUDE_PACKS_UNATTENDED=1 (a work order's run.sh sets it), or the nearest claude among the hook's parent
+// processes is a `claude -p` / `claude --print`. CLAUDE_PACKS_UNATTENDED=0 says someone is there, and the parents are not read.
 import { spawnSync } from 'node:child_process';
 import { chmodSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -14,11 +14,16 @@ import { asHook, isMain } from './lib/hook-log.mjs';
 
 const ANCESTORS = 8;
 
-// A process's command line is a print session: the claude command with -p or --print among its words.
-export function printSession(args) {
+// The words after the claude command in a process's command line, or null when it runs no claude.
+function claudeArgs(args) {
   const words = args.trim().split(/\s+/).map((w) => w.replace(/^['"]|['"]$/g, ''));
   const at = words.findIndex((w) => basename(w) === 'claude');
-  return at !== -1 && words.slice(at + 1).some((w) => w === '-p' || w === '--print');
+  return at === -1 ? null : words.slice(at + 1);
+}
+
+// A process's command line is a print session: the claude command with -p or --print among its words.
+export function printSession(args) {
+  return (claudeArgs(args) ?? []).some((w) => w === '-p' || w === '--print');
 }
 
 // The parent, and the command line, of one process, by ps (the same on Linux and macOS).
@@ -34,7 +39,8 @@ function unattended() {
   for (let pid = process.ppid, n = 0; pid > 1 && n < ANCESTORS; n += 1) {
     const p = parentOf(pid);
     if (!p) return false;
-    if (printSession(p.args)) return true;
+    // the nearest claude is the session that runs this hook; one further up is another session (KWB-130)
+    if (claudeArgs(p.args)) return printSession(p.args);
     pid = p.ppid;
   }
   return false;
@@ -64,15 +70,19 @@ function selftest() {
   // the parents read for real: the hook run by a stand-in `claude -p`, with nothing said in the environment
   put(join(dir, 'bin/claude'), `#!/bin/sh\n"${process.execPath}" "${hook}"\n`);
   chmodSync(join(dir, 'bin/claude'), 0o755);
+  // an interactive session started from a print session (a run's lead started from a `claude -p`): its own parent decides (KWB-130)
+  put(join(dir, 'outer/claude'), `#!/bin/sh\n"${join(dir, 'bin/claude')}" --resume x\n`);
+  chmodSync(join(dir, 'outer/claude'), 0o755);
   const env = { ...process.env, CLAUDE_PROJECT_DIR: dir };
   delete env.CLAUDE_PACKS_UNATTENDED;
-  const underPrint = (flag) => spawnSync('sh', ['-c', `"${join(dir, 'bin/claude')}" ${flag} x`], {
+  const underPrint = (flag, bin = 'bin') => spawnSync('sh', ['-c', `"${join(dir, bin, 'claude')}" ${flag} x`], {
     cwd: dir, env, encoding: 'utf8', input: JSON.stringify(agent({ run_in_background: true })),
   }).status;
   const before = process.env.CLAUDE_PACKS_UNATTENDED;
   const cases = [
     ['a background agent under a claude -p parent', underPrint('-p'), 2],
     ['a background agent under an interactive claude parent', underPrint('--resume'), 0],
+    ['an interactive claude under a claude -p: the nearer one decides', underPrint('-p', 'outer'), 0],
     ['a background agent in an unattended run', as('1', agent({ run_in_background: true })), 2],
     ['a background Task in an unattended run', as('1', { ...agent({ run_in_background: true }), tool_name: 'Task' }), 2],
     ['a foreground agent in an unattended run', as('1', agent({})), 0],

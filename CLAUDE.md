@@ -90,6 +90,7 @@ Always do:
 - Put every kind of thing in its one place. The rules, checks and skills for it load only there:
   - the kit's tests → `test/`
   - versions and notes → `docs/`
+  - the planner skills a person uses in claude.ai → `planner/`
 - The other folders:
   - `bin/`: the claude-packs command (bin/claude-packs.mjs)
   - `configurations/`: the configurations: one config.json per kind of project (its packs, layout template, hook order, preamble)

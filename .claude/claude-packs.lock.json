@@ -1,5 +1,5 @@
 {
-  "kit": "1.4.0",
+  "kit": "1.5.0",
   "packs": [
     "base"
   ],
@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-09T19:53:18.216Z",
+  "updated": "2026-11-10T01:42:47.365Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/agents-held.md": "0da8fb50ef828b0440389751254c16ae1cf9dd21c78fc23a7d957b221674a409",
@@ -17,7 +17,7 @@
     ".claude/rules/field-map-over-if-runs.md": "b59ea4a692ff8941fcce63fe3a23e17da7c68069ad1b9f45bbab7a5de8746da4",
     ".claude/rules/finished-work-lands.md": "33dfaa323ddd0a27989920ad3de519b43d14932a54d748601cb52cd03e0888aa",
     ".claude/rules/git-right-first-time.md": "3fd5d16574cea43e40d618dde6bc0926ec87311fb0bcb52dd8c0fb795dd1f2c7",
-    ".claude/rules/instances-by-index-identities-by-id.md": "0ea2b0a9133d5c698357690911059bfc5f16aea52a6805be8c712524b190c5ef",
+    ".claude/rules/instances-by-index-identities-by-id.md": "4da7a44cb44c60af8cb813aad0ecd32e49c3e69a9a4aa3a5a145ba79d1b09e4f",
     ".claude/rules/lookup-over-if-chains.md": "7c6ace9cd1df14c1952e752e49200e5bee51afb3337b635cc39ab978c3266057",
     ".claude/rules/making-line-first.md": "dacbf3eb9e0f47586b4f42485b46d26302f678492a79a79d5623e5c94f6bfcdc",
     ".claude/rules/open-items-tagged.md": "b5535a7ad55f3972177a4a2a12ecb2559d798239111ef1492ec728be87beee48",
@@ -39,8 +39,8 @@
     ".claude/checks/lookup-over-if-chains.json": "49cec0241eeaf670cd0c82317fa2d99e6117223a5665f49ce692b8685130ba6d",
     ".claude/checks/no-code-after-midline-comment.json": "6689387457bd48e61e7f6442b3007e53b685ffcf852bc083e533f37bb016edb7",
     ".claude/checks/one-walk-per-template.json": "a90d0098d0a1a1b20a8e66087bd102d9d5105e2a7124be8ba4bb53cc0f644464",
-    ".claude/hooks/agents-held.mjs": "5673c0e5db83cb75e28d650e8bb8099f3eec33665196de0b4938dc9e4b9ee796",
-    ".claude/hooks/brief-guard.mjs": "f7bfe2dd8989bc310b11293eb849bf7ee899296c97237ead14f60dcff749ca0e",
+    ".claude/hooks/agents-held.mjs": "81b30b38b541e2560f5fef08222e4b4955a8cf92f9283be4382935031efab840",
+    ".claude/hooks/brief-guard.mjs": "874714800c2fe685abc3bde4b0f950610e52c927a042de2132bc9a8c4c88b2aa",
     ".claude/hooks/code-shape.mjs": "445c533344422bd2d158f0c3c828d3e2e5511326b3003c971099b1d41bfade36",
     ".claude/hooks/dispatch-once.mjs": "16ceb84252c021f644302f44b4c94f83e1882c3450a296a49fd55b338d48aa1e",
     ".claude/hooks/file-size-guard.mjs": "0e31aa45abf03db12e3e41c6b8925aa7a9b2a966882c704098416ec07c4ae149",
@@ -49,6 +49,7 @@
     ".claude/hooks/inside-the-project.mjs": "9a4cb9c1dbcfdb2a5b88c18e259ef35104997677695613998a0294f9c6d55639",
     ".claude/hooks/lesson-checks.mjs": "7eba41217838f3ef16f3de1e540944ca92684dda25ab24f5a224b6cbafd08383",
     ".claude/hooks/lib/apply-edit.mjs": "b5ba751ef1b21a32430592091b2dc795f64697afc6ca39443faa1c8b539af9f5",
+    ".claude/hooks/lib/audience.mjs": "b4c6e8d2ecab2b92e44f8c20015e32040b64f91e3e2bc2da2db7955d20f69490",
     ".claude/hooks/lib/code-shapes.mjs": "271d3aa2f7e95e826ab8631c3581d6cf2faca3b399d27a260de63103839e36dd",
     ".claude/hooks/lib/command-prefix.mjs": "e2a0c7ee60438904c7919219f26f492c6dcf3f5d153c76e910353911567d8d64",
     ".claude/hooks/lib/compile-cache.mjs": "66ef65976e010e96b33ae4c417700592283cce8a847a0298720e3c5dac2e86f9",
@@ -106,7 +107,7 @@
     ".claude/hooks/reuse-hint.mjs": "0ae184b17f4e90bdcb86cb4f7f2eaec10aa1fd4e7434b6c2dc538d8b9a79daa3",
     ".claude/hooks/run-hooks.mjs": "1c705455a6d1b029f747bfe0c15e3329fc080521ce7bc69103b547f821d8d163",
     ".claude/hooks/secrets-guard.mjs": "87d3db518d95a9b062f933337cd10be308ee4bf814f47f7dea25c14fa74d9461",
-    ".claude/hooks/shape-law.mjs": "71b651ab7e1c83a947610ee0564564fd929d001b142db51db63c5f0dbe4684b5",
+    ".claude/hooks/shape-law.mjs": "a9896ea0655d23355f12ce2d207abf2320665df82d704dbc47b0fee692b71023",
     ".claude/hooks/skill-first.mjs": "b8d97dc19ae1f6f37faf5ee504dd6a8892cc220585eb32c369c401baa5d70e07",
     ".claude/hooks/suite-once.mjs": "af9b33d692a710a52bea162d183c680ffa98303526f5a73d5c0f818a61e02057",
     ".claude/hooks/template-law.mjs": "387555a7d6d77784503544cd9922b56796dc95af593d29fd84d050d729efae5f",

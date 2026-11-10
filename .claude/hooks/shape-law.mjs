@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { checkoutRoot, insideProject, relInCheckout, ROOT } from './lib/project.mjs';
 import { addedFindings, findInstanceLiterals, formatFinding, isExcluded, isTestFile, logRefusal, readShape } from './lib/shape.mjs';
 import { addedDefs, findSelectorDefs, findUnknownTypes } from './lib/shape-code.mjs';
+import { addressedOutside } from './lib/audience.mjs';
 import { declaredAmount } from './lib/shape-prose.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
@@ -45,12 +46,13 @@ function main(text) {
     const shape = readShape(root) ?? readShape(ROOT);
     if (!shape || shape.error) continue;
     const rel = relInCheckout(w.path);
-    if (rel.startsWith('..') || isExcluded(rel, shape)) continue;
+    if (rel.startsWith('..') || isExcluded(rel, shape) || addressedOutside(rel, w.after)) continue;
     const { out, concepts } = judgeText(rel, w.before, w.after, shape, root);
     if (!out.length) continue;
     logRefusal(ROOT, 'shape-law', concepts);
     process.stderr.write(`BLOCKED by shape-law: this write names one instance of a concept that design/shape.json declares (KWB-1).\n${out.slice(0, 10).map((l) => `  ${l}`).join('\n')}${out.length > 10 ? `\n  ... and ${out.length - 10} more` : ''}\n` +
-      'Build for the shape: a loop over every instance or the generator; an instance seen in a bug goes on a "seen in:" line.\n');
+      'Build for the shape: a loop over every instance or the generator; an instance seen in a bug goes on a "seen in:" line.\n' +
+      'A page for a person outside the project, about the real machine\'s own named controls (never a spec, brief or code), says so in its first 5 lines: <!-- audience: outside --> (.md or .txt only).\n');
     return 2;
   }
   return 0;
@@ -135,6 +137,13 @@ function selftest() {
     ['allowed: the type of a camelCase concept, made a count of times (KWB-93)', w('src/world/Bank.h', 'struct PadBank { int bankIndex; };\nstd::array<PadBank, kBanks> banks {};\n'), 0],
     ['a selector of a camelCase concept not listed (KWB-93)', w('src/world/Pick.cpp', 'int pickPadBank(int pad) {\n  return pad % 4;\n}\n'), 2],
     ['allowed: a type inside a string is a fixture, not a type (KWB-94)', w('src/ui/fixtures.mjs', "export const RAIL = 'struct Rail { int index; float gain; };';\n"), 0],
+    // KWB-127: a page for a person outside the project, about the real machine's own named controls
+    ['doc: addressed outside, marker in the first lines (KWB-127)', w('docs/sample-request.md', '<!-- audience: outside -->\n# Recording\nRoute LFO 1 to VCO1 FREQ at +20, slot 2 triangle.\n'), 0],
+    ['doc: the same text with no marker is still refused (KWB-127)', w('docs/sample-request.md', '# Recording\nRoute LFO 1 to VCO1 FREQ at +20, slot 2 triangle.\n'), 2],
+    ['doc: a marker below the first 5 lines exempts nothing (KWB-127)', w('docs/sample-request.md', '# Recording\n\n\n\n\n<!-- audience: outside -->\nslot 2 triangle.\n'), 2],
+    ['code: the marker in a .cpp exempts nothing (KWB-127)', w('src/engines/Engine.cpp', '// <!-- audience: outside -->\nvoid f() { if (slotIx == 1) startCrew(); }\n'), 2],
+    ['code: the marker in a .py exempts nothing (KWB-127)', w('tests/slot_test.py', '# <!-- audience: outside -->\nrun(slot[1])\n'), 2],
+    ['code: a .md marker line in a .cpp first line exempts nothing (KWB-127)', w('src/engines/Bank.cpp', '<!-- audience: outside -->\nauto& s = slots[1];\n'), 2],
     ['allowed: excluded (build/)', w('build/gen/Table.cpp', 'auto& s = slots[1];\n'), 0],
     ['allowed: no design/shape.json', w('src/engines/Engine.cpp', 'if (slotIx == 1) go();\n', bare), 0],
     ['allowed: another project', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/src/x.cpp'), 'if (slotIx == 1) go();\n')), 0],
