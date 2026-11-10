@@ -18,7 +18,8 @@ Always do:
    - in the patch map but no page reaches it: dead, reserved, live and set by presets only, or a page still to find. A parameter list describes the control surface, not the engine: an algorithm with no knob for something usually has it, fixed.
 6. Check whether every parameter that shapes the sound is in the dump. One that is not must be sent another way, and a rebuild that loads only the dump loses it.
 7. Write down what changes the map. Menus are dynamic: a page hidden while its effect is off still exists. Pages re-label themselves: one byte can carry two names, by mode, so list both.
-8. Keep corrections in the file, and end it with what is not established.
+8. Read the routes as well as the pages: which press on which page opens which page, from the firmware's own page changes, with the manual as the second source. They become the build's route table (instrument-shell's `menu-is-one-route-table`), every row with its source.
+9. Keep corrections in the file, and end it with what is not established.
 
 Never do:
 - Conclude a parameter does not exist, or does nothing, because no page shows it.

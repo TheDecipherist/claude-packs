@@ -49,6 +49,7 @@ export const TABLE = [
   { files: /^packs\/(?!base\/)[\w-]+\//, why: 'a pack reaches a project through an install: the tests that bring this pack in',
     tests: (text, changed, root) => installs(text) && brings(root, changed.split('/')[1]).test(text) },
   { files: /^(packs\/base|profiles|prompts|configurations)\//, why: 'base, the seeds and the configurations reach every project: the tests that install packs', tests: (text) => installs(text) },
+  { files: /^planner\//, why: 'the planner skills claude.ai takes: the tests that read the planner folder (KWB-141)', tests: (text) => /join\(KIT, 'planner'\)/.test(text) },
   { files: /^global\//, why: 'the global part: the tests that run `global`', tests: (text) => /['"]global['"]/.test(text) },
   { files: /^packs\/[\w-]+\/(rules|checks|hooks|skills)\//, why: 'a pack\'s rules, checks, hooks and skills are counted on the README and the page: the tests that hold the true counts',
     tests: (text) => /true counts/.test(text) },

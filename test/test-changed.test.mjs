@@ -77,6 +77,8 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   assert.deepEqual(pick('scripts/test-changed.mjs'), ['test/test-changed.test.mjs']);
   assert.equal(pick('test/fresh-tmp.mjs').length, choose(KIT, [], g).tests.length, 'the preload: every test');
   assert.deepEqual(choose(KIT, ['CHANGELOG.md'], g).uncovered, ['CHANGELOG.md']);
+  // KWB-141: the planner test reads every planner file through join(KIT, 'planner'), which no import or path literal shows
+  assert.ok(pick('planner/ui-mockup/SKILL.md').includes('test/planner.test.mjs'), 'a planner skill: the planner test');
 });
 
 test('a pack that is not base: only the tests that bring it in, by name, preset or configuration (KWB-41)', () => {
