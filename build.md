@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.6.1, quoted words in image prompts (work/1.6.1-quoted-labels, stacked on work/1.6.1-release), started 2026-11-10, from a mock-up that came back with invented labels: every word an image prompt wants drawn exactly goes in double quotes.
+  making: a law in planner/ui-mockup, the same in the walkthrough's 5.1 and start-from-a-workorder's image prompt; concepts: none (design/shape.json declares none); reuse: the planner test's file readers.
+  done when: test/planner.test.mjs holds each of the three places to the quoting law, seen red without it; the tests the branch reaches green against main.
 - 1.6.1, release and disclaimer (work/1.6.1-release), started 2026-11-10, from the user's notes on the public GitHub and npm pages: a disclaimer on both, the GitHub link on npm's front page, and a GitHub release made at every publish by one script.
   making: DISCLAIMER.md (shipped) and a README section; the README's GitHub link at the top; scripts/release.mjs (`npm run release`: the checks, npm publish, the tag, the GitHub release from the CHANGELOG's section, each step skipped when already done so a stopped release resumes); concepts: none (design/shape.json declares none); reuse: scripts/test-changed.mjs's form for a kit script, package.json `scripts`.
   done when: the README and the npm package carry the disclaimer; test/release.test.mjs proves the notes taken from the CHANGELOG, the checks that refuse (not on main, a dirty tree, no CHANGELOG section, a tag already pushed) and the order of the steps in a dry run, each refusal seen red with its check taken out; the tests the branch reaches green against main.

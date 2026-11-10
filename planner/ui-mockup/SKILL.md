@@ -29,14 +29,15 @@ An approved explore image is a direction, not yet a reference: pin it, render it
 Always do:
 1. Render at **16:9**, straight on, the screen alone filling the frame: no device, no hands, no perspective, no room. A small screen or dialog is centred inside the 16:9 frame on a plain ground.
 2. Use **Nano Banana Pro**; another model only if the person asks. If an OpenArt connector is in this chat, offer to render here (recommended), say the cost first, and never start a generation the account cannot afford. Without it, say OpenArt can be connected, and give the prompt with the steps: openart.ai, the image generator, Nano Banana Pro, 16:9, paste, generate, download, name the file for its screen.
-3. Show the complete prompt before every render, never a summary.
-4. Iterate by image: the previous render attached as the reference, the change in words, "where the layout below differs from the attached image, the layout below wins". One change per round, so cause and effect stay readable; check each new render for drift before showing it.
-5. Make a detail render for anything too small to read whole (a knob and its label, the display), never a crop.
-6. Approve only a render that passes every check in `analyse-a-mockup.md`: counts, depth, alignment, readability, live parts, clutter. Show the person each check's answer.
-7. Extend the family by image: a new screen is rendered with the approved ones attached as references, "same design system as the attached image".
-8. Put each approved picture in `design/reference/`, named for its screen, with its final prompt beside it (`panel.prompt.txt`), and the explore prompt that found the direction too.
-9. Read each approved render into the order's UI step as `analyse-a-mockup.md` says, and put its counts in the order's repeated-things list.
-10. For a rebuild of real hardware, the picture is the real panel straight on, from its real controls and labels, never reimagined; the kit's `straight-on-and-aligned` governs the measuring.
+3. Put every word that must be drawn exactly in double quotes, in every prompt, whether it goes to the OpenArt connector or to the person: the title, each control's label, each switch position and scale mark ("1", "2", "3", "4"), each readout and preset name. Add the text rule: the only text in the picture is the text in double quotes, spelled as written, and no other word, label or number. An unquoted word is read as description, and the model makes up text from it: one render drew knobs labelled "MIDTIT" and "KERV" that no order named.
+4. Show the complete prompt before every render, never a summary.
+5. Iterate by image: the previous render attached as the reference, the change in words, "where the layout below differs from the attached image, the layout below wins". One change per round, so cause and effect stay readable; check each new render for drift before showing it.
+6. Make a detail render for anything too small to read whole (a knob and its label, the display), never a crop.
+7. Approve only a render that passes every check in `analyse-a-mockup.md`: counts, depth, alignment, readability, live parts, clutter. Show the person each check's answer.
+8. Extend the family by image: a new screen is rendered with the approved ones attached as references, "same design system as the attached image".
+9. Put each approved picture in `design/reference/`, named for its screen, with its final prompt beside it (`panel.prompt.txt`), and the explore prompt that found the direction too.
+10. Read each approved render into the order's UI step as `analyse-a-mockup.md` says, and put its counts in the order's repeated-things list.
+11. For a rebuild of real hardware, the picture is the real panel straight on, from its real controls and labels, never reimagined; the kit's `straight-on-and-aligned` governs the measuring.
 
 Never do:
 - Prototype the panel or a page in HTML or any second medium: the picture is the design and the build is code; a page in the middle is a second design that drifts from the first.
