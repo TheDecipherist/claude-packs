@@ -136,3 +136,10 @@ test('every place that writes an image prompt puts the words to be drawn in doub
     for (const law of laws) assert.match(body, law, `${file} lacks ${law}`);
   }
 });
+
+test('ui-mockup gives every plugin its settings layer: tabs along the top, scrolling, the standard audio and MIDI rows', () => {
+  // 1.7.0: a plugin's own settings own the devices, so the mock-up shows them, and the standalone no Options button
+  const law = readFileSync(join(KIT, 'planner/ui-mockup/SKILL.md'), 'utf8');
+  for (const part of [/settings layer as a screen of its own/, /tabs along the top, never a menu down the side/, /scrolling/, /"Enable QWERTY"/, /the MIDI inputs as check boxes/, /settings-layer-owns-the-devices/]) assert.match(law, part);
+  assert.ok(existsSync(join(KIT, 'packs/audio-core/rules/settings-layer-owns-the-devices.md')), 'the rule it names exists');
+});

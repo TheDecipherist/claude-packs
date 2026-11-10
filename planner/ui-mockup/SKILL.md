@@ -38,6 +38,7 @@ Always do:
 9. Put each approved picture in `design/reference/`, named for its screen, with its final prompt beside it (`panel.prompt.txt`), and the explore prompt that found the direction too.
 10. Read each approved render into the order's UI step as `analyse-a-mockup.md` says, and put its counts in the order's repeated-things list.
 11. For a rebuild of real hardware, the picture is the real panel straight on, from its real controls and labels, never reimagined; the kit's `straight-on-and-aligned` governs the measuring.
+12. Give every plugin its settings layer as a screen of its own: its sections as tabs along the top, never a menu down the side, and each tab's page scrolling, the picture showing it (a scroll bar, a row cut off at the bottom). The audio and MIDI tab, for the standalone only, carries the standard rows: device type, input, output and their channels, sample rate, buffer size, mute input to avoid feedback, the MIDI inputs as check boxes, MIDI channel, "Enable QWERTY" and its octave (the kit's `settings-layer-owns-the-devices`). With it, the standalone shows no Options button of its own.
 
 Never do:
 - Prototype the panel or a page in HTML or any second medium: the picture is the design and the build is code; a page in the middle is a second design that drifts from the first.
