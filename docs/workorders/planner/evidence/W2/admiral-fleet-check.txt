@@ -1,0 +1,15 @@
+  WARNING: no install block (a ```claude-packs fence): the run cannot install from the order
+  REFUSED: line 27: a placeholder is left: <step>
+  REFUSED: line 65: a placeholder is left: <main checkout>
+  REFUSED: line 65: a placeholder is left: <main checkout>
+  REFUSED: line 65: a placeholder is left: <trunk>
+  REFUSED: line 66: a placeholder is left: <main checkout>
+  REFUSED: line 89: a placeholder is left: <scratch>
+  REFUSED: line 129: a placeholder is left: <version>
+  REFUSED: line 70: the Done when of "W0.0 `land-branch` brings the main checkout up to date" holds no number and no path to a test, so nothing can measure it
+  REFUSED: line 89: the Done when of "W1. `full-stack` chooses `web`, `go`, `host-agent`, `shell-hooks`" holds no number and no path to a test, so nothing can measure it
+  REFUSED: line 97: the Done when of "W2. The tenant law judges Go" holds no number and no path to a test, so nothing can measure it
+  REFUSED: line 105: the Done when of "W3. One consistent `full-stack` layout, with a web folder" holds no number and no path to a test, so nothing can measure it
+  REFUSED: line 142: the Done when of "W7. Before calling it finished" holds no number and no path to a test, so nothing can measure it
+  REFUSED: line 148: the Done when of "W8. The report" holds no number and no path to a test, so nothing can measure it
+workorder check admiral-fleet: 13 refusal(s); a run cannot start until each is fixed

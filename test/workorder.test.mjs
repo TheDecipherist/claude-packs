@@ -59,16 +59,24 @@ test('the runner dates its log with a format BSD and GNU date both take (KWB-95)
   assert.match(run, /date \+%Y-%m-%dT%H:%M:%S%z/);
 });
 
-// KWB-98: each session's transcript holds the user's paths and name, so the runner's logs never reach git. The runner is run with
-// a stand-in `claude` on PATH that writes the session's lines and the DONE file, and git sees nothing of logs/.
-test('the runner keeps its session logs out of git (KWB-98)', () => {
-  const dir = fresh('wo-logs-');
+// The runner in a scratch repo, with stand-ins on PATH: `claude` runs `session` (a bash body), and `npx` is the kit's pre-flight,
+// `workorder check`, which exits `check` (0 passes the order, 1 refuses it).
+function runOrder(prefix, session, { check = 0, env = {} } = {}) {
+  const dir = fresh(prefix);
   execFileSync('git', ['init', '-q'], { cwd: dir });
   assert.equal(cli(dir, 'workorder', 'billing').status, 0);
   const bin = join(dir, '.bin');
   execFileSync('mkdir', ['-p', bin]);
-  writeFileSync(join(bin, 'claude'), `#!/usr/bin/env bash\necho '{"type":"system","cwd":"/home/someone"}'\ntouch "${join(dir, FOLDER, 'DONE')}"\n`, { mode: 0o755 });
-  const run = spawnSync('bash', [join(dir, FOLDER, 'run.sh')], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}` } });
+  writeFileSync(join(bin, 'claude'), `#!/usr/bin/env bash\n${session}\n`, { mode: 0o755 });
+  writeFileSync(join(bin, 'npx'), `#!/usr/bin/env bash\necho "check: $*" >> "${join(dir, '.checks')}"\nexit ${check}\n`, { mode: 0o755 });
+  const run = spawnSync('bash', [join(dir, FOLDER, 'run.sh')], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, ...env } });
+  return { dir, run };
+}
+
+// KWB-98: each session's transcript holds the user's paths and name, so the runner's logs never reach git. The runner is run with
+// a stand-in `claude` on PATH that writes the session's lines and the DONE file, and git sees nothing of logs/.
+test('the runner keeps its session logs out of git (KWB-98)', () => {
+  const { dir, run } = runOrder('wo-logs-', `echo '{"type":"system","cwd":"/home/someone"}'\ntouch "$PWD/${FOLDER}/DONE"`);
   assert.equal(run.status, 0, run.stdout + run.stderr);
   // KWB-100: the first session starts before progress.md exists, and the runner says nothing about it
   assert.equal(run.stderr, '', run.stderr);
@@ -80,21 +88,29 @@ test('the runner keeps its session logs out of git (KWB-98)', () => {
 // KWB-125: a session refused for the account's usage limit moved nothing because it could not run, not because the work is stuck.
 // The stand-in `claude` is refused four times, more than the three still sessions that stop a run, then finishes the order.
 test('the runner waits out a usage limit and carries on, never counting it as a still session (KWB-125)', () => {
-  const dir = fresh('wo-limit-');
-  execFileSync('git', ['init', '-q'], { cwd: dir });
-  assert.equal(cli(dir, 'workorder', 'billing').status, 0);
-  const bin = join(dir, '.bin');
-  execFileSync('mkdir', ['-p', bin]);
-  const calls = join(dir, '.calls');
   const refused = `{"type":"result","is_error":true,"api_error_status":429,"api_error":"usage_limit_reached","result":"You have hit your weekly limit"}`;
-  writeFileSync(join(bin, 'claude'), `#!/usr/bin/env bash\necho x >> "${calls}"\nif [ "$(wc -l < "${calls}")" -le 4 ]; then echo '${refused}'; exit 1; fi\ntouch "${join(dir, FOLDER, 'DONE')}"\n`, { mode: 0o755 });
-  const run = spawnSync('bash', [join(dir, FOLDER, 'run.sh')], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, LIMIT_WAIT: '0' } });
+  const session = `echo x >> "$PWD/.calls"\nif [ "$(wc -l < "$PWD/.calls")" -le 4 ]; then echo '${refused}'; exit 1; fi\ntouch "$PWD/${FOLDER}/DONE"`;
+  const { dir, run } = runOrder('wo-limit-', session, { env: { LIMIT_WAIT: '0' } });
   assert.equal(run.status, 0, run.stdout + run.stderr);
   assert.ok(existsSync(join(dir, FOLDER, 'DONE')), 'the order finished after the limit');
   const log = readFileSync(join(dir, FOLDER, 'logs/runner.log'), 'utf8');
   assert.equal(log.match(/usage limit/g)?.length, 4, log);
   assert.ok(existsSync(join(dir, FOLDER, 'logs/session-1.jsonl')), 'the session that ran is logged under its own number');
   assert.ok(!existsSync(join(dir, FOLDER, 'logs/session-2.jsonl')), 'a refused try is not a session');
+});
+
+// planner W2: the runner calls `workorder check` before its first session and starts none on a refusal.
+test('the runner starts no session on an order workorder check refuses', () => {
+  const { dir, run } = runOrder('wo-check-', `touch "$PWD/${FOLDER}/DONE"`, { check: 1 });
+  assert.equal(run.status, 5, run.stdout + run.stderr);
+  assert.match(readFileSync(join(dir, '.checks'), 'utf8'), /workorder check billing --dir /);
+  assert.ok(!existsSync(join(dir, FOLDER, 'logs/session-1.jsonl')), 'no session started');
+  assert.match(readFileSync(join(dir, FOLDER, 'logs/runner.log'), 'utf8'), /workorder check refused the order/);
+  const passed = runOrder('wo-check-ok-', `touch "$PWD/${FOLDER}/DONE"`);
+  assert.equal(passed.run.status, 0, passed.run.stdout + passed.run.stderr);
+  assert.ok(existsSync(join(passed.dir, '.checks')), 'the check ran before the first session');
+  const prompt = readFileSync(join(dir, FOLDER, 'PROMPT.md'), 'utf8');
+  assert.match(prompt, /run `npx @thedecipherist\/claude-packs workorder check billing`/, 'the prompt runs it too, in the project\'s own form');
 });
 
 // 1.5.11: a rebuild of a hardware instrument starts from the steps four rebuilds taught, not a blank order.

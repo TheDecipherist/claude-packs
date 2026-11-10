@@ -1,0 +1,35 @@
+✔ a clean order passes (1894.840099ms)
+✔ refused: a placeholder left outside a code fence (1836.417627ms)
+✔ refused: a step with no Done when line (1756.061372ms)
+✔ refused: a Done when with no number and no path to a test (1881.165985ms)
+✔ refused: a skill the project has not installed (1763.478808ms)
+✔ refused: a planner skill, which a run cannot use (1727.596771ms)
+✔ a placeholder inside a code fence, and the constraints tags, are not placeholders (1794.126041ms)
+✔ a Done when written as a list under its line is read whole (3606.591779ms)
+✔ refused: doctor --strict red (3574.559789ms)
+✔ an order with no install block is warned, not refused (1805.169605ms)
+✔ workorder writes the steps, the prompt and the runner, with its name in them (150.553872ms)
+✔ workorder never writes over a work order that exists (168.606633ms)
+✔ a work order needs a plain name (171.888033ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (104.114298ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.411191ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.44119ms)
+✔ the runner keeps its session logs out of git (KWB-98) (164.362208ms)
+✔ the runner waits out a usage limit and carries on, never counting it as a still session (KWB-125) (206.192543ms)
+✔ the runner starts no session on an order workorder check refuses (234.016177ms)
+✔ workorder --template rebuild writes the rebuild steps; an unknown template writes nothing (240.666843ms)
+✔ each template writes from a scratch folder with nothing left to fill in by the kit (236.296747ms)
+✔ the plugin template is the house decided: no angle bracket from the stack on, the HTML line, the install block (2.694236ms)
+✔ the rebuild template keeps every [if marker its source has, the HTML line and an install block (0.887179ms)
+✔ the prompt lands one branch per order and gates it with the tests the branch reaches (KWB-128) (0.198295ms)
+✔ the rebuild template names only skills, rules and tools the kit has (3.36492ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (16098.508769ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.332411ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37966.787999

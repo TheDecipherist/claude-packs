@@ -79,7 +79,7 @@ commands:
 5. The Mermaid chart of every module and every route, committed before any UI or engine code (`chart-first` refuses source before it).
 6. The cost unit measured: one INIT voice, the worst block, at 44.1 kHz and 128 samples, then at 48 kHz. The ledger above is re-scaled by it and the budget gate holds the measured figure (`cpu-worst-case-per-block`).
 
-**Done when:** `doctor --strict` is OK; an empty plugin loads and passes MIDI to a test tone; the standalone opens; every gate was seen red once and is green; `param-id-lock` exists; the chart is the first commit under `docs/`; the unit is measured at both rates and the ledger's total is within the budget.
+**Done when:** `doctor --strict` is OK; an empty plugin loads and passes MIDI to a test tone; the standalone opens; every gate was seen red once and is green; `param-id-lock` exists; the chart is the first commit under `docs/`; the unit is measured at 44.1 kHz and 48 kHz and the ledger's total is within the budget.
 
 ## W1. The parameter table, before any DSP
 
@@ -87,13 +87,13 @@ commands:
 2. Generated into the C++ the engine and the panel read; the host parameters are built from it by a loop.
 3. The id lock is updated in the same commit.
 
-**Done when:** a test reads the table and the generated C++ and finds every row in both; the lock lists every id; a planted id change is refused by `param-id-lock`.
+**Done when:** a test reads the table and the generated C++ and finds every row in both (0 missing); the lock lists every id; a planted id change is refused by `param-id-lock`.
 
 ## W2. Voices and modes  **[if polyphonic]**
 
 The voice count, the modes (poly, mono, legato, unison) and the voice stealing, from the interview's answers.
 
-**Done when:** the stated count sums without clipping (`voice-sum-headroom`) and renders within the measured budget per block; each mode has a gate that fails when a note is dropped or doubled (`note-ledger-and-pedals`).
+**Done when:** the stated count sums without clipping (`voice-sum-headroom`) and renders within the measured budget per block; each mode has a gate that fails when a note is dropped or doubled (`note-ledger-and-pedals`), with 0 dropped or doubled over 1,000 random notes per mode.
 
 ## W3. The oscillators
 
@@ -105,7 +105,7 @@ Each oscillator is its own voice path: its own filter, its own filter, amp and p
 
 The house filter, taken with `copy-and-prove`, or the filter the interview chose.
 
-**Done when:** the copy measures identical to its source; a sweep through the types shows no level drop beyond the house figure; one coefficient changed measures different.
+**Done when:** the copy measures identical to its source (0 samples differ); a sweep through the types shows no level drop beyond the house figure; one coefficient changed measures different.
 
 ## W5. Extra envelopes and LFOs
 
@@ -117,7 +117,7 @@ The free envelopes and LFOs the interview named, assignable to any control; ever
 
 One global chain with a send per oscillator and a DRY switch, by default. An insert per oscillator only where this order names it, with its ledger cost.
 
-**Done when:** a DRY oscillator measures identical with and without the chain; each send measures on the wet signal; each effect's neutral setting computes exactly nothing (`neutral-is-exact`); a reverb's decay is within tolerance at three settings (`measure-reverb`).
+**Done when:** a DRY oscillator measures identical with and without the chain (0 samples differ); each send measures on the wet signal; each effect's neutral setting computes exactly nothing (`neutral-is-exact`); a reverb's decay is within tolerance at three settings (`measure-reverb`).
 
 ## W7. The clock and the keys  **[if tempo-synced]**
 
@@ -136,17 +136,17 @@ Use `analyse-reference-look`, `new-panel-control`, `prove-control` and `hit-the-
 2. One class per kind of control, each written once; the panel is one table drawn in code from those numbers.
 3. The look gate compares the rendered panel to the picture element by element, depth rows included.
 
-**Done when:** every control comes from the template and the table (a structural test); every drawn control answers at its own centre and the count equals the chart's; the look gate passes, and is seen red on a moved control, a changed colour and a flattened shadow; no image ships in the source.
+**Done when:** every control comes from the template and the table (a structural test); every drawn control answers at its own centre and the count equals the chart's; the look gate passes, and is seen red on 3 planted faults (a moved control, a changed colour, a flattened shadow); no image ships in the source.
 
 ## W10. The presets
 
 Use `design-a-preset` and `spread-probe`. INIT is neutral through every stage. The bank is by category, every name the author's own.
 
-**Done when:** the stated count exists per category; INIT measures neutral (`neutral-is-exact`); every patch round-trips byte for byte and the four excluded controls are unchanged by a load; `spread-probe` says the bank really differs; the bank's gate from `design-a-preset` passes.
+**Done when:** the stated count exists per category; INIT measures neutral (`neutral-is-exact`); every patch round-trips byte for byte (0 bytes differ) and the 4 excluded controls are unchanged by a load; `spread-probe` says the bank really differs; the bank's gate from `design-a-preset` passes.
 
 ## W11. The realtime audit and the frame bench
 
-**Done when:** `juce-realtime-audit` has zero findings; the `asan-ubsan`, `tsan` and `rtsan` builds pass; `editor-frame-bench` measures paint and tick within budget.
+**Done when:** `juce-realtime-audit` has 0 findings; the `asan-ubsan`, `tsan` and `rtsan` builds pass; `editor-frame-bench` measures paint and tick within budget.
 
 ## W12. In the hosts
 
@@ -158,10 +158,10 @@ The DAW list: the hosts this order names, each one tested, because no single hos
 
 Read the finished work as a senior engineer would, down the house's list, line by line. An item that cannot be answered is listed open, never ticked. Where only a person can judge (how it sounds), say so.
 
-**Done when:** every line has an answer or is listed open, and what it found is in `bugs.md`.
+**Done when:** every line has an answer or is listed open (0 lines left blank), and what it found is in `bugs.md`.
 
 ## W14. The report
 
 Write `docs/workorders/{{name}}/report.md` and `summary.md`: what was built, what is proved and how, what is not; `logs` in full, with calls, refusals, right and wrong per hook; the ledger's estimate against the measurement.
 
-**Done when:** every section has counts or a stated reason there are none, and the report is pushed.
+**Done when:** each of the report's 4 parts (built, proved, not proved, the kit) has counts or a stated reason there are none, and the report is pushed.

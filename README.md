@@ -207,6 +207,8 @@ Write the steps with Claude, and the `write-a-workorder` skill keeps them honest
 **Done when:** all 41,206 rows of the sample load, the 12 known bad rows are each rejected with the right reason, and a planted bad row turns the test red.
 ```
 
+Before it runs, `workorder check billing` reads the order the way the run will and refuses what would stop it halfway, naming each: a placeholder left in angle brackets, a step whose "Done when" holds no number and no path to a test, a skill it names that the project has not installed (with the pack that brings it), and a red `doctor --strict`. An order with no install block gets a warning. `run.sh` and `PROMPT.md` run it before the first session and start nothing on a refusal.
+
 To run it, type `Run docs/workorders/billing/PROMPT.md` in Claude Code and watch, or leave it going with `bash docs/workorders/billing/run.sh`. Everything lands in files as it goes: `progress.md` line by line, `decisions.md` with each choice so you can overturn it, `bugs.md`, and a report with counts at the end. If a session ends, the next one picks up from `progress.md`, and it stops on a `DONE` file.
 
 **Read `run.sh` before you use it.** It runs Claude with permission prompts off, because nobody is there to answer. The hooks still judge every write, but use it only on a project you trust, in a repo you can roll back.
@@ -431,7 +433,8 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"`, `logs crashes`, `logs clear <hook>\|all fixed\|superseded "<why>"` |
 | `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing, and that a test answers each rule whose Check names one |
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed |
-| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template generic|plugin|rebuild` picks the steps (generic by default) |
+| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template` picks the steps: `generic` (the default), `plugin` or `rebuild` |
+| `workorder check <name>` | Before a run: refuses a placeholder left, a step with no measured Done when, a skill not installed, a red doctor |
 | `claude-ai-skill` | `workorder-writer.zip`: the guided work order interview, a skill to upload to claude.ai |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |

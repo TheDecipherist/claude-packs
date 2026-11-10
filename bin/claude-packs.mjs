@@ -20,6 +20,7 @@ import { logsCommand } from '../lib/logs.mjs';
 import { scan } from '../lib/scan.mjs';
 import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
 import { newWorkorder } from '../lib/workorder.mjs';
+import { workorderCheck } from '../lib/workorder-check.mjs';
 import { writeClaudeAiSkill } from '../lib/claude-ai-skill.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
@@ -35,6 +36,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      there, and a runner that starts session after session
                      --template <generic|plugin|rebuild>  the steps to start from: generic (blank, the default),
                                        plugin (a new synth or effect), rebuild (a hardware instrument as a plugin)
+  workorder check <name>  before a run: refuses a placeholder left, a step whose Done when has no number or test path,
+                     a skill named that is not installed (with the pack to add), and a red doctor --strict
   claude-ai-skill    workorder-writer.zip in <dir>: the guided work order interview, a skill to upload to claude.ai
   init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
                      and create the layout folders
@@ -117,8 +120,12 @@ async function main() {
     case 'claude-ai-skill':
       return writeClaudeAiSkill(dir);
     case 'workorder': {
+      if (rest[0] === 'check') return workorderCheck(dir, rest[1]);
       const template = rest.includes('--template') ? rest.splice(rest.indexOf('--template'), 2)[1] : undefined;
-      return newWorkorder(dir, rest[0], { template });
+      newWorkorder(dir, rest[0], { template });
+      console.log(`  What is left to fill in, as \`workorder check ${rest[0]}\` will judge it before a run starts:`);
+      await workorderCheck(dir, rest[0], { withDoctor: false });
+      return 0;
     }
     case 'init': {
       if (rest.includes('--auto')) {

@@ -17,6 +17,7 @@ The user wants this done from start to finish with no involvement. Nobody is rea
 <constraints>
 Always do:
 - Read these first, every session: this file, `workorder.md`, `docs/workorders/{{name}}/progress.md` (create it on the first run), `CLAUDE.md` and `build.md`.
+- Before the first item of the first session (no `progress.md` yet), run `{{kit}} workorder check {{name}}`. If it refuses, write what it names in `progress.md` under `BLOCKED: workorder check` and end the session there: an order that cannot finish is fixed by the person before it runs. This is the one stop this file allows.
 - Resume from `progress.md`: the first step not marked done, at its first unticked item.
 - After every finished item, append one line to `progress.md` before starting the next: `- YYYY-MM-DD W<n>.<item>: what was done, evidence path, commit`. The context may end at any moment, and the next session must be able to continue from that file alone.
 - Decide, and carry on. Write each choice in `docs/workorders/{{name}}/decisions.md` (`d-n`: the question, the options, what you chose and why). Prefer the choice that is easiest to reverse.

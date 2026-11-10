@@ -1,0 +1,21 @@
+== the placeholder refusal taken out: exit 1
+ℹ fail 1
+ℹ pass 8
+✖ refused: a placeholder left outside a code fence (1741.819544ms)
+== a step with no Done when let through: exit 1
+ℹ fail 1
+ℹ pass 8
+✖ refused: a step with no Done when line (1756.255311ms)
+== a Done when with no number let through: exit 1
+ℹ fail 1
+ℹ pass 8
+✖ refused: a Done when with no number and no path to a test (1806.948335ms)
+== the skill refusal taken out: exit 1
+ℹ fail 2
+ℹ pass 7
+✖ refused: a planner skill, which a run cannot use (1789.38129ms)
+✖ refused: a skill the project has not installed (1840.892162ms)
+== doctor not asked: exit 1
+ℹ fail 1
+ℹ pass 8
+✖ refused: doctor --strict red (1909.906317ms)
