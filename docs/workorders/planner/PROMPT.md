@@ -21,8 +21,13 @@ Always do:
 - After every finished item, append one line to `progress.md` before starting the next: `- YYYY-MM-DD W<n>.<item>: what was done, evidence path, commit`. The context may end at any moment, and the next session must be able to continue from that file alone.
 - Decide, and carry on. Write each choice in `docs/workorders/planner/decisions.md` (`d-n`: the question, the options, what you chose and why). Prefer the choice that is easiest to reverse.
 - A problem is never a reason to end. Log it, take the best honest way round, and go on to whatever can still be done.
-- Prove each step's "done when" by running it, with the evidence in `build/evidence/W<n>/`. A step is finished when it is measured, never when it looks right.
-- Work on one branch per step, `work/W<n>-<topic>`, pushed from its first commit, and land each finished step the way the `land-branch` skill says.
+- Prove each step's "done when" by running it, with the evidence in `docs/workorders/planner/evidence/W<n>/` (the public repo leaves `build/evidence/` out). The repo is public since 2026-11-09: mask any home path in committed evidence, and name no person.
+- Work on the one branch `work/1.6.0-planner` (the kit's law: one `work/<version>-<topic>` branch per order), made from the public `origin/main`, pushed from its first commit, and land it once, in W9, the way the `land-branch` skill says. Hold the kit lock throughout, one order at a time.
+- Start no agents. This PC's four agent slots are held by the V-Synth GT run in another project (the user, 2026-11-09); do every step yourself, one at a time.
+- The release is 1.6.0, not the 1.5.0 `workorder.md` names: research-gaps published 1.5.0 first (record it as a decision). The user's message is the yes for the release: the version bump, `npm publish` and the tag `v1.6.0`. If npm asks for a one-time code, list the publish open for the user and finish everything else.
+- W0.2 is already done: `planner` is in `.claude/layout.json` (folder and `kinds` row) and in `package.json` `files`, in the public repo's first commit. Measure it, and go on.
+- The user's holds for this order: every claude.ai skill the order reads is synced at `~/.claude/skills/synced/*/<skill>/`; if an `ls` finds nothing, stop that item and list it open with the exact command, and never write a skill from memory. The planner skills call pack skills (`design-a-preset`, `synth-cost`) and never copy their text. `inputs/` is read, not edited; W8 deletes it in its own commit. Templates are chosen by `--template`, never by configuration (d-1). `test/no-personal-name.test.mjs` is repo-wide: nothing under `planner/` or `inputs/` may name a person.
+- KWB-128 (this PROMPT template asks for a branch per step and a full suite at the end) belongs to this order's area: fix `prompts/workorder/PROMPT.md` with the templates in W1, with a test, or list it open with why.
 - Log every bug in `bugs.md` before fixing it, and every fault in the kit in `workflow-bugs.md`.
 - Follow every rule in `.claude/rules` and every skill that applies.
 - After a refusal, once you know the answer, mark it: `npx --no-install @thedecipherist/claude-packs logs mark <id> right|wrong "<why>"`.
@@ -50,4 +55,4 @@ A session may end at any time, and a new one resumes from `progress.md`. While a
 
 ## When everything is done
 
-Run the full test suite, `doctor --strict`, `scan` and `logs` one last time, with their outputs in `build/evidence/final/`. Only then write `docs/workorders/planner/DONE`, with the date and the final commit. Every step's "done when" must be measured first, or listed as `BLOCKED BY KIT`, or left open with a reason no further work could remove. Then say, in ten lines or fewer, what was built, what is proved, and what is not.
+Run `npm run test:changed -- --base origin/main` (the full suite runs only when the user asks for it, and this order does not), `doctor --strict`, `scan` and `logs` one last time, with their outputs in `docs/workorders/planner/evidence/final/`. Only then write `docs/workorders/planner/DONE`, with the date and the final commit. Every step's "done when" must be measured first, or listed as `BLOCKED BY KIT`, or left open with a reason no further work could remove. Then say, in ten lines or fewer, what was built, what is proved, and what is not.
