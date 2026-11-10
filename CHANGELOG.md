@@ -3,6 +3,7 @@
 ## Unreleased
 
 - A menu is one route table (`instrument-shell`): the rule `menu-is-one-route-table` and the tool `route-table.mjs`. `check` judges the table a project writes from its own: one outcome for each page, input and condition, every page reached from the start, a way back to the start from every page, every input routed or declared inert with its reason, every pulldown and window closing back to the page beneath, and no route to a page or input that does not exist. `mermaid` draws one diagram per branch from the table, for a person to read; the table stays the source. Each law is seen to catch its planted fault (`--selftest`, `test/route-table.test.mjs`).
+- What a layer hides does no work (`instrument-shell`): the rule `hidden-under-a-layer-is-idle` (under an opaque layer nothing is drawn, ticked or animated, what shows through a translucent one still is, the sound and the parameters go on, and the page beneath is drawn once at close at its current values) and the skill `prove-hidden-is-idle` (paints and ticks counted under every layer for a second, 0, with a planted meter left running seen red).
 - `menu-map` reads the routes as well as the pages: which press opens which page, from the firmware's own page changes, with the manual as the second source.
 - KWB-141: `test-changed` sends a change under `planner/` to the planner test.
 

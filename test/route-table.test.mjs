@@ -65,10 +65,10 @@ test('the Mermaid is drawn from the table: each branch has its own diagram, and 
   assert.deepEqual(readdirSync(dir).sort(), ['Edit.mmd', 'Play.mmd']);
 });
 
-test('instrument-shell installs the tool and its rule, and the installed tool proves itself', () => {
+test('instrument-shell installs the route tool, its rule and the layer law, and the installed tool proves itself', () => {
   const dir = fresh('routes-install-');
   run(dir, 'init', 'instrument-shell');
-  for (const f of ['tools/route-table.mjs', 'tools/lib/route-judge.mjs', 'tools/lib/route-mermaid.mjs', 'tools/lib/route-plants.mjs', 'rules/menu-is-one-route-table.md']) {
+  for (const f of ['tools/route-table.mjs', 'tools/lib/route-judge.mjs', 'tools/lib/route-mermaid.mjs', 'tools/lib/route-plants.mjs', 'rules/menu-is-one-route-table.md', 'rules/hidden-under-a-layer-is-idle.md', 'skills/prove-hidden-is-idle/SKILL.md']) {
     assert.ok(existsSync(join(dir, '.claude', f)), f);
   }
   const self = spawnSync('node', [join(dir, '.claude/tools/route-table.mjs'), '--selftest'], { encoding: 'utf8' });
