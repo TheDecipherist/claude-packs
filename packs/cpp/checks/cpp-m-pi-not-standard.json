@@ -1,0 +1,23 @@
+{
+  "id": "cpp-m-pi-not-standard",
+  "why": "M_PI is not standard C++: MSVC hides it, and the missing name cascades into strange errors. std::numbers has it.",
+  "rule": ".claude/rules/cpp-builds-everywhere.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\bM_(?:PI|PI_2|PI_4|E|SQRT2|LN2)\\b",
+  "bad": "const double w = 2.0 * M_PI * f;",
+  "good": "const double w = 2.0 * std::numbers::pi * f;",
+  "code": true
+}

@@ -1,0 +1,43 @@
+{
+  "name": "nginx",
+  "version": "1.0.0",
+  "description": "NGINX in front of containers: Docker DNS resolver, keepalive, stdout logs, headers with always, CSP, ModSecurity/CRS tuning.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/nginx"
+  },
+  "keywords": [
+    "nginx",
+    "waf"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
+  "folders": {},
+  "concepts": {
+    "nginx-conf": [
+      "**/nginx.conf",
+      "**/*.nginx.conf",
+      "**/nginx/**",
+      "**/conf.d/**/*.conf",
+      "**/sites-enabled/**"
+    ],
+    "modsec": [
+      "**/modsecurity.conf",
+      "**/modsecurity.d/**",
+      "**/modsec*/**",
+      "**/crs-setup.conf",
+      "**/*.modsec.conf",
+      "**/owasp-crs/**",
+      "**/REQUEST-*.conf",
+      "**/RESPONSE-*.conf"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

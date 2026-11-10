@@ -1,0 +1,84 @@
+{
+  "name": "js-ts",
+  "version": "1.0.0",
+  "description": "JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/js-ts"
+  },
+  "keywords": [
+    "javascript",
+    "typescript"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
+  "folders": {},
+  "concepts": {
+    "js": [
+      "**/*.js",
+      "**/*.mjs",
+      "**/*.cjs",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx"
+    ],
+    "ts": [
+      "**/*.ts",
+      "**/*.tsx"
+    ],
+    "js-tests": [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.test.js",
+      "**/*.test.mjs"
+    ],
+    "tsconfig": [
+      "**/tsconfig*.json"
+    ],
+    "routes": [
+      "**/routes/**/*.ts",
+      "**/server/**/*.ts",
+      "**/app.ts",
+      "**/server.ts"
+    ],
+    "entry": [
+      "**/server.ts",
+      "**/server.js",
+      "**/server.mjs",
+      "**/src/index.ts",
+      "**/src/index.js",
+      "**/src/main.ts",
+      "**/src/app.ts",
+      "**/index.ts",
+      "**/bin/**",
+      "**/worker/**/index.*",
+      "**/*.worker.ts",
+      "**/lifecycle.*"
+    ],
+    "schemas": [
+      "**/schemas/**",
+      "**/schema/**",
+      "**/*.schema.ts",
+      "**/*.schema.js",
+      "**/models/**",
+      "**/types/**"
+    ],
+    "handlers": [
+      "**/routes/**",
+      "**/handlers/**",
+      "**/adapters/**",
+      "**/services/**",
+      "**/controllers/**",
+      "**/app/api/**"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

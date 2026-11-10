@@ -1,0 +1,23 @@
+{
+  "name": "dynamic-data",
+  "version": "1.0.0",
+  "description": "Systems driven by definitions: a CMS, an admin generator, a low-code platform. One definition drives every surface, the engine enforces and the UI only reflects, every dynamic surface has a boundary, and nothing an import brings is dropped silently.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/dynamic-data"
+  },
+  "keywords": [
+    "cms",
+    "admin",
+    "metadata",
+    "low-code"
+  ],
+  "engines": {
+    "claude-packs": ">=0.26.0"
+  }
+}

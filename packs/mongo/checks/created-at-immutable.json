@@ -1,0 +1,25 @@
+{
+  "id": "created-at-immutable",
+  "why": "Rewriting created_at to re-sort a queue destroys the audit trail. Add queued_at and sort on that.",
+  "rule": ".claude/rules/writes-are-atomic.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\$set\\s*:\\s*\\{[^}]*\\bcreated_at\\s*:",
+  "bad": "{ $set: { status: 'open', created_at: now } }",
+  "good": "{ $set: { status: 'open', queued_at: now } }"
+}

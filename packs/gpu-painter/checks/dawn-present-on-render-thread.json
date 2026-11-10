@@ -1,0 +1,17 @@
+{
+  "id": "dawn-present-on-render-thread",
+  "why": "Getting the surface texture and presenting must happen only on the render thread (Fifo present blocks; encoders are not thread-safe). Keep those calls in the render-thread files.",
+  "rule": ".claude/rules/dawn-device-and-render-thread.md",
+  "concepts": [
+    "painter",
+    "ui",
+    "app"
+  ],
+  "exclude": [
+    "@render_thread"
+  ],
+  "pattern": "\\bwgpuSurface(Present|GetCurrentTexture)\\s*\\(|\\.\\s*(Present|GetCurrentTexture)\\s*\\(",
+  "code": true,
+  "bad": "void Editor::paint (juce::Graphics&) { surface.GetCurrentTexture (&tex); surface.Present(); }",
+  "good": "void Editor::paint (juce::Graphics&) { renderThread.requestFrame(); }"
+}

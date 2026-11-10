@@ -1,0 +1,21 @@
+{
+  "id": "no-inline-client-script",
+  "why": "Browser JavaScript inside a .ts template string is untyped, unlinted and untested, and every edit risks the CSP nonce. Serve a static client file.",
+  "rule": ".claude/rules/server-html-escapes-everything.md",
+  "concepts": [
+    "ui-templates"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**"
+  ],
+  "code": false,
+  "pattern": "<script\\b(?![^>]*\\b(?:src=|type=[\"']application/(?:ld\\+)?json))[^>]*>[\\s\\S]{300,}?</script>",
+  "bad": "<script>a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()x<y;a()</script>\n",
+  "good": "<script src=\"/app.js\" nonce=\"${nonce}\"></script>\n<script>boot();</script>\n"
+}

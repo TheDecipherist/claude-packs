@@ -1,0 +1,25 @@
+{
+  "id": "health-checks-nothing",
+  "why": "A health check that always says ok keeps a broken service in rotation.",
+  "rule": ".claude/rules/compose-pinned-and-closed.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "res\\.json\\(\\{\\s*status:\\s*'ok',\\s*service\\b",
+  "bad": "res.json({ status: 'ok', service: name });",
+  "good": "const ok = await pingDb();\nres.json({ status: ok ? 'ok' : 'degraded', service: name });"
+}

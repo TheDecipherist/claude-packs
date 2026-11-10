@@ -1,0 +1,28 @@
+{
+  "id": "hijack-needs-try",
+  "why": "After reply.hijack() Fastify's error handler cannot answer; a throw leaves the socket open forever. Wrap what follows in try/catch that ends the raw response.",
+  "rule": ".claude/rules/streams-and-hijacks.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "mode": "needs",
+  "pattern": "\\.hijack\\s*\\(\\s*\\)",
+  "needs": [
+    "\\btry\\s*\\{"
+  ],
+  "bad": "reply.hijack();\nconst stop = await streamChanges(raw, session._id);",
+  "good": "reply.hijack();\ntry { await streamChanges(raw, session._id); } catch (err: unknown) { log.error({ err }, 'sse failed'); raw.end(); }"
+}

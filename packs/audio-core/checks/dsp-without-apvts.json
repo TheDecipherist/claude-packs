@@ -1,0 +1,12 @@
+{
+  "id": "dsp-without-apvts",
+  "why": "DSP blocks take a plain parameter struct so the same sources build into the plugin, the tests and the benchmark; they never reach into the parameter tree.",
+  "rule": ".claude/rules/optimisations-are-null-tested.md",
+  "concepts": [
+    "dsp"
+  ],
+  "pattern": "AudioProcessorValueTreeState|getRawParameterValue|\\bapvts\\b",
+  "code": true,
+  "bad": "void Filter::prepare (juce::AudioProcessorValueTreeState& apvts) { cutoff = apvts.getRawParameterValue (\"cutoff\"); }",
+  "good": "void Filter::setParams (const FilterParams& p) noexcept { cutoff = p.cutoff; }"
+}

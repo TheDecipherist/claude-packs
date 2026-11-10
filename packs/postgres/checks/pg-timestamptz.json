@@ -1,0 +1,18 @@
+{
+  "id": "pg-timestamptz",
+  "why": "timestamp keeps no time zone, so the same value means different moments on different servers.",
+  "rule": ".claude/rules/postgres-types-say-what-they-hold.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)(?:[^\\n]*[(,\\s])?\"?\\w+\"?\\s+TIMESTAMP\\b(?:\\s*\\(\\d\\))?(?!\\s+WITH\\s+TIME\\s+ZONE)",
+  "flags": "im",
+  "bad": "created_at timestamp NOT NULL",
+  "good": "created_at timestamptz NOT NULL"
+}

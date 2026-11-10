@@ -1,0 +1,32 @@
+{
+  "id": "rust-stub-left-in",
+  "why": "A stub or a debug print compiles, so it ships. `unimplemented!` stays allowed: it is a decision, not a leftover.",
+  "rule": ".claude/rules/rust-lints-are-the-gate.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/benches/**",
+    "**/examples/**",
+    "**/fixtures/**",
+    "**/test_data/**",
+    "**/testdata/**",
+    "**/fuzz/**",
+    "**/xtask/**",
+    "**/target/**",
+    "**/vendor/**",
+    "**/build.rs",
+    "**/tests.rs",
+    "**/test.rs",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    "**/test_*.rs"
+  ],
+  "language": "rust",
+  "notInTests": true,
+  "pattern": "\\b(?:todo|dbg)!\\s*[(\\[{]",
+  "bad": "fn load() -> Config { todo!() }",
+  "good": "fn load() -> Result<Config> { read_config() }"
+}

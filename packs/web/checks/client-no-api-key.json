@@ -1,0 +1,29 @@
+{
+  "id": "client-no-api-key",
+  "why": "A key or connection string under app/, components/, client/ or public/ ships to every browser. Server-side only, through the env module.",
+  "rule": ".claude/rules/client-boundaries.md",
+  "concepts": [
+    "client"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*",
+    "**/app/api/**",
+    "**/route.ts",
+    "**/route.js"
+  ],
+  "code": false,
+  "pattern": "sk-ant-|ANTHROPIC_API_KEY|OPENAI_API_KEY|MONGODB_URI|mongodb(?:\\+srv)?://",
+  "bad": "const key = process.env.ANTHROPIC_API_KEY;",
+  "good": "const res = await fetch('/api/critic', { method: 'POST', body });"
+}

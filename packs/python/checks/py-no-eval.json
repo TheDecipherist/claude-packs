@@ -1,0 +1,18 @@
+{
+  "id": "py-no-eval",
+  "why": "eval and exec run whatever text they are given.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^[^#\\n]*(?<![\\w.])(?:eval|exec)\\(",
+  "flags": "m",
+  "bad": "value = eval(text)",
+  "good": "value = json.loads(text)\nmodel.eval()"
+}

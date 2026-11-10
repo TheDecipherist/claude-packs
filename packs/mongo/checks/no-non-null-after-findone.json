@@ -1,0 +1,25 @@
+{
+  "id": "no-non-null-after-findone",
+  "why": "(await findOne())! after a write turns a race (purge, archive) into a TypeError reported as INTERNAL. Return the document from findOneAndUpdate, or handle null.",
+  "rule": ".claude/rules/writes-are-atomic.md",
+  "concepts": [
+    "db-gateway",
+    "db-callers"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\(\\s*await\\s+[^()]*findOne\\s*\\((?:[^()]|\\([^()]*\\))*\\)\\s*\\)\\s*!|\\bawait\\s+[\\w.]*findOne\\s*\\((?:[^()]|\\([^()]*\\))*\\)\\s*;[^;]{0,120}?\\b(\\w+)!\\)",
+  "bad": "return (await goals.findOne({ _id: r.insertedId }))!;\nconst experiment = await scope.experiments.findOne({ _id });\nreturn { experiment: toResponse(experiment!) };",
+  "good": "const doc = await goals.findOneAndUpdate(filter, update, { upsert: true, returnDocument: 'after' });\nif (doc === null) throw new AdmiralError(ErrorCodes.NOT_FOUND, 'goal vanished');"
+}

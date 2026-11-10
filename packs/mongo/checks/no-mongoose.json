@@ -1,0 +1,23 @@
+{
+  "id": "no-mongoose",
+  "why": "Mongoose is not used: the native driver plus Zod is the data layer.",
+  "rule": ".claude/rules/driver-only-in-gateway.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/package.json"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "pattern": "[\\\"']mongoose[\\\"']",
+  "bad": "import mongoose from 'mongoose';",
+  "good": "import { MongoClient } from 'mongodb';"
+}

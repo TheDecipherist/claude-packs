@@ -1,0 +1,17 @@
+{
+  "id": "hook-refusal-on-stderr",
+  "why": "On exit 2 only stderr reaches Claude: a reason echoed to stdout is lost, and the refusal reads as nothing.",
+  "rule": ".claude/rules/a-refusal-is-exit-2.md",
+  "concepts": [
+    "hook-files"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/*.test.*"
+  ],
+  "pattern": "^\\s*echo\\b(?![^\\n]*>&2)[^\\n]*\\b(?:BLOCKED|REFUSED|refused|denied)\\b",
+  "bad": "echo \"BLOCKED: no force push\"\nexit 2\n",
+  "good": "echo \"BLOCKED: no force push\" >&2\nexit 2\n",
+  "flags": "m"
+}

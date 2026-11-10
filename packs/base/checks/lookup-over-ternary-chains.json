@@ -1,0 +1,20 @@
+{
+  "id": "lookup-over-ternary-chains",
+  "why": "A ternary chain is a lookup table written as control flow: adding a kind means finding every chain, and the compiler checks none of them.",
+  "rule": ".claude/rules/lookup-over-if-chains.md",
+  "concepts": [
+    "cpp",
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.min.js"
+  ],
+  "code": true,
+  "pattern": "\\?(?:[^?:;,()\\n]|::|\\((?:[^()\\n]|\\([^()\\n]*\\))*\\))*:(?:[^?:;,()\\n]|::|\\((?:[^()\\n]|\\([^()\\n]*\\))*\\))*\\?(?:[^?:;,()\\n]|::|\\((?:[^()\\n]|\\([^()\\n]*\\))*\\))*:(?:[^?:;,()\\n]|::|\\((?:[^()\\n]|\\([^()\\n]*\\))*\\))*\\?",
+  "bad": "const char* n = s == a ? \"A\" : s == b ? \"B\" : s == c ? \"C\" : \"D\";",
+  "good": "const auto f = g ? h : i ? j : k;\nprint (a ? \"x\" : \"y\", b ? \"x\" : \"y\", c ? \"x\" : \"y\");"
+}

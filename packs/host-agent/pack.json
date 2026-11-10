@@ -1,0 +1,22 @@
+{
+  "name": "host-agent",
+  "version": "1.0.0",
+  "description": "Software that runs as root on machines it does not own: updates are verified, secrets stay off the command line, system files are replaced atomically, and generated config is escaped.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/host-agent"
+  },
+  "keywords": [
+    "agent",
+    "daemon",
+    "security"
+  ],
+  "engines": {
+    "claude-packs": ">=0.25.0"
+  }
+}

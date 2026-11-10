@@ -1,0 +1,28 @@
+{
+  "id": "rate-limit-one-module",
+  "why": "Per-process limits multiply by replica count and vanish on restart, and six copies means six places to fix.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\b(?:rateLimit\\w*|rateStore)\\s*(?::[^=\\n]+)?=\\s*new Map\\b",
+  "bad": "const rateStore = new Map();",
+  "good": "import { rateLimit } from './rate-limit';",
+  "kind": "security"
+}

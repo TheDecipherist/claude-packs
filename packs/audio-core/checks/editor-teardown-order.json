@@ -1,0 +1,20 @@
+{
+  "id": "editor-teardown-order",
+  "why": "This editor's destructor takes away the timer or the look-and-feel while a parameter attachment is still connected, and resets the attachment after. Until that reset, the host can move the parameter (automation runs while the editor closes), and the attachment updates a control whose look-and-feel or timer is already gone. Reset the attachments first, as the first lines of the destructor, then stopTimer() and setLookAndFeel (nullptr).",
+  "rule": ".claude/rules/editor-destruction-order.md",
+  "globs": [
+    "**/*Editor.cpp",
+    "**/*Editor.h"
+  ],
+  "exclude": [
+    "**/third_party/**",
+    "**/build/**",
+    "**/_deps/**",
+    "**/JUCE/**"
+  ],
+  "code": true,
+  "kind": "correctness",
+  "pattern": "~\\w*Editor\\s*\\(\\s*\\)\\s*(?:override\\s*)?(?:noexcept\\s*)?\\{(?:[^{}]|\\{[^{}]*\\})*?\\b(?:setLookAndFeel\\s*\\(\\s*nullptr\\s*\\)|stopTimer\\s*\\(\\s*\\))(?:[^{}]|\\{[^{}]*\\})*?\\b\\w*[Aa]ttach\\w*\\s*(?:(?:\\.|->)\\s*(?:reset|clear)\\s*\\(|=\\s*nullptr)",
+  "bad": "SynthEditor::~SynthEditor()\n{\n    stopTimer();\n    setLookAndFeel (nullptr);\n    cutoffAttachment.reset();\n}",
+  "good": "SynthEditor::~SynthEditor()\n{\n    cutoffAttachment.reset();\n    attachments.clear();\n    stopTimer();\n    setLookAndFeel (nullptr);\n}"
+}

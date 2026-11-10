@@ -1,0 +1,24 @@
+{
+  "id": "timing-from-synthcore",
+  "why": "Tempo, MIDI clock and transport are written once, in synthcore. A unit that reads the play head or counts clock bytes itself is a second clock, and two clocks drift. Go through core::CoreHost.",
+  "rule": ".claude/rules/timing-from-synthcore.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/build/**",
+    "**/_deps/**",
+    "**/JUCE/**"
+  ],
+  "pattern": "\\bgetPlayHead\\s*\\(\\s*\\)\\s*(?:->|\\.)|\\bisMidiClock\\s*\\(",
+  "code": true,
+  "bad": "const auto pos = getPlayHead()->getPosition();",
+  "good": "host.readTransport (getPlayHead(), midi, n);"
+}

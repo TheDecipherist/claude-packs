@@ -1,0 +1,27 @@
+{
+  "id": "no-any",
+  "why": "`any` switches the type checker off for everything it touches; use `unknown` and narrow (Zod, instanceof, a type guard), or a generic.",
+  "rule": ".claude/rules/no-any.md",
+  "concepts": [
+    "ts"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/tests/**",
+    "**/test/**",
+    "**/*.config.*",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.d.ts"
+  ],
+  "code": true,
+  "pattern": "(:\\s*any\\b|\\bas\\s+any\\b|<any>|\\bany\\[\\]|Array<any>|Record<[^>]*,\\s*any>)",
+  "bad": "function handle(body: any) { return body.x as any; }",
+  "good": "function handle(body: unknown) { const b = BodySchema.parse(body); return b.x; }\nconst company = 'any company'; // any in prose"
+}

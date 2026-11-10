@@ -1,0 +1,16 @@
+{
+  "id": "one-seeded-random",
+  "why": "Stellix rule 4: formulas by default; the only randomness is the world's one seeded generator (RANDOM, 6.6). No other random call may exist in the engine, the world or the drawing.",
+  "rule": ".claude/rules/stellix-deterministic-world.md",
+  "concepts": [
+    "cpp"
+  ],
+  "exclude": [
+    "@seeded_random",
+    "**/tests/**"
+  ],
+  "pattern": "(?<![\\w.])(?:std::)?(?:s?rand|random|drand48|lrand48|arc4random(?:_uniform)?)\\s*\\(|\\b(?:random_device|mt19937(?:_64)?|minstd_rand0?|default_random_engine|ranlux\\w+|knuth_b)\\b|\\b\\w+_distribution\\b|\\bjuce::Random\\b|(?<![\\w:])Random\\s*(?:::|\\w+\\s*[;({=])|\\bgetSystemRandom\\b|\\bSecRandomCopyBytes\\b|\\bRAND_bytes\\b",
+  "code": true,
+  "bad": "float jitter = juce::Random::getSystemRandom().nextFloat();\nstd::mt19937 g (42);\nstd::uniform_real_distribution<float> d (0, 1);\nuint32_t v = arc4random_uniform (8);",
+  "good": "float jitter = world.seeded().next01();\nauto n = randomSource.next(); int operand (int); bool israndom;\ninline float hash (int i) { return std::sin (float (i) * 12.98f) * 43758.5f; }"
+}

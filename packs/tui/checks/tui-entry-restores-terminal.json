@@ -1,0 +1,27 @@
+{
+  "id": "tui-entry-restores-terminal",
+  "why": "Entering the alternate screen or raw mode without an exit handler that restores them strands the user in a broken terminal after a crash. process.once('exit', restore), registered before the first render.",
+  "rule": ".claude/rules/tui-resize-and-screen.md",
+  "concepts": [
+    "tui",
+    "tui-entry"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "\\?1049h|setRawMode\\s*\\(\\s*true\\s*\\)",
+  "needs": [
+    "\\?1049l|setRawMode\\s*\\(\\s*(?:false|wasRaw|prev\\w*|was\\w*)\\s*\\)",
+    "process\\.(?:once|on)\\s*\\(\\s*['\\\"](?:exit|SIGINT)['\\\"]"
+  ],
+  "bad": "process.stdout.write('\\x1B[?1049h\\x1B[?25l');\nconst { waitUntilExit } = render(<App />);",
+  "good": "process.stdout.write('\\x1B[?1049h\\x1B[?25l');\nconst restore = () => process.stdout.write('\\x1B[?25h\\x1B[?1049l');\nprocess.once('exit', restore);\nconst { waitUntilExit } = render(<App />);"
+}

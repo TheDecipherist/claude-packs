@@ -1,0 +1,28 @@
+{
+  "id": "ds-pages-compose-primitives",
+  "why": "A raw <button>/<input>/<select>/<textarea> in a page is an unstyled control one wave away from an unstyled surface. Compose Button and Field from the primitives module.",
+  "rule": ".claude/rules/ui-primitives-one-module.md",
+  "concepts": [
+    "pages"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*",
+    "**/components/ui/**",
+    "**/ui/**"
+  ],
+  "code": false,
+  "pattern": "<(?:button|input|select|textarea)[\\s>/]",
+  "bad": "<button className=\"px-3 py-1 rounded\" onClick={save}>Save</button>",
+  "good": "<Button onClick={save}>Save changes</Button>"
+}

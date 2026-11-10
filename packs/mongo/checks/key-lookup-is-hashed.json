@@ -1,0 +1,24 @@
+{
+  "id": "key-lookup-is-hashed",
+  "why": "One database read, backup or log then yields every customer's working credential.",
+  "rule": ".claude/rules/keys-hashed-input-picked.md",
+  "concepts": [
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\$match:\\s*\\{\\s*(?:apiKey|token)\\b|find(?:One)?\\(\\s*\\{\\s*(?:apiKey|token)\\b",
+  "bad": "col.aggregate([{ $match: { apiKey } }]);",
+  "good": "col.aggregate([{ $match: { apiKeyHash: sha256(apiKey) } }]);"
+}

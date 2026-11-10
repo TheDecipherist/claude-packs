@@ -1,0 +1,28 @@
+---
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  google-readability-casting,
+  cppcoreguidelines-narrowing-conversions,
+  cppcoreguidelines-special-member-functions,
+  cppcoreguidelines-init-variables,
+  cppcoreguidelines-virtual-class-destructor,
+  google-explicit-constructor,
+  google-global-names-in-headers,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
+  performance-*,
+  readability-make-member-function-const,
+  misc-definitions-in-headers
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*/(Source|src|lib|include)/.*'
+CheckOptions:
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: true
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: 'juce::String;juce::Identifier'
+...

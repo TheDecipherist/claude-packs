@@ -1,0 +1,18 @@
+{
+  "id": "py-no-swallowed-exception",
+  "why": "An exception caught and dropped is a failure nobody will ever see. Handle it, log it, or let it rise.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^\\s*except\\b[^\\n]*:\\s*(?:#[^\\n]*)?\\n\\s*pass\\b|^\\s*except\\b(?:\\s+\\(?(?:Exception|BaseException)\\b[^\\n:]*)?:[ \\t]*(?:pass|continue|return\\b(?:[ \\t]+(?:None|True|False|0|1|\\[\\]|\\{\\}|\"\"|''))?)[ \\t]*(?:#[^\\n]*)?$",
+  "flags": "m",
+  "bad": "try:\n    run()\nexcept ValueError:\n    pass\ntry:\n    run()\nexcept Exception: return 0",
+  "good": "try:\n    run()\nexcept ValueError as e:\n    log.warning(e)\ntry:\n    run()\nexcept FileNotFoundError: return None"
+}

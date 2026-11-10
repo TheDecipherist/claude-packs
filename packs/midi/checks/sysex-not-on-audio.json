@@ -1,0 +1,24 @@
+{
+  "id": "sysex-not-on-audio",
+  "why": "Decoding a dump on the audio thread blocks it. Hand the message off.",
+  "rule": ".claude/rules/sysex-is-a-record.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "(?:parse|load|decode|apply)\\w*\\s*\\([^;\\n]*getSysExData",
+  "bad": "loadPatch (m.getSysExData(), n);",
+  "good": "sysexInbox.push (m);",
+  "flags": "i",
+  "code": true
+}

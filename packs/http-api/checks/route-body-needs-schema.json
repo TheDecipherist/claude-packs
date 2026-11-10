@@ -1,0 +1,31 @@
+{
+  "id": "route-body-needs-schema",
+  "why": "A TypeScript type on a request body is a wish; only a runtime parse makes it true, and with Mongo the difference is operator injection.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/app/api/**/route.ts",
+    "**/app/api/**/route.js",
+    "**/routes/**/*.ts",
+    "**/routes/**/*.js"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\bawait\\s+(?:req|request)\\.json\\(\\)|\\breq\\.body\\b",
+  "mode": "needs",
+  "needs": [
+    "(?<!JSON)\\.(?:safeParse|parse)\\("
+  ],
+  "bad": "const body = await request.json();\nconst { a } = body;",
+  "good": "const body = Schema.parse(await request.json());",
+  "kind": "security"
+}

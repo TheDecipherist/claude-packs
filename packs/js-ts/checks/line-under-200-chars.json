@@ -1,0 +1,34 @@
+{
+  "id": "line-under-200-chars",
+  "why": "A 200+ character line hides awaits inside ternaries inside object literals, or holds a 1,100-character description string. Split it, or move the text to a descriptions table.",
+  "rule": ".claude/rules/stack-is-fastify-and-nextjs.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.min.*",
+    "**/*.d.ts",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/scripts/**",
+    "**/templates/**",
+    "**/views/**",
+    "**/ui/**",
+    "**/*.view.ts",
+    "**/*generated*",
+    "**/data/**"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^(?!\\s*(?:import\\b|export \\{|export \\*)).{201,}$",
+  "bad": "const x = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';",
+  "good": "const x = 'short';"
+}

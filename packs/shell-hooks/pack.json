@@ -1,0 +1,36 @@
+{
+  "name": "shell-hooks",
+  "version": "1.0.0",
+  "description": "Shell and Node hooks for Claude Code: portable, anchored, quoted, one prelude, JSON by a tool.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/shell-hooks"
+  },
+  "keywords": [
+    "hooks",
+    "shell"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
+  "folders": {},
+  "concepts": {
+    "shell-hooks": [
+      "**/hooks/**/*.sh",
+      "**/hooks/**/*.mjs",
+      "**/hooks/**/*.js",
+      "**/hooks/**/*.cjs"
+    ],
+    "hook-settings": [
+      "**/.claude/settings.json",
+      "**/.claude/settings.local.json"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

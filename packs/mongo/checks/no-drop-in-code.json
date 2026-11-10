@@ -1,0 +1,27 @@
+{
+  "id": "no-drop-in-code",
+  "why": "dropDatabase()/drop() in application code is an ops runbook action with a human gate, not a script line.",
+  "rule": ".claude/rules/deletes-name-what-dies.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts",
+    "db-callers"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/data/**"
+  ],
+  "code": true,
+  "pattern": "\\.(dropDatabase|dropCollection)\\s*\\(|\\bcollection\\([^)]*\\)\\s*\\.drop\\s*\\(",
+  "bad": "await db.dropDatabase();",
+  "good": "await col.deleteMany({ sessionId });"
+}

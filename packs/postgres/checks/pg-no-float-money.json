@@ -1,0 +1,19 @@
+{
+  "id": "pg-no-float-money",
+  "why": "A float cannot hold 0.10 exactly, so amounts drift.",
+  "rule": ".claude/rules/postgres-types-say-what-they-hold.md",
+  "globs": [
+    "**/*.sql",
+    "**/*.prisma"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)(?:[^\\n]*[(,\\s])?\"?(?:\\w*_)?(?:price|prices|amount|amounts|cost|costs|balance|balances|fee|fees|tax|taxes|total|totals)(?:_\\w*)?\"?\\s+(?:REAL|FLOAT\\d?|DOUBLE\\s+PRECISION|Float)\\b",
+  "flags": "im",
+  "bad": "unit_price double precision NOT NULL",
+  "good": "unit_price numeric(12, 2) NOT NULL"
+}

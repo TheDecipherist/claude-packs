@@ -1,0 +1,26 @@
+{
+  "id": "debug-route-not-shipped",
+  "why": "Temporary access paths are never removed, and an AI writes the comment instead of the check because the comment passes every test.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/app/api/**/debug/route.ts",
+    "**/app/api/**/test/route.ts",
+    "**/app/api/**/*-test/route.ts"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "export\\s+async\\s+function\\s+(?:GET|POST|PUT|PATCH|DELETE)\\b",
+  "bad": "export async function GET() {}",
+  "good": "const x = 1;",
+  "kind": "security"
+}

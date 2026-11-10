@@ -1,0 +1,27 @@
+{
+  "id": "captcha-is-not-constant",
+  "why": "A constant captcha answer is passed by any script that has seen it once.",
+  "rule": ".claude/rules/public-forms-are-defended.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\b\\w*CAPTCHA\\w*ANSWER\\w*\\s*=\\s*['\\\"`]|\\b(?:captcha|challenge)\\w*[Aa]nswer\\s*=\\s*['\\\"`]",
+  "bad": "const CAPTCHA_ANSWER = 'K';",
+  "good": "const answer = await newChallenge(session);",
+  "kind": "security"
+}

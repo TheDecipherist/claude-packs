@@ -1,0 +1,18 @@
+{
+  "id": "cpp-hardened-test-build",
+  "why": "Standard library hardening turns an out-of-range index into a stop instead of silent memory access. A test build should have it.",
+  "rule": ".claude/rules/cpp-absent-and-failed-are-types.md",
+  "concepts": [],
+  "globs": [
+    "**/CMakePresets.json"
+  ],
+  "exclude": [],
+  "code": false,
+  "pattern": "\"CMAKE_CXX_FLAGS\"\\s*:",
+  "bad": "{\"CMAKE_CXX_FLAGS\": \"-O2\"}",
+  "good": "{\"CMAKE_CXX_FLAGS\": \"-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST\"}",
+  "mode": "needs",
+  "needs": [
+    "_LIBCPP_HARDENING_MODE|_GLIBCXX_ASSERTIONS"
+  ]
+}

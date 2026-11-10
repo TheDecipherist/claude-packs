@@ -1,0 +1,27 @@
+{
+  "id": "role-checked-in-one-guard",
+  "why": "Copies of a security gate drift apart without any diff showing it, and the weakest copy decides what is exposed.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/app/api/**/route.ts",
+    "**/app/api/**/route.js",
+    "**/routes/**/*.ts",
+    "**/routes/**/*.js"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "strings": true,
+  "pattern": "\\brole\\s*[!=]==?\\s*['\\\"]admin['\\\"]|\\.role\\s*[!=]==?\\s*['\\\"]admin['\\\"]",
+  "bad": "if (session.user.role !== 'admin') return forbidden();",
+  "good": "const denied = await adminGuard();\nif (denied) return denied;",
+  "kind": "security"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "no-input-spread-into-write",
+  "why": "Whatever field the server trusts later can be set by the client today.",
+  "rule": ".claude/rules/keys-hashed-input-picked.md",
+  "concepts": [
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "(?:insertOne\\(|insertMany\\(|document:\\s*|\\$set:\\s*)\\{\\s*\\.\\.\\.(?:req\\.body|body|payload|input|event|data|params)\\b|\\.\\.\\.(?:req\\.body|body)\\s*,\\s*\\n\\s*\\w+At\\b|\\.map\\(\\(?(?:event|e|doc|item)\\)?\\s*=>\\s*\\(\\{\\s*\\.\\.\\.(?:event|e|item)\\s*,",
+  "bad": "await col.insertOne({ ...body, receivedAt: new Date() });",
+  "good": "await col.insertOne({ error: input.error, receivedAt: new Date() });"
+}

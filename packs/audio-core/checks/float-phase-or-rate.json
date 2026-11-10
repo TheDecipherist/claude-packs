@@ -1,0 +1,12 @@
+{
+  "id": "float-phase-or-rate",
+  "why": "Sample rate, phase and phase increment must be double (drift over long notes, tempo-synced clocks).",
+  "rule": ".claude/rules/double-where-precision-matters.md",
+  "concepts": [
+    "cpp"
+  ],
+  "pattern": "\\bfloat\\s+(\\w+\\s*,\\s*)*(sampleRate|sr|fs|phase\\w*|phaseInc\\w*|increment)\\b",
+  "code": true,
+  "bad": "struct Osc { float phase = 0.0f; float sampleRate = 48000.0f; };",
+  "good": "struct Osc { double phase = 0.0; double sampleRate = 48000.0; float level = 1.0f; };"
+}

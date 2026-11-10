@@ -1,0 +1,18 @@
+{
+  "id": "py-no-star-import",
+  "why": "A star import hides where a name came from, and any new name in that module can silently replace one of yours.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^from\\s+\\S+\\s+import\\s+\\*",
+  "flags": "m",
+  "bad": "from helpers import *",
+  "good": "from helpers import load, save"
+}

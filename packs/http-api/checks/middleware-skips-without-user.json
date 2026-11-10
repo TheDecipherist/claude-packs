@@ -1,0 +1,26 @@
+{
+  "id": "middleware-skips-without-user",
+  "why": "A middleware that passes when there is no user fails open, and a control nobody has seen fire is worse than none.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "if\\s*\\(\\s*!req\\.user\\s*\\)\\s*\\{\\s*next\\(\\)",
+  "bad": "if (!req.user) {\n  next();\n  return;\n}",
+  "good": "if (!req.user) {\n  res.status(401).json(body);\n  return;\n}",
+  "kind": "security"
+}

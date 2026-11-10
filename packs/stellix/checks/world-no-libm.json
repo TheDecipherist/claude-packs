@@ -1,0 +1,15 @@
+{
+  "id": "world-no-libm",
+  "why": "libm sin/cos/exp/pow differ in the last bits between Apple, MSVC and glibc; the world must replay bit-identically on Mac and Windows. Use the house world-math functions.",
+  "rule": ".claude/rules/world-fp-determinism.md",
+  "concepts": [
+    "world"
+  ],
+  "exclude": [
+    "@world_math"
+  ],
+  "pattern": "\\bstd::(sin|cos|tan|asin|acos|atan2?|exp2?|expm1|log(2|10|1p)?|pow|sinh|cosh|tanh|hypot|cbrt)\\s*\\(|(?<![\\w:.>])(sinf?|cosf?|tanf?|atan2f?|expf?|logf?|powf?)\\s*\\(",
+  "code": true,
+  "bad": "const double a = std::sin (phase) * radius;",
+  "good": "const double a = wm::sin (phase) * radius;"
+}

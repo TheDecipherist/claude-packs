@@ -1,0 +1,27 @@
+{
+  "id": "err-text-stays-server-side",
+  "why": "Driver and stack text tells an attacker what is behind the API.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/app/api/**/route.ts",
+    "**/app/api/**/route.js",
+    "**/routes/**/*.ts",
+    "**/routes/**/*.js"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\b(?:error|message|detail|details)\\s*:\\s*(?:(?:err|error|e)\\s+instanceof\\s+Error\\s*\\?\\s*)?\\(?(?:err|error|e)(?:\\s+as\\s+Error\\))?\\.message\\b",
+  "bad": "return json({ error: 'x', detail: error instanceof Error ? error.message : String(error) });",
+  "good": "return json({ error: 'x' });",
+  "kind": "security"
+}

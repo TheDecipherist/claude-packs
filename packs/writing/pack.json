@@ -1,0 +1,43 @@
+{
+  "name": "writing",
+  "version": "1.0.0",
+  "description": "Text that goes public reads like a person wrote it: cadence, voice, stance for replies, structure for posts. Rules, one-job skills and checks on public text.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/writing"
+  },
+  "keywords": [
+    "writing",
+    "voice"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
+  "folders": {},
+  "concepts": {
+    "public-text": [
+      "README*",
+      "**/README*",
+      "**/*.mdx",
+      "docs/manual/**",
+      "docs/guide/**",
+      "docs/guides/**",
+      "manual/**",
+      "content/**",
+      "blog/**",
+      "posts/**",
+      "articles/**",
+      "drafts/**"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {},
+  "optIn": [
+    "checks/no-time-or-date.json"
+  ]
+}

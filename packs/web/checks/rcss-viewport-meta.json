@@ -1,0 +1,28 @@
+{
+  "id": "rcss-viewport-meta",
+  "why": "Without the viewport meta the page renders at 980px and is zoomed out on every phone. Next's app router emits it; a hand-written document must.",
+  "rule": ".claude/rules/styles-live-in-stylesheets.md",
+  "globs": [
+    "**/index.html",
+    "**/_document.tsx",
+    "**/root.tsx",
+    "**/app.html"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "<html\\b",
+  "needs": [
+    "width=device-width"
+  ],
+  "bad": "<html lang=\"en\"><head><title>x</title></head></html>",
+  "good": "<html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /></head></html>"
+}

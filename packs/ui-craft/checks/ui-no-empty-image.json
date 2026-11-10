@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-empty-image",
+  "why": "An image with no source ships as a broken box. No image is better.",
+  "rule": ".claude/rules/pictures-do-a-job.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "<img\\b[^>]*\\bsrc=[\"']{2}|<img\\b(?![^>]*\\bsrc\\b)[^>]*>",
+  "bad": "<img src=\"\" alt=\"x\" />\n",
+  "good": "<img src=\"/a.jpg\" alt=\"The stool\" width=\"320\" height=\"200\" />\n"
+}

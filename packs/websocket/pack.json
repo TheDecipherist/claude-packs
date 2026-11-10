@@ -1,0 +1,21 @@
+{
+  "name": "websocket",
+  "version": "1.0.0",
+  "description": "WebSocket services: identity comes from the connection, each message is authorised, and a connection map survives a reconnect.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/websocket"
+  },
+  "keywords": [
+    "websocket",
+    "security"
+  ],
+  "engines": {
+    "claude-packs": ">=0.25.0"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "position-not-integrated",
+  "why": "A position added up from tempo is wrong for ever after a locate. Derive it from the host.",
+  "rule": ".claude/rules/measure-the-clock-in-audio.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**",
+    "**/*Clock*",
+    "**/*clock*",
+    "**/tests/**",
+    "**/test/**",
+    "**/*_test.*",
+    "**/*Test.*"
+  ],
+  "pattern": "\\b\\w*(?:[pP]os|[pP]pq|[bB]eat)\\w*\\s*\\+=[^;\\n]*(?:bpm|[tT]empo)",
+  "bad": "posBeats += n * bpm / (60.0 * sr);",
+  "good": "posBeats = clock.blockStartPpq();",
+  "code": true
+}

@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-ai-palette",
+  "why": "Purple and violet gradients are the most recognizable tell of generated UI. Use the project's palette.",
+  "rule": ".claude/rules/no-generated-look.md",
+  "concepts": [
+    "ui-markup",
+    "ui-styles"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\bfrom-(?:purple|violet|indigo|fuchsia)-\\d+\\b|linear-gradient\\([^)\\n]*\\b(?:purple|violet|indigo)\\b",
+  "bad": "<div className=\"bg-gradient-to-r from-purple-500 to-pink-500\" />\n",
+  "good": "<div className=\"bg-surface text-ink\" />\n"
+}

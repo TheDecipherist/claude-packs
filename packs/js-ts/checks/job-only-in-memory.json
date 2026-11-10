@@ -1,0 +1,28 @@
+{
+  "id": "job-only-in-memory",
+  "why": "The process restarts and replicates, and its memory does not: work that must finish goes on a queue.",
+  "rule": ".claude/rules/process-lifecycle.md",
+  "globs": [],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/dashboard/**",
+    "**/client/**",
+    "**/public/**",
+    "**/web/**",
+    "**/scripts/**"
+  ],
+  "pattern": "\\bvoid\\s+(?:process|run|execute|perform|deploy|sync)\\w*\\(",
+  "bad": "void processJob(job);",
+  "good": "await enqueue(job); // a worker claims it with findOneAndUpdate",
+  "concepts": [
+    "js"
+  ]
+}

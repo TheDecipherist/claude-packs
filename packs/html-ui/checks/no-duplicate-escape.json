@@ -1,0 +1,26 @@
+{
+  "id": "no-duplicate-escape",
+  "why": "A second escapeHtml (in auth, oauth, email) is the one that misses a character. One in html.ts, imported everywhere.",
+  "rule": ".claude/rules/server-html-escapes-everything.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**",
+    "**/html.*",
+    "**/ui/html.*",
+    "**/lib/html.*"
+  ],
+  "code": true,
+  "pattern": "\\b(?:function|const)\\s+(?:escapeHtml|escapeHTML|htmlEscape|escapeAttr)\\b",
+  "bad": "function escapeHtml(s: string): string { return s.replace(/&/g, '&amp;'); }",
+  "good": "import { escapeHtml } from '../ui/html.js';"
+}

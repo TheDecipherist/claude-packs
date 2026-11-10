@@ -1,0 +1,27 @@
+{
+  "id": "midi-realtime-first",
+  "why": "A receive path that masks the channel before testing for real-time bytes eats every clock byte.",
+  "rule": ".claude/rules/clock-is-a-pulse-stream.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\b\\w+\\s*&\\s*0x[fF]0\\b",
+  "bad": "int k = b & 0xF0;",
+  "good": "if (b >= 0xF8) { rt (b); return; } int k = b & 0xF0;",
+  "mode": "needs",
+  "needs": [
+    "0x[fF]8|[rR]eal[tT]ime"
+  ],
+  "code": true
+}

@@ -1,0 +1,19 @@
+{
+  "id": "nginx-resolver-ttl",
+  "why": "Without a resolver with a TTL, NGINX resolves the upstream once at startup and keeps sending traffic to a replaced container's dead IP.",
+  "rule": ".claude/rules/nginx-production.md",
+  "concepts": [
+    "nginx-conf"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "\\bproxy_pass\\b",
+  "needs": [
+    "\\bresolver\\s+127\\.0\\.0\\.11\\b"
+  ],
+  "bad": "location / { proxy_pass http://api:3000; }",
+  "good": "http { resolver 127.0.0.11 ipv6=off valid=10s; server { location / { set $api http://api:3000; proxy_pass $api; } } }"
+}

@@ -1,0 +1,102 @@
+{
+  "name": "node",
+  "description": "A Node.js or TypeScript service, web app, CLI, library, MCP server or edge proxy: base, plus the packs its stack needs (js-ts, mongo, fastify, ai, docker, shell-hooks, html-ui, web, tui, nginx). The presets pick them.",
+  "packs": {
+    "always": [
+      "base",
+      "writing",
+      "hook-proof"
+    ],
+    "choose": [
+      "js-ts",
+      "mongo",
+      "postgres",
+      "fastify",
+      "ai",
+      "docker",
+      "shell-hooks",
+      "html-ui",
+      "web",
+      "tui",
+      "nginx",
+      "stored-text",
+      "ui-craft",
+      "python",
+      "shell",
+      "cpp",
+      "http-api",
+      "react",
+      "multi-tenant",
+      "websocket",
+      "host-agent",
+      "go",
+      "rust",
+      "ci",
+      "dynamic-data",
+      "zod",
+      "content-site"
+    ],
+    "default": [
+      "js-ts"
+    ]
+  },
+  "layout": {
+    "folders": {
+      "docs": {
+        "path": "docs",
+        "purpose": "spec, decisions, versions.md"
+      },
+      "src": {
+        "path": "src",
+        "purpose": "the code: the entry, routes, handlers, the database gateway, schemas"
+      },
+      "test": {
+        "path": "test",
+        "purpose": "tests"
+      },
+      "tools": {
+        "path": "tools",
+        "purpose": "scripts that never ship"
+      }
+    },
+    "kinds": {
+      "tests": {
+        "what": "tests",
+        "in": "test",
+        "concepts": [
+          "js-tests"
+        ],
+        "files": [
+          "**/*.test.*",
+          "**/*.spec.*"
+        ]
+      },
+      "docs": {
+        "what": "the spec, decisions, research, versions.md",
+        "in": "docs",
+        "concepts": [
+          "docs-folder"
+        ]
+      },
+      "tools": {
+        "what": "scripts that never ship",
+        "in": "tools"
+      }
+    }
+  },
+  "sourceFiles": "\\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs)$",
+  "preamble": {
+    "always": [
+      "Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.",
+      "When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.",
+      "When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.",
+      "claude-packs (`@thedecipherist/claude-packs`) is the source of truth for every rule, check, hook and skill this project's configuration installs. A fix to one of them is made in the kit, with its test, and comes here with `npx --no-install @thedecipherist/claude-packs update`. A project edits its installed copy only to try a fix before it goes into the kit."
+    ],
+    "never": [
+      "Create source files outside these folders, or put a kind of thing anywhere but its place. The folder-law and placement-law hooks refuse both.",
+      "Edit files in `.claude/rules`, `.claude/checks` or `.claude/hooks` to get past a block. Fix the code, or ask the user to change the law.",
+      "Route around a block: no override variables, no writing through the shell after a refusal, no parking files in a scratchpad, no putting new code into an unrelated existing file.",
+      "Point at a document by line number. Cite a fixed anchor (`{#id}`) or a symbol name; lines move."
+    ]
+  }
+}

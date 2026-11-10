@@ -1,0 +1,13 @@
+{
+  "id": "alpine-with-native-build",
+  "why": "Alpine (musl) plus native modules (bcrypt, sharp, canvas, better-sqlite3, node-gyp) means compiling in the image with build-base/python3 and prebuilt binaries that do not match. Use node:<version>-slim (Debian) instead.",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s*FROM\\s+\\S*alpine[\\s\\S]*?(?:node-gyp|npm\\s+rebuild|apk\\s+add[^\\n]*\\b(?:build-base|g\\+\\+|make|python3)\\b)",
+  "bad": "FROM node:24-alpine\nRUN apk add --no-cache python3 make g++\nRUN npm ci",
+  "good": "FROM node:24.11.0-slim\nRUN npm ci"
+}

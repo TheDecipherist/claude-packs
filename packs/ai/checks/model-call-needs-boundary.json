@@ -1,0 +1,29 @@
+{
+  "id": "model-call-needs-boundary",
+  "why": "This file calls a model but never applies the SHA-256 boundary. Any diff, title, page or user text reaching the prompt raw is a prompt-injection path. Build the user content from wrapBoundary(...).",
+  "rule": ".claude/rules/ai-input-sha-boundary.md",
+  "concepts": [
+    "ai"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/boundary.*"
+  ],
+  "mode": "needs",
+  "pattern": "\\.messages\\.(?:create|parse|stream)\\s*\\(|\\.beta\\.messages\\.\\w+\\s*\\(|\\.chat\\.completions\\.create\\s*\\(|\\.responses\\.create\\s*\\(|\\bgenerateText\\s*\\(|\\bgenerateObject\\s*\\(|\\bstreamText\\s*\\(",
+  "needs": [
+    "\\b(?:wrapBoundary|wrapForPlanner|wrapForExecutor|wrapUntrusted|sha256(?:Hex)?)\\b|from\\s+['\"][^'\"]*boundary|untrusted:\\s*none"
+  ],
+  "bad": "const res = await client.messages.create({ model, messages: [{ role: 'user', content: `# Diff\\n${input.diff}` }] });",
+  "good": "const content = `${TEMPLATE}\\n${wrapBoundary(input.diff, 'executor diff')}`;\nconst res = await client.messages.create({ model, messages: [{ role: 'user', content }] });",
+  "strings": true
+}

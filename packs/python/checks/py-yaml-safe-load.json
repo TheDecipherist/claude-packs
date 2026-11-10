@@ -1,0 +1,18 @@
+{
+  "id": "py-yaml-safe-load",
+  "why": "yaml.load can build arbitrary objects from the text it reads.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "\\byaml\\.load\\((?![^)\\n]*Loader\\s*=\\s*yaml\\.SafeLoader)",
+  "flags": "m",
+  "bad": "data = yaml.load(text)",
+  "good": "data = yaml.safe_load(text)"
+}

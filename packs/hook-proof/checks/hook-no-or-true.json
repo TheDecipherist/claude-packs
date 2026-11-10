@@ -1,0 +1,18 @@
+{
+  "id": "hook-no-or-true",
+  "why": "`|| true` turns any failure into a pass, a guard's included.",
+  "rule": ".claude/rules/a-refusal-is-exit-2.md",
+  "concepts": [
+    "hook-files",
+    "hook-config"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/*.test.*"
+  ],
+  "pattern": "\\|\\|\\s*(?:true\\b|exit 0\\b|:(?=\\s|\"|$))",
+  "bad": "node guard.mjs || true\n",
+  "good": "node guard.mjs\n",
+  "flags": "m"
+}

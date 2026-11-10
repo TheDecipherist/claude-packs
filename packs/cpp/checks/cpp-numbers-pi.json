@@ -1,0 +1,16 @@
+{
+  "id": "cpp-numbers-pi",
+  "why": "A constant typed by hand comes in several spellings and precisions. std::numbers has them.",
+  "rule": ".claude/rules/cpp-numbers-and-casts.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "(?<![\\w.])(?:3\\.14159\\d*|6\\.2831\\d*|1\\.5707\\d*|0\\.70710\\d*|1\\.41421\\d*|2\\.71828\\d*|0\\.69314\\d*)(?:[fFlL])?\\b",
+  "bad": "const float tau = 2.0f * 3.14159265f;",
+  "good": "const float tau = 2.0f * std::numbers::pi_v<float>;"
+}

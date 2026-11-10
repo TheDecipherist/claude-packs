@@ -1,0 +1,31 @@
+{
+  "id": "rust-unsafe-needs-safety",
+  "why": "An unsafe block with no stated reason cannot be reviewed.",
+  "rule": ".claude/rules/rust-unsafe-is-proved.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/benches/**",
+    "**/examples/**",
+    "**/fixtures/**",
+    "**/test_data/**",
+    "**/testdata/**",
+    "**/fuzz/**",
+    "**/xtask/**",
+    "**/target/**",
+    "**/vendor/**",
+    "**/build.rs",
+    "**/tests.rs",
+    "**/test.rs",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    "**/test_*.rs"
+  ],
+  "pattern": "^(?<!(?:^|\\n)[ \\t]*//[^\\n]*[Ss][Aa][Ff][Ee][Tt][Yy][^\\n]*\\n(?:[ \\t]*//[^\\n]*\\n)*)(?![ \\t]*//)(?![^\\n]*//[^\\n]*SAFETY)[^\\n]*\\bunsafe\\s*\\{",
+  "flags": "m",
+  "bad": "fn f(p: *const u8) -> u8 {\n    unsafe { *p }\n}",
+  "good": "fn f(p: *const u8) -> u8 {\n    // SAFETY: the caller passes a live pointer, checked in new().\n    unsafe { *p }\n}"
+}

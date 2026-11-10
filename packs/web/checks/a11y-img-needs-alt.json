@@ -1,0 +1,26 @@
+{
+  "id": "a11y-img-needs-alt",
+  "why": "An <img> with no alt attribute reads its filename to screen readers. Describe it, or alt=\"\" for decorative.",
+  "rule": ".claude/rules/accessibility.md",
+  "concepts": [
+    "markup"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*"
+  ],
+  "code": false,
+  "pattern": "<img\\b(?![^>]*\\balt\\s*=)[^>]*>",
+  "bad": "<img src=\"/hero.png\" width=\"800\" height=\"400\">",
+  "good": "<img src=\"/hero.png\" alt=\"The Decipherist studio desk\" width=\"800\" height=\"400\">\n<img src=\"/divider.svg\" alt=\"\" width=\"40\" height=\"4\">"
+}

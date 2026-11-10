@@ -1,0 +1,25 @@
+{
+  "id": "zod-string-needs-max",
+  "why": "An unbounded z.string() accepts a 16 MB value into the document and the $jsonSchema derived from it has no maxLength either. Every string carries .max().",
+  "rule": ".claude/rules/schema-single-source-of-truth.md",
+  "concepts": [
+    "schemas"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "flags": "",
+  "pattern": "(?<!\\bz\\.record\\(\\s*)(?<!\\w_id:\\s{0,4})(?<!\\b_id:\\s{0,4})\\bz\\.string\\(\\)(?:\\.(?!(?:max|length|regex|uuid|datetime|email|url|ip|enum)\\b)\\w+\\([^()]*\\))*\\s*[,)\\]}]",
+  "bad": "cwd: z.string().min(1),\nhost: z.string(),",
+  "good": "cwd: z.string().min(1).max(4096),\nhost: z.string().max(253),\nhex: z.string().regex(HEX),\n_id: z.string(),\nsession_id: z.string(),\nfacts: z.record(z.string(), z.unknown()),"
+}

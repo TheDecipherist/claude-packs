@@ -1,0 +1,261 @@
+{
+  "_comment": "Where everything lives. folders = the folders; kinds = what goes where (CLAUDE.md shows it, placement-law enforces it); concepts = which rules fire where. Edit here, then run `npx --no-install @thedecipherist/claude-packs update`.",
+  "folders": {
+    "app": {
+      "path": "src",
+      "purpose": "PluginProcessor and PluginEditor, flat in src/: parameters, programs, session, clock, the window, bindings, actions"
+    },
+    "audio": {
+      "path": "src/engine",
+      "purpose": "the audio-thread code: the paraphonic voice, the ladder, MultiDrive, envelopes, mod buses (Engine, Coeffs)"
+    },
+    "params": {
+      "path": "src/patch",
+      "purpose": "the program record and the sysex both ways"
+    },
+    "generated": {
+      "path": "src/generated",
+      "purpose": "Sub37Params.h and Sub37Factory.h, written by tools/gen_headers.py from data/; never hand edited"
+    },
+    "ui": {
+      "path": "src/ui",
+      "purpose": "the shell adapter; after the rebuild, the native panel component and its gestures"
+    },
+    "data": {
+      "path": "data",
+      "purpose": "params.csv (the parameter table, append only) and factory.csv (the factory bank)"
+    },
+    "panel": {
+      "path": "panel",
+      "purpose": "gen_panel.py (the panel's source), measure_overlay.py, and their output panel.json and bindings.json"
+    },
+    "resources": {
+      "path": "resources",
+      "purpose": "the PNG panel export (resources/native), until the native rebuild deletes it"
+    },
+    "design": {
+      "path": "design/reference",
+      "purpose": "reference pictures and their measured analysis; read-only, never read by a build step"
+    },
+    "probes": {
+      "path": "tools",
+      "purpose": "the probes and gates (*_probe.cpp, tests_main.cpp, clock_gate_test.cpp, param_reaches_audio.cpp), snapshot_main.cpp, gen_headers.py, measure scripts"
+    },
+    "cmake": {
+      "path": "cmake",
+      "purpose": "Siblings.cmake, CheckGenerated.cmake, GenVersion.cmake (copies of synthkit/cmake)"
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "laws, research, manual audit, provenance, the gates, licences (logs at the root: bugs.md, todo.md, build.md)"
+    }
+  },
+  "concepts": {
+    "cpp": [
+      "src/**/*.cpp",
+      "src/**/*.h",
+      "tools/**/*.cpp",
+      "tools/**/*.h"
+    ],
+    "audio": [
+      "src/engine/**",
+      "src/PluginProcessor.h",
+      "src/PluginProcessor.cpp"
+    ],
+    "dsp": [
+      "src/engine/**"
+    ],
+    "params": [
+      "src/PluginProcessor.h",
+      "src/PluginProcessor.cpp",
+      "src/patch/**",
+      "src/generated/**",
+      "data/params.csv"
+    ],
+    "presets": [
+      "data/factory.csv",
+      "data/params.csv",
+      "src/patch/**"
+    ],
+    "generated": [
+      "src/generated/**"
+    ],
+    "ui": [
+      "src/PluginEditor.h",
+      "src/PluginEditor.cpp",
+      "src/ui/**"
+    ],
+    "app": [
+      "src/PluginProcessor.*",
+      "src/PluginEditor.*"
+    ],
+    "panel-spec": [
+      "panel/**",
+      "**/bindings.json"
+    ],
+    "reference": [
+      "design/reference/**"
+    ],
+    "tests": [
+      "tools/*_probe.cpp",
+      "tools/tests_main.cpp",
+      "tools/clock_gate_test.cpp",
+      "tools/param_reaches_audio.cpp"
+    ],
+    "build": [
+      "CMakeLists.txt",
+      "**/CMakeLists.txt",
+      "cmake/**"
+    ],
+    "claude": [
+      ".claude/skills/**",
+      "**/.claude/skills/**",
+      ".claude/agents/**",
+      ".claude/rules/**"
+    ],
+    "notes": [
+      "bugs.md",
+      "todo.md",
+      "build.md",
+      "workflow-bugs.md",
+      "docs/**/*.md"
+    ],
+    "docs-folder": [
+      "docs"
+    ],
+    "tooling": [
+      "tools/**",
+      ".claude/hooks/**",
+      ".claude/settings.json"
+    ],
+    "plan": [
+      "build.md",
+      "**/build.md"
+    ],
+    "copy-trees": [
+      "kind:copy",
+      ".claude/layout.json"
+    ]
+  },
+  "kinds": {
+    "audio-entry": {
+      "what": "processBlock and the audio-thread engine: voice, ladder, MultiDrive, envelopes, mod buses",
+      "in": "audio",
+      "concepts": [
+        "audio",
+        "tests"
+      ],
+      "content": "\\b(processBlock|renderNextBlock|getNextAudioBlock)\\s*\\("
+    },
+    "processor": {
+      "what": "the processor: parameter registration, programs, session, clock",
+      "in": "app"
+    },
+    "editor": {
+      "what": "the window and anything that paints: the editor, the native panel component, its gestures",
+      "in": "ui",
+      "concepts": [
+        "ui",
+        "tests"
+      ],
+      "content": "\\bvoid\\s+(?:\\w+::)*paint\\s*\\(\\s*(?:juce::)?Graphics\\b"
+    },
+    "patch": {
+      "what": "the program record and the sysex both ways",
+      "in": "params"
+    },
+    "generated": {
+      "what": "the generated headers (Sub37Params.h, Sub37Factory.h): run tools/gen_headers.py, never hand edit",
+      "in": "generated",
+      "concepts": [
+        "generated"
+      ],
+      "files": [
+        "**/Sub37Params.h",
+        "**/Sub37Factory.h"
+      ]
+    },
+    "bank": {
+      "what": "the parameter table (append only) and the factory bank",
+      "in": "data",
+      "concepts": [
+        "presets"
+      ],
+      "files": [
+        "**/factory.csv",
+        "**/params.csv"
+      ]
+    },
+    "panel": {
+      "what": "the panel source (gen_panel.py) and its output panel.json and bindings.json",
+      "in": "panel",
+      "concepts": [
+        "panel-spec"
+      ],
+      "files": [
+        "**/panel.json",
+        "**/bindings.json"
+      ]
+    },
+    "probe": {
+      "what": "a probe or gate with --selftest (the house template keeps them in tools/)",
+      "in": "probes",
+      "concepts": [
+        "tests"
+      ],
+      "files": [
+        "**/*_probe.cpp"
+      ]
+    },
+    "reference": {
+      "what": "reference pictures and their measured analysis",
+      "in": "design"
+    },
+    "export": {
+      "what": "the PNG panel export, until the native rebuild deletes it",
+      "in": "resources"
+    },
+    "docs": {
+      "what": "laws, research, provenance, the gates, licences",
+      "in": "docs",
+      "concepts": [
+        "docs-folder"
+      ],
+      "files": [
+        "**/laws.md",
+        "**/*-spec.md"
+      ]
+    },
+    "tools": {
+      "what": "scripts: gen_headers.py, measure scripts, the snapshot renderer",
+      "in": "probes"
+    }
+  },
+  "files": {},
+  "protected": [
+    "design/reference/**"
+  ],
+  "disable": [],
+  "enable": [],
+  "commands": {
+    "configure": "cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo",
+    "build": "buildq cmake --build build",
+    "test": "buildq ctest --test-dir build --output-on-failure",
+    "test-one": "buildq ctest --test-dir build --output-on-failure -R <name>",
+    "standalone": "buildq cmake --build build --target Sub37_Standalone",
+    "panel-check": "npm run panel:validate && npm run panel:check",
+    "panel-export": "npm run panel:native",
+    "snapshot": "Sub37Snapshot (built by the build command) writes the editor to PNG"
+  },
+  "siblings": [
+    "../"
+  ],
+  "paramIds": {
+    "extensions": "(\\.(cpp|h|hpp|cc|mm)|bindings\\.json)$",
+    "patterns": [
+      "\\{\\s*\"([a-z][a-z0-9_]*)\",\\s*\"[^\"]*\",\\s*\"(?:float|choice)\"",
+      "\"([a-z][a-z0-9_]*)\":\\s*\\{\\s*\"kind\""
+    ]
+  },
+  "complete": true
+}

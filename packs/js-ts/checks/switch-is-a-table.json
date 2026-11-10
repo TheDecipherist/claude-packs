@@ -1,0 +1,24 @@
+{
+  "id": "switch-is-a-table",
+  "why": "A switch with three or more cases on a kind is the if-chain in another costume: every new kind edits it. In JS/TS a Record<Kind, handler> is a compile error when a kind is missing.",
+  "rule": ".claude/rules/lookup-over-if-chains.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\bswitch\\s*\\([^)]*\\)\\s*\\{\\s*(?:case\\b[^:\\n]*:\\s*(?:return\\b[^;\\n]*;|[\\w.]+\\s*=[^;\\n]*;\\s*break;)\\s*){3,}",
+  "bad": "switch (def.type) {\n  case 'string': return s();\n  case 'number': return n();\n  case 'boolean': return b();\n}",
+  "good": "const CONVERTERS = { string: s, number: n, boolean: b } satisfies Record<ZodType, Converter>;\nreturn CONVERTERS[def.type](def);"
+}

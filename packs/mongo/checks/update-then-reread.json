@@ -1,0 +1,24 @@
+{
+  "id": "update-then-reread",
+  "why": "updateOne followed by findOne/findOrder to return the document is two round trips where findOneAndUpdate({ returnDocument: 'after' }) is one.",
+  "rule": ".claude/rules/writes-are-atomic.md",
+  "concepts": [
+    "db-gateway"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\.updateOne\\s*\\((?:[^()]|\\([^()]*\\))*\\)\\s*;\\s*(?:return\\s+)?(?:\\w+\\s*=\\s*)?(?:await\\s+)?[\\w.]*find(?:One|Order|Session|Message)\\s*\\(",
+  "bad": "await scope.workorders.updateOne({ number }, { $set: { status: 'sent' } });\nreturn findOrder(scope, number);",
+  "good": "return scope.workorders.findOneAndUpdate({ number }, { $set: { status: 'sent' } }, { returnDocument: 'after' });"
+}

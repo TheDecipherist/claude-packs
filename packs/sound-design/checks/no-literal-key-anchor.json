@@ -1,0 +1,30 @@
+{
+  "id": "no-literal-key-anchor",
+  "why": "A hard-coded key anchor is zero exactly where everyone auditions, so a wrong law passes by ear. Name it, with its source.",
+  "rule": ".claude/rules/test-off-the-easy-point.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/gates/**",
+    "**/*_test.*",
+    "**/*.test.*"
+  ],
+  "pattern": "(?:cut|filter|key)\\w*[^;\\n]*\\(\\s*\\w*note\\w*\\s*-\\s*60(?:\\.0*f?)?\\s*\\)",
+  "bad": "cut += kt * (note - 60) / 12.0;",
+  "good": "cut += kt * (note - kKeyAnchor) / 12.0;",
+  "flags": "i",
+  "code": true
+}

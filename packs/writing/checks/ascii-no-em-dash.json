@@ -1,0 +1,17 @@
+{
+  "id": "ascii-no-em-dash",
+  "why": "The cleanest AI tell there is: em dashes are in 0-0.5% of human posts and 97% of LLM-flagged ones. Use a comma, a parenthetical or a period. Smart quotes and the ellipsis character are not ASCII either.",
+  "rule": ".claude/rules/ascii-no-em-dash.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "[\\u2013\\u2014\\u2018\\u2019\\u201c\\u201d\\u2026]|\\s--\\s",
+  "bad": "It works \u2014 most of the time.\nIt works -- most of the time.\n",
+  "good": "It works, most of the time.\nRun `npm test -- a.test.mjs` and see [the docs](https://x.dev/a--b).\n\n```sh\nnpm test -- a -- b\n```\n"
+}

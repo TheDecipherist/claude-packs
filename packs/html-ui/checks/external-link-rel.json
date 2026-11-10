@@ -1,0 +1,21 @@
+{
+  "id": "external-link-rel",
+  "why": "rel=\"noreferrer\" without noopener leaves window.opener to the target page. Both, always.",
+  "rule": ".claude/rules/server-html-escapes-everything.md",
+  "concepts": [
+    "ui-templates"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**"
+  ],
+  "code": false,
+  "pattern": "rel\\s*=\\s*[\\\"'](?![^\\\"']*noopener)[^\\\"']*noreferrer[^\\\"']*[\\\"']",
+  "bad": "<a href=\"${url}\" rel=\"noreferrer\">",
+  "good": "<a href=\"${url}\" target=\"_blank\" rel=\"noopener noreferrer\">"
+}

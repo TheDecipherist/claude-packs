@@ -1,0 +1,18 @@
+{
+  "id": "sh-no-program-in-heredoc",
+  "why": "A program in a heredoc cannot be linted, tested or reused. Give it its own file and call it.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "\\b(?:python3?|node|ruby|perl)\\s+(?:-\\w+\\s+)*-(?:\\s[^\\n]*)?<<",
+  "flags": "m",
+  "bad": "python3 - \"$out\" <<'EOF'\nprint(1)\nEOF",
+  "good": "python3 tools/read_out.py \"$out\""
+}

@@ -1,0 +1,26 @@
+{
+  "id": "encrypted-name-plaintext-value",
+  "why": "A field named encrypted that holds plain text tells every reader it is safe.",
+  "rule": ".claude/rules/credentials-handled-safely.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "['\"]?[\\w.]*_encrypted['\"]?\\s*:\\s*(?!encrypt\\b|await\\s+encrypt\\b)[a-z]\\w*\\.",
+  "bad": "'config.access_token_encrypted': tokens.access_token,",
+  "good": "'config.access_token_encrypted': encrypt(tokens.access_token, key),",
+  "kind": "security"
+}

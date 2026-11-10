@@ -1,0 +1,22 @@
+{
+  "id": "prose-never-decides",
+  "why": "A substring of a description decides nothing: \"turned off\" once switched echoes on, and 93 reverbs measured as delays. Use the record field.",
+  "rule": ".claude/rules/account-every-term.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "[\"'][^\"'\\n]+[\"']\\s+in\\s+\\w*(?:desc|comment|prose)\\w*|\\b\\w*(?:desc|comment|prose)\\w*\\.(?:contains|find|includes|indexOf)\\s*\\(",
+  "bad": "is_echo = \"echo\" in desc",
+  "good": "is_echo = rec.keyword == KW_ECHO"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "compose-no-swarm-ignored-keys",
+  "why": "docker stack deploy silently ignores restart, container_name, depends_on, links and network_mode. Use deploy.restart_policy, service names, and retry-with-backoff in the app.",
+  "rule": ".claude/rules/compose-swarm-safe.md",
+  "concepts": [
+    "compose"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s{2,}(restart|container_name|depends_on|links|network_mode|ipv4_address):",
+  "bad": "  api:\n    restart: always\n    depends_on: [mongo]",
+  "good": "  api:\n    deploy:\n      restart_policy:\n        condition: on-failure"
+}

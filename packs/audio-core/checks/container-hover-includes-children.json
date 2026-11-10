@@ -1,0 +1,31 @@
+{
+  "id": "container-hover-includes-children",
+  "why": "JUCE sends a component a mouseExit when the pointer moves onto one of its children, so a hover flag driven by the container's own mouseEnter/mouseExit clears whenever the pointer is over a slider, knob or button inside it, and whatever the hover governs (a preview, a highlight) vanishes. Hover on a container means the pointer is over the container or any child: read isMouseOver (true), or listen to the children with addMouseListener (this, true), decide it in one place, and repaint what it governs when it changes.",
+  "rule": ".claude/rules/editor-paints-what-changed.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.h",
+    "**/*.hpp"
+  ],
+  "exclude": [
+    "**/third_party/**",
+    "**/build/**",
+    "**/_deps/**",
+    "**/JUCE/**"
+  ],
+  "code": true,
+  "kind": "correctness",
+  "pattern": "\\bvoid\\s+(?:\\w+::)?(?<=\\baddAndMakeVisible\\s*\\([\\s\\S]*)(?<!isMouseOver\\s*\\(\\s*true[\\s\\S]*)(?<!addMouseListener\\s*\\([^)]*,\\s*true[\\s\\S]*)(?![\\s\\S]*isMouseOver\\s*\\(\\s*true)(?![\\s\\S]*addMouseListener\\s*\\([^)]*,\\s*true)mouseExit\\s*\\([^)]*\\)\\s*(?:override\\s*)?\\{[^{}]*?\\b\\w*(?:[hH]over|[hH]ot|[oO]ver)\\w*\\s*(?:=|\\()",
+  "bad": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n}\n\nvoid RouteRow::mouseEnter (const juce::MouseEvent&)\n{\n    hovered = true;\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    hovered = false;\n    previewOff();\n}",
+  "good": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n    addMouseListener (this, true);\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    hovered = isMouseOver (true);\n    previewOff();\n}",
+  "examples": [
+    {
+      "bad": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    if (hovered)\n        hovered (std::nullopt);\n}",
+      "good": "RouteRow::RouteRow()\n{\n    addAndMakeVisible (amount);\n    addMouseListener (this, true);\n}\n\nvoid RouteRow::mouseExit (const juce::MouseEvent&)\n{\n    if (hovered && ! isMouseOver (true))\n        hovered (std::nullopt);\n}"
+    },
+    {
+      "bad": "Row::Row()\n{\n    addAndMakeVisible (knob);\n}\n\nvoid Row::mouseExit (const juce::MouseEvent&)\n{\n    isHot = false;\n}",
+      "good": "Knob::Knob() {}\n\nvoid Knob::mouseExit (const juce::MouseEvent&)\n{\n    isHot = false;\n}"
+    }
+  ]
+}

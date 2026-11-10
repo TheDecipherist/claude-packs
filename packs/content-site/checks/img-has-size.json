@@ -1,0 +1,20 @@
+{
+  "id": "img-has-size",
+  "why": "An image with no size makes the page jump as it loads.",
+  "rule": ".claude/rules/media-is-sized.md",
+  "globs": [
+    "**/*.html"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/admin*/**",
+    "**/*template*",
+    "**/partials/**",
+    "**/_*/**"
+  ],
+  "pattern": "<img\\b(?![^>]*\\bwidth=)[^>]*>",
+  "bad": "<img src=\"/a.webp\" alt=\"A\">",
+  "good": "<img src=\"/a.webp\" alt=\"A\" width=\"800\" height=\"600\">"
+}

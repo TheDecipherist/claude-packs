@@ -1,0 +1,76 @@
+{
+  "name": "full-stack",
+  "version": "1.0.0",
+  "description": "The full-stack configuration's stack choice: Fastify and Next.js only (stack-guard). The rest of the configuration is other packs: http-api, fastify, zod, docker.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/full-stack"
+  },
+  "keywords": [
+    "fastify",
+    "nextjs",
+    "zod"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
+  "configurationPack": true,
+  "folders": {},
+  "concepts": {
+    "api": [
+      "api"
+    ],
+    "core": [
+      "core"
+    ],
+    "routes": [
+      "routes"
+    ],
+    "handlers": [
+      "handlers"
+    ],
+    "adapters": [
+      "adapters"
+    ],
+    "schemas": [
+      "schemas"
+    ],
+    "channel": [
+      "web"
+    ],
+    "manifests": [
+      "**/package.json"
+    ],
+    "api-tests": [
+      "api-tests"
+    ],
+    "tests": [
+      "api-tests",
+      "**/*.test.ts",
+      "**/*.test.tsx"
+    ],
+    "ui": [
+      "web"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stack-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

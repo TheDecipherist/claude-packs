@@ -1,0 +1,18 @@
+{
+  "id": "py-no-shell-true",
+  "why": "shell=True hands a string to a shell, so any value in it can run a command. Pass a list of arguments.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "\\bsubprocess\\.\\w+\\([^)\\n]*\\bshell\\s*=\\s*True",
+  "flags": "m",
+  "bad": "subprocess.run(f\"ls {path}\", shell=True)",
+  "good": "subprocess.run([\"ls\", path], check=True)"
+}

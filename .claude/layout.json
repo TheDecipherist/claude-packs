@@ -1,0 +1,209 @@
+{
+  "_comment": "Where everything lives. folders = the folders; kinds = what goes where (CLAUDE.md shows it, placement-law enforces it); concepts = which rules fire where. Edit here, then run `npx --no-install @thedecipherist/claude-packs update`.",
+  "configuration": "base",
+  "folders": {
+    "bin": {
+      "path": "bin",
+      "purpose": "the claude-packs command (bin/claude-packs.mjs)"
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "the command's library: sync, settings, layout, doctor, scan, suggest, fix, the kit lock"
+    },
+    "packs": {
+      "path": "packs",
+      "purpose": "the packs a project installs: rules, checks, hooks, skills, tools (list shows them)"
+    },
+    "configurations": {
+      "path": "configurations",
+      "purpose": "the configurations: one config.json per kind of project (its packs, layout template, hook order, preamble)"
+    },
+    "global": {
+      "path": "global",
+      "purpose": "the global part: latest-versions, gnu-shell, shell-traps (global add)"
+    },
+    "profiles": {
+      "path": "profiles",
+      "purpose": "tailored seed layouts shipped in the package"
+    },
+    "prompts": {
+      "path": "prompts",
+      "purpose": "prompts the command prints (survey.md, scan-review.md)"
+    },
+    "planner": {
+      "path": "planner",
+      "purpose": "the claude.ai side: the skills a person plans a build with; planner-skills bundles them"
+    },
+    "test": {
+      "path": "test",
+      "purpose": "the kit's tests (npm test: node --test test/*.test.mjs)"
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "the kit's own development scripts (test-changed.mjs); never shipped"
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "versions, notes and the history of earlier releases (the logs are at the root: CHANGELOG.md, workflow-bugs.md)"
+    },
+    "site": {
+      "path": "site",
+      "purpose": "the web page: the design, and the numbers a test holds true; never shipped in the npm package"
+    }
+  },
+  "concepts": {
+    "tests": [
+      "test"
+    ],
+    "docs-folder": [
+      "docs"
+    ],
+    "cpp": [
+      "src/**/*.cpp",
+      "src/**/*.h",
+      "src/**/*.hpp",
+      "src/**/*.mm",
+      "tests/**/*.cpp",
+      "tests/**/*.h",
+      "packs/**/*.cpp",
+      "packs/**/*.h"
+    ],
+    "build": [
+      "**/CMakeLists.txt",
+      "**/*.cmake",
+      "CMakePresets.json"
+    ],
+    "claude": [
+      ".claude/skills/**",
+      "**/.claude/skills/**",
+      ".claude/agents/**",
+      ".claude/rules/**"
+    ],
+    "notes": [
+      "bugs.md",
+      "workflow-bugs.md",
+      "**/known-issues*.md",
+      "docs/**/*.md"
+    ],
+    "tooling": [
+      "tools/**",
+      ".claude/hooks/**",
+      ".claude/settings.json"
+    ],
+    "plan": [
+      "build.md",
+      "**/build.md"
+    ],
+    "copy-trees": [
+      "kind:copy",
+      ".claude/layout.json"
+    ],
+    "js": [
+      "src/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "tests/**/*.{js,mjs,cjs,ts,tsx}",
+      "test/**/*.{js,mjs,cjs,ts,tsx}"
+    ],
+    "public-text": [
+      "README*",
+      "**/README*",
+      "**/*.mdx",
+      "docs/manual/**",
+      "docs/guide/**",
+      "docs/guides/**",
+      "manual/**",
+      "content/**",
+      "blog/**",
+      "posts/**",
+      "articles/**",
+      "drafts/**"
+    ],
+    "hook-files": [
+      "**/.claude/hooks/**",
+      "**/hooks/**/*.sh",
+      "**/hooks/**/*.mjs",
+      "**/hooks/**/*.js",
+      "**/hooks/**/*.cjs",
+      "**/hooks/**/*.py"
+    ],
+    "hook-config": [
+      "**/.claude/settings.json",
+      "**/.claude/settings.local.json"
+    ]
+  },
+  "kinds": {
+    "tests": {
+      "what": "the kit's tests",
+      "in": "test",
+      "concepts": [
+        "tests"
+      ],
+      "files": [
+        "**/*.test.*"
+      ]
+    },
+    "docs": {
+      "what": "versions and notes",
+      "in": "docs",
+      "concepts": [
+        "docs-folder"
+      ]
+    },
+    "planner-skills": {
+      "what": "the planner skills a person uses in claude.ai",
+      "in": "planner",
+      "files": [
+        "**/SKILL.md"
+      ]
+    }
+  },
+  "files": {},
+  "protected": [],
+  "disable": [],
+  "enable": [
+    "hooks/secrets-guard.mjs",
+    "hooks/untrusted-boundary.mjs",
+    "hooks/dispatch-once.mjs",
+    "checks/lookup-over-if-chains.json",
+    "checks/field-map-over-if-runs.json",
+    "hooks/suite-once.mjs",
+    "hooks/template-law.mjs",
+    "checks/one-walk-per-template.json",
+    "hooks/reuse-hint.mjs",
+    "hooks/code-shape.mjs",
+    "hooks/repo-litter.mjs",
+    "hooks/skill-first.mjs",
+    "hooks/look-gate.mjs",
+    "hooks/inside-the-project.mjs",
+    "hooks/agents-held.mjs"
+  ],
+  "commands": {
+    "test": "npm test",
+    "test-one": "node --import ./test/fresh-tmp.mjs --test test/<name>.test.mjs",
+    "test-changed": "npm run test:changed",
+    "doctor": "node bin/claude-packs.mjs doctor --strict"
+  },
+  "siblings": [],
+  "guards": {
+    "git": {
+      "house": true,
+      "refuseTrunk": true,
+      "branchStart": "git switch -c work/<version>-<name> main",
+      "ghAuth": "cli"
+    },
+    "templates": {
+      "exclude": [
+        "global/hooks/**"
+      ]
+    },
+    "codeShape": {
+      "maxLineChars": 260,
+      "maxStatementsPerLine": 6,
+      "maxFunctionStatements": 150,
+      "maxParameters": 8,
+      "exclude": [
+        "global/hooks/**"
+      ]
+    }
+  },
+  "complete": true
+}

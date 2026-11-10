@@ -1,0 +1,28 @@
+{
+  "id": "client-calls-a-version",
+  "why": "A client that calls an unversioned path breaks the day the API changes.",
+  "rule": ".claude/rules/apis-are-versioned.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/data/**",
+    "**/docs/**"
+  ],
+  "pattern": "\\b(?:fetch|axios(?:\\.\\w+)?|api\\.\\w+)\\(\\s*['\"`]/api/(?!v\\d+(?:/|['\"`])|auth/|health)",
+  "bad": "const r = await fetch('/api/orders');",
+  "good": "const r = await fetch(`${API}/orders`);\nconst s = await fetch('/api/v1/orders');\nawait fetch('/api/auth/session');"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "no-vague-attribution",
+  "why": "Name the source or drop the claim. Honest personal doubt beats borrowed authority.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "\\b(?:experts say|studies (?:have )?show(?:n)?|research suggests|it is widely regarded)\\b",
+  "bad": "Studies have shown it helps.\n",
+  "good": "I haven't seen good numbers on it.\n",
+  "flags": "i"
+}

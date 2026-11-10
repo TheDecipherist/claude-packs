@@ -1,0 +1,13 @@
+{
+  "id": "npm-ci-not-install",
+  "why": "npm install can rewrite the lockfile and resolve different versions per build. npm ci installs exactly the lockfile or fails.",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s*RUN\\s+[^\\n]*\\bnpm\\s+(?:install|i)\\b(?![^\\n]*-g\\b)",
+  "bad": "RUN npm install --production",
+  "good": "RUN npm ci --omit=dev\nRUN npm install -g pnpm"
+}

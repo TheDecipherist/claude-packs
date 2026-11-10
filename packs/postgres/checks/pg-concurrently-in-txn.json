@@ -1,0 +1,18 @@
+{
+  "id": "pg-concurrently-in-txn",
+  "why": "CREATE INDEX CONCURRENTLY cannot run in a transaction: the migration fails when it runs.",
+  "rule": ".claude/rules/postgres-migrations-never-stop-traffic.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^[ \\t]*(?:BEGIN|START\\s+TRANSACTION)\\b[^\\n]*;(?:(?!^[ \\t]*(?:COMMIT|END|ROLLBACK)\\b)[\\s\\S])*?\\bCONCURRENTLY\\b",
+  "flags": "im",
+  "bad": "BEGIN;\nCREATE INDEX CONCURRENTLY i ON t (a);\nCOMMIT;",
+  "good": "CREATE INDEX CONCURRENTLY i ON t (a);"
+}

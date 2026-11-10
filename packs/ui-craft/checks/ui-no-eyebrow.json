@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-eyebrow",
+  "why": "A tiny tracked uppercase label above a heading is the template's signature. Put it in the heading, or drop it.",
+  "rule": ".claude/rules/no-generated-look.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "uppercase[^\"'\\n]*tracking-[^>\\n]*>[^<\\n]*</\\w+>\\s*<h[1-3]\\b",
+  "bad": "<p className=\"text-xs uppercase tracking-widest\">Docs</p>\n<h2>Title</h2>",
+  "good": "<h2 className=\"text-2xl\">What it does</h2>\n"
+}

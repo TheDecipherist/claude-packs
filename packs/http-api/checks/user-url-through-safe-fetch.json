@@ -1,0 +1,28 @@
+{
+  "id": "user-url-through-safe-fetch",
+  "why": "Letting a customer choose where your server sends a request gives them a reach into your private network and metadata endpoints.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\bfetch\\(\\s*(?:channel|webhook|hook|alert|req|request|body|input|payload)\\.\\w*(?:[uU]rl|URL)\\b",
+  "bad": "await fetch(channel.webhookUrl, opts);",
+  "good": "await safeFetch(channel.webhookUrl, opts);",
+  "kind": "security"
+}

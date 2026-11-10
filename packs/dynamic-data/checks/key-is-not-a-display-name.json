@@ -1,0 +1,28 @@
+{
+  "id": "key-is-not-a-display-name",
+  "why": "A display name as a tenant key orphans the data on a rename. Key on an immutable id.",
+  "rule": ".claude/rules/one-fact-one-place.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\b(?:brand|tenant|company|org|organization|account|client)(?:Name)?\\s*:\\s*[\\w.]+\\.(?:name|title|displayName|label)\\b",
+  "bad": "const row = { brand: tenant.name, sku };",
+  "good": "const row = { tenantId: tenant._id, sku };",
+  "kind": "quality",
+  "code": true
+}

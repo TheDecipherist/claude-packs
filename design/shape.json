@@ -1,0 +1,10 @@
+{
+  "concepts": {},
+  "exclude": [
+    "out/**",
+    "build/**",
+    "third_party/**",
+    "JUCE/**",
+    "node_modules/**"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "zod-v4-formats",
+  "why": "z.string().email()/.uuid()/.url()/.datetime()/.ip() are the deprecated Zod 3 spellings. Zod 4 has z.email(), z.uuid(), z.url(), z.iso.datetime(), z.ipv4().",
+  "rule": ".claude/rules/schema-single-source-of-truth.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": true,
+  "pattern": "\\bz\\.string\\(\\)\\s*\\.(email|uuid|url|datetime|date|time|ip|ipv4|ipv6|emoji|cuid|ulid|base64)\\s*\\(",
+  "bad": "at: z.string().datetime(),\nmail: z.string().email(),",
+  "good": "at: z.iso.datetime(),\nmail: z.email(),",
+  "whenDep": {
+    "zod": 4
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "jwt-verify-pins-algorithm",
+  "why": "A token verified with no pinned algorithm lets the token choose how it is checked.",
+  "rule": ".claude/rules/credentials-handled-safely.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\bjwt\\.verify\\(\\s*[^,()]+(?:\\(\\))?\\s*,\\s*[^,()]+(?:\\(\\))?\\s*\\)",
+  "bad": "jwt.verify(token, getSecret())",
+  "good": "jwt.verify(token, getSecret(), { algorithms: ['HS256'] })",
+  "kind": "security"
+}

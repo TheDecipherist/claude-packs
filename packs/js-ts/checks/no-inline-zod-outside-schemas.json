@@ -1,0 +1,27 @@
+{
+  "id": "no-inline-zod-outside-schemas",
+  "why": "A z.object() in a route, handler, adapter or service is the per-layer copy that drifts, one commit before the second copy appears. Declare it in the schemas module and import it.",
+  "rule": ".claude/rules/schema-single-source-of-truth.md",
+  "concepts": [
+    "handlers"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/schemas/**",
+    "**/schema/**",
+    "**/*.schema.*"
+  ],
+  "code": true,
+  "pattern": "\\bz\\.object\\s*\\(",
+  "bad": "const Body = z.object({ name: z.string().max(80) });",
+  "good": "import { CreateSessionInput } from '../schemas/index.js';"
+}

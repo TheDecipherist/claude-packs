@@ -1,0 +1,16 @@
+{
+  "id": "modsec-no-blanket-off",
+  "why": "ctl:ruleEngine=Off or SecRuleEngine Off for a path turns the WAF off exactly where it is needed. Exclude one rule for one URI with ctl:ruleRemoveById.",
+  "rule": ".claude/rules/modsecurity-tuning.md",
+  "concepts": [
+    "modsec"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "pattern": "ctl:ruleEngine=Off|^\\s*SecRuleEngine\\s+Off\\b",
+  "flags": "m",
+  "bad": "SecRule REQUEST_URI \"@beginsWith /api\" \"id:1000,phase:1,pass,nolog,ctl:ruleEngine=Off\"",
+  "good": "SecRule REQUEST_URI \"@beginsWith /api/orders\" \"id:999100,phase:1,pass,nolog,ctl:ruleRemoveById=942100\""
+}

@@ -1,0 +1,28 @@
+{
+  "id": "client-no-browser-global-at-module-scope",
+  "why": "window/document/localStorage at module scope runs during the server render and throws. Read them inside effects and handlers, or behind typeof window !== 'undefined'.",
+  "rule": ".claude/rules/client-boundaries.md",
+  "concepts": [
+    "client"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*",
+    "**/public/**"
+  ],
+  "code": true,
+  "flags": "m",
+  "pattern": "^(?:export\\s+)?(?:const|let|var)\\s+\\w+\\s*=\\s*(?:window|document|localStorage|sessionStorage|navigator)\\b",
+  "bad": "const width = window.innerWidth;",
+  "good": "useEffect(() => { setWidth(window.innerWidth); }, []);"
+}

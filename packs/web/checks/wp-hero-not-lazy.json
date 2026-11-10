@@ -1,0 +1,27 @@
+{
+  "id": "wp-hero-not-lazy",
+  "why": "loading=\"lazy\" or fetchpriority=\"low\" on the hero delays the very element LCP measures. Preload it and mark it fetchpriority=\"high\".",
+  "rule": ".claude/rules/web-performance.md",
+  "concepts": [
+    "markup"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*"
+  ],
+  "code": false,
+  "flags": "i",
+  "pattern": "fetchpriority=.?low[^>]*hero|hero[^>]*loading=.?lazy",
+  "bad": "<img class=\"hero\" src=\"/hero.avif\" loading=\"lazy\">",
+  "good": "<img class=\"hero\" src=\"/hero.avif\" fetchpriority=\"high\" width=\"1600\" height=\"900\" alt=\"\u2026\">"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "no-locale-change",
+  "why": "A plugin must never change the process locale; it breaks number formatting in the host. Querying it with nullptr is fine.",
+  "rule": ".claude/rules/params-and-state-thread-safe.md",
+  "concepts": [
+    "cpp"
+  ],
+  "pattern": "\\bsetlocale\\s*\\(\\s*LC_\\w+\\s*,\\s*(?!nullptr\\b|NULL\\b|0\\s*\\))[^\\s)]|std::locale::global\\s*\\(",
+  "code": true,
+  "bad": "setlocale (LC_ALL, \"C\");",
+  "good": "auto* current = setlocale (LC_ALL, nullptr);"
+}

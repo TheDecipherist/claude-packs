@@ -1,0 +1,18 @@
+{
+  "id": "py-no-bare-except",
+  "why": "A bare except also catches KeyboardInterrupt and SystemExit, and hides every bug in the block. Catch the exception you expect, by name.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^\\s*except\\s*:",
+  "flags": "m",
+  "bad": "try:\n    run()\nexcept:\n    log()",
+  "good": "try:\n    run()\nexcept ValueError:\n    log()"
+}

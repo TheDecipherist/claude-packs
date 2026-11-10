@@ -1,0 +1,18 @@
+{
+  "id": "no-trailing-ing",
+  "why": "Fact, comma, then a participle that fake-analyzes. Cut everything after the comma; a real claim gets its own sentence with evidence.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": ",\\s+(?:highlighting|underscoring|showcasing|reflecting|ensuring|paving the way)\\b",
+  "bad": "It ships in one file, ensuring a smoother experience.\n",
+  "good": "It ships in one file.\n",
+  "flags": "i"
+}

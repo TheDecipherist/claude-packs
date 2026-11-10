@@ -1,0 +1,28 @@
+{
+  "id": "query-cast-is-not-validation",
+  "why": "A TypeScript type on a request body is a wish; only a runtime parse makes it true, and with Mongo the difference is operator injection.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\breq\\.query\\.\\w+\\s+as\\s+\\w+|\\breq\\.query\\[[^\\]]+\\]\\s+as\\s+\\w+",
+  "bad": "const rule = req.query.rule as string;",
+  "good": "const { rule } = QuerySchema.parse(req.query);",
+  "kind": "security"
+}

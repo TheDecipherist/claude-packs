@@ -1,0 +1,28 @@
+{
+  "id": "client-ip-not-leftmost-xff",
+  "why": "The left end of that header is written by the client unless the proxy says otherwise, and the code should not depend on a proxy setting nobody can see.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "strings": true,
+  "pattern": "x-forwarded-for['\\\"]\\]?\\)?[^\\n]{0,40}\\.split\\(|\\bforwarded\\??\\.split\\(|['\\\"]x-forwarded-for['\\\"]\\)\\s*\\|\\||\\.get\\(['\\\"]x-forwarded-for['\\\"]\\)\\s*\\|\\|",
+  "bad": "const ip = req.headers['x-forwarded-for']?.toString().split(',')[0];",
+  "good": "const ip = clientIp(req);",
+  "kind": "security"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "prodbuild-no-dev-flags",
+  "why": "A shipped bundler config with minify off, development mode or browser source maps on un-optimises the production build.",
+  "rule": ".claude/rules/production-build.md",
+  "concepts": [
+    "build-config"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": true,
+  "pattern": "\\bminify\\s*:\\s*false|\\bswcMinify\\s*:\\s*false|\\bmode\\s*:\\s*['\\\"]development['\\\"]|\\bproductionBrowserSourceMaps\\s*:\\s*true|['\\\"]style-loader['\\\"]",
+  "bad": "export default { productionBrowserSourceMaps: true };",
+  "good": "export default { reactStrictMode: true };"
+}

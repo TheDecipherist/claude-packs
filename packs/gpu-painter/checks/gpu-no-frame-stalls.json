@@ -1,0 +1,12 @@
+{
+  "id": "gpu-no-frame-stalls",
+  "why": "Blocking waits, sleeps, timer pacing, the message-thread lock or GPU readbacks on the frame path stall the render thread. Pace from the display link; read back only in tests.",
+  "rule": ".claude/rules/gpu-render-lifecycle.md",
+  "concepts": [
+    "painter"
+  ],
+  "pattern": "waitUntilCompleted|waitUntilScheduled|Thread::sleep|std::this_thread::sleep|startTimerHz\\s*\\(|MessageManagerLock|\\.\\s*MapAsync\\s*\\(|wgpuBufferMapAsync\\s*\\(",
+  "code": true,
+  "bad": "void RenderThread::frame() { juce::Thread::sleep (1); buffer.MapAsync (wgpu::MapMode::Read, 0, n, cb); }",
+  "good": "void RenderThread::frame() { encodePasses(); surface.Present(); }"
+}

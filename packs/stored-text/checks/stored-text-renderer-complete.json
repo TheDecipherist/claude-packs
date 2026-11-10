@@ -1,0 +1,24 @@
+{
+  "id": "stored-text-renderer-complete",
+  "why": "The renderer is the one place stored text is made safe and readable, so it does all four jobs: line endings, markdown, highlighted code, sanitizing. One missing means every page shows raw symbols, a grey code block, stray characters or a script.",
+  "rule": ".claude/rules/stored-text-renders-once.md",
+  "concepts": [
+    "stored-text-renderer"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "strings": true,
+  "mode": "needs",
+  "pattern": "\\bexport\\b",
+  "needs": [
+    "\\\\r",
+    "marked|markdown-it|micromark|remark|react-markdown|unified",
+    "shiki|highlight\\.js|hljs|prism|rehype-highlight|rehype-pretty-code",
+    "sanitize|DOMPurify|dompurify"
+  ],
+  "bad": "import { marked } from 'marked';\nexport const renderStored = (text: string) => marked.parse(text);\n",
+  "good": "import { marked } from 'marked';\nimport { codeToHtml } from 'shiki';\nimport sanitizeHtml from 'sanitize-html';\nexport const renderStored = (text: string) => sanitizeHtml(marked.parse(text.replace(/\\r\\n?/g, '\\n')));\n"
+}

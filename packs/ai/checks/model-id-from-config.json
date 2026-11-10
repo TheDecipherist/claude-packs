@@ -1,0 +1,28 @@
+{
+  "id": "model-id-from-config",
+  "why": "A model id, max_tokens or beta flag as a literal at the call site is a setting nobody can change without a deploy. They live in one MODELS table in config.",
+  "rule": ".claude/rules/ai-input-sha-boundary.md",
+  "concepts": [
+    "ai"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/config.*",
+    "**/config/**",
+    "**/env.*",
+    "**/models.*"
+  ],
+  "code": false,
+  "pattern": "['\\\"](?:claude|gpt|o[134]|gemini)-[a-z0-9.-]+['\\\"]",
+  "bad": "const MODEL = 'claude-opus-5-5';\nmodel: 'claude-opus-5-5',",
+  "good": "import { MODELS } from '../config.js';\nmodel: MODELS.critic.id,"
+}

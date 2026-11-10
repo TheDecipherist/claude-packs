@@ -1,0 +1,26 @@
+{
+  "id": "a11y-no-clickable-div",
+  "why": "A div/span with onClick is not focusable, does not fire on Enter/Space and is announced as nothing. <button> for actions, <a href> for navigation.",
+  "rule": ".claude/rules/accessibility.md",
+  "concepts": [
+    "markup"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*"
+  ],
+  "code": false,
+  "pattern": "<(?:div|span|li|td|p)\\b(?![^>]*\\binset-0\\b)[^>]*\\bon[Cc]lick\\s*=",
+  "bad": "<div onClick={open}>Open</div>",
+  "good": "<button type=\"button\" onClick={open}>Open</button>"
+}

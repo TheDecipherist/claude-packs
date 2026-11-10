@@ -1,0 +1,26 @@
+{
+  "id": "objectid-equals",
+  "why": "Comparing ObjectIds by toHexString() is four calls and a string compare where ObjectId.equals exists and also accepts a string.",
+  "rule": ".claude/rules/writes-are-atomic.md",
+  "concepts": [
+    "db-gateway",
+    "db-callers",
+    "db-scripts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "toHexString\\(\\)\\s*[!=]==?\\s*[\\w.]*toHexString\\(\\)",
+  "bad": "if (o._id.toHexString() === parent._id.toHexString())",
+  "good": "if (o._id.equals(parent._id))"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "client-no-window-location-nav",
+  "why": "window.location for an internal route throws away SPA state and prefetching, and re-triggers the dev unstyled flash on every click. Use the router; mark external URLs and downloads with // allow location nav.",
+  "rule": ".claude/rules/client-boundaries.md",
+  "concepts": [
+    "client"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.stories.*",
+    "**/public/**"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^(?!.*allow location nav).*window\\.location\\.(?:href\\s*=(?!\\s*['\"`]https?://)|assign\\s*\\((?!\\s*['\"`]https?://)|replace\\s*\\((?!\\s*['\"`]https?://)|reload\\s*\\()",
+  "bad": "window.location.href = '/admin/tools';",
+  "good": "router.push('/admin/tools');\nwindow.location.href = file.downloadUrl; // allow location nav"
+}

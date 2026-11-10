@@ -1,0 +1,27 @@
+{
+  "name": "rust",
+  "version": "1.0.0",
+  "description": "Rust: errors returned, unsafe proved, async never blocks, clippy as the gate. What clippy reads better stays with clippy.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/rust"
+  },
+  "keywords": [
+    "rust",
+    "cargo",
+    "clippy"
+  ],
+  "engines": {
+    "claude-packs": ">=1.1.0"
+  },
+  "concepts": {
+    "rust": [
+      "**/*.rs"
+    ]
+  }
+}

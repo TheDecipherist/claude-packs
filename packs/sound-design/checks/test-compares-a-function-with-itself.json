@@ -1,0 +1,22 @@
+{
+  "id": "test-compares-a-function-with-itself",
+  "why": "A test that compares a function with itself passes by construction. Assert the printed value.",
+  "rule": ".claude/rules/test-off-the-easy-point.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\b(?:EXPECT_(?:EQ|NEAR|DOUBLE_EQ|FLOAT_EQ)|ASSERT_(?:EQ|NEAR)|expectWithinAbsoluteError|expectEquals)\\s*\\(\\s*([\\w:.]+)\\s*\\([^()]*\\)\\s*,\\s*\\1\\s*\\(",
+  "bad": "EXPECT_NEAR(cutoffHz(v), cutoffHz(v), 0.01);",
+  "good": "EXPECT_NEAR(cutoffHz(74), 987.8, 0.1);"
+}

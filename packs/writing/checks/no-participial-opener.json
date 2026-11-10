@@ -1,0 +1,18 @@
+{
+  "id": "no-participial-opener",
+  "why": "Instruction-tuned models open sentences this way at 2-5x the human rate (PNAS 2025). Start with the subject.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "(?:^|[.!?]\\s+)(?:Leveraging|Building on|Drawing from|Harnessing)\\b",
+  "bad": "Leveraging the cache, it runs fast.\n",
+  "good": "It runs fast from the cache.\n",
+  "flags": "m"
+}

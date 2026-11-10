@@ -1,0 +1,33 @@
+{
+  "id": "tui-width-is-state",
+  "why": "A value computed from process.stdout.columns at render time keeps its old width after a resize until the next keypress. In a React/Ink component the width is state updated by the resize handler.",
+  "rule": ".claude/rules/tui-resize-and-screen.md",
+  "globs": [
+    "**/*.tsx"
+  ],
+  "concepts": [
+    "tui"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**",
+    "**/bin/**",
+    "**/cli.tsx",
+    "**/index.tsx",
+    "**/main.tsx"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "process\\.stdout\\.columns",
+  "needs": [
+    "\\buseState\\s*\\(",
+    "['\\\"]resize['\\\"]"
+  ],
+  "bad": "const divider = '\\u2500'.repeat(process.stdout.columns ?? 80);",
+  "good": "const [termWidth, setTermWidth] = useState(process.stdout.columns ?? 80);\nuseEffect(() => { const on = () => setTermWidth(process.stdout.columns ?? 80); process.stdout.on('resize', on); return () => { process.stdout.off('resize', on); }; }, []);"
+}

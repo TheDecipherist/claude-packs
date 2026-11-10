@@ -1,0 +1,17 @@
+{
+  "id": "dockerfile-needs-healthcheck",
+  "why": "Without a HEALTHCHECK, rolling updates and rollback have nothing to decide on and a dead service stays in rotation.",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "mode": "needs",
+  "pattern": "^\\s*(CMD|ENTRYPOINT)\\s",
+  "needs": [
+    "^\\s*HEALTHCHECK\\s"
+  ],
+  "bad": "FROM node:24.11.0-slim\nUSER node\nCMD [\"node\", \"dist/index.js\"]",
+  "good": "FROM node:24.11.0-slim\nHEALTHCHECK --interval=30s CMD node dist/healthcheck.js\nUSER node\nCMD [\"node\", \"dist/index.js\"]"
+}

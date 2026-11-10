@@ -1,0 +1,14 @@
+{
+  "id": "compose-db-needs-auth",
+  "why": "A database with no auth belongs to every container on its network.",
+  "rule": ".claude/rules/compose-pinned-and-closed.md",
+  "globs": [
+    "**/*compose*.yml",
+    "**/*compose*.yaml"
+  ],
+  "exclude": [],
+  "pattern": "--bind_ip_all(?![\\s\\S]*--auth)",
+  "bad": "command: [\"--replSet\", \"rs0\", \"--bind_ip_all\"]",
+  "good": "command: [\"--replSet\", \"rs0\", \"--bind_ip_all\", \"--auth\", \"--keyFile\", \"/run/secrets/k\"]",
+  "kind": "security"
+}

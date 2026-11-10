@@ -1,0 +1,23 @@
+{
+  "id": "audio-seed-fixed",
+  "why": "An unseeded source makes two renders differ, and every measurement then carries noise.",
+  "rule": ".claude/rules/meter-before-engine.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\bstd::random_device\\b|\\bsrand\\s*\\(\\s*(?:std::)?time\\s*\\(|\\bjuce::Random::getSystemRandom\\s*\\(|\\bjuce::Random\\s+\\w+\\s*;",
+  "bad": "std::mt19937 rng{std::random_device{}()};",
+  "good": "std::mt19937 rng{kNoiseSeed};",
+  "code": true
+}

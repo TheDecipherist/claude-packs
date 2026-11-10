@@ -1,0 +1,23 @@
+{
+  "id": "no-inline-style",
+  "why": "style=\"\u2026\" in server HTML is dropped by a nonce-only production CSP, so prod renders differently from dev. Put it in the nonce'd stylesheet.",
+  "rule": ".claude/rules/server-html-escapes-everything.md",
+  "concepts": [
+    "ui-templates"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**",
+    "**/css.*",
+    "**/styles.*"
+  ],
+  "code": false,
+  "pattern": "\\bstyle\\s*=\\s*[\\\"']",
+  "bad": "<span style=\"color: var(--muted)\">",
+  "good": "<span class=\"muted\">"
+}

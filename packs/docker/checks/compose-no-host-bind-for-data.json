@@ -1,0 +1,18 @@
+{
+  "id": "compose-no-host-bind-for-data",
+  "why": "A host-path bind mount breaks the moment the container lands on another node. App data lives in a named volume; a bind mount is for a read-only config in dev.",
+  "rule": ".claude/rules/compose-swarm-safe.md",
+  "concepts": [
+    "compose"
+  ],
+  "exclude": [
+    "**/*dev*",
+    "**/*local*",
+    "**/*override*"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s+-\\s*['\\\"]?(?:\\.{1,2}/|/(?!var/run/docker\\.sock))[^:\\n]*:/[^:\\n]*['\\\"]?\\s*$",
+  "bad": "    volumes:\n      - ./data:/data/db",
+  "good": "    volumes:\n      - mongo-data:/data/db\n      - ./nginx.conf:/etc/nginx/nginx.conf:ro"
+}

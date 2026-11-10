@@ -1,0 +1,19 @@
+{
+  "id": "test-imports-the-source",
+  "why": "A green test that holds its own copy of the logic is worse than no test, because it says the code is proven.",
+  "rule": ".claude/rules/tests-can-fail.md",
+  "globs": [
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "exclude": [],
+  "strings": true,
+  "pattern": "\\b(?:describe|it|test)\\(",
+  "mode": "needs",
+  "needs": [
+    "^import\\s+(?!type\\b)[^;]*?from\\s+['\\\"](?:\\.\\.?/|@/|~/)|\\bimport\\(\\s*['\\\"`]|\\brequire\\(\\s*['\\\"]\\.|execSync\\(|spawn\\("
+  ],
+  "bad": "describe('x', () => { function copy() {} it('y', () => {}); });",
+  "good": "import { f } from '../src/f';\ndescribe('x', () => {});",
+  "flags": "m"
+}

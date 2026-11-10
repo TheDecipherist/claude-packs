@@ -1,0 +1,48 @@
+{
+  "name": "postgres",
+  "version": "1.0.0",
+  "description": "PostgreSQL: migrations that never stop traffic, values always bound, types that say what they hold, and no database wiped by mistake.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/postgres"
+  },
+  "keywords": [
+    "postgres",
+    "postgresql",
+    "sql",
+    "migrations"
+  ],
+  "engines": {
+    "claude-packs": ">=1.1.0"
+  },
+  "concepts": {
+    "postgres": [
+      "**/*.sql",
+      "**/*.prisma"
+    ]
+  },
+  "optIn": [
+    "checks/pg-index-concurrently.json",
+    "checks/pg-fk-not-valid.json",
+    "checks/pg-timestamptz.json"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/db-wipe-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

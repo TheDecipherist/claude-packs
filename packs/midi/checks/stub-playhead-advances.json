@@ -1,0 +1,27 @@
+{
+  "id": "stub-playhead-advances",
+  "why": "A frozen position pins the clock: invisible to a delay, and it reads as broken modulation.",
+  "rule": ".claude/rules/measure-the-clock-in-audio.md",
+  "globs": [
+    "**/tests/**/*.cpp",
+    "**/test/**/*.cpp",
+    "**/probes/**/*.cpp",
+    "**/*_test.cpp",
+    "**/*Test.cpp"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "(?:ppqPosition\\s*=|setPpqPosition\\s*\\()\\s*[\\d.]+",
+  "bad": "info.ppqPosition = 0.0;",
+  "good": "info.ppqPosition = 0.0;\nppq += beatsPerBlock;",
+  "mode": "needs",
+  "needs": [
+    "[pP]pq\\w*\\s*\\+="
+  ],
+  "code": true
+}

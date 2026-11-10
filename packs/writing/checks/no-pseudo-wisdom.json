@@ -1,0 +1,18 @@
+{
+  "id": "no-pseudo-wisdom",
+  "why": "Unfalsifiable, safe, empty. Delete it, or give the specific version.",
+  "rule": ".claude/rules/no-stock-language.md",
+  "concepts": [
+    "public-text"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/CHANGELOG*"
+  ],
+  "prose": true,
+  "pattern": "\\b(?:the key is finding|the right balance|one-size-fits-all|context is everything)\\b",
+  "bad": "The key is finding the right balance.\n",
+  "good": "Under 50 users, use the free tier.\n",
+  "flags": "i"
+}

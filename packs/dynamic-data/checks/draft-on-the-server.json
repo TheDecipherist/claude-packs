@@ -1,0 +1,27 @@
+{
+  "id": "draft-on-the-server",
+  "why": "A draft in localStorage is a second truth on one device. Keep it on the server, per user, so it follows them.",
+  "rule": ".claude/rules/saves-are-patches.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\b(?:localStorage|sessionStorage)\\.setItem\\([^)\\n]*(?:draft|unsaved|autosave|filters?)\\b",
+  "bad": "localStorage.setItem('draft:' + id, JSON.stringify(doc));",
+  "good": "await saveDraft(id, patch);\nsessionStorage.setItem('tab', tab);",
+  "kind": "quality",
+  "flags": "i"
+}

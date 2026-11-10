@@ -1,0 +1,28 @@
+{
+  "id": "no-security-off-switch",
+  "why": "Temporary access paths are never removed, and an AI writes the comment instead of the check because the comment passes every test.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "process\\.env\\.\\w*(?:BYPASS|DISABLE_\\w*(?:AUTH|RATE|LIMIT|CSRF)|SKIP_\\w*(?:AUTH|VERIFY)|ALLOW_ALL|INSECURE)\\w*",
+  "bad": "if (process.env.DISABLE_RATE_LIMIT === 'true') return;",
+  "good": "if (isTest) return;",
+  "kind": "security"
+}

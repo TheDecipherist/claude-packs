@@ -1,0 +1,16 @@
+{
+  "id": "rust-allow-needs-reason",
+  "why": "A lint turned off with no reason stays off long after the reason is gone.",
+  "rule": ".claude/rules/rust-lints-are-the-gate.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/target/**",
+    "**/vendor/**"
+  ],
+  "language": "rust",
+  "pattern": "#!?\\[\\s*(?:allow|expect)\\s*\\((?![^\\]]*\\breason\\s*=)",
+  "bad": "#[allow(dead_code)]\nfn old() {}",
+  "good": "#[expect(dead_code, reason = \"called from the FFI side\")]\nfn old() {}"
+}

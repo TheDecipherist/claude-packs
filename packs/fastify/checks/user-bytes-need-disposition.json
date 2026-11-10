@@ -1,0 +1,29 @@
+{
+  "id": "user-bytes-need-disposition",
+  "why": "Serving uploaded bytes inline with their stored mime on the app origin is stored XSS: a text/html or image/svg+xml upload runs with the session cookie. Content-Disposition: attachment, or an allow-listed type.",
+  "rule": ".claude/rules/trust-config-not-headers.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "\\.type\\(\\s*[\\w.]+\\.(?:mime|mimeType|contentType|content_type)\\b",
+  "needs": [
+    "Content-Disposition"
+  ],
+  "bad": "return reply.type(got.meta.mime).send(got.bytes);",
+  "good": "return reply.header('Content-Disposition', `attachment; filename=\"${safeName}\"`).type(got.meta.mime).send(got.bytes);",
+  "flags": "i"
+}

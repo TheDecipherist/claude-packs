@@ -1,0 +1,26 @@
+{
+  "id": "no-token-in-query",
+  "why": "A token in a URL lands in logs, history and proxies.",
+  "rule": ".claude/rules/identity-comes-from-the-connection.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "searchParams\\.get\\(\\s*['\"](?:token|api_?key|access_token|secret)['\"]",
+  "bad": "const token = url.searchParams.get('token');",
+  "good": "const token = await firstMessageToken(ws);",
+  "kind": "security"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "sh-quote-arguments",
+  "why": "An unquoted variable splits on spaces and expands globs, so a path with a space becomes two arguments.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^[^#\\\"'\\n]*\\b(?:cp|mv|rm|cat|cd|mkdir|touch|chmod|chown|source)\\s+[^\\\"'\\n#]*\\$[A-Za-z_{]",
+  "flags": "m",
+  "bad": "cp $src $dst",
+  "good": "cp \"$src\" \"$dst\""
+}

@@ -1,0 +1,21 @@
+{
+  "id": "rcss-no-fixed-wide-width",
+  "why": "A fixed width of 500px or more is wider than a phone; the layout scrolls sideways. max-width, %, or min(800px, 100%).",
+  "rule": ".claude/rules/styles-live-in-stylesheets.md",
+  "concepts": [
+    "styles"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/out/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": false,
+  "pattern": "(?<![\\w-])(?:min-)?width\\s*:\\s*(?:[5-9]\\d{2}|\\d{4,})px",
+  "bad": ".card { width: 640px; }",
+  "good": ".card { max-width: 640px; width: min(640px, 100%); }"
+}

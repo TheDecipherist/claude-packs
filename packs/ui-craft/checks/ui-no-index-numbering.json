@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-index-numbering",
+  "why": "01, 02, 03 beside headings is costume, not order. Use position, or a real <ol>.",
+  "rule": ".claude/rules/no-generated-look.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": ">\\s*0[1-9]\\s*</(?:span|div|p|small)>",
+  "bad": "<span>01</span><h3>Fast</h3>\n",
+  "good": "<ol><li>Fast</li></ol>\n<span>12</span>\n"
+}

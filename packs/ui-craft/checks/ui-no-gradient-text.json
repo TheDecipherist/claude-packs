@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-gradient-text",
+  "why": "Gradient text is decoration, not meaning, and fails contrast at its light end.",
+  "rule": ".claude/rules/no-generated-look.md",
+  "concepts": [
+    "ui-markup",
+    "ui-styles"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\bbg-clip-text\\b|background-clip:\\s*text",
+  "bad": "<h1 className=\"bg-clip-text text-transparent\">Hello</h1>\n",
+  "good": "<h1 className=\"text-ink\">Hello</h1>\n"
+}

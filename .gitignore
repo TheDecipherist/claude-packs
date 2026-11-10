@@ -1,0 +1,13 @@
+node_modules/
+*.tgz
+.DS_Store
+.claude/statusbar-activity.json
+.claude/worktrees/
+.claude/.claude-packs-backup/
+.claude/state/
+.claude/usage.log
+.claude/hooks.log
+.claude-packs-lock
+.claude/kit-lock.log
+.claude/logs/
+.env

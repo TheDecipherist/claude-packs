@@ -1,0 +1,21 @@
+{
+  "id": "tsconfig-flags",
+  "why": "strict, noUncheckedIndexedAccess and verbatimModuleSyntax are the three flags that cost hours when turned on late and nothing when turned on first. A tsconfig that carries compilerOptions carries all three.",
+  "rule": ".claude/rules/tsconfig-strict.md",
+  "concepts": [
+    "tsconfig"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "mode": "needs",
+  "pattern": "^(?![\\s\\S]*\\\"extends\\\")[\\s\\S]*\\\"compilerOptions\\\"",
+  "needs": [
+    "\\\"strict\\\"\\s*:\\s*true",
+    "\\\"noUncheckedIndexedAccess\\\"\\s*:\\s*true",
+    "\\\"verbatimModuleSyntax\\\"\\s*:\\s*true"
+  ],
+  "bad": "{ \"compilerOptions\": { \"strict\": true, \"target\": \"ES2023\" } }",
+  "good": "{ \"compilerOptions\": { \"strict\": true, \"noUncheckedIndexedAccess\": true, \"verbatimModuleSyntax\": true, \"target\": \"ES2023\" } }\n{ \"extends\": \"./tsconfig.base.json\", \"include\": [\"src\"] }"
+}

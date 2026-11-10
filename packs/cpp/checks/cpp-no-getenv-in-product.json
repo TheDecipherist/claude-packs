@@ -1,0 +1,22 @@
+{
+  "id": "cpp-no-getenv-in-product",
+  "why": "A shipped binary must not read switches from the environment: each one is a branch no customer needs, and some make it hang or lift a safety limit. Configuration comes in through one place; a test fault lives in the test build.",
+  "rule": ".claude/rules/cpp-faults-only-in-the-test-build.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/gates/**",
+    "**/harness/**",
+    "**/tools/**",
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "(?<![\\w.>])(?:std::)?(?:secure_)?getenv\\s*\\(",
+  "bad": "const bool faultLate = std::getenv (\"APP_FAULT_LATE\") != nullptr;\nif (const char* e = getenv (\"APP_WORKERS\")) n = parse (e);",
+  "good": "const Config cfg = Config::fromArgs (argc, argv);"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "csp-not-switched-off",
+  "why": "A Content Security Policy is what stops injected script from running. Switched off, one XSS bug is the whole site.",
+  "rule": ".claude/rules/routes-validate-and-answer.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "kind": "security",
+  "code": true,
+  "pattern": "\\bcontentSecurityPolicy\\s*:\\s*false\\b",
+  "bad": "app.use(helmet({ contentSecurityPolicy: false }));",
+  "good": "app.use(helmet({ contentSecurityPolicy: { directives: POLICY } }));"
+}

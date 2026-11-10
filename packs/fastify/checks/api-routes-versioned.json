@@ -1,0 +1,28 @@
+{
+  "id": "api-routes-versioned",
+  "why": "An unversioned API route cannot change without breaking every client. /api/v1/ from the first line.",
+  "rule": ".claude/rules/three-layers.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/ui/**",
+    "**/auth/**",
+    "**/health*",
+    "**/app/api/**"
+  ],
+  "code": false,
+  "pattern": "\\.(?:get|post|put|patch|delete|route)\\s*\\(\\s*['\\\"`]/api/(?!v\\d+/)",
+  "bad": "app.get('/api/sessions', handler);",
+  "good": "app.get('/api/v1/sessions', handler);"
+}

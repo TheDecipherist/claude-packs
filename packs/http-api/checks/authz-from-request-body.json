@@ -1,0 +1,26 @@
+{
+  "id": "authz-from-request-body",
+  "why": "What a caller may do comes from what the server stored, never from the request.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "req\\.body\\??\\.(?:applied_to|role|company_id|tenant_id|owner_id|is_admin)\\b",
+  "bad": "const appliedTo = req.body?.applied_to ?? [];",
+  "good": "const appliedTo = stored.applied_to;",
+  "kind": "security"
+}

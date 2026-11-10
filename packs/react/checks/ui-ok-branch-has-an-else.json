@@ -1,0 +1,23 @@
+{
+  "id": "ui-ok-branch-has-an-else",
+  "why": "An empty screen after a failure tells the customer their data is gone, and nobody hears about it.",
+  "rule": ".claude/rules/react-state-and-effects.md",
+  "globs": [
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "strings": true,
+  "pattern": "\\bif\\s*\\(\\s*\\w+\\.ok\\s*\\)\\s*\\{(?:[^{}]|\\{(?:[^{}]|\\{[^{}]*\\})*\\})*\\}\\s*(?!else\\b)(?=[\\n}])",
+  "bad": "if (res.ok) { setData(await res.json()); }\n}",
+  "good": "if (!res.ok) { setError('x'); return; }\nsetData(await res.json());"
+}

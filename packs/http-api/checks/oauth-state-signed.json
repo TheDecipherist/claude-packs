@@ -1,0 +1,26 @@
+{
+  "id": "oauth-state-signed",
+  "why": "OAuth state exists to stop forged callbacks, and unsigned JSON is the forgery.",
+  "rule": ".claude/rules/credentials-handled-safely.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\bstate\\s*=\\s*Buffer\\.from\\(\\s*JSON\\.stringify|JSON\\.parse\\(\\s*Buffer\\.from\\(\\s*state\\b",
+  "bad": "const state = Buffer.from(JSON.stringify({ company_id })).toString('base64url');",
+  "good": "const state = randomBytes(32).toString('base64url');\nawait saveState(hashToken(state), { company_id });",
+  "kind": "security"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "test-skip-on-failed-setup",
+  "why": "A skip that hides a failed setup reports green on a broken product.",
+  "rule": ".claude/rules/a-control-is-seen-to-fire.md",
+  "globs": [
+    "**/tests/**/*.ts",
+    "**/test/**/*.ts",
+    "**/e2e/**/*.ts",
+    "**/*.spec.ts"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "pattern": "test\\.skip\\(\\s*!(?![A-Z_]+\\b)\\w+",
+  "bad": "test.skip(!wsId, 'No WS created');",
+  "good": "expect(wsId).toBeTruthy();"
+}

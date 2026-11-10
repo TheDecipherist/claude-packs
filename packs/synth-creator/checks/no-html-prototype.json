@@ -1,0 +1,24 @@
+{
+  "id": "no-html-prototype",
+  "why": "Tried on three house projects and dropped each time. An HTML page compiles in a second, which is the whole appeal, but it is a second design: the page and the C++ panel each become a source of truth, nothing holds one to the other, and they drift; every change is made twice or in the wrong place, and the build matches whichever design it read last. The reference picture is the design. It is measured into numbers once (`analyse-reference-look`), the panel is one table drawn in code from those numbers (`ui-drawn-in-code`, `no-shipped-images`), and the look gate compares the rendered panel to the picture element by element, depth rows included. One picture, one table, one gate. A page in the middle is a copy the shape law would refuse anywhere else, and it is the one copy of the design no hook reaches: not an image, not C++.",
+  "rule": ".claude/rules/ui-drawn-in-code.md",
+  "globs": [
+    "**/*.html",
+    "**/*.htm"
+  ],
+  "exclude": [
+    "docs/**",
+    "**/tests/**",
+    "**/test/**",
+    "**/build/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/third_party/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "^[ \\t]*(?:<!doctype[ \\t]+html\\b|<html[\\s>])",
+  "flags": "im",
+  "kind": "quality",
+  "bad": "<!DOCTYPE html>\n<html>\n<body><div class=\"knob\" id=\"cutoff\"></div></body>\n</html>",
+  "good": "<div class=\"note\">A fragment the build embeds is not a page.</div>"
+}

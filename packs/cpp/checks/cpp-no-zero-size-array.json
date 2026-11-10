@@ -1,0 +1,23 @@
+{
+  "id": "cpp-no-zero-size-array",
+  "why": "GCC allows an empty array as an extension, and MSVC refuses it, so the build breaks on Windows only.",
+  "rule": ".claude/rules/cpp-builds-everywhere.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**"
+  ],
+  "pattern": "\\w+\\s+\\w+\\s*\\[\\s*\\]\\s*=\\s*\\{\\s*\\}\\s*;",
+  "bad": "inline constexpr Preset kFactory[] = {};",
+  "good": "inline constexpr Preset kFactory[] = { Preset {} };",
+  "code": true
+}

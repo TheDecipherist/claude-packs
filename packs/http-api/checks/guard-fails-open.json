@@ -1,0 +1,28 @@
+{
+  "id": "guard-fails-open",
+  "why": "A guard that needs its input to exist before it refuses anything turns a missing value into full access.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/app/api/**/route.ts",
+    "**/app/api/**/route.js",
+    "**/routes/**/*.ts",
+    "**/routes/**/*.js",
+    "**/middleware*"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\.length\\s*>\\s*0\\s*&&\\s*!\\s*[\\w.]+\\.(?:includes|has|some)\\(|\\bif\\s*\\(\\s*!?[A-Za-z_]*(?:SECRET|TOKEN|ALLOWED|API_KEY)\\w*\\s*&&\\s*[^\\n]*(?:!==?|!\\s*[A-Z_a-z]+\\.)",
+  "bad": "if (ids.length > 0 && !ids.includes(siteId)) return forbidden();\nif (CRON_SECRET && header !== expected) return unauthorized();",
+  "good": "if (!ids.includes(siteId)) return forbidden();\nif (!CRON_SECRET) throw new Error('CRON_SECRET unset');",
+  "kind": "security"
+}

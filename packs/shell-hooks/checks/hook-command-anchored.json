@@ -1,0 +1,12 @@
+{
+  "id": "hook-command-anchored",
+  "why": "A relative hook command resolves only when Claude Code starts in one directory; from a subfolder or /cd it silently never runs. Anchor on $CLAUDE_PROJECT_DIR or an absolute path.",
+  "rule": ".claude/rules/hooks-portable-anchored-quoted.md",
+  "concepts": [
+    "hook-settings"
+  ],
+  "code": false,
+  "pattern": "\\\"command\\\"\\s*:\\s*\\\"(?!(?:node|bash|sh|python3?|npx)\\s+\\\\?\\\"?(?:\\$CLAUDE_PROJECT_DIR|\\$HOME|~|/))(?!\\$CLAUDE_PROJECT_DIR|/|~)",
+  "bad": "\"command\": \"bash packages/channel/hooks/check-signal.sh\"",
+  "good": "\"command\": \"node \\\"$CLAUDE_PROJECT_DIR/.claude/hooks/check-signal.mjs\\\"\""
+}

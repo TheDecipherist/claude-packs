@@ -1,0 +1,32 @@
+{
+  "id": "rust-static-mut",
+  "why": "A static mut is a data race the compiler stopped checking. An extern declaration has no initializer and is left alone.",
+  "rule": ".claude/rules/rust-unsafe-is-proved.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/benches/**",
+    "**/examples/**",
+    "**/fixtures/**",
+    "**/test_data/**",
+    "**/testdata/**",
+    "**/fuzz/**",
+    "**/xtask/**",
+    "**/target/**",
+    "**/vendor/**",
+    "**/build.rs",
+    "**/tests.rs",
+    "**/test.rs",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    "**/test_*.rs"
+  ],
+  "language": "rust",
+  "notInTests": true,
+  "pattern": "(?<!')\\bstatic\\s+mut\\s+\\w+\\s*:[^;=]*=",
+  "bad": "static mut COUNT: u32 = 0;",
+  "good": "static COUNT: AtomicU32 = AtomicU32::new(0);"
+}

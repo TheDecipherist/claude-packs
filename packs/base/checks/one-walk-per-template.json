@@ -1,0 +1,23 @@
+{
+  "id": "one-walk-per-template",
+  "why": "A test that presses, clicks or drags every instance of one template repeats the same behaviour hundreds of times and proves nothing more than one press does. Walk one instance of each template and every one-off; prove the rest with a read of the table that each is built from its template and wired. One every-instance pass that only proves each is hooked through its input path is allowed, and is not this: name it so, apart from the walks.",
+  "rule": ".claude/rules/test-the-template-once.md",
+  "globs": [
+    "**/gates/**",
+    "**/probes/**",
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/*_test.*",
+    "**/e2e/**"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/node_modules/**"
+  ],
+  "code": true,
+  "pattern": "(?:for\\s*\\([^;\\n]*?(?::|\\bof\\b|\\bin\\b)\\s*(?:await\\s+)?[^;\\n]*?(?:\\b(?:controls|ctls|kDefs|kPanel|widgets|knobs|sliders|buttons)\\b(?:\\(\\))?|\\.all\\(\\))\\s*\\)|for\\s*\\([^;\\n]*;[^;\\n]*<\\s*[\\w:.>-]*(?:kControls|kCount|(?:controls|ctls|kDefs|kPanel|widgets|knobs|sliders|buttons)\\.size\\(\\)|(?:controls|ctls|kDefs|kPanel|widgets|knobs|sliders|buttons)\\.length)[^;\\n]*;[^)\\n]*\\)|\\b(?:controls|ctls|kDefs|kPanel|widgets|knobs|sliders|buttons)\\.forEach\\()(?![^}\\n]{0,300}?\\.id\\s*===?(?!=))(?:\\s*\\{[^}]{0,300}?|[^;}]{0,300}?)\\b(?:press\\w*(?:\\.push_back|\\.push)?|click\\w*|drag\\w*|hover\\w*|tap)\\s*\\(",
+  "bad": "for (const auto& c : L.controls) if (c.visible) pressIds.push_back(c.id);\nfor (const b of buttons) {\n  await b.click();\n}\nfor (int i = 0; i < ctl::kCount; i++) pressAt (centreOf (i));\nbuttons.forEach((b) => b.hover());",
+  "good": "for (const auto& c : L.controls) if (c.id == id) pressAt (c.box.getCentre());\nfor (const d : kDefs) assert (d.bind != nullptr);\nawait buttons[0].click();\nfor (const row of table) expect(row.template).toBe('knob');"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "nginx-headers-always",
+  "why": "add_header without `always` is dropped on 4xx/5xx responses, so error pages ship without nosniff, frame protection or HSTS.",
+  "rule": ".claude/rules/nginx-production.md",
+  "concepts": [
+    "nginx-conf"
+  ],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "code": false,
+  "pattern": "\\badd_header\\s+(?:X-Frame-Options|X-Content-Type-Options|Strict-Transport-Security|Content-Security-Policy(?:-Report-Only)?|Referrer-Policy)\\b(?![^;]*\\balways\\b)",
+  "bad": "add_header X-Content-Type-Options nosniff;",
+  "good": "add_header X-Content-Type-Options nosniff always;"
+}

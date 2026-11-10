@@ -1,0 +1,31 @@
+{
+  "id": "route-scopes-to-the-caller",
+  "why": "Authentication says who is calling; without an owner in the query, every customer's data is one guessed id away.",
+  "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "globs": [
+    "**/app/api/**/route.ts",
+    "**/app/api/**/route.js",
+    "**/routes/**/*.ts",
+    "**/routes/**/*.js"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "code": true,
+  "pattern": "\\b(?:find|get|list|update|delete|search)\\w*\\(\\s*(?:id|siteId|sessionId|params\\.id|query\\.siteId)\\b|\\bsiteId:\\s*query\\.siteId\\b",
+  "mode": "needs",
+  "needs": [
+    "session\\.user\\.id|\\breq\\.userId\\b|\\w*[Ss]iteAccess\\(|adminGuard\\(|assertAdmin\\(|validateServiceKey\\("
+  ],
+  "bad": "const s = await findSegmentById(id);\nreturn json(s);",
+  "good": "const s = await findSegmentById(id, session.user.id);",
+  "kind": "security"
+}

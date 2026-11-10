@@ -1,0 +1,25 @@
+{
+  "id": "field-map-over-if-runs",
+  "why": "Three or more ifs in a row on fields of the same object (if (args.filter?.flag !== undefined) filter.flags = \u2026) grow by one line per field forever. A field table plus one loop keeps every field in one place and makes the next field one table row.",
+  "rule": ".claude/rules/field-map-over-if-runs.md",
+  "concepts": [
+    "cpp",
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.min.js",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*_test.*"
+  ],
+  "code": true,
+  "pattern": "if\\s*\\(\\s*!?\\s*([A-Za-z_$][\\w$]*(?:(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*)*)(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*\\s*(?:(?:!==?|===?)\\s*(?:undefined|null|nullptr)\\s*)?\\)[^\\n]*\\n(?:[^\\n]*\\n){0,3}?\\s*if\\s*\\(\\s*!?\\s*\\1(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*\\s*(?:(?:!==?|===?)\\s*(?:undefined|null|nullptr)\\s*)?\\)[^\\n]*\\n(?:[^\\n]*\\n){0,3}?\\s*if\\s*\\(\\s*!?\\s*\\1(?:\\?\\.|\\.|->)[A-Za-z_$][\\w$]*\\s*(?:(?:!==?|===?)\\s*(?:undefined|null|nullptr)\\s*)?\\)",
+  "bad": "  if (args.filter?.flag !== undefined) filter.flags = args.filter.flag;\n  if (args.filter?.kind !== undefined) filter.kind = args.filter.kind;\n  if (args.filter?.path !== undefined) filter.path = { $regex: escapeRe(args.filter.path) };\n",
+  "good": "const FILTER_FIELDS = {\n  flag: (v) => ({ flags: v }),\n  kind: (v) => ({ kind: v }),\n  path: (v) => ({ path: { $regex: escapeRe(v) } }),\n};\nfor (const [k, put] of Object.entries(FILTER_FIELDS)) if (args.filter?.[k] !== undefined) Object.assign(filter, put(args.filter[k]));\nif (a.x) f();\nif (b.y) g();\nif (c.z) h();\n"
+}

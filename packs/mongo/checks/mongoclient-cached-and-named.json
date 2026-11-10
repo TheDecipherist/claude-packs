@@ -1,0 +1,34 @@
+{
+  "id": "mongoclient-cached-and-named",
+  "why": "A MongoClient created without the globalThis cache stacks a new pool on every hot reload, and without appName it is anonymous in the Atlas connection view.",
+  "rule": ".claude/rules/one-client-one-pool.md",
+  "concepts": [
+    "db-gateway"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/scripts/**",
+    "**/migrations/**",
+    "**/seeds/**",
+    "**/bin/**"
+  ],
+  "code": true,
+  "mode": "needs",
+  "pattern": "\\bnew\\s+MongoClient\\s*\\(",
+  "needs": [
+    "\\bglobalThis\\b|\\b(?:let|var)\\s+\\w*[Cc]lient\\b|\\b\\w*[Cc]lient\\s*\\?\\?=",
+    "\\bappName\\s*:",
+    "\\bmaxPoolSize\\s*:"
+  ],
+  "bad": "client = new MongoClient(uri, { ignoreUndefined: true });",
+  "good": "const g = globalThis as { __mongoClient?: MongoClient };\ng.__mongoClient ??= new MongoClient(env.MONGODB_URI, { appName: env.APP_NAME, maxPoolSize: 10 });\nlet client;\nexport const getClient = () => (client ??= new MongoClient(uri, { appName: name, maxPoolSize: 10 }));\n"
+}

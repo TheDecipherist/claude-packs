@@ -1,0 +1,34 @@
+{
+  "id": "rust-string-as-error",
+  "why": "An error the caller cannot match on can only be printed. A public function returns a type of its own.",
+  "rule": ".claude/rules/rust-errors-are-returned.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/benches/**",
+    "**/examples/**",
+    "**/fixtures/**",
+    "**/test_data/**",
+    "**/testdata/**",
+    "**/fuzz/**",
+    "**/xtask/**",
+    "**/target/**",
+    "**/vendor/**",
+    "**/build.rs",
+    "**/tests.rs",
+    "**/test.rs",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    "**/test_*.rs",
+    "**/main.rs",
+    "**/bin/**"
+  ],
+  "language": "rust",
+  "notInTests": true,
+  "pattern": "\\bpub\\s+(?:async\\s+)?fn\\b[^{;]*?->\\s*(?:std::result::)?Result<(?:[^<>(),;{]|\\([^()]*\\)|<(?:[^<>]|<(?:[^<>]|<[^<>]*>)*>)*>)*,\\s*(?:String|&\\'static\\s+str|Box<dyn\\s+(?:std::error::)?Error\\b[^>]*>)\\s*>",
+  "bad": "pub fn parse(s: &str) -> Result<Port, String> { Err(s.to_string()) }",
+  "good": "pub fn parse(s: &str) -> Result<Port, ParseError> { Err(ParseError::Empty) }"
+}

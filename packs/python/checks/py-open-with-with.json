@@ -1,0 +1,18 @@
+{
+  "id": "py-open-with-with",
+  "why": "A file opened without `with` stays open when anything raises.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^\\s*\\w+\\s*=\\s*open\\(|^(?!\\s*with\\b)[^#\\n]*\\b(?:json\\.load\\(\\s*open\\(|open\\([^\\n]*\\)\\s*\\.\\s*(?:read|readlines|write)\\()",
+  "flags": "m",
+  "bad": "f = open(path)\ndata = f.read()\nrows = json.load(open(path))",
+  "good": "with open(path) as f:\n    data = f.read()"
+}

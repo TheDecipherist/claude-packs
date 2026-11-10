@@ -1,0 +1,30 @@
+{
+  "id": "boundary-computes-its-own-hash",
+  "why": "wrapForPlanner(x, sha256Hex(x), from) at five call sites is the hash computed by the caller, which one day disagrees with the text. The helper hashes what it wraps.",
+  "rule": ".claude/rules/ai-input-sha-boundary.md",
+  "concepts": [
+    "ai"
+  ],
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/boundary.*"
+  ],
+  "code": true,
+  "pattern": "\\bwrap\\w*\\(\\s*([\\w.]+)\\s*,\\s*sha256\\w*\\(\\s*\\1\\s*\\)",
+  "bad": "wrapForPlanner(text, sha256Hex(text), 'activity')",
+  "good": "wrapBoundary(text, 'activity')"
+}

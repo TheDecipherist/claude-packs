@@ -1,0 +1,19 @@
+{
+  "id": "cpp-no-using-namespace-in-header",
+  "why": "A using directive in a header changes name lookup in every file that includes it.",
+  "rule": ".claude/rules/cpp-headers-declare.md",
+  "concepts": [],
+  "globs": [
+    "**/*.h",
+    "**/*.hh",
+    "**/*.hpp"
+  ],
+  "exclude": [
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "^using[ \\t]+namespace\\b",
+  "bad": "using namespace app;",
+  "good": "namespace e = app::engines;\nvoid f() {\n    using namespace detail;\n}",
+  "flags": "m"
+}

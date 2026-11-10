@@ -1,0 +1,33 @@
+{
+  "id": "pg-bind-values",
+  "why": "A value in the SQL text is an injection. Bind it as a parameter: $1, %s, or the driver's own tagged form.",
+  "rule": ".claude/rules/postgres-values-are-bound.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.py",
+    "**/*.go",
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**",
+    "**/tests/**",
+    "**/test/**",
+    "**/__tests__/**",
+    "**/migrations/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/*_test.go",
+    "**/*_test.py",
+    "**/test_*.py"
+  ],
+  "pattern": "^(?![ \\t]*(?://|#))(?![^\\n]*pg: allow)[^\\n]*?(?:(?<!\\bsql|\\bSQL|\\$queryRaw|\\$executeRaw|\\braw|sql<[^`\\n]{0,60}>)`\\s*(?:SELECT|INSERT\\s+INTO|UPDATE|DELETE\\s+FROM)\\b[^`]*?(?:'%?\\$\\{|(?:=|<|>|LIKE|ILIKE)\\s*\\$\\{|\\bIN\\s*\\(\\s*\\$\\{(?!\\w*(?:placeholder|param)))|\\bf(?:\"\"\"|\\'\\'\\'|\"|\\')\\s*(?:SELECT|INSERT\\s+INTO|UPDATE|DELETE\\s+FROM)\\b[^\\n]*?(?:'%?\\{|(?:=|<|>|LIKE|ILIKE)\\s*\\{|\\bIN\\s*\\(\\s*\\{(?!\\w*(?:placeholder|param)))|Sprintf\\(\\s*[\"`]\\s*(?:SELECT|INSERT\\s+INTO|UPDATE|DELETE\\s+FROM)\\b[^\\n]*?(?:'%?%[sv]|(?:=|<|>|LIKE|ILIKE)\\s*%[sv])|format!\\(\\s*r?#*\"\\s*(?:SELECT|INSERT\\s+INTO|UPDATE|DELETE\\s+FROM)\\b[^\\n]*?(?:'%?\\{|(?:=|<|>|LIKE|ILIKE)\\s*\\{|\\bIN\\s*\\(\\s*\\{(?!\\w*(?:placeholder|param))))",
+  "flags": "im",
+  "bad": "await db.query(`SELECT * FROM users WHERE email = '${email}'`);",
+  "good": "await pool.query(\"SELECT * FROM users WHERE email = $1\", [email]);"
+}

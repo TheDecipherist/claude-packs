@@ -1,0 +1,23 @@
+{
+  "id": "race-leaves-work-running",
+  "why": "Promise.race ends the wait, not the work, which goes on using its connection and may still write.",
+  "rule": ".claude/rules/outbound-calls-have-a-limit.md",
+  "globs": [],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "Promise\\.race\\(\\s*\\[",
+  "bad": "await Promise.race([work(), timeout(5000)]);",
+  "good": "await work({ signal: AbortSignal.timeout(5000) });",
+  "concepts": [
+    "js"
+  ]
+}

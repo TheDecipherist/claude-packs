@@ -1,0 +1,12 @@
+{
+  "id": "compose-no-hardcoded-ip",
+  "why": "Container IPs change on every restart, scale and update. The service name is the identity.",
+  "rule": ".claude/rules/compose-swarm-safe.md",
+  "concepts": [
+    "compose"
+  ],
+  "code": false,
+  "pattern": "\\b(?:10(?:\\.\\d{1,3}){3}|172\\.(?:1[6-9]|2\\d|3[01])(?:\\.\\d{1,3}){2}|192\\.168(?:\\.\\d{1,3}){2})\\b|\\b127\\.0\\.0\\.1:\\d",
+  "bad": "      MONGODB_URI: mongodb://10.0.1.12:27017/app",
+  "good": "      MONGODB_URI: mongodb://mongo:27017/app"
+}

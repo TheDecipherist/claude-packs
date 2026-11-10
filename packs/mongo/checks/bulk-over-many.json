@@ -1,0 +1,28 @@
+{
+  "id": "bulk-over-many",
+  "why": "Multi-document writes go through one bulkWrite built from an ops array. insertMany/updateMany are the smell this exists to catch; a deliberate one-off says why in a comment on the same line.",
+  "rule": ".claude/rules/reads-aggregate-writes-bulk.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/gateway.*",
+    "**/gateway/**"
+  ],
+  "code": false,
+  "pattern": "^(?!.*//).*\\.(insertMany|updateMany)\\s*\\(",
+  "flags": "m",
+  "bad": "await col.insertMany(docs);",
+  "good": "await col.bulkWrite(docs.map((d) => ({ insertOne: { document: d } })));\nawait col.updateMany(f, u); // mongo: one-off backfill, idempotent"
+}

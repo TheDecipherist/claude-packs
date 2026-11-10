@@ -1,0 +1,26 @@
+{
+  "id": "no-empty-deletemany",
+  "why": "deleteMany with an empty filter wipes the collection. Name what to delete; if the store upserts on a stable key, ask whether the delete is needed at all.",
+  "rule": ".claude/rules/deletes-name-what-dies.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts",
+    "db-callers"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\.deleteMany\\s*\\(\\s*(\\{\\s*\\})?\\s*\\)",
+  "bad": "await col.deleteMany({});",
+  "good": "await col.deleteMany({ sessionId, status: 'expired' });"
+}

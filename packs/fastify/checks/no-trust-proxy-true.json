@@ -1,0 +1,25 @@
+{
+  "id": "no-trust-proxy-true",
+  "why": "trustProxy: true makes req.ip the leftmost X-Forwarded-For value, so every spoofed header is a fresh rate-limit bucket. Use the ingress hop count or an address list.",
+  "rule": ".claude/rules/security-one-switch.md",
+  "concepts": [
+    "fastify-app",
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\btrustProxy\\s*:\\s*true\\b|trust proxy['\\\"]?\\s*,\\s*true",
+  "bad": "const app = Fastify({ trustProxy: true });",
+  "good": "const app = Fastify({ trustProxy: 1 });"
+}

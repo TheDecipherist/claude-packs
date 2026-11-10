@@ -1,0 +1,21 @@
+{
+  "id": "ui-no-zoom-lock",
+  "why": "Disabling zoom locks out people who need it (WCAG 1.4.4).",
+  "rule": ".claude/rules/touch-and-small-screens.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "user-scalable\\s*=\\s*(?:no|0)|maximum-scale\\s*=\\s*1(?:\\.0)?\\b",
+  "bad": "<meta name=\"viewport\" content=\"width=device-width, user-scalable=no\">\n",
+  "good": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+}

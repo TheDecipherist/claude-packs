@@ -1,0 +1,25 @@
+{
+  "id": "email-html-escapes",
+  "why": "Mail clients render it, so one contact form submission can put a phishing link in staff mail under your own domain.",
+  "rule": ".claude/rules/email-html-escapes.md",
+  "globs": [
+    "**/email/**/*.ts",
+    "**/mail/**/*.ts",
+    "**/emails/**/*.ts"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "strings": true,
+  "pattern": "</?(?:p|td|div|span|strong|b|h[1-6]|li|a)\\b[^>\\n]*>[^<\\n`]*\\$\\{\\s*(?!esc\\w*\\(|encodeURIComponent)[\\w.]+\\s*\\}",
+  "bad": "const html = `<p><strong>Name:</strong> ${name}</p>`;",
+  "good": "const html = `<p><strong>Name:</strong> ${escapeHtml(name)}</p>`;"
+}

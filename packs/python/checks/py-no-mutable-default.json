@@ -1,0 +1,18 @@
+{
+  "id": "py-no-mutable-default",
+  "why": "A mutable default is made once and shared by every call, so one call changes the next.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "^\\s*(?:async\\s+)?def\\s+\\w+\\([^)]*=\\s*(?:\\[\\s*\\]|\\{\\s*\\}|set\\(\\)|dict\\(\\)|list\\(\\))",
+  "flags": "m",
+  "bad": "def add(row, rows=[]):\n    rows.append(row)",
+  "good": "def add(row, rows=None):\n    rows = rows or []"
+}

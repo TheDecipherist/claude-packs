@@ -1,0 +1,22 @@
+{
+  "id": "tui-no-ris-reset",
+  "why": "\\x1Bc (RIS) resets the whole terminal: colours, font, cursor settings, and behaves differently per emulator. Clear with \\x1B[2J\\x1B[H.",
+  "rule": ".claude/rules/tui-resize-and-screen.md",
+  "concepts": [
+    "tui",
+    "tui-entry"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/test/**"
+  ],
+  "code": false,
+  "pattern": "\\\\x1[bB]c(?![0-9A-Za-z])|\\\\u001[bB]c(?![0-9A-Za-z])|\\\\033c(?![0-9A-Za-z])",
+  "bad": "process.stdout.write('\\x1Bc');",
+  "good": "process.stdout.write('\\x1B[2J\\x1B[H');"
+}

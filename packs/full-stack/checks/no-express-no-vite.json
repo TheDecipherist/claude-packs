@@ -1,0 +1,23 @@
+{
+  "id": "no-express-no-vite",
+  "why": "The stack is Fastify and Next.js. Express and Vite are never imported, depended on or mentioned; a 'ported from Express' comment is how the next Express import gets in.",
+  "rule": ".claude/rules/stack-is-fastify-and-nextjs.md",
+  "concepts": [
+    "js"
+  ],
+  "globs": [
+    "**/package.json"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.md"
+  ],
+  "code": false,
+  "flags": "i",
+  "pattern": "['\"](express|vite)['\"]\\s*:|from\\s*['\"](express|vite)['\"]|require\\(\\s*['\"](express|vite)['\"]\\s*\\)",
+  "bad": "import express from 'express';\n// same as express trust proxy 1",
+  "good": "import Fastify from 'fastify';\napp.register(helmet);\n\"vitest\": \"3.0.0\"\nThe express lane is closed.\n"
+}

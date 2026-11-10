@@ -1,0 +1,18 @@
+{
+  "id": "sh-no-parse-ls",
+  "why": "ls output breaks on spaces and newlines. A glob does not.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "\\bfor\\s+\\w+\\s+in\\s+\\$\\(\\s*ls\\b|\\bls\\b[^|\\n]*\\|\\s*(?:while|xargs)\\b",
+  "flags": "m",
+  "bad": "for f in $(ls *.txt); do echo \"$f\"; done",
+  "good": "for f in *.txt; do echo \"$f\"; done"
+}

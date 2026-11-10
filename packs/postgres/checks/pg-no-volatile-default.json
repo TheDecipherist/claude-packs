@@ -1,0 +1,18 @@
+{
+  "id": "pg-no-volatile-default",
+  "why": "A volatile default rewrites the whole table under an exclusive lock. `now()` is not volatile, and stays allowed.",
+  "rule": ".claude/rules/postgres-migrations-never-stop-traffic.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)[ \\t]*(?:ALTER\\s+TABLE\\s+\\S+\\s+)?ADD\\s+(?:COLUMN\\s+)?(?:IF\\s+NOT\\s+EXISTS\\s+)?\"?\\w+\"?\\s+[^,;]*?\\bDEFAULT\\b[^,;]*?\\b(?:gen_random_uuid|uuid_generate_v\\d\\w*|uuidv[47]|clock_timestamp|random|nextval|timeofday)\\s*\\(",
+  "flags": "im",
+  "bad": "ALTER TABLE t ADD COLUMN token uuid DEFAULT gen_random_uuid();",
+  "good": "ALTER TABLE t ADD COLUMN created_at timestamptz DEFAULT now();"
+}

@@ -1,0 +1,178 @@
+/* What the kit's page adds to the design in main.css. */
+@layer components {
+  .page-identity__title { text-transform: none; }
+
+  .lede {
+    max-width: 62ch;
+    margin: var(--space-6) auto 0;
+    font-size: var(--text-h3);
+    line-height: 1.45;
+    color: var(--color-text-muted);
+  }
+
+  .install {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
+    background: var(--color-void);
+    color: var(--color-hero-text);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    max-width: 100%;
+  }
+
+  .install code { min-width: 0; overflow-x: auto; white-space: nowrap; }
+
+  .install button {
+    flex: none;
+    padding: var(--space-1) var(--space-4);
+    border: 1px solid oklch(0.88 0.010 60 / 0.25);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-hero-text);
+    font-size: var(--text-small);
+    cursor: pointer;
+  }
+
+  .install button:hover { border-color: var(--color-green); color: var(--color-green); }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+
+  .terminal {
+    margin-top: var(--space-8);
+    border: 1px solid oklch(0.88 0.010 60 / 0.12);
+    border-radius: var(--radius-md);
+    background: oklch(0.07 0.030 248);
+    overflow: hidden;
+  }
+
+  .terminal__bar {
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid oklch(0.88 0.010 60 / 0.10);
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: oklch(0.62 0.020 248);
+  }
+
+  .terminal pre {
+    margin: 0;
+    padding: var(--space-6);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    line-height: 1.7;
+    color: oklch(0.88 0.012 60);
+  }
+
+  .terminal .refused { color: var(--color-amber); font-weight: 700; }
+  .terminal .why { color: var(--color-green); }
+  .terminal .dim { color: oklch(0.62 0.020 248); }
+
+  .section--void .section__subheading { color: oklch(0.72 0.020 248); }
+
+  .repo-card__desc {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  .site-footer .footer__tagline { color: oklch(0.72 0.020 248); }
+  .site-footer a { color: var(--color-green); }
+
+  .ways {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+    margin-top: var(--space-8);
+  }
+
+  .way {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+  }
+
+  .way h3 { font-family: var(--font-display); font-size: var(--text-h3); }
+  .way p { color: var(--color-text-muted); }
+
+  .way pre {
+    margin-top: auto;
+    padding: var(--space-3) var(--space-4);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border-radius: var(--radius-sm);
+    background: var(--color-void);
+    color: var(--color-hero-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    line-height: 1.7;
+  }
+
+  .ledger {
+    width: 100%;
+    margin-top: var(--space-8);
+    border-collapse: collapse;
+    font-size: var(--text-body);
+  }
+
+  .ledger th,
+  .ledger td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .ledger th {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .ledger td:first-child { font-family: var(--font-mono); font-size: var(--text-mono); white-space: nowrap; }
+
+  .proofs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4) var(--space-12);
+    margin-top: var(--space-8);
+    list-style: none;
+  }
+
+  .proofs strong { display: block; font-family: var(--font-display); font-size: var(--text-h3); font-weight: 600; }
+  .proofs span { color: var(--color-text-muted); }
+
+  .section--void .proofs span { color: oklch(0.72 0.020 248); }
+  .section--void .proofs strong { color: var(--color-hero-text); }
+
+  .notice {
+    margin-top: var(--space-8);
+    padding: var(--space-4) var(--space-6);
+    border-left: 3px solid var(--color-amber);
+    color: oklch(0.82 0.015 60);
+  }
+
+  @media (max-width: 900px) {
+    .ways, .proofs { grid-template-columns: minmax(0, 1fr); }
+    .ledger thead { display: none; }
+    .ledger tr { display: block; padding-block: var(--space-3); border-bottom: 1px solid var(--color-border); }
+    .ledger td { display: block; padding: 0; border: 0; }
+    .ledger td:first-child { white-space: normal; overflow-wrap: anywhere; color: var(--color-text-muted); }
+  }
+}

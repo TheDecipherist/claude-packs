@@ -1,0 +1,25 @@
+{
+  "id": "lookup-over-if-chains",
+  "why": "Three or more branches on one value (if/else if, or ifs in a row that each return) are a lookup table (JS/TS) or an object per kind (C++; an exhaustive switch over an enum class only in a hot inner loop): one place to add a case, and a missing case is a compile error. The chain hides a missing case and grows forever.",
+  "rule": ".claude/rules/lookup-over-if-chains.md",
+  "concepts": [
+    "cpp",
+    "js"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.min.js",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*_test.*"
+  ],
+  "code": true,
+  "pattern": "if\\s*\\(\\s*(?![\\w.]*\\.length\\b)([A-Za-z_][\\w.]*(?:->\\w+)*(?:\\(\\))?)\\s*===?(?!=)(?!\\s*(?:null|undefined|nullptr)\\b)\\s*[^)&|]+\\)[\\s\\S]{0,600}?(?:else\\s+)?if\\s*\\(\\s*\\1\\s*===?(?!=)(?!\\s*(?:null|undefined|nullptr)\\b)\\s*[^)&|]+\\)[\\s\\S]{0,600}?(?:else\\s+)?if\\s*\\(\\s*\\1\\s*===?(?!=)(?!\\s*(?:null|undefined|nullptr)\\b)",
+  "bad": "if (row.kind === 'turn') return `<div>${turn(row)}</div>`;\nif (row.kind === 'system') return `<div>${note(row)}</div>`;\nif (row.kind === 'bash') return detailed(row);",
+  "good": "const RENDER = { turn: (row) => `<div>${turn(row)}</div>`, system: (row) => `<div>${note(row)}</div>`, bash: detailed };\nreturn (RENDER[row.kind] ?? unknownKind)(row);\nswitch (mode) {\n    case Mode::line: return drawLine (ctx);\n    case Mode::fill: return drawFill (ctx);\n    case Mode::text: return drawText (ctx);\n}\nif (score > 90) a(); else if (score > 80) b(); else if (score > 70) c();\nif (a == 1) x(); else if (b == 2) y(); else if (c == 3) z();\nif (row.kind === 'turn') return t(row);\nif (row.kind === 'system') return s(row);\nif (x === null) return a;\nif (x === undefined) return b;\nif (x === '') return c;\n"
+}

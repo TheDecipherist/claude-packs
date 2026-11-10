@@ -1,0 +1,21 @@
+{
+  "name": "ci",
+  "version": "1.0.0",
+  "description": "CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/ci"
+  },
+  "keywords": [
+    "ci",
+    "github-actions"
+  ],
+  "engines": {
+    "claude-packs": ">=0.25.0"
+  }
+}

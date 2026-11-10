@@ -1,0 +1,16 @@
+{
+  "id": "test-name-says-behaviour",
+  "why": "A test named `works` says nothing when it fails. Name the behaviour.",
+  "rule": ".claude/rules/test-names-describe-behavior.md",
+  "concepts": [
+    "js-tests"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "pattern": "\\b(?:it|test)\\(\\s*['\"`](?:works?|test\\s*\\d*|should work|it works|basic|ok|todo)['\"`]",
+  "flags": "i",
+  "bad": "it('works', () => {});\n",
+  "good": "it('refuses an expired token', () => {});\n"
+}

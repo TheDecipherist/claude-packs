@@ -1,0 +1,24 @@
+{
+  "id": "no-regexp-from-input",
+  "why": "new RegExp(input) is ReDoS and pattern injection. Escape with a helper, or anchor and length-cap the input before it becomes a pattern.",
+  "rule": ".claude/rules/credentials-and-input.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\bnew\\s+RegExp\\s*\\(\\s*(?!['\\\"`/])(?!escapeRegExp|escapeRegex|escapeRe)\\w",
+  "bad": "const re = new RegExp(query.q);",
+  "good": "const re = new RegExp(escapeRegExp(query.q));\nconst fixed = new RegExp('^[a-z]+$');"
+}

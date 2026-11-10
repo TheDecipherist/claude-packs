@@ -1,0 +1,16 @@
+{
+  "id": "cpp-clamp-before-cast",
+  "why": "Casting a NaN or an out-of-range float to an integer is undefined, so a clamp after the cast comes too late. Clamp the float, then cast, and check a computed value is finite first.",
+  "rule": ".claude/rules/cpp-numbers-and-casts.md",
+  "concepts": [
+    "cpp"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/build/**"
+  ],
+  "code": true,
+  "pattern": "std::(?:clamp|min|max)(?:<\\w+>)?\\s*\\(\\s*(?:-?[\\w.]+\\s*,\\s*)?(?:(?:int|long|int\\d+_t|size_t)\\s*\\(|static_cast<\\s*(?:int|long|std::int\\d+_t|int\\d+_t|std::size_t|size_t)\\s*>\\s*\\()(?!\\s*std::l+r(?:ound|int)\\b)(?=[^;\\n]*(?:\\d\\.\\d|std::(?:floor|ceil|round|trunc|log|log2|log10|sqrt|pow|exp)\\b|float\\s*\\(|double\\s*\\(|/))",
+  "bad": "const int steps = std::clamp (int (dist / 0.25f), 8, 240);",
+  "good": "const int steps = int (std::clamp (dist / 0.25f, 8.0f, 240.0f));\nstd::clamp (int (std::lround (x)), 0, 4);\nstd::max (0, int (list.size()) - 1);"
+}

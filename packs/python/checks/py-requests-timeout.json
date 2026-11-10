@@ -1,0 +1,18 @@
+{
+  "id": "py-requests-timeout",
+  "why": "requests waits forever by default: one slow server hangs the program.",
+  "rule": ".claude/rules/python-errors-and-resources.md",
+  "concepts": [
+    "python"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**"
+  ],
+  "pattern": "\\brequests\\.(?:get|post|put|patch|delete|head)\\((?![^)\\n]*\\btimeout\\s*=)",
+  "flags": "m",
+  "bad": "r = requests.get(url)",
+  "good": "r = requests.get(url, timeout=10)"
+}

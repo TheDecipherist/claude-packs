@@ -1,0 +1,16 @@
+{
+  "id": "hook-catch-must-not-allow",
+  "why": "A catch that returns 0 turns a crashed guard into a passed call. Only an event that cannot be parsed may be let through.",
+  "rule": ".claude/rules/a-refusal-is-exit-2.md",
+  "concepts": [
+    "hook-files"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/*.test.*"
+  ],
+  "pattern": "(?<!JSON\\.parse\\([^\\n]*)\\bcatch\\b\\s*(?:\\([^)]*\\))?\\s*\\{\\s*(?:return 0\\b|process\\.exit\\(0\\))|\\bexcept\\b[^\\n]*:\\s*\\n\\s*(?:return 0\\b|sys\\.exit\\(0\\))",
+  "bad": "try {\n  judge(payload);\n} catch (e) {\n  return 0;\n}\n",
+  "good": "try { payload = JSON.parse(text); } catch { return 0; }\ntry {\n  judge(payload);\n} catch (e) {\n  process.stderr.write(String(e));\n  return 2;\n}\n"
+}

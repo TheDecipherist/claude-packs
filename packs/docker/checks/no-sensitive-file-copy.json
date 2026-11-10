@@ -1,0 +1,13 @@
+{
+  "id": "no-sensitive-file-copy",
+  "why": "COPY of .env, .npmrc, keys or credentials bakes the secret into a layer. Exclude them in .dockerignore and mount at build (--mount=type=secret) or run time.",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s*(?:COPY|ADD)\\s+[^\\n]*(?:\\.env\\b|\\.npmrc\\b|\\.pem\\b|\\.key\\b|id_rsa|id_ed25519|id_ecdsa|\\bcredentials\\b|\\.aws/|\\.ssh/)",
+  "bad": "COPY .env .npmrc ./",
+  "good": "RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci"
+}

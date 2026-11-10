@@ -1,0 +1,19 @@
+# The gate's lint set: paste it into Cargo.toml. In a workspace, write [workspace.lints.rust] and [workspace.lints.clippy]
+# at the root, and `[lints] workspace = true` in each crate. An application can drop unwrap_used from main.rs with an
+# `#[expect(clippy::unwrap_used, reason = "...")]`. `reason` needs Rust 1.81.
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+todo = "deny"
+dbg_macro = "deny"
+allow_attributes_without_reason = "deny"
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+panic_in_result_fn = "deny"
+redundant_clone = "deny"
+clone_on_ref_ptr = "deny"
+fn_params_excessive_bools = "deny"
+wildcard_enum_match_arm = "deny"

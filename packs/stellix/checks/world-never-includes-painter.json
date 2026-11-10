@@ -1,0 +1,12 @@
+{
+  "id": "world-never-includes-painter",
+  "why": "Stellix 8: the world is coordinates, not graphics. The audio side includes nothing from the painter or any GPU API; it publishes a plain-data snapshot and nothing else.",
+  "rule": ".claude/rules/stellix-world-snapshot.md",
+  "concepts": [
+    "world",
+    "audio"
+  ],
+  "pattern": "#\\s*(include|import)\\s*[<\"][^>\"]*(painter|Painter|gpu/|render/|Renderer|juce_opengl|OpenGL|Metal/|MetalKit|QuartzCore|bgfx|webgpu)[^>\"]*[>\"]",
+  "bad": "#include \"../painter/PlanetMesh.h\"",
+  "good": "#include \"WorldSnapshot.h\""
+}

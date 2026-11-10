@@ -1,0 +1,26 @@
+{
+  "name": "go",
+  "version": "1.0.0",
+  "description": "Go: errors are handled, wrapped and never discarded on a state change, and context goes first.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/go"
+  },
+  "keywords": [
+    "go",
+    "golang"
+  ],
+  "engines": {
+    "claude-packs": ">=0.25.0"
+  },
+  "concepts": {
+    "go": [
+      "**/*.go"
+    ]
+  }
+}

@@ -1,0 +1,427 @@
+{
+  "_comment": "Where everything lives. folders = the folders; kinds = what goes where (CLAUDE.md shows it, placement-law enforces it); concepts = which rules fire where. Edit here, then run `npx --no-install @thedecipherist/claude-packs update`.",
+  "configuration": "full-stack",
+  "folders": {
+    "core": {
+      "path": "packages/core/src",
+      "purpose": "shared code the API and the web app both import"
+    },
+    "schemas": {
+      "path": "packages/core/src/schemas",
+      "purpose": "every Zod 4 schema: requests, responses, records, forms, the error contract"
+    },
+    "api": {
+      "path": "api/src",
+      "purpose": "the Fastify API: buildServer(), env.ts, the error handler, plugins"
+    },
+    "routes": {
+      "path": "api/src/routes",
+      "purpose": "thin routes: method, path, schemas, one handler call"
+    },
+    "handlers": {
+      "path": "api/src/handlers",
+      "purpose": "the work of each route, through adapters"
+    },
+    "adapters": {
+      "path": "api/src/adapters",
+      "purpose": "the one database gateway and every other outside service"
+    },
+    "auth": {
+      "path": "api/src/auth",
+      "purpose": "authentication and the request's identity (the chain keys come from here)"
+    },
+    "api-tests": {
+      "path": "api/test",
+      "purpose": "API tests through inject()"
+    },
+    "channel": {
+      "path": "channel",
+      "purpose": "the Next.js web app"
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "the spec, decisions, versions.md"
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": "scripts that never ship"
+    }
+  },
+  "concepts": {
+    "js": [
+      "core",
+      "api",
+      "channel",
+      "api-tests",
+      "src/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "tests/**/*.{js,mjs,cjs,ts,tsx}",
+      "test/**/*.{js,mjs,cjs,ts,tsx}",
+      "**/*.js",
+      "**/*.mjs",
+      "**/*.cjs",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "packages/core/src/schemas/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "packages/core/src/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "api/src/handlers/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "api/src/adapters/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "api/src/routes/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "api/src/auth/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "api/test/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "api/src/**/*.{js,mjs,cjs,jsx,ts,tsx}",
+      "channel/**/*.{js,mjs,cjs,jsx,ts,tsx}"
+    ],
+    "cpp": [
+      "src/**/*.cpp",
+      "src/**/*.h",
+      "src/**/*.hpp",
+      "src/**/*.mm",
+      "tests/**/*.cpp",
+      "tests/**/*.h",
+      "packages/core/src/schemas/**/*.c",
+      "packages/core/src/schemas/**/*.cc",
+      "packages/core/src/schemas/**/*.cpp",
+      "packages/core/src/schemas/**/*.cxx",
+      "packages/core/src/schemas/**/*.h",
+      "packages/core/src/schemas/**/*.hh",
+      "packages/core/src/schemas/**/*.hpp",
+      "packages/core/src/schemas/**/*.mm",
+      "packages/core/src/**/*.c",
+      "packages/core/src/**/*.cc",
+      "packages/core/src/**/*.cpp",
+      "packages/core/src/**/*.cxx",
+      "packages/core/src/**/*.h",
+      "packages/core/src/**/*.hh",
+      "packages/core/src/**/*.hpp",
+      "packages/core/src/**/*.mm",
+      "api/src/handlers/**/*.c",
+      "api/src/handlers/**/*.cc",
+      "api/src/handlers/**/*.cpp",
+      "api/src/handlers/**/*.cxx",
+      "api/src/handlers/**/*.h",
+      "api/src/handlers/**/*.hh",
+      "api/src/handlers/**/*.hpp",
+      "api/src/handlers/**/*.mm",
+      "api/src/adapters/**/*.c",
+      "api/src/adapters/**/*.cc",
+      "api/src/adapters/**/*.cpp",
+      "api/src/adapters/**/*.cxx",
+      "api/src/adapters/**/*.h",
+      "api/src/adapters/**/*.hh",
+      "api/src/adapters/**/*.hpp",
+      "api/src/adapters/**/*.mm",
+      "api/src/routes/**/*.c",
+      "api/src/routes/**/*.cc",
+      "api/src/routes/**/*.cpp",
+      "api/src/routes/**/*.cxx",
+      "api/src/routes/**/*.h",
+      "api/src/routes/**/*.hh",
+      "api/src/routes/**/*.hpp",
+      "api/src/routes/**/*.mm",
+      "api/src/auth/**/*.c",
+      "api/src/auth/**/*.cc",
+      "api/src/auth/**/*.cpp",
+      "api/src/auth/**/*.cxx",
+      "api/src/auth/**/*.h",
+      "api/src/auth/**/*.hh",
+      "api/src/auth/**/*.hpp",
+      "api/src/auth/**/*.mm",
+      "api/test/**/*.c",
+      "api/test/**/*.cc",
+      "api/test/**/*.cpp",
+      "api/test/**/*.cxx",
+      "api/test/**/*.h",
+      "api/test/**/*.hh",
+      "api/test/**/*.hpp",
+      "api/test/**/*.mm",
+      "api/src/**/*.c",
+      "api/src/**/*.cc",
+      "api/src/**/*.cpp",
+      "api/src/**/*.cxx",
+      "api/src/**/*.h",
+      "api/src/**/*.hh",
+      "api/src/**/*.hpp",
+      "api/src/**/*.mm",
+      "channel/**/*.c",
+      "channel/**/*.cc",
+      "channel/**/*.cpp",
+      "channel/**/*.cxx",
+      "channel/**/*.h",
+      "channel/**/*.hh",
+      "channel/**/*.hpp",
+      "channel/**/*.mm"
+    ],
+    "tests": [
+      "tests",
+      "api-tests",
+      "**/*.test.ts",
+      "**/*.test.tsx"
+    ],
+    "build": [
+      "**/CMakeLists.txt",
+      "**/*.cmake",
+      "CMakePresets.json"
+    ],
+    "claude": [
+      ".claude/skills/**",
+      "**/.claude/skills/**",
+      ".claude/agents/**",
+      ".claude/rules/**"
+    ],
+    "notes": [
+      "bugs.md",
+      "workflow-bugs.md",
+      "**/known-issues*.md",
+      "docs/**/*.md"
+    ],
+    "docs-folder": [
+      "docs"
+    ],
+    "tooling": [
+      "tools/**",
+      ".claude/hooks/**",
+      ".claude/settings.json"
+    ],
+    "plan": [
+      "build.md",
+      "**/build.md"
+    ],
+    "copy-trees": [
+      "kind:copy",
+      ".claude/layout.json"
+    ],
+    "api": [
+      "api",
+      "**/routes/**",
+      "**/app/api/**",
+      "**/server.ts",
+      "**/server.js",
+      "**/app.ts",
+      "**/app.js"
+    ],
+    "core": [
+      "core"
+    ],
+    "routes": [
+      "routes",
+      "**/routes/**",
+      "**/app/api/**",
+      "**/routes/**/*.ts",
+      "**/handlers/**/*.ts",
+      "**/controllers/**/*.ts",
+      "**/app.ts",
+      "**/server.ts",
+      "**/ui/router*.ts",
+      "**/auth/**/*.ts",
+      "**/server/**/*.ts"
+    ],
+    "handlers": [
+      "handlers",
+      "**/handlers/**",
+      "**/controllers/**",
+      "**/services/**",
+      "**/routes/**",
+      "**/adapters/**",
+      "**/app/api/**"
+    ],
+    "adapters": [
+      "adapters",
+      "**/adapters/**",
+      "**/repositories/**"
+    ],
+    "schemas": [
+      "schemas",
+      "**/schemas/**",
+      "**/*.schema.ts",
+      "**/schema/**",
+      "**/*.schema.js",
+      "**/models/**",
+      "**/types/**"
+    ],
+    "channel": [
+      "channel"
+    ],
+    "manifests": [
+      "**/package.json"
+    ],
+    "api-tests": [
+      "api-tests"
+    ],
+    "ui": [
+      "channel"
+    ],
+    "fastify-app": [
+      "**/app.ts",
+      "**/server.ts",
+      "**/src/index.ts",
+      "**/plugins/**/*.ts"
+    ],
+    "env": [
+      "**/env.ts"
+    ],
+    "dockerfile": [
+      "**/Dockerfile",
+      "**/Dockerfile.*",
+      "**/*.Dockerfile",
+      "**/.dockerignore"
+    ],
+    "compose": [
+      "**/compose*.yml",
+      "**/compose*.yaml",
+      "**/docker-compose*.yml",
+      "**/docker-compose*.yaml",
+      "**/stack*.yml",
+      "**/stack*.yaml"
+    ],
+    "docker-scripts": [
+      "**/docker/**/*.sh",
+      "**/entrypoint*.sh",
+      "**/.gitattributes"
+    ],
+    "public-text": [
+      "README*",
+      "**/README*",
+      "**/*.mdx",
+      "docs/manual/**",
+      "docs/guide/**",
+      "docs/guides/**",
+      "manual/**",
+      "content/**",
+      "blog/**",
+      "posts/**",
+      "articles/**",
+      "drafts/**"
+    ],
+    "hook-files": [
+      "**/.claude/hooks/**",
+      "**/hooks/**/*.sh",
+      "**/hooks/**/*.mjs",
+      "**/hooks/**/*.js",
+      "**/hooks/**/*.cjs",
+      "**/hooks/**/*.py"
+    ],
+    "hook-config": [
+      "**/.claude/settings.json",
+      "**/.claude/settings.local.json"
+    ],
+    "ts": [
+      "**/*.ts",
+      "**/*.tsx"
+    ],
+    "js-tests": [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.test.js",
+      "**/*.test.mjs"
+    ],
+    "tsconfig": [
+      "**/tsconfig*.json"
+    ],
+    "entry": [
+      "**/server.ts",
+      "**/server.js",
+      "**/server.mjs",
+      "**/src/index.ts",
+      "**/src/index.js",
+      "**/src/main.ts",
+      "**/src/app.ts",
+      "**/index.ts",
+      "**/bin/**",
+      "**/worker/**/index.*",
+      "**/*.worker.ts",
+      "**/lifecycle.*"
+    ],
+    "stored-text-ui": [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.vue",
+      "**/*.svelte",
+      "**/ui/**/*.ts",
+      "**/views/**/*.ts",
+      "**/templates/**/*.ts",
+      "**/render*.ts",
+      "**/*.view.ts"
+    ],
+    "stored-text-renderer": [
+      "**/stored-text.*"
+    ],
+    "ui-markup": [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.html",
+      "**/*.vue",
+      "**/*.svelte",
+      "**/ui/**/*.ts",
+      "**/views/**/*.ts",
+      "**/templates/**/*.ts",
+      "**/*.view.ts"
+    ],
+    "ui-styles": [
+      "**/*.css",
+      "**/*.scss",
+      "**/tailwind.config.*"
+    ]
+  },
+  "kinds": {
+    "schema": {
+      "what": "a Zod schema (z.object) and the error contract",
+      "in": "schemas",
+      "concepts": [
+        "schemas",
+        "env"
+      ],
+      "content": "\\bz\\.(?:object|strictObject|looseObject)\\s*\\(",
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".mts",
+        ".cts",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs"
+      ]
+    },
+    "db-gateway": {
+      "what": "the database driver and its one gateway",
+      "in": "adapters",
+      "concepts": [
+        "adapters",
+        "api-tests"
+      ],
+      "content": "\\bfrom\\s+['\"](?:mongodb|pg|mysql2|mongoose|@prisma/client|drizzle-orm[^'\"]*|ioredis|redis)['\"]",
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".mts",
+        ".cts",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs"
+      ]
+    },
+    "api-test": {
+      "what": "API tests (inject(), never a bound port)",
+      "in": "api-tests"
+    }
+  },
+  "files": {},
+  "protected": [],
+  "disable": [],
+  "enable": [],
+  "commands": {},
+  "siblings": [],
+  "guards": {
+    "git": {
+      "house": true,
+      "ghAuth": "cli",
+      "trunkNeedsYes": true
+    }
+  },
+  "ruleTests": {},
+  "followFolders": true,
+  "sourceFiles": "\\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs)$"
+}

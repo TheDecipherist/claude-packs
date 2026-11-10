@@ -1,0 +1,44 @@
+{
+  "name": "@thedecipherist/claude-packs",
+  "version": "1.5.0",
+  "description": "Per-project Claude Code rules, lesson checks, hooks and skills that hold code to what a senior engineer would accept, in every language. Stops repetition before it is written, scans a project on a copy, and turns what it finds into a work order.",
+  "type": "module",
+  "bin": {
+    "claude-packs": "bin/claude-packs.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "global",
+    "prompts",
+    "planner",
+    "profiles",
+    "packs",
+    "configurations",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "optionalDependencies": {
+    "jscpd": "5.4.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --import ./test/fresh-tmp.mjs --test test/*.test.mjs",
+    "test:changed": "node scripts/test-changed.mjs"
+  },
+  "license": "MIT",
+  "author": "TheDecipherist",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/TheDecipherist/claude-packs#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheDecipherist/claude-packs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TheDecipherist/claude-packs/issues"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "denormals-not-in-prepare",
+  "why": "disableDenormalisedNumberSupport() only affects the calling thread; prepareToPlay may run on another thread. Use juce::ScopedNoDenormals at the top of processBlock.",
+  "rule": ".claude/rules/scoped-no-denormals.md",
+  "concepts": [
+    "cpp"
+  ],
+  "pattern": "disableDenormalisedNumberSupport\\s*\\(",
+  "code": true,
+  "bad": "void P::prepareToPlay (double sr, int n) { juce::FloatVectorOperations::disableDenormalisedNumberSupport(); }",
+  "good": "void P::processBlock (B& b, M& m) { juce::ScopedNoDenormals noDenormals; }"
+}

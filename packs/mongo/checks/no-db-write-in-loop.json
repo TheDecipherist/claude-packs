@@ -1,0 +1,25 @@
+{
+  "id": "no-db-write-in-loop",
+  "why": "A write per iteration is a round trip per iteration. Collect the ops and run one bulkWrite, or update one document with arrayFilters.",
+  "rule": ".claude/rules/writes-are-atomic.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\bfor\\s*(?:await\\s*)?\\([^)]*\\)\\s*\\{[^{}]*?\\bawait\\s+[\\w.()]*\\.(?:insertOne|updateOne|deleteOne|replaceOne|findOneAndUpdate)\\s*\\(",
+  "bad": "for (const s of steps) {\n  await scope.workorders.updateOne({ number }, { $set: { [`plan.$[s].status`]: 'done' } });\n}",
+  "good": "await scope.workorders.bulkWrite(steps.map((s) => ({ updateOne: { filter: { number }, update: { $set: { 'plan.$[s].status': 'done' } }, arrayFilters: [{ 's.qid': s.qid }] } })));"
+}

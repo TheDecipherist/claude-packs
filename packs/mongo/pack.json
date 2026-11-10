@@ -1,0 +1,52 @@
+{
+  "name": "mongo",
+  "version": "1.0.0",
+  "description": "MongoDB with the native driver: one client, one gateway, aggregation reads, bulkWrite writes, safe deletes.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/mongo"
+  },
+  "keywords": [
+    "mongodb"
+  ],
+  "engines": {
+    "claude-packs": ">=0.19.0"
+  },
+  "folders": {},
+  "concepts": {
+    "db-gateway": [
+      "**/gateway.ts",
+      "**/gateway/**",
+      "**/db/**",
+      "**/lib/db.*",
+      "**/lib/db/**",
+      "**/adapters/**",
+      "**/repositories/**",
+      "**/*.repository.*",
+      "**/*mongo*"
+    ],
+    "db-scripts": [
+      "**/scripts/**",
+      "**/migrations/**",
+      "**/seeds/**",
+      "**/bin/**"
+    ],
+    "db-callers": [
+      "**/routes/**",
+      "**/handlers/**",
+      "**/services/**",
+      "**/app/**",
+      "**/pages/**",
+      "**/components/**",
+      "**/ui/**",
+      "**/lifecycle/**"
+    ]
+  },
+  "skillsIn": null,
+  "hooks": {}
+}

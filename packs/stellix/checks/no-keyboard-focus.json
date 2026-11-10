@@ -1,0 +1,12 @@
+{
+  "id": "no-keyboard-focus",
+  "why": "Stellix 3a: no dropdown, button or readout ever takes keyboard focus; QWERTY always plays.",
+  "rule": ".claude/rules/stellix-deterministic-world.md",
+  "concepts": [
+    "ui"
+  ],
+  "pattern": "setWantsKeyboardFocus\\s*\\(\\s*true|grabKeyboardFocus\\s*\\(|setMouseClickGrabsKeyboardFocus\\s*\\(\\s*true",
+  "code": true,
+  "bad": "presetBox.setWantsKeyboardFocus (true);",
+  "good": "presetBox.setWantsKeyboardFocus (false);"
+}

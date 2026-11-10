@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-stock-labels",
+  "why": "\"Get started\" and \"Learn more\" say nothing about what happens. Name the button for what it does.",
+  "rule": ".claude/rules/interface-copy.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": ">\\s*(?:Get started|Learn more)\\s*<",
+  "bad": "<Button>Get started</Button>\n",
+  "good": "<Button>Create your first project</Button>\n",
+  "flags": "i"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "cookie-host-prefix",
+  "why": "A session cookie without the __Host- prefix can be set by a subdomain or over plain HTTP. __Host- forces secure, path=/ and no domain.",
+  "rule": ".claude/rules/trust-config-not-headers.md",
+  "concepts": [
+    "routes"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": false,
+  "pattern": "\\bsetCookie\\s*\\(\\s*['\\\"](?!__Host-)",
+  "bad": "reply.setCookie('ui_session', token, { httpOnly: true, path: '/ui' });",
+  "good": "reply.setCookie('__Host-session', token, { httpOnly: true, secure: true, path: '/', sameSite: 'lax' });"
+}

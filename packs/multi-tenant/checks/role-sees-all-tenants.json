@@ -1,0 +1,34 @@
+{
+  "id": "role-sees-all-tenants",
+  "why": "A role inside a tenant must never decide a query across tenants.",
+  "rule": ".claude/rules/no-role-crosses-a-tenant.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.go"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*_test.go"
+  ],
+  "pattern": "role\\s*===\\s*(?:UserRole\\.)?['\"]?[Oo]wner['\"]?\\s*\\?\\s*\\[\\]|role\\s*!==\\s*(?:UserRole\\.)?['\"]?[Oo]wner['\"]?\\s*&&\\s*\\w+\\._id|\\bif\\s+[\\w.]*[Rr]ole\\s*==\\s*(?:[\\w.]*\\.)?(?:\"[Oo]wner\"|Role[Oo]wner|[Oo]wner)\\s*\\{\\s*\\w+\\s*:?=\\s*bson\\.[MD]\\{\\s*\\}|\\bif\\s+[\\w.]*[Rr]ole\\s*!=\\s*(?:[\\w.]*\\.)?(?:\"[Oo]wner\"|Role[Oo]wner|[Oo]wner)\\s*\\{\\s*\\w+\\[\\s*\"_id\"\\s*\\]\\s*=",
+  "bad": "const pipeline = user.role === UserRole.Owner\n  ? []\n  : [{ $match: { _id: id } }];",
+  "good": "const pipeline = [{ $match: { _id: new ObjectId(user.company_id) } }];",
+  "kind": "security",
+  "examples": [
+    {
+      "bad": "filter := bson.M{\"_id\": id}\nif user.Role == RoleOwner {\n\tfilter = bson.M{}\n}",
+      "good": "filter := bson.M{\"company_id\": user.CompanyID, \"_id\": id}\nif user.Role != RoleOwner {\n\treturn errForbidden\n}"
+    }
+  ]
+}

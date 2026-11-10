@@ -1,0 +1,23 @@
+{
+  "id": "ui-no-assistant-palette",
+  "why": "Cream with terracotta is the most recognisable generated look. Use the project's palette.",
+  "rule": ".claude/rules/no-generated-look.md",
+  "concepts": [
+    "ui-markup",
+    "ui-styles"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "#(?:d97757|da7756|c15f3c|cc785c|bd5d3a|f0eee6|faf9f5|f5f4ed|eeece2|e8e6dc)\\b",
+  "bad": ".accent { color: #d97757; }\n",
+  "good": ".accent { color: var(--brand-blue); }\n",
+  "flags": "i"
+}

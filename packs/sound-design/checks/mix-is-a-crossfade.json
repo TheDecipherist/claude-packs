@@ -1,0 +1,30 @@
+{
+  "id": "mix-is-a-crossfade",
+  "why": "A mix that scales only the wet path is silent at 0%. It is a crossfade.",
+  "rule": ".claude/rules/neutral-is-exact.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/gates/**",
+    "**/*_test.*",
+    "**/*.test.*"
+  ],
+  "pattern": "=\\s*\\w*wet\\w*\\s*\\*\\s*\\w*mix\\w*\\s*;",
+  "bad": "out = wet * mix;",
+  "good": "out = dry * c + wet * s;",
+  "flags": "i",
+  "code": true
+}

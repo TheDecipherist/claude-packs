@@ -1,0 +1,25 @@
+{
+  "id": "no-count-plus-one-ids",
+  "why": "countDocuments()+1 as an id races: two concurrent creates get the same number and the unique index throws an opaque E11000. Use an $inc counter document with findOneAndUpdate.",
+  "rule": ".claude/rules/writes-are-atomic.md",
+  "concepts": [
+    "db-gateway",
+    "db-scripts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "countDocuments\\s*\\([^;]*\\)\\s*\\)?\\s*\\+\\s*1\\b|\\bn\\s*\\+\\s*1\\s*\\}`|\\(await\\s+[\\w.]*countDocuments[^;]*\\)\\s*\\+\\s*1",
+  "bad": "return `WO-${(await scope.countDocuments({ kind: 'work' })) + 1}`;",
+  "good": "const c = await counters.findOneAndUpdate({ _id: `wo:${sessionId}` }, { $inc: { n: 1 } }, { upsert: true, returnDocument: 'after' });\nreturn `WO-${c.n}`;"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "no-latest-base",
+  "why": "An unpinned or :latest base image changes under you between builds. Pin the exact tag (latest-versions tells you which).",
+  "rule": ".claude/rules/dockerfile-production.md",
+  "concepts": [
+    "dockerfile"
+  ],
+  "code": false,
+  "flags": "m",
+  "pattern": "^\\s*FROM\\s+(?:--platform=\\S+\\s+)?(?!scratch\\b)(?![\\w./-]+:\\S*\\d)[\\w./-]+(?::latest)?(?:\\s+AS\\s+\\w+)?\\s*$",
+  "bad": "FROM node:latest\nFROM node AS build\nFROM --platform=linux/amd64 node:latest AS build\n",
+  "good": "FROM node:24.11.0-slim AS build\nFROM scratch"
+}

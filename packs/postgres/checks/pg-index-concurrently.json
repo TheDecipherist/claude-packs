@@ -1,0 +1,18 @@
+{
+  "id": "pg-index-concurrently",
+  "why": "A plain CREATE INDEX blocks every write to a live table until it finishes.",
+  "rule": ".claude/rules/postgres-migrations-never-stop-traffic.md",
+  "globs": [
+    "**/*.sql"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/target/**",
+    "**/dist/**"
+  ],
+  "pattern": "^(?![ \\t]*--)(?![^\\n]*pg: allow)[ \\t]*CREATE\\s+(?:UNIQUE\\s+)?INDEX\\s+(?!CONCURRENTLY\\b)(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:\"?\\w+\"?\\s+)?ON\\s+(?:ONLY\\s+)?(?:\"?\\w+\"?\\.)?\"?(\\w+)\\b\"?(?<!CREATE\\s+(?:UNLOGGED\\s+)?TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:\"?\\w+\"?\\.)?\"?\\1\"?[\\s(][\\s\\S]*)",
+  "flags": "im",
+  "bad": "CREATE INDEX i ON t (a);",
+  "good": "CREATE TABLE t (a int);\nCREATE INDEX i ON t (a);"
+}

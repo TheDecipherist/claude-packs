@@ -1,0 +1,22 @@
+{
+  "id": "ui-no-marketing-buzzword",
+  "why": "Filler that fits any product says nothing about this one. Say what it does.",
+  "rule": ".claude/rules/interface-copy.md",
+  "concepts": [
+    "ui-markup"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "pattern": "\\b(?:world-class|enterprise-grade|next-generation|next-gen|cutting-edge|best-in-class|revolutionary|empowers?|supercharges?|streamlines?)\\b",
+  "bad": "<p>Empower your team with world-class tools.</p>\n",
+  "good": "<p>Find a customer's last order in one search.</p>\n",
+  "flags": "i"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "rust-unwrap-in-library",
+  "why": "A failure the caller could handle becomes a panic with no reason. Return it with `?`, or say why it cannot happen with `.expect(\"...\")`.",
+  "rule": ".claude/rules/rust-errors-are-returned.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/benches/**",
+    "**/examples/**",
+    "**/fixtures/**",
+    "**/test_data/**",
+    "**/testdata/**",
+    "**/fuzz/**",
+    "**/xtask/**",
+    "**/target/**",
+    "**/vendor/**",
+    "**/build.rs",
+    "**/tests.rs",
+    "**/test.rs",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    "**/test_*.rs",
+    "**/main.rs",
+    "**/bin/**"
+  ],
+  "language": "rust",
+  "notInTests": true,
+  "pattern": "(?<!\\.lock\\(\\)|\\.read\\(\\)|\\.write\\(\\))\\.unwrap\\(\\)",
+  "bad": "let n = text.parse::<u32>().unwrap();",
+  "good": "let n = text.parse::<u32>()?;"
+}

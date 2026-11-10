@@ -1,0 +1,44 @@
+{
+  "name": "zod",
+  "version": "1.0.0",
+  "description": "Zod 4 schemas written once, in one folder, and imported everywhere (schemas-only), with the environment shaped in one env.ts.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/zod"
+  },
+  "keywords": [
+    "zod",
+    "schemas"
+  ],
+  "engines": {
+    "claude-packs": ">=0.26.0"
+  },
+  "concepts": {
+    "schemas": [
+      "**/schemas/**",
+      "**/*.schema.ts"
+    ],
+    "env": [
+      "**/env.ts"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/schemas-only.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

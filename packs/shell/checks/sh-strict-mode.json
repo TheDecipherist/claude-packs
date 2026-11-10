@@ -1,0 +1,20 @@
+{
+  "id": "sh-strict-mode",
+  "why": "Without strict mode a failed step is ignored and the script carries on with bad state. A file only sourced is left out.",
+  "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "concepts": [
+    "shell"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**"
+  ],
+  "pattern": "^#![^\\n]*\\b(?:ba|z|da)?sh\\b",
+  "flags": "m",
+  "bad": "#!/usr/bin/env bash\nset -u\necho done",
+  "good": "#!/usr/bin/env bash\nset -euo pipefail\necho done\n",
+  "mode": "needs",
+  "needs": [
+    "^\\s*set\\s+-\\w*e\\w*(?:\\s+-o\\s+pipefail|\\w*o\\s+pipefail)"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "watch-not-poll",
+  "why": "A deadline loop that sleeps and re-queries is ~130 round trips per wait. A change stream or a findOneAndUpdate wake-up costs one.",
+  "rule": ".claude/rules/writes-are-atomic.md",
+  "concepts": [
+    "db-gateway",
+    "db-callers"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "\\bwhile\\s*\\(\\s*Date\\.now\\s*\\(\\)\\s*<[^{]*\\{[\\s\\S]{0,400}?\\bawait\\s+(?:sleep|delay|setTimeout|wait)\\s*\\(",
+  "bad": "while (Date.now() < deadline) {\n  const op = await fileops.findOne({ _id });\n  if (op?.status !== 'pending') return op;\n  await sleep(150);\n}",
+  "good": "const stream = fileops.watch([{ $match: { 'documentKey._id': _id } }]);\nconst next = await Promise.race([stream.next(), timeout]);"
+}

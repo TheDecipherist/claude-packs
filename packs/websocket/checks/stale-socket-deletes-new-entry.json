@@ -1,0 +1,25 @@
+{
+  "id": "stale-socket-deletes-new-entry",
+  "why": "A dead socket's late close must not delete its reconnected successor's entry.",
+  "rule": ".claude/rules/identity-comes-from-the-connection.md",
+  "globs": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/e2e/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**"
+  ],
+  "pattern": "\\.on\\(\\s*['\"]close['\"](?:(?!===\\s*ws\\b)[\\s\\S]){0,120}?\\.delete\\(\\s*(?:connectionId|key|id|hostname)\\s*\\)",
+  "bad": "ws.on('close', () => {\n  connections.delete(connectionId);\n});",
+  "good": "ws.on('close', () => {\n  if (connections.get(connectionId)?.ws === ws) connections.delete(connectionId);\n});"
+}

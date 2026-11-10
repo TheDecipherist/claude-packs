@@ -1,0 +1,32 @@
+{
+  "id": "rust-blocking-in-async",
+  "why": "A blocking call in an async fn stops every task on that thread. Hand it to spawn_blocking, or use the runtime's own version.",
+  "rule": ".claude/rules/rust-async-never-blocks.md",
+  "globs": [
+    "**/*.rs"
+  ],
+  "exclude": [
+    "**/tests/**",
+    "**/test/**",
+    "**/benches/**",
+    "**/examples/**",
+    "**/fixtures/**",
+    "**/test_data/**",
+    "**/testdata/**",
+    "**/fuzz/**",
+    "**/xtask/**",
+    "**/target/**",
+    "**/vendor/**",
+    "**/build.rs",
+    "**/tests.rs",
+    "**/test.rs",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    "**/test_*.rs"
+  ],
+  "language": "rust",
+  "notInTests": true,
+  "pattern": "\\basync\\s+fn\\b[^{;]*\\{(?:(?!\\bfn\\b|\\|\\||\\bmove\\s*\\||\\bspawn\\w*\\s*\\(|\\bunblock\\s*\\()[^}])*?\\b(?:thread::sleep|std::fs::\\w+|std::process::Command::new)\\s*\\(",
+  "bad": "async fn wait() {\n    std::thread::sleep(ONE_SECOND);\n}",
+  "good": "async fn wait() {\n    tokio::time::sleep(ONE_SECOND).await;\n}"
+}
