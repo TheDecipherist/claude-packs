@@ -3,7 +3,7 @@ const MAX_N = 1 << 18;
 const LOBE = 6; // bins either side of a peak treated as part of it (BH-4 main lobe is ±4)
 const ENBW_BH4 = 2.0044; // equivalent noise bandwidth of the 4-term Blackman-Harris window, in bins
 
-function fft(re, im) {
+export function fft(re, im) {
   const n = re.length;
   for (let i = 1, j = 0; i < n; i += 1) {
     let bit = n >> 1;

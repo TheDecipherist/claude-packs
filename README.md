@@ -373,7 +373,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 10 | 4 | 1 | 9 |
 | `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
-| `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first, an offline VST3 renderer, and comparing with the real machine | 7 | 5 | 0 | 7 |
+| `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first, an offline VST3 renderer, and comparing with the real machine | 7 | 7 | 0 | 7 |
 | `stellix` | Laws of one synth project | 5 | 5 | 1 | 0 |
 | `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 0 | 1 |
 | `synth-creator` | The synth-creator configuration's own laws | 8 | 3 | 10 | 2 |

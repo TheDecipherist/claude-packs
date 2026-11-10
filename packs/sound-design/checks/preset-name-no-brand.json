@@ -1,0 +1,29 @@
+{
+  "id": "preset-name-no-brand",
+  "why": "A preset name ships with the product: a machine, brand or artist name in it is a claim the product cannot make, and the gate's rule 8 names the sound, never its source. Measured on the house banks: 1 hit in 2,086 Tabula presets (a recipe named for an electric piano brand), 0 in 167 Stellix presets.",
+  "rule": ".claude/rules/presets-are-named-and-neutral.md",
+  "globs": [
+    "**/*.tabula",
+    "**/bank/**/*.json",
+    "**/banks/**/*.json",
+    "**/presets/**/*.json",
+    "data/bank/**/*.json"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/node_modules/**",
+    "**/_deps/**"
+  ],
+  "pattern": "^name=.*\\b(?:Moog|Minimoog|Roland|Korg|Yamaha|Oberheim|OB-?X[a8]?|Juno|JP-?8000|DX-?7|TB-?303|TR-?[89]0[89]|Sylenth|Novation|Arturia|Elektron|Waldorf|PPG|CS-?80|Alesis|Ensoniq|Kawai|Casio|Rhodes|Wurlitzer|Wurli|Hammond|Mellotron|Solina|Steinway|Fender|Lexicon|Eventide|Vangelis|Kraftwerk)\\b|\"name\"\\s*:\\s*\"[^\"\\n]*\\b(?:Moog|Minimoog|Roland|Korg|Yamaha|Oberheim|OB-?X[a8]?|Juno|JP-?8000|DX-?7|TB-?303|TR-?[89]0[89]|Sylenth|Novation|Arturia|Elektron|Waldorf|PPG|CS-?80|Alesis|Ensoniq|Kawai|Casio|Rhodes|Wurlitzer|Wurli|Hammond|Mellotron|Solina|Steinway|Fender|Lexicon|Eventide|Vangelis|Kraftwerk)\\b",
+  "flags": "im",
+  "kind": "correctness",
+  "bad": "name=R130  SLEEPER RHODES",
+  "good": "name=R130  SLEEPER TINES",
+  "examples": [
+    {
+      "bad": "{\n \"name\": \"JUNO STRINGS\",\n \"category\": \"PAD\"\n}",
+      "good": "{\n \"name\": \"GLASS NAVE\",\n \"category\": \"PAD\"\n}"
+    }
+  ]
+}

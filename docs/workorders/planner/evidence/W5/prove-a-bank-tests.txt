@@ -1,0 +1,23 @@
+✔ a bank that meets the gate passes every line (574.948695ms)
+✔ a planted fault fails chord-peak, and only it (573.864578ms)
+✔ a planted fault fails mono-lows, and only it (565.066156ms)
+✔ a planted fault fails nothing-under-40, and only it (574.376787ms)
+✔ a planted fault fails tail, and only it (526.736259ms)
+✔ a planted fault fails first-sound, and only it (215.370891ms)
+✔ a planted fault fails velocity, and only it (199.133383ms)
+✔ a planted fault fails wheel, and only it (568.589486ms)
+✔ a planted fault fails sync, and only it (541.675745ms)
+✔ a planted fault fails delay-off-the-arp, and only it (576.162585ms)
+✔ a planted fault fails pad-release, and only it (532.258462ms)
+✔ a planted fault fails bell-release, and only it (571.272149ms)
+✔ a planted fault fails organ-velocity, and only it (551.334269ms)
+✔ a planted fault fails bank-loudness, and only it (607.534488ms)
+✔ a render the gate needs and the bank lacks fails as not measured (189.423781ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25495.157572

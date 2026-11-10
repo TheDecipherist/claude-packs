@@ -1,0 +1,10 @@
+# The two checks, measured on the house banks (2026-11-09)
+
+## preset-name-no-brand
+First list, with ambiguous English words (Spire, Diva, Vital, Massive, Serum, Zebra, Virus, Nord, Prophet, Jupiter, Andromeda): 9 of 2,086 Tabula presets; 8 were the word 'spire' (SLATE SPIRE, DAWN SPIRE, ...), so those names were dropped.
+Shipped list: 1 of 2,086 Tabula presets (bank-recipes/R130 SLEEPER RHODES: an electric piano brand in a preset name, a true hit); 0 of 167 Stellix presets.
+
+## preset-not-default-envelope (.tabula, the sparse text format)
+First pattern (no aenv_ line in [params]): 66 of 2,086. Read: organs and pianos (the model owns its envelope; an organ has no envelope by law) and presets with per-slot envelopes (oscN.ampenv.*), all correct.
+With per-slot envelopes and the model engines (organ, piano, tine, reed) left out: 2 hits, both the bass engine, which owns its envelope too.
+Shipped pattern (bass engine left out too): 0 of 2,086. Through the installed lesson-checks hook: a pad preset with no amp envelope is refused (exit 2), one with aenv_attack and aenv_release1 passes; a preset named JUNO STRINGS is refused, WARM STRINGS passes.

@@ -1,0 +1,21 @@
+{
+  "id": "preset-not-default-envelope",
+  "why": "A preset that never sets its amp envelope plays the toolkit's default one, the 'default left in' finding of the patch research (34 % of plugin bells): every such patch has the same attack and release whatever its kind. Written for the house's text patches, where a key left at its default is not written; an engine that owns its envelope (organ, piano, tine, reed, the bass engine) is left out. Measured on the house banks: 0 of 2,086 Tabula presets after reading the 66 first hits (organs, pianos and per-slot envelopes, all correct).",
+  "rule": ".claude/rules/presets-are-named-and-neutral.md",
+  "globs": [
+    "**/*.tabula"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/node_modules/**",
+    "**/_deps/**",
+    "**/INIT*",
+    "**/init*"
+  ],
+  "pattern": "^\\[params\\]\\n(?:(?!aenv_|osc\\d\\.ampenv\\.|\\[|osc\\d_type=osc\\.type\\.(?:firewheel|piano|firetine|firekeys|firebass)\\b)[^\\n]*\\n)*(?:\\[|(?![\\s\\S]))",
+  "flags": "m",
+  "kind": "correctness",
+  "bad": "name=P001  SLOW TIDE\ncategory=cat.pad\n[params]\nosc1_on=on\nosc1_type=osc.type.analog\n[rows]\n",
+  "good": "name=P001  SLOW TIDE\ncategory=cat.pad\n[params]\nosc1_on=on\nosc1_type=osc.type.analog\naenv_attack=0.5\naenv_release1=1.5\n[rows]\n"
+}

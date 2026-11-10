@@ -1,50 +1,64 @@
 ---
 name: design-a-preset
-description: Use when designing, tuning, naming or reviewing a preset, a bank or an INIT, or asking how to make a kind of sound.
+description: Use when designing, tuning, naming, reviewing or shipping a preset, patch, program, bank or INIT, asking how to make a kind of sound, or asking what a synth needs to make one.
 ---
 
-# Design a preset (one job: a program that sells itself on the first note and passes the gate)
+# Design a preset (one job: a patch that passes the gate)
 
-The law for the bank, beside the panel's design laws. A preset is finished when it passes the gate, not when it sounds good tonight. The rule `presets-are-named-and-neutral` holds what every bank must; this is how to make one. Values below are published starting points unless the machine's own data replaces them.
+The method and the gate are here. The numbers are beside it; load only what the job needs:
+- **A kind of sound:** `references/categories/<kind>.md` (piano, keys, organ, strings, pad, lead, pluck, bass, brass, bell, arp, sequence-stab-chord, fx, drums, wind-vocal), with `references/tables.md`.
+- **Why a number works:** `references/building-blocks.md` (waves, tuning, filters, envelopes, movement, playing, effects, levels).
+- **What a synth needs to make a kind:** `references/what-a-synth-needs.md`, for planning an engine from the sounds it must ship.
+- **This machine's own engines:** the project's recipe file (`layout.json` `recipes`, default `docs/recipes/*.md`). The kit's recipes are the generic ones.
 
-## A preset on the platform
+A number's source is tagged: **[DATA]** measured over 6,223 hardware and 7,146 plugin factory patches; **[LAW]** the house's decision, kept until a measurement overturns it; **[WHY]** the physics or psychoacoustics; **[EAR]** the author's ear over seven rounds (253 presets heard, 92 liked). Where a measurement on this machine disagrees, the measurement wins.
 
-A program is a row of the parameter table (frozen id order) plus a name and a category. INIT is every module off and one clean saw through nothing. A parameter added later gets a default that leaves every existing preset bit-identical. A preset is authored on the panel and read back, never typed into the table, and one that depends on a pinned, hidden or off-law control is a bug.
+## The words
 
-## Three layers, and every control taken into account
+- **Slot:** one oscillator with its own tune, level, pan, filter, amp envelope and filter envelope. A big sound is slots stacked on one key range. A slot has a **role** (Body, Air, Ground, Edge, Click, Sub); a recipe names the role, never the slot number.
+- **Sources:** band-limited waves (saw, pulse, square, tri, sine, up to 8 unison voices); a sub oscillator; a seven-saw supersaw with detune, mix and drift [FIRESAW]; FM, six operators; noise with band and width; a physical piano model; a bit-shaped wave with motion [FIREBLOOM]; a phase-locked body-and-sub bass engine [FIREBASS]; a reed model [FIREKEYS]; a tine model with pickup position [FIRETINE]; a tonewheel organ with drawbars [FIREWHEEL].
+- **Amp envelope** [SWELL] and **filter envelope** [GLOW]: A / D / S / R in ms or s, sustain 0 to 1, then the amount (-1 to +1) and VEL (how much velocity scales it).
+- **Cutoff, resonance:** 0 to 1 of the knob (0.5 is about 1 kHz, 0.28 about 300 Hz, 0.65 about 2.5 kHz). **KT:** key tracking, 0 to 100 %.
+- **Filter types:** a clean ladder, a state-variable, a warm 12 dB two-pole, a twin band and notch, and a drive filter of the house's own [BURN]. Slopes 6 to 24 dB/oct.
+- **Drive** [HEAT], PRE or POST the filter. **Mod:** chorus, ensemble, phaser, flanger. **Delay:** synced or free, loop filtered. **Reverb** by program: room, plate, hall, big.
+- **Row:** a tempo-clocked step modulator on one control. **Assign:** wheel, velocity, aftertouch or pressure on any control.
 
-The first bank of the house reference plugin had one placement in 309 of 316 presets and 59 controls that never varied. So a preset is three layers, each overriding only the one before:
+Every recipe is written with the machine's extra modulation (a sound map, macros) off: if it does not sound right without them, it is not right.
 
-1. **Base:** the machine on and in circuit. A preset that leaves two thirds of the plate at default sounds like one that did not load.
-2. **Routing profile:** where each module sits and what drives it. A machine ships a small named set, and every preset names one.
-3. **Recipe:** what this program is for. It wins over both.
+<constraints>
+Always do:
+1. **Start from INIT:** one saw in one slot, every module off, filter open, no effects. It is the reference every patch is heard against [LAW].
+2. **Choose the engine and the wave for the identity.** The ear names one element in a good patch; decide it first.
+3. **Tune the slots against each other:** octaves, fifths, a few cents. The same wave stacked on the same pitch is louder, not bigger [EAR].
+4. **Set the filter:** type, slope, cutoff, resonance, key tracking. Cutoff is modulated in 89 % of hardware patches and 80 to 99 % of plugin patches per kind [DATA]; a filter that does nothing over the note is missing the main voice.
+5. **Shape the envelopes,** amp first, then filter, each slot its own where the roles differ.
+6. **Add the movement:** one thing heard by 2 s, another by 8 s.
+7. **Wire the playing:** velocity always audible, the wheel always does something, key tracking on the cutoff. A dead wheel fails review like a dead knob [LAW].
+8. **Effects last, and chosen:** the reverb named with its pre-delay, the delay on a subdivision with its loop filtered, chorus after the filter.
+9. **Level by measurement, never typed:** -6 dBFS peak on a four-note chord at velocity 100; the bank within 1 LU; mono under 120 Hz; nothing under 40 Hz; limiter off [LAW].
+10. **Run the gate** below. A patch is finished when it passes, not when it sounds good tonight.
+11. Carry the author's ear as a bias [EAR]: liked patches had reverb (+16 points), a performance assign (+16), delay (+14), a slow attack (+10), a saw (+10); fewer had a unison stack (-16) or a mono voice (-10). Width from detuned slots and effects beats width from a unison stack; glide and mono only where the kind asks (acid, legato lead, bass).
 
-Of two copies of a block, the player's copy gets a fixed job the user learns (the first filter always at the input); the patch's copy carries the variety. Choose every placement, never inherit it: a placement whose host is off is silence, however hard it is driven, and one without an amount is still inaudible. Name the space; the default room is not a choice. Use the shaping, not only the frequency. **Every control is used, or exempt with a written reason**, and a coverage check fails on a control that never varies with none.
+Never do:
+- Reach for the effects to hide a weak oscillator.
+- Make one thing wider and call it big; give a pad vibrato; put velocity only on volume.
+- Type a level, or leave a toolkit's default envelope in a shipped patch.
+- Name a patch after a machine, a brand, an artist or a track.
+</constraints>
 
-## Universal laws
+## The gate: before calling a patch done
+
+Every patch, in this order [LAW]. The measurable lines are measured by `node .claude/tools/prove-a-bank.mjs` on renders from `bounce-a-plugin`; the spread of the bank by `spread-probe`.
 
 1. **First note sells it:** one key, cold, default velocity, no wheel.
-2. **It plays:** velocity always does something audible (never only volume on a pad); the mod wheel always does something (vibrato on leads); aftertouch should; cutoff tracks pitch.
-3. **It moves:** something changes by 2 s and something else by 8 s, and note two is still the same preset.
-4. **It sits:** -6 dBFS peak at velocity 100 on a four-note chord; the bank matched within 1 LU; mono-compatible, everything under 120 Hz mono; nothing clips inside the chain. A preset that needs a limiter is not finished.
-5. **One identity, one imperfection:** the ear names one element, and one deliberate hardware flaw (drift, a late second lane, a delay that saturates).
-6. **It is this machine's:** it uses what only this engine does. A preset any trial synth could make is a wasted slot.
-7. **Measured, then frozen:** level at three velocities; no hole over 3 dB in 100-500 Hz in the mono sum; wheel, velocity and aftertouch move the audio; sync lands at 120, 90 and 140; the tail falls below -60 dB in a stated time; no runaway feedback at any wheel position; under 20 ms to first sound for a pluck, bass, lead or key.
-8. **Named to be found:** `CATEGORY . Name`, three words at most, the sound and not the recipe; the notes carry its identity, wheel, velocity and tempo.
-
-## By kind
-
-- **Pads:** three things at different distances, never one thing made wider: a body (one lane, the stack behind the bed, LP24 at 40-60 %, attack 300-800 ms), air (a second lane an octave up, high-passed, -9 dB, spread; the wheel opens it) and ground (a sub sine, -6 dB, mono, no filter). Warmth is a filter law: LP24, cutoff 35-55 %, resonance 10-20 %, chorus after the filter. One slow LFO (0.05-0.15 Hz) on cutoff; release at least the attack; a hall with 20-40 ms pre-delay and a low-cut send. Pan the air, centre the body, never pan the ground.
-- **Plucks:** the envelope is the sound: amp A0 D150-400 S0 R50-150, a filter envelope shorter than the amp's, velocity to filter 50-80 %, keytrack 100 %, a dotted-eighth delay filtered and ducked.
-- **Leads:** two lanes, one identity; LP12 55-75 %, a 5-10 ms attack click; the wheel is vibrato at 5-6.5 Hz, up to 25 cents, after a 300 ms delay; mono legato with 30-80 ms portamento; the reverb on the send.
-- **Basses:** mono legato, no stack, no chorus under 150 Hz; LP24 20-35 %, envelope +40-60 %; velocity to envelope, aftertouch to cutoff; drive after the filter (before is another sound, and says so). Under 100 Hz mono, under 40 Hz gone.
-- **Arps and sequences:** the preset is the pattern: 8 or 16 steps that resolve, gate 30-50 % for plucks and 70-90 % for pads, never 100 %; a velocity map that is never flat; the delay on a different subdivision from the arp; a sequence ships in C and survives 90-140 BPM.
-- **Effects:** judged on a dry pluck, a pad and a drum loop, and usable on two. A delay's time relations are the preset, synced per channel, with a high-pass and a low-pass in the loop, always; feedback decides the category. A reverb's pre-delay is decided on every preset and its decay set by category; width under 100 %. A chain has one hero, and its order is the preset, chosen deliberately.
-
-## The bank
-
-Three flagships no other machine can make, each with a wheel move that changes the song; thirty a producer keeps; the rest real variations. One signature move per machine across the bank. Every category has its INIT. 128 slots; ship fewer if that is what passes. The categories are closed: a synth's `INIT PAD STRING LEAD PLUCK BASS KEY BELL BRASS ARP SEQ FX/TEXTURE DRUM`, an effect's `INIT DELAY REVERB CHAIN DYNAMIC TEXTURE`.
-
-## Before calling a preset done
-
-First note cold; velocity, wheel and keytrack audible; it moves by 2 s and 8 s; -6 dBFS, within 1 LU, mono clean; its identity and imperfection named; a routing profile named and every placement chosen with its host on; the space named; no module on without a reason; its name three words at most, in a closed category. For a bank: the flagships pass a one-hand 20-second demo, every category has its INIT, the coverage check is green, and `spread-probe` has counted the distinct sounds beside the total (the rule).
+2. **It plays:** velocity audible, never only volume on a pad; the wheel does something (vibrato on leads, no exceptions); cutoff tracks pitch at two points.
+3. **It moves:** something changes by 2 s and something else by 8 s, from the engine alone; the second note is still the same patch.
+4. **It sits:** -6 dBFS peak at v100 on a four-note chord; the bank within 1 LU; no hole over 3 dB in 100 to 500 Hz on the mono sum; everything under 120 Hz mono; nothing under 40 Hz; nothing clips in the chain. A patch that needs a limiter is not finished.
+5. **One identity, one imperfection,** both named in the notes.
+6. **It is this machine's:** it uses something only this engine does; a patch any plugin's trial could make is a wasted slot.
+7. **Measured, then frozen:** level at three velocities; sync lands at 120, 90 and 140 BPM; tail below -60 dB in the stated time; no runaway feedback at any wheel position; under 20 ms to first sound for pluck, bass, lead and keys.
+8. **Named to be found:** `CATEGORY . Name`, three words at most, the sound not the recipe, no machine or brand name; the notes carry identity, wheel, velocity and tempo.
+9. **Every module on has a reason;** nothing pinned or hidden; every effect placement chosen with its amount non-zero; the space named (a default room is not a choice).
+10. **Per kind:** pluck and arp: delay off the arp's subdivision, ducked; arp: 8 or 16 steps that resolve, gate set, velocity map not flat, in a named key; bass: lows mono, no chorus under 150 Hz, glide off unless the note says why; pad: three distances, release at least the attack; lead: vibrato on the wheel, glide legato only; bell: release equal to decay; piano and keys: v40 and v110 differ in level and colour; organ: no velocity, no envelope shape.
+11. **Each slot alone:** a render with each slot solo, so a weak layer cannot hide; a version at 120, 90 and 140 BPM for anything synced.
+12. **The owner hears it.** The gate makes it shippable; the ear makes it a keeper.

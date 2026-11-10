@@ -8,7 +8,7 @@ paths:
   - "**/*[Bb]ank*"
 ---
 
-# Presets carry the author's own names, INIT is neutral through every stage, and a bank shows the engine
+# Presets carry the author's own names, INIT is neutral through every stage, a bank shows the engine, and its levels are measured
 
 <constraints>
 Always do:
@@ -18,6 +18,12 @@ Always do:
 - Take every control into account: each one is used across the bank, or exempt with a written reason.
 - Run `spread-probe` over the bank before calling it done: every program rendered with the same excitations, and the effectively distinct sounds counted and reported beside the total.
 - Gate a preset by the `design-a-preset` skill's list: first note, level, mono, movement, sync, tail.
+- Measure levels, never type them: -6 dBFS peak on a four-note chord at velocity 100, the bank within 1 LU, mono under 120 Hz, nothing under 40 Hz, with the limiter off (`prove-a-bank`).
+- Give every pad a release at least as long as its attack.
+- Make velocity audible on every preset, and on a pad never only as volume.
+- Make the mod wheel do something on every preset.
+- Put a delay on a subdivision other than the arp's.
+- Leave glide off by default; a preset that glides says why in its notes.
 
 Never do:
 - Name a preset after another machine, a brand, an artist or a track, or copy a factory name.
