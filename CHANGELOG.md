@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.6.1 (2026-11-10)
 
 - `DISCLAIMER.md` (shipped in the package) and a Disclaimer section in the README: no warranty, the user answers for what they build and for having the right to every source a project reads (firmware, manuals, recordings), reverse engineering is for learning and interoperability and the law and licences that apply must be checked before using what it finds, tools the kit points to (Ghidra among them) are their makers' and their output is a claim to prove, product names belong to their owners, and none of it is legal advice.
 - The README's first line links GitHub and its releases beside npm, so npm's page leads to the repo.
