@@ -1,0 +1,15 @@
+Work order: docs/workorders/generic/ (template generic)
+Work order: docs/workorders/plugin/ (template plugin)
+Work order: docs/workorders/rebuild/ (template rebuild)
+claude-packs: no work order template "nope": the kit has generic, plugin, rebuild. Nothing was written
+exit 2
+docs/workorders/generic/PROMPT.md
+docs/workorders/generic/run.sh
+docs/workorders/generic/workorder.md
+docs/workorders/plugin/PROMPT.md
+docs/workorders/plugin/run.sh
+docs/workorders/plugin/workorder.md
+docs/workorders/rebuild/PROMPT.md
+docs/workorders/rebuild/run.sh
+docs/workorders/rebuild/workorder.md
+no {{ left

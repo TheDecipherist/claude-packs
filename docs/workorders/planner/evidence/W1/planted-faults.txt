@@ -1,0 +1,24 @@
+== a {{ left in the plugin template: exit 1
+ℹ fail 1
+ℹ pass 15
+✖ each template writes from a scratch folder with nothing left to fill in by the kit (149.192724ms)
+== the HTML Never line removed from the plugin template: exit 1
+ℹ fail 1
+ℹ pass 15
+✖ the plugin template is the house decided: no angle bracket from the stack on, the HTML line, the install block (2.937867ms)
+== an [if marker dropped from the rebuild template: exit 1
+ℹ fail 1
+ℹ pass 15
+✖ the rebuild template keeps every [if marker its source has, the HTML line and an install block (1.9743ms)
+== an angle bracket in the plugin template's decided text: exit 1
+ℹ fail 1
+ℹ pass 15
+✖ the plugin template is the house decided: no angle bracket from the stack on, the HTML line, the install block (1.949575ms)
+== the install block dropped from the rebuild template: exit 1
+ℹ fail 1
+ℹ pass 15
+✖ the rebuild template keeps every [if marker its source has, the HTML line and an install block (1.376741ms)
+== KWB-128: a branch per step back in the prompt: exit 1
+ℹ fail 1
+ℹ pass 15
+✖ the prompt lands one branch per order and gates it with the tests the branch reaches (KWB-128) (1.131554ms)

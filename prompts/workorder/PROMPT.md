@@ -22,7 +22,7 @@ Always do:
 - Decide, and carry on. Write each choice in `docs/workorders/{{name}}/decisions.md` (`d-n`: the question, the options, what you chose and why). Prefer the choice that is easiest to reverse.
 - A problem is never a reason to end. Log it, take the best honest way round, and go on to whatever can still be done.
 - Prove each step's "done when" by running it, with the evidence in `build/evidence/W<n>/`. A step is finished when it is measured, never when it looks right.
-- Work on one branch per step, `work/W<n>-<topic>`, pushed from its first commit, and land each finished step the way the `land-branch` skill says.
+- Work on one branch for this order, `work/{{name}}`, made from the fetched trunk and pushed from its first commit. Land it once, when every step is done, the way the `land-branch` skill says, gated by the tests its changes reach against the trunk.
 - Log every bug in `bugs.md` before fixing it, and every fault in the kit in `workflow-bugs.md`.
 - Follow every rule in `.claude/rules` and every skill that applies.
 - After a refusal, once you know the answer, mark it: `npx --no-install @thedecipherist/claude-packs logs mark <id> right|wrong "<why>"`.
@@ -50,4 +50,4 @@ A session may end at any time, and a new one resumes from `progress.md`. While a
 
 ## When everything is done
 
-Run the full test suite, `doctor --strict`, `scan` and `logs` one last time, with their outputs in `build/evidence/final/`. Only then write `docs/workorders/{{name}}/DONE`, with the date and the final commit. Every step's "done when" must be measured first, or listed as `BLOCKED BY KIT`, or left open with a reason no further work could remove. Then say, in ten lines or fewer, what was built, what is proved, and what is not.
+Run the tests the branch's changes reach, measured against the trunk (the `pick-tests` skill; the project's `test-changed` command with `--base origin/<trunk>` where it has one), `doctor --strict`, `scan` and `logs` one last time, with their outputs in `build/evidence/final/`. Only then write `docs/workorders/{{name}}/DONE`, with the date and the final commit. Every step's "done when" must be measured first, or listed as `BLOCKED BY KIT`, or left open with a reason no further work could remove. Then say, in ten lines or fewer, what was built, what is proved, and what is not.

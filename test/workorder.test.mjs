@@ -3,6 +3,7 @@
 import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, statSync, test, writeFileSync } from './kit-cli.mjs';
 
 const FOLDER = 'docs/workorders/billing';
+const TEMPLATES = 'prompts/workorder/templates';
 const README = readFileSync(join(KIT, 'README.md'), 'utf8');
 
 test('workorder writes the steps, the prompt and the runner, with its name in them', () => {
@@ -107,17 +108,60 @@ test('workorder --template rebuild writes the rebuild steps; an unknown template
   assert.ok(existsSync(join(dir, 'docs/workorders/rebuild/PROMPT.md')) && existsSync(join(dir, 'docs/workorders/rebuild/run.sh')));
   const plain = fresh('wo-plain-');
   assert.equal(cli(plain, 'workorder', 'billing').status, 0);
-  assert.match(readFileSync(join(plain, FOLDER, 'workorder.md'), 'utf8'), /^# Work order: billing/, 'the plain form keeps the blank steps');
+  const blank = readFileSync(join(plain, FOLDER, 'workorder.md'), 'utf8');
+  assert.match(blank, /^# Work order: billing/, 'the plain form keeps the blank steps');
+  assert.equal(blank, readFileSync(join(KIT, `${TEMPLATES}/generic.md`), 'utf8').replaceAll('{{name}}', 'billing').replace(/\{\{date\}\}/, blank.match(/Written (\S+)\./)[1]), 'no flag is generic');
   const bad = fresh('wo-bad-');
   const r = cli(bad, 'workorder', 'x', '--template', 'nope');
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr + r.stdout, /rebuild/, 'the refusal names the templates there are');
+  assert.match(r.stderr + r.stdout, /generic, plugin, rebuild/, 'the refusal names the templates there are');
   assert.ok(!existsSync(join(bad, 'docs/workorders/x')), 'nothing was written');
+});
+
+// planner W1: the three templates, chosen by --template and never by configuration (d-1).
+test('each template writes from a scratch folder with nothing left to fill in by the kit', () => {
+  const dir = fresh('wo-each-');
+  for (const t of ['generic', 'plugin', 'rebuild']) {
+    assert.equal(cli(dir, 'workorder', t, '--template', t).status, 0, t);
+    for (const file of ['workorder.md', 'PROMPT.md', 'run.sh']) assert.doesNotMatch(readFileSync(join(dir, 'docs/workorders', t, file), 'utf8'), /\{\{/, `${t}/${file}`);
+  }
+});
+
+const HTML_NEVER = '- Prototype the panel or a page in HTML or a web page: it is a second design that drifts from the first. The reference picture is measured into numbers and the panel is drawn in code from that table.';
+const template = (t) => readFileSync(join(KIT, `${TEMPLATES}/${t}.md`), 'utf8');
+const unfenced = (text) => text.replace(/^```[\s\S]*?^```/gm, '').replace(/<\/?constraints>/g, '');
+
+test('the plugin template is the house decided: no angle bracket from the stack on, the HTML line, the install block', () => {
+  const text = template('plugin');
+  const fixed = unfenced(text.slice(text.indexOf('**The stack.**')));
+  assert.ok(text.includes('**The stack.**'));
+  assert.doesNotMatch(fixed, /[<>]/, `a placeholder in the decided text: ${fixed.match(/.*[<>].*/)?.[0]}`);
+  assert.ok(text.includes(HTML_NEVER), 'the HTML line in its Never list');
+  assert.match(text, /^```claude-packs\nconfiguration: synth-creator\n/m, 'the install block');
+});
+
+// The source's markers, read from the synced claude.ai template (workorder-writer/templates/workorder-rebuild.md) on 2026-11-09.
+const REBUILD_IFS = ['...', 'the firmware computes the sound or the control', 'a real unit is owned', "a sibling model's firmware is mapped", 'the firmware computes the sound or the control',
+  'digital', 'analogue', 'a real unit is owned', 'it has one', 'it takes microcode and has no data sheet', 'W10 ran and recordings exist'];
+
+test('the rebuild template keeps every [if marker its source has, the HTML line and an install block', () => {
+  const text = template('rebuild');
+  assert.deepEqual([...text.matchAll(/\*\*\[if ([^\]]*)\]\*\*/g)].map((m) => m[1]), REBUILD_IFS);
+  assert.ok(text.includes(HTML_NEVER), 'the HTML line in its Never list');
+  assert.match(text, /^```claude-packs\nconfiguration: synth-creator\n/m, 'the install block');
+});
+
+// KWB-128: the prompt held a branch per step and a full suite at the end, both against the kit's own laws.
+test('the prompt lands one branch per order and gates it with the tests the branch reaches (KWB-128)', () => {
+  const prompt = readFileSync(join(KIT, 'prompts/workorder/PROMPT.md'), 'utf8');
+  assert.doesNotMatch(prompt, /work\/W<n>|full test suite|whole suite/);
+  assert.match(prompt, /one branch for this order, `work\/\{\{name\}\}`/);
+  assert.match(prompt, /tests the branch's changes reach/);
 });
 
 // Every skill, rule and tool the rebuild template names is one the kit has, so a run never looks for one that is not there.
 test('the rebuild template names only skills, rules and tools the kit has', () => {
-  const text = readFileSync(join(KIT, 'prompts/workorder/workorder-rebuild.md'), 'utf8');
+  const text = template('rebuild');
   // **The foundation** lists them as "its skills `a`, `b`; its tool `c`; and its rules `d` and `e`."
   const named = (kind) => [...text.matchAll(new RegExp(`its ${kind} ([^;.]*)`, 'g'))].flatMap((m) => [...m[1].matchAll(/`([\w-]+)`/g)].map((n) => n[1]));
   const have = (kind, name) => readdirSync(join(KIT, 'packs')).some((p) => existsSync(join(KIT, 'packs', p, kind, name)));

@@ -1,0 +1,26 @@
+✔ claude-ai-skill writes one skill folder as a zip claude.ai can take, with both templates (160.424681ms)
+✔ the walkthrough holds the mock-up laws and names every pack-free piece it relies on (0.775907ms)
+✔ workorder writes the steps, the prompt and the runner, with its name in them (108.603203ms)
+✔ workorder never writes over a work order that exists (152.859611ms)
+✔ a work order needs a plain name (151.707201ms)
+✔ the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file (71.201345ms)
+✔ the runner says what it switches off, and stops when nothing moves (0.315103ms)
+✔ the runner dates its log with a format BSD and GNU date both take (KWB-95) (0.323703ms)
+✔ the runner keeps its session logs out of git (KWB-98) (102.592728ms)
+✔ the runner waits out a usage limit and carries on, never counting it as a still session (KWB-125) (149.588802ms)
+✔ workorder --template rebuild writes the rebuild steps; an unknown template writes nothing (251.953845ms)
+✔ each template writes from a scratch folder with nothing left to fill in by the kit (224.14653ms)
+✔ the plugin template is the house decided: no angle bracket from the stack on, the HTML line, the install block (2.61692ms)
+✔ the rebuild template keeps every [if marker its source has, the HTML line and an install block (0.942507ms)
+✔ the prompt lands one branch per order and gates it with the tests the branch reaches (KWB-128) (0.264402ms)
+✔ the rebuild template names only skills, rules and tools the kit has (6.587051ms)
+✔ a new project with no packs named takes base alone, never a synth pack (KWB-84) (18089.77577ms)
+✔ a new reader meets the benefits first, and every file the page says a project keeps is one the kit names (0.29021ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19410.202446

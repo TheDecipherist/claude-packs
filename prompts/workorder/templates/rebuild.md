@@ -55,6 +55,7 @@ Never do:
 - Copy code from any other project, emulator or plugin. Take facts, cite them, prove them.
 - Invent a control, page, parameter or global the machine does not have. Every string shown is the machine's own.
 - Draw the panel from an image, or ship one.
+- Prototype the panel or a page in HTML or a web page: it is a second design that drifts from the first. The reference picture is measured into numbers and the panel is drawn in code from that table.
 - Claim a match to a real unit's sound, or call a part exact that no gate proved exact.
 - Write <what the house's shared code owns: tempo, MIDI clock, transport, key handling> here.
 - Mark a step done when it was not measured, or weaken a test to pass it.
@@ -64,7 +65,17 @@ Never do:
 
 ## W0. The project, set up the kit's way
 
-1. Add the packs a plugin needs: `npx --no-install @thedecipherist/claude-packs add <cpp audio-core instrument-shell reverse-engineering ...>`. Check that every skill, tool and rule **The foundation** names exists. A gap is a kit fault: log it and update the kit.
+The kit is installed from this block and nothing else. Change it here, before the run, never in `.claude/layout.json` by hand.
+
+```claude-packs
+configuration: synth-creator
+packs: cpp, audio-core, instrument-shell, midi, sound-design, reverse-engineering
+commands:
+  build: node .claude/tools/buildq.mjs cmake --build build --preset dev
+  test: node .claude/tools/buildq.mjs ctest --preset dev
+```
+
+1. Install from the block: `npx --no-install @thedecipherist/claude-packs init --from docs/workorders/{{name}}/workorder.md`. Check that every skill, tool and rule **The foundation** names exists. A gap is a kit fault: log it and update the kit.
 2. Start the unit: `CMakeLists.txt` and `CMakePresets.json` (`dev`, `asan-ubsan`, `tsan`), the plugin framework through CMake at a version looked up, never remembered.
 3. Link the house's shared code as its README says.
 4. Prove the guards: `doctor --strict` OK; an exact copy of a source file refused by `once-only`; `git push --force` refused.

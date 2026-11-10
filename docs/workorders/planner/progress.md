@@ -6,3 +6,8 @@ One line per finished item: `- date W<n>.<item>: what was done, evidence path, c
 - 2026-11-09 W0.2: measured, already in the first public commit: layout.json folder `planner` and kinds row `planner-skills`; package.json files has `planner`; npm pack --dry-run lists planner/README.md; evidence docs/workorders/planner/evidence/W0/npm-pack-planner.txt
 - 2026-11-09 W0.3: decisions.md d-1 to d-8; sources.md lists the four synced paths found
 - 2026-11-09 W0.4: planner/README.md read end to end; it is the spec for W1-W9
+- 2026-11-09 W1.1: lib/workorder.mjs takes --template generic|plugin|rebuild from prompts/workorder/templates/, generic by default, an unknown name refused with the list and nothing written; evidence docs/workorders/planner/evidence/W1/three-templates.txt
+- 2026-11-09 W1.2: templates/rebuild.md is the synced template (identical but for {{name}}/{{date}}) with W0 installing from its install block and the HTML Never line
+- 2026-11-09 W1.3: templates/plugin.md written new: the stack, W0 (install block, gates with pluginval, param-id-lock --init, chart first, cost unit at 44.1 and 48 kHz), W1 parameter table, a step per sound part with [if] markers, panel, presets, audit, DAW list, finish, report; the order-binding laws and the Never list
+- 2026-11-09 W1.4: templates/generic.md is the old workorder.md, moved unchanged
+- 2026-11-09 W1.5: test/workorder.test.mjs: each template writes with no {{ left, nope refused with the list, plugin has no angle bracket from The stack on and carries the HTML line and the install block, rebuild keeps its source's 11 [if markers; KWB-128 fixed in PROMPT.md with its test; six planted faults each red; README rows; evidence docs/workorders/planner/evidence/W1/planted-faults.txt, tests.txt

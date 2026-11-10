@@ -33,7 +33,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      --packs <a,b>     the packs (default base alone); --profile <name>, --config <name> as for init
   workorder <name>   a work order in docs/workorders/<name>: the steps, the prompt that runs them with nobody
                      there, and a runner that starts session after session
-                     --template rebuild   the steps of a hardware instrument rebuilt as a plugin
+                     --template <generic|plugin|rebuild>  the steps to start from: generic (blank, the default),
+                                       plugin (a new synth or effect), rebuild (a hardware instrument as a plugin)
   claude-ai-skill    workorder-writer.zip in <dir>: the guided work order interview, a skill to upload to claude.ai
   init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
                      and create the layout folders
@@ -116,7 +117,7 @@ async function main() {
     case 'claude-ai-skill':
       return writeClaudeAiSkill(dir);
     case 'workorder': {
-      const template = rest.includes('--template') ? rest.splice(rest.indexOf('--template'), 2)[1] : null;
+      const template = rest.includes('--template') ? rest.splice(rest.indexOf('--template'), 2)[1] : undefined;
       return newWorkorder(dir, rest[0], { template });
     }
     case 'init': {

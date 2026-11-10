@@ -189,7 +189,7 @@ That writes three files to `docs/workorders/billing/`:
 | `PROMPT.md` | How to run: take the recommended choice, never stop to ask, record every decision, resume from `progress.md` |
 | `run.sh` | Starts session after session until the work is done |
 
-`workorder <name> --template rebuild` writes the steps of a hardware instrument rebuilt as a plugin in place of the blank ones: the sources, the firmware map, a blind second pass in Ghidra, the firmware run as the oracle, the parameter layer, the engine, the panel drawn in code, the gates and a report. Four rebuilds taught it, and its `[if ...]` steps fit an analogue voice, a digital engine or a real unit you can record.
+`--template` picks the steps it starts from: `generic` (the blank ones, and the default), `plugin` (a new synth or effect, with the house's decisions written in: the stack, the gates and the chart first, the parameter table before any DSP, one step per sound part, the panel from the approved render, presets, the audit, a named list of hosts) or `rebuild`. The template is a choice, never read from the project's configuration, since a new synth and a rebuild share one. `workorder <name> --template rebuild` writes the steps of a hardware instrument rebuilt as a plugin: the sources, the firmware map, a blind second pass in Ghidra, the firmware run as the oracle, the parameter layer, the engine, the panel drawn in code, the gates and a report. Four rebuilds taught it, and its `[if ...]` steps fit an analogue voice, a digital engine or a real unit you can record.
 
 Write the steps with Claude, and the `write-a-workorder` skill keeps them honest. What makes one work:
 
@@ -431,7 +431,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"`, `logs crashes`, `logs clear <hook>\|all fixed\|superseded "<why>"` |
 | `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing, and that a test answers each rule whose Check names one |
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed |
-| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template rebuild` for a hardware rebuild |
+| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template generic|plugin|rebuild` picks the steps (generic by default) |
 | `claude-ai-skill` | `workorder-writer.zip`: the guided work order interview, a skill to upload to claude.ai |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |
