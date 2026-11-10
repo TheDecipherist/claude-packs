@@ -19,7 +19,7 @@ import { fixPlan } from '../lib/fix-plan.mjs';
 import { logsCommand } from '../lib/logs.mjs';
 import { scan } from '../lib/scan.mjs';
 import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
-import { newWorkorder } from '../lib/workorder.mjs';
+import { assertTemplate, newWorkorder } from '../lib/workorder.mjs';
 import { workorderCheck } from '../lib/workorder-check.mjs';
 import { blockPacks, installFrom, readInstallBlock } from '../lib/install-block.mjs';
 import { sync } from '../lib/sync.mjs';
@@ -33,6 +33,7 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
                      --packs <a,b>     the packs (default base alone); --profile <name>, --config <name> as for init
                      --from <workorder.md>  install from the order's install block, as init --from does
+                     --template <t>    and its work order, docs/workorders/<name>/, from that template
   workorder <name>   a work order in docs/workorders/<name>: the steps, the prompt that runs them with nobody
                      there, and a runner that starts session after session
                      --template <generic|plugin|rebuild>  the steps to start from: generic (blank, the default),
@@ -125,7 +126,12 @@ async function main() {
       if (block?.configuration && config && block.configuration !== config) throw new Error(`--config ${config} and the install block's configuration ${block.configuration} differ: name one`);
       const named = config ?? block?.configuration ?? null;
       const chosen = packs ?? (block ? blockPacks({ ...block, configuration: named }) : named ? readConfig(named).packs.default : ['base']);
-      return (await newProject(dir, rest[0], { packs: chosen, seedLayout, config: named, block })).code;
+      // --template <t>: the project's work order too, docs/workorders/<name>/ from that template (checked before anything is made)
+      const template = rest.includes('--template') ? rest.splice(rest.indexOf('--template'), 2)[1] : null;
+      if (template) assertTemplate(template);
+      const made = await newProject(dir, rest[0], { packs: chosen, seedLayout, config: named, block });
+      if (template) newWorkorder(made.dir, rest[0], { template });
+      return made.code;
     }
     case 'claude-ai-skill':
       return writeClaudeAiZips(dir, ['workorder-writer']);

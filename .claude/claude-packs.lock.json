@@ -1,5 +1,5 @@
 {
-  "kit": "1.5.0",
+  "kit": "1.6.0",
   "packs": [
     "base"
   ],
@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-10T02:14:07.456Z",
+  "updated": "2026-11-10T02:57:58.155Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/agents-held.md": "0da8fb50ef828b0440389751254c16ae1cf9dd21c78fc23a7d957b221674a409",
@@ -126,9 +126,10 @@
     ".claude/skills/pick-tests/SKILL.md": "5f533e28b208dbc95b58d05458d78c708044bdb0632e5663b8136e96b18af28b",
     ".claude/skills/pressure-test-skill/SKILL.md": "67028f7437b5474f4f79b54e283f368d8619993bfef2a28aaa850685dfb1bb67",
     ".claude/skills/prove-instances-identical/SKILL.md": "3a030057cbf9b62c61f6e3b18ced3f0497719a997e77d6bfba3dc7d839082576",
+    ".claude/skills/run-a-workorder/SKILL.md": "896a8dba1900e3d1b28ed222cc3fbdec5e461e508f35045dc0ac57d704568b44",
     ".claude/skills/start-from-a-workorder/SKILL.md": "ea90ba16d2f3f677650598c608ae410cf84aa979144900506da6099c6fdeac3f",
     ".claude/skills/test-quietly/SKILL.md": "40c462b0bfd679b9f7b53867544f7bbc2a5f617e08397a2595670da989a9a10f",
-    ".claude/skills/write-a-workorder/SKILL.md": "eeb862a6160c1d52ff1bb372f2e388e17965eda95c01ef910b5086bc3bbd195a",
+    ".claude/skills/write-a-workorder/SKILL.md": "5ddd4b82b74e584f38e45d3551ca252465e4c79829e3a9f3e77be33041f22867",
     ".claude/rules/ascii-no-em-dash.md": "90ef9a960b9e26c2112a7fe02938a59dbb693bb3479e87ea5fc34c35b174215f",
     ".claude/rules/cut-the-padding.md": "f7255ed109bf0832e1e32515c8b61fa832e573c711b4ad706cf46c8b1a1f2a3c",
     ".claude/rules/direct-voice.md": "5a8014b0ee8d76c642ede50502b3e7f8d44b8aadf595a9e52bb0fcfd2efb7a8f",

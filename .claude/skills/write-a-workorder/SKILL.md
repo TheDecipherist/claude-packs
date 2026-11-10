@@ -5,7 +5,7 @@ description: Use when a project or a large piece of work should be built with no
 
 # Write a work order (one job: a brief that needs nobody to answer anything)
 
-`workorder <name>` writes `docs/workorders/<name>/`: `workorder.md` (the steps), `PROMPT.md` (how to run with nobody there) and `run.sh` (session after session). You write the steps, always starting from the kit's template: `workorder <name>` gives the general one, and `--template rebuild` the one four instrument rebuilds taught. Never start from a blank page. The `start-from-a-workorder` skill takes a finished order and its design into the run.
+`workorder <name>` writes `docs/workorders/<name>/`: `workorder.md` (the steps), `PROMPT.md` (how to run with nobody there) and `run.sh` (session after session). You write the steps, always starting from one of the kit's templates, chosen with `--template`: `generic` (the default), `plugin` (a new instrument or effect, the house's decisions written in) or `rebuild` (what four hardware rebuilds taught). Never start from a blank page. An order planned in claude.ai arrives filled in from the same templates; the `run-a-workorder` skill starts it and keeps it running.
 
 <constraints>
 Always do:
@@ -19,23 +19,24 @@ Always do:
 8. Make each new test show it can fail: a planted fault, seen red.
 9. Tell the run what to record: decisions as it makes them, bugs before fixing them, and one line of progress per item, so a new session can resume from files alone.
 10. Keep a last step that reads the finished work as a senior engineer would, and a report with counts.
-11. Before leaving it running, read `PROMPT.md` and `run.sh`, and check that `doctor --strict` is OK and the first step can start.
-12. To change a run in progress, edit `PROMPT.md` and commit it. A run should refuse an instruction it cannot trace to its order or to you, so a file dropped beside it is rightly ignored.
+11. Name only skills the project has installed; `workorder check` refuses the rest, naming the pack to add.
+12. Carry the order's install block (one fence with the info string `claude-packs`, in the kit's own keys); W0 installs from it with `init --from` and nothing else.
 
 Never do:
 - Leave a decision open. Give the recommended choice, or tell the run to take one and record it.
-- Write a step that needs a person: a login, a purchase, a judgement of taste. Put it first, or list it as open for the end.
+- Write a step that needs a person: a login, a purchase, a judgement of taste. Taste is settled before the run; the rest goes first, or is listed open for the end.
+- Name a skill that is not installed, or a measurement no skill in the project makes.
 - Let a checkpoint read as the end. A run finishes only on the DONE file.
-- Ask for a whole product in one step. A step is what can be proved in one go.
+- Ask for a whole product in one step. A step is what one skill can prove in one go.
 </constraints>
 
 A step that works:
 
 ```markdown
-## W2. The import
+## W4. The filter
 
-1. Read every record in `data/orders.csv` into the schema of W1.
-2. Reject a bad row by name, with its line number. Never skip one silently.
+1. Take the house filter through `copy-and-prove`, with its origin and its licence row.
+2. Wire it into every instance from the chart's route, never by hand per instance.
 
-**Done when:** all 41,206 rows of the sample load, the 12 known bad rows are each rejected with the right reason, and a planted bad row turns the test red.
+**Done when:** the copy measures identical to its source (0 samples differ) and one changed coefficient measures different; `measure-tone` shows a sweep through the types with no level drop beyond the house figure; a planted wrong coefficient turns the gate red.
 ```

@@ -455,7 +455,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `update-all <dir...>` | Update every listed project that has the kit |
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"`, `logs crashes`, `logs clear <hook>\|all fixed\|superseded "<why>"` |
 | `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing, and that a test answers each rule whose Check names one |
-| `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed; `--from <workorder.md>` installs from a work order's install block |
+| `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed; `--from <workorder.md>` installs from a work order's install block; `--template <t>` writes its work order too |
 | `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template` picks the steps: `generic` (the default), `plugin` or `rebuild` |
 | `workorder check <name>` | Before a run: refuses a placeholder left, a step with no measured Done when, a skill not installed, a red doctor |
 | `claude-ai-skill` | `workorder-writer.zip`: the work order interview alone, as `planner-skills --zip` writes it |
