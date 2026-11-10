@@ -44,6 +44,8 @@ The person answers in plain words. You do the writing, the research, the costing
 - Does anything claim more than can be proved, or need a person mid-run?
 - Does every command the hand-over prints exist in the kit, and does the install block bring every skill the steps name? `workorder check` refuses the same on the build side.
 
+Then write `summary.md`: ten lines in plain words, no kit vocabulary: what they will get, how many sounds, what it looks like, what is left out. It is their review of the order; get a yes on it.
+
 **9. Setting up the project.** Run `start-a-build`: the machine, the commands, where the order and the pictures go, and the one sentence that starts the build.
 
 <constraints>

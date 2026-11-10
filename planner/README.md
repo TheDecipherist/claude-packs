@@ -1,8 +1,8 @@
 # planner/: the claude.ai side of the kit
 
-The skills a person uses in claude.ai to get from "I want to build a synth" to a finished work order that Claude Code builds with nobody there, under this kit's laws. They live in the kit because they must agree with it to the letter: the templates, the preset law, the cost rule and the mock-up measurements are the same files the build runs under, bundled for claude.ai by one command.
+The skills a person uses in claude.ai to get from "I want to build a synth" to a finished work order that Claude Code builds with nobody there, under this kit's laws. They live in the kit because they must agree with it to the letter: the templates, the preset law and the cost rule are the same files the build runs under, bundled for claude.ai by one command, and the mock-up approval names the build's own measurements (`analyse-reference-look`).
 
-The person answers questions in plain words. The skills do the writing, the research, the costing, the design pictures and the checking. Someone who has never written a spec or built a plugin can finish in one sitting, and the result runs session after session on its own.
+The person answers questions in plain words. The skills do the writing, the research, the costing, the design pictures and the checking. It is written so someone who has never written a spec or built a plugin can finish in one sitting, and the result runs session after session on its own; the first real planner run is the test of that (see Status).
 
 - **Two pillars.** Every question is one of two: *what are you making?* and *what makes it done?* An answer to the first with no answer to the second is taste with no finish, and it does not go in the order.
 - **One source.** A law lives in one place. What the build runs under is a pack skill or rule; the planner reads the same file. Nothing here is a copy of anything in `packs/`.
@@ -19,8 +19,8 @@ Each does one job and fires on one intent, so usage counts show which fire, whic
 | **workorder-writer** | "I want to build a synth / effect / plugin / replica", "how do I start", "write the work order", "plan this build" | the interview: nine stages from the idea to `workorder.md`, calling the others where they fit | `planner/workorder-writer/` |
 | **start-a-build** | "how do I set up the project", "install claude-packs", "what's next", "start the build", "where do the files go" | the hand-over: the machine (WSL, LSP), the commands, where the order and the pictures go, the start sentence; sets the project up over GitHub when a connection exists | `planner/start-a-build/` |
 | **ui-mockup** | "mock up my panel", "render the UI", "is this render good enough" | the design picture: OpenArt render in 16:9, iterate until approved, check it the way the build will measure it (depth rows included) | `planner/ui-mockup/`; its measurements are `packs/base/skills/analyse-reference-look` |
-| **design-a-preset** | "how do I make a pad / bass / bell", "what's a good INIT", "review this bank", "what does my synth need to make arps" | one patch or bank by category, from the measured research: the method, fifteen categories, the tables, the gate, what a synth needs per kind | `packs/sound-design/skills/design-a-preset/` (installed in every synth project; bundled for claude.ai as it is) |
-| **synth-cost** | "is 96 voices too heavy", "can a laptop run this", "effects per oscillator?" | the cost ledger: units per voice x voices against the budget, the thresholds, the cuts in order of least pain | `packs/audio-core/skills/synth-cost/` (same) |
+| **design-a-preset** | "how do I make a pad / bass / bell", "what's a good INIT", "review this bank", "what does my synth need to make arps" | one patch or bank by category, from the measured research: the method, fifteen categories, the tables, the gate, what a synth needs per kind | `packs/sound-design/skills/design-a-preset/` (installed with `sound-design`, which the plugin and rebuild templates' install blocks name; bundled for claude.ai as it is) |
+| **synth-cost** | "is 96 voices too heavy", "can a laptop run this", "effects per oscillator?" | the cost ledger: units per voice x voices against the budget, the thresholds, the cuts in order of least pain | `packs/audio-core/skills/synth-cost/` (installed with `audio-core`, a default pack of every `synth-creator` project; bundled as it is) |
 
 The interview calls out at four points instead of carrying the content: Stage 2 reads `design-a-preset`'s `what-a-synth-needs.md` to turn "pads, basses, bells" into capabilities; Stage 5 runs `synth-cost` after every answer that changes the voice; Stage 7 is `ui-mockup`; Stage 9 is `start-a-build`.
 
@@ -111,7 +111,7 @@ The short version; `workorder-writer/SKILL.md` carries the full list and `packs/
 - `prompts/workorder/templates/{generic,plugin,rebuild}.md` are the templates both sides use: `workorder <name> --template <t>` writes one into the project; Stage 6 fills the same file.
 - `lib/install-block.mjs` parses the install block; `init --from` and `new --from` install from it; Stage 5 writes it with the same keys (`configuration`, `packs`, `enable`, `looks`, `guards`, `commands`).
 - `workorder check` refuses a placeholder left, a step with no measured Done when, a skill the project lacks, or a red `doctor`; Stage 8 runs the same list by hand before the hand-over.
-- `planner-skills` bundles everything claude.ai needs: the three skills here, `design-a-preset` and `synth-cost` from their packs, and the project-layout skill per configuration it already made. `--zip <dir>` writes one zip per skill.
+- `planner-skills` bundles everything claude.ai needs: the three skills here, and `design-a-preset` and `synth-cost` from their packs. `--zip <dir>` writes one zip per skill, five in all; the project-layout skill per configuration it already made stays printed, or written with `--out`.
 
 If you change a law, change it in its pack, with its test. If you change how the interview asks, change it here. Neither copies the other.
 
@@ -159,9 +159,9 @@ All in the kit's own `test/`, run with `npm run test:changed` while working:
 - no file names a person (`test/no-personal-name.test.mjs`, repo-wide already);
 - no angle-bracket placeholder outside a code fence in any planner skill text;
 - every command and flag `start-a-build` prints exists in `bin/claude-packs.mjs` at this version (the test that would have caught `--template rebuild` and `start-from-a-workorder` being named before they existed);
-- an intent table: sentences and the one skill whose description should match each, with none matching two;
+- an intent table: sentences and the one skill each should start, by the kit's trigger-word match (`skillFor` in `lib/planner.mjs`: the description sharing the most words, a tie a misfire);
 - `planner-skills --zip` on a scratch folder writes exactly one zip per skill and each unzips to `SKILL.md` plus its references;
-- the README counts (`test/readme.test.mjs`) include the planner skills.
+- the kit's README names all five and says how to install them; its pack counts (`test/readme.test.mjs`) include the two pack skills.
 
 ---
 
@@ -187,4 +187,10 @@ All in the kit's own `test/`, run with `npm run test:changed` while working:
 
 ## Status
 
-Early. The interview, the question file, the cost ledger, the mock-up analysis and the hand-over exist as drafts. The build-side pieces (`--template`, `workorder check`, `init --from`, `design-a-preset`, `synth-cost`, the no-HTML check) land through kit work orders; `CHANGELOG.md` says what is real at each version.
+Real at 1.6.0, each with its test in the kit's `test/`:
+
+- the three skills here, under 8,000 characters each, with their references; `design-a-preset` (the patch document: the method, the gate, fifteen categories, the tables, what a synth needs) and `synth-cost` (the cost ledger) in their packs;
+- `workorder <name> --template generic|plugin|rebuild`, `workorder check <name>`, `init --from` and `new --from` with the install block, `planner-skills --zip`;
+- `prove-a-bank`, the bank's measurable gate on renders, and the two bank checks (`preset-name-no-brand`, `preset-not-default-envelope`), measured on the house banks.
+
+Not proved: that a person who knows nothing finishes the interview in one sitting, and that each sentence a real person types starts the right skill in claude.ai (the intent test runs the kit's own match, not claude.ai's). The first real planner run against a new synth is the test, and its report says what it found. The cost ledger's units are planning estimates until a build's W0 measures one.
