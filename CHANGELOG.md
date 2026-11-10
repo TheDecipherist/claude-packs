@@ -7,6 +7,7 @@
 - What a layer hides does no work (`instrument-shell`): the rule `hidden-under-a-layer-is-idle` (under an opaque layer nothing is drawn, ticked or animated, what shows through a translucent one still is, the sound and the parameters go on, and the page beneath is drawn once at close at its current values) and the skill `prove-hidden-is-idle` (paints and ticks counted under every layer for a second, 0, with a planted meter left running seen red).
 - `menu-map` reads the routes as well as the pages: which press opens which page, from the firmware's own page changes, with the manual as the second source.
 - KWB-141: `test-changed` sends a change under `planner/` to the planner test.
+- KWB-142: `workorder` and `new` refuse a name that starts with `-`, so `workorder --help` no longer writes `docs/workorders/--help/`.
 
 ## 1.6.1 (2026-11-10)
 

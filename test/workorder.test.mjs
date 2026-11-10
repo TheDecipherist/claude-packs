@@ -34,6 +34,11 @@ test('a work order needs a plain name', () => {
   assert.equal(cli(dir, 'workorder').status, 2);
   assert.equal(cli(dir, 'workorder', '../out').status, 2);
   assert.ok(!existsSync(join(dir, '..', 'out')));
+  // KWB-142: a flag is never a name; `workorder --help` wrote docs/workorders/--help/, and `new --help` would make a project of it
+  assert.equal(cli(dir, 'workorder', '--help').status, 2);
+  assert.ok(!existsSync(join(dir, 'docs', 'workorders', '--help')), 'nothing written for a flag');
+  assert.equal(cli(dir, 'new', '--help').status, 2);
+  assert.ok(!existsSync(join(dir, '--help')), 'no project made of a flag');
 });
 
 test('the prompt holds what two builds taught: nobody asked, decisions recorded, only a traced order obeyed, and an end on a DONE file', () => {
