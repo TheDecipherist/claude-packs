@@ -66,6 +66,7 @@ const SHELL_LEX = ['.claude/hooks/lib/shell-lex.mjs'];   // 1.5.6 (KWB-118): she
 const SHELL_CHANGED = ['.claude/hooks/lib/shell-writes-selftest.mjs'];   // 1.5.6 (KWB-118): its cases for a cd inside a child shell
 const SMOOTHING = ['.claude/hooks/lib/smoothing-checks.mjs'];   // 1.5.12 (KWB-126): realtime-guard's smoothing judgement, audio-core, off until layout.json has guards.smoothing
 const SMOOTHING_CHANGED = ['.claude/hooks/realtime-guard.mjs', '.claude/rules/smooth-continuous-parameters.md'];   // its cases; the rule names the guard
+const SETTINGS = ['.claude/hooks/lib/settings-standard.mjs', '.claude/rules/settings-layer-owns-the-devices.md'];   // 1.7.0: the standard settings and their rule, audio-core; the settings-layer hook itself is new, so it is held back
 const RESEARCH = ['editor-destruction-order', 'panel-surface-and-sections', 'knob-anatomy', 'colour-by-role', 'panel-sizes-by-kind', 'panel-gestures', 'every-time-control-syncs', 'module-kill-switch'].map((r) => `.claude/rules/${r}.md`);   // 1.5.0 research-gaps: audio-core's laws from the outside review (the editor's teardown; its check is held back)
 const DRAWN = ['.claude/rules/ui-drawn-in-code.md'];   // 1.5.0 research-gaps: the rule ui-drawn-in-code and no-html-prototype point at (synth-creator); chart-first and its rule, and both checks, are held back
 const USER_FILES = ['.claude/rules/tests-never-touch-user-files.md'];
@@ -94,7 +95,7 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST, ...SETTINGS] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, ...SMOOTHING_CHANGED, ...BANK_PROOF_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');

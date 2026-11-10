@@ -355,7 +355,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | Pack | For | Rules | Checks | Hooks | Skills |
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
-| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters | 52 | 12 | 2 | 8 |
+| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, a settings layer with the standard settings | 53 | 12 | 3 | 8 |
 | `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 14 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
@@ -498,7 +498,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 
-Packs add their own: `realtime-guard` and `param-id-lock` (`audio-core`), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, `chart-first`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
+Packs add their own: `realtime-guard`, `param-id-lock` and `settings-layer` (`audio-core`; every plugin has a settings layer with the standard settings, and its standalone no JUCE Options button), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, `chart-first`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
 Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. Nothing is ever cleared: a log past 1 MB moves to `.claude/logs/` under a dated name (`"guards": { "logs": { "maxKb": 1024 } }`). A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
 

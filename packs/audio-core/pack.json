@@ -98,6 +98,11 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/realtime-guard.mjs\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/settings-layer.mjs\"",
+            "timeout": 10
           }
         ]
       }

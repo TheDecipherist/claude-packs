@@ -94,6 +94,7 @@
       "secrets-guard.mjs",
       "untrusted-boundary.mjs",
       "realtime-guard.mjs",
+      "settings-layer.mjs",
       "browser-guard.py",
       "no-shipped-images.mjs"
     ],

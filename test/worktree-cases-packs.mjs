@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { bash, fire, fireAs, put } from './worktree-rig.mjs';
+import { requiredSettings } from '../packs/audio-core/hooks/lib/settings-standard.mjs';
 
 // The worktree's layout says one thing and main's another; the hook is judged by the checkout its file or command is in.
 const withGuards = (wt, guards) => put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards }));
@@ -68,5 +69,15 @@ export const PACK_CASES = {
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'src/painter/logo.png')), 2);
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'tests/goldens/panel.png')), 0);
     assert.equal(bash(here, 'no-shipped-images.mjs', `cp /tmp/a.png ${join(wt, 'src/app/logo.png')}`), 2);
+  },
+  'settings-layer.mjs': ({ here, wt }) => {
+    // the worktree's layout declares the settings layer and main's does not: the worktree's file is judged by the worktree's layout
+    const layout = JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8'));
+    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...layout, settingsLayer: { files: ['src/app/SettingsRows.cpp'] } }));
+    const rows = (ids) => `const SettingRow rows[] = { ${ids.map((id) => `{ "${id}" }`).join(', ')} };\n`;
+    const all = requiredSettings().map(([id]) => id);
+    assert.equal(fire(here, 'settings-layer.mjs', join(wt, 'src/app/SettingsRows.cpp'), rows(all.filter((id) => id !== 'midi.qwerty'))), 2);
+    assert.equal(fire(here, 'settings-layer.mjs', join(wt, 'src/app/SettingsRows.cpp'), rows(all)), 0);
+    assert.equal(fire(here, 'settings-layer.mjs', join(here, 'src/app/SettingsRows.cpp'), rows([])), 0, 'main declares no settings layer');
   },
 };
