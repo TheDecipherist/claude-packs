@@ -1,6 +1,6 @@
-# Analyse a mock-up (for `workorder-writer`, Stage 7 and Stage 8)
+# Analyse a mock-up (for `ui-mockup`, in `workorder-writer`'s Stage 7)
 
-Merged from the kit's `analyse-reference-look` skill, its `ui-matches-reference-look` and `straight-on-and-aligned` rules, and the `image-to-code` skill's render-and-extract discipline. The mock-up is the design: the build measures it and is gated against it. So a mock-up approved loosely is built loosely, and a mock-up with no depth is built flat. Two jobs happen here, before the order is handed over: get renders that can be measured, and read them into the order.
+Drawn from the kit's `analyse-reference-look` skill and its `ui-matches-reference-look` and `straight-on-and-aligned` rules, and from a render-and-extract discipline: render, read the render as a specification, never as a mood. The mock-up is the design: the build measures it and is gated against it. So a mock-up approved loosely is built loosely, and a mock-up with no depth is built flat. Two jobs happen here, before the order is handed over: get renders that can be measured, and read them into the order.
 
 ## Why depth comes first
 
@@ -21,7 +21,7 @@ Always do:
    - **Readability:** every label legible at the render's own size; the type consistent across the picture.
    - **Live parts:** a meter, a scope or a screen shows what it will show live, not a decorative stand-in.
    - **Clutter:** no pills, badges, fake status text or decorative markers the order does not name; a control the order does not have is removed from the render, not added to the order.
-6. Approve only a render that passes all five. The approved set goes in `design/reference/`, one file per screen, named for it, with the prompt that made it beside it. The concept render from before the interview is replaced, never kept as a second reference.
+6. Approve only a render that passes all six. The approved set goes in `design/reference/`, one file per screen, named for it, with the prompt that made it beside it. The concept render from before the interview is replaced, never kept as a second reference.
 
 **Reading the renders into the order (Stage 8)**
 7. Read each approved render as a specification, not a vibe. Extract into the order's UI section:
@@ -40,7 +40,7 @@ Always do:
 10. For a rebuild of real hardware, the mock-up is the real panel from the correctly lit photo and the drawing, and `straight-on-and-aligned` governs: the object, not the photograph; the camera's angle, the lighting, bends and wear are not design; rectify against a known anchor before measuring.
 
 Never do:
-- Approve a render by eye for "looks good". The five checks above are the approval.
+- Approve a render by eye for "looks good". The six checks above are the approval.
 - Approve a flat render for a panel that should have depth, or a render whose shadows are too soft or too compressed to measure.
 - Crop a detail out of a larger render to stand in for a detail render.
 - Keep two references for one screen (the concept and the final, two iterations, a render and a crop). One screen, one picture.

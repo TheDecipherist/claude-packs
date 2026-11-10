@@ -67,7 +67,7 @@ The skill shows this list at the start of every stage with the current one marke
 
 **Stage 6** writes the steps in the house order: skeleton and gates, the parameter table before any DSP, the Mermaid chart before any UI or engine code, then the panel from the approved render, the engine one part at a time, presets, the realtime audit, a DAW step with a named host list, review, report. Every step names the pack skill that proves it and ends with a number.
 
-**Stage 7** makes the pictures. One render per screen, straight on, 16:9, nothing outside the app. Iterated in OpenArt until the person likes it, with the previous render attached as the reference. Approved only after five checks: counts, depth, alignment, readability, live parts and clutter. A concept render made before the interview is welcome as a source and is rendered again at the end.
+**Stage 7** makes the pictures. One render per screen, straight on, 16:9, nothing outside the app. Iterated in OpenArt until the person likes it, with the previous render attached as the reference. Approved only after six checks: counts, depth, alignment, readability, live parts and clutter. A concept render made before the interview is welcome as a source and is rendered again at the end.
 
 **Stage 8** is the check: every source has a path, every step has a number, every decision is made, every repeated thing has its count, nothing claims more than can be proved, no step needs a person mid-run, and every command the hand-over will print exists in this kit (`workorder check` holds the same line on the build side).
 
@@ -143,7 +143,7 @@ planner/
     handover.md              machine set-up (WSL, LSP), commands, file placement, the GitHub path
   ui-mockup/
     SKILL.md                 render, iterate, approve
-    analyse-a-mockup.md      the five approval checks and the prompt bands; the measurements are
+    analyse-a-mockup.md      the six approval checks and the prompt bands; the measurements are
                              packs/base/skills/analyse-reference-look's
 ```
 

@@ -1,0 +1,42 @@
+== a SKILL.md over 8,000 characters: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ every planner SKILL.md is under 8,000 characters and its description starts "Use when" (1.747214ms)
+== a description that does not start Use when: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ every planner SKILL.md is under 8,000 characters and its description starts "Use when" (1.95303ms)
+== a placeholder left in prose: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ no planner skill file leaves an angle-bracket placeholder outside a code fence (1.66091ms)
+== a command the kit does not have: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ every command and flag start-a-build prints exists in the kit (1.271385ms)
+== a flag the kit does not have: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ every command and flag start-a-build prints exists in the kit (1.63301ms)
+== a skill the kit does not have: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ every skill a planner file names exists in the kit or the planner (2.48767ms)
+== a description that no longer triggers on voices: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ each sentence of the intent table starts exactly one skill, the right one (8.31347ms)
+== a zip that leaves out the references: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ planner-skills --zip writes exactly five zips, each its SKILL.md and its references, as another reader sees them (149.848687ms)
+== a pack skill copied into planner/: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ each sentence of the intent table starts exactly one skill, the right one (9.068929ms)
+== a pack skill copied into planner/synth-cost: exit 1
+ℹ fail 3
+ℹ pass 4
+✖ every planner SKILL.md is under 8,000 characters and its description starts "Use when" (1.992139ms)
+✖ every skill a planner file names exists in the kit or the planner (1.697719ms)
+✖ the pack skills ride as they are: no planner file is a copy of a pack skill, and no pack holds a planner skill (0.437731ms)

@@ -34,10 +34,10 @@ The commands are in [Start here](#start-here).
 
 Write the plan first, then the design, then hand both to Claude Code.
 
-1. **Add the walkthrough to claude.ai, once.** `npx @thedecipherist/claude-packs claude-ai-skill` writes `workorder-writer.zip`. Upload it in claude.ai under Settings, Capabilities, Skills. It belongs to no pack and no project installs it: it is the planning half, and it lives in claude.ai.
-2. **Write the work order in claude.ai, with Fable on High.** Say "I want to make a work order". The walkthrough interviews you stage by stage: what you are making, what it does, what you have, how it looks, how it is built. It researches between questions and gives a recommendation with every choice. It starts from the kit's template (a rebuild of a hardware instrument gets the rebuild template), and holds the order to the kit's laws while you write it, so the build is never refused for something the plan asked for. Get your app, idea or product as finished as you can. Plan in claude.ai, not Claude Code: claude.ai is great at research, and Claude Code is eager to start coding.
-3. **Make the design once the work order is complete.** The walkthrough writes an AI image prompt for each screen. With the OpenArt connector in claude.ai, it offers to make the mock-ups for you; without it, take the prompts to [openart.ai](https://openart.ai). Use the Nano Banana Pro model, which works very well for this, and make every mock-up 16:9, so every screen resizes and scales the same way. Go again until each one looks right.
-4. **Hand both to Claude Code.** `npx @thedecipherist/claude-packs new <name>`, then `workorder <name>` inside it (with `--template rebuild` for a rebuild) for the runner files. Save the finished order over `docs/workorders/<name>/workorder.md` and the pictures in `design/reference/`, named for the screen each shows. Then tell Claude Code: `Start from docs/workorders/<name>/workorder.md and the design in design/reference/`. The `start-from-a-workorder` skill reads the order the way the run will and lists any gaps before a line of code is written. It measures each picture with `analyse-reference-look`, and then the build starts: you can watch it, or [let it run on its own](#let-it-build-on-its-own).
+1. **Add the planner to claude.ai, once.** `npx @thedecipherist/claude-packs planner-skills --zip dist/` writes one zip per skill: `workorder-writer` (the interview), `start-a-build` (the hand-over), `ui-mockup` (the design pictures), and `design-a-preset` and `synth-cost` from their packs, as the build has them. Upload each in claude.ai ([Installing the skills in claude.ai](#installing-the-skills-in-claudeai)). The planning half lives in claude.ai; no project installs these three.
+2. **Write the work order in claude.ai, with Fable on High.** Say "I want to build a synth". The interview goes in nine stages, shown at every step: what you are making, what it does, what you have, how it looks, how it is built, the steps, the pictures, the check, the set-up. Every question is one of two: what are you making, and what makes it done. It researches between questions, recommends with every choice, turns the sounds you want into what the synth needs (`design-a-preset`), keeps a running cost against the CPU budget (`synth-cost`), starts from the kit's template (`plugin`, `rebuild` or `generic`) and writes the order's install block. Plan in claude.ai, not Claude Code: claude.ai is great at research, and Claude Code is eager to start coding.
+3. **Make the design once the order is complete.** `ui-mockup` writes the prompt for each screen in bands, renders it with the OpenArt connector when claude.ai has it (else you take the prompt to [openart.ai](https://openart.ai)), with Nano Banana Pro, every picture 16:9, iterated until you like it, and approves a render only when it passes six checks: counts, depth, alignment, readability, live parts, clutter. The panel is never prototyped in HTML: the picture is the design, and the build draws it in code.
+4. **Hand it to Claude Code.** `start-a-build` prints every command filled in: `new <name> --from <order>` (the kit installed from the order's install block), `workorder <name> --template <t>` for the runner files, the order saved over `docs/workorders/<name>/workorder.md`, the pictures in `design/reference/`, and `workorder check <name>`, which refuses an order that cannot finish. Then type `Run docs/workorders/<name>/PROMPT.md` in Claude Code, or [let it run on its own](#let-it-build-on-its-own).
 
 ## See it work
 
@@ -227,6 +227,16 @@ To run it, type `Run docs/workorders/billing/PROMPT.md` in Claude Code and watch
 **Read `run.sh` before you use it.** It runs Claude with permission prompts off, because nobody is there to answer. The hooks still judge every write, but use it only on a project you trust, in a repo you can roll back.
 
 To change a run in progress, edit its `PROMPT.md` and commit it. A run won't act on an instruction it can't trace to its order or to you, so a file dropped beside it is ignored on purpose.
+
+## Installing the skills in claude.ai
+
+```
+npx @thedecipherist/claude-packs planner-skills --zip dist/
+```
+
+writes `dist/<skill>.zip` for each of the five skills, each its `SKILL.md` and its reference files and nothing else. In claude.ai, upload each zip as a skill (Settings, then the skills section; the place varies by plan, so follow the app). Start a chat and type "I want to build a synth". If `workorder-writer` does not start the interview, its description did not match; open an issue with the sentence you typed. `claude-ai-skill` writes the interview's zip alone.
+
+`planner-skills` with no flag prints them, and the project-layout skill per configuration; `--out <dir>` writes those. The planner's skills live in the kit's `planner/` folder, and the two pack skills come from their packs as they are, so a law changed in its pack is the planner's at the next bundle.
 
 ## Questions
 
@@ -448,12 +458,12 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed; `--from <workorder.md>` installs from a work order's install block |
 | `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template` picks the steps: `generic` (the default), `plugin` or `rebuild` |
 | `workorder check <name>` | Before a run: refuses a placeholder left, a step with no measured Done when, a skill not installed, a red doctor |
-| `claude-ai-skill` | `workorder-writer.zip`: the guided work order interview, a skill to upload to claude.ai |
+| `claude-ai-skill` | `workorder-writer.zip`: the work order interview alone, as `planner-skills --zip` writes it |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |
 | `configs` | The configurations |
 | `config <name> [--dry-run]` | Switch configuration |
-| `planner-skills [--out <dir>]` | One project-layout skill body per configuration |
+| `planner-skills [--out <dir>] [--zip <dir>]` | One project-layout skill body per configuration; `--zip` one zip per claude.ai skill (the planner's three, `design-a-preset`, `synth-cost`) |
 | `survey` | Print the prompt that makes Claude write `docs/project.md` for tailoring |
 | `shape scan` | Every instance literal in the repo, against `design/shape.json` |
 | `symmetry gen\|run` | The generated gate: every instance has the same members, and every pair swaps the same |

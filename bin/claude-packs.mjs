@@ -13,7 +13,7 @@ import { newProject } from '../lib/new.mjs';
 import { dupScan } from '../lib/once-only-report.mjs';
 import { PRESETS, availablePacks, readPack } from '../lib/packs.mjs';
 import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
-import { plannerSkills } from '../lib/planner.mjs';
+import { plannerSkills, writeClaudeAiZips } from '../lib/planner.mjs';
 import { addCustomPack, loadCustomPacks, newPack } from '../lib/custom-packs.mjs';
 import { fixPlan } from '../lib/fix-plan.mjs';
 import { logsCommand } from '../lib/logs.mjs';
@@ -22,7 +22,6 @@ import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
 import { newWorkorder } from '../lib/workorder.mjs';
 import { workorderCheck } from '../lib/workorder-check.mjs';
 import { blockPacks, installFrom, readInstallBlock } from '../lib/install-block.mjs';
-import { writeClaudeAiSkill } from '../lib/claude-ai-skill.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
@@ -40,7 +39,7 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                                        plugin (a new synth or effect), rebuild (a hardware instrument as a plugin)
   workorder check <name>  before a run: refuses a placeholder left, a step whose Done when has no number or test path,
                      a skill named that is not installed (with the pack to add), and a red doctor --strict
-  claude-ai-skill    workorder-writer.zip in <dir>: the guided work order interview, a skill to upload to claude.ai
+  claude-ai-skill    workorder-writer.zip in <dir>: the work order interview alone, as planner-skills --zip writes it
   init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
                      and create the layout folders
                      --config <name>   the configuration (configs lists them; stored in layout.json
@@ -59,7 +58,9 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
   config <name>      switch this project to another configuration; prints what changes first
                      --dry-run         print what would change and stop
   planner-skills [--out <dir>]   one project-layout skill body per configuration, from its layout template
-                     (printed, or written to <dir>/<configuration>/project-layout/SKILL.md)
+                     (printed, or written to <dir>/<configuration>/project-layout/SKILL.md), and the claude.ai skills
+                     --zip <dir>   one zip per claude.ai skill: workorder-writer, start-a-build, ui-mockup,
+                                   design-a-preset, synth-cost, each its SKILL.md and its references
   update-all <dir...>  update every listed project that already has claude-packs
                      (e.g. update-all ~/projects/*); folders without it are skipped
   doctor [--strict] [--fresh]  verify the install (paths, folders, hooks, checks' own examples); a hook's selftest that
@@ -127,7 +128,7 @@ async function main() {
       return (await newProject(dir, rest[0], { packs: chosen, seedLayout, config: named, block })).code;
     }
     case 'claude-ai-skill':
-      return writeClaudeAiSkill(dir);
+      return writeClaudeAiZips(dir, ['workorder-writer']);
     case 'workorder': {
       if (rest[0] === 'check') return workorderCheck(dir, rest[1]);
       const template = rest.includes('--template') ? rest.splice(rest.indexOf('--template'), 2)[1] : undefined;
@@ -154,7 +155,7 @@ async function main() {
       return doctor(dir, console.log, INSTALLING);
     }
     case 'planner-skills':
-      return plannerSkills(rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null);
+      return plannerSkills(rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null, console.log, { zip: rest.includes('--zip') ? resolve(rest[rest.indexOf('--zip') + 1]) : null });
     case 'configs':
       console.log(describeConfigs(layoutConfiguration(dir)));
       return 0;

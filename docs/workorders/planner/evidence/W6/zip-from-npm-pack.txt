@@ -1,0 +1,19 @@
+$ npm pack; npm install <the tarball> (in a clean scratch folder)
+$ npx --no-install @thedecipherist/claude-packs planner-skills --zip dist
+  wrote <scratch>/dist/workorder-writer.zip
+  wrote <scratch>/dist/start-a-build.zip
+  wrote <scratch>/dist/ui-mockup.zip
+  wrote <scratch>/dist/design-a-preset.zip
+  wrote <scratch>/dist/synth-cost.zip
+Upload each zip in claude.ai as a skill (Settings, then the skills section), then say "I want to build a synth".
+exit 0
+design-a-preset.zip
+start-a-build.zip
+synth-cost.zip
+ui-mockup.zip
+workorder-writer.zip
+dist/design-a-preset.zip testzip None 19 files
+dist/start-a-build.zip testzip None 2 files
+dist/synth-cost.zip testzip None 2 files
+dist/ui-mockup.zip testzip None 2 files
+dist/workorder-writer.zip testzip None 6 files
