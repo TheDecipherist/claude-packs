@@ -12,6 +12,7 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 ## In progress
 
 - 1.6.1, quoted words in image prompts (work/1.6.1-quoted-labels, stacked on work/1.6.1-release), started 2026-11-10, from a mock-up that came back with invented labels: every word an image prompt wants drawn exactly goes in double quotes.
+  and: a misspelled word is never a reason to render again; the build draws every word from the order, in code (the user, 2026-11-10).
   making: a law in planner/ui-mockup, the same in the walkthrough's 5.1 and start-from-a-workorder's image prompt; concepts: none (design/shape.json declares none); reuse: the planner test's file readers.
   done when: test/planner.test.mjs holds each of the three places to the quoting law, seen red without it; the tests the branch reaches green against main.
 - 1.6.1, release and disclaimer (work/1.6.1-release), started 2026-11-10, from the user's notes on the public GitHub and npm pages: a disclaimer on both, the GitHub link on npm's front page, and a GitHub release made at every publish by one script.

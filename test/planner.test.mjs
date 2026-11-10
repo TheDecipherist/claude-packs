@@ -126,8 +126,9 @@ test('the pack skills ride as they are: no planner file is a copy of a pack skil
 test('every place that writes an image prompt puts the words to be drawn in double quotes, and says only quoted text is drawn', () => {
   // 1.6.1: a mock-up whose labels were left unquoted came back with knobs labelled "MIDTIT" and "KERV" that no order named.
   const places = {
-    'planner/ui-mockup/SKILL.md': [/every word that must be drawn exactly in double quotes/, /only text in the picture is the text in double quotes/],
+    'planner/ui-mockup/SKILL.md': [/every word that must be drawn exactly in double quotes/, /only text in the picture is the text in double quotes/, /misspelled is not a reason to render again/],
     'planner/workorder-writer/questions.md': [/every word to be drawn exactly in double quotes/],
+    'planner/ui-mockup/analyse-a-mockup.md': [/a spelling is never a reason to render again/],
     'packs/base/skills/start-from-a-workorder/SKILL.md': [/goes in double quotes/, /only text in the picture is the quoted text/],
   };
   for (const [file, laws] of Object.entries(places)) {
