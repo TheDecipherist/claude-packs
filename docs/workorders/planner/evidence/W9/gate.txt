@@ -1,0 +1,8 @@
+gate on committed 1c63cff: node .claude/tools/quiet-test.mjs npm run test:changed -- --base origin/main
+ℹ tests 575
+ℹ suites 0
+ℹ pass 575
+ℹ fail 0
+ℹ duration_ms 1458412.514077
+exit 0
+running: node --import ./test/fresh-tmp.mjs --test --test-concurrency=2 test/base-laws.test.mjs test/configs.test.mjs test/configurations.test.mjs test/custom-packs.test.mjs test/every-language.test.m
