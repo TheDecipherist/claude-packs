@@ -40,5 +40,8 @@
   },
   "bugs": {
     "url": "https://github.com/TheDecipherist/claude-packs/issues"
+  },
+  "dependencies": {
+    "yaml": "2.9.1"
   }
 }

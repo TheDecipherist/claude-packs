@@ -1,0 +1,14 @@
+Work order: docs/workorders/plan/ (template plugin)
+$ new scratch --config synth-creator --from docs/workorders/plan/workorder.md
+  configuration: synth-creator
+  install block: looks, commands written into .claude/layout.json; updating
+  configuration: synth-creator
+New project: <scratch>/scratch
+  configuration: synth-creator
+OK: base, cpp, audio-core, instrument-shell, midi, sound-design
+$ doctor --strict
+OK: base, cpp, audio-core, instrument-shell, midi, sound-design
+exit 0
+$ init --from with an unknown key
+claude-packs: <scratch>/bad.md: the install block has "looksies", a key the kit does not read. It takes: configuration, packs, files, protected, buildOutput, writeOnce, keepWorktrees, disable, enable, commands, siblings, maxFileLines, paramIds, guards, sourceFiles, gates, ruleTests, followFolders, looks, chart. Nothing was installed
+exit 2

@@ -29,8 +29,16 @@ Never do:
 
 ## W0. Set up
 
-1. <The project's skeleton, and a build that runs.>
-2. Run `doctor --strict` and fix what it finds.
+The kit is installed from this block and nothing else. Name the configuration and the packs the project needs (`suggest` reads them from the code), and any layout keys it owns (`enable`, `commands`, ...).
+
+```claude-packs
+configuration: base
+packs: base
+```
+
+1. Install from the block: `npx --no-install @thedecipherist/claude-packs init --from docs/workorders/{{name}}/workorder.md`.
+2. <The project's skeleton, and a build that runs.>
+3. Run `doctor --strict` and fix what it finds.
 
 **Done when:** <A measurement: the build passes, the first test runs, `doctor --strict` is OK.>
 

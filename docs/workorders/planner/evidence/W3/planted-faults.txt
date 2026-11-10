@@ -1,0 +1,16 @@
+== an unknown key let through: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ an unknown key is refused by name, and nothing is installed (1888.607617ms)
+== the owned keys not written by init --from: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ the block's own layout keys land in layout.json, and what enable names switches on (2210.931181ms)
+== the owned keys not written by new --from: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ new --from installs the block and commits it with the scaffold (2364.347162ms)
+== two blocks taken as one: exit 1
+ℹ fail 1
+ℹ pass 6
+✖ an order with no block, or two, is refused (1944.245354ms)

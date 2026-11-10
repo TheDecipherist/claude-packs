@@ -21,6 +21,7 @@ import { scan } from '../lib/scan.mjs';
 import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
 import { newWorkorder } from '../lib/workorder.mjs';
 import { workorderCheck } from '../lib/workorder-check.mjs';
+import { blockPacks, installFrom, readInstallBlock } from '../lib/install-block.mjs';
 import { writeClaudeAiSkill } from '../lib/claude-ai-skill.mjs';
 import { sync } from '../lib/sync.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
@@ -32,6 +33,7 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
   new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
                      workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
                      --packs <a,b>     the packs (default base alone); --profile <name>, --config <name> as for init
+                     --from <workorder.md>  install from the order's install block, as init --from does
   workorder <name>   a work order in docs/workorders/<name>: the steps, the prompt that runs them with nobody
                      there, and a runner that starts session after session
                      --template <generic|plugin|rebuild>  the steps to start from: generic (blank, the default),
@@ -46,6 +48,8 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                      --profile <name>  start from a tailored layout shipped in the package (e.g. stellix)
                      --layout <file>   start from your own layout.json
                      --auto            the configuration and packs suggest finds, so nobody picks them by hand
+                     --from <workorder.md>  the order's install block (its claude-packs fence): its configuration
+                                       and packs, then its layout keys (enable, looks, guards, commands, ...), then update
   add <pack...>      add packs to an existing install
                      --from <git-url>  a custom pack from a team's repository; its hooks stay off until "enable" names them
   new-pack <name> [--repo <git-url>]  a new repository for a team's own pack, ready to edit and push
@@ -115,8 +119,13 @@ async function main() {
   const fetched = ['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'claude-ai-skill'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
 
   switch (command) {
-    case 'new':
-      return (await newProject(dir, rest[0], { packs: packs ?? (config ? readConfig(config).packs.default : ['base']), seedLayout, config })).code;
+    case 'new': {
+      const block = fromUrl ? readInstallBlock(resolve(fromUrl)) : null;
+      if (block?.configuration && config && block.configuration !== config) throw new Error(`--config ${config} and the install block's configuration ${block.configuration} differ: name one`);
+      const named = config ?? block?.configuration ?? null;
+      const chosen = packs ?? (block ? blockPacks({ ...block, configuration: named }) : named ? readConfig(named).packs.default : ['base']);
+      return (await newProject(dir, rest[0], { packs: chosen, seedLayout, config: named, block })).code;
+    }
     case 'claude-ai-skill':
       return writeClaudeAiSkill(dir);
     case 'workorder': {
@@ -131,6 +140,11 @@ async function main() {
       if (rest.includes('--auto')) {
         const pick = suggestionOf(dir);
         await sync(dir, pick.packs.map((p) => p.pack), { force, mkdirs: true, seedLayout, config: pick.config });
+        return doctor(dir, console.log, INSTALLING);
+      }
+      if (fromUrl) {
+        const block = await installFrom(dir, resolve(fromUrl), { force });
+        if (isSynth(blockPacks(block)) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
         return doctor(dir, console.log, INSTALLING);
       }
       if (rest.length === 0 && !config) throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');

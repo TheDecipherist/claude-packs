@@ -20,6 +20,8 @@ test('an update keeps buildOutput, and adds none where the project set none', ()
   assert.equal(buildLayout(bare, []).buildOutput, undefined);
   assert.equal(buildLayout(bare, []).keepWorktrees, undefined);
   assert.equal(buildLayout(bare, []).looks, undefined);
+  // KWB-136: an empty chart list means no chart can be found; with none set, chart-first takes its default glob
+  assert.equal(buildLayout(bare, []).chart, undefined);
 });
 
 // 0.9.1: a layout key a hook or tool reads, and that the layout builder does not write, must be project-owned (OWNED), or the
