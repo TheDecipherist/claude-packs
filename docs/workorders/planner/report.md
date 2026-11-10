@@ -26,13 +26,13 @@ The order `docs/workorders/planner/workorder.md`, run unattended on 2026-11-09 i
 
 ## What the kit did: `logs` for this run
 
-The counts below were read before the landing; `evidence/final/logs.txt` has the last ones. 3 refusals in the build, each judged right, no crash:
+From `logs` at the end (`evidence/final/logs.txt`): 1,526 hook calls by 22 hooks, 4 refusals (3 judged right, 1 wrong, 0 open), 0 crashes. In the build:
 - `template-law`, twice: a function name already in the repo (`linesOf`, renamed to `orderLines` for its own job), and a folder walker that already existed (`filesUnder` in `lib/selftest-cache.mjs`, exported and called). Both caught a second copy before it was written.
 - `git-guard`, once: a commit before the previous one was pushed (KWB-26's law); pushed, then committed.
 
 At the landing, `inside-the-project` refused `git -C` on the main checkout (land-branch step 9), judged wrong and logged as KWB-137: the main checkout is the folder this worktree lives in. The main checkout was not fast-forwarded by this run.
 
-Three hook-context notes said a Bash write to source could not be judged by content laws; the source writes moved to Edit and Write after the first.
+Hook-context notes said a Bash write to source could not be judged by content laws (planted-fault scripts and a few small edits); the source writes moved to Edit and Write after the first ones.
 
 ## What is not proved
 

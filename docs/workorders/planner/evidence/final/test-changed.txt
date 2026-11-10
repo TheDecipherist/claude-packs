@@ -1,0 +1,7 @@
+origin/main 5159fd5, HEAD 5159fd5; the landing gate ran on 1c63cff (evidence/W9/gate.txt, 575 of 575)
+  docs/workorders/planner/evidence/W9/published.txt
+  docs/workorders/planner/evidence/final/test-changed.txt
+chose 0 of 76 test files:
+no test covers: docs/workorders/planner/evidence/W9/published.txt, docs/workorders/planner/evidence/final/test-changed.txt
+This is a changed-only run. With --base origin/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks.
+exit 0

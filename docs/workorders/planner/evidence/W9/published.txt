@@ -1,0 +1,26 @@
+$ npx @thedecipherist/claude-packs@1.6.0 new scratch --config synth-creator --template plugin
+  configuration: synth-creator
+New project: <scratch>/scratch
+  configuration: synth-creator
+OK: base, cpp, audio-core
+Work order: docs/workorders/scratch/ (template plugin)
+exit 0
+$ npx @thedecipherist/claude-packs@1.6.0 init --from docs/workorders/scratch/workorder.md
+  install block: looks, commands written into .claude/layout.json; updating
+OK: base, cpp, audio-core, instrument-shell, midi, sound-design
+$ npx @thedecipherist/claude-packs@1.6.0 doctor --strict
+OK: base, cpp, audio-core, instrument-shell, midi, sound-design
+exit 0
+$ npx @thedecipherist/claude-packs@1.6.0 planner-skills --zip dist
+5
+design-a-preset.zip
+start-a-build.zip
+synth-cost.zip
+ui-mockup.zip
+workorder-writer.zip
+dist/design-a-preset.zip testzip None
+dist/start-a-build.zip testzip None
+dist/synth-cost.zip testzip None
+dist/ui-mockup.zip testzip None
+dist/workorder-writer.zip testzip None
+  "kit": "1.6.0",

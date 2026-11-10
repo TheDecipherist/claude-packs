@@ -1,0 +1,43 @@
+1526 calls, 2026-11-10T01:41:58.365Z to 2026-11-10T03:27:39.658Z
+hook                      calls refused right wrong  open fixed crash    ms
+template-law                348       2     2     0     0     2     0     3
+inside-the-project          348       1     0     1     0     0     0     6
+git-guard                   274       1     1     0     0     0     0     5
+look-gate                   545       0     0     0     0     0     0     3
+kit-lock                    354       0     0     0     0     0     0    17
+lesson-checks               348       0     0     0     0     0     0     3
+file-size-guard             348       0     0     0     0     0     0     2
+placement-law               348       0     0     0     0     0     0     2
+folder-law                  348       0     0     0     0     0     0     2
+shape-law                   348       0     0     0     0     0     0     6
+brief-guard                 348       0     0     0     0     0     0     2
+once-only                   348       0     0     0     0     0     0     4
+secrets-guard               348       0     0     0     0     0     0     2
+untrusted-boundary          348       0     0     0     0     0     0     1
+dispatch-once               348       0     0     0     0     0     0     2
+code-shape                  348       0     0     0     0     0     0     2
+skill-first                 276       0     0     0     0     0     0     4
+suite-once                  274       0     0     0     0     0     0    44
+repo-litter                 274       0     0     0     0     0     0     2
+making                        3       0     0     0     0     0     0     6
+reuse-hint                    3       0     0     0     0     0     0    56
+fixed: the same file passed the same hook later in that session. Judge the open ones: `logs refusals --open`, then `logs mark <id> right|wrong "<why>"`.
+63a26f91 2026-11-10T01:53:37.656Z template-law right
+  ~/projects/claude-packs/.claude/worktrees/planner/lib/workorder-check.mjs
+  BLOCKED by template-law: linesOf (line 29) already exists: lib/logs.mjs:15, packs/base/hooks/lesson-checks.mjs:78.
+ec74284a 2026-11-10T02:44:29.744Z template-law right
+  ~/projects/claude-packs/.claude/worktrees/planner/lib/planner.mjs
+  BLOCKED by template-law: filesUnder (line 61) already exists: lib/selftest-cache.mjs:14.
+c2b5549c 2026-11-10T02:53:05.357Z git-guard right
+  cat >> docs/workorders/planner/progress.md <<'EOF'
+- 2026-11-09 W8.1: docs/workorders/planner/inputs/ deleted in its own commit (2311d75); nothing outside this order and build.md's history named it
+- 2026-11-09 W8.2: planner/README.md read section by section: 6 claims corrected (the bundled measurements, one sitting, design-a-preset's install, --zip and project-layout, the intent rule, the README counts), summary.md added to the interview's Stage 8, Status rewritten to what is real; every claim checked in evidence/W8/readme-check.md, with the open items and why
+EOF
+P="planner docs/workorders/planner/progress.md docs/workorders/planner/evidence/W8"; git add $P && git commit -q -m "planner W8: planner/README.md checked claim by claim and corrected, its Status what is real; the interview writes summary.md
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -- $P && git log --oneline -1 && source ~/.env && git push -q https://x-access-token:[masked] work/1.6.0-planner 2>&1 | sed 's/ghp_[A-Za-z0-9]*/***/g'
+  git-guard: work/1.6.0-planner has 1 commit(s) that are not on GitHub (git@github.com:TheDecipherist/claude-packs.git):
+1e00a96e 2026-11-10T03:22:52.581Z inside-the-project wrong
+  E=docs/workorders/planner/evidence/W9; { echo "gate on committed 1c63cff: node .claude/tools/quiet-test.mjs npm run test:changed -- --base origin/main"; grep -E "^running:|^ℹ (tests|suites|pass|fail|duration_ms)|^exit" /tmp/w9-gate.txt; } | sed 's#~#~#g' > $E/gate.txt; cat $E/gate.txt | tail -6; git -C ~/projects/claude-packs status --short | head -5; git -C ~/projects/claude-packs rev-parse --abbrev-ref HEAD
+  BLOCKED by inside-the-project: ~/projects/claude-packs is a checkout of this project kept outside it. Work for a project happens inside that project, always: outside it no hook of the kit judges anything (KWB-103). A worktree goes in .claude/worktrees/<name>: git worktree add .claude/worktrees/<name> -b <branch> origin/<trunk>.
+4 refusal(s)
