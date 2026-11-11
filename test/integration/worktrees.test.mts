@@ -6,32 +6,29 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, PIN_GUARD, bash, caseFrom, fire, fireAs, installedCase, landFromWorktree, project, put, stellix } from './worktree-rig.mts';
-import { readJson } from '../packs/base/hooks/lib/json.mjs';
-import { COMMAND_CASES } from './worktree-cases-commands.mts';
-import { PACK_CASES } from './worktree-cases-packs.mts';
+import { CLI, caseFrom, fire, fireAs, installedCase, project, put } from '../worktree-rig.mts';
+import type { Checkouts } from '../worktree-rig.mts';
+import { readJson } from '../../packs/base/hooks/lib/json.mts';
+import { COMMAND_CASES } from '../worktree-cases-commands.mts';
+import { PACK_CASES } from '../worktree-cases-packs.mts';
+import { worktreeCase as CODE_SHAPE } from '../../packs/base/hooks/code-shape.mts';
+import { worktreeCase as DISPATCH_ONCE } from '../../packs/base/hooks/dispatch-once.mts';
+import { worktreeCase as FILE_SIZE_GUARD } from '../../packs/base/hooks/file-size-guard.mts';
+import { worktreeCase as FOLDER_LAW } from '../../packs/base/hooks/folder-law.mts';
+import { worktreeCase as GIT_GUARD } from '../../packs/base/hooks/git-guard.mts';
+import { worktreeCase as HEARTBEAT } from '../../packs/base/hooks/heartbeat.mts';
+import { worktreeCase as LESSON_CHECKS } from '../../packs/base/hooks/lesson-checks.mts';
+import { worktreeCase as ONCE_ONLY } from '../../packs/base/hooks/once-only.mts';
+import { worktreeCase as ONCE_ONLY_INDEX } from '../../packs/base/hooks/once-only-index.mts';
+import { worktreeCase as PLACEMENT_LAW } from '../../packs/base/hooks/placement-law.mts';
+import { worktreeCase as SECRETS_GUARD } from '../../packs/base/hooks/secrets-guard.mts';
+import { worktreeCase as SHAPE_LAW } from '../../packs/base/hooks/shape-law.mts';
 
-// the hooks moved onto the contract (W4) export their worktree case as data beside their selftest
-const [FOLDER_LAW, PLACEMENT_LAW, SECRETS_GUARD, LESSON_CHECKS, HEARTBEAT] = (await Promise.all([
-  import('../packs/base/hooks/folder-law.mjs'), import('../packs/base/hooks/placement-law.mjs'), import('../packs/base/hooks/secrets-guard.mjs'),
-  import('../packs/base/hooks/lesson-checks.mjs'), import('../packs/base/hooks/heartbeat.mjs'),
-])).map((m) => m.worktreeCase);
+/** A layout as the tests here read it: its folders, concepts and guards by name. */
+interface Layout { folders: Record<string, Record<string, unknown>>; concepts: Record<string, string[]>; guards?: unknown; enable?: string[] }
+const readLayout = (dir: string): Layout => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) as Layout;
 
-test('folder-law allows a new file in a right folder of a worktree and refuses a wrong one', () => {
-  const { here, wt } = stellix();
-  assert.equal(fire(here, 'folder-law.mjs', join(wt, 'lib/app/src/host_groups.h')), 0);
-  assert.equal(fire(here, 'folder-law.mjs', join(wt, 'random/stray.cpp')), 2);
-  assert.equal(fire(here, 'folder-law.mjs', join(here, 'lib/app/src/fine.h')), 0);
-  assert.equal(fire(here, 'folder-law.mjs', join(here, 'random/stray.cpp')), 2);
-});
-
-test('file-size-guard measures a worktree file by its own checkout', () => {
-  const { here, wt } = stellix();
-  assert.equal(fire(here, 'file-size-guard.mjs', join(wt, 'lib/app/src/small.h')), 0);
-  assert.equal(fire(here, 'file-size-guard.mjs', join(wt, 'lib/app/src/huge.h'), 'x\n'.repeat(400)), 2);
-});
-
-const PARAMS = (...ids) => ids.map((id) => `auto p_${id} = juce::ParameterID { "${id}", 1 };`).join('\n') + '\n';
+const PARAMS = (...ids: string[]): string => ids.map((id) => `auto p_${id} = juce::ParameterID { "${id}", 1 };`).join('\n') + '\n';
 const APVTS = 'void Filter::prepare (juce::AudioProcessorValueTreeState& apvts) { cutoff = apvts.getRawParameterValue ("cutoff"); }\n';
 const RT_BAD = 'void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m) { auto* x = new float[64]; }\n';
 
@@ -41,13 +38,13 @@ const SHAPE = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(
 // One case per installed hook: the worktree file it must allow and the one it must refuse, judged
 // from the worktree's own checkout. A hook added to the packs without a case here, in worktree-cases-commands.mts (a base hook
 // that judges a command by its checkout's layout) or in worktree-cases-packs.mts (a hook a pack other than base adds) fails the test.
-const CASES = {
+const CASES: Record<string, (checkouts: Checkouts) => void | Promise<void>> = {
   ...PACK_CASES,
   ...COMMAND_CASES,
   // the runner as settings.json runs it (KWB-24): the hooks it names judge a worktree file against the worktree, and the
   // timing lines go to the main checkout's log (CLAUDE_PROJECT_DIR)
   'run-hooks.mjs': ({ here, wt }) => {
-    const via = (file, content = '// new\n') => spawnSync('node', [join(here, '.claude/hooks/run-hooks.mjs'), '.claude/hooks/folder-law.mjs', '.claude/hooks/file-size-guard.mjs'],
+    const via = (file: string, content = '// new\n') => spawnSync('node', [join(here, '.claude/hooks/run-hooks.mjs'), '.claude/hooks/folder-law.mjs', '.claude/hooks/file-size-guard.mjs'],
       { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: file, content } }), env: { ...process.env, CLAUDE_PROJECT_DIR: here }, encoding: 'utf8' });
     assert.equal(via(join(wt, 'src/core/Svf.cpp')).status, 0);
     assert.equal(via(join(wt, 'stray/Svf.cpp')).status, 2);
@@ -55,21 +52,21 @@ const CASES = {
     assert.match(readFileSync(join(here, '.claude/hooks.log'), 'utf8'), /\tfolder-law\t\d+\t2\tWrite/);
   },
   'folder-law.mjs': caseFrom('folder-law.mjs', FOLDER_LAW),
-  'file-size-guard.mjs': caseFrom('file-size-guard.mjs', (await import('../packs/base/hooks/file-size-guard.mjs')).worktreeCase),
+  'file-size-guard.mjs': caseFrom('file-size-guard.mjs', FILE_SIZE_GUARD),
   'placement-law.mjs': caseFrom('placement-law.mjs', PLACEMENT_LAW),
-  'shape-law.mjs': caseFrom('shape-law.mjs', (await import('../packs/base/hooks/shape-law.mjs')).worktreeCase),
+  'shape-law.mjs': caseFrom('shape-law.mjs', SHAPE_LAW),
   'lesson-checks.mjs': (checkouts) => {
     caseFrom('lesson-checks.mjs', LESSON_CHECKS)(checkouts);   // the worktree's own check; the step below moves a concept in its layout
     const { here, wt } = checkouts;
     // The worktree's branch moved the dsp concept into src/engine: its own layout.json decides, not main's.
     const layoutFile = join(wt, '.claude/layout.json');
-    const layout = JSON.parse(readFileSync(layoutFile, 'utf8'));
-    layout.concepts.dsp = [...layout.concepts.dsp, 'src/engine/**'];
+    const layout = readLayout(wt);
+    layout.concepts.dsp = [...(layout.concepts.dsp ?? []), 'src/engine/**'];
     writeFileSync(layoutFile, JSON.stringify(layout, null, 2));
     assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), APVTS), 2);
     assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/engine/Filter.cpp'), APVTS), 2);
     assert.equal(fire(here, 'lesson-checks.mjs', join(here, 'src/engine/Filter.cpp'), APVTS), 0);
-    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'),'void Filter::setParams (const P& p) noexcept {}\n'), 0);
+    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), 'void Filter::setParams (const P& p) noexcept {}\n'), 0);
   },
   'frozen-files.mjs': installedCase('frozen-files.mjs'),
   'spec-lock.mjs': installedCase('spec-lock.mjs'),
@@ -79,7 +76,7 @@ const CASES = {
   'heartbeat.mjs': (checkouts) => {
     caseFrom('heartbeat.mjs', HEARTBEAT)(checkouts);
     const { here, wt } = checkouts;
-    const beat = (name, root = here) => readJson(join(root, '.claude/logs/heartbeats', `${name}.json`));
+    const beat = (name: string, root = here): { tool?: string; event?: string } | null => readJson<{ tool?: string; event?: string }>(join(root, '.claude/logs/heartbeats', `${name}.json`));
     assert.equal(fireAs(here, 'heartbeat.mjs', { hook_event_name: 'PreToolUse', cwd: wt, tool_name: 'Edit', tool_input: { file_path: join(wt, 'src/x.cpp') } }).status, 0);
     assert.equal(beat('agent-x')?.tool, 'Edit');
     assert.equal(beat('agent-x', wt), null);
@@ -87,7 +84,7 @@ const CASES = {
     assert.equal(beat('lead')?.event, 'post');
   },
   'stage-guard.mjs': installedCase('stage-guard.mjs'),
-  'git-guard.mjs': caseFrom('git-guard.mjs', (await import('../packs/base/hooks/git-guard.mjs')).worktreeCase),
+  'git-guard.mjs': caseFrom('git-guard.mjs', GIT_GUARD),
   // A non-base pack's hook cannot be imported from packs/ (its ./lib/ is base's, merged only by an install), so these cases stay
   // functions, beside the `worktreeCase` data each hook exports, until slice 6 reads it from an install.
   'realtime-guard.mjs': ({ here, wt }) => {
@@ -97,32 +94,33 @@ const CASES = {
   'param-id-lock.mjs': ({ here, wt }) => {
     // PostToolUse: the edit is already on disk. A worktree that drops an id is refused even though
     // main still has it; a worktree's new id goes into the worktree's lock, never main's.
-    const post = (file) => fireAs(here, 'param-id-lock.mjs', { tool_name: 'Write', tool_input: { file_path: file } }).status;
+    const post = (file: string): number | null => fireAs(here, 'param-id-lock.mjs', { tool_name: 'Write', tool_input: { file_path: file } }).status;
+    const lockOf = (root: string): string[] => JSON.parse(readFileSync(join(root, '.claude/param-ids.lock.json'), 'utf8')) as string[];
     put(join(wt, 'src/params/Params.h'), PARAMS('cutoff'));
     assert.equal(post(join(wt, 'src/params/Params.h')), 2);
     put(join(wt, 'src/params/Params.h'), PARAMS('cutoff', 'res', 'drive'));
     assert.equal(post(join(wt, 'src/params/Params.h')), 0);
-    assert.ok(JSON.parse(readFileSync(join(wt, '.claude/param-ids.lock.json'), 'utf8')).includes('drive'));
-    assert.ok(!JSON.parse(readFileSync(join(here, '.claude/param-ids.lock.json'), 'utf8')).includes('drive'));
+    assert.ok(lockOf(wt).includes('drive'));
+    assert.ok(!lockOf(here).includes('drive'));
     // Main drops an id the worktree still has: the worktree's copy must not hide it.
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff'));
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
   },
-  'dispatch-once.mjs': caseFrom('dispatch-once.mjs', (await import('../packs/base/hooks/dispatch-once.mjs')).worktreeCase),
-  'once-only.mjs': caseFrom('once-only.mjs', (await import('../packs/base/hooks/once-only.mjs')).worktreeCase),
-  'once-only-index.mjs': caseFrom('once-only-index.mjs', (await import('../packs/base/hooks/once-only-index.mjs')).worktreeCase),
-  'code-shape.mjs': caseFrom('code-shape.mjs', (await import('../packs/base/hooks/code-shape.mjs')).worktreeCase),
+  'dispatch-once.mjs': caseFrom('dispatch-once.mjs', DISPATCH_ONCE),
+  'once-only.mjs': caseFrom('once-only.mjs', ONCE_ONLY),
+  'once-only-index.mjs': caseFrom('once-only-index.mjs', ONCE_ONLY_INDEX),
+  'code-shape.mjs': caseFrom('code-shape.mjs', CODE_SHAPE),
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
     put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');
-    const said = (cwd) => fireAs(here, 'reuse-hint.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'format the date range', cwd }).stdout;
+    const said = (cwd: string): string => fireAs(here, 'reuse-hint.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'format the date range', cwd }).stdout;
     assert.match(said(wt), /formatDateRange/);
     assert.doesNotMatch(said(here), /formatDateRange/);
   },
   'making.mjs': ({ here, wt }) => {
     put(join(wt, 'design/shape.json'), JSON.stringify(SHAPE));
-    const said = (cwd) => fireAs(here, 'making.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'drive slot 2 louder', cwd }).stdout;
+    const said = (cwd: string): string => fireAs(here, 'making.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'drive slot 2 louder', cwd }).stdout;
     assert.match(said(wt), /you named slot 2: building for all slots/);
     assert.doesNotMatch(said(here), /you named/, 'main has no manifest yet');
   },
@@ -131,7 +129,7 @@ const CASES = {
 test('every hook judges a worktree file against the worktree, inside a real git worktree', async () => {
   const p = project(['audio-core', 'gpu-painter', 'stellix', 'reverse-engineering'], (dir) => {
     const lf = join(dir, '.claude/layout.json');
-    const layout = JSON.parse(readFileSync(lf, 'utf8'));
+    const layout = readLayout(dir);
     layout.folders.engines_copy = { path: 'src/engines/copied', kind: 'copy', purpose: 'a copy tree' };
     layout.guards = { copy: { tools: ['tools/copy_in.py'] }, git: { refuseTrunk: true } };
     layout.enable = ['hooks/user-asks.mjs', 'hooks/idle-wake.mjs']; // the opt-in hooks too, so every hook is tried
@@ -142,38 +140,10 @@ test('every hook judges a worktree file against the worktree, inside a real git 
   });
   const installed = readdirSync(join(p.here, '.claude/hooks')).filter((f) => /\.(mjs|py)$/.test(f)).sort();
   assert.deepEqual(installed, Object.keys(CASES).sort(), 'every installed hook needs a worktree case here');
-  const failed = [];
+  const failed: string[] = [];
   for (const [hook, check] of Object.entries(CASES)) {
-    try { await check(p); } catch (e) { failed.push(`${hook}: ${e.message.split('\n')[0]}`); }
+    try { await check(p); } catch (e) { failed.push(`${hook}: ${(e instanceof Error ? e.message : String(e)).split('\n')[0]}`); }
   }
   assert.deepEqual(failed, []);
 });
 
-test('git-guard at Stop, fired from a worktree, refuses while its landing left the main checkout behind (KWB-96)', () => {
-  const p = project(['audio-core'], (dir) => {
-    const lf = join(dir, '.claude/layout.json');
-    writeFileSync(lf, JSON.stringify({ ...JSON.parse(readFileSync(lf, 'utf8')), guards: { git: { house: true } } }, null, 2));
-  });
-  const trunk = landFromWorktree(p);
-  const stop = () => fireAs(p.here, 'git-guard.mjs', { hook_event_name: 'Stop', cwd: p.wt, session_id: `wt-lag-${process.pid}` });
-  const s = stop();
-  assert.equal(s.status, 2, s.stderr);
-  assert.ok(s.stderr.includes(`git -C ${p.here} merge --ff-only origin/${trunk}`), s.stderr);
-  execFileSync('git', ['-C', p.here, 'merge', '-q', '--ff-only', `origin/${trunk}`]);
-  assert.equal(stop().status, 0, 'fast-forwarded, the turn ends');
-});
-
-test('version-pin-guard reads docs/versions.md from the worktree the pin is written in', () => {
-  const { here, wt } = project(['audio-core'], (dir) => {
-    put(join(dir, 'package.json'), '{"dependencies":{}}\n');
-    put(join(dir, 'docs/versions.md'), '| name | latest | checked | source | used | decision |\n|---|---|---|---|---|---|\n');
-  });
-  const today = new Date().toISOString().slice(0, 10);
-  writeFileSync(join(wt, 'docs/versions.md'), `${readFileSync(join(wt, 'docs/versions.md'), 'utf8')}| zod | 4.1.12 | ${today} | https://github.com/colinhacks/zod/releases | 4.1.12 | use |\n`);
-  const pin = (file) => spawnSync('node', [PIN_GUARD], {
-    input: JSON.stringify({ tool_name: 'Write', tool_input: { file_path: file, content: '{"dependencies":{"zod":"4.1.12"}}\n' } }),
-    env: { ...process.env, CLAUDE_PROJECT_DIR: here },
-  }).status;
-  assert.equal(pin(join(wt, 'package.json')), 0, 'the worktree has the fresh row');
-  assert.equal(pin(join(here, 'package.json')), 2, 'main has no row');
-});
