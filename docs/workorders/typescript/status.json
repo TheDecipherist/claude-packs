@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T11:32:43Z",
+  "updated": "2026-11-11T12:51:49Z",
   "steps": [
     {
       "id": "W0",
@@ -27,7 +27,7 @@
       "title": "The core: base hooks lib by layer",
       "items": 5,
       "done": 0,
-      "agent": "w3-l0-shell, w3-l0-scanners, w3-l0-project"
+      "agent": "w3-l1-writes, w3-l1-logs, w3-l1-selftests"
     },
     {
       "id": "W4",
@@ -95,22 +95,22 @@
   ],
   "agents": [
     {
-      "name": "w3-l0-shell",
-      "worktree": ".claude/worktrees/w3-l0-shell",
+      "name": "w3-l1-writes",
+      "worktree": ".claude/worktrees/w3-l1-writes",
       "step": "W3",
-      "started": "2026-11-11T11:32:43Z"
+      "started": "2026-11-11T12:51:49Z"
     },
     {
-      "name": "w3-l0-scanners",
-      "worktree": ".claude/worktrees/w3-l0-scanners",
+      "name": "w3-l1-logs",
+      "worktree": ".claude/worktrees/w3-l1-logs",
       "step": "W3",
-      "started": "2026-11-11T11:32:43Z"
+      "started": "2026-11-11T12:51:49Z"
     },
     {
-      "name": "w3-l0-project",
-      "worktree": ".claude/worktrees/w3-l0-project",
+      "name": "w3-l1-selftests",
+      "worktree": ".claude/worktrees/w3-l1-selftests",
       "step": "W3",
-      "started": "2026-11-11T11:32:43Z"
+      "started": "2026-11-11T12:51:49Z"
     }
   ]
 }

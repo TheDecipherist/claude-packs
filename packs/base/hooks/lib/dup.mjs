@@ -18,8 +18,8 @@ import { tmpdir } from 'node:os';
 import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchesAny } from './glob.mjs';
-import { codeFiles } from './elements.mjs';
-import { extPattern, extsOf } from './source-exts.mjs';
+import { isJunk, walk } from './files.mjs';
+import { extPattern } from './source-exts.mjs';
 
 export const LIMITS = { tokens: 50, lines: 6, gap: 2 };
 export const SOURCE = extPattern('c', 'cpp', 'objc', 'python', 'js', 'ts', 'rust');
@@ -88,9 +88,10 @@ export const real = (p) => { try { return realpathSync(p); } catch { const d = d
 
 // The files a TypeScript build emitted beside their sources: the build's output, never a copy in the repo (KWB-170).
 const TWIN = { '.mts': '.mjs', '.cts': '.cjs', '.ts': '.js', '.tsx': '.js' };
+const NOT_WALKED = (name) => name === 'node_modules' || name === '.git' || isJunk(name);
 function emittedTwins(abs) {
-  return codeFiles(abs, [], extsOf('ts')).map((rel) => join(abs, rel.replace(/\.(?:mts|cts|tsx|ts)$/, (ext) => TWIN[ext])))
-    .filter((twin) => existsSync(twin));
+  return walk(abs, NOT_WALKED).filter((f) => /\.(?:mts|cts|tsx|ts)$/.test(f) && !f.endsWith('.d.mts'))
+    .map((f) => f.replace(/\.(?:mts|cts|tsx|ts)$/, (ext) => TWIN[ext])).filter((twin) => existsSync(twin));
 }
 
 export function scan(root, { extra = [], ignore: alsoIgnore = [], layout = {}, shape = null, jscpd = null, timeoutMs = 8000, paths = null } = {}) {

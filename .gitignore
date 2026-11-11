@@ -42,3 +42,13 @@ packs/base/hooks/lib/rust-scan.mjs
 packs/base/hooks/lib/secret-patterns.mjs
 packs/base/hooks/lib/selftest.mjs
 packs/base/hooks/lib/shell-lex.mjs
+# W3 layer 1, emitted
+packs/base/hooks/lib/content.mjs
+packs/base/hooks/lib/dup.mjs
+packs/base/hooks/lib/event-log.mjs
+packs/base/hooks/lib/hub-rig.mjs
+packs/base/hooks/lib/languages.mjs
+packs/base/hooks/lib/look-gate-selftest.mjs
+packs/base/hooks/lib/program-writes.mjs
+packs/base/hooks/lib/run-discovery.mjs
+packs/base/hooks/lib/skill-first-selftest.mjs
