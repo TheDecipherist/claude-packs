@@ -24,9 +24,9 @@ export const RIG_FOLDERS = {
   engine: { path: 'src/engine', purpose: 'the engine that drives the core' },
 } as const;
 
-export function project(initArgs: readonly string[], before: (dir: string) => void = () => {}): Checkouts {
-  const dir = scratchDir('cpw-');
-  execFileSync('node', [CLI, 'init', ...initArgs, '--dir', dir], { encoding: 'utf8' });
+/** An installed project's folder made a git repo with the rig's folders in its layout, committed, and one agent worktree under it
+ *  (`project` below installs one first; the hook tier hands it a copy of a fixture). `before` runs on the folder first. */
+export function checkoutsOf(dir: string, before: (dir: string) => void = () => {}): Checkouts {
   withLayout(dir, (layout) => ({ folders: { ...(layout.folders as Record<string, unknown>), ...RIG_FOLDERS } }));
   before(dir);
   git(dir, 'init', '-q');
@@ -34,6 +34,12 @@ export function project(initArgs: readonly string[], before: (dir: string) => vo
   git(dir, 'commit', '-qm', 'init');
   git(dir, 'worktree', 'add', '-q', '.claude/worktrees/agent-x', '-b', 'work/x');
   return { here: dir, wt: join(dir, '.claude/worktrees/agent-x') };
+}
+
+export function project(initArgs: readonly string[], before: (dir: string) => void = () => {}): Checkouts {
+  const dir = scratchDir('cpw-');
+  execFileSync('node', [CLI, 'init', ...initArgs, '--dir', dir], { encoding: 'utf8' });
+  return checkoutsOf(dir, before);
 }
 
 /** A landing from the worktree, as land-branch makes one there (KWB-96): a bare "GitHub" beside the repo, the trunk and the
