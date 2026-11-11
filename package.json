@@ -28,12 +28,13 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "node scripts/clean-emitted.mts && tsc -b",
+    "build": "node scripts/clean-emitted.mts && tsc -b && node scripts/build-proxy.mts --host",
+    "build:proxy": "node scripts/build-proxy.mts",
     "check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p test/tsconfig.json",
     "pretest": "npm run build",
     "test": "node --import ./test/fresh-tmp.mts --test --test-concurrency=6 test/*.test.mjs \"test/**/*.test.mts\"",
     "test:changed": "node scripts/test-changed.mjs",
-    "prepack": "npm run build",
+    "prepack": "npm run build && node scripts/build-proxy.mts",
     "prepare": "npm run build",
     "release": "node scripts/release.mjs"
   },
