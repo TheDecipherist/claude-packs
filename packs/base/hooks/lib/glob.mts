@@ -7,6 +7,11 @@ function escape(s: string): string {
   return s.replace(/[.+^$()|[\]\\]/g, '\\$&');
 }
 
+/** `s` as text a RegExp matches literally: the one owner of the escape (shape, git-guard and git-auth each had a copy). */
+export function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function globToRegExp(glob: string): RegExp {
   const known = cache.get(glob);
   if (known) return known;
