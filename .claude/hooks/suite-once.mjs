@@ -44,7 +44,10 @@ function uncommitted(dir) {
 // tests". A question about a full run, or a sentence that only mentions one ("why is the entire suite running", "full runs
 // only when I ask"), is no request.
 const ASKS_FULL = /\b(?:run|start|do|launch|kick off)\s+(?:\w+\s+){0,2}?(?:full|whole|complete|entire|every|all(?: of)?(?: the)?)\s+(?:\w+\s+){0,2}?(?:suite|run|tests?|gates?)\b/i;
-export const askedForFull = (prompt) => ASKS_FULL.test(prompt ?? '');
+// A session started to run the whole suite says so of itself: a work order's run.sh passes "this session runs the whole suite"
+// (KWB-168); a complaint about an agent that runs it ("the agent runs the whole suite") is no grant.
+const GRANTS_FULL = /\bthis\s+session\s+(?:may\s+)?runs?\s+the\s+(?:full|whole|complete|entire)\s+(?:test\s+)?suite\b/i;
+export const askedForFull = (prompt) => ASKS_FULL.test(prompt ?? '') || GRANTS_FULL.test(prompt ?? '');
 
 export function refusal(command, cwd, asked = false) {
   const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
@@ -84,6 +87,9 @@ function selftest() {
     ['a sentence about full runs is no request', askedForFull('full complete runs should only be if I notice something off'), false],
     ['do a complete run', askedForFull('do a complete run of everything'), true],
     ['run all the tests', askedForFull('please run all the tests'), true],
+    ['a run.sh session prompt that grants the whole suite (KWB-168)', askedForFull("Run docs/workorders/x/PROMPT.md; this session runs the whole suite where a step's Done when names it"), true],
+    ['the plain run.sh prompt asks nothing (KWB-168)', askedForFull('Run docs/workorders/x/PROMPT.md'), false],
+    ['a complaint that an agent runs the whole suite asks nothing (KWB-168)', askedForFull('the agent runs the whole suite again and again'), false],
   ].map(([label, got, want]) => [label, got ? 1 : 0, want ? 1 : 0]);
   const as = (cmd, transcript) => runHook(hook, dir, { ...bashOf(cmd, dir), transcript_path: transcript });
   const sh = (cmd) => as(cmd, land);
