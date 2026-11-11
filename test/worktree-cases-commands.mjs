@@ -36,6 +36,12 @@ export const COMMAND_CASES = {
     assert.equal(bash(here, 'suite-once.mjs', `cd ${wt} && bash tools/all.sh`), 2);
     assert.equal(bash(here, 'suite-once.mjs', `cd ${here} && bash tools/all.sh`), 0);
   },
+  'no-find.mjs': ({ here, wt }) => {
+    // no layout key: a search of the disk is refused from a worktree as from the main checkout, a plain command passes (KWB-154)
+    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && find . -name '*.cpp'`), 2);
+    assert.equal(bash(here, 'no-find.mjs', `cd ${here} && find . -name '*.cpp'`), 2);
+    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && git status --short`), 0);
+  },
   'repo-litter.mjs': ({ here, wt }) => {
     // The worktree's layout allows this asset; main's does not.
     put(join(wt, 'hero.png'), 'x');

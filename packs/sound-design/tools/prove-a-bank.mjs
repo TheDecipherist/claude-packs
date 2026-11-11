@@ -11,6 +11,7 @@
 // beats, when a part is synced. Exit 1 when any line fails or a render it needs is missing; every line is printed with its figure.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { isMain } from '../hooks/lib/hook-log.mjs';
 import { readWav } from './lib/wav.mjs';
 import { bandDb, centroid, differenceDb, firstSoundMs, loudness, mid, peakDb, periodSec, side, tailMs } from './lib/bank-measures.mjs';
 
@@ -99,4 +100,5 @@ function main() {
   return failed ? 1 : 0;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) process.exit(main());
+// by real paths: started by a linked path (macOS's /var, a linked project folder) or on Windows, it still runs (KWB-158)
+if (isMain(import.meta.url)) process.exit(main());

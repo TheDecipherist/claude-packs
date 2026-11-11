@@ -266,7 +266,10 @@ test('doctor fails when a hook fails its selftest', () => {
 // enables it, update prints what it holds back, and an enabled git-guard still leaves main alone until refuseTrunk.
 test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable, and update prints the list', () => {
   const kit052 = tmp();
-  execFileSync('sh', ['-c', `git -C '${fileURLToPath(new URL('..', import.meta.url))}' archive c671865 | tar -x -C '${kit052}'`]);
+  // two steps, so a commit the checkout lacks fails here by name: in a pipe the shell reported only tar's exit, and an empty tar
+  // left no kit to run (the Mac suite, from a copy without the history: KWB-158's sweep); no sh, so Windows runs it too
+  const archive = execFileSync('git', ['-C', fileURLToPath(new URL('..', import.meta.url)), 'archive', 'c671865'], { maxBuffer: 1 << 28 });
+  execFileSync('tar', ['-x', '-C', kit052], { input: archive });
   const dir = tmp();
   execFileSync('node', [join(kit052, 'bin/claude-packs.mjs'), 'init', 'audio-core', 'gpu-painter', '--dir', dir], { encoding: 'utf8' });
   const before = readFileSync(join(dir, '.claude/settings.json'), 'utf8');

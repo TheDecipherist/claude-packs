@@ -5,8 +5,9 @@
 // dependency file is judged (WB-69): the Write tool, an Edit or MultiEdit (its new_string taken literally), an install
 // command, and the shell writing the file (>, >>, tee, sed -i, cp, mv, a heredoc; lib/shell-writes.mjs).
 // `node version-pin-guard.mjs --selftest` proves every extractor and the age check.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterText, shellWrites } from './lib/shell-writes.mjs';
 
 const MAX_AGE = Number(process.env.VERSION_GUARD_DAYS ?? 14);
@@ -268,7 +269,10 @@ function selftest() {
   return 0;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {
+// by real paths, as the hooks' isMain does (the global part has no hooks lib beside it): started by a linked path (macOS's /var)
+// or on Windows (`/C:/...`), it still runs (KWB-158)
+const realPath = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
+if (process.argv[1] && realPath(process.argv[1]) === realPath(fileURLToPath(import.meta.url))) {
   if (process.argv.includes('--selftest')) process.exit(selftest());
   let raw = '';
   process.stdin.on('data', (c) => { raw += c; });

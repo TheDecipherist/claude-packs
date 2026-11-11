@@ -3,6 +3,7 @@
 // audio-core's, installed beside it).
 import { assert, cli, fresh, join, spawnSync, test, writeFileSync } from './kit-cli.mjs';
 import { writeWav } from '../packs/audio-core/tools/lib/wav.mjs';
+import { symlinkSync } from 'node:fs';
 
 const RATE = 44100;
 const dbToGain = (d) => 10 ** (d / 20);
@@ -98,4 +99,16 @@ test('a render the gate needs and the bank lacks fails as not measured', () => {
   const r = prove((b) => { delete b.presets[0].renders.wheel127; return only('pad')(b); });
   assert.equal(r.status, 1);
   assert.match(r.out, /FAIL {2}PAD \. Slow Tide {2}wheel: not measured: no wheel127 render/);
+});
+
+// KWB-158: started by a linked path (macOS's /var is a link to /private/var; any linked project folder), the tool still runs: its
+// main is chosen by real paths, never by comparing argv[1] with its own URL. A junction on Windows needs no rights.
+test('prove-a-bank started through a linked folder still measures the bank', () => {
+  const link = join(fresh('bank-link-'), 'project');
+  symlinkSync(project, link, 'junction');
+  const dir = fresh('bank-run-');
+  for (const [name, channels] of Object.entries(FILES)) writeFileSync(join(dir, name), writeWav(channels, RATE));
+  writeFileSync(join(dir, 'bank.json'), JSON.stringify(BANK));
+  const r = spawnSync('node', [join(link, '.claude/tools/prove-a-bank.mjs'), join(dir, 'bank.json')], { encoding: 'utf8', timeout: 60000 });
+  assert.match(r.stdout + r.stderr, /all \d+ lines pass/, 'a tool started by a linked path ran nothing');
 });

@@ -17,11 +17,13 @@ function fakeXvfb() {
 const run = (args, env) => spawnSync('node', [TOOL, ...args], { encoding: 'utf8', env });
 
 test('on Linux with a display, a window goes to a virtual one, and Wayland is not left open beside it', () => {
+  // the plan for Linux, asked on whatever system runs the suite: the real tool on a Mac takes macOS's road (KWB-158's sweep)
   const env = { PATH: `${fakeXvfb()}:${process.env.PATH}`, DISPLAY: ':0', WAYLAND_DISPLAY: 'wayland-0' };
-  const done = run(['sh', '-c', 'echo "wayland=[$WAYLAND_DISPLAY] quiet=$QUIET_TEST"'], env);
-  assert.equal(done.status, 0);
-  assert.match(done.stdout, /virtual display: -a/);
-  assert.match(done.stdout, /wayland=\[\] quiet=1/);
+  const done = plan(['sh', '-c', 'true'], env, 'linux');
+  const at = done.command.indexOf('xvfb-run');
+  assert.ok(at >= 0 && done.command[at + 1] === '-a', `the command goes through xvfb-run -a: ${done.command.join(' ')}`);
+  assert.equal(done.env.WAYLAND_DISPLAY, undefined, 'Wayland is not left open beside it');
+  assert.equal(done.env.QUIET_TEST, '1');
 });
 
 test('the command keeps its own exit code', () => {
