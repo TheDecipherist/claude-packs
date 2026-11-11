@@ -91,7 +91,7 @@ function judgeWrite(w, rel) {
   return `${rel} adds a second place that branches on the same kind.\n${lines}\n${FIX}`;
 }
 
-const main = (text) => judgeEvent(text, { name: 'dispatch-once', write: judgeWrite });
+const main = (text) => judgeEvent(text, { name: 'dispatch-once', write: judgeWrite }, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

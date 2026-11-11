@@ -31,7 +31,7 @@ export function verdict(rel, before, after, globs) {
 const main = (text) => judgeEvent(text, {
   name: 'schemas-only',
   write: (w, rel) => verdict(rel, w.before, w.after, conceptGlobs(readLayout(claudeRoot(projectRoot(), w.path, process.cwd())), 'schemas') ?? ['**/schemas/**']),
-});
+}, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

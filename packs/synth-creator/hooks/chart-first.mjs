@@ -40,7 +40,7 @@ const hasChart = (checkout, globs) => committed(checkout).some((f) => f.size > 0
 function unchartedWrites(payload) {
   const out = [];
   const seen = new Map();
-  for (const w of writesOf(payload, payload.cwd ?? projectRoot())) {
+  for (const w of writesOf(payload, payload.cwd ?? projectRoot(), process.env)) {
     if (w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd())) continue;
     const rel = relInCheckout(projectRoot(), w.path, process.cwd());
     if (rel.startsWith('.claude/')) continue;

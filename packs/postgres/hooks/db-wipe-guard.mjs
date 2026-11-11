@@ -61,7 +61,7 @@ export function refusal(command, cwd) {
     'If it is not, this is the user\'s to run, not Claude\'s: stop and ask.\n';
 }
 
-const main = (text) => judgeEvent(text, { name: 'db-wipe-guard', command: refusal });
+const main = (text) => judgeEvent(text, { name: 'db-wipe-guard', command: refusal }, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

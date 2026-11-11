@@ -49,7 +49,7 @@ export function refusal(command, asked = false) {
 function main(text) {
   const payload = readPayload(text);
   const asked = askedFor(payload?.transcript_path ? lastPrompt(payload.transcript_path) : '');
-  return judgeEvent(text, { name: 'no-find', command: (command) => refusal(command, asked) });
+  return judgeEvent(text, { name: 'no-find', command: (command) => refusal(command, asked) }, process);
 }
 
 function selftest() {

@@ -27,7 +27,7 @@ function main(text) {
     return 0;
   }
   if (!Array.isArray(state.files) || state.files.length === 0) return 0;
-  const hit = writesOf(payload, payload.cwd ?? process.cwd()).map((w) => w.path).filter((f) => insideProject(projectRoot(), f, process.cwd())).map((f) => relative(checkoutRoot(projectRoot(), f, process.cwd()), f))
+  const hit = writesOf(payload, payload.cwd ?? process.cwd(), process.env).map((w) => w.path).filter((f) => insideProject(projectRoot(), f, process.cwd())).map((f) => relative(checkoutRoot(projectRoot(), f, process.cwd()), f))
     .find((rel) => rel === '.claude/state/frozen.json' || matchesAny(rel, state.files));
   if (!hit) return 0;
   const rel = hit;

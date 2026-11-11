@@ -31,7 +31,7 @@ function judgeAdd(command, cwd) {
   return null;
 }
 
-const main = (text) => judgeEvent(text, { name: 'firmware-out-of-git', command: judgeAdd });
+const main = (text) => judgeEvent(text, { name: 'firmware-out-of-git', command: judgeAdd }, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

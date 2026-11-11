@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // PreToolUse hook (Write|Edit|MultiEdit|NotebookEdit|Bash, every route: lib/writes.mjs): blocks writes that ADD realtime-unsafe code to
 // audio-thread functions in C++ files. Exit 2 = block, stderr goes back to Claude. `--selftest` proves it.
-import { writesOf } from './lib/writes.mjs';
+import { readPayload, writesOf } from './lib/writes.mjs';
 import { findViolations, violationKey } from './lib/realtime-checks.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -15,13 +15,9 @@ import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 const CPP = /\.(cpp|cc|cxx|h|hh|hpp|mm)$/;
 
 function main(text) {
-  let payload;
-  try {
-    payload = JSON.parse(text);
-  } catch {
-    return 0;
-  }
-  for (const w of writesOf(payload)) {
+  const payload = readPayload(text);
+  if (!payload) return 0;
+  for (const w of writesOf(payload, process.cwd(), process.env)) {
     if (w.after === null || !CPP.test(w.path) || !insideProject(projectRoot(), w.path, process.cwd())) continue;
     const code = judge(w.path, w) || judgeSmooth(w);
     if (code) return code;

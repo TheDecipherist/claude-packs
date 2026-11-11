@@ -41,7 +41,7 @@ function judgeText(rel, before, after, shape, root) {
 function main(text) {
   let payload;
   try { payload = JSON.parse(text); } catch { return 0; }
-  for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
+  for (const w of writesOf(payload, payload.cwd ?? process.cwd(), process.env)) {
     if (w.after === null || w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd()) || w.after.includes('\0')) continue;
     const root = checkoutRoot(projectRoot(), w.path, process.cwd());
     const shape = readShape(root) ?? readShape(projectRoot());

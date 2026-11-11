@@ -60,7 +60,7 @@ const main = (text) => judgeEvent(text, {
   name: 'stack-guard',
   command: judgeInstall,
   write: (w) => (w.after === null ? null : basename(w.path) === 'package.json' ? judgeManifest(w.before, w.after) : CODE.has(extname(w.path)) ? judgeCode(w.before, w.after) : null),
-});
+}, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

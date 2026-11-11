@@ -56,7 +56,7 @@ function main(text) {
     return 0;
   }
   const input = payload.tool_input ?? {};
-  const bad = writesOf(payload, payload.cwd ?? projectRoot()).filter((w) => w.op !== 'delete' && isBlocked(w.path)).map((w) => w.path);
+  const bad = writesOf(payload, payload.cwd ?? projectRoot(), process.env).filter((w) => w.op !== 'delete' && isBlocked(w.path)).map((w) => w.path);
   if (payload.tool_name === 'Bash' && !commandLeavesProject(projectRoot(), input.command, process.cwd(), process.env.HOME)) {
     const tokens = (input.command ?? '').split(/\s+/).map((t) => t.replace(/^['"]|['"]$/g, ''));
     if (/\b(curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b/.test(input.command ?? '')) bad.push(...tokens.filter((t) => t && isBlocked(t, payload.cwd ?? projectRoot())));
