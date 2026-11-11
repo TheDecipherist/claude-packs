@@ -5,10 +5,12 @@ import { existsSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { readJson } from '../packs/base/hooks/lib/json.mjs';
+import { readJson } from '../../packs/base/hooks/lib/json.mts';
+
+interface Kept { version: string; at: number }
 
 test('the run has its own temp folder, by its real path (macOS /var is /private/var: KWB-158)', () => {
-  const dir = process.env.TMPDIR;
+  const dir = process.env['TMPDIR'];
   assert.ok(dir && existsSync(dir), 'TMPDIR is a folder of this run');
   assert.equal(dir, realpathSync(dir), 'the real path');
   assert.match(dir, /claude-packs-test-/);
@@ -16,16 +18,18 @@ test('the run has its own temp folder, by its real path (macOS /var is /private/
 });
 
 test('kit-fresh reads a kept answer inside the run, holding this kit\'s own version (no test reaches npm: KWB-156)', () => {
-  const cache = process.env.CLAUDE_PACKS_CACHE_DIR;
-  assert.ok(cache && cache.startsWith(process.env.TMPDIR), 'inside the run\'s folder');
-  const kept = readJson(join(cache, 'kit-fresh.json'));
-  assert.equal(kept.version, readJson(new URL('../package.json', import.meta.url)).version);
+  const cache = process.env['CLAUDE_PACKS_CACHE_DIR'];
+  const tmp = process.env['TMPDIR'] ?? '';
+  assert.ok(cache && cache.startsWith(tmp), 'inside the run\'s folder');
+  const kept = readJson<Kept>(join(cache, 'kit-fresh.json'));
+  assert.ok(kept, 'a kept answer');
+  assert.equal(kept.version, readJson<{ version: string }>(new URL('../../package.json', import.meta.url).pathname)?.version);
   assert.ok(Date.now() - kept.at < 24 * 3600 * 1000, 'today\'s');
 });
 
 test('selftests are the gate\'s, the memory of proved hooks is the run\'s, and no Claude process is the holder', () => {
-  assert.equal(process.env.CLAUDE_PACKS_SELFTESTS, 'gate', 'a test\'s install takes the hooks as proved by the gate (KWB-166)');
-  assert.ok(process.env.CLAUDE_PACKS_SELFTEST_CACHE?.startsWith(process.env.TMPDIR), 'one memory a run, never an earlier run\'s (KWB-41)');
-  assert.equal(process.env.CLAUDE_PID, undefined, 'kit-lock never reads this process as a session (KWB-40)');
-  assert.ok(process.env.CLAUDE_PACKS_FIXTURES,'the installs the tests copy are built under one folder of the run (test/fixtures/installs.mts)');
+  assert.equal(process.env['CLAUDE_PACKS_SELFTESTS'], 'gate', 'a test\'s install takes the hooks as proved by the gate (KWB-166)');
+  assert.ok(process.env['CLAUDE_PACKS_SELFTEST_CACHE']?.startsWith(process.env['TMPDIR'] ?? '\0'), 'one memory a run, never an earlier run\'s (KWB-41)');
+  assert.equal(process.env['CLAUDE_PID'], undefined, 'kit-lock never reads this process as a session (KWB-40)');
+  assert.ok(process.env['CLAUDE_PACKS_FIXTURES'], 'the installs the tests copy are built under one folder of the run (test/fixtures/installs.mts)');
 });

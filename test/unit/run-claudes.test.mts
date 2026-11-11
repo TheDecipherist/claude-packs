@@ -3,17 +3,17 @@
 // machine's processes.
 import assert from 'node:assert/strict';
 import { mkdirSync, utimesSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
-import { claudesIn, orderProjectOf, sessionOrders } from '../packs/base/hooks/lib/run-claudes.mjs';
-import { fresh } from './kit-cli.mts';
+import { claudesIn, orderProjectOf, sessionOrders } from '../../packs/base/hooks/lib/run-claudes.mts';
+import { fresh } from '../kit-cli.mts';
 
 const HOUR = 60 * 60 * 1000;
-const put = (file, text = 'x\n') => { mkdirSync(join(file, '..'), { recursive: true }); writeFileSync(file, text); };
-const age = (file, ms) => { const t = (Date.now() - ms) / 1000; utimesSync(file, t, t); };
+const put = (file: string, text = 'x\n'): void => { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, text); };
+const age = (file: string, ms: number): void => { const t = (Date.now() - ms) / 1000; utimesSync(file, t, t); };
 
 /** a project with three orders: live (status.json now), done (a DONE file), cold (untouched for two hours) */
-function project() {
+function project(): string {
   const dir = fresh('runs-');
   put(join(dir, 'docs/workorders/live/status.json'), '{}\n');
   put(join(dir, 'docs/workorders/done/status.json'), '{}\n');
@@ -24,7 +24,7 @@ function project() {
   return dir;
 }
 
-const PS = (lines) => lines.map(([pid, args]) => `${pid} ${args}`).join('\n');
+const PS = (lines: readonly (readonly [number, string])[]): string => lines.map(([pid, args]) => `${pid} ${args}`).join('\n');
 
 test('every kind of Claude Code process is a candidate, and nothing else', () => {
   const ps = PS([[11, 'claude --dangerously-skip-permissions'], [12, '/Users/u/.vscode/extensions/anthropic.claude-code-2.1.0/resources/native-binary/claude --output-format stream-json'],
@@ -44,7 +44,7 @@ test('a session\'s order is found with no run.sh; a DONE order and one untouched
   const dir = project();
   const found = sessionOrders({ ps: PS([[4242, 'claude']]), cwds: () => new Map([[4242, join(dir, '.claude/worktrees/agent-x/src')]]), platform: 'darwin', nowMs: Date.now(), trees: () => [] });
   assert.deepEqual(found.runs.map((r) => r.order), ['live']);
-  assert.equal(found.runs[0].project, dir);
+  assert.equal(found.runs[0]?.project, dir);
 });
 
 test('an order whose files are old runs while a worktree on its work/<order>-* branch was touched in the hour', () => {
@@ -57,5 +57,5 @@ test('an order whose files are old runs while a worktree on its work/<order>-* b
 test('on Windows it says it is not supported yet, and never crashes', () => {
   const found = sessionOrders({ ps: PS([[7, 'claude']]), platform: 'win32', nowMs: Date.now() });
   assert.deepEqual(found.runs, []);
-  assert.match(found.unsupported, /not supported on Windows yet/);
+  assert.match(found.unsupported ?? '', /not supported on Windows yet/);
 });

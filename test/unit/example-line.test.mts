@@ -1,7 +1,7 @@
 // 0.9.3 (KWB-6): the "seen in:" / "example:" test is linear in the line's length; the forms it excuses are unchanged.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { isExampleLine } from '../packs/base/hooks/lib/shape.mjs';
+import { isExampleLine } from '../../packs/base/hooks/lib/shape.mts';
 
 test('a long row of dashes is judged at once, not in exponential time', () => {
   for (const line of ['# ' + '-'.repeat(200), '// ' + '-'.repeat(500), '- '.repeat(300), '-- '.repeat(300) + 'x']) {

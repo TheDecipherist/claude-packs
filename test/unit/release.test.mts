@@ -1,7 +1,7 @@
 // 1.6.1: `npm run release` makes the npm package, the tag and the GitHub release from one version and its CHANGELOG section, and
 // refuses a repo that is not ready. Its parts are judged here without touching npm or GitHub.
-import { assert, test } from './kit-cli.mts';
-import { gitWithToken, githubRemote, notesFor, plan, refusals } from '../scripts/release.mjs';
+import { assert, test } from '../kit-cli.mts';
+import { gitWithToken, githubRemote, notesFor, plan, refusals } from '../../scripts/release.mts';
 
 const CHANGELOG = '# Changelog\n\n## Unreleased\n\n- next\n\n## 1.6.1 (2026-11-10)\n\n- the release script\n- the disclaimer\n\n## 1.6.0 (2026-11-09)\n\n- the planner\n';
 
@@ -34,9 +34,9 @@ test('a release is refused off main, on a dirty tree, and when main is not GitHu
 });
 
 test('the steps run in order, and a step already done is skipped, so a stopped release is finished by running it again', () => {
-  const steps = (done) => plan({ name: '@x/kit', version: '1.6.1', ...done }).map((s) => `${s.act}:${s.done}`);
+  const steps = (done: { published: boolean; tagged: boolean; released: boolean }): string[] => plan({ name: '@x/kit', version: '1.6.1', ...done }).map((s) => `${s.act}:${s.done}`);
   assert.deepEqual(steps({ published: false, tagged: false, released: false }), ['publish:false', 'tag:false', 'release:false']);
   assert.deepEqual(steps({ published: true, tagged: false, released: false }), ['publish:true', 'tag:false', 'release:false']);
   assert.deepEqual(steps({ published: true, tagged: true, released: true }), ['publish:true', 'tag:true', 'release:true']);
-  assert.match(plan({ name: '@x/kit', version: '1.6.1', published: false }).map((s) => s.step).join(' | '), /npm publish @x\/kit@1\.6\.1 \| tag v1\.6\.1 on GitHub \| GitHub release v1\.6\.1/);
+  assert.match(plan({ name: '@x/kit', version: '1.6.1', published: false, tagged: false, released: false }).map((s) => s.step).join(' | '), /npm publish @x\/kit@1\.6\.1 \| tag v1\.6\.1 on GitHub \| GitHub release v1\.6\.1/);
 });
