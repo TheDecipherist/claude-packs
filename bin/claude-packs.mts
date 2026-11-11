@@ -20,7 +20,7 @@ import { readLock } from '../lib/manifest.mts';
 import { newProject } from '../lib/new.mts';
 import { dupScan } from '../lib/once-only-report.mts';
 import { PRESETS, availablePacks, readPack } from '../lib/packs.mts';
-import { plannerSkills, writeClaudeAiZips } from '../lib/planner.mts';
+import { plannerSkills } from '../lib/planner.mts';
 import { scan } from '../lib/scan.mts';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mts';
 import { statusCommand } from '../lib/status-cli.mts';
@@ -69,7 +69,7 @@ function seedOf(value: Run['value']): Partial<Layout> | null {
 }
 
 // The commands that never load a team's custom packs (they read, or they make something new).
-const NO_CUSTOM_PACKS = new Set(['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'claude-ai-skill', 'status']);
+const NO_CUSTOM_PACKS = new Set(['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'status']);
 
 function parse(command: string | undefined, argv: readonly string[]): Run {
   const flags: Record<Switch, boolean> = { dryRun: false, force: false, strict: false, fresh: false };
@@ -182,7 +182,6 @@ function list(): number {
 
 const COMMANDS: Record<string, Command> = {
   new: newCommand,
-  'claude-ai-skill': (run) => writeClaudeAiZips(run.dir, ['workorder-writer']),
   workorder,
   init,
   'planner-skills': (run) => plannerSkills(pathOf(run, '--out'), console.log, { zip: pathOf(run, '--zip') }),

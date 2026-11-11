@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Stellix spec laws: the world, determinism, generated reset, no shipped images.",
   "type": "stock",
+  "fits": ["synth-creator"],
+  "requires": [],
+  "tests": {
+    "hooks/no-shipped-images.mts": ["test/hooks/stellix/no-shipped-images.test.mts"]
+  },
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
@@ -48,6 +53,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-shipped-images.mjs\"",
             "role": "judge",
+            "order": 180,
             "timeout": 10
           }
         ]

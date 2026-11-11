@@ -3,6 +3,18 @@
   "version": "1.0.0",
   "description": "Instruments built on a shared shell: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit.",
   "type": "stock",
+  "fits": ["synth-creator"],
+  "requires": [],
+  "tests": {
+    "tools/lib/route-judge.mts": ["test/tools/instrument-shell/route-table.test.mts"],
+    "tools/lib/route-mermaid.mts": ["test/tools/instrument-shell/route-table.test.mts"],
+    "tools/lib/route-plants.mts": ["test/tools/instrument-shell/route-table.test.mts"],
+    "tools/route-table.mts": ["test/tools/instrument-shell/route-table.test.mts"]
+  },
+  "concepts": {},
+  "folders": {},
+  "hooks": {},
+  "skillsIn": null,
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",

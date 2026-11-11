@@ -45,11 +45,12 @@ test('HOOK_EXPORT takes a hook on either contract, and refuses a file with no ex
   assert.deepEqual([runnable(claude)('new.mjs'), runnable(claude)('old.mjs'), runnable(claude)('gone.mjs')], [true, false, false]);
 });
 
-test('orderHooks puts the kit hooks in the configuration\'s order and leaves the project\'s own where they were', () => {
+test('orderHooks puts the kit hooks in their rows\' order and leaves the project\'s own where they were (was: the configuration\'s order)', () => {
   const ours = (c = '') => c.includes('.claude/hooks/');
-  const hooks = [node('b.mjs'), { command: 'mine' }, node('a.mjs'), node('z.mjs')];
-  assert.deepEqual(orderHooks(hooks, ['a.mjs', 'b.mjs'], ours).map((h) => h.command?.split('/').pop() ?? h.command), ['a.mjs"', 'mine', 'b.mjs"', 'z.mjs"']);
-  assert.deepEqual(orderHooks(hooks, undefined, ours), hooks);
+  const hooks = [node('b.mjs', { order: 20 }), { command: 'mine' }, node('a.mjs', { order: 10 }), node('z.mjs')];
+  assert.deepEqual(orderHooks(hooks, ours).map((h) => h.command?.split('/').pop() ?? h.command), ['a.mjs"', 'mine', 'b.mjs"', 'z.mjs"'], 'a row with no order goes last');
+  const plain = [node('b.mjs'), { command: 'mine' }, node('a.mjs')];
+  assert.deepEqual(orderHooks(plain, ours), plain, 'no orders: pack order');
 });
 
 test('readSettings: none is empty, malformed throws with nothing written', () => {

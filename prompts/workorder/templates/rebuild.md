@@ -75,7 +75,7 @@ commands:
   test: node .claude/tools/buildq.mjs ctest --preset dev
 ```
 
-1. Install from the block: `npx --no-install @thedecipherist/claude-packs init --from docs/workorders/{{name}}/workorder.md`. Check that every skill, tool and rule **The foundation** names exists. A gap is a kit fault: log it and update the kit.
+1. Install from the block: `{{kit}} init --from docs/workorders/{{name}}/workorder.md`. Check that every skill, tool and rule **The foundation** names exists. A gap is a kit fault: log it and update the kit.
 2. Start the unit: `CMakeLists.txt` and `CMakePresets.json` (`dev`, `asan-ubsan`, `tsan`), the plugin framework through CMake at a version looked up, never remembered.
 3. Link the house's shared code as its README says.
 4. Prove the guards: `doctor --strict` OK; an exact copy of a source file refused by `once-only`; `git push --force` refused.

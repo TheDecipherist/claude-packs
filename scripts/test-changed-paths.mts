@@ -5,10 +5,11 @@
 //   packs/p/hooks/lib/m        -> test/unit/hooks-lib/m, and the hook tests of every hook that imports m, transitively
 //   packs/p/tools/t            -> test/tools/p/t, and its split parts
 //   test/kit-cli, fresh-tmp, a fixture builder -> the integration tier
-//   pack.json `tests`          -> the test files it names, for any change under that pack
+//   pack.json `tests`          -> the test files it names for the changed file (a map from each code file to its tests)
 //   pack.json `requires`       -> a change under a pack also reaches the tests of the packs that require it
 import { join } from 'node:path';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
+import { testsOf, type PackFields } from '../lib/pack-manifest.mts';
 import { HOOK, TEST } from './test-changed-table.mts';
 
 /** A test file and why a path says it covers the change. */
@@ -17,7 +18,6 @@ export type PathPick = [test: string, why: string];
 /** Every module that imports a file, directly or through others. */
 export type Reachers = (file: string) => ReadonlySet<string>;
 
-interface PackManifest { tests?: unknown; requires?: unknown }
 
 const stringsOf = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -30,7 +30,7 @@ const inTier = (tests: readonly string[], dir: string, stem: string): string[] =
 const INTEGRATION_HELPER = /^test\/(?:kit-cli|fresh-tmp)\.m[jt]s$|^test\/fixtures\/.*\.m[jt]s$/;
 
 /** The manifest of a pack, or none. */
-const manifestOf = (root: string, pack: string): PackManifest | null => readJson<PackManifest>(join(root, 'packs', pack, 'pack.json'));
+const manifestOf = (root: string, pack: string): PackFields | null => readJson<PackFields>(join(root, 'packs', pack, 'pack.json'));
 
 /** The tests a changed file reaches by its path and its pack's manifest. `files` is every file of the repo. */
 export function pathTests(root: string, changed: string, files: readonly string[], reachers: Reachers): PathPick[] {
@@ -52,7 +52,10 @@ export function pathTests(root: string, changed: string, files: readonly string[
   if (INTEGRATION_HELPER.test(changed)) add(tests.filter((t) => t.startsWith('test/integration/')), `path: ${changed} builds what the integration tier runs on`);
   const owner = /^packs\/([\w-]+)\//.exec(changed)?.[1];
   if (owner) {
-    add(stringsOf(manifestOf(root, owner)?.tests).filter((t) => tests.includes(t)), `pack.json of ${owner} names it in tests`);
+    // `tests` is a map from each code file of the pack (its path inside the pack) to its test files; a change to pack.json itself reaches them all
+    const named = testsOf(manifestOf(root, owner) ?? {});
+    const inPack = changed.slice(`packs/${owner}/`.length);
+    add((inPack === 'pack.json' ? Object.values(named).flat() : named[inPack] ?? []).filter((t) => tests.includes(t)), `pack.json of ${owner} names it in tests`);
     for (const f of files) {
       const dependent = /^packs\/([\w-]+)\/pack\.json$/.exec(f)?.[1];
       if (dependent && stringsOf(manifestOf(root, dependent)?.requires).includes(owner)) {

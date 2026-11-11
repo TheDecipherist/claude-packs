@@ -155,7 +155,7 @@ export async function sync(projectDir: string, requested: readonly string[] | nu
   const installed: Layout = { ...layout, disable: [...(layout.disable ?? []), ...sw.held, ...(Array.isArray(config['leaveOut']) ? (config['leaveOut'] as string[]) : [])] };
   const { files, untouchable } = copyPackFiles(projectDir, packNames, installed, lock, force, log);
   removeDropped(projectDir, lock, files, log);
-  const { retired, statusLine } = syncSettings(claudeDir, packNames, installed, Object.keys(lock.files), config.hookOrder);
+  const { retired, statusLine } = syncSettings(claudeDir, packNames, installed, Object.keys(lock.files));
   if (retired.length) log(`  retired settings entries (merged into protect-vendor, or global by design): ${retired.join(', ')}`);
   if (statusLine === 'kept') log('  status line: the project has its own, kept; the kit\'s is .claude/tools/statusline.mjs, to wire by hand');
   const { stale } = await applyPaths(projectDir, { skip: untouchable });

@@ -36,7 +36,7 @@ configuration: base
 packs: base
 ```
 
-1. Install from the block: `npx --no-install @thedecipherist/claude-packs init --from docs/workorders/{{name}}/workorder.md`.
+1. Install from the block: `{{kit}} init --from docs/workorders/{{name}}/workorder.md`.
 2. <The project's skeleton, and a build that runs.>
 3. Run `doctor --strict` and fix what it finds.
 

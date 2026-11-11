@@ -7,6 +7,7 @@ import { gitLines } from '../packs/base/hooks/lib/git-run.mts';
 import { isDir, readText, walk } from '../packs/base/hooks/lib/files.mts';
 import { parseJson } from '../packs/base/hooks/lib/json.mts';
 import { languageOf } from '../packs/base/hooks/lib/languages.mjs';
+import { configsAt } from '../lib/configs.mts';
 
 const rel = (root: string, file: string): string => relative(root, file).replace(/\\/g, '/');
 const dirs = (dir: string): string[] => (isDir(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name) : []);
@@ -28,13 +29,13 @@ export function synthWordsInBase(root: string): string[] {
     return m ? [`${rel(root, f)}:${i + 1}: "${m[0]}" in ${line.trim().slice(0, 90)}`] : [];
   }));
 }
-interface ConfigPacks { name: string; packs: { always: string[]; choose: string[] } }
-/** Configurations that take the synth-creator pack, and those whose first pack is not base. */
+/** Configurations that take the synth-creator pack, and those whose first pack is not base: each one as the root makes it (its deltas over
+ *  configurations/shared.json, the packs that fit it from each pack.json `fits`). */
 export function configurationFaults(root: string): { takers: string[]; notBaseFirst: string[] } {
-  const configs = dirs(join(root, 'configurations')).flatMap((c) => json<ConfigPacks>(join(root, 'configurations', c, 'config.json')) ?? []);
+  const configs = configsAt(root);
   return {
-    takers: configs.filter((c) => [...c.packs.always, ...c.packs.choose].includes('synth-creator')).map((c) => c.name),
-    notBaseFirst: configs.filter((c) => c.packs.always[0] !== 'base').map((c) => c.name),
+    takers: configs.filter((c) => [...c.packs.always, ...c.packs.choose].includes('synth-creator')).flatMap((c) => c.name ?? []),
+    notBaseFirst: configs.filter((c) => c.packs.always[0] !== 'base').flatMap((c) => c.name ?? []),
   };
 }
 

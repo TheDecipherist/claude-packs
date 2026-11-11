@@ -1,175 +1,37 @@
 {
-  "name": "full-stack",
   "description": "A web service: a Fastify API and a Next.js web app in one repo, Zod 4 schemas in one shared folder, one database gateway, one error contract.",
-  "packs": {
-    "always": [
-      "base",
-      "full-stack",
-      "http-api",
-      "fastify",
-      "zod",
-      "docker",
-      "writing",
-      "hook-proof"
-    ],
-    "choose": [
-      "js-ts",
-      "go",
-      "stored-text",
-      "ui-craft",
-      "shell",
-      "shell-hooks",
-      "react",
-      "web",
-      "multi-tenant",
-      "websocket",
-      "ci",
-      "host-agent",
-      "dynamic-data",
-      "mongo",
-      "postgres",
-      "ai",
-      "nginx",
-      "content-site",
-      "admiral"
-    ],
-    "default": [
-      "js-ts",
-      "stored-text",
-      "ui-craft"
-    ]
-  },
+  "packs": { "with": ["full-stack", "http-api", "fastify", "zod", "docker"], "default": ["js-ts", "stored-text", "ui-craft"] },
+  "sourceFiles": "\\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs)$",
   "layout": {
+    "own": ["folders", "kinds"],
     "folders": {
-      "core": {
-        "path": "packages/core/src",
-        "purpose": "shared code the API and the web app both import"
-      },
-      "schemas": {
-        "path": "packages/core/src/schemas",
-        "purpose": "every Zod 4 schema: requests, responses, records, forms, the error contract"
-      },
-      "api": {
-        "path": "packages/api/src",
-        "purpose": "the Fastify API: buildServer(), env.ts, the error handler, plugins"
-      },
-      "routes": {
-        "path": "packages/api/src/routes",
-        "purpose": "thin routes: method, path, schemas, one handler call"
-      },
-      "handlers": {
-        "path": "packages/api/src/handlers",
-        "purpose": "the work of each route, through adapters"
-      },
-      "adapters": {
-        "path": "packages/api/src/adapters",
-        "purpose": "the one database gateway and every other outside service"
-      },
-      "auth": {
-        "path": "packages/api/src/auth",
-        "purpose": "authentication and the request's identity (the chain keys come from here)"
-      },
-      "api-tests": {
-        "path": "packages/api/test",
-        "purpose": "API tests through inject()"
-      },
-      "web": {
-        "path": "packages/web",
-        "purpose": "the Next.js web app"
-      },
-      "web-app": {
-        "path": "packages/web/app",
-        "purpose": "the web app's routes: pages, layouts and their loading and error states (the App Router)"
-      },
-      "web-components": {
-        "path": "packages/web/components",
-        "purpose": "the web app's components, built from the one set of UI primitives"
-      },
-      "docs": {
-        "path": "docs",
-        "purpose": "the spec, decisions, versions.md"
-      },
-      "tools": {
-        "path": "tools",
-        "purpose": "scripts that never ship"
-      }
-    },
-    "concepts": {
-      "js": [
-        "core",
-        "api",
-        "web",
-        "api-tests"
-      ],
-      "pages": [
-        "web-app"
-      ],
-      "components": [
-        "web-components"
-      ],
-      "client": [
-        "web"
-      ]
+      "core": { "path": "packages/core/src", "purpose": "shared code the API and the web app both import" },
+      "schemas": { "path": "packages/core/src/schemas", "purpose": "every Zod 4 schema: requests, responses, records, forms, the error contract" },
+      "api": { "path": "packages/api/src", "purpose": "the Fastify API: buildServer(), env.ts, the error handler, plugins" },
+      "routes": { "path": "packages/api/src/routes", "purpose": "thin routes: method, path, schemas, one handler call" },
+      "handlers": { "path": "packages/api/src/handlers", "purpose": "the work of each route, through adapters" },
+      "adapters": { "path": "packages/api/src/adapters", "purpose": "the one database gateway and every other outside service" },
+      "auth": { "path": "packages/api/src/auth", "purpose": "authentication and the request's identity (the chain keys come from here)" },
+      "api-tests": { "path": "packages/api/test", "purpose": "API tests through inject()" },
+      "web": { "path": "packages/web", "purpose": "the Next.js web app" },
+      "web-app": { "path": "packages/web/app", "purpose": "the web app's routes: pages, layouts and their loading and error states (the App Router)" },
+      "web-components": { "path": "packages/web/components", "purpose": "the web app's components, built from the one set of UI primitives" },
+      "docs": { "path": "docs", "purpose": "the spec, decisions, versions.md" },
+      "tools": { "path": "tools", "purpose": "scripts that never ship" }
     },
     "kinds": {
-      "schema": {
-        "what": "a Zod schema (z.object) and the error contract",
-        "in": "schemas",
-        "concepts": [
-          "schemas",
-          "env"
-        ],
-        "content": "\\bz\\.(?:object|strictObject|looseObject)\\s*\\(",
-        "extensions": [
-          ".ts",
-          ".tsx",
-          ".mts",
-          ".cts",
-          ".js",
-          ".jsx",
-          ".mjs",
-          ".cjs"
-        ]
-      },
-      "db-gateway": {
-        "what": "the database driver and its one gateway",
-        "in": "adapters",
-        "concepts": [
-          "adapters",
-          "api-tests"
-        ],
-        "content": "\\bfrom\\s+['\"](?:mongodb|pg|mysql2|mongoose|@prisma/client|drizzle-orm[^'\"]*|ioredis|redis)['\"]",
-        "extensions": [
-          ".ts",
-          ".tsx",
-          ".mts",
-          ".cts",
-          ".js",
-          ".jsx",
-          ".mjs",
-          ".cjs"
-        ]
-      },
-      "api-test": {
-        "what": "API tests (inject(), never a bound port)",
-        "in": "api-tests"
-      }
+      "schema": { "what": "a Zod schema (z.object) and the error contract", "in": "schemas", "concepts": ["schemas", "env"], "content": "\\bz\\.(?:object|strictObject|looseObject)\\s*\\(", "extensions": [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"] },
+      "db-gateway": { "what": "the database driver and its one gateway", "in": "adapters", "concepts": ["adapters", "api-tests"], "content": "\\bfrom\\s+['\"](?:mongodb|pg|mysql2|mongoose|@prisma/client|drizzle-orm[^'\"]*|ioredis|redis)['\"]", "extensions": [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"] },
+      "api-test": { "what": "API tests (inject(), never a bound port)", "in": "api-tests" }
+    },
+    "concepts": {
+      "js": ["core", "api", "web", "api-tests"],
+      "pages": ["web-app"],
+      "components": ["web-components"],
+      "client": ["web"]
     }
   },
-  "sourceFiles": "\\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs)$",
   "preamble": {
-    "always": [
-      "Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.",
-      "When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.",
-      "When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.",
-      "claude-packs (`@thedecipherist/claude-packs`) is the source of truth for every rule, check, hook and skill this project's configuration installs. A fix to one of them is made in the kit, with its test, and comes here with `npx --no-install @thedecipherist/claude-packs update`. A project edits its installed copy only to try a fix before it goes into the kit."
-    ],
-    "never": [
-      "Create source files outside these folders, or put a kind of thing anywhere but its place. The folder-law and placement-law hooks refuse both.",
-      "Put a database call outside the adapters, a Zod schema outside the schemas folder, or business rules in a route.",
-      "Edit files in `.claude/rules`, `.claude/checks` or `.claude/hooks` to get past a block. Fix the code, or ask the user to change the law.",
-      "Route around a block: no override variables, no writing through the shell after a refusal, no parking files in a scratchpad, no putting new code into an unrelated existing file.",
-      "Point at a document by line number. Cite a fixed anchor (`{#id}`) or a symbol name; lines move."
-    ]
+    "never": { "insert": { "1": ["Put a database call outside the adapters, a Zod schema outside the schemas folder, or business rules in a route."] } }
   }
 }

@@ -34,9 +34,9 @@ Its keys are the kit's own (`layout.json`'s `configuration`, `enable`, `looks`, 
 
 ```bash
 mkdir -p ~/projects && cd ~/projects
-npx @thedecipherist/claude-packs new NAME --from ORDER
+{{kit}} new NAME --from ORDER
 cd NAME
-npx @thedecipherist/claude-packs workorder NAME --template TEMPLATE
+{{kit}} workorder NAME --template TEMPLATE
 cp ORDER docs/workorders/NAME/workorder.md
 ```
 
@@ -47,7 +47,7 @@ Then the design: put the approved pictures in `design/reference/`, one per scree
 Then the pre-flight and the first commit:
 
 ```bash
-npx @thedecipherist/claude-packs workorder check NAME
+{{kit}} workorder check NAME
 git add docs design .claude
 git commit -m "NAME: the work order and the design"
 ```

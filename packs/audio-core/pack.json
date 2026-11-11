@@ -3,6 +3,19 @@
   "version": "1.0.0",
   "description": "Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance.",
   "type": "stock",
+  "fits": ["synth-creator"],
+  "requires": [],
+  "tests": {
+    "hooks/lib/realtime-checks.mts": ["test/hooks/audio-core/realtime-guard.test.mts"],
+    "hooks/lib/settings-standard.mts": ["test/hooks/audio-core/settings-layer.test.mts"],
+    "hooks/lib/smoothing-checks.mts": ["test/hooks/audio-core/realtime-guard.test.mts"],
+    "hooks/param-id-lock.mts": ["test/hooks/audio-core/param-id-lock.test.mts"],
+    "hooks/realtime-guard.mts": ["test/hooks/audio-core/realtime-guard.test.mts"],
+    "hooks/settings-layer.mts": ["test/hooks/audio-core/settings-layer.test.mts"],
+    "tools/lib/spectrum.mts": ["test/tools/audio-core/tone-report.test.mts"],
+    "tools/lib/wav.mts": ["test/tools/audio-core/tone-report.test.mts"],
+    "tools/tone-report.mts": ["test/tools/audio-core/tone-report.test.mts"]
+  },
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
@@ -98,12 +111,14 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/realtime-guard.mjs\"",
             "role": "judge",
+            "order": 150,
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/settings-layer.mjs\"",
             "role": "judge",
+            "order": 160,
             "timeout": 10
           }
         ]
@@ -117,6 +132,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/param-id-lock.mjs\"",
             "role": "recorder",
+            "order": 10,
             "timeout": 20
           }
         ]

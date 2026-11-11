@@ -16,7 +16,7 @@ const SYNTH_LINE = 'Put drawing code in audio or world folders';
 test('configs lists every configuration with what it installs', () => {
   const out = run(project(), 'configs');
   for (const name of ['base', 'synth-creator']) assert.match(out, new RegExp(`^${name}\\b`, 'm'), name);
-  assert.match(out, /synth-creator[\s\S]*packs: base, synth-creator, writing, hook-proof \(always\); cpp, audio-core, gpu-painter, stellix\b[^\n]*\(to choose\)/);
+  assert.match(out, /synth-creator[\s\S]*packs: base, synth-creator, writing, hook-proof \(always\); [^\n]*\baudio-core\b[^\n]*\bgpu-painter\b[^\n]*\bstellix\b[^\n]*\(to choose\)/);   // (the packs to choose are each pack's `fits`, in name order)
   assert.match(out, /rules \d+, hooks \d+, checks \d+, skills \d+/);
 });
 

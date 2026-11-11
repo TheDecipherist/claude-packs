@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Application and page design in any web stack: forms, motion, states, navigation, touch, copy, type and space, the look of generated UI, and a rendered-page gate.",
   "type": "stock",
+  "fits": ["base", "full-stack", "go", "node", "python", "rust"],
+  "requires": [],
+  "tests": {
+    "tools/page-measure.mts": ["test/tools/ui-craft/page-measure.test.mts"]
+  },
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",

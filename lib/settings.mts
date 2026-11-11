@@ -27,6 +27,8 @@ export interface Settings {
 export interface SyncResult { retired: string[]; statusLine: 'set' | 'kept' | 'removed' | null }
 
 const SCRIPT = /\.claude\/hooks\/([\w-]+\.(?:mjs|py))\b/;
+/** The order settings.json lists the events in. */
+export const EVENT_ORDER: readonly string[] = ['PreToolUse', 'PostToolUse', 'Stop', 'SessionStart', 'SubagentStop', 'UserPromptSubmit'];
 // Hooks a project carried by hand that the kit has taken over elsewhere: copy-tree-guard is merged into
 // protect-vendor; shell-traps and gnu-shell are global by design (`claude-packs global add`); git-guard, build-guard,
 // time-guard, user-asks and idle-wake were Python and are Node now. A project entry for one only runs it twice, or runs
@@ -96,17 +98,13 @@ export function readSettings(claudeDir: string): Settings {
   return settings;
 }
 
-// A configuration's "hookOrder" ({ "<event> <matcher>": [script, ...] }; no matcher: "<event>") puts the kit hooks of an entry
-// in that order, in the places kit hooks had there; the project's own hooks keep theirs; a script it does not list keeps its
-// pack order after the listed ones (0.10.0: moving a hook into another pack does not reorder a project's settings).
-export function orderHooks(hooks: readonly HookEntry[], order: readonly string[] | undefined, isOurs: (command?: string) => boolean): HookEntry[] {
-  if (!order?.length) return [...hooks];
+// The order of an entry's kit hooks is each hook row's `order` in its pack.json (W7 b; it replaced a configuration's hookOrder list,
+// which was a hand copy that had lost 14 hooks): the lowest runs first, in the places kit hooks had there; the project's own hooks
+// keep theirs; a row with no `order` (a custom pack's) keeps its pack order after the numbered ones.
+export function orderHooks(hooks: readonly HookEntry[], isOurs: (command?: string) => boolean): HookEntry[] {
   const places = hooks.flatMap((h, i) => (isOurs(h.command) ? [{ h, i }] : []));
-  const rank = (h: HookEntry): number => {
-    const i = order.indexOf(SCRIPT.exec(h.command ?? '')?.[1] ?? '');
-    return i < 0 ? order.length : i;
-  };
-  const sorted = places.map(({ h }, n) => ({ h, n })).sort((a, b) => rank(a.h) - rank(b.h) || a.n - b.n);
+  const rank = (h: HookEntry): number => h.order ?? Number.POSITIVE_INFINITY;
+  const sorted = places.map(({ h }, n) => ({ h, n })).sort((a, b) => (rank(a.h) === rank(b.h) ? 0 : rank(a.h) - rank(b.h)) || a.n - b.n);
   const out = [...hooks];
   places.forEach(({ i }, k) => {
     const next = sorted[k];
@@ -138,7 +136,7 @@ function syncStatusLine(settings: Settings, packNames: readonly string[], layout
 
 /** Rebuilds the kit's hooks in settings.json from the installed packs and writes it. `previous`: the paths the last install
  *  managed (its lock), so a hook a pack dropped is removed too. */
-export function syncSettings(claudeDir: string, packNames: readonly string[], layout: Partial<Layout> = {}, previous: readonly string[] = [], hookOrder: Record<string, readonly string[]> = {}): SyncResult {
+export function syncSettings(claudeDir: string, packNames: readonly string[], layout: Partial<Layout> = {}, previous: readonly string[] = []): SyncResult {
   const file = join(claudeDir, 'settings.json');
   const settings = readSettings(claudeDir);
   const events: Record<string, ReadGroup[]> = {};
@@ -175,18 +173,15 @@ export function syncSettings(claudeDir: string, packNames: readonly string[], la
       }
     }
   }
-  for (const [event, groups] of Object.entries(events)) for (const g of groups) g.hooks = orderHooks(g.hooks, hookOrder[g.matcher === undefined ? event : `${event} ${g.matcher}`], isOurs);
+  for (const groups of Object.values(events)) for (const g of groups) g.hooks = orderHooks(g.hooks, isOurs);
   if (!isDisabled(layout, `hooks/${RUNNER}`)) for (const groups of Object.values(events)) for (const g of groups) g.hooks = throughRunner(g.hooks, runnable(claudeDir));
   for (const event of Object.keys(events)) {
     events[event] = (events[event] ?? []).filter((g) => g.hooks.length > 0);
     if (events[event]?.length === 0) delete events[event];
   }
-  // the events in the order the configuration's hookOrder names them (a fresh install of 0.10.0 writes them as 0.9.x did)
-  const named = [...new Set(Object.keys(hookOrder).map((k) => k.split(' ')[0] ?? ''))];
-  const rank = (e: string): number => (named.includes(e) ? named.indexOf(e) : named.length);
-  settings.hooks = named.length
-    ? Object.fromEntries(Object.entries(events).map((entry, n) => ({ entry, n })).sort((a, b) => rank(a.entry[0]) - rank(b.entry[0]) || a.n - b.n).map((x) => x.entry))
-    : events;
+  // the events in the order of EVENT_ORDER (the one 0.9.x wrote them in); an event it does not name keeps its place after those
+  const rank = (e: string): number => (EVENT_ORDER.includes(e) ? EVENT_ORDER.indexOf(e) : EVENT_ORDER.length);
+  settings.hooks = Object.fromEntries(Object.entries(events).map((entry, n) => ({ entry, n })).sort((a, b) => rank(a.entry[0]) - rank(b.entry[0]) || a.n - b.n).map((x) => x.entry));
   // layout.siblings: the folders Claude may read and edit besides this project (e.g. "../" for
   // every sibling project), so rolling a lesson out to other projects never stalls on access.
   // Added only; entries the user put there themselves are never removed.

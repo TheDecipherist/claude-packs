@@ -1,16 +1,16 @@
 // What the configurations files share (split by configuration so no file sums over a minute): the configurations the kit ships, one's
 // config.json, and the test that a configuration installs into a fresh repo and passes doctor --strict.
 import { KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, test } from '../kit-cli.mts';
-import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+import { readConfig } from '../../lib/configs.mts';
 
 interface Folder { path: string; planned?: boolean }
 export interface Config { layout: { folders: Record<string, Folder> }; preamble: { never: string[] } }
 
-export const CONFIGS = readdirSync(join(KIT, 'configurations')).sort();
+export const CONFIGS = readdirSync(join(KIT, 'configurations'), { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort();
+/** A configuration as the kit makes it: its deltas over configurations/shared.json. */
 export const config = (name: string): Config => {
-  const c = parseJson<Config>(readFileSync(join(KIT, 'configurations', name, 'config.json'), 'utf8'));
-  assert.ok(c, `${name} has a config.json`);
-  return c;
+  const c = readConfig(name);
+  return { layout: { folders: { ...c.layout?.folders } }, preamble: { never: [...(c.preamble?.never ?? [])] } };
 };
 
 /** One test per named configuration: it installs into a fresh repo and `doctor --strict` passes there. */

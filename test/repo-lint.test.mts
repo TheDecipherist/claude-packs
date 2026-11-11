@@ -171,7 +171,8 @@ test('base and the base configuration name no synth word', () => {
 });
 test('only the synth-creator configuration installs the synth-creator pack, and every configuration installs base first', () => {
   assert.deepEqual(configurationFaults(KIT), { takers: ['synth-creator'], notBaseFirst: [] });
-  const bad = planted({ 'configurations/x/config.json': '{"name":"x","packs":{"always":["writing"],"choose":["synth-creator"]}}' });
+  const shared = '{"packs":{"always":["writing"]},"layout":{"folders":{},"kinds":{}},"preamble":{"always":[],"never":[]}}';   // a base that does not start with base, and a delta that adds the synth pack
+  const bad = planted({ 'configurations/shared.json': shared, 'configurations/x/config.json': '{"packs":{"with":["synth-creator"]}}' });
   assert.deepEqual(configurationFaults(bad), { takers: ['x'], notBaseFirst: ['x'] });
 });
 test('every lesson check gets through a large file within its budget', () => {

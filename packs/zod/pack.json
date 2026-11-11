@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "Zod 4 schemas written once, in one folder, and imported everywhere (schemas-only), with the environment shaped in one env.ts.",
   "type": "stock",
+  "fits": ["node"],
+  "requires": [],
+  "tests": {
+    "hooks/schemas-only.mts": ["test/hooks/zod/schemas-only.test.mts"]
+  },
+  "folders": {},
+  "skillsIn": null,
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
@@ -36,6 +43,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/schemas-only.mjs\"",
             "role": "judge",
+            "order": 240,
             "timeout": 10
           }
         ]

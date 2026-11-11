@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { readText } from '../packs/base/hooks/lib/files.mts';
 import type { Configuration, LayoutKind, Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { availableConfigs, itemsOf, planOf, readConfig } from './configs.mts';
+import { kitCommandAnywhere } from './kit-command.mts';
 import { filesUnder } from './selftest-cache.mts';
 import { zipOf } from './zip.mts';
 
@@ -51,7 +52,7 @@ export function plannerSkill(name: string): string {
     `- packs: ${c.packs.always.join(', ')}${c.packs.choose.length ? `; to choose: ${c.packs.choose.join(', ')}` : ''}`,
     `- hooks: ${items.hooks.join(', ')}`,
     `- skills: ${items.skills.join(', ') || 'none'}`,
-    `- rules: ${items.rules.length} (\`npx --no-install @thedecipherist/claude-packs configs\` lists the configurations)`,
+    `- rules: ${items.rules.length} (\`${kitCommandAnywhere()} configs\` lists the configurations)`,
     '',
     '## House rules',
     '',
@@ -92,8 +93,9 @@ export function claudeAiSkillFiles(name: string): Record<string, string> {
   const skill = CLAUDE_AI_SKILLS[name];
   if (!skill) throw new Error(`unknown claude.ai skill "${name}" (available: ${Object.keys(CLAUDE_AI_SKILLS).join(', ')})`);
   const { dir, also } = skill;
-  const files = Object.fromEntries(textsUnder(dir).map(([f, text]) => [`${name}/${f}`, text]));
-  for (const [f, text] of also ? textsUnder(also.from) : []) files[`${name}/${also?.to}/${f}`] = text.replaceAll('{{name}}', '<name>').replaceAll('{{date}}', '<date>');
+  const kit = (text: string): string => text.replaceAll('{{kit}}', kitCommandAnywhere());
+  const files = Object.fromEntries(textsUnder(dir).map(([f, text]) => [`${name}/${f}`, kit(text)]));
+  for (const [f, text] of also ? textsUnder(also.from) : []) files[`${name}/${also?.to}/${f}`] = kit(text).replaceAll('{{name}}', '<name>').replaceAll('{{date}}', '<date>');
   return files;
 }
 

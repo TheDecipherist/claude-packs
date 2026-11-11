@@ -120,7 +120,7 @@ If you change a law, change it in its pack, with its test. If you change how the
 ## Installing the skills in claude.ai
 
 ```
-npx @thedecipherist/claude-packs planner-skills --zip dist/
+claude-packs planner-skills --zip dist/
 ```
 
 writes `dist/<skill>.zip` for each skill (its `SKILL.md` and its reference files, nothing else). In claude.ai, upload each zip as a skill (Settings, then the skills section; the exact place varies by plan, so follow the app). Start a chat and type "I want to build a synth". If `workorder-writer` does not start the interview, its description did not match; open an issue with the sentence you typed.

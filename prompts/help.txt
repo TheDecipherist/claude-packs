@@ -14,7 +14,6 @@ usage: npx --no-install @thedecipherist/claude-packs <command> [options]
   status             every unattended run alive on this machine: each project with a progress bar, each agent with its
                      step and its bar, and how much is left; --dir <project> [--order <name>] for one project, running or
                      not; --watch <minutes> to print it again every so many minutes
-  claude-ai-skill    workorder-writer.zip in <dir>: the work order interview alone, as planner-skills --zip writes it
   init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
                      and create the layout folders
                      --config <name>   the configuration (configs lists them; stored in layout.json
