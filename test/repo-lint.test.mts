@@ -47,6 +47,12 @@ export function handWritten(root: string, folders: readonly string[]): string[] 
   return folders.flatMap((f) => walk(join(root, f), skipped)).filter((f) => /\.(?:mjs|js|cjs|py)$/.test(f) && emittedFrom(f) === null).map((f) => rel(root, f));
 }
 
+// Gate 3b: git tracks no file it ignores: an emitted .mjs committed by naming its module in `git commit -- <paths>` (KWB-179).
+export function trackedIgnored(root: string): string[] {
+  const r = spawnSync('git', ['ls-files', '--cached', '--ignored', '--exclude-standard'], { cwd: root, encoding: 'utf8' });
+  return r.stdout.split('\n').filter(Boolean);
+}
+
 // Gate 4: every shape types.d.mts declares is declared there and nowhere else.
 const DECLARED = /^\s*(?:export\s+)?(?:declare\s+)?(?:interface|type)\s+([A-Z]\w*)/gm;
 export function secondShapes(root: string, typesFile: string, folders = SOURCE_FOLDERS): string[] {
@@ -113,6 +119,13 @@ test('gate 3: a converted folder holds no hand-written .mjs; a stray one beside 
   assert.deepEqual(handWritten(KIT, CONVERTED), []);
   const dir = planted({ 'lib/a.mts': 'export const a = 1;\n', 'lib/a.mjs': 'export const a = 1;\n', 'lib/b.mjs': 'export const b = 2;\n' });
   assert.deepEqual(handWritten(dir, ['lib']), ['lib/b.mjs']);
+});
+
+test('gate 3b: git tracks no file it ignores (an emitted .mjs); a committed one is found (KWB-179)', () => {
+  assert.deepEqual(trackedIgnored(KIT), []);
+  const dir = planted({ '.gitignore': 'lib/a.mjs\n', 'lib/a.mts': 'export const a = 1;\n', 'lib/a.mjs': 'export const a = 1;\n' });
+  for (const args of [['init', '-q'], ['add', '-f', 'lib/a.mjs', 'lib/a.mts', '.gitignore']]) spawnSync('git', args, { cwd: dir });
+  assert.deepEqual(trackedIgnored(dir), ['lib/a.mjs']);
 });
 
 test('gate 4: each shared shape is defined once, in types.d.mts; a second interface Lock is found', () => {

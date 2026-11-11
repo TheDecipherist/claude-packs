@@ -44,8 +44,10 @@ d-20), and the owners you build on: `packs/base/hooks/lib/{files,git-run,hash,js
    for the tests your change reaches (keep its output in a file; read it before running anything again).
 8. Commit by name: `git add <paths>` then `git commit -m "typescript W3 <slice>: X in TypeScript (...)" -- <paths>`. Never
    `git add -A`, `.`, or a path of an emitted `.mjs` (git ignores them; naming one in `git commit -- <paths>` commits the build
-   output, so name only sources, tests and the importers you changed). Push the branch after each commit:
-   `git push -u origin work/2.0.0-ts-<slice>`.
+   output, so name only sources, tests and the importers you changed). The removal of `X.mjs` is staged by your `git rm`: commit
+   it with a plain `git commit -m "..."` after `git diff --cached --name-status` shows only what you mean, never by naming
+   `X.mjs` in `-- <paths>` (that commits the emitted file instead; the repo lint's gate 3b refuses it, KWB-179). Push the branch
+   after each commit: `git push -u origin work/2.0.0-ts-<slice>`.
 
 ## Never through the shell
 
