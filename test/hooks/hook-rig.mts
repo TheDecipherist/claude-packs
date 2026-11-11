@@ -10,7 +10,7 @@ import { scratchDir } from '../../packs/base/hooks/lib/files.mts';
 import type { WorktreeCase } from '../../packs/base/hooks/lib/selftest.mts';
 import { buildOnce, copyInstall, fixture, withLayout } from '../fixtures/installs.mts';
 import type { FixtureName } from '../fixtures/installs.mts';
-import { assert, cli, hookRun, run, selftest, test } from '../kit-cli.mts';
+import { assert, cli, hookRun, run, selftestOnce, test } from '../kit-cli.mts';
 import type { Payload } from '../kit-cli.mts';
 import { RIG_FOLDERS, caseFrom, checkoutsOf, worktreeCaseOf } from '../worktree-rig.mts';
 import type { Checkouts } from '../worktree-rig.mts';
@@ -90,7 +90,7 @@ export interface Contract {
 export function holdsTheContract({ hook, dir, same, worktree }: Contract): void {
   const name = hook.replace(/\.(?:mjs|py)$/, '');
   test(`${name}: its selftest passes in an install`, () => {
-    const r = selftest(dir(), hook);
+    const r = selftestOnce(dir(), hook);   // not run again when this run already proved these bytes (doctor's WB-4 or another install)
     assert.equal(r.status, 0, r.stdout + r.stderr);
   });
   test(`${name}: judges a worktree file against the worktree, in a real git worktree`, async () => {
