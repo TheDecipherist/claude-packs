@@ -6,7 +6,10 @@ import { readdirSync, utimesSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { put, readText, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
-import { LOG, LOGS, appendRotated, asHook, dispatchHook, isMain, readHookLog, runAsHook } from '../../../packs/base/hooks/lib/hook-log.mts';
+import { LOG, LOGS, appendRotated, asHook, contextOf, dispatchHook, isMain, readHookLog, runAsHook, takesContext } from '../../../packs/base/hooks/lib/hook-log.mts';
+import { snapshot, writtenSince } from '../../../packs/base/hooks/lib/selftest.mts';
+import { pass, refuse } from '../../../packs/base/hooks/lib/verdict.mts';
+import type { Hook, HookContext } from '../../../packs/base/hooks/lib/types.d.mts';
 
 function project(layout?: unknown): string {
   const root = scratchDir('hook-log-');
@@ -110,4 +113,70 @@ test('imported, not run: isMain is false and runAsHook does nothing', async () =
   let ran = false;
   await runAsHook(other, 'x', () => { ran = true; return 0; }, () => { ran = true; return 0; });
   assert.equal(ran, false);
+});
+
+// ---- the hook contract (typescript order W4): hook(event, ctx) -> Verdict beside hook(text) -> number ----
+const EVENT = JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'x' } });
+
+test('contextOf: the project, folder, environment, parent, time and layout of this process, each overridable', () => {
+  const root = project({ folders: { src: { path: 'src' } }, concepts: {} });
+  const made = contextOf({ projectDir: root });
+  assert.equal(made.projectDir, root);
+  assert.equal(made.cwd, process.cwd());
+  assert.equal(made.sessionPid, process.ppid);
+  assert.ok(Math.abs(made.now - Date.now()) < 5000);
+  assert.deepEqual(Object.keys(made.layout.folders), ['src'], 'the layout is the project\'s own');
+  const over = contextOf({ projectDir: root, cwd: '/elsewhere', sessionPid: 7, env: { A: '1' } });
+  assert.deepEqual([over.cwd, over.sessionPid, over.env.A], ['/elsewhere', 7, '1']);
+});
+
+test('takesContext: two parameters is the contract, one is the old kind', () => {
+  const two: Hook = (_event, _ctx) => pass;
+  assert.equal(takesContext(two), true);
+  assert.equal(takesContext((_text: string) => 0), false);
+});
+
+test('a two-parameter hook gets the parsed event and a context; its Verdict code is the exit code, logged once', async () => {
+  const root = project();
+  const seen: [string | undefined, HookContext][] = [];
+  const judge: Hook = (ev, ctx) => { seen.push([ev.tool_name, ctx]); return refuse('planted refusal'); };
+  assert.equal(await inProject(root, () => asHook('planted', judge, () => EVENT)), 2);
+  assert.equal(seen[0]?.[0], 'Bash');
+  assert.equal(seen[0]?.[1].projectDir, root);
+  assert.deepEqual(readHookLog(root).filter((r) => r.hook === 'planted').map((r) => [r.event, r.code, r.tool]), [['PreToolUse', '2', 'Bash']]);
+});
+
+test('a one-parameter hook still runs as it did: the text in, the code out', async () => {
+  const root = project();
+  let got = '';
+  assert.equal(await inProject(root, () => asHook('old', (text: string) => { got = text; return 0; }, () => EVENT)), 0);
+  assert.equal(got, EVENT);
+  assert.equal(readHookLog(root).filter((r) => r.hook === 'old').length, 1);
+});
+
+test('a two-parameter hook that returns no Verdict, or throws, is a crash: the error comes out, the call is logged as 1', async () => {
+  const root = project();
+  const silent = ((_event: unknown, _ctx: unknown) => undefined) as unknown as Hook;
+  await assert.rejects(inProject(root, () => asHook('silent', silent, () => EVENT)), /returned no Verdict/);
+  await assert.rejects(inProject(root, () => asHook('boom', (_e, _c) => { throw new Error('planted'); }, () => EVENT)), /planted/);
+  assert.deepEqual(readHookLog(root).map((r) => [r.hook, r.code]), [['silent', '1'], ['boom', '1']]);
+});
+
+test('dispatchHook takes either kind: --selftest first, a flag next, else the hook', async () => {
+  const root = project();
+  const judge: Hook = (_event, _ctx) => refuse('x');   // declared with both parameters: `length` 2 is what makes it this kind
+  assert.equal(await dispatchHook(['--selftest'], 'j', judge, () => 0), 0);
+  assert.equal(await inProject(root, () => dispatchHook([], 'j', judge, () => 0, { stdin: () => EVENT })), 2);
+  assert.equal(await dispatchHook(['--check'], 'j', judge, () => 0, { flags: { '--check': () => 4 } }), 4);
+});
+
+test('the write trap: a judge that writes a file is seen, one that leaves the project alone is not; the runner\'s logs do not count', () => {
+  const root = project();
+  put(join(root, 'a.txt'), 'one\n');
+  const before = snapshot(root);
+  put(join(root, LOG), 'a line the runner wrote\n');
+  assert.deepEqual(writtenSince(root, before), []);
+  put(join(root, 'a.txt'), 'changed text\n');
+  put(join(root, 'new.txt'), 'x');
+  assert.deepEqual(writtenSince(root, before), ['a.txt', 'new.txt']);
 });

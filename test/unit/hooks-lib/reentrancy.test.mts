@@ -36,7 +36,7 @@ async function judge(project: string, cwd: string, file: string): Promise<number
   process.chdir(cwd);
   try {
     const text = toJson({ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: file, content: 'int x;\n' } });
-    return (await runAll([FOLDER_LAW], text, project, { env, stdout: process.stdout, stderr: process.stderr })).code;
+    return (await runAll([FOLDER_LAW], text, project, { env, stdout: process.stdout, stderr: process.stderr, cwd: project, sessionPid: 1 })).code;
   } finally {
     process.chdir(was.cwd);
     if (was.dir === undefined) delete process.env.CLAUDE_PROJECT_DIR; else process.env.CLAUDE_PROJECT_DIR = was.dir;
