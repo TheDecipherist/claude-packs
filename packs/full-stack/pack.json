@@ -67,6 +67,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stack-guard.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]

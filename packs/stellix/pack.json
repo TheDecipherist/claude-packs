@@ -47,6 +47,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-shipped-images.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]

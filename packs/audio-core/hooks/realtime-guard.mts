@@ -1,69 +1,67 @@
-#!/usr/bin/env node
 // PreToolUse hook (Write|Edit|MultiEdit|NotebookEdit|Bash, every route: lib/writes.mjs): blocks writes that ADD realtime-unsafe code to
 // audio-thread functions in C++ files. Exit 2 = block, stderr goes back to Claude. `--selftest` proves it.
-import { readPayload, writesOf } from './lib/writes.mjs';
-import { findViolations, violationKey } from './lib/realtime-checks.mjs';
-import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
-import { readLayout } from './lib/layout.mjs';
-import { judgeSmoothing, smoothingConfig } from './lib/smoothing-checks.mjs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
-
+import { isMain, runAsHook } from './lib/hook-log.mts';
+import { readLayout } from './lib/layout.mts';
+import { claudeRoot } from './lib/project.mts';
+import { findViolations, violationKey } from './lib/realtime-checks.mts';
+import { editOf, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
+import type { WorktreeCase } from './lib/selftest.mts';
+import { judgeSmoothing, smoothingConfig } from './lib/smoothing-checks.mts';
+import type { FileWrite, Hook } from './lib/types.d.mts';
+import { judgeVerdict } from './lib/writes.mts';
 
 const CPP = /\.(cpp|cc|cxx|h|hh|hpp|mm)$/;
 
-function main(text) {
-  const payload = readPayload(text);
-  if (!payload) return 0;
-  for (const w of writesOf(payload, process.cwd(), process.env)) {
-    if (w.after === null || !CPP.test(w.path) || !insideProject(projectRoot(), w.path, process.cwd())) continue;
-    const code = judge(w.path, w) || judgeSmooth(w);
-    if (code) return code;
-  }
-  return 0;
-}
-
-// KWB-126, 1.7.2: a control smoothed outside the project's smoothing module is refused too, always (lib/smoothing-checks.mjs).
-function judgeSmooth(w) {
-  const cfg = smoothingConfig(readLayout(claudeRoot(projectRoot(), w.path, process.cwd())));
-  const msg = judgeSmoothing(w, relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path), cfg);
-  if (!msg) return 0;
-  process.stderr.write(msg);
-  return 2;
-}
-
-function judge(file, result) {
-  const input = { file_path: file };
-
-  const existing = new Set(findViolations(result.before).map(violationKey));
-  const added = findViolations(result.after).filter((v) => !existing.has(violationKey(v)));
-  if (added.length === 0) return 0;
+// What a write adds that is realtime-unsafe in an audio-thread function, as the refusal text, or null.
+function judge(w: FileWrite): string | null {
+  const existing = new Set(findViolations(w.before ?? '').map(violationKey));
+  const added = findViolations(w.after ?? '').filter((v) => !existing.has(violationKey(v)));
+  if (added.length === 0) return null;
 
   const lines = added.slice(0, 12).map((v) => `  line ${v.line} in ${v.func}(): ${v.why}\n      ${v.text}`);
   const more = added.length > 12 ? `\n  ...and ${added.length - 12} more` : '';
-  process.stderr.write(
-    `BLOCKED by realtime-guard: this edit adds realtime-unsafe code to audio-thread functions in ${input.file_path}\n` +
+  return `BLOCKED by realtime-guard: this edit adds realtime-unsafe code to audio-thread functions in ${w.path}\n` +
       `${lines.join('\n')}${more}\n\n` +
       'Fix: pre-allocate in prepareToPlay(), cache parameter pointers in the constructor, hand data to the UI via atomics/AbstractFifo + Timer.\n' +
       'If a line is a deliberate safe exception, end it with `// rt-ok: <reason>`.\n' +
-      'See .claude/rules/audio-thread-realtime-safe.md.\n',
-  );
-  return 2;
+      'See .claude/rules/audio-thread-realtime-safe.md.\n';
 }
 
-function selftest() {
-  const hook = fileURLToPath(import.meta.url);
-  const block = (body) => `void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m)\n{\n    juce::ScopedNoDenormals nd;\n${body}\n}\n`;
+// KWB-126, 1.7.2: a control smoothed outside the project's smoothing module is refused too, always (lib/smoothing-checks.mjs).
+export const hook: Hook = (event, ctx) => judgeVerdict(event, {
+  name: 'realtime-guard',
+  write: (w, rel) => {
+    if (w.after === null || !CPP.test(w.path)) return null;
+    return judge(w) ?? judgeSmoothing(w, rel, smoothingConfig(readLayout(claudeRoot(ctx.projectDir, w.path, ctx.cwd))));
+  },
+}, ctx);
+
+const RT_BAD = 'void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m) { auto* x = new float[64]; }\n';
+const RT_GOOD = 'void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m) { juce::ScopedNoDenormals noDenormals; b.clear(); }\n';
+
+/** A write to the worktree's audio code is judged as one in the main checkout: the allocation is refused, the clean block is not. */
+export const worktreeCase: WorktreeCase = {
+  steps: [
+    { label: 'new in processBlock, in the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/audio/Voice.cpp', content: RT_BAD } }, want: 2 },
+    { label: 'a clean processBlock, in the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/audio/Voice.cpp', content: RT_GOOD } }, want: 0 },
+  ],
+};
+
+export function selftest(): number {
+  const hookFile = fileURLToPath(import.meta.url);
+  const block = (body: string): string => `void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m)\n{\n    juce::ScopedNoDenormals nd;\n${body}\n}\n`;
   const old = block('    auto* x = new float[64]; // legacy');
   const dir = scratchProject({ 'src/audio/Old.cpp': old });
-  const w = (file, body) => runHook(hook, dir, writeOf(join(dir, file), block(body))).status;
+  const w = (file: string, body: string): number | null => runHook(hookFile, dir, writeOf(join(dir, file), block(body))).status;
   const cfg = { guards: { smoothing: { module: 'src/dsp/smooth/**', namespace: 'smooth', scope: ['src/audio/**', 'src/dsp/**', 'src/app/PluginProcessor*'] } } };
   const sm = scratchProject({ 'src/audio/Old.cpp': 'void Old::f()\n{\n    level += 0.1f * (target - level);\n}\n' }, cfg);
   const none = scratchProject({});
   const off = scratchProject({}, { guards: { smoothing: { off: 'a tool with no audio thread' } } });
-  const s = (file, body, d = sm) => runHook(hook, d, writeOf(join(d, file), `void X::f()\n{\n${body}\n}\n`)).status;
+  const projects = [dir, sm, none, off];
+  const before = projects.map((d) => snapshot(d));   // each project as the judge finds it: the rows below must leave it as it is
+  const s = (file: string, body: string, d: string = sm): number | null => runHook(hookFile, d, writeOf(join(d, file), `void X::f()\n{\n${body}\n}\n`)).status;
   return verdicts('realtime-guard', [
     ['smoothing: the shipped per-block gain', s('src/audio/Out.cpp', '    audio.applyGain (link.volume() * outputGain);'), 2],
     ['smoothing: applyGain on a member', s('src/audio/Out.cpp', '    b.applyGain (outputGain);'), 2],
@@ -88,7 +86,7 @@ function selftest() {
     ['smoothing: a marker without a reason', s('src/dsp/Comp.cpp', '    env += atk * (peak - env); // smooth-ok:'), 2],
     ['smoothing: the module itself', s('src/dsp/smooth/Smoother.h', '    juce::SmoothedValue<float> v;\n    x += k * (t - x);'), 0],
     ['smoothing: outside the scope', s('src/ui/Meter.cpp', '    level += k * (target - level);'), 0],
-    ['smoothing: a slew already there is not added', runHook(hook, sm, editOf(join(sm, 'src/audio/Old.cpp'), 'void Old::f()', 'void Old::g()')).status, 0],
+    ['smoothing: a slew already there is not added', runHook(hookFile, sm, editOf(join(sm, 'src/audio/Old.cpp'), 'void Old::f()', 'void Old::g()')).status, 0],
     // 1.7.2: always on. With no guards.smoothing the module is any folder named smooth and the scope the audio code; off only with a reason
     ['smoothing: no guards.smoothing, still judged', s('src/audio/Out.cpp', '    b.applyGain (outputGain);', none), 2],
     ['smoothing: no guards.smoothing, a folder named smooth is the module', s('src/dsp/smooth/Smooth.h', '    juce::SmoothedValue<float> v;', none), 0],
@@ -103,11 +101,11 @@ function selftest() {
     ['a lock in processBlock', w('src/audio/Voice.cpp', '    const juce::ScopedLock sl (lock);'), 2],
     ['plain arithmetic', w('src/audio/Voice.cpp', '    b.applyGain (0.5f);'), 0],
     ['an rt-ok exception', w('src/audio/Voice.cpp', '    auto* x = new float[64]; // rt-ok: test only'), 0],
-    ['a fault already there is not added', runHook(hook, dir, editOf(join(dir, 'src/audio/Old.cpp'), 'ScopedNoDenormals nd;', 'ScopedNoDenormals noDenormals;')).status, 0],
-    ['not C++', runHook(hook, dir, writeOf(join(dir, 'tools/x.py'), 'x = [1]\n')).status, 0],
-    ['another project is not ours', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/Voice.cpp'), block('    auto* x = new float[64];'))).status, 0],
+    ['a fault already there is not added', runHook(hookFile, dir, editOf(join(dir, 'src/audio/Old.cpp'), 'ScopedNoDenormals nd;', 'ScopedNoDenormals noDenormals;')).status, 0],
+    ['not C++', runHook(hookFile, dir, writeOf(join(dir, 'tools/x.py'), 'x = [1]\n')).status, 0],
+    ['another project is not ours', runHook(hookFile, dir, writeOf(join(dirname(dir), 'elsewhere/Voice.cpp'), block('    auto* x = new float[64];'))).status, 0],
+    ['a judge writes no file (the write trap)', projects.flatMap((d, i) => writtenSince(d, before[i] ?? new Map())).join(','), ''],
   ]);
 }
 
-export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('realtime-guard', main));
+if (isMain(import.meta.url)) await runAsHook(import.meta.url, 'realtime-guard', hook, selftest);

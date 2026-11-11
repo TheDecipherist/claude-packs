@@ -39,6 +39,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/db-wipe-guard.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]

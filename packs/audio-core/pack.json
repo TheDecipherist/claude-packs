@@ -97,11 +97,13 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/realtime-guard.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/settings-layer.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]
@@ -114,6 +116,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/param-id-lock.mjs\"",
+            "role": "recorder",
             "timeout": 20
           }
         ]
