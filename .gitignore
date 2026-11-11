@@ -89,3 +89,12 @@ packs/base/hooks/lib/run-tree.mjs
 packs/base/hooks/lib/shape-code.mjs
 packs/base/hooks/lib/trunk-lag.mjs
 packs/base/hooks/lib/unread-writes.mjs
+# W3 layers 4 to 6, split out
+packs/base/hooks/lib/remote-heads.mjs
+packs/base/hooks/lib/push-form.mjs
+packs/base/hooks/lib/branches-ahead.mjs
+packs/base/hooks/lib/stop-verdict.mjs
+packs/base/hooks/lib/pushed-selftest.mjs
+packs/base/hooks/lib/run-live.mjs
+packs/base/hooks/lib/run-progress.mjs
+packs/base/hooks/lib/run-rows.mjs

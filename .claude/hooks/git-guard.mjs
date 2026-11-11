@@ -87,7 +87,7 @@ export const DEFAULTS = {
 
 const at = (cwd) => ({ cwd, env: process.env, timeoutMs: 10_000 });   // W4 passes the event's ctx.env
 const real = {
-  login: loggedInAs,
+  login: () => loggedInAs(process.env),   // W4 passes the event's ctx.env
   dirty: (cwd) => gitLines(['--no-optional-locks', 'status', '--porcelain'], at(cwd)).filter((l) => l.trim()),
   branch: (cwd) => gitOut(['rev-parse', '--abbrev-ref', 'HEAD'], at(cwd)) ?? '',
   hasHead: (cwd) => gitRun(['rev-parse', '-q', '--verify', 'HEAD'], at(cwd)).ok,
@@ -164,7 +164,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
       if (refused) return refused;
       pushedBefore = true;
     }
-    const ghRefused = ghLaw(cmd, p, c, env.login);   // env.login: gh's own account, asked only when a gh call is refused
+    const ghRefused = ghLaw(cmd, p, c, process.env, env.login);   // env.login: gh's own account, asked only when a gh call is refused
     if (ghRefused) return ghRefused;
     if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
     if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${esc(tok)}`).test(p)) {
@@ -184,7 +184,7 @@ function main(text) {
   const cfg = { ...DEFAULTS, ...(layout.enable?.includes('guards/git-house') ? NEW_INSTALL_GIT : {}), ...(layout.guards?.git ?? {}) }; // KF-8: an existing project opts in
   if (payload.hook_event_name === 'Stop') {
     if (!cfg.house) return 0;
-    const v = stopVerdict(projectRoot(), cfg, payload.session_id, undefined, { lag: trunkLag }); // KWB-96: and the main checkout's trunk
+    const v = stopVerdict(projectRoot(), process.env, cfg, payload.session_id, { lag: trunkLag }); // KWB-96: and the main checkout's trunk
     if (v.stdout) process.stdout.write(v.stdout);
     if (v.stderr) process.stderr.write(v.stderr);
     return v.code;
@@ -201,7 +201,7 @@ function main(text) {
   }
   if (!cfg.house || !/git|gh |ghp_|github_pat_/.test(command)) return 0;
   const warnings = [];
-  const env = { ...real, unpushed: (cwd, c) => unpushed(cwd, real.branch(cwd), forRepo(cwd, projectRoot(), c)), warn: (m) => warnings.push(m) };
+  const env = { ...real, unpushed: (cwd, c) => unpushed(cwd, process.env, real.branch(cwd), forRepo(cwd, process.env, projectRoot(), c)), warn: (m) => warnings.push(m) };
   const reason = house(command, payload.cwd ?? process.cwd(), env, cfg);
   if (warnings.length) process.stdout.write(JSON.stringify({ systemMessage: warnings.join('\n') }));
   if (!reason) return 0;
