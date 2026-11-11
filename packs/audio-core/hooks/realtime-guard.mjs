@@ -63,9 +63,9 @@ function selftest() {
   const dir = scratchProject({ 'src/audio/Old.cpp': old });
   const w = (file, body) => runHook(hook, dir, writeOf(join(dir, file), block(body)));
   const cfg = { guards: { smoothing: { module: 'src/dsp/smooth/**', namespace: 'smooth', scope: ['src/audio/**', 'src/dsp/**', 'src/app/PluginProcessor*'] } } };
-  const sm = scratchProject({ '.claude/layout.json': JSON.stringify(cfg), 'src/audio/Old.cpp': 'void Old::f()\n{\n    level += 0.1f * (target - level);\n}\n' });
+  const sm = scratchProject({ 'src/audio/Old.cpp': 'void Old::f()\n{\n    level += 0.1f * (target - level);\n}\n' }, cfg);
   const none = scratchProject({});
-  const off = scratchProject({ '.claude/layout.json': JSON.stringify({ guards: { smoothing: { off: 'a tool with no audio thread' } } }) });
+  const off = scratchProject({}, { guards: { smoothing: { off: 'a tool with no audio thread' } } });
   const s = (file, body, d = sm) => runHook(hook, d, writeOf(join(d, file), `void X::f()\n{\n${body}\n}\n`));
   return verdicts('realtime-guard', [
     ['smoothing: the shipped per-block gain', s('src/audio/Out.cpp', '    audio.applyGain (link.volume() * outputGain);'), 2],
