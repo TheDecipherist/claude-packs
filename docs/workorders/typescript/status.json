@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T17:34:49Z",
+  "updated": "2026-11-11T20:55:04Z",
   "steps": [
     {
       "id": "W0",
@@ -40,8 +40,9 @@
       "id": "W5",
       "title": "The tests: three tiers",
       "items": 6,
-      "done": 0,
-      "agent": "w5-d, w5-a, w5-b, w5-c"
+      "done": 5,
+      "agent": null,
+      "note": "the Done when's two time lines carried to W8 and W11 (d-27)"
     },
     {
       "id": "W6",
@@ -93,30 +94,5 @@
       "agent": null
     }
   ],
-  "agents": [
-    {
-      "name": "w5-d",
-      "worktree": ".claude/worktrees/w5-d",
-      "step": "W5",
-      "started": "2026-11-11T17:34:49Z"
-    },
-    {
-      "name": "w5-a",
-      "worktree": ".claude/worktrees/w5-a",
-      "step": "W5",
-      "started": "2026-11-11T17:34:49Z"
-    },
-    {
-      "name": "w5-b",
-      "worktree": ".claude/worktrees/w5-b",
-      "step": "W5",
-      "started": "2026-11-11T17:34:49Z"
-    },
-    {
-      "name": "w5-c",
-      "worktree": ".claude/worktrees/w5-c",
-      "step": "W5",
-      "started": "2026-11-11T17:34:49Z"
-    }
-  ]
+  "agents": []
 }

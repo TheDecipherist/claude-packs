@@ -175,3 +175,17 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Chosen: leave them out (test/repo-readers.mts `USERS_OWN`); the run's own records (progress, decisions, briefs) are fixed instead.
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
+
+## d-27 W5's two time lines are measured again after W8 {#d-27}
+- Question: W5's Done when asks for the suite's wall under 180 s (median of two) and no file over 60 s summed. Measured after every
+  W5 wave (build/evidence/W5/summary.md): wall 989 s and 976 s (median 982 s) at load 4 to 12, with the user's cap of 6 files at
+  once (9c5e31d: the uncapped suite took load 25 on 18 cores); summed 5,386 to 5,464 s; about 8 files outside the shared rigs at
+  60 to 98 s, all selftest or doctor bound. Splitting files (W5-h) lowered no sum; one selftest a run (W5-g) saved what doctor
+  re-ran (about 34 s), not the per-hook runs, which go side by side.
+- Options: keep cutting in W5 (each selftest is about 15 s of hook processes, 75 or so node starts; the sum can only fall that
+  way, and at 6 at once 180 s needs a sum near 1,080 s, a fifth of today's); or carry both lines to after W8, whose resident
+  runner and proxy remove the per-call start that the selftests are made of.
+- Chosen: carry them. W5 is closed with every other line met; W8.6's budgets and W11's after-measurements run the suite again
+  (two runs, median, load recorded) against 180 s and 60 s, and the result goes into report.md either way.
+- Why: the cost is a process per hook call, which is W8's subject; cutting tests further now would weaken what they prove for
+  time W8 removes anyway. Overturn by editing the order's W5 Done when.
