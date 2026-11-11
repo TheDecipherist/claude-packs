@@ -180,8 +180,8 @@ packs: base
 
 1. The branch `work/2.0.0-typescript` from `work/1.9.0-platforms`, pushed (done: the order's first commit); d-1 to d-10 written to
    `docs/workorders/typescript/decisions.md`.
-2. Merge `origin/work/1.9.1-admiral-skill` (5e19ef5: the `admiral` pack with one skill; survey open-work section 5, the one live branch)
-   into the order's branch: one copy where the README row and site counts overlap, its CHANGELOG line under 2.0.0, the skill gains the
+2. Merge `origin/work/1.9.1-admiral-skill` (5e19ef5: the `admiral` pack with one skill; survey open-work section 5, the one live branch;
+   the PC session asked for it and the user said yes in the Mac session, 2026-11-11) into the order's branch: one copy where the README row and site counts overlap, its CHANGELOG line under 2.0.0, the skill gains the
    rule "watch a session with get_replies(since) or watch(), not wait_for_reply on one message" with its "When it will not connect"
    row (A reply never arrives | it answers another chat's message | read the session, not the message); the pack is kept and gets its
    tests at W5 like every pack.
