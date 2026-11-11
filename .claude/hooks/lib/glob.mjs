@@ -5,6 +5,10 @@ const ONE_CHAR = { '*': '[^/]*', '?': '[^/]' }; // a lone * stays inside one fol
 function escape(s) {
     return s.replace(/[.+^$()|[\]\\]/g, '\\$&');
 }
+/** `s` as text a RegExp matches literally: the one owner of the escape (shape, git-guard and git-auth each had a copy). */
+export function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 export function globToRegExp(glob) {
     const known = cache.get(glob);
     if (known)

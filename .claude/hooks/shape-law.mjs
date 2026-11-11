@@ -27,7 +27,7 @@ const TEST_NOTE = 'a test that drives one instance proves that instance only: lo
 
 function judgeText(rel, before, after, shape, root) {
   // a call that takes a count looks like one that takes an index; the declaration tells them apart (KF-17)
-  const lits = addedFindings(before, after, (t) => findInstanceLiterals(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after)));
+  const lits = addedFindings(before, after, (t) => findInstanceLiterals(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after, process.env)));
   const test = isTestFile(rel);
   const out = lits.map((f) => `${formatFinding(f, rel)}${test ? `\n      ${TEST_NOTE}` : ''}`);
   const concepts = lits.map((f) => f.concept);
@@ -41,7 +41,7 @@ function judgeText(rel, before, after, shape, root) {
 function main(text) {
   let payload;
   try { payload = JSON.parse(text); } catch { return 0; }
-  for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
+  for (const w of writesOf(payload, payload.cwd ?? process.cwd(), process.env)) {
     if (w.after === null || w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd()) || w.after.includes('\0')) continue;
     const root = checkoutRoot(projectRoot(), w.path, process.cwd());
     const shape = readShape(root) ?? readShape(projectRoot());

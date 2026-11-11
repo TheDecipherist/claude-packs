@@ -100,7 +100,7 @@ function judgeWrite(w, rel) {
   return near ? nearRefusal(near) : remade(defs, entries, rel);
 }
 
-const main = (text) => judgeEvent(text, { name: 'template-law', write: judgeWrite });
+const main = (text) => judgeEvent(text, { name: 'template-law', write: judgeWrite }, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

@@ -65,7 +65,7 @@ const main = (text) => judgeEvent(text, {
   name: 'secrets-guard',
   command: judgeAdd,
   write: (w) => (w.op === 'delete' ? null : judgeWrite(w)),
-});
+}, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

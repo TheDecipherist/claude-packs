@@ -6,7 +6,7 @@
 // kind's own "extensions" (a TypeScript kind: [".ts", ".tsx"]; KWB-36). `--selftest` proves it.
 import { readFileSync } from 'node:fs';
 import { extname, relative } from 'node:path';
-import { writesOf } from './lib/writes.mjs';
+import { readPayload, writesOf } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
@@ -34,9 +34,9 @@ export function misplaced(layout, rel, before, after) {
 }
 
 function main(text) {
-  let payload;
-  try { payload = JSON.parse(text); } catch { return 0; }
-  for (const w of writesOf(payload)) {
+  const payload = readPayload(text);
+  if (!payload) return 0;
+  for (const w of writesOf(payload, process.cwd(), process.env)) {
     if (w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd())) continue;
     const rel = relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path).replace(/\\/g, '/');
     // an unknown result (a program's output) is judged by name only

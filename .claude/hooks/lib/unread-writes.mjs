@@ -14,7 +14,7 @@ export function unreadWrites(ev, root) {
   const command = ev.tool_input?.command;
   if (ev.tool_name !== 'Bash' || ev.hook_event_name !== 'PreToolUse' || !INLINE.test(command ?? '')) return '';
   const cwd = ev.cwd ?? root;
-  const unread = writesOf(ev, cwd).filter((w) => w.after === null && CONTENT_OPS.has(w.op) && languageOf(extname(w.path)) && insideProject(root, w.path, cwd)).map((w) => relative(cwd, w.path));
+  const unread = writesOf(ev, cwd, process.env).filter((w) => w.after === null && CONTENT_OPS.has(w.op) && languageOf(extname(w.path)) && insideProject(root, w.path, cwd)).map((w) => relative(cwd, w.path));
   if (!unread.length) return '';
   const files = unread.join(', ');
   return JSON.stringify({

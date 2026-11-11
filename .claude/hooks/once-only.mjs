@@ -14,8 +14,8 @@ import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { changedLines, copyGlobs, excludeGlobs, FIX, findJscpd, isGenerated, isSource, real } from './lib/dup.mjs';
-import { judgeWrites } from './lib/dup-index.mjs';
+import { changedLines, copyGlobs, excludeGlobs, FIX, findJscpd, isGenerated, isSource, realPath } from './lib/dup.mjs';
+import { judgeCopyWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
@@ -33,7 +33,7 @@ const HOW = `Code that exists once is called, never copied: ${FIX}. A function w
 function judged(payload) {
   const out = [];
   const gone = [];
-  for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
+  for (const w of writesOf(payload, payload.cwd ?? process.cwd(), process.env)) {
     if (!insideProject(projectRoot(), w.path, process.cwd())) continue;
     if (w.op === 'delete') { gone.push(w.path); continue; }
     if (w.after === null || w.after === undefined || !isSource(w.path) || isGenerated(w.after)) continue;
@@ -53,12 +53,12 @@ export function judge(payload) {
   if (!list.length) return { code: 0 };
   const found = [];
   // each checkout written to: its index finds the candidates (built once, then only changed files are read again), jscpd
-  // confirms on those files alone (lib/dup-index.mjs judgeWrites)
+  // confirms on those files alone (lib/dup-index.mjs judgeCopyWrites)
   for (const root of new Set(list.map((j) => j.root))) {
     const mine = list.filter((j) => j.root === root);
-    const r = judgeWrites(root, mine.map((j) => ({ path: j.w.path, after: j.w.after, range: j.range })), { layout: mine[0].layout, shape: mine[0].shape, ignore: gone });
+    const r = judgeCopyWrites(root, mine.map((j) => ({ path: j.w.path, after: j.w.after, range: j.range })), { env: process.env, layout: mine[0].layout, shape: mine[0].shape, ignore: gone });
     if (r.error) return { code: 0, note: `once-only could not judge: ${r.error}` }; // doctor shows a missing detector
-    const base = real(root);
+    const base = realPath(root);
     const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
     for (const c of r.clones) found.push(`${show(c.at)} repeats ${show(c.other)} (${c.lines} lines, ${c.tokens} tokens)`);
   }
@@ -103,7 +103,7 @@ const JS = (name, pad = 2) => `export function ${name}(rows, widths) {
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);
-  if (!findJscpd([process.cwd()])) {
+  if (!findJscpd(process.env, [process.cwd()])) {
     console.error('once-only selftest FAILED: jscpd not found (npm install the kit with its optional dependency, or set CLAUDE_PACKS_JSCPD)');
     return 1;
   }

@@ -70,3 +70,7 @@ packs/base/hooks/lib/shape.mjs
 packs/base/hooks/lib/shape-lists.mjs
 packs/base/hooks/lib/turn.mjs
 packs/base/hooks/lib/writes.mjs
+packs/base/hooks/lib/shape-hits.mjs
+packs/base/hooks/lib/shape-lines.mjs
+packs/base/hooks/lib/shape-model.mjs
+.claude/hooks/kit-lock.mjs

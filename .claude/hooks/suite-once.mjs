@@ -72,7 +72,7 @@ export function refusal(command, cwd, asked = false) {
 function main(text) {
   const payload = readPayload(text);
   const asked = askedForFull(payload?.transcript_path ? lastPrompt(payload.transcript_path) : '');
-  return judgeEvent(text, { name: 'suite-once', command: (command, cwd) => refusal(command, cwd, asked) });
+  return judgeEvent(text, { name: 'suite-once', command: (command, cwd) => refusal(command, cwd, asked) }, process);
 }
 
 function selftest() {

@@ -154,7 +154,7 @@ function main(text) {
   } catch {
     return 0;
   }
-  for (const w of writesOf(payload)) {
+  for (const w of writesOf(payload, process.cwd(), process.env)) {
     if (w.after === null || !insideProject(projectRoot(), w.path, process.cwd())) continue;
     const code = judge(w.path, { before: w.before, after: w.after });
     if (code) return code;
