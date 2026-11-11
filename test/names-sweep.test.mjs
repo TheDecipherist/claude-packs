@@ -1,9 +1,12 @@
 // 0.30.0: a name the manual prints is the fastest way into an image, and the test of every way of unwrapping it. Each image here is built wrapped the way a real one was.
 import { assert, cli, existsSync, fresh, join, readFileSync, readdirSync, spawnSync, test, writeFileSync, KIT } from './kit-cli.mjs';
 import { interleave, wrappings } from '../packs/reverse-engineering/tools/lib/unwrap.mjs';
-import { abbreviationOf, displayForms, readNames, report, sweep } from '../packs/reverse-engineering/tools/names-sweep.mjs';
+import { abbreviationOf, displayForms, readNames, report, sweep } from '../packs/reverse-engineering/tools/lib/names-report.mjs';
 
-const TOOL = join(KIT, 'packs/reverse-engineering/tools/names-sweep.mjs');
+// The command runs from an install, as a project runs it: it finds base's hook lib beside the tools (W4: isMain from hook-log).
+const INSTALL = fresh('names-sweep-install-');
+assert.equal(cli(INSTALL, 'init', 'reverse-engineering', '--config', 'cpp').status, 0);
+const TOOL = join(INSTALL, '.claude/tools/names-sweep.mjs');
 const PATCHES = ['Super Saw', 'Glass Keys', 'Deep Bass', 'Soft Pad', 'Hard Sync', 'Bell Tree'];
 const names = PATCHES.map((name) => ({ group: 'patch', name }));
 

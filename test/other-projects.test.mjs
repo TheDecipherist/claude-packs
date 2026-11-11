@@ -31,8 +31,8 @@ test('no hook of this project blocks an edit in another project', () => {
   const targets = ['src/dsp/Big.cpp', 'src/dsp/New.cpp', 'lib/world/src/sim.cpp', 'lib/engines/src/tabula/Voice.h', 'docs/stellix-spec.md', 'Resources/logo.png', 'CMakeLists.txt'];
   // Every hook, node and python, as a PreToolUse call (time-guard's PostToolUse reports on the machine, not on a file).
   const hooks = readdirSync(join(here, '.claude/hooks')).filter((f) => /\.(mjs|py)$/.test(f));
-  assert.ok(hooks.includes('git-guard.mjs') && hooks.includes('browser-guard.py'), 'the house hooks are installed and fired too');
-  const fire = (h, payload) => spawnSync(h.endsWith('.py') ? 'python3' : 'node', [join(here, '.claude/hooks', h)], { input: JSON.stringify({ hook_event_name: 'PreToolUse', ...payload }), env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: here } });
+  assert.ok(hooks.includes('git-guard.mjs') && hooks.includes('browser-guard.mjs'), 'the house hooks are installed and fired too');
+  const fire = (h, payload) => spawnSync('node', [join(here, '.claude/hooks', h)], { input: JSON.stringify({ hook_event_name: 'PreToolUse', ...payload }), env: { ...process.env, CLAUDE_PROJECT_DIR: here } });
   const blocked = [];
   for (const h of hooks) {
     for (const t of [...targets, 'tools/shot.mjs']) {

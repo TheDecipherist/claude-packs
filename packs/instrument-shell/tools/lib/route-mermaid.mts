@@ -3,27 +3,37 @@
 //   - each page of the branch is a node, labelled by its label (else its id);
 //   - a route to a page of another branch goes to a stub naming that page, drawn dashed;
 //   - "back" goes to one "back" node; a route from "*" is drawn once, from an "any page" node.
-import { ANY, BACK, readTable } from './route-judge.mjs';
+import { ANY, BACK, readTable } from './route-judge.mts';
+import type { ReadTable, RoutePage, RouteTable } from './route-judge.mts';
 
-const mermaidText = (text) => `"${String(text).replace(/"/g, '#quot;')}"`;
+/** One branch's diagram: its name, the file it is written to and its Mermaid text. */
+export interface Diagram { name: string; file: string; text: string }
+
+const mermaidText = (text: unknown): string => `"${String(text).replace(/"/g, '#quot;')}"`;
 const NO_BRANCH = 'menu';
-const menuBranchOf = (page) => page?.branch || NO_BRANCH;
+const menuBranchOf = (page: RoutePage | undefined): string => page?.branch || NO_BRANCH;
 
 /** The menu's branches, each with its Mermaid text: { name, file, text }. */
-export function diagrams(table) {
+export function diagrams(table: RouteTable): Diagram[] {
   const t = readTable(table);
   const names = [...new Set([...t.pages.values()].map(menuBranchOf))];
   return names.map((name) => ({ name, file: `${name.replace(/[^\w-]+/g, '-').replace(/^-|-$/g, '') || NO_BRANCH}.mmd`, text: diagram(t, name) }));
 }
 
-function diagram(t, name) {
-  const ids = new Map();
-  const node = (key) => ids.get(key) ?? (ids.set(key, `n${ids.size}`), ids.get(key));
+function diagram(t: ReadTable, name: string): string {
+  const ids = new Map<string, string>();
+  const node = (key: string): string => {
+    const known = ids.get(key);
+    if (known !== undefined) return known;
+    const made = `n${ids.size}`;
+    ids.set(key, made);
+    return made;
+  };
   const lines = ['flowchart LR'];
   const inBranch = [...t.pages.values()].filter((p) => menuBranchOf(p) === name);
   const here = new Set(inBranch.map((p) => p.id));
   for (const p of inBranch) lines.push(`  ${node(p.id)}[${mermaidText(p.label ?? p.id)}]`);
-  const stubs = new Set();
+  const stubs = new Set<string>();
   for (const r of t.routes.filter((r) => here.has(r.from) || r.from === ANY)) {
     const from = node(r.from);
     const label = mermaidText(r.when ? `${r.input} (${r.when})` : r.input);

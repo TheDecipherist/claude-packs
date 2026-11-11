@@ -2,7 +2,7 @@
 // and hooks fired the way Claude Code fires them (the main checkout's copy, CLAUDE_PROJECT_DIR = main).
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -54,8 +54,14 @@ const swapPaths = (value, here, wt) => {
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, swapPaths(v, here, wt)]));
   return value;
 };
+// A case's `.claude/layout.json` is merged into the checkout's own layout, key by key, never put in its place: every case works in
+// the same worktree, and the layout a later one reads must still be the project's.
+const putCaseFile = (file, text) => {
+  const merged = file.endsWith('.claude/layout.json') && existsSync(file) ? { ...JSON.parse(readFileSync(file, 'utf8')), ...JSON.parse(text) } : null;
+  put(file, merged ? JSON.stringify(merged) : text);
+};
 export const caseFrom = (hook, worktreeCase) => ({ here, wt }) => {
-  for (const [file, text] of Object.entries(worktreeCase.files ?? {})) put(swapPaths(file, here, wt), swapPaths(text, here, wt));
+  for (const [file, text] of Object.entries(worktreeCase.files ?? {})) putCaseFile(swapPaths(file, here, wt), swapPaths(text, here, wt));
   for (const step of worktreeCase.steps) assert.equal(fireAs(here, hook, swapPaths(step.event, here, wt)).status, step.want, `${hook}: ${step.label}`);
 };
 export const fire = (here, hook, file, content = '// new\n') => fireAs(here, hook, { tool_name: 'Write', tool_input: { file_path: file, content } }).status;

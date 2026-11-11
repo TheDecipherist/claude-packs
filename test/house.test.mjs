@@ -15,7 +15,7 @@ const PACKS = fileURLToPath(new URL('../packs/', import.meta.url));
 const run = (dir, ...a) => execFileSync('node', [CLI, ...a, '--dir', dir], { encoding: 'utf8' });
 const tmp = () => mkdtempSync(join(tmpdir(), 'cph-'));
 const lock = (dir) => JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
-const fire = (dir, hook, payload) => spawnSync(hook.endsWith('.py') ? 'python3' : 'node', [join(dir, '.claude/hooks', hook)], {
+const fire = (dir, hook, payload) => spawnSync('node', [join(dir, '.claude/hooks', hook)], {
   input: JSON.stringify(payload), env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8',
 });
 const setLayout = (dir, change) => {
@@ -33,22 +33,22 @@ test('the house hooks install where they belong, project-neutral, and pass their
   setLayout(dir, (l) => { l.enable = ['hooks/user-asks.mjs', 'hooks/idle-wake.mjs']; });
   assert.match(run(dir, 'update'), /switching on \(new to this project\): hooks\/idle-wake\.mjs, hooks\/user-asks\.mjs/);
   const hooks = readdirSync(join(dir, '.claude/hooks'));
-  assert.deepEqual(hooks.filter((h) => h.endsWith('.py')), ['browser-guard.py'], 'every kit hook is Node but browser-guard (README says why)');
-  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'user-asks.mjs', 'idle-wake.mjs', 'browser-guard.py', 'protect-vendor.mjs']) {
+  assert.deepEqual(hooks.filter((h) => h.endsWith('.py')), [], 'every kit hook is Node: browser-guard was ported (W4), so no installed settings.json runs python3');
+  for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'user-asks.mjs', 'idle-wake.mjs', 'browser-guard.mjs', 'protect-vendor.mjs']) {
     assert.ok(hooks.includes(h), h);
-    const r = spawnSync(h.endsWith('.py') ? 'python3' : 'node', [join(dir, '.claude/hooks', h), '--selftest'], { env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' });
+    const r = spawnSync('node', [join(dir, '.claude/hooks', h), '--selftest'], { env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' });
     assert.equal(r.status, 0, `${h}: ${r.stdout}${r.stderr}`);
     assert.doesNotMatch(readFileSync(join(dir, '.claude/hooks', h), 'utf8'), /stellix/i, `${h} names no project`);
   }
   assert.ok(!hooks.includes('copy-tree-guard.py'), 'merged into protect-vendor');
   const audioOnly = tmp();
   run(audioOnly, 'init', 'audio-core');
-  assert.ok(!existsSync(join(audioOnly, '.claude/hooks/browser-guard.py')), 'browser-guard comes with gpu-painter');
+  assert.ok(!existsSync(join(audioOnly, '.claude/hooks/browser-guard.mjs')), 'browser-guard comes with gpu-painter');
   const s = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
   // run by node itself (idle-wake: async) or named in a run-hooks.mjs command, one node process per settings entry (KWB-24)
   for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'idle-wake.mjs', 'user-asks.mjs']) assert.match(s, new RegExp(`(?:node \\\\"\\$CLAUDE_PROJECT_DIR/|run-hooks\\.mjs\\\\"[^"]* )\\.claude/hooks/${h.replace('.', '\\.')}`));
   assert.match(s, /node \\"\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/idle-wake\.mjs/, 'an async hook keeps its own entry');
-  assert.match(s, /python3 \\"\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/browser-guard\.py/);
+  assert.match(s, /run-hooks\.mjs\\"[^"]* \.claude\/hooks\/browser-guard\.mjs/); assert.doesNotMatch(s, /python3/, 'no python3 in a gpu-painter install (W4)');
   const settings = JSON.parse(s);
   assert.equal(settings.hooks.Stop[0].hooks[0].asyncRewake, true);
   assert.equal(settings.hooks.SessionStart[0].matcher, 'compact');
@@ -254,12 +254,12 @@ test('doctor fails when a hook fails its selftest', () => {
   const law = "if (['rebase', 'filter-branch'].includes(sub)";
   assert.ok(text.includes(law));
   writeFileSync(hook, text.replace(law, 'if (false'));
-  const py = join(dir, '.claude/hooks/browser-guard.py');
-  writeFileSync(py, readFileSync(py, 'utf8').replace('if rx.search(seg): return', 'if False: return'));
+  const guard = join(dir, '.claude/hooks/browser-guard.mjs');
+  writeFileSync(guard, readFileSync(guard, 'utf8').replace('LAUNCH_BASH.some((rx) => rx.test(seg))', 'false'));
   const r = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' });
   assert.equal(r.status, 1);
   assert.match(r.stdout, /git-guard\.mjs fails its selftest/);
-  assert.match(r.stdout, /browser-guard\.py fails its selftest/, 'the one Python hook too');
+  assert.match(r.stdout, /browser-guard\.mjs fails its selftest/, 'the ported browser-guard too');
 });
 
 // A project installed at 0.5.x and updated: every hook and check 0.6.0 added stays off until the project's layout
@@ -279,7 +279,7 @@ test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable
   writeFileSync(join(dir, 'design/shape.json'), '{ "concepts": {}, "exclude": [] }\n');
   const out = run(dir, 'update');
   assert.doesNotMatch(out, /shape-law|brief-guard/, 'switched on by the first update already');
-  for (const item of ['hooks/git-guard.mjs', 'hooks/build-guard.mjs', 'hooks/time-guard.mjs', 'hooks/user-asks.mjs', 'hooks/idle-wake.mjs', 'hooks/browser-guard.py', 'checks/no-opengl.json', 'checks/no-code-after-midline-comment.json']) {
+  for (const item of ['hooks/git-guard.mjs', 'hooks/build-guard.mjs', 'hooks/time-guard.mjs', 'hooks/user-asks.mjs', 'hooks/idle-wake.mjs', 'hooks/browser-guard.mjs', 'checks/no-opengl.json', 'checks/no-code-after-midline-comment.json']) {
     assert.match(out, new RegExp(`held back, not switched on .*${item.replace(/[./]/g, (c) => `\\${c}`)}`), item);
     assert.ok(!existsSync(join(dir, '.claude', item)), `${item} not installed`);
   }

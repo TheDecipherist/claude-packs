@@ -96,7 +96,7 @@
       "untrusted-boundary.mjs",
       "realtime-guard.mjs",
       "settings-layer.mjs",
-      "browser-guard.py",
+      "browser-guard.mjs",
       "no-shipped-images.mjs"
     ],
     "PreToolUse Agent|Task": [

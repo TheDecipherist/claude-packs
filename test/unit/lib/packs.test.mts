@@ -1,6 +1,7 @@
 // lib/packs.mjs: what the installer copies (W2.3, d-2): never a TypeScript source, a source map or the build's memory.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,6 +46,24 @@ test('readPack names an unknown pack and a pack.json that is not JSON; a custom 
 test('normalisePacks puts base first, expands a preset, drops duplicates and refuses an unknown name', () => {
   assert.deepEqual(normalisePacks(['node-lib', 'js-ts', 'base']), ['base', ...(PRESETS['node-lib'] ?? [])]);
   assert.throws(() => normalisePacks(['nope']), /unknown pack/);
+});
+
+test('a pack whose requirement is absent is refused with the requirement named (W4: sound-design requires audio-core)', () => {
+  assert.deepEqual(readPack('sound-design').requires, ['audio-core']);
+  assert.throws(() => normalisePacks(['sound-design']), /sound-design requires audio-core/);
+  assert.throws(() => normalisePacks(['cpp', 'sound-design']), /sound-design requires audio-core/);
+  assert.deepEqual(normalisePacks(['audio-core', 'sound-design']), ['base', 'audio-core', 'sound-design']);
+  assert.deepEqual(normalisePacks(['sound-design', 'audio-core']), ['base', 'sound-design', 'audio-core']);   // a requirement may come after
+});
+
+test('`init sound-design` alone refuses, naming audio-core, and writes nothing (W4 Done when)', () => {
+  const dir = scratchDir('cp-requires-');
+  const alone = spawnSync(process.execPath, [join(KIT, 'bin/claude-packs.mjs'), 'init', 'sound-design', '--dir', dir], { encoding: 'utf8' });
+  assert.notEqual(alone.status, 0);
+  assert.match(alone.stdout + alone.stderr, /sound-design requires audio-core/);
+  assert.equal(existsSync(join(dir, '.claude')), false, 'nothing was installed');
+  const both = spawnSync(process.execPath, [join(KIT, 'bin/claude-packs.mjs'), 'init', '--config', 'synth-creator', 'cpp', 'audio-core', 'sound-design', '--dir', dir], { encoding: 'utf8' });
+  assert.equal(both.status, 0, both.stdout + both.stderr);
 });
 
 test('isDisabled matches a file, a folder and a folder with a trailing slash, not a name that merely starts alike', () => {

@@ -16,6 +16,7 @@
     "dsp",
     "sound-design"
   ],
+  "requires": ["audio-core"],
   "engines": {
     "claude-packs": ">=0.28.0"
   }
