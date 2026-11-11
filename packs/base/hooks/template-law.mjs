@@ -5,14 +5,14 @@
 // reason is left alone, and so are tests, `protected` globs, generated and built code. The other files' shapes are kept between calls, keyed by
 // time and size, so a write reads only what changed. `--selftest` proves it.
 import { readFileSync } from 'node:fs';
-import { extname, join, resolve } from 'node:path';
+import { extname, join } from 'node:path';
 import { parametersOf } from './lib/code-shapes.mjs';
 import { isContent } from './lib/content.mjs';
 import { languageOf } from './lib/languages.mjs';
 import { nearCopy } from './lib/near-copies.mjs';
 import { EXTS, shapesOfText, repoIndex } from './lib/repo-index.mjs';
 import { TEMPLATE, TESTS, copiesNeeded, skippedBy } from './lib/elements.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { judgeEvent } from './lib/writes.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -20,7 +20,6 @@ import { matchesAny } from './lib/glob.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 
 // { id: [{ file, line, what }] } over every other file.
@@ -86,10 +85,10 @@ function judgeWrite(w, rel) {
   const fresh = after.shapes.filter((s, i) => after.shapes.findIndex((x) => x.id === s.id) === i && here.get(s.id) > (was.get(s.id) ?? 0));
   const { statements, defs } = addedTo(before, after);
   if (!fresh.length && !statements.length && !defs.length) return null;
-  const layout = readLayout(claudeRoot(ROOT, w.path, process.cwd()));
+  const layout = readLayout(claudeRoot(projectRoot(), w.path, process.cwd()));
   const skip = skippedBy(layout);
   if (matchesAny(rel, skip) || isContent(rel, layout)) return null;
-  const root = checkoutRoot(ROOT, w.path, process.cwd());
+  const root = checkoutRoot(projectRoot(), w.path, process.cwd());
   const entries = repoIndex(root, [...TESTS, ...skip], layout);
   const others = copiesElsewhere(entries, rel);
   for (const s of fresh) {

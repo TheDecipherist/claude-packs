@@ -10,16 +10,15 @@
 //   node kit-fresh.mjs              the hook (the event on stdin)
 //   node kit-fresh.mjs --check      for run.sh: says what is outdated, exits 2 when the session must not start
 //   node kit-fresh.mjs --selftest
-import { join, resolve } from 'node:path';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { join } from 'node:path';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { parseJson } from './lib/json.mjs';
 import { atCommit, atStart } from './lib/kit-fresh-look.mjs';
 import { claudeRoot } from './lib/project.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 /** the checkout a session or a command in `cwd` works in: a worktree's own, never the main checkout's */
-const rootOf = (cwd) => claudeRoot(ROOT, join(cwd, 'x'), process.cwd());
+const rootOf = (cwd) => claudeRoot(projectRoot(), join(cwd, 'x'), process.cwd());
 
 function main(text) {
   const ev = parseJson(text);

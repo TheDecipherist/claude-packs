@@ -32,13 +32,12 @@ import { fileURLToPath } from 'node:url';
 import { bareWords } from './lib/command-prefix.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mjs';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 import { trunkLag } from './lib/trunk-lag.mjs';
 import { gitLines, gitOut, gitRun } from './lib/git-run.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -181,11 +180,11 @@ function main(text) {
   try { payload = JSON.parse(text); } catch { return 0; }
   const command = payload.tool_input?.command ?? '';
   // the project's laws: its own layout (a worktree with its own layout.json is judged by it, else the project's)
-  const layout = readLayout(claudeRoot(ROOT, join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json'), process.cwd()));
+  const layout = readLayout(claudeRoot(projectRoot(), join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json'), process.cwd()));
   const cfg = { ...DEFAULTS, ...(layout.enable?.includes('guards/git-house') ? NEW_INSTALL_GIT : {}), ...(layout.guards?.git ?? {}) }; // KF-8: an existing project opts in
   if (payload.hook_event_name === 'Stop') {
     if (!cfg.house) return 0;
-    const v = stopVerdict(resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), cfg, payload.session_id, undefined, { lag: trunkLag }); // KWB-96: and the main checkout's trunk
+    const v = stopVerdict(projectRoot(), cfg, payload.session_id, undefined, { lag: trunkLag }); // KWB-96: and the main checkout's trunk
     if (v.stdout) process.stdout.write(v.stdout);
     if (v.stderr) process.stderr.write(v.stderr);
     return v.code;
@@ -202,7 +201,7 @@ function main(text) {
   }
   if (!cfg.house || !/git|gh |ghp_|github_pat_/.test(command)) return 0;
   const warnings = [];
-  const env = { ...real, unpushed: (cwd, c) => unpushed(cwd, real.branch(cwd), forRepo(cwd, resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()), c)), warn: (m) => warnings.push(m) };
+  const env = { ...real, unpushed: (cwd, c) => unpushed(cwd, real.branch(cwd), forRepo(cwd, projectRoot(), c)), warn: (m) => warnings.push(m) };
   const reason = house(command, payload.cwd ?? process.cwd(), env, cfg);
   if (warnings.length) process.stdout.write(JSON.stringify({ systemMessage: warnings.join('\n') }));
   if (!reason) return 0;

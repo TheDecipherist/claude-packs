@@ -26,9 +26,8 @@ import { languageNamed } from './lib/languages.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout, resolveAliases } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 
 // "concepts": [...] resolve through .claude/layout.json, the same map the rules trigger from.
 // A worktree file is judged by its own checkout's checks and layout (claudeRoot).
@@ -49,7 +48,7 @@ const appliesTo = (root, c) => Object.entries(c.whenDep ?? {}).every(([dep, majo
 // "replaces": [ids]: when both are installed, the wider check stands and the narrower one is left out, so a hit is reported once.
 const withoutReplaced = (checks) => { const gone = new Set(checks.flatMap((c) => c.replaces ?? [])); return checks.filter((c) => !gone.has(c.id)); };
 
-export function loadChecks(root = ROOT) {
+export function loadChecks(root = projectRoot()) {
   const dir = join(root, '.claude', 'checks');
   let files = [];
   try {
@@ -156,7 +155,7 @@ function main(text) {
     return 0;
   }
   for (const w of writesOf(payload)) {
-    if (w.after === null || !insideProject(ROOT, w.path, process.cwd())) continue;
+    if (w.after === null || !insideProject(projectRoot(), w.path, process.cwd())) continue;
     const code = judge(w.path, { before: w.before, after: w.after });
     if (code) return code;
   }
@@ -164,9 +163,9 @@ function main(text) {
 }
 
 function judge(file, result) {
-  const checks = loadChecks(claudeRoot(ROOT, file, process.cwd()));
-  const rel = relative(checkoutRoot(ROOT, file, process.cwd()), file);
-  const published = isContent(rel, readLayout(claudeRoot(ROOT, file, process.cwd())));
+  const checks = loadChecks(claudeRoot(projectRoot(), file, process.cwd()));
+  const rel = relative(checkoutRoot(projectRoot(), file, process.cwd()), file);
+  const published = isContent(rel, readLayout(claudeRoot(projectRoot(), file, process.cwd())));
   const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []) && (!published || c.prose));
   if (relevant.length === 0) return 0;
 

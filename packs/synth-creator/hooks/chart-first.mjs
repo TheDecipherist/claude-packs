@@ -12,9 +12,8 @@ import { codeFolders, readLayout } from './lib/layout.mjs';
 import { claudeRoot, checkoutRoot, insideProject, relInCheckout } from './lib/project.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { bashOf, git, put, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const DEFAULT_CHART = ['docs/**/*.mmd'];
 const TESTS = /(^|\/)tests?(\/|$)/;
 
@@ -41,14 +40,14 @@ const hasChart = (checkout, globs) => committed(checkout).some((f) => f.size > 0
 function unchartedWrites(payload) {
   const out = [];
   const seen = new Map();
-  for (const w of writesOf(payload, payload.cwd ?? ROOT)) {
-    if (w.op === 'delete' || !insideProject(ROOT, w.path, process.cwd())) continue;
-    const rel = relInCheckout(ROOT, w.path, process.cwd());
+  for (const w of writesOf(payload, payload.cwd ?? projectRoot())) {
+    if (w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd())) continue;
+    const rel = relInCheckout(projectRoot(), w.path, process.cwd());
     if (rel.startsWith('.claude/')) continue;
-    const layout = readLayout(claudeRoot(ROOT, w.path, process.cwd()));
+    const layout = readLayout(claudeRoot(projectRoot(), w.path, process.cwd()));
     const globs = chartGlobs(layout);
     if (matchesAny(rel, globs) || !sourceFolders(layout).some((f) => rel.startsWith(`${f}/`))) continue;
-    const checkout = checkoutRoot(ROOT, w.path, process.cwd());
+    const checkout = checkoutRoot(projectRoot(), w.path, process.cwd());
     if (!seen.has(checkout)) seen.set(checkout, hasChart(checkout, globs));
     if (!seen.get(checkout)) out.push({ rel, globs });
   }

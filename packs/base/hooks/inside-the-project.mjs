@@ -14,10 +14,9 @@ import { bareWords } from './lib/command-prefix.mjs';
 import { commonGitDir, insideProject } from './lib/project.mjs';
 import { bashOf, git, put, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { readPayload, writesOf } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const WORKTREE_VALUE_OPTIONS = new Set(['-b', '-B', '--reason']);
 const home = (p) => p.replace(/^~(?=\/|$)/, process.env.HOME ?? '~');
@@ -46,12 +45,12 @@ function checkoutOf(path) {
 
 // True when a path is outside the project but inside a checkout of this same repo.
 function besideTheProject(path) {
-  if (insideProject(ROOT, path, process.cwd())) return false;
+  if (insideProject(projectRoot(), path, process.cwd())) return false;
   const checkout = checkoutOf(path);
   if (!checkout) return false;
-  const ours = commonGitDir(ROOT);
+  const ours = commonGitDir(projectRoot());
   if (ours && commonGitDir(checkout) === ours) return true;
-  const origin = originOf(ROOT);
+  const origin = originOf(projectRoot());
   return origin !== null && originOf(checkout) === origin;
 }
 
@@ -103,8 +102,8 @@ function judgeCommand(command, cwd) {
       const { dir, next } = gitFolder(words, here);
       if (besideTheProject(dir)) return why(dir);
       // A worktree command on another project's repo is that project's business (KWB-104): judge the target only here.
-      const target = insideProject(ROOT, dir, process.cwd()) ? worktreeTarget(words, next) : null;
-      if (target && !insideProject(ROOT, resolve(dir, home(target)), process.cwd())) return why(resolve(dir, home(target)));
+      const target = insideProject(projectRoot(), dir, process.cwd()) ? worktreeTarget(words, next) : null;
+      if (target && !insideProject(projectRoot(), resolve(dir, home(target)), process.cwd())) return why(resolve(dir, home(target)));
     }
   }
   return null;

@@ -12,7 +12,7 @@
 //   node once-only.mjs --selftest
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative, resolve } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { changedLines, copyGlobs, excludeGlobs, FIX, findJscpd, isGenerated, isSource, real } from './lib/dup.mjs';
 import { judgeWrites } from './lib/dup-index.mjs';
@@ -23,9 +23,8 @@ import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './li
 import { readShape } from './lib/shape.mjs';
 import { readPayload, writesOf } from './lib/writes.mjs';
 import { isContent } from './lib/content.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const HOW = `Code that exists once is called, never copied: ${FIX}. A function written for a many concept takes the instance as a parameter.\n` +
   'Moving or extracting code: take the old copy out in the same write (one Write or MultiEdit), or take it out first.';
@@ -35,12 +34,12 @@ function judged(payload) {
   const out = [];
   const gone = [];
   for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
-    if (!insideProject(ROOT, w.path, process.cwd())) continue;
+    if (!insideProject(projectRoot(), w.path, process.cwd())) continue;
     if (w.op === 'delete') { gone.push(w.path); continue; }
     if (w.after === null || w.after === undefined || !isSource(w.path) || isGenerated(w.after)) continue;
-    const root = checkoutRoot(ROOT, w.path, process.cwd());
+    const root = checkoutRoot(projectRoot(), w.path, process.cwd());
     const rel = relative(root, w.path).replace(/\\/g, '/');
-    const layout = readLayout(claudeRoot(ROOT, w.path, process.cwd()));
+    const layout = readLayout(claudeRoot(projectRoot(), w.path, process.cwd()));
     const shape = readShape(root);
     if (matchesAny(rel, [...excludeGlobs(layout, shape), ...copyGlobs(layout)]) || isContent(rel, layout)) continue;
     const range = changedLines(w.before, w.after);

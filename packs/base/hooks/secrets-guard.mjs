@@ -11,16 +11,15 @@
 //   node secrets-guard.mjs --selftest
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { basename, join, relative, resolve } from 'node:path';
+import { basename, join, relative } from 'node:path';
 import { judgeEvent } from './lib/writes.mjs';
 import { checkoutRoot } from './lib/project.mjs';
 import { bashOf, git, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { gitAdds } from './lib/git-adds.mjs';
 import { SECRETS } from './lib/secret-patterns.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const ENV = /^\.env(\..+)?$/;
 const ENV_OK = /\.(example|sample|template|dist)$/;
@@ -40,7 +39,7 @@ function ignored(root, path) {
 }
 
 function judgeWrite(w) {
-  const root = checkoutRoot(ROOT, w.path, process.cwd());
+  const root = checkoutRoot(projectRoot(), w.path, process.cwd());
   if (isEnv(w.path)) return ignored(root, w.path) ? null : `${relative(root, w.path)} is a .env file git does not ignore. Add \`.env\` (and \`.env.*\`, with !.env.example) to .gitignore first; a .env is never committed.`;
   if (w.after === null) return null;
   const what = addedSecret(w.before, w.after);

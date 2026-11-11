@@ -11,16 +11,15 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readPayload } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, projectRoot, isMain } from './lib/hook-log.mjs';
 import { selftest } from './lib/skill-first-selftest.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const PICTURE = /\.(pdf|png|jpe?g|webp|gif|bmp|tiff?)$/i;
 const PICTURE_END = String.raw`[^'"\n|;&]*\.(?:pdf|png|jpe?g|webp|gif|bmp|tiff?)\b`;
@@ -38,19 +37,19 @@ const READS = /\b(python3?|pdftoppm|pdfimages|pdftocairo|pdftotext|docling|magic
 
 const full = (file, cwd) => (file.startsWith('/') ? file : join(cwd, file));
 // The layout of the checkout a file sits in (a worktree's own), not of the session's project.
-const checkoutLayout = (file) => readLayout(claudeRoot(ROOT, file, process.cwd()));
+const checkoutLayout = (file) => readLayout(claudeRoot(projectRoot(), file, process.cwd()));
 
 function rowsFor(file, project) {
   const own = (checkoutLayout(file).guards?.skillFirst ?? [])
     .map((r) => ({ skill: r.skill, what: r.what ?? `a source read through ${r.skill}`, named: null, globs: () => r.sources ?? [] }));
-  const installed = (skill) => [claudeRoot(ROOT, file, process.cwd()), join(project, '.claude')].some((root) => existsSync(join(root, 'skills', skill, 'SKILL.md')));
+  const installed = (skill) => [claudeRoot(projectRoot(), file, process.cwd()), join(project, '.claude')].some((root) => existsSync(join(root, 'skills', skill, 'SKILL.md')));
   return [...ROWS, ...own].filter((r) => installed(r.skill));
 }
 
 // The row a source file belongs to: by its name, or by a glob of its own checkout's layout.
 function sourceRow(file, cwd, project) {
   const path = full(file, cwd);
-  const rel = relative(checkoutRoot(ROOT, path, process.cwd()), path).replace(/\\/g, '/');
+  const rel = relative(checkoutRoot(projectRoot(), path, process.cwd()), path).replace(/\\/g, '/');
   const inGlobs = (r) => PICTURE.test(path) && !rel.startsWith('..') && matchesAny(rel, r.globs(checkoutLayout(path)));
   return rowsFor(path, project).find((r) => (r.named && r.named.test(path)) || inGlobs(r)) ?? null;
 }

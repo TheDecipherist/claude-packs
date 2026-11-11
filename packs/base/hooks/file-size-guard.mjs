@@ -13,10 +13,9 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { verdicts } from './lib/selftest.mjs';
 import { isContent } from './lib/content.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { extsOf } from './lib/source-exts.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 // Code, scripts, shaders and CMake files (Stellix's source rule counted scripts and CMake too); docs and data are not code.
 const SOURCE = extsOf('c', 'cpp', 'objc', 'js', 'ts', 'python', 'shader', 'shell', 'cmake');
 const isSource = (rel) => SOURCE.has(extname(rel)) || /(^|\/)CMakeLists\.txt$/.test(rel);
@@ -36,9 +35,9 @@ function main(text) {
   let payload;
   try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload)) {
-    if (w.after === null || relative(ROOT, w.path).startsWith('..')) continue;
-    const rel = relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path);
-    const msg = verdict(rel, w.before, w.after, readLayout(claudeRoot(ROOT, w.path, process.cwd())).maxFileLines ?? 300);
+    if (w.after === null || relative(projectRoot(), w.path).startsWith('..')) continue;
+    const rel = relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path);
+    const msg = verdict(rel, w.before, w.after, readLayout(claudeRoot(projectRoot(), w.path, process.cwd())).maxFileLines ?? 300);
     if (msg) { process.stderr.write(msg); return 2; }
   }
   return 0;

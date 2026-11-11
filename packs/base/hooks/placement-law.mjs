@@ -11,9 +11,8 @@ import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout } from './lib/layout.mjs';
 import { insideProject, checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { verdicts } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const CODE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.wgsl', '.metal', '.hlsl']);
 
 const home = (layout, kind) => (kind.concepts ?? []).flatMap((c) => conceptGlobs(layout, c) ?? []);
@@ -38,10 +37,10 @@ function main(text) {
   let payload;
   try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload)) {
-    if (w.op === 'delete' || !insideProject(ROOT, w.path, process.cwd())) continue;
-    const rel = relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path).replace(/\\/g, '/');
+    if (w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd())) continue;
+    const rel = relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path).replace(/\\/g, '/');
     // an unknown result (a program's output) is judged by name only
-    const hit = misplaced(readLayout(claudeRoot(ROOT, w.path, process.cwd())), rel, w.before, w.after ?? w.before);
+    const hit = misplaced(readLayout(claudeRoot(projectRoot(), w.path, process.cwd())), rel, w.before, w.after ?? w.before);
     if (hit) return refuse(rel, hit);
   }
   return 0;
