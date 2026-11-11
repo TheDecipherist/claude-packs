@@ -1,14 +1,15 @@
 // planner W6: the claude.ai skills that plan a build. They must agree with the kit to the letter, so they are held here: their size and
 // trigger form, no placeholder left, no command, flag or skill the kit lacks, one skill per intent, and the bundle claude.ai takes.
 // Python's zipfile reads the bundle back, so the zip is judged by another reader than the code that wrote it.
-import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
-import { CLAUDE_AI_SKILLS, claudeAiDescriptions, claudeAiSkillFiles, skillFor } from '../lib/planner.mjs';
+import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
+import type { Spawned } from '../kit-cli.mts';
+import { CLAUDE_AI_SKILLS, claudeAiDescriptions, claudeAiSkillFiles, skillFor } from '../../lib/planner.mts';
 
 const PLANNER = join(KIT, 'planner');
-const SKILLS = readdirSync(PLANNER, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
-const filesOf = (skill) => readdirSync(join(PLANNER, skill)).filter((f) => f.endsWith('.md')).map((f) => join(skill, f));
-const text = (rel) => readFileSync(join(PLANNER, rel), 'utf8');
-const unfenced = (t) => t.replace(/^(```+|~~~+)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, '');
+const SKILLS: string[] = readdirSync(PLANNER, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+const filesOf = (skill: string): string[] => readdirSync(join(PLANNER, skill)).filter((f) => f.endsWith('.md')).map((f) => join(skill, f));
+const text = (rel: string): string => readFileSync(join(PLANNER, rel), 'utf8');
+const unfenced = (t: string): string => t.replace(/^(```+|~~~+)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, '');
 
 test('every planner SKILL.md is under 8,000 characters and its description starts "Use when"', () => {
   assert.deepEqual(SKILLS.sort(), ['start-a-build', 'ui-mockup', 'workorder-writer']);
@@ -36,7 +37,7 @@ test('every command and flag start-a-build prints exists in the kit', () => {
   assert.ok(calls.length >= 3, `the hand-over prints its commands: ${calls.length}`);
   const missing = calls.flatMap(([, command, rest]) => [
     ...(COMMANDS.has(command) ? [] : [`command ${command}`]),
-    ...(rest.match(/--[a-z][\w-]*/g) ?? []).filter((f) => !FLAGS.has(f)).map((f) => `${command} ${f}`)]);
+    ...(rest?.match(/--[a-z][\w-]*/g) ?? []).filter((f) => !FLAGS.has(f)).map((f) => `${command} ${f}`)]);
   assert.deepEqual(missing, []);
 });
 
@@ -44,13 +45,13 @@ test('every command and flag start-a-build prints exists in the kit', () => {
 test('every skill a planner file names exists in the kit or the planner', () => {
   const have = new Set([...SKILLS, ...readdirSync(join(KIT, 'packs')).flatMap((p) => (existsSync(join(KIT, 'packs', p, 'skills')) ? readdirSync(join(KIT, 'packs', p, 'skills')) : []))]);
   const named = SKILLS.flatMap(filesOf).flatMap((f) => [...text(f).matchAll(/`([a-z0-9]+(?:-[a-z0-9]+)+)`(?: skill|'s)|(?:skill|Run|run) `([a-z0-9]+(?:-[a-z0-9]+)+)`/g)]
-    .map((m) => [f, m[1] ?? m[2]]));
+    .map((m): [string, string | undefined] => [f, m[1] ?? m[2]]));
   assert.ok(named.length >= 5, `the planner names the skills it calls: ${named.length}`);
-  assert.deepEqual(named.filter(([, s]) => !have.has(s)).map(([f, s]) => `${f}: ${s}`), []);
+  assert.deepEqual(named.filter(([, s]) => !have.has(s ?? '')).map(([f, s]) => `${f}: ${s}`), []);
 });
 
 // What a person types in claude.ai, and the one skill that should start. The kit's trigger-word match (`skillFor`) decides.
-const INTENTS = {
+const INTENTS: Readonly<Record<string, string>> = {
   'I want to build a synth': 'workorder-writer',
   'I want to build an effect': 'workorder-writer',
   'How do I start making a plugin?': 'workorder-writer',
@@ -78,33 +79,34 @@ test('each sentence of the intent table starts exactly one skill, the right one'
   assert.ok(Object.keys(INTENTS).length >= 15);
   const descriptions = claudeAiDescriptions();
   assert.deepEqual(Object.keys(descriptions).sort(), Object.keys(CLAUDE_AI_SKILLS).sort());
-  const wrong = Object.entries(INTENTS).map(([s, want]) => [s, want, skillFor(s, descriptions)]).filter(([, want, got]) => got !== want);
+  const wrong = Object.entries(INTENTS).map(([s, want]): [string, string, string | null] => [s, want, skillFor(s, descriptions)]).filter(([, want, got]) => got !== want);
   assert.deepEqual(wrong.map(([s, want, got]) => `"${s}": wants ${want}, got ${got}`), []);
 });
 
-const unzip = (zip, script) => spawnSync('python3', ['-I', '-c', `import zipfile,sys,json\nz=zipfile.ZipFile(sys.argv[1])\n${script}`, zip], { encoding: 'utf8' });
+const unzip = (zip: string, script: string): Spawned => spawnSync('python3', ['-I', '-c', `import zipfile,sys,json\nz=zipfile.ZipFile(sys.argv[1])\n${script}`, zip], { encoding: 'utf8' });
 
 test('planner-skills --zip writes exactly five zips, each its SKILL.md and its references, as another reader sees them', () => {
   const dir = fresh('planner-zip-');
   const r = cli(dir, 'planner-skills', '--zip', join(dir, 'dist'));
   assert.equal(r.status, 0, r.stderr);
   assert.deepEqual(readdirSync(join(dir, 'dist')).sort(), Object.keys(CLAUDE_AI_SKILLS).map((n) => `${n}.zip`).sort());
-  for (const name of Object.keys(CLAUDE_AI_SKILLS)) {
+  for (const [name, skill] of Object.entries(CLAUDE_AI_SKILLS)) {
     const read = unzip(join(dir, 'dist', `${name}.zip`), 'print(json.dumps({"bad": z.testzip(), "names": z.namelist()}))');
     assert.equal(read.status, 0, read.stderr);
-    const { bad, names } = JSON.parse(read.stdout);
+    const { bad, names } = JSON.parse(read.stdout) as { bad: string | null; names: string[] };
     assert.equal(bad, null, `${name}: every entry reads back with its checksum`);
     assert.ok(names.includes(`${name}/SKILL.md`), name);
     // what the folder on disk holds (and the templates, for the interview), read here and not by the code that zips
-    const { dir: source, also } = CLAUDE_AI_SKILLS[name];
-    const onDisk = (folder, to = '') => readdirSync(join(KIT, folder), { recursive: true, withFileTypes: true }).filter((e) => e.isFile())
+    const { dir: source, also } = skill;
+    const onDisk = (folder: string, to = ''): string[] => readdirSync(join(KIT, folder), { recursive: true, withFileTypes: true }).filter((e) => e.isFile())
       .map((e) => `${name}/${to}${join(e.parentPath, e.name).slice(join(KIT, folder).length + 1)}`);
     assert.deepEqual(names.sort(), [...onDisk(source), ...(also ? onDisk(also.from, `${also.to}/`) : [])].sort(), `${name}: its folder and nothing else`);
   }
   // a planted fault: one changed byte in the stored data is seen by the other reader
   const zip = join(dir, 'dist', 'synth-cost.zip');
   const bytes = readFileSync(zip);
-  bytes[bytes.indexOf('# What a synth design costs')] ^= 1;
+  const at = bytes.indexOf('# What a synth design costs');
+  bytes[at] = (bytes[at] ?? 0) ^ 1;
   writeFileSync(join(dir, 'planted.zip'), bytes);
   assert.notEqual(JSON.parse(unzip(join(dir, 'planted.zip'), 'print(json.dumps(z.testzip()))').stdout), null, 'the planted change is caught');
 });
@@ -125,7 +127,7 @@ test('the pack skills ride as they are: no planner file is a copy of a pack skil
 
 test('every place that writes an image prompt puts the words to be drawn in double quotes, and says only quoted text is drawn', () => {
   // 1.6.1: a mock-up whose labels were left unquoted came back with knobs labelled "MIDTIT" and "KERV" that no order named.
-  const places = {
+  const places: Readonly<Record<string, RegExp[]>> = {
     'planner/ui-mockup/SKILL.md': [/every word that must be drawn exactly in double quotes/, /only text in the picture is the text in double quotes/, /misspelled is not a reason to render again/],
     'planner/workorder-writer/questions.md': [/every word to be drawn exactly in double quotes/],
     'planner/ui-mockup/analyse-a-mockup.md': [/a spelling is never a reason to render again/],
