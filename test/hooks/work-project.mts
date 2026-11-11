@@ -29,6 +29,10 @@ export function logLines(dir: string, file: string): Record<string, unknown>[] {
   return (text ?? '').split('\n').filter(Boolean).map((line) => parseJson<Record<string, unknown>>(line) ?? {});
 }
 
+/** A C++ function long enough (26 lines) to be code once-only and the making line judge, named by `name`. */
+export const cppFunction = (name: string): string =>
+  `float ${name} (float x)\n{\n${Array.from({ length: 24 }, (_, i) => `    const float v${i} = x * ${i}.5f + std::tan (x / ${i + 2}.0f);\n`).join('')}    return x;\n}\n`;
+
 /** A Bash command fired at one hook of the project, as a PreToolUse event in the project. */
 export const bashAt = (dir: string, hook: string, command: string): Spawned =>
   hookRun(dir, hook, { hook_event_name: 'PreToolUse', cwd: dir, tool_name: 'Bash', tool_input: { command } });
