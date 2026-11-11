@@ -158,3 +158,12 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
   fresh and index: kit-version, kit-fresh-look, kit-fresh-selftest, repo-index, shape-code, unread-writes).
 - Chosen: one agent per chain, each converting its chain in import order and proving each file before the next.
 - Why: the rule the layers serve (a file imports only converted files) holds inside each chain, and three rounds become one.
+
+## d-25 param-id-lock stays one hook until W8 {#d-25}
+- Question: param-id-lock both refuses (a locked id removed) and records (the lock started, new ids added); W4 says such a hook is
+  split into a judge and a recorder.
+- Options: split now (a new hook file; `update` brings a new hook only when `layout.enable` names it, so existing audio projects
+  would silently stop recording ids); keep one hook, marked `recorder` (serial), until W8.1's settings migration moves every
+  project to the hook table, where the split comes in with the table and switches on with it.
+- Chosen: keep it, `role: recorder`; the split is W8.1's, with its migration and a test that an updated audio project still records.
+- Why: a law must never stop silently in existing projects (CLAUDE.md, "What switches on").

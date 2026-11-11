@@ -13,12 +13,12 @@ node_modules/
 .env
 build/
 # emitted by `npm run build` beside each .mts (d-2); a folder's lines become one rule when its last hand-written .mjs goes
-# the base pack is TypeScript whole: every .mjs under its hooks and tools is emitted (d-2)
-packs/base/hooks/**/*.mjs
-packs/base/tools/**/*.mjs
-scripts/clean-emitted.mjs
 lib/kit-lock.mjs
 .claude/hooks/kit-lock.mjs
+# TypeScript whole: every .mjs here is emitted beside its .mts (d-2)
+packs/**/*.mjs
+global/**/*.mjs
+scripts/*.mjs
 # W4: lib, emitted as each converts
 lib/backup.mjs
 lib/build-queue.mjs
@@ -41,3 +41,14 @@ lib/selftest-cache.mjs
 lib/shape.mjs
 lib/symmetry-doctor.mjs
 lib/zip.mjs
+
+lib/configs.mjs
+lib/layout.mjs
+lib/settings.mjs
+lib/claude-md.mjs
+lib/custom-packs.mjs
+lib/hook-proof.mjs
+lib/hover-gate.mjs
+lib/shape-cli.mjs
+lib/status-cli.mjs
+lib/workorder.mjs

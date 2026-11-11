@@ -13,7 +13,12 @@ test('FILES installs the shell readers the global hooks read through, and every 
   for (const f of ['shell-writes', 'program-writes', 'program-read', 'command-prefix', 'shell-lex', 'files', 'json', 'shell-sed']) {
     assert.ok(FILES.some(([from, to]) => from === `../packs/base/hooks/lib/${f}.mjs` && to === `hooks/claude-packs/lib/${f}.mjs`), f);
   }
-  assert.equal(FILES.length, 12);
+  // the global hooks' own helpers (W4): what they share, installed beside each hook that reads it
+  for (const [from, to] of [['hooks/lib/global-hook.mjs', 'hooks/claude-packs/lib/global-hook.mjs'], ['hooks/lib/global-hook.mjs', 'hooks/lib/global-hook.mjs'],
+    ['hooks/lib/manifest-pins.mjs', 'hooks/claude-packs/lib/manifest-pins.mjs'], ['hooks/lib/command-pins.mjs', 'hooks/claude-packs/lib/command-pins.mjs']]) {
+    assert.ok(FILES.some(([f, t]) => f === from && t === to), `${from} to ${to}`);
+  }
+  assert.equal(FILES.length, 16);
 });
 
 test('add wires each hook once, keeps the user\'s settings and edited file, and remove undoes only ours', () => {

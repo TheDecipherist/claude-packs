@@ -91,10 +91,16 @@ const STATUS = ['.claude/hooks/heartbeat.mjs', '.claude/hooks/no-find.mjs', ...[
   ...['statusline', 'statusline-paint', 'statusline-runs', 'statusline-session', 'statusline-work'].map((f) => `.claude/tools/${f}.mjs`)];
 // 2.0.0 (the typescript order, W3): installed files the conversion rewrote, the same law emitted from TypeScript, or an importer
 // that now passes the project root, env or pid a converted lib used to read itself (W3.3); each layer's merge adds its own
-const CONVERTED_CHANGED = [...['shape-symmetry', 'shape-symmetry-selftest', 'test-verdict', 'quiet-test', 'statusline', 'statusline-paint', 'statusline-runs',
+const CONVERTED_CHANGED = ['.claude/hooks/lib/realtime-checks.mjs', '.claude/tools/buildq.mjs', '.claude/tools/freeze.mjs',
+  ...['build-guard', 'build-sweep', 'chart-first', 'idle-wake', 'protect-vendor', 'stage-guard', 'time-guard', 'user-asks'].map((f) => `.claude/hooks/${f}.mjs`),
+  ...['shape-symmetry', 'shape-symmetry-selftest', 'test-verdict', 'quiet-test', 'tone-report', 'page-measure', 'statusline', 'statusline-paint', 'statusline-runs',
   'statusline-session', 'statusline-work'].map((f) => `.claude/tools/${f}.mjs`), ...['file-size-guard', 'folder-law', 'frozen-files', 'lesson-checks', 'making', 'once-only', 'placement-law', 'reuse-hint', 'run-hooks', 'spec-lock'].map((f) => `.claude/hooks/${f}.mjs`),
   ...['trunk-lag', 'pushed', 'git-auth', 'kit-version', 'kit-fresh-look', 'kit-fresh-selftest', 'repo-index', 'shape-code', 'unread-writes',
     'run-status', 'run-remotes', 'run-transcripts', 'run-tree', 'git-guard-selftest', 'function-shapes', 'near-copies', 'shape-lists', 'shape', 'writes', 'elements', 'hook-log', 'code-shapes', 'shape-prose', 'shell-writes', 'trunk-lag-selftest', 'making-check-selftest', 'turn', 'content', 'dup-index', 'event-log', 'hub-rig', 'languages', 'apply-edit', 'cpp-scan', 'crash-policy', 'dup', 'elements', 'git-adds', 'glob', 'identifier-runs', 'layout', 'own-processes', 'program-read', 'program-writes', 'prose', 'repo-index', 'rust-scan', 'secret-patterns', 'shape-code', 'skill-first-selftest', 'unread-writes', 'writes'].map((f) => `.claude/hooks/lib/${f}.mjs`)];
+// 2.0.0 (the typescript order, W4): what synth-creator's split hooks brought, new to a project that has synth-creator
+const SYNTH_TYPESCRIPT = ['build-guard-selftest', 'time-findings', 'time-state'].map((f) => `.claude/hooks/lib/${f}.mjs`);
+// 2.0.0: gone on purpose: browser-guard.py ported to TypeScript, and house.py, its Python library, deleted with it (W4)
+const REMOVED = ['.claude/hooks/lib/house.py', '.claude/hooks/browser-guard.py'];
 // 2.0.0 (the typescript order, W2.5): the shared owners every base lib reads through, new to every project
 const TYPESCRIPT = ['files', 'git-run', 'hash', 'source-exts', 'shell-sed', 'shape-hits', 'shape-lines', 'shape-model', 'branches-ahead', 'push-form',
   'pushed-selftest', 'remote-heads', 'stop-verdict', 'run-live', 'run-progress', 'run-rows', 'verdict', 'brief-findings', 'litter', 'making-check-turn',
@@ -122,8 +128,10 @@ for (const project of ['stellix', 'sub37']) {
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
     const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...STATUS, ...KIT_FRESH, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...TYPESCRIPT, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST, ...SETTINGS] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
-    assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
-    const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
+    const kept = Object.keys(was.files).filter((f) => !REMOVED.includes(f));
+    const ported = lock.packs.includes('gpu-painter') ? ['.claude/hooks/browser-guard.mjs'] : [];   // W4: browser-guard.py in TypeScript
+    assert.deepEqual(Object.keys(lock.files).sort(), [...kept, ...added, ...SYNTH_TYPESCRIPT, ...ported].sort(), 'the same files, no more, no fewer');
+    const changed = kept.filter((f) => lock.files[f] !== was.files[f]).sort();
     assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, ...SMOOTHING_CHANGED, ...BANK_PROOF_CHANGED, ...PROMPT_FILE_CHANGED, ...CONVERTED_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
     for (const [file, from] of Object.entries(MOVED)) {
       assert.ok(was.files[file] && lock.files[file], `${file}: kept in the lock after the move`);
@@ -155,6 +163,7 @@ test('full-stack: an update keeps an existing project\'s own layout, and changes
   assert.equal(readFileSync(join(dir, 'CLAUDE.md'), 'utf8'), before('claude-md.txt'), 'CLAUDE.md');
   const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
   const old = JSON.parse(before('lock.json'));
-  assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(old.files), ...FULL_STACK_ADDED].sort(), 'the same files, and the listed new ones');
-  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && ![...FULL_STACK_CHANGED, ...SHELL_CHANGED, ...PROMPT_FILE_CHANGED, ...CONVERTED_CHANGED].includes(f)), [], 'only the listed files changed');
+  const kept = Object.keys(old.files).filter((f) => !REMOVED.includes(f));
+  assert.deepEqual(Object.keys(lock.files).sort(), [...kept, ...FULL_STACK_ADDED].sort(), 'the same files, and the listed new ones');
+  assert.deepEqual(kept.filter((f) => lock.files[f] !== old.files[f] && ![...FULL_STACK_CHANGED, ...SHELL_CHANGED, ...PROMPT_FILE_CHANGED, ...CONVERTED_CHANGED].includes(f)), [], 'only the listed files changed');
 });

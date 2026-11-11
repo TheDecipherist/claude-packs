@@ -15,9 +15,9 @@ const KIT = fileURLToPath(new URL('..', import.meta.url));
 const TSC = join(KIT, 'node_modules/.bin/tsc');
 const SOURCE_FOLDERS = ['bin', 'lib', 'global', 'scripts', 'packs', '.claude/hooks', 'test'];
 // The folders converted whole: no hand-written .mjs, .js or .py is left in them (the lead adds each as W3 and W4 finish it).
-const CONVERTED: readonly string[] = ['packs/base/hooks', 'packs/base/tools'];
-// A hand-written file a converted folder still holds on purpose, each with the step that removes it.
-const NOT_YET: ReadonlySet<string> = new Set(['packs/base/hooks/lib/house.py']);   // W4 slice 3 ports browser-guard.py and deletes it
+const CONVERTED: readonly string[] = ['packs', 'global', 'scripts'];
+// A hand-written file a converted folder still holds on purpose, each with the step that removes it (none since W4 wave 2).
+const NOT_YET: ReadonlySet<string> = new Set([]);
 
 const rel = (root: string, file: string): string => relative(root, file).replace(/\\/g, '/');
 const skipped = (name: string): boolean => name === 'node_modules' || name === 'fixtures' || name === 'worktrees' || name === '.DS_Store';

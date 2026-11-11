@@ -25,13 +25,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/frozen-files.mjs .claude/hooks/placement-law.mjs .claude/hooks/protect-vendor.mjs .claude/hooks/spec-lock.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs .claude/hooks/realtime-guard.mjs .claude/hooks/brief-guard-count.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/frozen-files.mjs .claude/hooks/placement-law.mjs .claude/hooks/protect-vendor.mjs .claude/hooks/spec-lock.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs .claude/hooks/realtime-guard.mjs .claude/hooks/browser-guard.mjs .claude/hooks/brief-guard-count.mjs",
             "timeout": 60
-          },
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/browser-guard.py\"",
-            "timeout": 15
           }
         ]
       },

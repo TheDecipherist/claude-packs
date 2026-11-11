@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import type { BuildLaws } from './lib/build-guard-selftest.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { readJson } from './lib/json.mts';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Env, Hook, HookEvent } from './lib/types.d.mts';
 import { pass, refuse } from './lib/verdict.mts';
@@ -43,20 +44,8 @@ export function heavy(w: readonly string[]): boolean {
   return false;
 }
 
-// Heredoc bodies are text written to a file or fed to a program, never commands of this shell.
-export function stripHeredocs(cmd: string): string {
-  const out: string[] = [];
-  const lines = cmd.split('\n');
-  for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i] ?? '';
-    out.push(line);
-    const m = line.match(/<<-?\s*['"]?([A-Za-z_][A-Za-z0-9_]*)['"]?/);
-    if (m) { i += 1; while (i < lines.length && (lines[i] ?? '').trim() !== m[1]) i += 1; }
-  }
-  return out.join('\n');
-}
-
-const blankQuotes = (s: string): string => s.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+// Heredoc bodies are text written to a file or fed to a program, never commands of this shell; quoted words are no command
+// either (shell-lex owns both: W2.5, the other-packs survey's eight and four copies).
 // Quoted text (a commit note, a bug title) keeps its length but loses its words, so a note naming the test runner is not a test run
 const maskQuotes = (s: string): string => s.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, (q) => `${q.slice(0, 1)}${' '.repeat(q.length - 2)}${q.slice(-1)}`);
 const words = (part: string): string[] => part.replace(/(^|\s)#.*$/, '').trim().split(/\s+/).filter(Boolean);
@@ -65,7 +54,7 @@ const words = (part: string): string[] => part.replace(/(^|\s)#.*$/, '').trim().
 const KEYWORDS: readonly string[] = ['do', 'then', 'else', 'elif', 'if', 'while', 'until', '!', '{', '}'];
 
 export function offending(cmd: string): string | null {
-  const pieces = blankQuotes(stripHeredocs(cmd)).split(/(&&|\|\||;|\||\n|\(|\)|\x60|\$\()/);
+  const pieces = blankQuotes(dropHeredocs(cmd)).split(/(&&|\|\||;|\||\n|\(|\)|\x60|\$\()/);
   for (let i = 0; i < pieces.length; i += 2) {
     if (pieces[i - 1] === ')') continue; // the words after a `$(...)` or `(...)` are its command's arguments, never a new command (KWB-89)
     let w = words(pieces[i] ?? '');
@@ -86,7 +75,7 @@ export function offending(cmd: string): string | null {
 
 // A sleep loop or a long sleep, in the commands this shell runs.
 export function polling(cmd: string): string | null {
-  const body = blankQuotes(stripHeredocs(cmd));
+  const body = blankQuotes(dropHeredocs(cmd));
   if (/\b(until|while)\b[^\n]*\bdo\b[\s\S]*\bsleep\b/.test(body) || /\b(until|while)\b[\s\S]*;\s*do\b[\s\S]*\bsleep\b/.test(body)) return 'a loop that sleeps';
   for (const m of body.matchAll(/(?:^|[;&|(\n]|\bdo\b|\bthen\b)\s*sleep\s+([0-9.]+)/g)) if (Number(m[1]) > 5) return `sleep ${m[1]}`;
   if (/for\s+\w+\s+in\s+\$\(seq[^)]*\)[\s\S]*\bsleep\b/.test(body)) return 'a loop that sleeps';
@@ -97,7 +86,7 @@ export function polling(cmd: string): string | null {
 // Opening an .app or running the binary inside one (kept for the agent-jobs rule; the refusal itself is off: The user,
 // 2026-10-11, agents may open the app; the fault was one agent doing it on repeat).
 export function launchesApp(cmd: string): boolean {
-  return /(^|[;&|(\s])open\s+(-[a-zA-Z]+\s+)*[^\s;&|]*\.app\b|(^|[;&|(\s])open\s+-a\s|\.app\/Contents\/MacOS\//.test(blankQuotes(stripHeredocs(cmd)));
+  return /(^|[;&|(\s])open\s+(-[a-zA-Z]+\s+)*[^\s;&|]*\.app\b|(^|[;&|(\s])open\s+-a\s|\.app\/Contents\/MacOS\//.test(blankQuotes(dropHeredocs(cmd)));
 }
 
 const isFolder = (word: string, from: string): boolean => {
@@ -117,7 +106,7 @@ function ctestCount(dir: string, pat: string, env: Env): number {
 
 // A build of everything, or a test run with no -R or one matching more than 30 tests. null when the scope is named.
 export function tooWide(cmd: string, cwd: string, countTests: (dir: string, pat: string) => number): string | null {
-  const body = stripHeredocs(cmd);
+  const body = dropHeredocs(cmd);
   const bare = maskQuotes(body);
   const cd = body.match(/cd\s+(\S+)\s*&&/)?.[1];
   const from = cd ? cd.replace(/^~(?=\/|$)/, homedir()) : cwd;
@@ -171,7 +160,7 @@ export const hook: Hook = (event, ctx) => {
       'run_in_background and you are notified when it ends.');
   }
   // A light agent may RUN an already-built program through the queue (a render), never compile or run a test suite
-  if (aid && /(cmake\s+--build|\bctest\b|\bmake\b|\bninja\b|xcodebuild|tools\/build\.sh\s+(build|test))/.test(maskQuotes(stripHeredocs(cmd))) && lightAgent(event, ctx.env.HOME ?? homedir())) {
+  if (aid && /(cmake\s+--build|\bctest\b|\bmake\b|\bninja\b|xcodebuild|tools\/build\.sh\s+(build|test))/.test(maskQuotes(dropHeredocs(cmd))) && lightAgent(event, ctx.env.HOME ?? homedir())) {
     return refuse('build-guard: this agent was started as KIND: light, and light agents do not build or run tests (at most 3 build agents run at once, ' +
       '). Do the light part, and say in your report what needs building.');
   }
