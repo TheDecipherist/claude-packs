@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-11T11:24:09.832Z",
+  "updated": "2026-11-11T11:29:39.913Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/agents-held.md": "0da8fb50ef828b0440389751254c16ae1cf9dd21c78fc23a7d957b221674a409",
@@ -76,7 +76,7 @@
     ".claude/hooks/lib/house.py": "0c8a2e113eec53c48caa8e11f5dd8f1d611ed239cc137c246d8d7bab8e4aa661",
     ".claude/hooks/lib/hub-rig.mjs": "49332a493a1d5e2f3d40fc3575ae95b4793f3d9491ede596609ded9cbfb00c81",
     ".claude/hooks/lib/identifier-runs.mjs": "95d6f4bdf3213841994619274ec57ef0fc20a15ed2b71cc7709ea43a3e641d8f",
-    ".claude/hooks/lib/json.mjs": "e29a009077b837441dd943d0fc05a5595416664d1588180a71985cac77ce138b",
+    ".claude/hooks/lib/json.mjs": "39ce64623563839f0ea930aa10fb3c2b6c8972a990a86f94de5ac77a48dfee30",
     ".claude/hooks/lib/kit-fresh-look.mjs": "f14ffed53d3d08ce30341428d153d198883763a201942bf6d4774d989964d183",
     ".claude/hooks/lib/kit-fresh-selftest.mjs": "1862756d6ec55531550b4bbeed113c80674a401d2ac9843dca6895935cda4cfa",
     ".claude/hooks/lib/kit-version.mjs": "ebee84d193d8f97cb8d1845d3197506875ac0824dc2a372cbfa26f5d98c0788c",

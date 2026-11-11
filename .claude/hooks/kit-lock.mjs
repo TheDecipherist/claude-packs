@@ -17,9 +17,10 @@ import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, normalize, relative, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writesOf } from '../../packs/base/hooks/lib/writes.mjs';
-// the lock's one format and lease, read in every form (lib/kit-lock.mjs; `claude-packs lock status|take|release`, KWB-25)
-import { acquire, checkouts, describe, LOCK, LEASE_MIN, readLock, renew, takeLock as take } from '../../lib/kit-lock.mjs';
+// the installed hooks lib, never the source tree: a half-moved lib in packs/ crashed this hook on every call (KWB-172)
+import { writesOf } from './lib/writes.mjs';
+// the lock's one format and lease, read in every form (lib/kit-lock.mts, emitted; `claude-packs lock status|take|release`, KWB-25)
+import { acquire, checkouts, describe, LOCK, LEASE_MIN, readLease as readLock, renew, takeLock as take } from '../../lib/kit-lock.mjs';
 
 export { checkouts, LOCK, take };
 
@@ -117,7 +118,7 @@ function selftest() {
   cases.push(['and the take-over logged', /took over .*session other/.test(readFileSync(join(root, '.claude/kit-lock.log'), 'utf8'))]);
   other(1);
   // settings.json runs kit-lock inside run-hooks.mjs (KWB-26): it must refuse there too, not fail as exit 1
-  const r = spawnSync(process.execPath, [fileURLToPath(new URL('../../packs/base/hooks/run-hooks.mjs', import.meta.url)), fileURLToPath(import.meta.url)], {
+  const r = spawnSync(process.execPath, [fileURLToPath(new URL('./run-hooks.mjs', import.meta.url)), fileURLToPath(import.meta.url)], {
     input: JSON.stringify(B('me', "git commit -m 'x'")), encoding: 'utf8', env: { ...process.env, HOME: home, CLAUDE_PROJECT_DIR: root },
   });
   cases.push(['through run-hooks: another session\'s commit refused', r.status === 2 && r.stderr.includes('BLOCKED by kit-lock')]);

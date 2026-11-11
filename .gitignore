@@ -18,3 +18,5 @@ packs/base/hooks/lib/git-run.mjs
 packs/base/hooks/lib/hash.mjs
 packs/base/hooks/lib/source-exts.mjs
 scripts/clean-emitted.mjs
+packs/base/hooks/lib/json.mjs
+lib/kit-lock.mjs

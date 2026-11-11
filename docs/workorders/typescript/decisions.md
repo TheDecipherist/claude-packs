@@ -113,3 +113,12 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
   modules as W3 converts each (shell-lex and selftest at L0, json at the W2.10 pilot, hook-log at L2), each before its first user
   converts onto it, so a file still imports only converted files.
 - Why: converting hook-log in W2 drags its layer (layout, event-log) with it; W3's order is what keeps every slice green.
+
+## d-19 What the W2.10 pilot converts {#d-19}
+- Question: the pilot names json, project, files and git-run, and `.claude/hooks/kit-lock.mts`.
+- Chosen: json, files, git-run (and hash, source-exts) converted; lib/kit-lock.mjs converted to lib/kit-lock.mts (its readLock renamed
+  readLease, the lease, apart from manifest's install lock); `.claude/hooks/kit-lock` stays `.mjs` with W2.10's fix (it imports the
+  installed `./lib/writes.mjs` and `./run-hooks.mjs` and the emitted `lib/kit-lock.mjs`, never a source path) and becomes `.mts`
+  when `writes` is converted (W3 L3), since a `.mts` may import only typed modules; project converts at W3 L0 with its `ctx` form.
+- Why: project reads `process.env` and `process.cwd()` at import (gate 11) and its `ctx` form changes what 23 importers call,
+  which is W3.3's work; converting it now would make the pilot either fail gate 11 or change 23 files outside its layer.
