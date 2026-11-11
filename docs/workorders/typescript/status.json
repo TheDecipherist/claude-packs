@@ -1,19 +1,97 @@
 {
-  "updated": "2026-11-11T10:00:00Z",
+  "updated": "2026-11-11T10:49:34Z",
   "steps": [
-    { "id": "W0", "title": "Set up and the baseline", "items": 7, "done": 1, "agent": null },
-    { "id": "W1", "title": "Find out, before building", "items": 7, "done": 0, "agent": null },
-    { "id": "W2", "title": "The foundation", "items": 11, "done": 0, "agent": null },
-    { "id": "W3", "title": "The core: base hooks lib by layer", "items": 5, "done": 0, "agent": null },
-    { "id": "W4", "title": "The slices, in parallel", "items": 7, "done": 0, "agent": null },
-    { "id": "W5", "title": "The tests: three tiers", "items": 6, "done": 0, "agent": null },
-    { "id": "W6", "title": "End to end and the change-to-tests map", "items": 7, "done": 0, "agent": null },
-    { "id": "W7", "title": "Packs from one template, facts generated", "items": 4, "done": 0, "agent": null },
-    { "id": "W8", "title": "Per-call cost, Go proxy, TypeScript in projects", "items": 6, "done": 0, "agent": null },
-    { "id": "W9", "title": "The release in five minutes", "items": 4, "done": 0, "agent": null },
-    { "id": "W10", "title": "Before calling it finished", "items": 2, "done": 0, "agent": null },
-    { "id": "W11", "title": "The report, with the comparison", "items": 3, "done": 0, "agent": null },
-    { "id": "W12", "title": "Land and publish 2.0.0", "items": 2, "done": 0, "agent": null }
+    {
+      "id": "W0",
+      "title": "Set up and the baseline",
+      "items": 7,
+      "done": 7,
+      "agent": null
+    },
+    {
+      "id": "W1",
+      "title": "Find out, before building",
+      "items": 7,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W2",
+      "title": "The foundation",
+      "items": 11,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W3",
+      "title": "The core: base hooks lib by layer",
+      "items": 5,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W4",
+      "title": "The slices, in parallel",
+      "items": 7,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W5",
+      "title": "The tests: three tiers",
+      "items": 6,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W6",
+      "title": "End to end and the change-to-tests map",
+      "items": 7,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W7",
+      "title": "Packs from one template, facts generated",
+      "items": 4,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W8",
+      "title": "Per-call cost, Go proxy, TypeScript in projects",
+      "items": 6,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W9",
+      "title": "The release in five minutes",
+      "items": 4,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W10",
+      "title": "Before calling it finished",
+      "items": 2,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W11",
+      "title": "The report, with the comparison",
+      "items": 3,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W12",
+      "title": "Land and publish 2.0.0",
+      "items": 2,
+      "done": 0,
+      "agent": null
+    }
   ],
   "agents": []
 }

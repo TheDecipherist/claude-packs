@@ -72,3 +72,17 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
   a project gets only the `sh` picker `.claude/hooks/bin/hook-proxy`, which execs the binary from the user's cache or falls back to
   `node .claude/hooks/run-hooks.mjs`.
 - Why: projects commit `.claude/`; a binary there breaks other platforms and bloats git (review-2 5.1).
+
+## d-14 Where the baseline is measured, and the admiral merge's gate {#d-14}
+- Question: W0.5 says "on the branch's first commit"; W0.2 asks for the merge's picked tests green. Measure on 905e6be, or after W0.1 to W0.6?
+- Options: check out 905e6be in a worktree and measure there; measure on the branch after W0.1 to W0.4 and W0.6.
+- Chosen: after them (9c0c30d and on). No code is converted before W2; the differences are the admiral skill (content), suite-once's
+  KWB-168 grant (which W0.6 needs before the baseline can run) and the order's own docs. The whole-suite run (a) is also the merge's
+  gate: it is a superset of the 58 files `test:changed` picked for it.
+- Why: the "before" must be the kit as W1 starts from; a second whole-suite run on 905e6be would cost 13 minutes and differ by one skill.
+
+## d-15 What a one-file gate touches {#d-15}
+- Question: W0.5(b)/(c) say a file "touched". A comment line picks no test (the picker reads changed functions, KWB-166).
+- Chosen: a no-op statement on the first line of the file's first top-level function (`probes/baseline.mjs` `FIRST_FUNCTION`), the same
+  at W6 and W11 on the `.mts`.
+- Why: a real one-hook change is a change inside the hook's code; a comment would measure a gate that runs nothing.
