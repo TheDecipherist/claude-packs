@@ -3,6 +3,7 @@
 // A selftest module is left out of the repo lint's no-process gates (d-20): it runs as a process.
 import { lagCases } from './trunk-lag-selftest.mts';
 import { ownerCases, pushedCases } from './pushed-selftest.mts';
+import { bashOf, runHook, scratchProject, snapshot, writtenSince } from './selftest.mts';
 import type { Unpushed } from './push-form.mts';
 import type { Failure, GitGuards } from './remote-heads.mts';
 import type { VerdictRow } from './types.d.mts';
@@ -12,7 +13,9 @@ export interface HouseEnv {
   dirty: (here: string) => string[];
   branch: (here: string) => string | null;
   hasHead: (here: string) => boolean;
-  login: () => string;
+  login?: () => string;
+  /** The environment variables the laws read (is the token variable set here?): the event's, planted by a case. */
+  vars?: Readonly<Record<string, string | undefined>>;
   remoteUrl?: (here: string, remote: string) => string | null;
   merging?: (here: string) => boolean;
   unpushed?: (here: string, cfg: GitGuards) => Unpushed | Failure | null;
@@ -26,6 +29,22 @@ export interface GitGuardLaws {
 }
 
 type Mark = readonly [command: string, env: HouseEnv];
+
+// A judge writes nothing into the project (W4): a refused command and a Stop leave every file of it as it was. (What git-guard
+// keeps is outside the project: GitHub's last look in the git dir, a session's Stop memory in the caller's TMPDIR.)
+function trapCases(hookFile: string): VerdictRow[] {
+  const dir = scratchProject({ 'a.txt': 'one\n' }, { folders: {}, concepts: {}, guards: { git: { house: true } } });
+  const before = snapshot(dir);
+  const refused = runHook(hookFile, dir, bashOf('git add -A', dir)).status;
+  const token = runHook(hookFile, dir, bashOf('git push -u https://x-access-token:abc@github.com/a/b.git work/x', dir)).status;
+  const stopped = runHook(hookFile, dir, { hook_event_name: 'Stop', cwd: dir, session_id: 'trap' }).status;
+  return [
+    ['a git add -A is refused through the runner', refused, 2],
+    ['a token push -u is refused through the runner', token, 2],
+    ['a Stop in a folder with no git says nothing to refuse', stopped, 0],
+    ['a judge writes no file (the write trap)', writtenSince(dir, before).join(','), ''],
+  ];
+}
 
 export function selftest(hookFile: string, { problem, house }: GitGuardLaws): number {
   const bad: string[] = [];
@@ -126,6 +145,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
     ['pushed law', pushedCases(hookFile)],   // KWB-26: a real repo and a bare "GitHub" beside it
     ['owner pushes', ownerCases(hookFile)],  // guards.git.pushNeedsYes (KWB-157)
     ['trunk law', lagCases(hookFile)],       // the trunk a landing leaves behind in the main checkout (KWB-96)
+    ['write trap', trapCases(hookFile)],     // a judge writes no file of the project (W4)
   ];
   for (const [name, cases] of grouped) for (const [label, got, want] of cases) if (got !== want) bad.push(`${name}: ${label} (got ${got}, wanted ${want})`);
   for (const b of bad) console.error(`git-guard selftest FAILED: ${b}`);
@@ -134,6 +154,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
   const counts = [
     `${tokenCases.length + 1} token cases`, `${mustBlock.length + 7} house refusals`, `${mustPass.length + 4} passes`,
     `${n('pushed law')} pushed-law cases`, `${n('owner pushes')} owner-push cases`, `${n('trunk law')} trunk-law cases`,
+    `${n('write trap')} write-trap cases`,
   ];
   console.log(`git-guard selftest: OK (${counts.join(', ')})`);
   return 0;
