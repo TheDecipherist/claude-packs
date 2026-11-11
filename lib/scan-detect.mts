@@ -1,23 +1,49 @@
 // What a project is, from its files and its dependencies: the configuration and the packs `scan` recommends, each with its evidence.
 // One row per pack: a pack is recommended when its row finds something, and says what it found.
-import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { isContent } from '../packs/base/hooks/lib/content.mjs';
-import { readConfig } from './configs.mjs';
+import { isContent } from '../packs/base/hooks/lib/content.mts';
+import { readText } from '../packs/base/hooks/lib/files.mts';
+import { readJson } from '../packs/base/hooks/lib/json.mts';
+import { readLayout } from '../packs/base/hooks/lib/layout.mts';
+import { readConfig } from './configs.mts';
 
-const dep = (ctx, ...names) => names.find((n) => ctx.deps.has(n) || [...ctx.deps].some((d) => d.startsWith(`${n}/`)));
-const file = (ctx, re) => ctx.files.find((f) => re.test(f));
-const said = (hit, what) => (hit ? `${what}: ${hit}` : null);
+/** What a row reads of a project: its dependency names, its files (code), its published files (text), where it is and whether it has no code yet. */
+export interface DetectContext {
+  deps: ReadonlySet<string>;
+  dir: string;
+  files: readonly string[];
+  published: readonly string[];
+  early: boolean;
+}
+
+/** A row finds something in the project and says what, or finds nothing (null). */
+type Row = (ctx: DetectContext) => string | null;
+
+export interface PackFound { pack: string; why: string }
+
+export interface Recommendation {
+  config: string;
+  why: string;
+  always: readonly string[];
+  packs: PackFound[];
+  leftOut: string[];
+  early: boolean;
+  fullStack: boolean;
+}
+
+/** The first of these names a dependency of the project (or a scoped package under it). */
+const dep = (ctx: DetectContext, ...names: string[]): string | undefined => names.find((n) => ctx.deps.has(n) || [...ctx.deps].some((d) => d.startsWith(`${n}/`)));
+const file = (ctx: DetectContext, re: RegExp): string | undefined => ctx.files.find((f) => re.test(f));
+const said = (hit: string | undefined, what: string): string | null => (hit ? `${what}: ${hit}` : null);
+const textHas = (ctx: DetectContext, rel: string, text: RegExp): boolean => text.test(readText(join(ctx.dir, rel)) ?? '');
 // The first of a project's files with this name that holds this text: a name says too little where every project has the same files.
 const MOST_READ = 40;
-function holds(ctx, name, text) {
-  return ctx.files.filter((f) => name.test(f)).slice(0, MOST_READ).find((f) => { try { return text.test(readFileSync(join(ctx.dir, f), 'utf8')); } catch { return false; } });
-}
+const holds = (ctx: DetectContext, name: RegExp, text: RegExp): string | undefined => ctx.files.filter((f) => name.test(f)).slice(0, MOST_READ).find((f) => textHas(ctx, f, text));
 
 // A project at its start has no source, and only its notes say what it will be (KF-3: a JUCE plugin's first `suggest` said base, with no warning). Once code
 // exists the code decides, and a word in a README adds nothing.
 const NOTES = /(^|\/)(?:README|PROMPT|BRIEF|SPEC|PLAN)[^/]*\.md$|^docs\/(?:[^/]+\/)*[^/]+\.md$/i;
-const NOTED = {
+const NOTED: Readonly<Record<string, RegExp>> = {
   'audio-core': /\bJUCE\b|\bVST3?\b|\baudio plug-?in\b/i,
   cpp: /\bC\+\+/,
   midi: /\bMIDI\b/,
@@ -27,15 +53,15 @@ const NOTED = {
   python: /\bPython\b/,
   rust: /\bRust\b/,
 };
-function noted(ctx, pack) {
-  if (!ctx.early || !NOTED[pack]) return null;
+function noted(ctx: DetectContext, pack: string): string | null {
+  const re = NOTED[pack];
+  if (!ctx.early || !re) return null;
   const notes = [...ctx.files, ...ctx.published].filter((f) => NOTES.test(f)).slice(0, MOST_READ);
-  const hit = notes.find((f) => { try { return NOTED[pack].test(readFileSync(join(ctx.dir, f), 'utf8')); } catch { return false; } });
-  return said(hit, 'named in the notes');
+  return said(notes.find((f) => textHas(ctx, f, re)), 'named in the notes');
 }
 
 // A driver alone says Postgres; a tool that speaks several databases says it only with this second signal in its own file.
-const POSTGRES_FILES = [
+const POSTGRES_FILES: readonly (readonly [RegExp, RegExp])[] = [
   [/(^|\/)(?:requirements[^/]*\.txt|pyproject\.toml|Pipfile)$/, /\b(?:psycopg2?(?:-binary)?|asyncpg)\b/],
   [/(^|\/)go\.mod$/, /jackc\/pgx|lib\/pq\b|gorm\.io\/driver\/postgres/],
   [/(^|\/)Cargo\.toml$/, /\b(?:tokio-postgres|deadpool-postgres)\b|\b(?:sqlx|diesel|sea-orm)\b[^\n]*postgres/],
@@ -45,21 +71,25 @@ const POSTGRES_FILES = [
   [/(^|\/)[\w.-]*compose[\w.-]*\.ya?ml$/, /image:\s*['"]?[\w./-]*(?:postgres|postgis|pgvector|timescale)/],
 ];
 
-const ROWS = {
+const web: Row = (c) => said(dep(c, 'next', 'react', 'vue', 'svelte') ?? file(c, /\.(tsx|jsx|vue|svelte|html)$/), 'web UI');
+const htmlUi: Row = (c) => said(file(c, /(^|\/)(ui|views|templates)\/[^/]+\.ts$|\.view\.ts$/), 'server-rendered UI');
+const mongo: Row = (c) => said(dep(c, 'mongodb', 'mongoose'), 'dependency');
+
+const ROWS: Readonly<Record<string, Row>> = {
   'js-ts': (c) => said(file(c, /\.(ts|tsx|js|jsx|mjs|cjs)$/), 'JS or TS source'),
-  mongo: (c) => said(dep(c, 'mongodb', 'mongoose'), 'dependency'),
+  mongo,
   postgres: (c) => said(dep(c, 'pg', 'postgres', 'pg-promise', '@neondatabase/serverless', '@vercel/postgres'), 'dependency')
     ?? said(POSTGRES_FILES.map(([name, text]) => holds(c, name, text)).find(Boolean), 'Postgres named in'),
   fastify: (c) => said(dep(c, 'fastify'), 'dependency'),
   ai: (c) => said(dep(c, '@anthropic-ai/sdk', 'openai', 'ai', '@ai-sdk'), 'dependency'),
   docker: (c) => said(file(c, /(^|\/)(Dockerfile[^/]*|[\w.-]*compose[\w.-]*\.ya?ml)$/), 'file'),
   'shell-hooks': (c) => said(file(c, /(^|\/)hooks\/[^/]+\.(sh|mjs|js|cjs)$/), 'hook file'),
-  'html-ui': (c) => said(file(c, /(^|\/)(ui|views|templates)\/[^/]+\.ts$|\.view\.ts$/), 'server-rendered UI'),
-  web: (c) => said(dep(c, 'next', 'react', 'vue', 'svelte') ?? file(c, /\.(tsx|jsx|vue|svelte|html)$/), 'web UI'),
+  'html-ui': htmlUi,
+  web,
   tui: (c) => said(dep(c, 'ink', 'blessed', 'terminal-kit'), 'dependency'),
   nginx: (c) => said(file(c, /(^|\/)nginx[^/]*\.conf(?:\.template)?$|\/nginx\/.+\.conf$/), 'file'),
-  'stored-text': (c) => (ROWS.web(c) || ROWS['html-ui'](c)) && (ROWS.mongo(c) || dep(c, 'pg', 'mysql2', 'sqlite3', 'better-sqlite3', 'prisma', 'drizzle-orm')) ? 'a UI and a database' : null,
-  'ui-craft': (c) => ROWS.web(c) ?? ROWS['html-ui'](c),
+  'stored-text': (c) => ((web(c) || htmlUi(c)) && (mongo(c) || dep(c, 'pg', 'mysql2', 'sqlite3', 'better-sqlite3', 'prisma', 'drizzle-orm')) ? 'a UI and a database' : null),
+  'ui-craft': (c) => web(c) ?? htmlUi(c),
   cpp: (c) => said(file(c, /\.(?:cc|cpp|cxx|hh|hpp|mm)$/), 'C++ source'),
   python: (c) => said(file(c, /\.py$/), 'Python source'),
   go: (c) => said(file(c, /\.go$/), 'Go source'),
@@ -84,42 +114,52 @@ const ROWS = {
 };
 
 // The configuration of the project: a synth; else the language most of its files are in; else base. full-stack is offered, never assumed: it fixes a folder layout.
-const LEADS = [['cpp', /\.(?:c|cc|cpp|cxx|h|hh|hpp|mm)$/, 'C++ sources'], ['node', /\.(?:ts|tsx|js|jsx|mjs|cjs)$/, 'JS or TS sources'], ['python', /\.py$/, 'Python sources'], ['go', /\.go$/, 'Go sources'], ['rust', /\.rs$|(^|\/)Cargo\.toml$/, 'Rust sources']];
+const LEADS: readonly (readonly [name: string, re: RegExp, why: string])[] = [
+  ['cpp', /\.(?:c|cc|cpp|cxx|h|hh|hpp|mm)$/, 'C++ sources'],
+  ['node', /\.(?:ts|tsx|js|jsx|mjs|cjs)$/, 'JS or TS sources'],
+  ['python', /\.py$/, 'Python sources'],
+  ['go', /\.go$/, 'Go sources'],
+  ['rust', /\.rs$|(^|\/)Cargo\.toml$/, 'Rust sources'],
+];
 
-function configFor(ctx) {
-  if (ROWS['audio-core'](ctx)) return { name: 'synth-creator', why: 'JUCE sources' };
+interface Lead { name: string; why: string }
+
+function configFor(ctx: DetectContext): Lead {
+  if (ROWS['audio-core']?.(ctx)) return { name: 'synth-creator', why: 'JUCE sources' };
   if (noted(ctx, 'audio-core')) return { name: 'synth-creator', why: 'named in the notes' };
   const [lead] = LEADS.map(([name, re, why]) => ({ name, why, n: ctx.files.filter((f) => re.test(f)).length })).sort((a, b) => b.n - a.n);
-  return lead.n ? lead : { name: 'base', why: 'no stack the kit has a configuration for' };
+  return lead && lead.n ? lead : { name: 'base', why: 'no stack the kit has a configuration for' };
 }
 
 const INSTALLED = /(^|\/)(\.claude|node_modules)\//;
 
 // A project that names its configuration has decided; reading the files again can only disagree with it.
-function namedConfig(projectDir) {
+function namedConfig(projectDir: string): Lead | null {
+  const name = readLayout(projectDir).configuration;
+  if (!name) return null;
   try {
-    const name = JSON.parse(readFileSync(join(projectDir, '.claude/layout.json'), 'utf8')).configuration;
-    return name && readConfig(name) ? { name, why: 'named in its layout.json' } : null;
+    return readConfig(name) ? { name, why: 'named in its layout.json' } : null;
   } catch { return null; }
 }
 
-export function recommend(projectDir, files) {
-  const deps = new Set();
+type PackJson = Partial<Record<'dependencies' | 'devDependencies' | 'peerDependencies', Record<string, unknown>>>;
+
+/** The configuration and the packs a project's files and dependencies recommend, each pack with what was found. */
+export function recommend(projectDir: string, files: readonly string[]): Recommendation {
+  const deps = new Set<string>();
   for (const f of files.filter((x) => /(^|\/)package\.json$/.test(x))) {
-    const p = join(projectDir, f);
-    if (!existsSync(p)) continue;
-    try {
-      const j = JSON.parse(readFileSync(p, 'utf8'));
-      for (const k of ['dependencies', 'devDependencies', 'peerDependencies']) for (const n of Object.keys(j[k] ?? {})) deps.add(n);
-    } catch { /* a package.json that does not parse says nothing */ }
+    const j = readJson<PackJson>(join(projectDir, f)); // a package.json that does not parse says nothing
+    if (j === null || typeof j !== 'object') continue;
+    for (const k of ['dependencies', 'devDependencies', 'peerDependencies'] as const) for (const n of Object.keys(j[k] ?? {})) deps.add(n);
   }
   const own = files.filter((f) => !INSTALLED.test(f)); // the kit's own files and installed dependencies say nothing about the project
-  const ctx = { deps, dir: projectDir, files: own.filter((f) => !isContent(f)), published: own.filter(isContent) };
-  ctx.early = !LEADS.some(([, re]) => ctx.files.some((f) => re.test(f)));
+  const code = own.filter((f) => !isContent(f));
+  const early = !LEADS.some(([, re]) => code.some((f) => re.test(f)));
+  const ctx: DetectContext = { deps, dir: projectDir, files: code, published: own.filter((f) => isContent(f)), early };
   const { name, why } = namedConfig(projectDir) ?? configFor(ctx);
   const config = readConfig(name);
-  const packs = [];
-  const leftOut = [];
+  const packs: PackFound[] = [];
+  const leftOut: string[] = [];
   for (const pack of config.packs.choose) {
     const found = ROWS[pack]?.(ctx) ?? noted(ctx, pack);
     if (found) packs.push({ pack, why: found });
