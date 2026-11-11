@@ -196,7 +196,7 @@ export function runRows(s, nowMs = Date.now(), checkedAt = null) {
   });
   const current = s.steps.find((x) => x.done < x.items);
   if (!s.finished && n === 0 && current) {
-    agents.push({ who: 'lead', id: current.id, title: current.title, percent: percent(current.done, current.items), now: '', ...liveOf(s.lead, null, null, nowMs) });
+    agents.push({ who: 'lead', id: current.id, title: current.title, percent: percent(current.done, current.items), now: '', ...liveOf(s.lead, null, s.leadWork ?? null, nowMs) });
   }
   return { project: { name, percent: s.percent, state, left, checked }, agents: alignLive(agents) };
 }
@@ -210,8 +210,11 @@ function ordersIn(project, only) {
  *  and on every machine remotes.json lists (1.8.1), or one project's orders here (`dir`). */
 export function runsReport({ dir = null, order = null, remotes = undefined, ask = undefined, here = undefined } = {}) {
   const runs = (dir ? ordersIn(dir, order).map((o) => ({ project: dir, order: o })) : runningOrders()).map((r) => orderStatus(r.project, r.order));
-  const work = workIn(runs.flatMap((r) => r.agents.map((a) => a.path)));   // the check: what really runs in each worktree now
+  // the check: what really runs in each agent's worktree now, and in the checkout the lead works in (the user: "and what
+  // happened to the heartbeat and cores and all that?"); a process counts for the deepest folder, so an agent's build is its own
+  const work = workIn([...runs.map((r) => r.project), ...runs.flatMap((r) => r.agents.map((a) => a.path))]);
   for (const a of runs.flatMap((r) => r.agents)) a.work = work?.[a.path] ?? null;
+  for (const r of runs) r.leadWork = work?.[r.project] ?? null;
   const listed = dir ? [] : (remotes ?? remotesOf());
   const far = remotesReport(listed, ask);
   // with other machines listed, every run says where it runs, this machine's own too; alone, no names
