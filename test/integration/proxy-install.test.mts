@@ -85,7 +85,7 @@ test('the first event of a session with no daemon is judged by the fallback: rm 
 test('the picker under a planted uname of Linux x86_64 on this machine runs the TypeScript runner, never the darwin binary', { skip }, () => {
   const r = rig(true);
   const bin = scratchDir('planted-uname-');
-  put(join(bin, 'uname'), '#!/bin/sh\ncase "$*" in *-r*) echo 5.15.0 ;; *) echo "Linux x86_64" ;; esac\n');
+  put(join(bin, 'uname'), '#!/bin/sh\ncase "$*" in *r*) echo "Linux 5.15.0 x86_64" ;; *) echo "Linux x86_64" ;; esac\n');
   chmodSync(join(bin, 'uname'), 0o755);
   const out = fire(r, RM, { ...r.env, PATH: `${bin}:${r.env.PATH}` });
   assert.equal(out.code, 2);
@@ -95,9 +95,9 @@ test('the picker under a planted uname of Linux x86_64 on this machine runs the 
 
 test('the picker under a planted macOS 11 runs the TypeScript runner: Go\'s minimum is 12', { skip: target?.startsWith('darwin') ? skip : 'not a Mac' }, () => {
   const r = rig(true);
-  const bin = scratchDir('planted-sw-vers-');
-  put(join(bin, 'sw_vers'), '#!/bin/sh\necho 11.7.10\n');
-  chmodSync(join(bin, 'sw_vers'), 0o755);
+  const bin = scratchDir('planted-uname-old-');
+  put(join(bin, 'uname'), '#!/bin/sh\necho "Darwin 20.6.0 arm64"\n');   // macOS 11
+  chmodSync(join(bin, 'uname'), 0o755);
   const out = fire(r, RM, { ...r.env, PATH: `${bin}:${r.env.PATH}` });
   assert.equal(out.code, 2);
   assert.deepEqual(sources(r), ['event:runner']);
