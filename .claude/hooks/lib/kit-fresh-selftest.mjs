@@ -45,6 +45,11 @@ export function selftest() {
     cases.push(['an older lock blocks a run with nobody there', atStart(old, { ...START, npm: answer('1.9.0'), unattended: true })?.block ?? null, true]);
     cases.push(['the newest lock says nothing', say(atStart(scratchProject(lock('1.9.0')), { ...START, npm: answer('1.9.0'), unattended: true })), '']);
     cases.push(['a lock newer than npm (a tarball before its release) says nothing', say(atStart(scratchProject(lock('1.9.1')), { ...START, npm: answer('1.9.0') })), '']);
+    // CLAUDE_PACKS_UNATTENDED has one meaning, agents-held's: 1 nobody there, 0 someone there, unset or anything else not said (KWB-185)
+    const blocksWith = (said) => atStart(old, { env: said === undefined ? {} : { CLAUDE_PACKS_UNATTENDED: said }, now: START.now, npm: answer('1.9.0') })?.block ?? null;
+    cases.push(['CLAUDE_PACKS_UNATTENDED=1 blocks an outdated project', blocksWith('1'), true]);
+    cases.push(['CLAUDE_PACKS_UNATTENDED=0 says someone is there: no block (KWB-185)', blocksWith('0'), false]);
+    cases.push(['CLAUDE_PACKS_UNATTENDED unset does not block', blocksWith(undefined), false]);
     // the installed package is what runs, the lock only its note (KWB-162): a stale lock beside a current package is up to date
     const packed = scratchProject({ ...lock('1.0.0'), ...installed('1.9.0') });
     cases.push(['the installed package wins over a stale lock', say(atStart(packed, { ...START, npm: answer('1.9.0'), unattended: true })), '']);

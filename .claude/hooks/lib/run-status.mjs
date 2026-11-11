@@ -60,11 +60,14 @@ export function orderStatus(project, order, { env, nowMs = Date.now() }) {
     // an agent of this order with nothing written yet still counts: its worktree is on the order's own branch, work/<order>-<name>
     // (the user: "I dont see those 5 agents"); one merged back and untouched for KIN_MS is a finished agent, unless work runs in it
     const kin = (branch) => typeof branch === 'string' && branch.startsWith(`work/${order}-`);
-    const stale = (t) => nowMs - t.touched > KIN_MS && t.branch !== null && mergedInto(project, t.branch, `work/${order}`, env);
+    const merged = (branch) => branch !== null && mergedInto(project, branch, `work/${order}`, env);
+    const stale = (t) => nowMs - t.touched > KIN_MS && merged(t.branch);
+    // its own file says done and its branch is merged: finished, whatever its worktree (KWB-188: 37 finished worktrees listed)
+    const finished = (t) => (t.file?.state === 'done' || (t.file?.items !== undefined && (t.file.done ?? 0) >= t.file.items)) && merged(t.branch);
     const agents = trees.map((t) => ({ ...t, file: readJson(join(t.path, 'docs', 'workorders', order, 'agents', `${t.name}.json`)), beat: beatOf(t.name) }))
         .map((t) => { const known = Boolean(t.file || listed.has(t.name) || alive(t.beat)); return { ...t, known, kinOnly: !known && kin(t.branch) }; })
         .filter((t) => t.known || t.kinOnly)
-        .map((t) => ({ ...t, stale: t.kinOnly && stale(t), fresh: t.kinOnly && t.branch !== null && commitsAhead(project, t.branch, `work/${order}`, env) === 0 })) // runsReport drops a stale one unless work runs in it
+        .map((t) => ({ ...t, stale: (t.kinOnly && stale(t)) || finished(t), fresh: t.kinOnly && t.branch !== null && commitsAhead(project, t.branch, `work/${order}`, env) === 0 })) // runsReport drops a stale one unless work runs in it
         .map((t) => {
         const f = t.file ?? {};
         const step = f.step ?? listed.get(t.name)?.step ?? null;

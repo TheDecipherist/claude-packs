@@ -110,7 +110,7 @@ export function kitVerdict(root, { git, fetch }) {
 }
 const COMMIT = /(?:^|[;&|(\s])git\b(?:\s+-C\s+\S+|\s+-c\s+\S+)*\s+commit\b/;
 /** what to say at a session's start, and whether it must not start: { say, block } | null */
-export function atStart(root, { env, now, unattended = Boolean(env['CLAUDE_PACKS_UNATTENDED']), npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git = kitGit(root, env) }) {
+export function atStart(root, { env, now, unattended = env['CLAUDE_PACKS_UNATTENDED'] === '1', npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git = kitGit(root, env) }) {
     if (isKitRepo(root)) {
         const v = kitVerdict(root, { git, fetch: true });
         return v && { say: v.say, block: false };

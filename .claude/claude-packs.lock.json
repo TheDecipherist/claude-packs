@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-11T18:31:40.472Z",
+  "updated": "2026-11-11T19:02:06.762Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/agents-held.md": "0da8fb50ef828b0440389751254c16ae1cf9dd21c78fc23a7d957b221674a409",
@@ -79,8 +79,8 @@
     ".claude/hooks/lib/hub-rig.mjs": "14ecc9f75f5b0178ef989b09112ce3117afb00d185fdd0e3f66aa9c86b116a2b",
     ".claude/hooks/lib/identifier-runs.mjs": "74dd8601af12a9327a004766c50eb874a3eeeec07bd2e4febe0ee52834384580",
     ".claude/hooks/lib/json.mjs": "39ce64623563839f0ea930aa10fb3c2b6c8972a990a86f94de5ac77a48dfee30",
-    ".claude/hooks/lib/kit-fresh-look.mjs": "31f18211e9fc3e00d113555bca564c08d937b2fbd6080eb1723f141bfcf3ddab",
-    ".claude/hooks/lib/kit-fresh-selftest.mjs": "111bfddb50d06069e35186fc8f8c4d68357b0fbe018bf7346d25897f87f009c3",
+    ".claude/hooks/lib/kit-fresh-look.mjs": "78a82b4ed2cecb69f860bf44ec117fdb6e5501b10661bc7e1b7b2755ccab7e81",
+    ".claude/hooks/lib/kit-fresh-selftest.mjs": "abf35edd2553f22f12a535660fb6806c8ab96c159623caaf11367efdb05a970b",
     ".claude/hooks/lib/kit-version.mjs": "2257bbab3406a22b94f691e5141c42ffed29a80eefd44b9eab63a128606718ec",
     ".claude/hooks/lib/languages.mjs": "63cad1b0f5653ef16b7315fc05b3e0fe0aa1b317888f806f44a72439bb224e7d",
     ".claude/hooks/lib/layout.mjs": "d206b8500b0058ed6221472419a03a956cd6b7b8e72a92ae3eec03fedb13e3e8",
@@ -107,7 +107,7 @@
     ".claude/hooks/lib/run-progress.mjs": "b71d9ebf3d3cb2f3f3c58e8942d7e892d9fb496353081f45998dd237a46cc0e0",
     ".claude/hooks/lib/run-remotes.mjs": "af9e992f4ba007c3229b770b34e00921cfd03b2d2e26dbeb714fa6d323d2144d",
     ".claude/hooks/lib/run-rows.mjs": "1fcac0ff8a0a155348ad2b080ee63bd951fa8f74d03dbf13e3264944020ebd8a",
-    ".claude/hooks/lib/run-status.mjs": "0c50a40a46c99e0c9198c510ee63748216149e1406634fcf6ba39a9aa43ea059",
+    ".claude/hooks/lib/run-status.mjs": "356d2e1615f319b181d94d70be90f4be9b1e1fb3c72a2ccc79c4d6aefc87c1aa",
     ".claude/hooks/lib/run-transcripts.mjs": "28d2f2e64852849cda0890827d7fb0765d1f951d36860c99c676f8a7e6fce7c6",
     ".claude/hooks/lib/run-tree.mjs": "54a5e2997fd24e1b198c53108adc18aa0922512ff7b46f676b65062241140e14",
     ".claude/hooks/lib/rust-scan.mjs": "4cc41781fb73a7265de4709a40f8bbc2253b28d65bfeaa4082ae017bdfadaa52",

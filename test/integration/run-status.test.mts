@@ -137,6 +137,20 @@ test('an agent shows from its first minute, by its worktree on the order\'s bran
   assert.equal(runRows(again, Date.now()).agents[0]?.title, 'no status file yet', 'its first commit: started');
 });
 
+test('an agent whose branch is merged and whose own file says done leaves the list, its worktree kept; one not merged yet stays (KWB-188)', () => {
+  const { dir, git } = project({ status: { steps: [{ id: 'W1', title: 'x', items: 2, done: 0 }], agents: [{ name: 'merged', step: 'W1' }, { name: 'open', step: 'W1' }] } });
+  git('branch', 'work/demo');
+  for (const name of ['merged', 'open']) {
+    git('worktree', 'add', '-q', `.claude/worktrees/${name}`, '-b', `work/demo-${name}`);
+    mkdirSync(join(dir, `.claude/worktrees/${name}/docs/workorders/demo/agents`), { recursive: true });
+    writeFileSync(join(dir, `.claude/worktrees/${name}/docs/workorders/demo/agents/${name}.json`), toJson({ name, step: 'W1', items: 3, done: 3 }));
+  }
+  gitIn(join(dir, '.claude/worktrees/open'), 'commit', '-q', '--allow-empty', '-m', 'done, not merged yet');
+  const [run] = runsReport({ ...HERE, dir, order: 'demo' }).runs;
+  assert.ok(run);
+  assert.deepEqual(run.agents.map((a) => a.name), ['open'], 'the merged and done agent left out');
+});
+
 test('a status file that is not JSON is ignored and the progress is derived instead, never a crash', () => {
   const { dir } = project({ progress: '- W0.1 a\n' });
   writeFileSync(join(dir, 'docs/workorders/demo/status.json'), '{ not json');
