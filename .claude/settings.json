@@ -123,5 +123,17 @@
     "command": "node \"$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs\"",
     "padding": 0,
     "refreshInterval": 1
+  },
+  "extraKnownMarketplaces": {
+    "claude-packs-kit": {
+      "source": {
+        "source": "directory",
+        "path": "./"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "kit-typescript-lsp@claude-packs-kit": true,
+    "typescript-lsp@claude-plugins-official": false
   }
 }
