@@ -73,6 +73,13 @@ test('a change under docs/ picks the repo lint (KWB-131)', () => {
   assert.ok(picked.includes('test/repo-lint.test.mts'), picked.join(' '));
 });
 
+test('a change to a document at the root picks the repo lint, which reads each of them (KWB-190)', () => {
+  for (const doc of ['README.md', 'CLAUDE.md', 'CHANGELOG.md']) {
+    const picked = [...choose(KIT, [doc], graph(KIT)).chosen.keys()];
+    assert.ok(picked.includes('test/repo-lint.test.mts'), `${doc}: ${picked.join(' ')}`);
+  }
+});
+
 test('a hook change picks its own test and split parts, and the noop test: nothing else besides its selftest', () => {
   const g = graph(KIT);
   const picked = [...choose(KIT, ['packs/base/hooks/git-guard.mts'], g, { 'packs/base/hooks/git-guard.mts': 'M' }, { 'packs/base/hooks/git-guard.mts': new Set(['hook']) }).chosen.keys()];

@@ -504,7 +504,6 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template` picks the steps: `generic` (the default), `plugin` or `rebuild` |
 | `workorder check <name>` | Before a run: refuses a placeholder left, a step with no measured Done when, a skill not installed, a red doctor |
 | `status [--order <name>] [--watch <minutes>]` | Where every unattended run on this machine stands: one line per project with a bar and its percent, then one per agent with its step, its own bar and what it is doing. `--dir <project>` reports that project's orders, running or not |
-| `claude-ai-skill` | `workorder-writer.zip`: the work order interview alone, as `planner-skills --zip` writes it |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |
 | `configs` | The configurations |

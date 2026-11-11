@@ -51,7 +51,8 @@ const noopOf = (text: string, changed: string, root: string): boolean => /noop/.
 // it in; the installer's own code (lib/) reaches its tests through their imports and names.
 export const TABLE: readonly TableRow[] = [
   { files: /^package\.json$/, why: 'runs every test (its scripts, its dependencies)', tests: () => true },
-  { files: /^docs\//, why: 'a document: the tests that read every file the repo keeps (KWB-131)', tests: (text) => /reads every file the repo keeps/.test(text) },
+  // a document under docs/ (KWB-131) or at the root, which the repo lint reads too: the README's tables, the names (KWB-190)
+  { files: /^(docs\/|[\w.-]+\.md$)/, why: 'a document: the tests that read every file the repo keeps (KWB-131, KWB-190)', tests: (text) => /reads every file the repo keeps/.test(text) },
   { files: /^test\/fresh-tmp\.m[jt]s$/, why: 'the preload: its own test (every test loads it; this one checks what it gives them)', tests: (text) => /test\/fresh-tmp\.mjs itself|The preload itself/.test(text) },
   { files: /^packs\/manifest-[\w.-]+\.json$/, why: 'the per-version manifest: the noop test compares an update against it', tests: (text) => /packs\/manifest-/.test(text) || /readManifest\(/.test(text) },
   { files: /^packs\//, why: 'an installed file changed: noop holds every installed file and every change to one listed', tests: noopOf },

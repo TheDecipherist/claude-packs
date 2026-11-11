@@ -190,6 +190,8 @@ export interface PackManifest {
   /** Hooks that switch on even in a project that already has the pack (an update), named here by their file. */
   onByDefault?: readonly string[];
   requires?: readonly string[];
+  /** The configurations the pack may join (W7: replaces the configurations' `choose` lists). */
+  fits?: readonly string[];
   tests?: Record<string, readonly string[]>;
   [key: string]: unknown;
 }
@@ -200,7 +202,6 @@ export interface Configuration {
   description?: string;
   packs: { always: readonly string[]; choose: readonly string[]; default: readonly string[] };
   layout?: Partial<Layout>;
-  hookOrder?: Record<string, readonly string[]>;
   sourceFiles?: string;
   /** The CLAUDE.md block's opening rules: the ones every project of the kind keeps, and the ones it never does. */
   preamble?: { always: readonly string[]; never: readonly string[] };
