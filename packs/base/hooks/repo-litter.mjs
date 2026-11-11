@@ -14,6 +14,8 @@ import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
+
 export const BIG_MB = 10;
 const MB = 1024 * 1024;
 const KEPT_IMAGE = /^(favicon|apple-touch-icon|logo|icon|og-image|social|android-chrome|mstile|safari-pinned)/i;
@@ -40,8 +42,8 @@ function staged(dir, arg) {
 
 function judgeAdd(command, cwd) {
   for (const { dir, args } of gitAdds(command, cwd)) {
-    const root = checkoutRoot(join(dir, 'x'));
-    const cfg = readLayout(claudeRoot(join(dir, 'x'))).guards?.repoLitter ?? {};
+    const root = checkoutRoot(ROOT, join(dir, 'x'), process.cwd());
+    const cfg = readLayout(claudeRoot(ROOT, join(dir, 'x'), process.cwd())).guards?.repoLitter ?? {};
     for (const abs of args.filter((a) => !a.startsWith('-')).flatMap((a) => staged(dir, a))) {
       const fault = faultOf(relative(root, abs).replace(/\\/g, '/'), abs, cfg);
       if (fault) return `${fault}\nA real asset can be named in guards.repoLitter.allow.\n`;
@@ -57,7 +59,7 @@ function selftest() {
   const dir = scratchProject({ 'src/a.pdf:Zone.Identifier': 'x', 'shot.png': 'x', 'favicon.png': 'x', 'src/a.ts': 'x', 'src/hero.png': 'x', 'trace.har': 'x', 'kept.png': 'x', '.claude/layout.json': JSON.stringify({ guards: { repoLitter: { maxFileMb: 1, allow: ['kept.png'] } } }) });
   git(dir, 'init', '-q');
   put(join(dir, 'media/big.bin'), 'x'.repeat(2 * MB));
-  const add = (paths) => runHook(hook, dir, bashOf(`git add ${paths}`, dir));
+  const add = (paths) => runHook(hook, dir, bashOf(`git add ${paths}`, dir)).status;
   return verdicts('repo-litter', [
     ['a screenshot in the root', add('shot.png'), 2],
     ['a big file', add('media/big.bin'), 2],
@@ -68,7 +70,7 @@ function selftest() {
     ['an image in its folder', add('src/hero.png'), 0],
     ['a favicon in the root', add('favicon.png'), 0],
     ['a file the layout allows', add('kept.png'), 0],
-    ['something else entirely', runHook(hook, dir, bashOf('git status', dir)), 0],
+    ['something else entirely', runHook(hook, dir, bashOf('git status', dir)).status, 0],
   ]);
 }
 

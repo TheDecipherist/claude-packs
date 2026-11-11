@@ -22,10 +22,12 @@ import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, real } from './lib
 import { judgeWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
-import { checkoutRoot, claudeRoot, insideProject, ROOT } from './lib/project.mjs';
+import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { readShape } from './lib/shape.mjs';
 import { lastTurn, writesOfTurn } from './lib/turn.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const MAX_SENDS = 3;
 const NOT_CONCEPTS = new Set(['none', 'no', '-', 'n/a', 'one', 'many', 'ids']);
@@ -144,14 +146,14 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   const path = event.hook_event_name === 'SubagentStop' ? event.agent_transcript_path ?? event.transcript_path : event.transcript_path;
   const turn = lastTurn(path ?? '');
   const text = `${turn.text}\n${event.last_assistant_message ?? ''}`;
-  const writes = writesOfTurn(turn, cwd).filter((w) => insideProject(w.path));
+  const writes = writesOfTurn(turn, cwd).filter((w) => insideProject(ROOT, w.path, process.cwd()));
   const problems = [];
-  const rel = (p) => relative(checkoutRoot(p), p).replace(/\\/g, '/');
+  const rel = (p) => relative(checkoutRoot(ROOT, p, process.cwd()), p).replace(/\\/g, '/');
   // Each write is judged against its own checkout (a worktree's own build.md, manifest and layout), never the session's folder:
   // a lead in the main checkout writing in a worktree has its making line in that worktree's build.md (Stellix WB-86).
   const byRoot = new Map();
-  for (const w of writes) { const r = checkoutRoot(w.path); if (!byRoot.has(r)) byRoot.set(r, []); byRoot.get(r).push(w); }
-  if (!byRoot.size) byRoot.set(checkoutRoot(join(cwd, 'x')), []);
+  for (const w of writes) { const r = checkoutRoot(ROOT, w.path, process.cwd()); if (!byRoot.has(r)) byRoot.set(r, []); byRoot.get(r).push(w); }
+  if (!byRoot.size) byRoot.set(checkoutRoot(ROOT, join(cwd, 'x'), process.cwd()), []);
   const judged = [];
   for (const [r, ws] of byRoot) {
     const lay = readLayout(r);
@@ -185,7 +187,7 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
 
   // 2. once-only on the source the turn wrote. The tools' writes passed once-only itself when it is installed; running its detector again on them at
   // every Stop cost over the kit's own 500 ms line (KF-33). The shell's writes stay: much of what they write is unknown at write time.
-  const atWrite = existsSync(join(claudeRoot(join(cwd, 'x')), '.claude/hooks/once-only.mjs'));
+  const atWrite = existsSync(join(claudeRoot(ROOT, join(cwd, 'x'), process.cwd()), '.claude/hooks/once-only.mjs'));
   const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))];
   // each checkout's sources against that checkout's own index, layout and manifest: a file in one worktree is never judged
   // against its twin in another worktree of the same repo (KWB-155)
@@ -193,7 +195,7 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   for (const root of byRoot.keys()) {
     const layout = readLayout(root);
     const shape = readShape(root) ?? readShape(ROOT);
-    const mine = sources.filter((p) => checkoutRoot(p) === root && !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
+    const mine = sources.filter((p) => checkoutRoot(ROOT, p, process.cwd()) === root && !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
     if (!mine.length) continue;
     // once-only's index finds the candidates, jscpd confirms on those files alone (lib/dup-index.mjs; KWB-24: no whole-repo scan)
     const added = addedRanges(root, mine);

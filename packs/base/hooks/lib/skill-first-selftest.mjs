@@ -26,8 +26,8 @@ export function selftest(hook) {
   const circuit = transcript('circuit', [{ name: 'Skill', input: { skill: 'read-a-circuit-diagram' } }]);
   const look = transcript('look', [{ name: 'Read', input: { file_path: '/kit/packs/audio-core/skills/analyse-reference-look/SKILL.md' } }]);
   const scan = transcript('scan', [{ name: 'Skill', input: { skill: 'read-a-scan' } }]);
-  const read = (file, t, cwd = dir) => runHook(hook, cwd, { tool_name: 'Read', tool_input: { file_path: file }, cwd, transcript_path: t });
-  const bash = (command, t) => runHook(hook, dir, { tool_name: 'Bash', tool_input: { command }, cwd: dir, transcript_path: t });
+  const read = (file, t, cwd = dir) => runHook(hook, cwd, { tool_name: 'Read', tool_input: { file_path: file }, cwd, transcript_path: t }).status;
+  const bash = (command, t) => runHook(hook, dir, { tool_name: 'Bash', tool_input: { command }, cwd: dir, transcript_path: t }).status;
   const render = `python3 -c "import pypdfium2" "${manual}"`;
   return verdicts('skill-first', [
     ['a service-manual tile read with its skill unloaded', read(sheet, none), 2],

@@ -13,6 +13,8 @@ import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
+
 const FIRMWARE = /\.(bin|rom|eprom|epr|hex|srec|s19|mot|ic\d+|lod|syx|mid|dis|disasm|asm\.txt|lst|wiz|mfw|raf)$/i;
 const OWN_BUILD = /(^|\/)(build|out|dist|target)\//;
 
@@ -20,8 +22,8 @@ const staged = (dir, arg) => (spawnSync('git', ['ls-files', '--others', '--modif
 
 function judgeAdd(command, cwd) {
   for (const { dir, args } of gitAdds(command, cwd)) {
-    const root = checkoutRoot(join(dir, 'x'));
-    const fixtures = readLayout(claudeRoot(join(dir, 'x'))).guards?.firmware?.fixtures ?? [];
+    const root = checkoutRoot(ROOT, join(dir, 'x'), process.cwd());
+    const fixtures = readLayout(claudeRoot(ROOT, join(dir, 'x'), process.cwd())).guards?.firmware?.fixtures ?? [];
     for (const abs of args.filter((a) => !a.startsWith('-')).flatMap((a) => staged(dir, a))) {
       const rel = relative(root, abs).replace(/\\/g, '/');
       if (FIRMWARE.test(rel) && !OWN_BUILD.test(rel) && !matchesAny(rel, fixtures)) return `${rel} looks like firmware, a disassembly or a sound bank, which stays out of git. Keep it local, and ship derived facts. A small test fixture is named in guards.firmware.fixtures.\n`;
@@ -36,7 +38,7 @@ function selftest() {
   const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'roms/os.bin': 'x', 'banks/factory.syx': 'x', 'test/fixtures/one.syx': 'x', 'src/a.cpp': 'x', '.claude/layout.json': JSON.stringify({ guards: { firmware: { fixtures: ['test/fixtures/**'] } } }) });
   git(dir, 'init', '-q');
-  const add = (p) => runHook(hook, dir, bashOf(`git add ${p}`, dir));
+  const add = (p) => runHook(hook, dir, bashOf(`git add ${p}`, dir)).status;
   return verdicts('firmware-out-of-git', [
     ['a ROM image', add('roms/os.bin'), 2],
     ['a folder holding one', add('roms'), 2],

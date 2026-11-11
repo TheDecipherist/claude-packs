@@ -42,13 +42,13 @@ function unchartedWrites(payload) {
   const out = [];
   const seen = new Map();
   for (const w of writesOf(payload, payload.cwd ?? ROOT)) {
-    if (w.op === 'delete' || !insideProject(w.path)) continue;
-    const rel = relInCheckout(w.path);
+    if (w.op === 'delete' || !insideProject(ROOT, w.path, process.cwd())) continue;
+    const rel = relInCheckout(ROOT, w.path, process.cwd());
     if (rel.startsWith('.claude/')) continue;
-    const layout = readLayout(claudeRoot(w.path));
+    const layout = readLayout(claudeRoot(ROOT, w.path, process.cwd()));
     const globs = chartGlobs(layout);
     if (matchesAny(rel, globs) || !sourceFolders(layout).some((f) => rel.startsWith(`${f}/`))) continue;
-    const checkout = checkoutRoot(w.path);
+    const checkout = checkoutRoot(ROOT, w.path, process.cwd());
     if (!seen.has(checkout)) seen.set(checkout, hasChart(checkout, globs));
     if (!seen.get(checkout)) out.push({ rel, globs });
   }
@@ -75,10 +75,10 @@ function selftest() {
   git(dir, 'init', '-q');
   git(dir, 'add', '.');
   git(dir, 'commit', '-q', '-m', 'start');
-  const w = (rel) => runHook(me, dir, writeOf(join(dir, rel)));
+  const w = (rel) => runHook(me, dir, writeOf(join(dir, rel))).status;
   const cases = [
     ['no chart: a source write refused', w('src/ui/Panel.cpp'), 2],
-    ['no chart: by the shell too', runHook(me, dir, bashOf('cat > src/dsp/Svf.cpp <<EOF\nx\nEOF', dir)), 2],
+    ['no chart: by the shell too', runHook(me, dir, bashOf('cat > src/dsp/Svf.cpp <<EOF\nx\nEOF', dir)).status, 2],
     ['no chart: the chart itself may be written', w('docs/chart.mmd'), 0],
     ['no chart: a test passes', w('tests/panel_test.cpp'), 0],
     ['no chart: docs pass', w('docs/spec.md'), 0],

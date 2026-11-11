@@ -28,7 +28,7 @@ function main(text) {
     return 0;
   }
   if (!Array.isArray(state.files) || state.files.length === 0) return 0;
-  const hit = writesOf(payload, payload.cwd ?? process.cwd()).map((w) => w.path).filter((f) => insideProject(f)).map((f) => relative(checkoutRoot(f), f))
+  const hit = writesOf(payload, payload.cwd ?? process.cwd()).map((w) => w.path).filter((f) => insideProject(ROOT, f, process.cwd())).map((f) => relative(checkoutRoot(ROOT, f, process.cwd()), f))
     .find((rel) => rel === '.claude/state/frozen.json' || matchesAny(rel, state.files));
   if (!hit) return 0;
   const rel = hit;
@@ -45,17 +45,17 @@ function selftest() {
   const frozen = JSON.stringify({ files: ['tests/bug_7*', 'goldens/**'], reason: 'bug 7' });
   const dir = scratchProject({ '.claude/state/frozen.json': frozen });
   const idle = scratchProject();
-  const e = (root, file) => runHook(hook, root, editOf(join(root, file)));
+  const e = (root, file) => runHook(hook, root, editOf(join(root, file))).status;
   return verdicts('frozen-files', [
     ['the test that proves the fix', e(dir, 'tests/bug_7_test.cpp'), 2],
     ['a golden render', e(dir, 'goldens/pad.wav'), 2],
     ['the code being fixed', e(dir, 'src/dsp/Svf.cpp'), 0],
     ['the frozen list itself', e(dir, '.claude/state/frozen.json'), 2],
     ['nothing frozen', e(idle, 'tests/bug_7_test.cpp'), 0],
-    ['another project is not ours', runHook(hook, dir, editOf(join(dirname(dir), 'elsewhere/tests/bug_7.cpp'))), 0],
-    ['the shell writing the frozen test', runHook(hook, dir, bashOf("cat > tests/bug_7_test.cpp <<'EOF'\nEXPECT (true);\nEOF", dir)), 2],
-    ['the shell deleting a golden', runHook(hook, dir, bashOf('rm -f goldens/pad.wav', dir)), 2],
-    ['the shell writing the code', runHook(hook, dir, bashOf('echo x >> src/dsp/Svf.cpp', dir)), 0],
+    ['another project is not ours', runHook(hook, dir, editOf(join(dirname(dir), 'elsewhere/tests/bug_7.cpp'))).status, 0],
+    ['the shell writing the frozen test', runHook(hook, dir, bashOf("cat > tests/bug_7_test.cpp <<'EOF'\nEXPECT (true);\nEOF", dir)).status, 2],
+    ['the shell deleting a golden', runHook(hook, dir, bashOf('rm -f goldens/pad.wav', dir)).status, 2],
+    ['the shell writing the code', runHook(hook, dir, bashOf('echo x >> src/dsp/Svf.cpp', dir)).status, 0],
   ]);
 }
 

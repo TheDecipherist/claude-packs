@@ -17,6 +17,8 @@ import { judgeEvent, readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
+
 const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b|-N\b|--show-only\b|--print-labels\b)\S+)*|cargo\s+(?:test|nextest\s+run)(?:\s+-\S+)*)$/;
 const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec|\S*buildq)\s+|timeout\s+\S+\s+)+/;
 const REDIRECT = /\s*(?:\d?>>?|&>)&?\s*\S+/g;
@@ -56,10 +58,10 @@ export function refusal(command, cwd, asked = false) {
     const cd = part.trim().match(/^cd\s+(\S+)$/);
     if (cd) { here = resolve(here, cd[1]); continue; }
     const words = clean(part);
-    const { commands = {} } = readLayout(claudeRoot(resolve(here, 'x'))); // claudeRoot takes a file: a worktree's own layout, not main's
+    const { commands = {} } = readLayout(claudeRoot(ROOT, resolve(here, 'x'), process.cwd())); // claudeRoot takes a file: a worktree's own layout, not main's
     if (!WHOLE.test(words) && !WRAPPER.test(bare(words)) && !ownSuite(words, commands.test)) continue;
     if (asked) continue;
-    const dirty = uncommitted(checkoutRoot(resolve(here, 'x')));
+    const dirty = uncommitted(checkoutRoot(ROOT, resolve(here, 'x'), process.cwd()));
     const changed = commands['test-changed'] ? `\`${commands['test-changed']}\`, against the trunk` : 'the pick-tests skill, against the trunk';
     return `\`${words}\` runs the whole suite${dirty.length ? `, on uncommitted work:\n    ${dirty.slice(0, 8).join('\n    ')}` : '.'}\n` +
       `The gate before landing and before a release is the tests the branch's changes reach (${changed}). The whole suite runs only when the user asks for a full run, in that turn.\n`;
@@ -91,14 +93,14 @@ function selftest() {
     ['the plain run.sh prompt asks nothing (KWB-168)', askedForFull('Run docs/workorders/x/PROMPT.md'), false],
     ['a complaint that an agent runs the whole suite asks nothing (KWB-168)', askedForFull('the agent runs the whole suite again and again'), false],
   ].map(([label, got, want]) => [label, got ? 1 : 0, want ? 1 : 0]);
-  const as = (cmd, transcript) => runHook(hook, dir, { ...bashOf(cmd, dir), transcript_path: transcript });
+  const as = (cmd, transcript) => runHook(hook, dir, { ...bashOf(cmd, dir), transcript_path: transcript }).status;
   const sh = (cmd) => as(cmd, land);
   const committed = [
     ['the whole suite to land committed work: the gate is the changed tests now', sh('npm test'), 2],
     ['the project\'s own whole-suite command, committed and unasked', sh('bash tools/all.sh'), 2],
     ['the whole suite when the user asks for it', as('npm test', full), 0],
     ['the project\'s own whole-suite command when asked', as('bash tools/all.sh', full), 0],
-    ['no transcript: nobody asked', runHook(hook, dir, bashOf('npm test', dir)), 2],
+    ['no transcript: nobody asked', runHook(hook, dir, bashOf('npm test', dir)).status, 2],
   ];
   put(`${dir}/a.txt`, 'two\n');
   const said = sh('npm test');

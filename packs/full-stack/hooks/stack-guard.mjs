@@ -66,8 +66,8 @@ function selftest() {
   const hook = fileURLToPath(import.meta.url);
   const pkg = (deps) => JSON.stringify({ name: 'x', dependencies: deps }, null, 2);
   const dir = scratchProject({ 'api/package.json': pkg({ fastify: '5.6.1' }), 'api/src/old.ts': "import express from 'express';\n" });
-  const w = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text));
-  const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir));
+  const w = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text)).status;
+  const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir)).status;
   const cases = [
     ['express added to package.json', w('api/package.json', pkg({ fastify: '5.6.1', express: '5.1.0' })), 2],
     ['vite added as a dev dependency', w('api/package.json', JSON.stringify({ devDependencies: { vite: '7.1.0' } })), 2],

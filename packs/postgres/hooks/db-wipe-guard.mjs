@@ -12,6 +12,8 @@ import { bashOf, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
+
 const WIPES = [
   [/\bprisma\s+migrate\s+reset\b/, 'prisma migrate reset'],
   [/\bprisma\s+db\s+push\b[^\n;&|]*--(?:force-reset|accept-data-loss)\b/, 'prisma db push with a forced reset'],
@@ -45,7 +47,7 @@ function hostOfEnv(root) {
 function targetOf(command, cwd) {
   const named = hostIn(command) ?? command.match(HOST_FLAG)?.[1];
   if (named) return { host: named, from: 'the command' };
-  return hostOfEnv(checkoutRoot(resolve(cwd, 'x'))) ?? { host: null, from: null };
+  return hostOfEnv(checkoutRoot(ROOT, resolve(cwd, 'x'), process.cwd())) ?? { host: null, from: null };
 }
 
 export function refusal(command, cwd) {
@@ -68,7 +70,7 @@ function selftest() {
   const local = scratchProject({ '.env': 'DATABASE_URL="postgresql://app@localhost:5432/app"\n' });
   const compose = scratchProject({ '.env.local': 'export POSTGRES_URL=postgres://app@db/app\n' });
   const unknown = scratchProject({});
-  const sh = (dir, cmd) => runHook(hook, dir, bashOf(cmd, dir));
+  const sh = (dir, cmd) => runHook(hook, dir, bashOf(cmd, dir)).status;
   return verdicts('db-wipe-guard', [
     ['a reset, with .env on a live host', sh(live, 'npx prisma migrate reset --force'), 2],
     ['a forced push there', sh(live, 'npx prisma db push --force-reset'), 2],

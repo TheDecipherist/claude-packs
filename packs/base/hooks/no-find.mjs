@@ -57,7 +57,7 @@ function selftest() {
   const dir = scratchProject({ 'a.txt': 'one\n' });
   const plain = promptFile(dir, 'plain', 'build the settings layer');
   const told = promptFile(dir, 'told', 'use find to list every wav under reference/');
-  const sh = (cmd, transcript = plain) => runHook(hook, dir, { ...bashOf(cmd, dir), transcript_path: transcript });
+  const sh = (cmd, transcript = plain) => runHook(hook, dir, { ...bashOf(cmd, dir), transcript_path: transcript }).status;
   return verdicts('no-find', [
     ['find from the root', sh('find / -name QwertyPlayer.h -path "*core*"'), 2],
     ['find in the project', sh('find . -name "*.cpp"'), 2],
@@ -69,7 +69,7 @@ function selftest() {
     ['inside $( )', sh('cat $(find . -name x)'), 2],
     ['by its path', sh('/usr/bin/find . -maxdepth 1'), 2],
     ['the user asked for find by name', sh('find reference -name "*.wav"', told), 0],
-    ['no transcript: nobody asked', runHook(hook, dir, bashOf('find . -name x', dir)), 2],
+    ['no transcript: nobody asked', runHook(hook, dir, bashOf('find . -name x', dir)).status, 2],
     ['the word in a string is no command', sh('echo "find the bug"'), 0],
     ['nor after a separator inside a string', sh('git commit -m "fix it; find the leak later" -- a.txt'), 0],
     ['git grep and grep in a named folder', sh('git grep -n QwertyPlayer -- src && grep -rn x src/'), 0],

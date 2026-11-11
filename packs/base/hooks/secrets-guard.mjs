@@ -20,6 +20,8 @@ import { SECRETS } from './lib/secret-patterns.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
+
 const ENV = /^\.env(\..+)?$/;
 const ENV_OK = /\.(example|sample|template|dist)$/;
 const KEY = /\.(pem|key|private|p12|pfx|jks|keystore)$|^id_(rsa|dsa|ecdsa|ed25519)$|^credentials\.json$/;
@@ -38,7 +40,7 @@ function ignored(root, path) {
 }
 
 function judgeWrite(w) {
-  const root = checkoutRoot(w.path);
+  const root = checkoutRoot(ROOT, w.path, process.cwd());
   if (isEnv(w.path)) return ignored(root, w.path) ? null : `${relative(root, w.path)} is a .env file git does not ignore. Add \`.env\` (and \`.env.*\`, with !.env.example) to .gitignore first; a .env is never committed.`;
   if (w.after === null) return null;
   const what = addedSecret(w.before, w.after);
@@ -74,7 +76,7 @@ function selftest() {
   git(dir, 'init', '-q');
   const open = scratchProject({ 'src/app.ts': '\n' });
   git(open, 'init', '-q');
-  const run = (d, payload) => runHook(hook, d, payload);
+  const run = (d, payload) => runHook(hook, d, payload).status;
   const cases = [
     ['a GitHub token written into source', run(dir, writeOf(join(dir, 'src/app.ts'), `const t = '${gh}';\n`)), 2],
     ['a private key written into a doc', run(dir, writeOf(join(dir, 'docs/key.md'), `${pem}\n${'MIIEvQIBADANBgkqhkiG9w0BAQEFAASC'.repeat(3)}\n`)), 2],

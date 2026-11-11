@@ -15,7 +15,7 @@ export function selftest(hook) {
   const report = (verdict) => JSON.stringify({ reference: 'design/reference/home.webp', code: key(), verdict });
   const legacy = (verdict) => JSON.stringify({ reference: 'design/reference/home.webp', commit: head(), verdict });
   const event = (name, command) => ({ hook_event_name: name, tool_name: 'Bash', tool_input: { command }, cwd: dir });
-  const land = (branch) => runHook(hook, dir, event('PreToolUse', `git merge --ff-only ${branch}`));
+  const land = (branch) => runHook(hook, dir, event('PreToolUse', `git merge --ff-only ${branch}`)).status;
   const saidAfter = (command) => spawnSync(process.execPath, [hook], {
     cwd: dir, input: JSON.stringify(event('PostToolUse', command)), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
   }).stdout;

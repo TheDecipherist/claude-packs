@@ -38,7 +38,7 @@ export function selftest(hookUrl) {
     session = `${run}-${session}`;
     writeFileSync(join(dir, 'build.md'), BUILD(making));
     writeFileSync(T, [user('build the slot filter'), ...entries.flat()].map((e) => JSON.stringify(e)).join('\n'));
-    return runHook(hook, dir, { hook_event_name: 'Stop', transcript_path: T, cwd: dir, session_id: session, stop_hook_active: active, last_assistant_message: last });
+    return runHook(hook, dir, { hook_event_name: 'Stop', transcript_path: T, cwd: dir, session_id: session, stop_hook_active: active, last_assistant_message: last }).status;
   };
   const at = (f) => join(dir, f);
   const W = (f, content) => use('Write', { file_path: at(f), content });

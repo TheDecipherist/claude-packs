@@ -37,8 +37,8 @@ function main(text) {
   try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload)) {
     if (w.after === null || relative(ROOT, w.path).startsWith('..')) continue;
-    const rel = relative(checkoutRoot(w.path), w.path);
-    const msg = verdict(rel, w.before, w.after, readLayout(claudeRoot(w.path)).maxFileLines ?? 300);
+    const rel = relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path);
+    const msg = verdict(rel, w.before, w.after, readLayout(claudeRoot(ROOT, w.path, process.cwd())).maxFileLines ?? 300);
     if (msg) { process.stderr.write(msg); return 2; }
   }
   return 0;

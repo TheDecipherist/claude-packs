@@ -41,7 +41,7 @@ function selftest() {
   put(`${dir}/in-build/build.ninja`, 'build a.o: CXX_COMPILER__x a.cpp\n  LAUNCHER = /opt/homebrew/bin/ccache\n');
   const run = (cmd, have) => {
     process.env.COMPILE_CACHE_INSTALLED = have;
-    return runHook(self, dir, bashOf(cmd, dir)) === 2;
+    return runHook(self, dir, bashOf(cmd, dir)).status === 2;
   };
   const cases = [
     ['a build of an uncached folder, through the queue', run('node .claude/tools/buildq.mjs cmake --build bare --target X', 'yes'), true],

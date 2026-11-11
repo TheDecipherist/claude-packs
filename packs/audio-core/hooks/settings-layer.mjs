@@ -79,8 +79,8 @@ function main(text) {
   return judgeEvent(text, {
     name: 'settings-layer',
     write: (w, rel) => {
-      const root = checkoutRoot(w.path);
-      return judgeLayer(w, rel, root, claudeRoot(w.path)) ?? judgeCmake(w, rel, root);
+      const root = checkoutRoot(ROOT, w.path, process.cwd());
+      return judgeLayer(w, rel, root, claudeRoot(ROOT, w.path, process.cwd())) ?? judgeCmake(w, rel, root);
     },
   });
 }
@@ -116,7 +116,7 @@ function selftest() {
   const LAYER = 'src/ui/SettingsRows.cpp';
   const layout = (layer) => ({ folders: {}, concepts: {}, ...(layer ? { settingsLayer: layer } : {}) });
   const project = (files, layer = { files: [LAYER] }) => scratchProject(files, layout(layer));
-  const write = (dir, rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text));
+  const write = (dir, rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text)).status;
   const PLUGIN_CMAKE = 'juce_add_plugin(F FORMATS VST3 AU)\n';
   const STANDALONE_CMAKE = 'juce_add_plugin(F FORMATS VST3 Standalone)\n';
   const FLAG = 'target_compile_definitions(F PUBLIC JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1)\n';
@@ -138,9 +138,9 @@ function selftest() {
     ['a Standalone added as its own app', write(full, 'CMakeLists.txt', STANDALONE_CMAKE + FLAG), 0],
     ['the flag set in another CMake file', write(split, 'CMakeLists.txt', STANDALONE_CMAKE), 0],
     ['an old Standalone, another CMake edit', write(old, 'CMakeLists.txt', `${STANDALONE_CMAKE}# tidy\n`), 0],
-    ['--status: a plugin with no settings layer', runHook(hook, bare, null, ['--status']), 1],
-    ['--status: an old layer and JUCE\'s window', runHook(hook, old, null, ['--status']), 1],
-    ['--status: a complete plugin', runHook(hook, full, null, ['--status']), 0],
+    ['--status: a plugin with no settings layer', runHook(hook, bare, null, ['--status']).status, 1],
+    ['--status: an old layer and JUCE\'s window', runHook(hook, old, null, ['--status']).status, 1],
+    ['--status: a complete plugin', runHook(hook, full, null, ['--status']).status, 0],
     ['another project is not ours', write(full, `../elsewhere-${Date.now()}/src/ui/SettingsRows.cpp`, rows([])), 0],
   ];
   return verdicts('settings-layer', cases);

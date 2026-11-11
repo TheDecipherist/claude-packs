@@ -82,7 +82,7 @@ export async function runAll(args, text, root = projectRoot()) {
     if (c === 2) code = 2;
   }
   logCall(root, text, judged, appendRotated, performance.now());
-  const crash = crashVerdict(root, ev, judged);
+  const crash = crashVerdict(root, ev, judged, Date.now());
   if (crash.stderr) err.push(crash.stderr);
   if (crash.code === 2) code = 2;
   outs.push(...[crash.stdout, code === 0 ? unreadWrites(ev, root) : ''].filter(Boolean));

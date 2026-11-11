@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, utimesSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { claudesIn, projectOf, sessionOrders } from '../packs/base/hooks/lib/run-claudes.mjs';
+import { claudesIn, orderProjectOf, sessionOrders } from '../packs/base/hooks/lib/run-claudes.mjs';
 import { fresh } from './kit-cli.mjs';
 
 const HOUR = 60 * 60 * 1000;
@@ -35,14 +35,14 @@ test('every kind of Claude Code process is a candidate, and nothing else', () =>
 
 test('a folder inside a worktree gives its main checkout', () => {
   const dir = project();
-  assert.equal(projectOf(join(dir, '.claude/worktrees/agent-x/src')), dir);
-  assert.equal(projectOf(join(dir, 'docs')), dir);
-  assert.equal(projectOf(fresh('nothing-')), null);
+  assert.equal(orderProjectOf(join(dir, '.claude/worktrees/agent-x/src')), dir);
+  assert.equal(orderProjectOf(join(dir, 'docs')), dir);
+  assert.equal(orderProjectOf(fresh('nothing-')), null);
 });
 
 test('a session\'s order is found with no run.sh; a DONE order and one untouched for over an hour are not', () => {
   const dir = project();
-  const found = sessionOrders({ ps: PS([[4242, 'claude']]), cwds: () => new Map([[4242, join(dir, '.claude/worktrees/agent-x/src')]]), platform: 'darwin', trees: () => [] });
+  const found = sessionOrders({ ps: PS([[4242, 'claude']]), cwds: () => new Map([[4242, join(dir, '.claude/worktrees/agent-x/src')]]), platform: 'darwin', nowMs: Date.now(), trees: () => [] });
   assert.deepEqual(found.runs.map((r) => r.order), ['live']);
   assert.equal(found.runs[0].project, dir);
 });
@@ -50,12 +50,12 @@ test('a session\'s order is found with no run.sh; a DONE order and one untouched
 test('an order whose files are old runs while a worktree on its work/<order>-* branch was touched in the hour', () => {
   const dir = project();
   const trees = () => [{ name: 'agent-x', branch: 'work/cold-agent', touched: Date.now() - 60_000 }, { name: 'other', branch: 'work/done-x', touched: Date.now() }];
-  const found = sessionOrders({ ps: PS([[7, 'claude']]), cwds: () => new Map([[7, dir]]), platform: 'linux', trees });
+  const found = sessionOrders({ ps: PS([[7, 'claude']]), cwds: () => new Map([[7, dir]]), platform: 'linux', nowMs: Date.now(), trees });
   assert.deepEqual(found.runs.map((r) => r.order).sort(), ['cold', 'live']);
 });
 
 test('on Windows it says it is not supported yet, and never crashes', () => {
-  const found = sessionOrders({ ps: PS([[7, 'claude']]), platform: 'win32' });
+  const found = sessionOrders({ ps: PS([[7, 'claude']]), platform: 'win32', nowMs: Date.now() });
   assert.deepEqual(found.runs, []);
   assert.match(found.unsupported, /not supported on Windows yet/);
 });

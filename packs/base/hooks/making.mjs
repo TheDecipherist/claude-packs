@@ -9,11 +9,13 @@
 //   node making.mjs --cost       the text's size per turn (doctor prints it)
 //   node making.mjs --selftest
 import { readFileSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { checkoutRoot, ROOT } from './lib/project.mjs';
+import { join, resolve } from 'node:path';
+import { checkoutRoot } from './lib/project.mjs';
 import { scratchProject } from './lib/selftest.mjs';
 import { findInstanceLiterals, readShape } from './lib/shape.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 export const TEXT = "making: before the first write, answer in build.md's In progress entry for this step, one line: " +
   '`making: <what you are making>; concepts: <each you touch, its shape from design/shape.json>; reuse: <function, where it lives>`. ' +
@@ -92,7 +94,7 @@ function main(text) {
   let event = {};
   try { event = JSON.parse(text || '{}'); } catch { /* the text still goes */ }
   if (event.hook_event_name && event.hook_event_name !== 'UserPromptSubmit') return 0;
-  const root = event.cwd ? checkoutRoot(join(event.cwd, 'prompt')) : ROOT;
+  const root = event.cwd ? checkoutRoot(ROOT, join(event.cwd, 'prompt'), process.cwd()) : ROOT;
   let shape = null;
   try { shape = readShape(root) ?? readShape(ROOT); } catch { /* the text still goes */ }
   process.stdout.write(`${inject(event.prompt ?? '', shape)}\n`);
