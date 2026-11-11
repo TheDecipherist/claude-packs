@@ -151,3 +151,10 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
   the brief.
 - Why: it is the one module whose job is to bind a hook to its process; under the resident runner (W8) a hook is called with its
   event and `ctx` and never touches hook-log's process side, and W4 replaces every `projectRoot()` call with `ctx.projectDir`.
+
+## d-24 Layers 4 to 6 as three chains {#d-24}
+- Question: W3 merges each layer before the next starts; layers 4 to 6 are 14 files in three import chains that touch no other's
+  files (git: pushed, git-auth, trunk-lag, git-guard-selftest; status: run-remotes, run-transcripts, run-status, run-tree;
+  fresh and index: kit-version, kit-fresh-look, kit-fresh-selftest, repo-index, shape-code, unread-writes).
+- Chosen: one agent per chain, each converting its chain in import order and proving each file before the next.
+- Why: the rule the layers serve (a file imports only converted files) holds inside each chain, and three rounds become one.

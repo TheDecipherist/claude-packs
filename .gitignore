@@ -74,3 +74,18 @@ packs/base/hooks/lib/shape-hits.mjs
 packs/base/hooks/lib/shape-lines.mjs
 packs/base/hooks/lib/shape-model.mjs
 .claude/hooks/kit-lock.mjs
+# W3 layers 4 to 6, emitted
+packs/base/hooks/lib/git-auth.mjs
+packs/base/hooks/lib/git-guard-selftest.mjs
+packs/base/hooks/lib/kit-fresh-look.mjs
+packs/base/hooks/lib/kit-fresh-selftest.mjs
+packs/base/hooks/lib/kit-version.mjs
+packs/base/hooks/lib/pushed.mjs
+packs/base/hooks/lib/repo-index.mjs
+packs/base/hooks/lib/run-remotes.mjs
+packs/base/hooks/lib/run-status.mjs
+packs/base/hooks/lib/run-transcripts.mjs
+packs/base/hooks/lib/run-tree.mjs
+packs/base/hooks/lib/shape-code.mjs
+packs/base/hooks/lib/trunk-lag.mjs
+packs/base/hooks/lib/unread-writes.mjs
