@@ -35,7 +35,13 @@ Always do:
 
 ## The user's yes for W12
 
-(Empty until the user writes `publish 2.0.0: yes (Tim, YYYY-MM-DD)` here.)
+publish 2.0.0: yes (Tim, 2026-11-11)
+
+The user's words, 2026-11-11: "go ahead ... use recommended choices for everything to run unattended. once the kit is complete and
+merged to main and pushed and new npm package release and README.md updated with the new kit details." So W12 lands on `main`,
+pushes, publishes 2.0.0 to npm and ships the README rewritten for 2.0.0 (TypeScript, the LSP, the Go proxy and resident runner,
+parallel hooks, the release in five minutes, the new commands), its copy run through the `tim-writing` skill before it is written
+(the user's global rule for public writing), with the numbers taken from W11's comparison table and `scripts/counts.mts`.
 
 Never do:
 - Stop to ask, wait for an answer, or end a turn while any step can still move.

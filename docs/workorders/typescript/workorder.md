@@ -662,8 +662,11 @@ check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the rep
 ## W12. Land and publish 2.0.0 (the one stop)
 
 The one landing and the one publish, after W11: the CHANGELOG's 2.0.0 section (1.9.0 folded in with KWB-165 to 167 and the admiral
-pack), `npm run release major` for real, with the user's yes written into the PROMPT before this step runs (the PROMPT names it as
-the one stop this order allows). No prerelease on `latest` (kit-fresh compares three numbers).
+pack), the README rewritten for 2.0.0 (what the kit is now: TypeScript with the LSP, the Go proxy and the resident runner, hooks in
+parallel, the release in five minutes, the new commands, the before-and-after numbers of W11), its copy through `tim-writing` before
+it is written and its tables from `scripts/counts.mts`, then `npm run release major` for real, with the user's yes written into the
+PROMPT before this step runs (written 2026-11-11). No prerelease on `latest` (kit-fresh compares three numbers).
 
-**Done when:** 2.0.0 on npm (`npm view` shows it) and `main` on GitHub equal to the local `main`; the tag and the GitHub release exist;
+**Done when:** `counts --check` green on the new README and every number in it traced to W11's evidence or the generator; 2.0.0 on
+npm (`npm view` shows it) and `main` on GitHub equal to the local `main`; the tag and the GitHub release exist;
 `docs/workorders/typescript/DONE` names the commit; bandwarp is untouched (its `git status` in the evidence, 0 changes).
