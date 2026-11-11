@@ -13,6 +13,13 @@ const withLayout = (wt, keys) => {
   put(join(wt, '.claude/layout.json'), JSON.stringify({ ...layout, ...keys(layout) }));
 };
 
+// a hook moved onto the contract (W4) exports its worktree case as data beside its selftest; the four below each keep the steps
+// that need more than files and events (a layout written into the worktree, an environment said, a commit made there)
+const [AGENTS_HELD, SUITE_ONCE, REPO_LITTER, LOOK_GATE] = (await Promise.all([
+  import('../packs/base/hooks/agents-held.mjs'), import('../packs/base/hooks/suite-once.mjs'),
+  import('../packs/base/hooks/repo-litter.mjs'), import('../packs/base/hooks/look-gate.mjs'),
+])).map((m) => m.worktreeCase);
+
 export const COMMAND_CASES = {
   'inside-the-project.mjs': ({ here, wt }) => {
     // A worktree inside the project (.claude/worktrees/) is the project's, and work there passes; a worktree of the same repo
@@ -23,13 +30,17 @@ export const COMMAND_CASES = {
     spawnSync('git', ['-C', here, 'worktree', 'add', '-q', beside, '-b', 'beside-case'], { stdio: 'ignore' });
     assert.equal(write(join(beside, 'src/n.ts')), 2);
   },
-  'agents-held.mjs': ({ here, wt }) => {
+  'agents-held.mjs': (checkouts) => {
+    caseFrom('agents-held.mjs', AGENTS_HELD)(checkouts);
+    const { here, wt } = checkouts;
     // A session with nobody there, working in a worktree, is refused a background agent as on main; a foreground one passes (KWB-124).
     const agent = (cwd, background) => fireAs(here, 'agents-held.mjs', { tool_name: 'Agent', tool_input: { prompt: 'x', run_in_background: background }, cwd }, { CLAUDE_PACKS_UNATTENDED: '1' }).status;
     assert.equal(agent(wt, true), 2);
     assert.equal(agent(wt, false), 0);
   },
-  'suite-once.mjs': ({ here, wt }) => {
+  'suite-once.mjs': (checkouts) => {
+    caseFrom('suite-once.mjs', SUITE_ONCE)(checkouts);
+    const { here, wt } = checkouts;
     // The worktree's layout names its own suite command, main's does not. Nobody asked for a full run (1.3.0: the gate is the
     // changed tests; a full run only on the user's request).
     withLayout(wt, (l) => ({ commands: { ...l.commands, test: 'bash tools/all.sh' } }));
@@ -46,7 +57,9 @@ export const COMMAND_CASES = {
   },
   // a hook moved onto the contract (W4) exports its own worktree case as data, beside its selftest
   'no-find.mjs': caseFrom('no-find.mjs', (await import('../packs/base/hooks/no-find.mjs')).worktreeCase),
-  'repo-litter.mjs': ({ here, wt }) => {
+  'repo-litter.mjs': (checkouts) => {
+    caseFrom('repo-litter.mjs', REPO_LITTER)(checkouts);
+    const { here, wt } = checkouts;
     // The worktree's layout allows this asset; main's does not.
     put(join(wt, 'hero.png'), 'x');
     put(join(here, 'hero.png'), 'x');
@@ -67,7 +80,9 @@ export const COMMAND_CASES = {
     assert.equal(read(wt), 2);
     assert.equal(read(here), 0);
   },
-  'look-gate.mjs': ({ here, wt }) => {
+  'look-gate.mjs': (checkouts) => {
+    caseFrom('look-gate.mjs', LOOK_GATE)(checkouts);
+    const { here, wt } = checkouts;
     // The worktree's layout declares a look and its branch changes the look's code; main's declares none. After a build the
     // worktree is told its look is due, and main says nothing.
     const g = (cwd, ...a) => spawnSync('git', ['-C', cwd, '-c', 'user.email=t@t', '-c', 'user.name=t', ...a], { encoding: 'utf8' });

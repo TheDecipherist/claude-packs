@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // suite-once (PreToolUse, Bash): the whole test suite runs only when the user asks for a full run (one agent ran all 425 tests on
 // 1 core; KWB-41: a session ran the kit's suite again and again, 12 minutes each, on code that had not changed; 1.3.0: a UI change
 // that touched neither the engine nor its reference model waited over an hour on a C++ project's whole suite to land). The gate before
@@ -7,39 +6,37 @@
 // "commands".test in layout.json with any options after it, a build wrapper's `build.sh test`: KF-23) is refused unless the user's
 // prompt that started the turn asks for one ("run the full suite"). Named tests (`npm test -- a.test.mjs`, `ctest -R x`) and the
 // changed-only run are always allowed. `--selftest` proves it.
-import { execFileSync } from 'node:child_process';
+// A judge on the hook contract (typescript order W4): the event and its context in, a Verdict out, nothing written.
 import { resolve } from 'node:path';
-import { readLayout } from './lib/layout.mjs';
-import { checkoutRoot, claudeRoot } from './lib/project.mjs';
-import { bashOf, git, promptFile, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
-import { lastPrompt } from './lib/turn.mjs';
-import { judgeEvent, readPayload } from './lib/writes.mjs';
-import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
+import { gitLines } from './lib/git-run.mts';
+import { isMain, runAsHook } from './lib/hook-log.mts';
+import { readLayout } from './lib/layout.mts';
+import { checkoutRoot, claudeRoot } from './lib/project.mts';
+import { bashOf, git, promptFile, put, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
+import type { WorktreeCase } from './lib/selftest.mts';
+import { lastPrompt } from './lib/turn.mts';
+import type { Hook, VerdictRow } from './lib/types.d.mts';
+import { judgeVerdict } from './lib/writes.mts';
 import { fileURLToPath } from 'node:url';
-
 
 const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b|-N\b|--show-only\b|--print-labels\b)\S+)*|cargo\s+(?:test|nextest\s+run)(?:\s+-\S+)*)$/;
 const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec|\S*buildq)\s+|timeout\s+\S+\s+)+/;
 const REDIRECT = /\s*(?:\d?>>?|&>)&?\s*\S+/g;
 const WRAPPER = /^\S*\bbuild\.sh\s+test(?:\s+-\S+)*$/;
 
-const clean = (part) => part.trim().replace(PREFIX, '').replace(REDIRECT, '').trim();
-const bare = (words) => words.replace(/^(?:bash|sh)\s+/, '').replace(/^\.\//, '');
+const clean = (part: string): string => part.trim().replace(PREFIX, '').replace(REDIRECT, '').trim();
+const bare = (words: string): string => words.replace(/^(?:bash|sh)\s+/, '').replace(/^\.\//, '');
 
 // The project's own command, as it is or with options; a name after it (`build.sh test one_gate`) is a named test.
-function ownSuite(words, test) {
+function ownSuite(words: string, test: string | undefined): boolean {
   if (!test) return false;
   const [w, t] = [bare(words), bare(test)];
   return w === t || (w.startsWith(`${t} `) && w.slice(t.length).trim().split(/\s+/).every((a) => a.startsWith('-')));
 }
 
-function uncommitted(dir) {
-  try {
-    return execFileSync('git', ['-C', dir, '--no-optional-locks', 'status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).split('\n').filter((l) => l.trim());
-  } catch {
-    return []; // not a repository: nothing says the work is unfinished
-  }
-}
+// A repository that is not one has nothing uncommitted: nothing says the work is unfinished.
+const uncommitted = (dir: string, env: Readonly<Record<string, string | undefined>>): string[] =>
+  gitLines(['-C', dir, '--no-optional-locks', 'status', '--porcelain', '--untracked-files=no'], { cwd: dir, env }).filter((l) => l.trim());
 
 // The user asks for a full run, as a request in their own words: "run the full suite", "do a complete run", "start all the
 // tests". A question about a full run, or a sentence that only mentions one ("why is the entire suite running", "full runs
@@ -48,19 +45,25 @@ const ASKS_FULL = /\b(?:run|start|do|launch|kick off)\s+(?:\w+\s+){0,2}?(?:full|
 // A session started to run the whole suite says so of itself: a work order's run.sh passes "this session runs the whole suite"
 // (KWB-168); a complaint about an agent that runs it ("the agent runs the whole suite") is no grant.
 const GRANTS_FULL = /\bthis\s+session\s+(?:may\s+)?runs?\s+the\s+(?:full|whole|complete|entire)\s+(?:test\s+)?suite\b/i;
-export const askedForFull = (prompt) => ASKS_FULL.test(prompt ?? '') || GRANTS_FULL.test(prompt ?? '');
+export const askedForFull = (prompt: string | null | undefined): boolean => ASKS_FULL.test(prompt ?? '') || GRANTS_FULL.test(prompt ?? '');
 
-export function refusal(command, cwd, asked = false) {
+/** The project and the process a refusal reads: the project's folder and environment (the layout and the git state come from them). */
+export interface SuiteWhere {
+  projectDir: string;
+  env: Readonly<Record<string, string | undefined>>;
+}
+
+export function refusal(command: string, cwd: string, asked: boolean, where: SuiteWhere): string | null {
   const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
   let here = cwd;
   for (const part of body.split(/&&|\|\||;|\||\n|(?<![&>])&(?![&>])/)) {
     const cd = part.trim().match(/^cd\s+(\S+)$/);
-    if (cd) { here = resolve(here, cd[1]); continue; }
+    if (cd) { here = resolve(here, cd[1] ?? '.'); continue; }
     const words = clean(part);
-    const { commands = {} } = readLayout(claudeRoot(projectRoot(), resolve(here, 'x'), process.cwd())); // claudeRoot takes a file: a worktree's own layout, not main's
-    if (!WHOLE.test(words) && !WRAPPER.test(bare(words)) && !ownSuite(words, commands.test)) continue;
+    const { commands = {} } = readLayout(claudeRoot(where.projectDir, resolve(here, 'x'), cwd)); // claudeRoot takes a file: a worktree's own layout, not main's
+    if (!WHOLE.test(words) && !WRAPPER.test(bare(words)) && !ownSuite(words, commands['test'])) continue;
     if (asked) continue;
-    const dirty = uncommitted(checkoutRoot(projectRoot(), resolve(here, 'x'), process.cwd()));
+    const dirty = uncommitted(checkoutRoot(where.projectDir, resolve(here, 'x'), cwd), where.env);
     const changed = commands['test-changed'] ? `\`${commands['test-changed']}\`, against the trunk` : 'the pick-tests skill, against the trunk';
     return `\`${words}\` runs the whole suite${dirty.length ? `, on uncommitted work:\n    ${dirty.slice(0, 8).join('\n    ')}` : '.'}\n` +
       `The gate before landing and before a release is the tests the branch's changes reach (${changed}). The whole suite runs only when the user asks for a full run, in that turn.\n`;
@@ -69,21 +72,31 @@ export function refusal(command, cwd, asked = false) {
 }
 
 // The user's prompt that started this turn decides whether a full run was asked for; with no transcript, nobody asked.
-function main(text) {
-  const payload = readPayload(text);
-  const asked = askedForFull(payload?.transcript_path ? lastPrompt(payload.transcript_path) : '');
-  return judgeEvent(text, { name: 'suite-once', command: (command, cwd) => refusal(command, cwd, asked) }, process);
-}
+export const hook: Hook = (event, ctx) => {
+  const asked = askedForFull(event.transcript_path ? lastPrompt(event.transcript_path) : '');
+  return judgeVerdict(event, { name: 'suite-once', command: (command, cwd) => refusal(command, cwd, asked, ctx) }, ctx);
+};
 
-function selftest() {
-  const hook = fileURLToPath(import.meta.url);
+/** The whole suite is refused in a worktree as in main when nobody asked for it, and the changed-only run passes. The worktree's
+ *  own `commands.test` (its layout differs from main's) is the one step that needs a layout write: worktree-cases-commands.mjs. */
+export const worktreeCase: WorktreeCase = {
+  steps: [
+    { label: 'the whole suite after a cd into the worktree', event: { tool_name: 'Bash', tool_input: { command: 'cd {wt} && npm test' } }, want: 2 },
+    { label: 'the whole suite after a cd into the main checkout', event: { tool_name: 'Bash', tool_input: { command: 'cd {here} && npm test' } }, want: 2 },
+    { label: 'the changed-only run in the worktree', event: { tool_name: 'Bash', tool_input: { command: 'cd {wt} && npm run test:changed' } }, want: 0 },
+  ],
+};
+
+export function selftest(): number {
+  const hookFile = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'a.txt': 'one\n', '.claude/layout.json': JSON.stringify({ commands: { test: 'bash tools/all.sh', 'test-changed': 'npm run test:changed' } }) });
   git(dir, 'init', '-q');
   git(dir, 'add', 'a.txt', '.claude/layout.json');
   git(dir, 'commit', '-qm', 'x');
   const land = promptFile(dir, 'land', 'land the branch');
   const full = promptFile(dir, 'full', 'something looks truly off, run the full suite');
-  const asks = [
+  const before = snapshot(dir);   // the project as the judge finds it: the rows below must leave it as it is
+  const asks: VerdictRow[] = ([
     ['a question about the suite is no request', askedForFull('why is the entire suite running?'), false],
     ['a sentence about full runs is no request', askedForFull('full complete runs should only be if I notice something off'), false],
     ['do a complete run', askedForFull('do a complete run of everything'), true],
@@ -91,17 +104,19 @@ function selftest() {
     ['a run.sh session prompt that grants the whole suite (KWB-168)', askedForFull("Run docs/workorders/x/PROMPT.md; this session runs the whole suite where a step's Done when names it"), true],
     ['the plain run.sh prompt asks nothing (KWB-168)', askedForFull('Run docs/workorders/x/PROMPT.md'), false],
     ['a complaint that an agent runs the whole suite asks nothing (KWB-168)', askedForFull('the agent runs the whole suite again and again'), false],
-  ].map(([label, got, want]) => [label, got ? 1 : 0, want ? 1 : 0]);
-  const as = (cmd, transcript) => runHook(hook, dir, { ...bashOf(cmd, dir), transcript_path: transcript }).status;
-  const sh = (cmd) => as(cmd, land);
-  const committed = [
+  ] as const).map(([label, got, want]) => [label, got ? 1 : 0, want ? 1 : 0]);
+  const as = (cmd: string, transcript: string): number | null => runHook(hookFile, dir, { ...bashOf(cmd, dir), transcript_path: transcript }).status;
+  const sh = (cmd: string): number | null => as(cmd, land);
+  const committed: VerdictRow[] = [
     ['the whole suite to land committed work: the gate is the changed tests now', sh('npm test'), 2],
     ['the project\'s own whole-suite command, committed and unasked', sh('bash tools/all.sh'), 2],
     ['the whole suite when the user asks for it', as('npm test', full), 0],
     ['the project\'s own whole-suite command when asked', as('bash tools/all.sh', full), 0],
-    ['no transcript: nobody asked', runHook(hook, dir, bashOf('npm test', dir)).status, 2],
+    ['no transcript: nobody asked', runHook(hookFile, dir, bashOf('npm test', dir)).status, 2],
+    ['a judge writes no file on committed work (the write trap)', writtenSince(dir, before).join(','), ''],
   ];
   put(`${dir}/a.txt`, 'two\n');
+  const dirty = snapshot(dir);
   const said = sh('npm test');
   return verdicts('suite-once', [
     ...asks,
@@ -128,8 +143,8 @@ function selftest() {
     ['words about the suite', sh("echo 'npm test'"), 0],
     ['a heredoc body', sh("cat <<'EOF'\nnpm test\nEOF"), 0],
     ['another project', sh('cd /tmp && npm test'), 0],
+    ['a judge writes no file on uncommitted work (the write trap)', writtenSince(dir, dirty).join(','), ''],
   ]);
 }
 
-export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('suite-once', main));
+if (isMain(import.meta.url)) await runAsHook(import.meta.url, 'suite-once', hook, selftest);

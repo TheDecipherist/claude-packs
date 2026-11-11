@@ -6,10 +6,16 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, PIN_GUARD, bash, fire, fireAs, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
+import { CLI, PIN_GUARD, bash, caseFrom, fire, fireAs, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
 import { readJson } from '../packs/base/hooks/lib/json.mjs';
 import { COMMAND_CASES } from './worktree-cases-commands.mjs';
 import { PACK_CASES } from './worktree-cases-packs.mjs';
+
+// the hooks moved onto the contract (W4) export their worktree case as data beside their selftest
+const [FOLDER_LAW, PLACEMENT_LAW, SECRETS_GUARD, LESSON_CHECKS, HEARTBEAT] = (await Promise.all([
+  import('../packs/base/hooks/folder-law.mjs'), import('../packs/base/hooks/placement-law.mjs'), import('../packs/base/hooks/secrets-guard.mjs'),
+  import('../packs/base/hooks/lesson-checks.mjs'), import('../packs/base/hooks/heartbeat.mjs'),
+])).map((m) => m.worktreeCase);
 
 test('folder-law allows a new file in a right folder of a worktree and refuses a wrong one', () => {
   const { here, wt } = stellix();
@@ -51,18 +57,12 @@ const CASES = {
     assert.equal(via(join(wt, 'src/dsp/Huge.cpp'), 'x\n'.repeat(400)).status, 2);
     assert.match(readFileSync(join(here, '.claude/hooks.log'), 'utf8'), /\tfolder-law\t\d+\t2\tWrite/);
   },
-  'folder-law.mjs': ({ here, wt }) => {
-    assert.equal(fire(here, 'folder-law.mjs', join(wt, 'src/dsp/Svf.cpp')), 0);
-    assert.equal(fire(here, 'folder-law.mjs', join(wt, 'stray/Svf.cpp')), 2);
-  },
+  'folder-law.mjs': caseFrom('folder-law.mjs', FOLDER_LAW),
   'file-size-guard.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'file-size-guard.mjs', join(wt, 'src/dsp/Small.cpp')), 0);
     assert.equal(fire(here, 'file-size-guard.mjs', join(wt, 'src/dsp/Huge.cpp'), 'x\n'.repeat(400)), 2);
   },
-  'placement-law.mjs': ({ here, wt }) => {
-    assert.equal(fire(here, 'placement-law.mjs', join(wt, 'src/painter/shaders/glow.wgsl'), '@fragment fn fs() {}'), 0);
-    assert.equal(fire(here, 'placement-law.mjs', join(wt, 'src/dsp/glow.wgsl'), '@fragment fn fs() {}'), 2);
-  },
+  'placement-law.mjs': caseFrom('placement-law.mjs', PLACEMENT_LAW),
   'shape-law.mjs': ({ here, wt }) => {
     // the worktree's branch added a concept to its own manifest: its design/shape.json decides, not main's
     const shape = { concepts: { lane: { shape: 'many', count: 8, generator: 'laneId(i)', words: ['lane', 'lanes'] } }, exclude: [] };
@@ -77,7 +77,9 @@ const CASES = {
     assert.equal(fire(here, 'brief-guard.mjs', join(wt, 'docs/brief.md'), 'Drive lane 3.\n'), 2);
     assert.equal(fire(here, 'brief-guard.mjs', join(wt, 'docs/brief.md'), 'seen in: lane 3; build for every lane\n'), 0);
   },
-  'lesson-checks.mjs': ({ here, wt }) => {
+  'lesson-checks.mjs': (checkouts) => {
+    caseFrom('lesson-checks.mjs', LESSON_CHECKS)(checkouts);   // the worktree's own check; the step below moves a concept in its layout
+    const { here, wt } = checkouts;
     // The worktree's branch moved DSP into src/synth: its own layout.json decides, not main's.
     const layoutFile = join(wt, '.claude/layout.json');
     const layout = JSON.parse(readFileSync(layoutFile, 'utf8'));
@@ -104,12 +106,7 @@ const CASES = {
     assert.equal(bash(here, 'spec-lock.mjs', `sed -i '' s/a/b/ ${join(wt, 'src/dsp/Svf.cpp')}`), 0);
     lock('unlock');
   },
-  'secrets-guard.mjs': ({ here, wt }) => {
-    put(join(wt, '.gitignore'), '.env\n');   // the worktree ignores .env; main does not (yet)
-    assert.equal(fire(here, 'secrets-guard.mjs', join(wt, '.env'), 'A=1\n'), 0, 'ignored by the worktree');
-    assert.equal(fire(here, 'secrets-guard.mjs', join(here, '.env'), 'A=1\n'), 2, 'not ignored by main');
-    assert.equal(bash(here, 'secrets-guard.mjs', `git -C ${wt} add .env`), 2);
-  },
+  'secrets-guard.mjs': caseFrom('secrets-guard.mjs', SECRETS_GUARD),
   'untrusted-boundary.mjs': ({ here, wt }) => {
     const call = 'const r = await client.messages.create({ messages: [{ role: "user", content: page }] });\n';
     assert.equal(fire(here, 'untrusted-boundary.mjs', join(wt, 'tools/ask.mjs'), call), 2);
@@ -117,7 +114,9 @@ const CASES = {
   },
   // 1.8.0: a call in the worktree is that agent's heartbeat, written in the main checkout where the status reads it, never
   // into the worktree; a call in the main checkout is the lead's
-  'heartbeat.mjs': ({ here, wt }) => {
+  'heartbeat.mjs': (checkouts) => {
+    caseFrom('heartbeat.mjs', HEARTBEAT)(checkouts);
+    const { here, wt } = checkouts;
     const beat = (name, root = here) => readJson(join(root, '.claude/logs/heartbeats', `${name}.json`));
     assert.equal(fireAs(here, 'heartbeat.mjs', { hook_event_name: 'PreToolUse', cwd: wt, tool_name: 'Edit', tool_input: { file_path: join(wt, 'src/x.cpp') } }).status, 0);
     assert.equal(beat('agent-x')?.tool, 'Edit');
