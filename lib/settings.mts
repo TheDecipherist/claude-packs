@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { readText } from '../packs/base/hooks/lib/files.mts';
 import { parseJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { Layout } from '../packs/base/hooks/lib/types.d.mts';
-import { RUNNER, forSettings, runnable, type HookEntry, type HookGroup, type ReadGroup } from './hook-entries.mts';
+import { PICKER, RUNNER, forSettings, runnable, type HookEntry, type HookGroup, type ReadGroup } from './hook-entries.mts';
 import { foldEvents, writeHookTable } from './hook-fold.mts';
 import { isDisabled, kitHookScripts, readPack } from './packs.mts';
 
@@ -105,7 +105,7 @@ export function syncSettings(claudeDir: string, packNames: readonly string[], la
     const m = rel.replace(/\\/g, '/').match(/^\.claude\/hooks\/([\w-]+\.(?:mjs|py))$/);
     if (m?.[1] !== undefined) ours.add(m[1]);
   }
-  const isOurs = (command = ''): boolean => ours.has(SCRIPT.exec(command)?.[1] ?? '');
+  const isOurs = (command = ''): boolean => ours.has(SCRIPT.exec(command)?.[1] ?? '') || command.includes(PICKER);
 
   const retired = new Set<string>();
   for (const groups of Object.values(events)) for (const g of groups) for (const h of g.hooks) {
@@ -134,7 +134,7 @@ export function syncSettings(claudeDir: string, packNames: readonly string[], la
   }
   for (const groups of Object.values(events)) for (const g of groups) g.hooks = orderHooks(g.hooks, isOurs);
   const table = !isDisabled(layout, `hooks/${RUNNER}`);
-  if (table) writeHookTable(claudeDir, foldEvents(events, (name) => ours.has(name) && runnable(claudeDir)(name)));
+  if (table) writeHookTable(claudeDir, foldEvents(events, (name) => ours.has(name) && runnable(claudeDir)(name), !isDisabled(layout, 'hooks/bin/hook-proxy')));
   else for (const groups of Object.values(events)) for (const g of groups) g.hooks = g.hooks.map(forSettings);
   for (const event of Object.keys(events)) {
     events[event] = (events[event] ?? []).filter((g) => g.hooks.length > 0);

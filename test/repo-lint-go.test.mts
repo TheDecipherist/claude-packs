@@ -7,9 +7,9 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { put, scratchDir } from '../packs/base/hooks/lib/files.mts';
+import type { Env } from '../packs/base/hooks/lib/types.d.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
-type Env = Readonly<Record<string, string | undefined>>;
 
 /** What Go says of a module: null when Go is not on PATH (the gate is skipped, with a note), else each command's first lines of complaint. */
 export function goGates(folder: string, env: Env = process.env): { skipped: string } | { problems: string[] } {

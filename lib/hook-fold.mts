@@ -7,7 +7,7 @@ import { ensureDir } from '../packs/base/hooks/lib/files.mts';
 import { unionMatcher, TABLE_FILE } from '../packs/base/hooks/lib/hook-table.mts';
 import { writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { HookEventName, HookTableRow } from '../packs/base/hooks/lib/types.d.mts';
-import { RUNNER, forSettings, nodeScript, type HookEntry, type ReadGroup } from './hook-entries.mts';
+import { PICKER, RUNNER, forSettings, nodeScript, type HookEntry, type ReadGroup } from './hook-entries.mts';
 
 const rowOf = (event: string, matcher: string | undefined, h: HookEntry, script: string): HookTableRow => ({
   hook: script.replace(/\.mjs$/, ''),
@@ -29,15 +29,16 @@ function addRow(rows: HookTableRow[], row: HookTableRow): void {
   else rows[twin] = { ...found, events: [...found.events, ...row.events.filter((e) => !found.events.includes(e))] };
 }
 
-const runnerEntry = (timeouts: readonly number[]): HookEntry => ({
-  type: 'command',
-  command: `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${RUNNER}"`,
-  timeout: Math.min(60, timeouts.reduce((a, t) => a + t, 0)),
-});
+// The entry's command: the `sh` picker of the Go proxy (W8.2, d-13), which is told the entry's timeout (the proxy answers a second before
+// it) and execs the TypeScript runner where it has no binary; or, where the project switched the picker off, the runner itself.
+const runnerEntry = (timeouts: readonly number[], proxy: boolean): HookEntry => {
+  const timeout = Math.min(60, timeouts.reduce((a, t) => a + t, 0));
+  return { type: 'command', command: proxy ? `sh "$CLAUDE_PROJECT_DIR/${PICKER}" ${timeout}` : `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${RUNNER}"`, timeout };
+};
 
 /** Folds each event's kit hooks that `canFold` takes (the kit's own, and written for the runner: a project's own hook keeps its entry) into its one runner entry, in place, and returns the table's rows. The runner entry takes
  *  the place of the first group that held one of them; its matcher is their union. */
-export function foldEvents(events: Record<string, ReadGroup[]>, canFold: (name: string) => boolean = () => true): HookTableRow[] {
+export function foldEvents(events: Record<string, ReadGroup[]>, canFold: (name: string) => boolean = () => true, proxy = false): HookTableRow[] {
   const rows: HookTableRow[] = [];
   for (const [event, groups] of Object.entries(events)) {
     const folded: HookTableRow[] = [];
@@ -58,7 +59,7 @@ export function foldEvents(events: Record<string, ReadGroup[]>, canFold: (name: 
     }
     if (folded.length > 0) {
       const matcher = unionMatcher(folded.map((r) => r.matcher));
-      out.splice(at, 0, { ...(matcher !== undefined ? { matcher } : {}), hooks: [runnerEntry(folded.map((r) => r.timeout ?? 10))] });
+      out.splice(at, 0, { ...(matcher !== undefined ? { matcher } : {}), hooks: [runnerEntry(folded.map((r) => r.timeout ?? 10), proxy)] });
     }
     events[event] = out;
   }

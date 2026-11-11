@@ -13,6 +13,8 @@ export interface HookGroup { matcher?: string; hooks?: HookEntry[] }
 export type ReadGroup = { matcher?: string; hooks: HookEntry[] };
 
 export const RUNNER = 'run-hooks.mjs';
+/** The `sh` picker of the Go proxy, the one runner command a settings entry may run instead of the TypeScript runner (W8.2, d-13). */
+export const PICKER = '.claude/hooks/bin/hook-proxy';
 export const NODE_HOOK = /^node "\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/([\w-]+\.mjs)"$/;
 // Only a hook written for the runner (it exports hook: `hook(text)`, or `hook(event, ctx)` on the new contract) is run by it; any
 // other node hook keeps its own entry: the kit repo's own kit-lock was folded in, failed there as exit 1 and never refused (KWB-26).

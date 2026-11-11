@@ -30,7 +30,7 @@ test('the house hooks install where they belong, project-neutral', () => {   // 
   const settings = settingsOf(dir);
   const stop = settings.hooks.Stop?.flatMap((g) => g.hooks) ?? [];
   assert.equal(stop.find((h) => h.command.includes('idle-wake.mjs'))?.asyncRewake, true, 'idle-wake keeps its own entry, asyncRewake (W8.1)');
-  assert.equal(stop.filter((h) => h.command.includes('run-hooks.mjs')).length, 1, 'Stop has the one runner entry beside it');
+  assert.equal(stop.filter((h) => h.command.includes('bin/hook-proxy')).length, 1, 'Stop has the one runner entry (the proxy\'s picker) beside it');
   const table = JSON.parse(readFileSync(join(dir, '.claude/hooks/hooks.json'), 'utf8')) as { events: string[]; matcher?: string }[];
   assert.ok(table.some((r) => r.events.includes('SessionStart') && r.matcher === 'compact'), 'a SessionStart row of the table matches compact');
   assert.ok(!existsSync(join(dir, '.claude/hooks/lib/__pycache__')), 'no byte-code cache in the project');

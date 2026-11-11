@@ -3,12 +3,11 @@
 // finds it. A project's git never holds a binary (review-2 3.6, 5.1).
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import type { Env } from '../packs/base/hooks/lib/types.d.mts';
 
 export const TARGETS = ['darwin-arm64', 'darwin-amd64', 'linux-arm64', 'linux-amd64'] as const;
 export type Target = (typeof TARGETS)[number];
 export const BINARY = 'hook-proxy';
-
-export type Env = Readonly<Record<string, string | undefined>>;
 
 /** The target name Node's platform and arch make (darwin-arm64, linux-amd64), or null where no client is built. */
 export function hostTarget(platform: string = process.platform, arch: string = process.arch): Target | null {
