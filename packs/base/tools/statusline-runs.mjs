@@ -66,4 +66,4 @@ export function runsSegments(cache, nowMs, paint, mode) {
   return [...rows, ...far];
 }
 
-if (process.argv[1] === SELF && process.argv[2] === '--refresh' && process.argv[3]) writeJson(process.argv[3], runsReport());
+if (process.argv[1] === SELF && process.argv[2] === '--refresh' && process.argv[3]) writeJson(process.argv[3], runsReport({ env: process.env, platform: process.platform }));
