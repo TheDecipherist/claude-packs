@@ -15,3 +15,18 @@ test('KF-26: a filter is no search: it needs a return or break on the match', ()
   assert.equal(lessonWrite(dir, 'src/a.cpp', body('for (const auto& c : controls) if (c.id == id) return &c;')).status, 2);
   assert.equal(lessonWrite(dir, 'src/a.cpp', body('for (const auto& c : controls) { if (c.id == id) { found = &c; break; } }')).status, 2);
 });
+
+// 0.24.0: the fixtures are the shapes measured on Stellix: a gate that presses every control, a search written by hand.
+test('a hand-written search is refused; the library call passes', () => {
+  const dir = fixture('cpp');
+  assert.equal(lessonWrite(dir, 'src/app/find.cpp', 'for (const auto& c : shown().controls) if (c.id == id) return &c;\n').status, 2);
+  assert.equal(lessonWrite(dir, 'src/app/find.cpp', 'const auto it = std::ranges::find (controls, id, &Control::id);\n').status, 0);
+});
+
+test('a gate that presses every control is refused; a walk of one, and a read of them all, pass', () => {
+  const dir = fixture('cpp');
+  const refused = lessonWrite(dir, 'tests/gates/press.h', 'for (const auto& c : L.controls) if (c.visible) pressIds.push_back(c.id);\n');
+  assert.equal(refused.status, 2);
+  assert.match(refused.stderr, /one-walk-per-template/);
+  assert.equal(lessonWrite(dir, 'tests/gates/one.h', 'pressAt (first.box.getCentre());\nfor (const auto& d : kDefs) check (d.bind != nullptr);\n').status, 0);
+});

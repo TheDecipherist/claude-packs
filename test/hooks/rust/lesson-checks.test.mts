@@ -56,3 +56,12 @@ test('a stub, a lint off with no reason, a static mut and a * version are refuse
 holdsEachCaseIn(reviewPacksInstall, [
   ['rust', 'src/a.rs', 'pub fn f(x: &str) -> u32 {\n    x.parse().unwrap()\n}\n', 'pub fn f(x: &str) -> Result<u32, E> {\n    Ok(x.parse()?)\n}\n'],
 ]);
+
+// 1.1.0 (KWB-81, KWB-82): the repetition laws on Rust; three branches on one value are a match.
+test('three branches on one value are a match, and two are not', () => {
+  const dir = fixture('rust');
+  assert.equal(lessonWrite(dir, 'src/a.rs', 'pub fn name(kind: u8) -> u8 {\n    if kind == Kind::A {\n        1\n    } else if kind == Kind::B {\n        2\n    } else if kind == Kind::C {\n        3\n    } else {\n        4\n    }\n}\n').status, 2);
+  assert.equal(lessonWrite(dir, 'src/b.rs', 'pub fn name(kind: u8) -> u8 {\n    if kind == Kind::A {\n        1\n    } else if kind == Kind::B {\n        2\n    } else {\n        4\n    }\n}\n').status, 0);
+  assert.equal(lessonWrite(dir, 'src/d.rs', 'pub fn name(p: &Path) -> u8 {\n    if p == RENAME {\n        1\n    } else if p == SKIP {\n        2\n    } else if p == OTHER {\n        3\n    } else {\n        4\n    }\n}\n').status, 0, 'a pattern cannot compare these');
+  assert.equal(lessonWrite(dir, 'src/c.rs', 'pub fn name(a: u8, b: u8, c: u8) -> u8 {\n    if a == 1 {\n        1\n    } else if b == 2 {\n        2\n    } else if c == 3 {\n        3\n    } else {\n        4\n    }\n}\n').status, 0);
+});

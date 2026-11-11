@@ -10,6 +10,7 @@ import { logLines, runner, workProject } from '../work-project.mts';
 import { fireAs } from '../../worktree-rig.mts';
 import type { Checkouts } from '../../worktree-rig.mts';
 import { fixture, holdsTheContract, installedWorktreeCase } from '../hook-rig.mts';
+import { routeProject, unrefused } from '../routes.mts';
 
 const PARAMS = (...ids: string[]): string => `${ids.map((id) => `auto p_${id} = juce::ParameterID { "${id}", 1 };`).join('\n')}\n`;
 const PARAMS_H = 'src/params/Params.h';
@@ -49,6 +50,17 @@ holdsTheContract({
     put(join(project, PARAMS_H), PARAMS('cutoff'));
     return { payload: write(join(project, PARAMS_H)), status: 2 };
   },
+});
+
+// PostToolUse: the write has landed; every route that wrote an id file away is refused.
+test('param-id-lock refuses a lost parameter id by every route', () => {
+  const dir = routeProject();
+  put(join(dir, PARAMS_H), PARAMS('cutoff', 'res'));
+  spawnSync('node', [join(dir, '.claude/hooks/param-id-lock.mjs'), '--init'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, stdio: 'ignore' });
+  const missed = unrefused(dir, 'param-id-lock.mjs', PARAMS_H, `${PARAMS('cutoff')}PLACEHOLDER\n`, '// res gone', {
+    before: (target, landed) => put(target, landed), // the write already happened
+  });
+  assert.deepEqual(missed, []);
 });
 
 test('KF-18: a config regex param-id-lock cannot compile is reported by name, and is no crash', () => {

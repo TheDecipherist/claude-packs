@@ -19,6 +19,12 @@ test('a key under a custom prefix is a secret, and a private key file by its nam
   assert.ok(isSecretFile('conf/keys/mail.private'));
 });
 
+// 0.27.0: a tutorial sample is not a secret.
+test('a placeholder password is no secret; a real-looking one is', () => {
+  for (const p of ['password', 'yourpassword', 'changeme', 'example123', 'xxxxxxxx', 'YourSecret1']) assert.equal(addedSecret('', `mongodb://admin:${p}@db:27017`), null, p);
+  assert.ok(addedSecret('', `mongodb://admin:${['Tr0ub', 'adour9'].join('')}@db:27017`));
+});
+
 // 0.32.0: control names were reported as 11,410 secrets.
 test('a long identifier is no secret, and a real key still is', () => {
   const found = (text: string): boolean => SECRETS.some(([, re]) => { re.lastIndex = 0; return re.test(text); });
