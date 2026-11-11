@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.7.2 (2026-11-10)
 
 - Smoothing is always on (KWB-145): `realtime-guard` judges every project with `audio-core`, with no setting that switches it off. Without `guards.smoothing` the smoothing module is any folder named `smooth` (and the copy trees) and the scope the project's audio code; the key only names them more exactly. Existing projects take it with `update`: only lines an edit adds are judged. It also refuses a bypass switched in one sample (`if (bypassed)`), which clicks, and `smooth-continuous-parameters` now says every switch that changes what is heard crossfades through the smoothing module, and the click gate covers stepped controls and bypass.
 

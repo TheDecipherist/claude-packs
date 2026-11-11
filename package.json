@@ -1,6 +1,6 @@
 {
   "name": "@thedecipherist/claude-packs",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "Per-project Claude Code rules, lesson checks, hooks and skills that hold code to what a senior engineer would accept, in every language. Stops repetition before it is written, scans a project on a copy, and turns what it finds into a work order.",
   "type": "module",
   "bin": {
