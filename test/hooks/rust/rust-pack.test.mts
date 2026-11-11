@@ -5,7 +5,7 @@ import { languageOf } from '../../../packs/base/hooks/lib/languages.mts';
 import type { Language } from '../../../packs/base/hooks/lib/languages.mts';
 import { put } from '../../../packs/base/hooks/lib/files.mts';
 import { readJson } from '../../../packs/base/hooks/lib/json.mts';
-import { assert, cli, existsSync, fresh, join, mkdirSync, readFileSync, run, test, writeFileSync } from '../../kit-cli.mts';
+import { assert, cli, existsSync, fresh, join, mkdirSync, readFileSync, initAuto, run, test, writeFileSync } from '../../kit-cli.mts';
 import { fixture } from '../hook-rig.mts';
 
 const rustRow = (): Language => {
@@ -66,7 +66,7 @@ test('suggest reads a new crate, and init --auto installs the rust configuration
   const said = cli(dir, 'suggest').stdout;
   assert.match(said, /configuration: rust/);
   assert.match(said, /rust +Rust crate: Cargo\.toml/);
-  run(dir, 'init', '--auto');
+  initAuto(dir);
   assert.equal(readJson<{ configuration?: string }>(join(dir, '.claude/layout.json'), {})?.configuration, 'rust');
   assert.ok(existsSync(join(dir, '.claude/rules/rust-errors-are-returned.md')));
   assert.ok(existsSync(join(dir, '.claude/tools/rust-lints.toml')));
@@ -86,14 +86,14 @@ test('a new crate passes doctor --strict: no planned folder is missing, and no u
 test("a project's own clippy.toml is never replaced", () => {
   const dir = crate();
   writeFileSync(join(dir, 'clippy.toml'), 'msrv = "1.80"\n');
-  run(dir, 'init', '--auto');
+  initAuto(dir);
   assert.equal(readFileSync(join(dir, 'clippy.toml'), 'utf8'), 'msrv = "1.80"\n');
 });
 
 test('a project with no package.json is told the command that works there (KWB-76)', () => {
   const dir = crate();
   assert.match(cli(dir, 'suggest').stdout, /Install exactly this: npx @thedecipherist\/claude-packs init --auto/);
-  run(dir, 'init', '--auto');
+  initAuto(dir);
   assert.match(readFileSync(join(dir, 'CLAUDE.md'), 'utf8'), /no package\.json: run the kit as `npx @thedecipherist\/claude-packs <command>`/);
 });
 
@@ -103,7 +103,7 @@ test('a project with the kit in node_modules keeps the --no-install form, and no
   writeFileSync(join(dir, 'node_modules/@thedecipherist/claude-packs/package.json'), '{}\n');
   writeFileSync(join(dir, 'package.json'), '{}\n');
   assert.match(cli(dir, 'suggest').stdout, /Install exactly this: npx --no-install @thedecipherist/);
-  run(dir, 'init', '--auto');
+  initAuto(dir);
   assert.doesNotMatch(readFileSync(join(dir, 'CLAUDE.md'), 'utf8'), /no package\.json/);
 });
 

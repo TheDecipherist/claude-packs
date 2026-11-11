@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { buildFolders } from '../../../lib/repo-weight.mts';
 import { lockOf } from '../../fixtures/installs.mts';
-import { KIT, cli, fresh, git, projectWith, rmSync, run, selftest, spawnSync, writeFileSync } from '../../kit-cli.mts';
+import { KIT, cli, fresh, git, initAuto, projectWith, rmSync, run, selftest, spawnSync, writeFileSync } from '../../kit-cli.mts';
 import { FILES } from '../../../lib/global.mts';
 import { isContent } from '../../../packs/base/hooks/lib/content.mts';
 import { put } from '../../../packs/base/hooks/lib/files.mts';
@@ -28,8 +28,7 @@ test('suggest reads the project and init --auto installs exactly that', () => {
   assert.match(said.stdout, /shell +shell script: src\/run\.sh/);
   assert.match(said.stdout, /docker +file: Dockerfile/);
   assert.ok(!existsSync(join(dir, '.claude')), 'suggest writes nothing');
-  const r = cli(dir, 'init', '--auto');
-  assert.equal(r.status, 0, r.stdout + r.stderr);
+  initAuto(dir);   // throws on a non-zero exit
   const packs = lockOf(dir).packs ?? [];
   for (const p of ['python', 'shell', 'docker']) assert.ok(packs.includes(p), p);
   assert.ok(!packs.includes('mongo'));
@@ -82,7 +81,7 @@ test('a build folder is known by what the build leaves, and scan neither reads i
 test('a new reverse-engineering project with no code yet gets the pack, from its notes alone', () => {
   const dir = project({ 'docs/research.md': '# Research\n\nThe reset vector is at 0x0000 [FW].\n' });
   assert.match(suggested(dir), packLine('reverse-engineering'));
-  assert.equal(cli(dir, 'init', '--auto').status, 0);
+  initAuto(dir);
   assert.ok(existsSync(join(dir, '.claude/skills/names-first/SKILL.md')));
   assert.ok(existsSync(join(dir, '.claude/tools/names-sweep.mjs')));
 });

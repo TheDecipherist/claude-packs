@@ -15,11 +15,14 @@ function orderWith(block: string): string {
   return file;
 }
 
+// `init --from <order>` in `dir`: the one place this file starts an install from a block, which is every test's subject.
+const initFrom = (dir: string, order: string) => cli(dir, 'init', '--from', order);
+
 for (const template of ['generic', 'plugin', 'rebuild']) {
   test(`the ${template} template's own block installs with init --from, and doctor --strict is green there`, () => {
     const dir = fresh(`from-${template}-`);
     assert.equal(cli(dir, 'workorder', 'o', '--template', template).status, 0);
-    const r = cli(dir, 'init', '--from', join(dir, 'docs/workorders/o/workorder.md'));
+    const r = initFrom(dir, join(dir, 'docs/workorders/o/workorder.md'));
     assert.equal(r.status, 0, r.stdout + r.stderr);
     const strict = cli(dir, 'doctor', '--strict');
     assert.equal(strict.status, 0, strict.stdout);
@@ -32,7 +35,7 @@ for (const template of ['generic', 'plugin', 'rebuild']) {
 test('the block\'s own layout keys land in layout.json, and what enable names switches on', () => {
   const dir = fresh('from-keys-');
   const order = orderWith('configuration: synth-creator\npacks:\n  - cpp\n  - audio-core\nenable:\n  - hooks/user-asks.mjs\ncommands:\n  test: ctest --preset dev\n');
-  const r = cli(dir, 'init', '--from', order);
+  const r = initFrom(dir, order);
   assert.equal(r.status, 0, r.stdout + r.stderr);
   const layout = layoutOf(dir);
   assert.deepEqual(layout.enable, ['hooks/user-asks.mjs']);
@@ -43,7 +46,7 @@ test('the block\'s own layout keys land in layout.json, and what enable names sw
 
 test('an unknown key is refused by name, and nothing is installed', () => {
   const dir = fresh('from-unknown-');
-  const r = cli(dir, 'init', '--from', orderWith('configuration: base\npacks: base\nlooksies: []\n'));
+  const r = initFrom(dir, orderWith('configuration: base\npacks: base\nlooksies: []\n'));
   assert.equal(r.status, 2);
   assert.match(r.stderr, /"looksies", a key the kit does not read\. It takes: configuration, packs, files, .*looks.*Nothing was installed/);
   assert.ok(!existsSync(join(dir, '.claude')), 'nothing installed');
@@ -52,9 +55,9 @@ test('an unknown key is refused by name, and nothing is installed', () => {
 test('an order with no block, or two, is refused', () => {
   const none = join(fresh('order-'), 'workorder.md');
   writeFileSync(none, '# Work order: x\n');
-  assert.match(cli(fresh('from-none-'), 'init', '--from', none).stderr, /has no install block/);
+  assert.match(initFrom(fresh('from-none-'), none).stderr, /has no install block/);
   const two = orderWith('configuration: base\n```\n\n```claude-packs\nconfiguration: base\n');
-  assert.match(cli(fresh('from-two-'), 'init', '--from', two).stderr, /has 2 install blocks/);
+  assert.match(initFrom(fresh('from-two-'), two).stderr, /has 2 install blocks/);
 });
 
 test('new --from installs the block and commits it with the scaffold', () => {
@@ -75,7 +78,7 @@ test('new --template plugin, then init --from its own order, is green under doct
   const made = cli(parent, 'new', 'scratch', '--config', 'synth-creator', '--template', 'plugin');
   assert.equal(made.status, 0, made.stdout + made.stderr);
   const dir = join(parent, 'scratch');
-  const r = cli(dir, 'init', '--from', join(dir, 'docs/workorders/scratch/workorder.md'));
+  const r = initFrom(dir, join(dir, 'docs/workorders/scratch/workorder.md'));
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.equal(layoutOf(dir).looks?.[0]?.name, 'panel', 'the template block\'s looks');
   const strict = cli(dir, 'doctor', '--strict');

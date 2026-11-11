@@ -11,7 +11,7 @@ import { INIT_SITE_LIMIT, initSites } from './repo-readers.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
 
-test('a test starts from fixture(name): under 40 init call sites in the suite', { todo: 'red until the units, hooks, tools and integration shares (a, b, c) have moved their installs onto fixtures (W5 done-when)' }, () => {
+test('a test starts from fixture(name): under 40 init call sites in the suite', () => {
   const sites = initSites(KIT);
   assert.ok(sites.length < INIT_SITE_LIMIT, `${sites.length} init call sites, the limit is under ${INIT_SITE_LIMIT}: start from fixture(name) in test/fixtures/installs.mts`);
 });
