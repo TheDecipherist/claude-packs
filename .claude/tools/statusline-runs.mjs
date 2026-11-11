@@ -58,7 +58,7 @@ export function runsSegments(cache, nowMs, paint, mode) {
         `${paint(percentLabel(row.percent), tint(C.white))}  ${paint(row.state, C.dim)}${live}`;
     }
     return `${tree}${paint(row.who.padEnd(10), row.quiet ? C.red : tint(C.lavender))} ${paint('>', C.dim)} ` +
-      `${paint(`${row.id ?? '?'} ${row.title.slice(0, 22)}`.padEnd(27 - row.prefix.length), tint(C.teal))} ${meter(row.percent, 10, paint)} ` +
+      `${paint([row.id, row.title].filter(Boolean).join(' ').slice(0, 25).padEnd(27 - row.prefix.length), tint(C.teal))} ${meter(row.percent, 10, paint)} ` +
       `${paint(percentLabel(row.percent), tint(C.white))}${live}${row.now ? paint(`  ${row.now.slice(0, 60)}`, C.dim) : ''}`.trimEnd();
   };
   const rows = runTree(runs, nowMs, report.updated).map(draw);

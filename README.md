@@ -536,6 +536,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `untrusted-boundary` | Write | Refuses a model call with outside text and no per-call boundary |
 | `git-guard` | Bash | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
 | `suite-once` | Bash | Refuses the whole test suite unless the user's prompt asks for a full run |
+| `no-find` | Bash | Refuses `find`, `bfs`, `fd`, `locate` and `mdfind` unless the user's prompt asks for one: every location is named in the order and the layout |
 | `look-gate` | Bash, after a build | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
 | `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
@@ -543,7 +544,6 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 | `heartbeat` | Every call | Records what each agent did last and when, for the status line; refuses nothing |
-| `no-find` | Bash | Refuses a search of the disk (`find`, `bfs`, `fd`, `locate`, `mdfind`): every location is named in the order, the layout or the brief; allowed when the prompt asks for one by name |
 | `kit-fresh` | Session start, Bash | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
 
 Packs add their own: `realtime-guard`, `param-id-lock` and `settings-layer` (`audio-core`; every plugin has a settings layer with the standard settings, and its standalone no JUCE Options button), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, `chart-first`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.

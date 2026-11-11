@@ -45,10 +45,10 @@ export const COMMAND_CASES = {
     assert.equal(start(here).stdout, '');
   },
   'no-find.mjs': ({ here, wt }) => {
-    // no layout key: a search of the disk is refused from a worktree as from the main checkout, a plain command passes (KWB-154)
-    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && find . -name '*.cpp'`), 2);
-    assert.equal(bash(here, 'no-find.mjs', `cd ${here} && find . -name '*.cpp'`), 2);
-    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && git status --short`), 0);
+    // A search is refused in a worktree as in the main checkout (1.8.2, KWB-154): nobody asked for one.
+    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && find . -name x`), 2);
+    assert.equal(bash(here, 'no-find.mjs', `cd ${here} && find . -name x`), 2);
+    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && git grep -n x`), 0);
   },
   'repo-litter.mjs': ({ here, wt }) => {
     // The worktree's layout allows this asset; main's does not.

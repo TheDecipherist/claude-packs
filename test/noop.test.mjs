@@ -15,9 +15,9 @@ const FX = join(KIT, 'test/fixtures/noop');
 // 0.25.0: the person's name out of every file, a // in a string read right, and what the reviews changed.
 const REVIEWED = ['.claude/hooks/protect-vendor.mjs', '.claude/skills/analyse-reference-look/SKILL.md', '.claude/hooks/lib/house.py', '.claude/rules/oscillators-bandlimited.md', '.claude/hooks/secrets-guard.mjs', '.claude/rules/no-time-or-date.md', '.clang-tidy', '.claude/hooks/build-guard.mjs', '.claude/hooks/idle-wake.mjs', '.claude/hooks/lib/cpp-scan.mjs', '.claude/hooks/lib/hook-log.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/making-check.mjs', '.claude/hooks/run-hooks.mjs', '.claude/hooks/time-guard.mjs', '.claude/hooks/user-asks.mjs', '.claude/rules/clang-tidy-core-guidelines.md', '.claude/rules/hooks-and-gates.md', '.claude/rules/plan-and-logs.md', '.claude/skills/copy-and-prove/SKILL.md',
   '.claude/skills/new-panel-control/SKILL.md', '.claude/skills/test-quietly/SKILL.md'];   // 1.5.2: new-panel-control's step 7, the switch gate (KWB-105); test-quietly's step 7, the user's files (KWB-106)
-// 1.9.0: suite-once and the selftest helper read the turn's prompt through promptFile (1.8.2, no-find's); git-auth exports
-// loggedInAs, so git-guard's selftest plants gh's account instead of starting gh (KWB-160)
-const SWEEP_CHANGED = ['suite-once.mjs', 'lib/selftest.mjs', 'lib/git-auth.mjs'];
+// 1.9.0: git-auth exports loggedInAs, so git-guard's selftest plants gh's account instead of starting gh (KWB-160); suite-once and
+// the selftest lib are 1.8.2's PROMPT_FILE_CHANGED
+const SWEEP_CHANGED = ['lib/git-auth.mjs'];
 export const CHANGED = ['brief-guard.mjs', 'file-size-guard.mjs', 'folder-law.mjs', 'git-guard.mjs', 'making.mjs', 'once-only.mjs', 'placement-law.mjs',
   'shape-law.mjs', 'stage-guard.mjs', 'lesson-checks.mjs', 'dispatch-once.mjs', 'lib/layout.mjs', 'lib/glob.mjs', 'lib/pushed.mjs', 'lib/git-guard-selftest.mjs', 'lib/dup-index.mjs', 'lib/dup.mjs', 'lib/making-check-selftest.mjs', 'lib/project.mjs', 'lib/shape.mjs', 'lib/writes.mjs',
   ...SWEEP_CHANGED]
@@ -75,19 +75,19 @@ const RESEARCH = ['editor-destruction-order', 'panel-surface-and-sections', 'kno
 const DRAWN = ['.claude/rules/ui-drawn-in-code.md'];   // 1.5.0 research-gaps: the rule ui-drawn-in-code and no-html-prototype point at (synth-creator); chart-first and its rule, and both checks, are held back
 const USER_FILES = ['.claude/rules/tests-never-touch-user-files.md'];
 const START = ['.claude/skills/start-from-a-workorder/SKILL.md', '.claude/skills/run-a-workorder/SKILL.md', '.claude/skills/write-the-readme/SKILL.md'];   // 1.7.1: the README, the last of the build, in base   // 1.6.0 planner W7: run-a-workorder, the run's half of write-a-workorder, in base   // 1.5.11: a build starts from a finished work order and its design, in base   // 1.5.2 (KWB-106): a test gets copies of the user's files, in base, so in every project
+// 1.8.2: the selftest lib's promptFile (a transcript with one prompt), shared by suite-once and no-find; suite-once calls it
+const PROMPT_FILE_CHANGED = ['.claude/hooks/lib/selftest.mjs', '.claude/hooks/suite-once.mjs'];
 const BANK_PROOF_CHANGED = ['.claude/tools/lib/spectrum.mjs'];   // 1.6.0 planner W5: its FFT exported for sound-design's prove-a-bank (wav.mjs, in CHANGED, reads every channel)
 const COST = ['SKILL.md', 'cost-ledger.md'].map((f) => `.claude/skills/synth-cost/${f}`);   // 1.6.0 planner W4: audio-core's cost ledger, which the planner and the build share; its one line in cpu-worst-case-per-block (in REPAIRED)
 const AUDIENCE = ['.claude/hooks/lib/audience.mjs'];   // 1.5.13 (KWB-127): the marker for a page addressed outside the project, read by shape-law and brief-guard
 // 1.8.1: the status line and what it reads (base): the heartbeat hook, on by default since it refuses nothing, its settings
-// entries and the statusLine in expected/settings.json; the JSON helper; the run readers (1.9.0: run-claudes, a run found by its
-// Claude Code session, KWB-161; run-transcripts, an agent's last call from its transcript); the build queue's slots
-// 1.8.2: no-find (KWB-154), on by default as the user asked ("there would never be a good reason for using find"): it joins the
-// Bash group of expected/settings.json, its 10 s added to the group's timeout
-const NO_FIND = ['.claude/hooks/no-find.mjs'];
+// entries and the statusLine in expected/settings.json; the JSON helper; the run readers; the build queue's slots
+// 1.8.2: no-find, on by default (KWB-154), and the transcripts reader the status line uses where no heartbeat runs; 1.9.0: run-claudes,
+// a run found by its Claude Code session (KWB-161)
 // 1.9.0: kit-fresh (KWB-156), held back on update like every new hook until layout.json enables it; its libraries and the one version
 // reader (KWB-162) come with base, and base's SessionStart group now comes first in settings.json, before synth-creator's compact one
 const KIT_FRESH = ['kit-fresh-look', 'kit-fresh-selftest', 'kit-version'].map((f) => `.claude/hooks/lib/${f}.mjs`);
-const STATUS = ['.claude/hooks/heartbeat.mjs', ...['json', 'run-status', 'run-discovery', 'run-remotes', 'run-tree', 'run-transcripts', 'run-claudes', 'build-slots'].map((f) => `.claude/hooks/lib/${f}.mjs`),
+const STATUS = ['.claude/hooks/heartbeat.mjs', '.claude/hooks/no-find.mjs', ...['json', 'run-status', 'run-discovery', 'run-remotes', 'run-tree', 'run-transcripts', 'run-claudes', 'build-slots'].map((f) => `.claude/hooks/lib/${f}.mjs`),
   ...['statusline', 'statusline-paint', 'statusline-runs', 'statusline-session', 'statusline-work'].map((f) => `.claude/tools/${f}.mjs`)];
 const BUDGET = ['core-budget', 'compile-cache'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.5.4 (KWB-111, KWB-112): the machine's core share for the queue and the tests; whether a build folder compiles through the shared cache
 // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
@@ -110,10 +110,10 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...STATUS, ...NO_FIND, ...KIT_FRESH, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST, ...SETTINGS] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...STATUS, ...KIT_FRESH, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST, ...SETTINGS] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
-    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, ...SMOOTHING_CHANGED, ...BANK_PROOF_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
+    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, ...SMOOTHING_CHANGED, ...BANK_PROOF_CHANGED, ...PROMPT_FILE_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
     for (const [file, from] of Object.entries(MOVED)) {
       assert.ok(was.files[file] && lock.files[file], `${file}: kept in the lock after the move`);
       assert.equal(readFileSync(join(dir, file), 'utf8'), readFileSync(join(KIT, from), 'utf8'), `${file}: moved, not lost`);
@@ -132,7 +132,7 @@ test('an install that names no configuration gets synth-creator from its packs, 
 // keeps its own layout on update: no template folder or concept added, the same CLAUDE.md, the same files. A file the kit
 // changes on purpose later goes in FULL_STACK_CHANGED (look-gate and its selftest: a report is keyed by the code, KWB-121), and a new one in FULL_STACK_ADDED, with why.
 const FULL_STACK_CHANGED = [...SWEEP_CHANGED.map((f) => `.claude/hooks/${f}`), '.claude/rules/instances-by-index-identities-by-id.md', '.claude/hooks/shape-law.mjs', '.claude/hooks/brief-guard.mjs', '.claude/skills/write-a-workorder/SKILL.md', '.claude/hooks/look-gate.mjs', '.claude/hooks/lib/look-gate-selftest.mjs', '.claude/hooks/git-guard.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/lib/git-guard-selftest.mjs', '.claude/hooks/lib/project.mjs', '.claude/skills/pdf-to-md/SKILL.md', '.claude/tools/quiet-test.mjs', '.claude/skills/test-quietly/SKILL.md', '.claude/hooks/brief-guard.mjs', '.claude/hooks/lib/shape-prose.mjs', '.claude/hooks/lib/shape.mjs', '.claude/hooks/making-check.mjs', '.claude/hooks/lib/making-check-selftest.mjs', '.claude/hooks/lib/pushed.mjs', '.claude/rules/git-right-first-time.md', '.claude/rules/finished-work-lands.md'];   // KWB-157: guards.git.pushNeedsYes, in pushed.mjs and the two git rules   // 1.5.9 (KWB-122): making-check judges the file as it stands   // 1.4.7 (KWB-117): a path names a file   // 1.5.2 (KWB-106): test-quietly's step on the user's files   // 1.5.4 (KWB-111): quiet-test runs a test with the machine's core share   // 1.4.4 (KWB-103): project.mjs exports its common-dir reader; 1.4.5: pdf-to-md caps docling at two runs   // 1.4.1 (KWB-101): both read a command past its wrappers
-const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md', ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...STATUS, ...NO_FIND, ...KIT_FRESH];   // W4: the skill in base, the page law in ui-craft
+const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md', ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...STATUS, ...KIT_FRESH];   // W4: the skill in base, the page law in ui-craft
 test('full-stack: an update keeps an existing project\'s own layout, and changes only the listed files', () => {
   const { dir } = updated('full-stack', 'full-stack');
   const before = (f) => readFileSync(join(FX, 'full-stack', 'before', f), 'utf8');
@@ -144,5 +144,5 @@ test('full-stack: an update keeps an existing project\'s own layout, and changes
   const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
   const old = JSON.parse(before('lock.json'));
   assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(old.files), ...FULL_STACK_ADDED].sort(), 'the same files, and the listed new ones');
-  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && ![...FULL_STACK_CHANGED, ...SHELL_CHANGED].includes(f)), [], 'only the listed files changed');
+  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && ![...FULL_STACK_CHANGED, ...SHELL_CHANGED, ...PROMPT_FILE_CHANGED].includes(f)), [], 'only the listed files changed');
 });

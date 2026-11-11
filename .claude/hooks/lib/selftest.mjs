@@ -34,6 +34,12 @@ export const runHook = (hook, dir, payload, args = []) =>
 export const writeOf = (file_path, content = '// new\n') => ({ tool_name: 'Write', tool_input: { file_path, content } });
 export const editOf = (file_path, old_string = 'a', new_string = 'b') => ({ tool_name: 'Edit', tool_input: { file_path, old_string, new_string } });
 export const bashOf = (command, cwd) => ({ tool_name: 'Bash', tool_input: { command }, ...(cwd ? { cwd } : {}) });
+/** A transcript whose last prompt is `words`, for a hook that reads what the user asked this turn (suite-once, no-find). */
+export function promptFile(dir, name, words) {
+  const file = join(dir, `${name}.jsonl`);
+  put(file, `${JSON.stringify({ type: 'user', message: { content: words } })}\n`);
+  return file;
+}
 
 // cases: [label, actual, wanted]. Prints "<name> selftest: OK (n cases)" or each failure; exit code.
 export function verdicts(name, cases) {

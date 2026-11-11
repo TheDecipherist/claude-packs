@@ -1,15 +1,15 @@
 // The runs as a tree, the one shape `status` and the status line both draw (1.8.1): a project, its orders under it when it has
 // more than one, each order's agents under the order. The user: "but why is that not under the VSYNTHGT project?", "> lead
 // should not be on a new line should it? it looks confusing. cant see what really belongs to the VSYNTHGT project".
-//   PC: VSYNTHGT     ...  59%  41 of 99 items left, 2 orders
-//   ├ rebuild        ...  60%  32 of 80 items left, lead on W9 The engine: the sound
-//   └ ui-look        ...  53%  9 of 19 items left, lead on L2 The panel fixed
-//   MAC: BANDWARP    ...  47%  40 of 76 items left, 4 agents
-//   ├ dsp      > W3b The cluster   ...
-//   └ panel    > W8 The main panel ...
+//   PC: SHOP         ...  59%  41 of 99 items left, 2 orders
+//   ├ api            ...  60%  32 of 80 items left, lead on W9 The import
+//   └ web            ...  53%  9 of 19 items left, lead on L2 The checkout page
+//   MAC: BILLING     ...  47%  40 of 76 items left, 4 agents
+//   ├ invoices > W3b The ledger    ...
+//   └ emails   > W8 The templates  ...
 // A lead working alone is said on its order's row, never as a row of its own.
 import { basename } from 'node:path';
-import { checkedText, percent, projectOf, runRows } from './run-status.mjs';
+import { checkedText, percent, projectOf, runRows, workLine } from './run-status.mjs';
 
 /** The runs grouped by machine and project, in the order first seen: [{ name: "PC: VSYNTHGT", percent, items, done, state, runs }]. */
 export function projectGroups(runs) {
@@ -35,7 +35,8 @@ const under = (i, n) => (i === n - 1 ? '  ' : '│ ');          // what a last c
 function orderRows(r, { prefix, childPrefix, label, nowMs, checkedAt, top }) {
   const { project, agents } = runRows(r, nowMs, checkedAt);
   const lead = agents.length === 1 && agents[0].who === 'lead' ? agents[0] : null;
-  const live = lead && /[♥⚙]/.test(lead.live) ? lead.live.trim() : '';   // the lead's heartbeat or work, when there is one
+  // the lead's own work, on its order's row, agents or not: its builds and gates are often the machine's real work
+  const live = lead ? (/[♥⚙]/.test(lead.live) ? lead.live.trim() : '') : r.leadWork?.procs ? `lead ${workLine(r.leadWork)}` : '';
   const crew = lead ? `, lead on ${lead.id} ${lead.title.slice(0, 26)}` : agents.length ? `, ${agents.length} agent${agents.length === 1 ? '' : 's'}` : '';
   const state = `${project.left}${crew}${top ? project.checked : ''}`;
   const head = { kind: 'order', prefix, name: label ?? project.name, percent: project.percent, state, live, quiet: lead?.quiet ?? 0 };

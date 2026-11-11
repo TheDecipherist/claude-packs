@@ -2,18 +2,28 @@
 
 ## 1.9.0 (unreleased: work/1.9.0-platforms)
 
-The kit on Linux, macOS and Windows (KWB-152, docs/platform-audit.md), with 1.8.1 folded in (never published).
+The kit on Linux (WSL) and macOS alike (KWB-152, docs/platform-audit.md), after 1.8.2.
 
 - KWB-155: making-check judges each checkout's writes against that checkout's own index; a file in one worktree is never a copy of itself in another. `test/worktree-twins.test.mjs`.
 - KWB-147: git-guard counts untracked files only for `git clean`: a checkout, a branch switch, a stash or `reset --hard` never touches them. git-guard's selftest.
 - KWB-157 (a contributor's patch): `guards.git.pushNeedsYes`, every push the owner's.
 - KWB-158: a tool started by a linked path runs (`isMain` by real paths: macOS's `/var`, Windows' `/C:/`); the suite's temp folder is real. `prove-a-bank started through a linked folder`.
 - KWB-159: shape-law finds a call's declaration on macOS (git grep's BSD regex has no `\b`).
+- KWB-156: `kit-fresh`: at every session start, and in a work order's `run.sh` before every session, a project's kit is compared with npm's newest (asked at most once a day) and an older one is said with the update command; a run with nobody there does not start on it. In the kit's own repo, newer work on origin is named and a commit waits until it is merged. Offline, it says what it could not check and blocks nothing.
+- KWB-160: `new` leaves nothing in the user's home: git-guard's selftest no longer starts `gh` (its account is planted).
+- KWB-161: a run is found by its Claude Code session as well as by `run.sh`, so a work order driven from a session shows in the status line and `status` with its agents.
+- KWB-162: the status line shows the version of the kit package the project runs, never the lock's note of the last install.
+- KWB-163: every hook takes its own path from `fileURLToPath`.
+- KWB-164: an agent paused, waiting or finished on purpose is never drawn as stuck: red means something is wrong.
 - The Mac suite's other reds: quiet-test's Linux case asks the Linux plan on any system; the 0.5.x update test fails by name on a missing commit; no-find has its worktree case.
 
-## 1.8.1 (2026-11-11)
+## 1.8.2 (2026-11-11)
 
-1.8.0 was never published: its work is here, with what followed it.
+1.8.0 and 1.8.1 were never published: their work is here, with what followed them.
+
+- `no-find` (base, on in every project, `update` included): `find`, `bfs`, `fd`, `locate` and `mdfind` are refused as commands, anywhere in a line, past wrappers and `xargs`, unless the user's prompt that turn asks for one by name ("use find to …"; a question about one asks nothing). The refusal says where to look: the order's sources with their paths, the layout's folders, Glob and Grep on a named folder. A BANDWARP agent's `find / -name QwertyPlayer.h` searched a Mac's whole disk for a minute and a half for a file the order lists in `~/projects/synthcore` (KWB-154). Its selftest, 18 cases, each law seen red.
+- The status line and `status` show an agent from its first minute: a worktree on the order's own branch (`work/<order>-<name>`) is that order's agent, "not started yet" while its branch has nothing of its own and nothing runs in it; a merged one untouched for two hours is left out unless work runs in it. Where no heartbeat hook runs yet, an agent's last call comes from Claude Code's own transcripts. The lead's own work (its builds, its gates) shows on its order's row beside its agents.
+- Logged for the next release: KWB-151 (the same warning flags are not the same law on every compiler), KWB-152 (the kit is not proved the same on Linux, macOS and Windows), KWB-153 (a test the kit runs has no memory or time limit), KWB-155 (a file in one worktree read as a copy of itself in another).
 
 - The runs as a tree, in `status` and the status line: a project, its orders under it when it has more than one, each order's agents under the order (`├`, `└`, `│`); a lead working alone is said on its order's row ("lead on W9 …"), never as a row of its own; a run in a worktree is named by its project (`VSYNTHGT (ui-look)`), never the worktree's folder. Once other machines are listed every run says where it runs, this machine's too (`PC:`, `MAC:`; remotes.json's `"name"`, else `mac` on macOS and `pc` elsewhere). The process check measures the lead's checkout as well, so a lead's build shows its processes, cores and memory. `test/run-remotes.test.mjs`.
 - KWB-149: a build yields with `nice` on every system; on macOS it ran under `taskpolicy -b`, background work, which macOS keeps on the efficiency cores: a Mac's build used about 2.5 cores of 18. KWB-150: a job takes the core budget divided by the jobs running as it starts, its own counted, never less than its slot's share: a build alone on a quiet machine had compiled at `-j 3`. `test/core-budget.test.mjs`.
