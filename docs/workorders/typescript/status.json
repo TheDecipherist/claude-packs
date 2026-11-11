@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T11:30:59Z",
+  "updated": "2026-11-11T11:32:43Z",
   "steps": [
     {
       "id": "W0",
@@ -27,7 +27,7 @@
       "title": "The core: base hooks lib by layer",
       "items": 5,
       "done": 0,
-      "agent": null
+      "agent": "w3-l0-shell, w3-l0-scanners, w3-l0-project"
     },
     {
       "id": "W4",
@@ -93,5 +93,24 @@
       "agent": null
     }
   ],
-  "agents": []
+  "agents": [
+    {
+      "name": "w3-l0-shell",
+      "worktree": ".claude/worktrees/w3-l0-shell",
+      "step": "W3",
+      "started": "2026-11-11T11:32:43Z"
+    },
+    {
+      "name": "w3-l0-scanners",
+      "worktree": ".claude/worktrees/w3-l0-scanners",
+      "step": "W3",
+      "started": "2026-11-11T11:32:43Z"
+    },
+    {
+      "name": "w3-l0-project",
+      "worktree": ".claude/worktrees/w3-l0-project",
+      "step": "W3",
+      "started": "2026-11-11T11:32:43Z"
+    }
+  ]
 }
