@@ -44,8 +44,8 @@ export const hook = (event, ctx) => {
 /** A worktree file is measured by its own checkout: a small file passes there, a 400-line one is refused. */
 export const worktreeCase = {
     steps: [
-        { label: 'a small file in the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/dsp/Small.cpp', content: '// new\n' } }, want: 0 },
-        { label: 'a 400-line file in the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/dsp/Huge.cpp', content: 'x\n'.repeat(400) } }, want: 2 },
+        { label: 'a small file in the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/core/Small.cpp', content: '// new\n' } }, want: 0 },
+        { label: 'a 400-line file in the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/core/Huge.cpp', content: 'x\n'.repeat(400) } }, want: 2 },
     ],
 };
 export function selftest() {

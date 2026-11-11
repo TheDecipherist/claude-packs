@@ -112,7 +112,7 @@ export interface FileWrite {
 
 // ---- The project's own files ----
 
-export interface LayoutFolder { path: string; purpose?: string; kind?: string }
+export interface LayoutFolder { path: string; purpose?: string; kind?: string; planned?: boolean }
 export interface LayoutKind { what?: string; in?: string; concepts?: readonly string[]; content?: boolean | string; files?: readonly string[]; extensions?: readonly string[] }
 export interface Look { name: string; reference: string; code?: readonly string[]; report?: string }
 
@@ -187,6 +187,8 @@ export interface PackManifest {
   hooks?: SettingsHooks;
   optIn?: readonly string[];
   skillsIn?: string;
+  /** Hooks that switch on even in a project that already has the pack (an update), named here by their file. */
+  onByDefault?: readonly string[];
   requires?: readonly string[];
   tests?: Record<string, readonly string[]>;
   [key: string]: unknown;
@@ -200,7 +202,10 @@ export interface Configuration {
   layout?: Partial<Layout>;
   hookOrder?: Record<string, readonly string[]>;
   sourceFiles?: string;
-  preamble?: readonly string[];
+  /** The CLAUDE.md block's opening rules: the ones every project of the kind keeps, and the ones it never does. */
+  preamble?: { always: readonly string[]; never: readonly string[] };
+  /** Packs or files the configuration leaves out of what its packs would bring. */
+  leaveOut?: readonly string[];
   [key: string]: unknown;
 }
 
@@ -237,6 +242,8 @@ export interface LessonCheck {
   language?: string;
   notInTests?: boolean;
   kind?: string;
+  /** The check's file, once loaded from a pack or a project. */
+  file?: string;
   bad: string;
   good: string;
   [key: string]: unknown;

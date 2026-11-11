@@ -213,7 +213,7 @@
   ],
   "commands": {
     "test": "npm test",
-    "test-one": "node --import ./test/fresh-tmp.mjs --test test/<name>.test.mjs",
+    "test-one": "node --import ./test/fresh-tmp.mts --test test/<name>.test.mjs",
     "test-changed": "npm run test:changed",
     "doctor": "node bin/claude-packs.mjs doctor --strict"
   },

@@ -26,7 +26,7 @@ export interface TableRow {
 
 // What no import or name shows. `tests` picks the test files by their text. A test installs through the CLI itself or through
 // a test helper that runs it (kit-cli for most; worktree-rig, whose project() runs init, for the worktree tests).
-const INSTALLING_HELPERS = ['bin/claude-packs.mjs', './kit-cli.mjs', './worktree-rig.mjs', './kit-cli.mts', './worktree-rig.mts'];
+const INSTALLING_HELPERS = ['bin/claude-packs.mjs', './kit-cli.mjs', './worktree-rig.mjs', './kit-cli.mts', './worktree-rig.mts', 'fixtures/installs.mts'];
 const installs = (text: string): boolean => INSTALLING_HELPERS.some((h) => text.includes(h)) && /['"](init|new|add|update|update-all)['"]/.test(text);
 
 interface ConfigPacks { packs: { always: string[]; choose: string[] } }

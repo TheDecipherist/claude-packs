@@ -52,3 +52,14 @@ lib/hover-gate.mjs
 lib/shape-cli.mjs
 lib/status-cli.mjs
 lib/workorder.mjs
+lib/scan-detect.mjs
+lib/planner.mjs
+lib/doctor.mjs
+lib/workorder-check.mjs
+lib/switches.mjs
+lib/found-folders.mjs
+lib/scan.mjs
+lib/fix-plan.mjs
+lib/sync.mjs
+lib/install-block.mjs
+lib/project-files.mjs

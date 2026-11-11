@@ -31,12 +31,12 @@ export const hook = (event, ctx) => {
     return refuse(`making-check sent this turn back:\n- ${problems.join('\n- ')}`);
 };
 const SHAPE = JSON.stringify({ concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'] } }, exclude: [] });
-const MAKING = '# x\n\n## In progress\n\n| when | work/x | the gain; making: one gain per slot; concepts: slot (many, 4); reuse: slotGain in src/dsp/Gain.cpp | started |\n\n## Steps\n';
+const MAKING = '# x\n\n## In progress\n\n| when | work/x | the gain; making: one gain per slot; concepts: slot (many, 4); reuse: slotGain in src/core/Gain.cpp | started |\n\n## Steps\n';
 const GAIN = 'float slotGain (int slot) { return gains[slot]; }\n';
-/** The transcript of a turn that wrote src/dsp/Gain.cpp in `into`, from a session sitting in `cwd`. */
+/** The transcript of a turn that wrote src/core/Gain.cpp in `into`, from a session sitting in `cwd`. */
 const wrote = (cwd, into) => [
     { type: 'user', message: { content: 'go' } },
-    { type: 'assistant', cwd, message: { content: [{ type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: `${into}/src/dsp/Gain.cpp`, content: GAIN } }] } },
+    { type: 'assistant', cwd, message: { content: [{ type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: `${into}/src/core/Gain.cpp`, content: GAIN } }] } },
 ].map((e) => JSON.stringify(e)).join('\n');
 const stop = (cwd, transcript, session) => ({ hook_event_name: 'Stop', transcript_path: transcript, cwd, session_id: session });
 /** Each worktree's writes are judged by its own manifest and making line (KWB-155, Stellix WB-86): the worktree has both and

@@ -78,7 +78,7 @@ async function runSelftests(projectDir: string, layout: Layout, { fresh, env }: 
   const claudeDir = join(projectDir, '.claude');
   const hooks = readdirSync(join(claudeDir, 'hooks')).filter((f) => HOOK_FILE.test(f) && f !== 'lesson-checks.mjs').sort();
   const shared = sharedHash(claudeDir, layout.guards, env);
-  // In the kit's own test run (test/fresh-tmp.mjs sets CLAUDE_PACKS_SELFTESTS=gate) every install would prove the same 46 hooks again:
+  // In the kit's own test run (test/fresh-tmp.mts sets CLAUDE_PACKS_SELFTESTS=gate) every install would prove the same 46 hooks again:
   // 166 s a fresh install on the Mac. The gate proves the hooks a change touched, once (scripts/test-changed.mjs proveHooks), so
   // a test's install takes them as proved; a test about selftests sets CLAUDE_PACKS_SELFTESTS=run, and --fresh runs them all (KWB-166).
   const byGate = env.CLAUDE_PACKS_SELFTESTS === 'gate';

@@ -64,9 +64,9 @@ const writeAt = (file, content) => ({ tool_name: 'Write', tool_input: { file_pat
 export const worktreeCase = {
     files: { '{wt}/design/shape.json': JSON.stringify(LANE_SHAPE) },
     steps: [
-        { label: 'a literal instance in the worktree', event: writeAt('{wt}/src/dsp/Lanes.cpp', 'if (laneIx == 3) go();\n'), want: 2 },
-        { label: 'a loop over every lane in the worktree', event: writeAt('{wt}/src/dsp/Lanes.cpp', 'for (int lane = 0; lane < kLanes; ++lane) go(lane);\n'), want: 0 },
-        { label: 'the same literal in the main checkout, whose manifest has no lane', event: writeAt('{here}/src/dsp/Lanes.cpp', 'if (laneIx == 3) go();\n'), want: 0 },
+        { label: 'a literal instance in the worktree', event: writeAt('{wt}/src/core/Lanes.cpp', 'if (laneIx == 3) go();\n'), want: 2 },
+        { label: 'a loop over every lane in the worktree', event: writeAt('{wt}/src/core/Lanes.cpp', 'for (int lane = 0; lane < kLanes; ++lane) go(lane);\n'), want: 0 },
+        { label: 'the same literal in the main checkout, whose manifest has no lane', event: writeAt('{here}/src/core/Lanes.cpp', 'if (laneIx == 3) go();\n'), want: 0 },
     ],
 };
 const SELFTEST_SHAPE = {

@@ -11,18 +11,18 @@ The kit is for everyone: no file names one person (`test/no-personal-name.test.m
 ## Commands
 
 ```
-npm test                       # the full suite: only when the user asks for a full run (suite-once refuses it otherwise). Always via npm: it preloads test/fresh-tmp.mjs
+npm test                       # the full suite: only when the user asks for a full run (suite-once refuses it otherwise). Always via npm: it builds, then preloads test/fresh-tmp.mts
 npm run test:changed           # while working: the tests covering files changed since the base (prints why each was picked); with -- --base origin/main, the gate before landing and before a release
 node scripts/test-changed.mjs --dry-run [--base <ref>]
-node --import ./test/fresh-tmp.mjs --test test/shape.test.mjs                     # one file
-node --import ./test/fresh-tmp.mjs --test --test-name-pattern "<name>" test/*.test.mjs   # one test
+node --import ./test/fresh-tmp.mts --test test/shape.test.mjs                     # one file
+node --import ./test/fresh-tmp.mts --test --test-name-pattern "<name>" test/*.test.mjs   # one test
 node packs/base/hooks/<hook>.mjs --selftest   # every hook has one; doctor runs them all
 node bin/claude-packs.mjs init audio-core --dir <scratch>   # try an install; then `doctor --dir <scratch> [--strict]`
 node bin/claude-packs.mjs suggest|scan|fix --dir <project>  # what it needs; what is wrong, on a copy; the work order
 node bin/claude-packs.mjs lock status|release [--force]      # the kit lock (below)
 ```
 
-Never run `node --test` without the `fresh-tmp.mjs` preload: tests then share the system temp folder and fail at random (KWB-2). There is no build or lint step. Run `npm install` first: `jscpd` (an optional dependency, the `once-only` hook's detector) must be in `node_modules`, or every test that installs packs fails at doctor's `once-only`/`making-check` selftests.
+Never run `node --test` without the `fresh-tmp.mts` preload: tests then share the system temp folder and fail at random (KWB-2). Sources are TypeScript (`.mts`); `npm run build` emits the `.mjs` beside them (ignored by git), and `npm run check` type-checks the kit and its tests. Run `npm install` first: `jscpd` (an optional dependency, the `once-only` hook's detector) must be in `node_modules`, or every test that installs packs fails at doctor's `once-only`/`making-check` selftests.
 
 ## Architecture
 
@@ -125,7 +125,7 @@ Never do:
 
 Skills and checks run these; use them, not the raw tools:
 - test: `npm test`
-- test-one: `node --import ./test/fresh-tmp.mjs --test test/<name>.test.mjs`
+- test-one: `node --import ./test/fresh-tmp.mts --test test/<name>.test.mjs`
 - test-changed: `npm run test:changed`
 - doctor: `node bin/claude-packs.mjs doctor --strict`
 

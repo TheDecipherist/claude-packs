@@ -85,14 +85,14 @@ export const hook = (event, ctx) => {
     return why === null ? pass : refuse(why);
 };
 const writeAt = (file, content) => ({ tool_name: 'Write', tool_input: { file_path: file, content } });
-const CALL = 'float Voice::render (float x) noexcept { return svf.process (x); }\n';
+const CALL = 'float Mixer::render (float x) noexcept { return svf.process (x); }\n';
 /** A function that lives only in the worktree: a near-copy is refused there, and judged against main's tree in main. */
 export const worktreeCase = {
-    files: { '{wt}/src/dsp/Svf.cpp': `#include "Svf.h"\n\n${FN('Svf')}\n` },
+    files: { '{wt}/src/core/Svf.cpp': `#include "Svf.h"\n\n${FN('Svf')}\n` },
     steps: [
-        { label: 'a near-copy in the worktree', event: writeAt('{wt}/src/dsp/Copy.cpp', FN('Copy', '1.5f')), want: 2 },
-        { label: 'a call to it in the worktree', event: writeAt('{wt}/src/dsp/Voice.cpp', CALL), want: 0 },
-        { label: 'the same near-copy in the main checkout, which does not hold the function', event: writeAt('{here}/src/dsp/Copy.cpp', FN('Copy', '1.5f')), want: 0 },
+        { label: 'a near-copy in the worktree', event: writeAt('{wt}/src/core/Copy.cpp', FN('Copy', '1.5f')), want: 2 },
+        { label: 'a call to it in the worktree', event: writeAt('{wt}/src/core/Mixer.cpp', CALL), want: 0 },
+        { label: 'the same near-copy in the main checkout, which does not hold the function', event: writeAt('{here}/src/core/Copy.cpp', FN('Copy', '1.5f')), want: 0 },
     ],
 };
 export function selftest() {

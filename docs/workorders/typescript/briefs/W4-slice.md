@@ -40,7 +40,7 @@ name they use, or update them in the same commit.
 
 ## Proofs
 
-`npm run build`, `npm run check` exit 0, the repo lint (`node --import ./test/fresh-tmp.mjs --test test/repo-lint.test.mts`, 7
+`npm run build`, `npm run check` exit 0, the repo lint (`node --import ./test/fresh-tmp.mts --test test/repo-lint.test.mts`, 7
 tests), the selftest of every hook you changed (`node packs/<pack>/hooks/<hook>.mjs --selftest`; a non-base pack's hook in a scratch
 install: `init --config <one that brings the pack>` then `CLAUDE_PACKS_SELFTESTS=run node bin/claude-packs.mjs doctor --fresh
 --dir <scratch>`), `test/worktrees.test.mjs` for any hook, your unit tests (`test/unit/lib/NAME.test.mts` for a `lib/` module with
