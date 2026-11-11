@@ -12,26 +12,29 @@
 //   node run-hooks.mjs <hook path or name>...   (stdin: the event)
 //   node run-hooks.mjs --selftest
 import { readFileSync, rmSync, writeSync } from 'node:fs';
-import { basename, dirname, isAbsolute, join } from 'node:path';
+import { basename, dirname, extname, isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { crashVerdict } from './lib/crash-policy.mts';
 import { logCall } from './lib/event-log.mts';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mts';
 import { appendRotated, isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mts';
+import { hookRowsFor, readHookTable } from './lib/hook-table.mts';
 import { parseJson, toJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
+import { OUT_CAP, asRecord, capOut, mergeOut, type Json } from './lib/merge-out.mts';
 import { verdicts } from './lib/selftest.mts';
 import { unreadWrites } from './lib/unread-writes.mts';
 import { isVerdict } from './lib/verdict.mts';
 import type { Env } from './lib/shell-writes.mts';
-import type { Hook, HookContext, HookEvent, Verdict } from './lib/types.d.mts';
+import type { Hook, HookContext, HookEvent, HookTableRow, Verdict } from './lib/types.d.mts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+// the hooks sit beside the runner and have its extension (the emitted .mjs in a project; the .mts source when the source runs)
+const EXT = extname(fileURLToPath(import.meta.url));
 export const RUNNER = 'run-hooks';
-/** What the merged text of one event may hold: Claude Code cuts a hook's output at 10,000 characters. */
-export const OUT_CAP = 9000;
-export const nameOf = (arg: string): string => basename(arg).replace(/\.mjs$/, '');
-const fileOf = (arg: string): string => (isAbsolute(arg) ? arg : join(HERE, `${nameOf(arg)}.mjs`));
+export { OUT_CAP, capOut, mergeOut };
+export const nameOf = (arg: string): string => basename(arg).replace(/\.m[jt]s$/, '');
+const fileOf = (arg: string): string => (isAbsolute(arg) ? arg : join(HERE, `${nameOf(arg)}${EXT}`));
 
 /** What a one-parameter hook gives back (until W4 moves every hook): an exit code, its output in the streams. */
 export type HookResult = Verdict | number | void | undefined;
@@ -39,66 +42,9 @@ type ModuleHook = ((text: string) => HookResult | Promise<HookResult>) | Hook;
 /** A hook declared with both parameters takes the event and a context and returns a Verdict (types.d.mts `Hook`). */
 const takesContext = (fn: ModuleHook): fn is Hook => fn.length >= 2;
 
-type Json = Record<string, unknown>;
-const asRecord = (value: unknown): Json | null => (value !== null && typeof value === 'object' && !Array.isArray(value) ? (value as Json) : null);
-
 function hookOf(mod: unknown): ModuleHook | null {
   const fn = asRecord(mod)?.hook;
   return typeof fn === 'function' ? (fn as ModuleHook) : null;
-}
-
-const cutNote = (n: number): string => `\n[run-hooks: ${n} characters of the hooks' output were cut here; Claude Code cuts a hook's output at 10,000]\n`;
-
-// The text of the longest string field a merged JSON object carries, found where hooks put their words.
-function wordiest(obj: Json): { get: () => string; set: (s: string) => void } | null {
-  const holders: { get: () => string; set: (s: string) => void }[] = [];
-  for (const k of ['systemMessage', 'reason', 'stopReason']) {
-    if (typeof obj[k] === 'string') holders.push({ get: () => String(obj[k]), set: (s) => { obj[k] = s; } });
-  }
-  const spec = asRecord(obj.hookSpecificOutput);
-  if (spec && typeof spec.additionalContext === 'string') holders.push({ get: () => String(spec.additionalContext), set: (s) => { spec.additionalContext = s; } });
-  return holders.sort((a, b) => b.get().length - a.get().length)[0] ?? null;
-}
-
-/** The merged text held to OUT_CAP: plain text is cut at the end; a JSON object has its wordiest message cut, so it still parses. */
-export function capOut(text: string): string {
-  if (text.length <= OUT_CAP) return text;
-  const obj = asRecord(parseJson(text));
-  const holder = obj ? wordiest(obj) : null;
-  if (obj && holder) {
-    const whole = holder.get();
-    let kept = whole.length;
-    while (kept > 0) {
-      kept = Math.max(0, kept - Math.max(1, toJson(obj).length - OUT_CAP + cutNote(whole.length).length));
-      holder.set(whole.slice(0, kept) + cutNote(whole.length - kept));
-      if (toJson(obj).length <= OUT_CAP) return toJson(obj);
-    }
-  }
-  const keep = OUT_CAP - cutNote(text.length).length;
-  return text.slice(0, keep) + cutNote(text.length - keep);
-}
-
-// Several hooks' stdout: one is passed as it is; JSON objects are merged (their messages joined), anything else joined by lines.
-export function mergeOut(outs: readonly string[]): string {
-  const said = outs.filter((o) => o.trim());
-  if (said.length < 2) return capOut(said[0] ?? '');
-  const objs = said.map((o) => asRecord(parseJson(o)));
-  const plain = objs.some((o) => o === null);
-  if (plain) return capOut(said.map((o) => o.replace(/\n$/, '')).join('\n') + '\n');
-  const out: Json = {};
-  for (const o of objs) {
-    for (const [k, v] of Object.entries(o ?? {})) {
-      const have = out[k];
-      const here = asRecord(v);
-      const prior = asRecord(have);
-      if (k === 'hookSpecificOutput' && prior) {
-        const ctx = [prior.additionalContext, here?.additionalContext].filter(Boolean).join('\n');
-        out[k] = { ...prior, ...here, ...(ctx ? { additionalContext: ctx } : {}) };
-      } else if (typeof v === 'string' && typeof have === 'string' && ['systemMessage', 'reason', 'stopReason'].includes(k)) out[k] = `${have}\n${v}`;
-      else out[k] = v;
-    }
-  }
-  return capOut(JSON.stringify(out));
 }
 
 // A number-returning hook writes to the process's streams, so they are caught while it runs. W4 removes this, and the call
@@ -120,8 +66,14 @@ export interface RunResult { code: number; stdout: string; stderr: string }
 export interface Caller { env: Env; stdout: NodeJS.WriteStream; stderr: NodeJS.WriteStream; cwd: string; sessionPid: number }
 interface Judged { hook: string; ms: number; code: number; reason: string; out: string }
 
-// -> { code, stdout, stderr }. Each hook's own time is logged (its module's first import included).
-export async function runAll(args: readonly string[], text: string, root: string, caller: Caller): Promise<RunResult> {
+/** When the event arrived (ms since the epoch: this process's start for a one-shot runner, the socket read for the resident one) and
+ *  who runs it (`runner`, `daemon`, `proxy`): the event line's `ms` runs from `at` to the reply, never from performance.now(), which
+ *  in a resident process is its age (review-2 1.7). */
+export interface Arrival { at: number; source: 'runner' | 'daemon' | 'proxy' }
+
+// -> { code, stdout, stderr }. Each hook's own time is logged (its module's first import included), then one `event` line.
+export async function runAll(args: readonly string[], text: string, root: string, caller: Caller, arrival: Arrival = { at: Date.now(), source: 'runner' }): Promise<RunResult> {
+  const queue = Date.now() - arrival.at;
   const ev: HookEvent = asRecord(parseJson(text)) ?? {}; // an unparsable event: the hooks read it themselves
   const outs: string[] = [];
   const err: string[] = [];
@@ -163,12 +115,52 @@ export async function runAll(args: readonly string[], text: string, root: string
     judged.push({ hook: name, ms, code: c, reason: err.slice(before).join(''), out: out.join('') });
     if (c === 2) code = 2;
   }
-  logCall(root, text, judged, appendRotated, performance.now());
   const crash = crashVerdict(root, ev, judged, Date.now());
   if (crash.stderr) err.push(crash.stderr);
   if (crash.code === 2) code = 2;
   outs.push(...[crash.stdout, code === 0 ? unreadWrites(ev, root, caller.env) : ''].filter((s): s is string => Boolean(s)));
+  const wall = Date.now() - arrival.at;
+  logCall(root, text, judged, appendRotated, wall);
+  logHook(root, { event: ev.hook_event_name, hook: 'event', ms: wall, code, tool: ev.tool_name ?? ev.source, queue, source: arrival.source });
   return { code, stdout: mergeOut(outs), stderr: err.join('') };
+}
+
+/** One event through the table: the rows its name and matcher reach, in the table's `order`, run from `dir` (the hooks folder). */
+export function runEvent(table: readonly HookTableRow[], dir: string, text: string, root: string, caller: Caller, arrival?: Arrival): Promise<RunResult> {
+  const ev: HookEvent = asRecord(parseJson(text)) ?? {};
+  return runAll(hookRowsFor(table, ev).map((r) => join(dir, `${r.hook}${EXT}`)), text, root, caller, arrival);
+}
+
+type Case = [string, number | boolean | string | null, number | boolean | string | null];
+
+// W8.1: the runner decides from the table which hooks an event reaches, reads the layout again for every event, and times an event
+// from its arrival.
+async function tableCases(dir: string, caller: Caller, cases: Case[]): Promise<void> {
+  const says = (name: string, code = 0): void => put(join(dir, `${name}${EXT}`), `export function hook(event, ctx) {\n  return { code: ${code}, stdout: '', stderr: 'RAN ${name};' };\n}\n`);
+  for (const name of ['t-any', 't-write', 't-bash', 't-async', 't-stop', 't-regex']) says(name);
+  put(join(dir, `t-layout${EXT}`), "export function hook(event, ctx) {\n  return { code: ctx.layout.folders.marker ? 2 : 0, stdout: '', stderr: 'LAYOUT ' + Object.keys(ctx.layout.folders).join() + ';' };\n}\n");
+  const row = (hook: string, extra: Partial<HookTableRow> = {}): HookTableRow => ({ hook, events: ['PreToolUse'], role: 'judge', ...extra });
+  const table: HookTableRow[] = [
+    row('t-bash', { matcher: 'Bash', order: 30 }), row('t-write', { matcher: 'Write|Edit', order: 20 }), row('t-any', { order: 10 }),
+    row('t-regex', { matcher: 'mcp__.*', order: 40 }), row('t-async', { async: true, order: 5, role: 'recorder' }), row('t-stop', { events: ['Stop'] }),
+  ];
+  const ran = async (event: Json): Promise<string> => (await runEvent(table, dir, toJson(event), dir, caller)).stderr;
+  cases.push(['the table decides: a Bash call reaches the Bash hooks, in the table\'s order', await ran({ hook_event_name: 'PreToolUse', tool_name: 'Bash' }), 'RAN t-any;RAN t-bash;']);
+  cases.push(['a Write reaches the Write hooks and the one with no matcher', await ran({ hook_event_name: 'PreToolUse', tool_name: 'Write' }), 'RAN t-any;RAN t-write;']);
+  cases.push(['a matcher that is an expression is matched as one', await ran({ hook_event_name: 'PreToolUse', tool_name: 'mcp__x__y' }), 'RAN t-any;RAN t-regex;']);
+  cases.push(['an async row is never run by the runner, and another event reaches its own hooks only', await ran({ hook_event_name: 'Stop' }), 'RAN t-stop;']);
+  cases.push(['an event no row names runs nothing', await ran({ hook_event_name: 'Notification' }), '']);
+  const layoutFile = join(dir, '.claude/layout.json');
+  const layoutTable = [row('t-layout')];
+  const judge = async (): Promise<number> => (await runEvent(layoutTable, dir, toJson({ hook_event_name: 'PreToolUse', tool_name: 'Bash' }), dir, caller)).code;
+  put(layoutFile, toJson({ folders: {}, concepts: {} }));
+  const first = await judge();
+  put(layoutFile, toJson({ folders: { marker: { path: 'm' } }, concepts: {} }));
+  cases.push(['the layout changed between two events of one process: the second is judged by the new one', `${first}${await judge()}`, '02']);
+  await new Promise((done) => setTimeout(done, 400));
+  await runEvent(layoutTable, dir, toJson({ hook_event_name: 'PreToolUse', tool_name: 'Bash' }), dir, caller);
+  const last = readHookLog(dir).filter((r) => r.hook === 'event').at(-1);
+  cases.push(['the event line\'s ms runs from the event\'s arrival, not from the process\'s start', last !== undefined && last.ms < 200, true]);
 }
 
 async function selftest(real: Caller): Promise<number> {
@@ -201,7 +193,8 @@ async function selftest(real: Caller): Promise<number> {
   const r4 = await runAll([boom, ok], bash, dir, caller);
   cases.push(['the same call again goes through, and says so', r4.code === 0 && r4.stdout.includes('throws crashed'), true]);
   const rows = readHookLog(dir);
-  cases.push(['one timing line per hook per call', rows.length === 9 && rows.filter((r) => r.hook === 'refuses').map((r) => r.code).join() === '2,0', true]);
+  cases.push(['one timing line per hook per call', rows.filter((r) => r.hook !== 'event').length === 9 && rows.filter((r) => r.hook === 'refuses').map((r) => r.code).join() === '2,0', true]);
+  cases.push(['and one event line per call, from the runner, with its queue', rows.filter((r) => r.hook === 'event').length === 4 && rows.filter((r) => r.hook === 'event').every((r) => r.source === 'runner' && typeof r.queue === 'number'), true]);
   cases.push(['the line names the event and the tool', rows[0]?.event === 'PreToolUse' && rows[0]?.tool === 'Bash', true]);
   const lines = (f: string): Json[] => (readText(join(dir, '.claude/logs', f)) ?? '').split('\n').filter(Boolean).map((l) => asRecord(parseJson(l)) ?? {});
   const refused = lines('refusals.jsonl');
@@ -223,6 +216,7 @@ async function selftest(real: Caller): Promise<number> {
   cases.push(['a two-parameter hook that returns no Verdict crashed: the call is refused once, and the next hook still runs', r9.code === 2 && r9.stderr.includes('returns-nothing crashed') && r9.stdout.includes('"a"'), true]);
   const r10 = await runAll([bang], bash, dir, caller);
   cases.push(['a two-parameter hook that throws crashed', r10.code === 2 && r10.stderr.includes('throws-too crashed'), true]);
+  await tableCases(dir, caller, cases);
   rmSync(dir, { recursive: true, force: true });
   return verdicts('run-hooks', cases);
 }
@@ -234,9 +228,13 @@ if (isMain(import.meta.url)) {
   let text = '';
   try { text = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
   const root = projectRoot();
-  const r = await runAll(args, text, root, caller);
-  const ev: HookEvent = asRecord(parseJson(text)) ?? {}; // logged as '-' when there is none
-  logHook(root, { event: ev.hook_event_name, hook: RUNNER, ms: performance.now(), code: r.code, tool: ev.tool_name ?? ev.source });
+  // the event arrived when node started: its own start-up is part of what the event cost
+  const arrival: Arrival = { at: Date.now() - Math.round(process.uptime() * 1000), source: 'runner' };
+  // named hooks (an older settings entry, a hand-made one) run as named; with none, the table says which hooks the event reaches
+  const table = args.length === 0 ? readHookTable(HERE) : null;
+  const r: RunResult = args.length > 0 ? await runAll(args, text, root, caller, arrival)
+    : table !== null ? await runEvent(table, HERE, text, root, caller, arrival)
+      : { code: 1, stdout: '', stderr: `${RUNNER}: ${join(HERE, 'hooks.json')} is missing or is not the hook table, so no hook judged this call: run claude-packs update\n` };
   // written at once, then out: a hook may leave a timer or a child behind, and the event never waits on it
   for (const [fd, s] of [[1, r.stdout], [2, r.stderr]] as const) if (s) try { writeSync(fd, s); } catch { /* a closed pipe */ }
   process.exit(r.code);

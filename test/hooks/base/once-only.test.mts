@@ -5,6 +5,7 @@ import { assert, cli, put, readFileSync, test } from '../../kit-cli.mts';
 import { fixture, holdsTheContract } from '../hook-rig.mts';
 import { routeProject, unrefused } from '../routes.mts';
 import { scratchDir } from '../../../packs/base/hooks/lib/files.mts';
+import { readHookTable } from '../../../packs/base/hooks/lib/hook-table.mts';
 import { cppFunction, workProject, writeAt } from '../work-project.mts';
 
 holdsTheContract({
@@ -43,12 +44,12 @@ test('once-only refuses a near-copy of existing code by every route', () => {
 // `claude-packs dup scan` by file, and the three hooks wired where they fire.
 test('once-only, making and making-check are installed and wired where they fire', () => {
   const dir = fixture('audio-core');
-  const settings = JSON.parse(readFileSync(join(dir, '.claude/settings.json'), 'utf8')) as { hooks: Record<string, { matcher?: string; hooks: { command: string }[] }[]> };
+  const table = readHookTable(join(dir, '.claude/hooks')) ?? [];   // the rows the runner reads (W8.1)
   const runs = (event: string, hook: string, matcher?: string): boolean =>
-    (settings.hooks[event] ?? []).some((g) => (matcher === undefined || g.matcher === matcher) && g.hooks.some((h) => h.command.includes(`.claude/hooks/${hook}`)));
-  assert.ok(runs('PreToolUse', 'once-only.mjs', 'Write|Edit|MultiEdit|NotebookEdit|Bash'), 'once-only on the five write tools and the shell');
-  assert.ok(runs('UserPromptSubmit', 'making.mjs'), 'making on every prompt');
-  assert.ok(runs('Stop', 'making-check.mjs'), 'making-check when a turn ends');
+    table.some((r) => r.hook === hook && r.events.some((e) => e === event) && (matcher === undefined || r.matcher === matcher));
+  assert.ok(runs('PreToolUse', 'once-only', 'Write|Edit|MultiEdit|NotebookEdit|Bash'), 'once-only on the five write tools and the shell');
+  assert.ok(runs('UserPromptSubmit', 'making'), 'making on every prompt');
+  assert.ok(runs('Stop', 'making-check'), 'making-check when a turn ends');
 });
 
 test('doctor prints the making cost and the duplicate count; a count that went up is a problem', () => {

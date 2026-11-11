@@ -30,10 +30,12 @@ export const LOGS: string = join('.claude', 'logs');
 /** One line of hooks.log. `code` is the text of the exit code (`-` when none was written). */
 import type { HookLogLine } from './types.d.mts';
 /** One line of the hook log (types.d.mts owns the shape; the CLI reads an install's log through it). */
-export type HookLogEntry = HookLogLine;
+export type HookLogEntry = HookLogLine & { queue?: number; source?: string };
 
-/** What logHook is given: `ms` and `hook` are the call's; the rest are written as `-` when missing. */
-export interface HookLogCall { event?: string; hook?: string | null; ms: number; code?: number | null; tool?: string }
+/** What logHook is given: `ms` and `hook` are the call's; the rest are written as `-` when missing. The `event` line the runner
+ *  writes per event (hook `event`) adds `queue` (ms from the event's arrival to its first hook) and `source` (`runner`, `daemon`,
+ *  `proxy`) as the 7th and 8th columns; a per-hook line has neither. */
+export interface HookLogCall { event?: string; hook?: string | null; ms: number; code?: number | null; tool?: string; queue?: number; source?: string }
 
 interface LayoutLogs { guards?: { logs?: { maxKb?: unknown } } }
 
@@ -80,9 +82,10 @@ export const isMain = (url: string): boolean => Boolean(process.argv[1]) && real
 /** The project the hook runs for: CLAUDE_PROJECT_DIR, else the folder the process runs in. */
 export const projectRoot = (): string => resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
-export function logHook(root: string, { event = '-', hook, ms, code, tool = '-' }: HookLogCall): void {
+export function logHook(root: string, { event = '-', hook, ms, code, tool = '-', queue, source }: HookLogCall): void {
   const clean = (v: unknown): string => String(v ?? '-').replace(/[\t\n]/g, ' ') || '-';
-  appendRotated(root, LOG, `${new Date().toISOString()}\t${clean(event)}\t${clean(hook)}\t${Math.round(ms)}\t${code ?? '-'}\t${clean(tool)}\n`);
+  const more = source === undefined ? '' : `\t${Math.round(queue ?? 0)}\t${clean(source)}`;
+  appendRotated(root, LOG, `${new Date().toISOString()}\t${clean(event)}\t${clean(hook)}\t${Math.round(ms)}\t${code ?? '-'}\t${clean(tool)}${more}\n`);
 }
 
 /** One line per refused concept in .claude/usage.log: time, hook, concept (the shape hooks count what they refuse). */
@@ -108,7 +111,7 @@ export function readHookLog(root: string, { rotated = false }: { rotated?: boole
   for (const line of text.split('\n')) {
     const c = line.split('\t');
     if (c.length < 5 || !/^\d+$/.test(c[3] ?? '')) continue;
-    entries.push({ time: c[0] ?? '', event: c[1] ?? '', hook: c[2] ?? '', ms: Number(c[3]), code: c[4] ?? '', tool: c[5] ?? '-' });
+    entries.push({ time: c[0] ?? '', event: c[1] ?? '', hook: c[2] ?? '', ms: Number(c[3]), code: c[4] ?? '', tool: c[5] ?? '-', ...(c[7] !== undefined && /^\d+$/.test(c[6] ?? '') ? { queue: Number(c[6]), source: c[7] } : {}) });
   }
   return entries;
 }

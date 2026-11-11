@@ -1,5 +1,5 @@
 // 0.6.0: what a project that registered hooks by hand keeps (split from house-entries.test.mts so no file sums over a minute).
-import { assert, fresh, join, mkdirSync, run, test, writeFileSync } from '../kit-cli.mts';
+import { assert, fresh, join, mkdirSync, readFileSync, run, test, writeFileSync } from '../kit-cli.mts';
 import { commandsOf, settingsOf } from './house-rig.mts';
 
 test('a project\'s own hook entries stay; a kit hook already registered by hand is not doubled', () => {
@@ -16,10 +16,11 @@ test('a project\'s own hook entries stay; a kit hook already registered by hand 
   const hooks = settingsOf(dir).hooks;
   const all = commandsOf(hooks);
   assert.equal(all.filter((c) => c.includes('source-guard.py')).length, 1, 'the project\'s own python hook is kept');
-  const on = (event: string): string[] => (hooks[event] ?? []).flatMap((g) => g.hooks).map((h) => h.command);
+  const rows = JSON.parse(readFileSync(join(dir, '.claude/hooks/hooks.json'), 'utf8')) as { hook: string; events: string[] }[];   // the runner's table (W8.1)
+  const on = (event: string, hook: string): number => rows.filter((r) => r.hook === hook && r.events.includes(event)).length;
   // once per event: on Bash, and since 0.9.14 at Stop too (KWB-26: no session ends with a branch off GitHub)
-  for (const event of ['PreToolUse', 'Stop']) assert.equal(on(event).filter((c) => c.includes('git-guard.mjs')).length, 1, `the kit's git-guard once on ${event}`);
-  assert.equal(all.filter((c) => c.includes('build-guard.mjs')).length, 1, 'build-guard is the base pack\'s, once');
+  for (const event of ['PreToolUse', 'Stop']) assert.equal(on(event, 'git-guard'), 1, `the kit's git-guard once on ${event}`);
+  assert.equal(rows.filter((r) => r.hook === 'build-guard').length, 1, 'build-guard is the base pack\'s, once');
   for (const retired of ['copy-tree-guard.py', 'shell-traps.py', 'gnu-shell.py', 'git-guard.py', 'build-guard.py']) {
     assert.ok(!all.some((c) => c.includes(retired)), `${retired}: merged into protect-vendor, global by design, or Node now`);
   }

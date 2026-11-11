@@ -8,6 +8,7 @@ import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from '../packs/base/hooks/lib/files.mts';
+import { TABLE_FILE } from '../packs/base/hooks/lib/hook-table.mts';
 import { parseJson, readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Configuration, Layout, Lock, Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { backup, ensureGitignore } from './backup.mts';
@@ -77,7 +78,7 @@ function copyPackFiles(projectDir: string, packNames: readonly string[], layout:
 
 function removeDropped(projectDir: string, lock: Lock, files: Readonly<Record<string, string>>, log: Logger): void {
   for (const rel of Object.keys(lock.files)) {
-    if (files[rel] !== undefined) continue;
+    if (files[rel] !== undefined || rel === join('.claude', 'hooks', TABLE_FILE)) continue;   // the table is written after this
     if (isModified(projectDir, rel, lock)) {
       log(`  left ${rel}: no longer in any pack, but you edited it`);
       continue;
@@ -155,7 +156,11 @@ export async function sync(projectDir: string, requested: readonly string[] | nu
   const installed: Layout = { ...layout, disable: [...(layout.disable ?? []), ...sw.held, ...(Array.isArray(config['leaveOut']) ? (config['leaveOut'] as string[]) : [])] };
   const { files, untouchable } = copyPackFiles(projectDir, packNames, installed, lock, force, log);
   removeDropped(projectDir, lock, files, log);
-  const { retired, statusLine } = syncSettings(claudeDir, packNames, installed, Object.keys(lock.files));
+  const { retired, statusLine, table } = syncSettings(claudeDir, packNames, installed, Object.keys(lock.files));
+  // the hook table is generated, never edited: written each run and kept in the lock, so the manifest holds it (W8.1)
+  const tableRel = join('.claude', 'hooks', TABLE_FILE);
+  if (table) files[tableRel] = hashFile(join(projectDir, tableRel));
+  else rmSync(join(projectDir, tableRel), { force: true });
   if (retired.length) log(`  retired settings entries (merged into protect-vendor, or global by design): ${retired.join(', ')}`);
   if (statusLine === 'kept') log('  status line: the project has its own, kept; the kit\'s is .claude/tools/statusline.mjs, to wire by hand');
   const { stale } = await applyPaths(projectDir, { skip: untouchable });

@@ -7,15 +7,11 @@ import { join } from 'node:path';
 import { readText } from '../packs/base/hooks/lib/files.mts';
 import { parseJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { Layout } from '../packs/base/hooks/lib/types.d.mts';
+import { RUNNER, forSettings, runnable, type HookEntry, type HookGroup, type ReadGroup } from './hook-entries.mts';
+import { foldEvents, writeHookTable } from './hook-fold.mts';
 import { isDisabled, kitHookScripts, readPack } from './packs.mts';
 
-/** One hook entry of settings.json as the project holds it (user data: every field may be missing). The kit's own `role` and
- *  `order` come from a pack.json row and never reach a project's settings. */
-export interface HookEntry { type?: string; command?: string; timeout?: number; async?: boolean; asyncRewake?: boolean; role?: string; order?: number }
-/** One matcher group of settings.json. */
-export interface HookGroup { matcher?: string; hooks?: HookEntry[] }
-/** One matcher group once it has been read: its hooks are always a list. */
-type ReadGroup = { matcher?: string; hooks: HookEntry[] };
+export { HOOK_EXPORT, NODE_HOOK, RUNNER, forSettings, runnable, type HookEntry, type HookGroup } from './hook-entries.mts';
 /** `.claude/settings.json`: the hooks, the folders Claude may reach and the status line are the parts the kit writes. */
 export interface Settings {
   hooks?: Record<string, HookGroup[]>;
@@ -23,8 +19,8 @@ export interface Settings {
   statusLine?: unknown;
   [key: string]: unknown;
 }
-/** What `syncSettings` did: the retired hook scripts it dropped, and what became of the status line. */
-export interface SyncResult { retired: string[]; statusLine: 'set' | 'kept' | 'removed' | null }
+/** What `syncSettings` did: the retired hook scripts it dropped, what became of the status line, and whether it wrote the hook table. */
+export interface SyncResult { retired: string[]; statusLine: 'set' | 'kept' | 'removed' | null; table: boolean }
 
 const SCRIPT = /\.claude\/hooks\/([\w-]+\.(?:mjs|py))\b/;
 /** The order settings.json lists the events in. */
@@ -38,48 +34,11 @@ export const OLD_ASKS = 'tims-asks.mjs';
 export const FORERUNNERS: readonly string[] = ['git-guard.py', 'build-guard.py', 'time-guard.py', OLD_ASKS.replace('.mjs', '.py'), 'idle-wake.py'];
 export const RETIRED: readonly string[] = ['copy-tree-guard.py', 'shell-traps.py', 'gnu-shell.py', 'shell-traps.mjs', 'gnu-shell.mjs', OLD_ASKS, ...FORERUNNERS];
 
-// One node process per settings entry, not one per hook (KWB-24): a group's kit node hooks become one run-hooks.mjs command
-// that names them (`node ".../run-hooks.mjs" .claude/hooks/a.mjs .claude/hooks/b.mjs`), in their order, at the first one's
-// place, its timeout their sum (60 s at most). An async hook (idle-wake waits for minutes) keeps its own entry, as does
-// every hook that is not the kit's node hook (browser-guard.py, the project's own).
-export const RUNNER = 'run-hooks.mjs';
-export const NODE_HOOK = /^node "\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/([\w-]+\.mjs)"$/;
-// Only a hook written for the runner (it exports hook: `hook(text)`, or `hook(event, ctx)` on the new contract) is folded
-// in; any other node hook keeps its own entry: the kit repo's own kit-lock was folded in, failed there as exit 1 and never
-// refused (KWB-26).
-export const HOOK_EXPORT = /export\s+(?:const|let|function|async\s+function)\s+hook\b|export\s*\{[^}]*\bhook\b[^}]*\}/;
+// One runner entry per event, not one per hook (KWB-24, W8.1): lib/hook-fold.mts. An async hook (idle-wake waits for minutes)
+// keeps its own entry, as does every hook that is not the kit's node hook (browser-guard.py, the project's own).
 
-/** Whether the installed hook file of this name exports `hook`, so the runner can run it. */
-export const runnable = (claudeDir: string) => (name: string): boolean => HOOK_EXPORT.test(readText(join(claudeDir, 'hooks', name)) ?? '');
-
-const nodeScript = (h: HookEntry): string | undefined => NODE_HOOK.exec(h.command ?? '')?.[1];
-
-/** A group's hooks with every runnable kit node hook folded into one runner command at the first one's place. */
-export function throughRunner(hooks: readonly HookEntry[], canRun: (name: string) => boolean = () => true): HookEntry[] {
-  const scriptOf = (h: HookEntry): string | undefined => {
-    const name = h.async || h.asyncRewake ? undefined : nodeScript(h);
-    return name !== undefined && name !== RUNNER && canRun(name) ? name : undefined;
-  };
-  const kit = hooks.filter((h) => scriptOf(h) !== undefined);
-  const first = kit[0];
-  if (first === undefined) return hooks.map(forSettings);
-  const at = hooks.indexOf(first);
-  const runner: HookEntry = {
-    type: 'command',
-    command: `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${RUNNER}" ${kit.map((h) => `.claude/hooks/${scriptOf(h)}`).join(' ')}`,
-    timeout: Math.min(60, kit.reduce((a, h) => a + (h.timeout ?? 10), 0)),
-  };
-  const rest = hooks.filter((h) => scriptOf(h) === undefined).map(forSettings);
-  rest.splice(Math.min(at, rest.length), 0, runner);
-  return rest;
-}
-// What only the kit reads in a pack.json hook row (its role, its order: W4, W8.1) never reaches a project's settings.json.
-const KIT_ONLY = new Set(['role', 'order']);
-/** A hook entry as settings.json holds it: without the keys only the kit reads. */
-export const forSettings = (h: HookEntry): HookEntry => Object.fromEntries(Object.entries(h).filter(([k]) => !KIT_ONLY.has(k)));
-
-// A runner command back into one entry per hook it names, so the project's own hooks in it survive the rebuild below (the
-// runner itself is the kit's, so its whole command was dropped, and the project's kit-lock with it: KWB-26).
+// A runner command of an older install back into one entry per hook it names, so the project's own hooks in it survive the
+// rebuild below (the runner itself is the kit's, so its whole command was dropped, and the project's kit-lock with it: KWB-26).
 const RUNS = new RegExp(`^node "\\$CLAUDE_PROJECT_DIR/\\.claude/hooks/${RUNNER.replace('.', '\\.')}"((?:\\s+\\S+)+)$`);
 export function unfold(hooks: readonly HookEntry[]): HookEntry[] {
   return hooks.flatMap((h) => {
@@ -174,7 +133,9 @@ export function syncSettings(claudeDir: string, packNames: readonly string[], la
     }
   }
   for (const groups of Object.values(events)) for (const g of groups) g.hooks = orderHooks(g.hooks, isOurs);
-  if (!isDisabled(layout, `hooks/${RUNNER}`)) for (const groups of Object.values(events)) for (const g of groups) g.hooks = throughRunner(g.hooks, runnable(claudeDir));
+  const table = !isDisabled(layout, `hooks/${RUNNER}`);
+  if (table) writeHookTable(claudeDir, foldEvents(events, (name) => ours.has(name) && runnable(claudeDir)(name)));
+  else for (const groups of Object.values(events)) for (const g of groups) g.hooks = g.hooks.map(forSettings);
   for (const event of Object.keys(events)) {
     events[event] = (events[event] ?? []).filter((g) => g.hooks.length > 0);
     if (events[event]?.length === 0) delete events[event];
@@ -192,5 +153,5 @@ export function syncSettings(claudeDir: string, packNames: readonly string[], la
   }
   const statusLine = syncStatusLine(settings, packNames, layout);
   if (!writeJson(file, settings, { pretty: true })) throw new Error(`${file} could not be written`);
-  return { retired: [...retired], statusLine };
+  return { retired: [...retired], statusLine, table };
 }

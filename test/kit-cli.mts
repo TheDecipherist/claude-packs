@@ -10,6 +10,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { put } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
+import { TABLE_FILE, readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
+import { writeJson } from '../packs/base/hooks/lib/json.mts';
 import { readLayout } from '../packs/base/hooks/lib/layout.mts';
 import { proved, remember, selftestKey, sharedHash } from '../lib/selftest-cache.mts';
 
@@ -107,5 +109,9 @@ export function keepHooks(dir: string, also: readonly string[] = []): string {
   for (const f of hookFiles(join(dir, '.claude/hooks'))) {
     if (f.endsWith('.mjs') && f !== 'run-hooks.mjs' && f !== 'lesson-checks.mjs' && !FEW_HOOKS.includes(f) && !also.includes(f)) dropHook(join(dir, '.claude/hooks', f));
   }
+  // the runner's table names only the hooks that are left (a row with no file is a crash, and doctor says so)
+  const hooks = join(dir, '.claude/hooks');
+  const table = readHookTable(hooks);
+  if (table !== null) writeJson(join(hooks, TABLE_FILE), table.filter((r) => hookFiles(hooks).includes(`${r.hook}.mjs`)), { pretty: true });
   return dir;
 }

@@ -71,6 +71,9 @@ function sourceHooks(): string {
 
 /** A hook's `.mts` source fired as its emitted copy is: node, the payload on stdin, the project in the environment. */
 export function sourceRun(dir: string, hook: string, payload: Payload, env: Readonly<Record<string, string>> = {}): { status: number | null; stdout: string; stderr: string } {
+  // the runner reads the install's hook table, beside it: the source runner gets the same table and runs the .mts sources it names
+  const table = join(dir, '.claude/hooks/hooks.json');
+  if (hook === 'run-hooks.mjs' && existsSync(table)) cpSync(table, join(sourceHooks(), 'hooks.json'));
   const r = spawnSync('node', [join(sourceHooks(), hook.replace(/\.mjs$/, '.mts'))], {
     input: JSON.stringify(payload), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir, ...env },
   });

@@ -1,6 +1,7 @@
 // shape-law in an install (split from shape-law.test.mts so no file sums over a minute): what a new install carries, and what update switches on.
 import { join } from 'node:path';
 import { assert, cli, existsSync, readFileSync, rmSync, selftest, test, writeFileSync } from '../../kit-cli.mts';
+import { readHookTable } from '../../../packs/base/hooks/lib/hook-table.mts';
 import { fixture } from '../hook-rig.mts';
 
 // 0.9.0 (KWB-1): the engine-scoped checks no-instance-index-literal and no-instance-id-literal are retired; shape-law judges
@@ -21,16 +22,13 @@ test('the shape hooks are the law: on in a new install and switched on by update
   const lock = JSON.parse(readFileSync(lockFile, 'utf8')) as { files: Record<string, string> };
   for (const h of ['shape-law.mjs', 'brief-guard.mjs']) { delete lock.files[`.claude/hooks/${h}`]; rmSync(join(dir, '.claude/hooks', h)); }
   writeFileSync(lockFile, JSON.stringify(lock));
-  interface Group { matcher?: string; hooks: { command: string }[] }
-  const sf = join(dir, '.claude/settings.json');
-  const before = JSON.parse(readFileSync(sf, 'utf8')) as { hooks: Record<string, Group[]> };
-  for (const ev of Object.keys(before.hooks)) before.hooks[ev] = (before.hooks[ev] ?? []).map((g) => ({ ...g, hooks: g.hooks.filter((h) => !/shape-law|brief-guard/.test(h.command)) })).filter((g) => g.hooks.length);
-  writeFileSync(sf, JSON.stringify(before));
+  const tableFile = join(dir, '.claude/hooks/hooks.json');   // the runner's table names the hooks (W8.1): the project that had the kit had neither
+  const before = (readHookTable(join(dir, '.claude/hooks')) ?? []).filter((r) => !/shape-law|brief-guard/.test(r.hook));
+  writeFileSync(tableFile, JSON.stringify(before));
   const r = cli(dir, 'update');
   assert.match(r.stdout, /switching on \(new to this project\): .*hooks\/brief-guard\.mjs/);
   assert.match(r.stdout, /switching on \(new to this project\): .*hooks\/shape-law\.mjs/);
-  const s = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
-  assert.match(s, /hooks\/shape-law\.mjs/);
-  const agent = (JSON.parse(s) as { hooks: { PreToolUse: Group[] } }).hooks.PreToolUse.find((g) => g.matcher === 'Agent|Task');
-  assert.ok(agent?.hooks.some((h) => h.command.includes('brief-guard.mjs')), 'brief-guard reads every agent brief');
+  const table = readHookTable(join(dir, '.claude/hooks')) ?? [];
+  assert.ok(table.some((row) => row.hook === 'shape-law'), 'shape-law is a row again');
+  assert.ok(table.some((row) => row.hook === 'brief-guard' && row.matcher === 'Agent|Task'), 'brief-guard reads every agent brief');
 });

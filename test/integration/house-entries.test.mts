@@ -3,7 +3,7 @@ import { OLD_ASKS } from '../../lib/settings.mts';
 // (A project's own hook entries: house-entries-hand.test.mts, split so no file sums over a minute.)
 import { assert, existsSync, fresh, join, readFileSync, rmSync, run, test, writeFileSync } from '../kit-cli.mts';
 import { fixture, lockOf } from '../fixtures/installs.mts';
-import { settingsOf } from './house-rig.mts';
+import { runnerHooks, settingsOf } from './house-rig.mts';
 
 test('the build-step and copy-and-prove skills install, triggered by "Use when", under 8,000 characters', () => {
   const dir = fixture('audio-core');
@@ -45,6 +45,6 @@ test('a Node hook is on in a project that ran its Python forerunner, and the for
   assert.match(out, /held back, not switched on .*hooks\/time-guard\.mjs/);
   assert.match(out, /retired settings entries .*git-guard\.py/);
   const all = readFileSync(sf, 'utf8');
-  assert.match(all, /run-hooks\.mjs\\"[^"]* \.claude\/hooks\/git-guard\.mjs/, 'the Node hook runs (through run-hooks.mjs, KWB-24)');
+  assert.ok(runnerHooks(dir).includes('git-guard'), 'the Node hook runs (a row of the runner\'s table, W8.1)');
   assert.doesNotMatch(all, /git-guard\.py|-asks\.py/);
 });

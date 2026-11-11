@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Env, InstalledHookLogModule } from '../packs/base/hooks/lib/types.d.mts';
 import { ANSWERS, clearedAt, clearsOf } from './logs.mts';
 import { HOOK_FILE } from './packs.mts';
@@ -28,11 +29,20 @@ export function statusProblems(projectDir: string, env: Env = process.env): stri
   });
 }
 
+/** Whether a hook file is run: a settings entry names it, or the hook table the runner reads has a row for it (W8.1). */
+export function isRegistered(projectDir: string, settingsText: string, file: string): boolean {
+  const table = readHookTable(join(projectDir, '.claude', 'hooks')) ?? [];
+  return settingsText.includes(`.claude/hooks/${file}`) || table.some((r) => r.hook === hookName(file));
+}
+
 export async function hookProofProblems(projectDir: string, settingsText: string): Promise<string[]> {
   const dir = join(projectDir, '.claude', 'hooks');
   if (!existsSync(dir)) return [];
   const hooks = readdirSync(dir).filter((f) => HOOK_FILE.test(f) && f !== RUNNER);
-  const problems = hooks.filter((f) => !settingsText.includes(`.claude/hooks/${f}`)).map((f) => `${f} is in .claude/hooks but no settings entry runs it, so it refuses nothing`);
+  const problems = hooks.filter((f) => !isRegistered(projectDir, settingsText, f)).map((f) => `${f} is in .claude/hooks but no settings entry runs it, so it refuses nothing`);
+  for (const row of readHookTable(dir) ?? []) {
+    if (!hooks.some((f) => hookName(f) === row.hook)) problems.push(`hooks.json has a row for ${row.hook} but .claude/hooks has no such hook, so the runner crashes on it`);
+  }
   const log = join(dir, 'lib', 'hook-log.mjs');
   if (!existsSync(log)) return problems;
   const { readHookLog }: InstalledHookLogModule = await import(pathToFileURL(log).href);

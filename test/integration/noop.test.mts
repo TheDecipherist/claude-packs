@@ -1,7 +1,8 @@
 // 0.10.0 (STEP 3 item 3), on the per-version manifest (typescript order W5.4): synth-creator is everything the kit installed before
 // configurations, unchanged for Stellix and Sub37. test/fixtures/noop/<project>/before/ is that project's own install state
 // (layout.json, settings.json, the lock and CLAUDE.md, copied 2026-11-03), expected/ is what the 0.9.15 kit's `update` made of it.
-// The kit's `update` of it must make the same settings, the same CLAUDE.md and layout.json ("configuration" its one new key), and
+// (W8.1: expected/settings.json is regenerated: one runner entry per event, the project's own hooks kept as they were; the other
+// expected files are still the 0.9.15 kit's.) The kit's `update` of it must make the same settings, the same CLAUDE.md and layout.json ("configuration" its one new key), and
 // the files and hashes of packs/manifest-<version>.json (scripts/counts.mts writes it). That file is the list of what changed on
 // purpose: a change to an installed file shows in its diff, is read, and is kept; a change nobody listed is red here.
 import { KIT, assert, join, readFileSync, test } from '../kit-cli.mts';

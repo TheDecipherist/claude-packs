@@ -20,7 +20,8 @@ const HOOKS = ['.claude/hooks/folder-law.mjs', '.claude/hooks/file-size-guard.mj
 holdsTheContract({
   hook: 'run-hooks.mjs',
   dir: () => fixture('audio-core'),
-  same: (project) => ({ payload: entry(project, join(project, 'stray/Svf.cpp')), status: 0 }),
+  // no hooks named: the runner reads the install's table, so folder-law (a row of it) refuses the stray file, emitted and source alike
+  same: (project) => ({ payload: entry(project, join(project, 'stray/Svf.cpp')), status: 2 }),
   worktree: ({ here, wt }: Checkouts) => {
     // the hooks it names judge a worktree file against the worktree; the timing lines go to the main checkout's log
     const rows: readonly (readonly [string, string, number])[] = [
