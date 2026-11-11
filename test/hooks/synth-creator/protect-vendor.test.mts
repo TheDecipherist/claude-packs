@@ -2,7 +2,7 @@
 // test files.
 import { join } from 'node:path';
 import { git, withLayout, write } from '../../fixtures/installs.mts';
-import { assert, hookRun, put, run, test } from '../../kit-cli.mts';
+import { assert, hookRun, keepHooks, put, run, test } from '../../kit-cli.mts';
 import { fixture, holdsTheContract } from '../hook-rig.mts';
 import { workProject, writeAt } from '../work-project.mts';
 import { routeProject, unrefused } from '../routes.mts';
@@ -46,5 +46,7 @@ test('KF-2: protect-vendor\'s refusal names the setting that answers it', () => 
   const r = writeAt(dir, 'protect-vendor.mjs', 'build/evidence/R0/update.txt', 'x\n');
   assert.equal(r.status, 2);
   assert.match(r.stderr, /"buildOutput"/);
+  // doctor --fresh proves the selftests of the hooks left; ten of them, protect-vendor among them (W5-h: all 46 took 42 s)
+  keepHooks(dir, ['protect-vendor.mjs']);
   run(dir, 'doctor', '--fresh');
 });

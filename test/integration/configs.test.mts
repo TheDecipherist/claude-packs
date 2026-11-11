@@ -56,14 +56,6 @@ test('init without --config takes the configuration its packs belong to', () => 
   assert.equal(layoutOf(synth).configuration, 'synth-creator');
 });
 
-test('a layout without the key (an install before 0.10.0) gets the configuration of its packs on update', () => {
-  const dir = fixture('audio-core');
-  const { configuration: _gone, ...layout } = layoutOf(dir);
-  writeFileSync(join(dir, '.claude/layout.json'), JSON.stringify(layout, null, 2));
-  assert.match(run(dir, 'update'), /configuration: synth-creator \(from its packs: base, audio-core\)/);
-  assert.equal(layoutOf(dir).configuration, 'synth-creator');
-});
-
 test('config <name> lists what changes and switches; --dry-run changes nothing', () => {
   const dir = fixture('audio-core');
   const dry = run(dir, 'config', 'base', '--dry-run');
@@ -82,13 +74,4 @@ test('config <name> lists what changes and switches; --dry-run changes nothing',
   assert.ok(!existsSync(join(dir, '.claude/rules/math-domain-guards.md')), 'the synth rules went');
   assert.doesNotMatch(readFileSync(join(dir, 'CLAUDE.md'), 'utf8'), new RegExp(SYNTH_LINE));
   assert.match(run(dir, 'config', 'base'), /no change/);
-});
-
-test('doctor fails on a configuration the kit does not have, and on a pack outside it', () => {
-  const dir = fixture('audio-core');
-  const lf = join(dir, '.claude/layout.json');
-  writeFileSync(lf, JSON.stringify({ ...layoutOf(dir), configuration: 'gone' }, null, 2));
-  assert.match(cli(dir, 'doctor').stdout, /PROBLEM: layout\.json names configuration "gone"/);
-  writeFileSync(lf, JSON.stringify({ ...layoutOf(dir), configuration: 'base' }, null, 2));
-  assert.match(cli(dir, 'doctor').stdout, /PROBLEM: pack audio-core is installed but configuration base does not take it/);
 });

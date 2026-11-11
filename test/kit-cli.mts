@@ -83,3 +83,15 @@ export const selftest = (dir: string, hook: string): Spawned =>
 /** doctor with the selftests run, not taken as proved by the gate (a test whose subject is doctor's selftests; KWB-166). */
 export const doctorRunning = (dir: string, ...args: string[]): Spawned =>
   spawnSync('node', [CLI, 'doctor', ...args, '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTESTS: 'run' } });
+
+// W5-h: a test about what doctor does with selftests (the cache, a failing one) runs them on a few hooks, not on all of an install's:
+// the 30 of a base install take 28 s to prove, the ten kept 8 s, and the subject (what is remembered, what fails) is the same.
+import { readdirSync as hookFiles, rmSync as dropHook } from 'node:fs';
+const FEW_HOOKS = ['folder-law.mjs', 'secrets-guard.mjs', 'untrusted-boundary.mjs', 'skill-first.mjs', 'suite-once.mjs', 'heartbeat.mjs', 'placement-law.mjs', 'file-size-guard.mjs', 'inside-the-project.mjs', 'no-find.mjs'];
+/** `dir`'s `.claude/hooks` cut down to ten quick ones, the hooks named in `also`, the runner, the lesson checks and `lib/`; settings and the lock stay as they were. */
+export function keepHooks(dir: string, also: readonly string[] = []): string {
+  for (const f of hookFiles(join(dir, '.claude/hooks'))) {
+    if (f.endsWith('.mjs') && f !== 'run-hooks.mjs' && f !== 'lesson-checks.mjs' && !FEW_HOOKS.includes(f) && !also.includes(f)) dropHook(join(dir, '.claude/hooks', f));
+  }
+  return dir;
+}

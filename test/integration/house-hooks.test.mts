@@ -1,10 +1,11 @@
 // 0.6.0: the house hooks, skills and rules moved out of Stellix into the kit (each project-neutral, its project's values in
-// layout.json "guards"). This file: what installs. (The skills, the hand-registered entries and the forerunner: house-entries.test.mts.)
-import { assert, existsSync, fresh, join, readFileSync, readdirSync, run, spawnSync, test } from '../kit-cli.mts';
+// layout.json "guards"). This file: what installs. (The skills, the hand-registered entries and the forerunner: house-entries.test.mts;
+// the hooks' selftests: house-hooks-selftests.test.mts, split so no file sums over a minute.)
+import { assert, existsSync, fresh, join, readFileSync, readdirSync, run, test } from '../kit-cli.mts';
 import { fixture, withLayout } from '../fixtures/installs.mts';
 import { settingsOf } from './house-rig.mts';
 
-test('the house hooks install where they belong, project-neutral, and pass their selftests', () => {
+test('the house hooks install where they belong, project-neutral', () => {   // was: "the house hooks install where they belong, project-neutral, and pass their selftests" (the selftests: house-hooks-selftests.test.mts)
   const dir = fresh('cph-');
   const out = run(dir, 'init', 'audio-core', 'gpu-painter');
   assert.match(out, /held back, not switched on .*hooks\/idle-wake\.mjs, hooks\/user-asks\.mjs/, 'the opt-in hooks wait for "enable"');
@@ -15,8 +16,6 @@ test('the house hooks install where they belong, project-neutral, and pass their
   assert.deepEqual(hooks.filter((h) => h.endsWith('.py')), [], 'every kit hook is Node: browser-guard was ported (W4), so no installed settings.json runs python3');
   for (const h of ['git-guard.mjs', 'build-guard.mjs', 'time-guard.mjs', 'user-asks.mjs', 'idle-wake.mjs', 'browser-guard.mjs', 'protect-vendor.mjs']) {
     assert.ok(hooks.includes(h), h);
-    const r = spawnSync('node', [join(dir, '.claude/hooks', h), '--selftest'], { env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' });
-    assert.equal(r.status, 0, `${h}: ${r.stdout}${r.stderr}`);
     assert.doesNotMatch(readFileSync(join(dir, '.claude/hooks', h), 'utf8'), /stellix/i, `${h} names no project`);
   }
   assert.ok(!hooks.includes('copy-tree-guard.py'), 'merged into protect-vendor');
