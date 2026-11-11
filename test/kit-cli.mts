@@ -80,3 +80,6 @@ export function holdToExamples(dir: string, checks: readonly CheckExamples[], fi
 }
 export const selftest = (dir: string, hook: string): Spawned =>
   spawnSync('node', [join(dir, '.claude/hooks', hook), '--selftest'], { encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
+/** doctor with the selftests run, not taken as proved by the gate (a test whose subject is doctor's selftests; KWB-166). */
+export const doctorRunning = (dir: string, ...args: string[]): Spawned =>
+  spawnSync('node', [CLI, 'doctor', ...args, '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTESTS: 'run' } });

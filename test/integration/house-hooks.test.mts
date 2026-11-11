@@ -29,7 +29,7 @@ test('the house hooks install where they belong, project-neutral, and pass their
   assert.match(s, /run-hooks\.mjs\\"[^"]* \.claude\/hooks\/browser-guard\.mjs/); assert.doesNotMatch(s, /python3/, 'no python3 in a gpu-painter install (W4)');
   const settings = settingsOf(dir);
   assert.equal(settings.hooks.Stop?.[0]?.hooks[0]?.asyncRewake, true);
-  assert.equal(settings.hooks.SessionStart?.[0]?.matcher, 'compact');
+  assert.ok(settings.hooks.SessionStart?.some((entry) => entry.matcher === 'compact'), 'a SessionStart entry matches compact');
   assert.ok(!existsSync(join(dir, '.claude/hooks/lib/__pycache__')), 'no byte-code cache in the project');
   for (const [pack, check] of [['gpu-painter', 'no-opengl.json'], ['gpu-painter', 'no-opengl-link.json'], ['base', 'no-code-after-midline-comment.json']]) {
     assert.ok(existsSync(join(dir, '.claude/checks', check ?? '')), `${pack}: ${check}`);

@@ -4,7 +4,7 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { readJson } from '../../../packs/base/hooks/lib/json.mts';
-import { KIT, assert, cli, put, spawnSync, test } from '../../kit-cli.mts';
+import { KIT, assert, doctorRunning, put, spawnSync, test } from '../../kit-cli.mts';
 import { enable, extraFixture } from '../hook-rig.mts';
 
 test('WB-4: every hook in every pack has a passing --selftest, and doctor runs them all', () => {
@@ -21,10 +21,10 @@ test('WB-4: every hook in every pack has a passing --selftest, and doctor runs t
   assert.deepEqual(installed, shipped);
   const pin = spawnSync('node', [join(KIT, 'global/hooks/version-pin-guard.mjs'), '--selftest'], { encoding: 'utf8', input: '', timeout: 60000, env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
   assert.ok(pin.status === 0 && /selftest: OK/.test(pin.stdout), pin.stdout + pin.stderr);
-  assert.equal(cli(dir, 'doctor').status, 0);
+  assert.equal(doctorRunning(dir).status, 0);   // run, not taken as proved by the gate (KWB-166)
   put(join(dir, '.claude/hooks/protect-vendor.mjs'), "if (process.argv.includes('--selftest')) process.exit(1);\n");
   // --fresh runs every selftest: the planted one fails, and it is the only one
-  const planted = cli(dir, 'doctor', '--fresh').stdout;
+  const planted = doctorRunning(dir, '--fresh').stdout;
   assert.match(planted, /protect-vendor\.mjs fails its selftest/);
   assert.equal(planted.match(/fails its selftest/g)?.length, 1, 'every other hook passes its selftest');
 });
