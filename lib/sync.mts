@@ -18,7 +18,8 @@ import { listedPacks, packsFor, resolveConfig } from './configs.mts';
 import { withFoundFolders } from './found-folders.mts';
 import { buildLayout } from './layout.mts';
 import { hashFile, isModified, readLock, writeLock } from './manifest.mts';
-import { normalisePacks, planFiles } from './packs.mts';
+import { PACKS_DIR, normalisePacks, planFiles } from './packs.mts';
+import { installBinary } from './proxy-install.mts';
 import { applyPaths, renderRule } from './rules.mts';
 import { readSettings, syncSettings } from './settings.mts';
 import { reportSwitches, switches } from './switches.mts';
@@ -156,6 +157,8 @@ export async function sync(projectDir: string, requested: readonly string[] | nu
   const installed: Layout = { ...layout, disable: [...(layout.disable ?? []), ...sw.held, ...(Array.isArray(config['leaveOut']) ? (config['leaveOut'] as string[]) : [])] };
   const { files, untouchable } = copyPackFiles(projectDir, packNames, installed, lock, force, log);
   removeDropped(projectDir, lock, files, log);
+  const proxy = installBinary(join(PACKS_DIR, '..'), process.env);
+  log(proxy.kind === 'none' ? `  hook proxy: not installed (${proxy.why}); events run through the TypeScript runner` : `  hook proxy: ${proxy.kind === 'same' ? 'binary in place' : 'binary installed'} at ${proxy.file}`);
   const { retired, statusLine, table } = syncSettings(claudeDir, packNames, installed, Object.keys(lock.files));
   // the hook table is generated, never edited: written each run and kept in the lock, so the manifest holds it (W8.1)
   const tableRel = join('.claude', 'hooks', TABLE_FILE);

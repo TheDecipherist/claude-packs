@@ -23,7 +23,8 @@ test('update migrates the older runner entries to one per event and keeps the pr
   run(dir, 'update');
   const now = readJson<Settings>(join(dir, '.claude/settings.json'));
   const pre = (now?.hooks.PreToolUse ?? []).flatMap((g) => g.hooks.map((h) => h.command));
-  assert.equal(pre.filter((c) => c === RUN).length, 1, `one runner entry for PreToolUse:\n${pre.join('\n')}`);
+  assert.equal(pre.filter((c) => c.includes('.claude/hooks/bin/hook-proxy')).length, 1, `one runner entry for PreToolUse, the proxy's picker (W8.2):\n${pre.join('\n')}`);
+  assert.ok(!pre.includes(RUN), 'the node runner command is gone from settings: the picker execs it where there is no binary');
   assert.ok(!pre.some((c) => c.includes('run-hooks.mjs') && / \.claude\/hooks\//.test(c)), 'no entry names its hooks any more');
   assert.ok(pre.includes('echo mine'), 'the project\'s own command stays');
   assert.ok(pre.includes('node "$CLAUDE_PROJECT_DIR/.claude/hooks/own.mjs"'), 'the project\'s own hook the old runner named stays, as its own entry');

@@ -11,6 +11,7 @@ import { buildQueueProblems } from './build-queue.mts';
 import { configProblems, sourceFilesOf } from './configs.mts';
 import { coverage } from './coverage.mts';
 import { tokenProblems } from './git-tokens.mts';
+import { proxyProblems } from './doctor-proxy.mts';
 import { hookProofProblems, isRegistered, statusProblems } from './hook-proof.mts';
 import { timingProblems } from './hook-timing.mts';
 import { hoverGateProblems, pageGateProblems } from './hover-gate.mts';
@@ -165,6 +166,7 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
 
   for (const name of lock.packs) problems.push(...manifestProblems(readPack(name), name));
   problems.push(...await hookProofProblems(projectDir, settings)); // a guard that fails open fails silently (0.18.0)
+  problems.push(...proxyProblems(projectDir, env, log, fresh)); // the proxy's own selftest, and which path an event takes (W8.2)
   const toDo = (found: readonly string[]): void => { if (installing) found.forEach((f) => log(`  note: ${f}`)); else problems.push(...found); };
   toDo(statusProblems(projectDir, env)); // what a hook says a project still lacks: an empty id lock (KF-15), a missing settings layer (1.7.0)
   toDo(buildQueueProblems(projectDir, layout)); // a queue that is not there queues nothing (KF-1)

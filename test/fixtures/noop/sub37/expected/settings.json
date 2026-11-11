@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 60",
             "timeout": 60
           }
         ]
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 40",
             "timeout": 40
           }
         ]
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 60",
             "timeout": 60
           }
         ]
@@ -60,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 10",
             "timeout": 10
           }
         ]

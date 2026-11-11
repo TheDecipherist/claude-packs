@@ -8,8 +8,9 @@ import { dirname, join } from 'node:path';
 const MAX_TEXT = 8 * 1024 * 1024;
 // Python's byte-code caches and the Finder's files are never a project's files (a selftest run inside the package makes them).
 const JUNK = /^(?:__pycache__|\.DS_Store)$|\.pyc$/;
-// What only the kit's build reads: a TypeScript source (a .d.mts among them), a source map, the build's own memory (d-2).
-const BUILD_ONLY = /\.(?:mts|cts|map|tsbuildinfo)$/;
+// What only the kit's build reads: a TypeScript source (a .d.mts among them), a source map, the build's own memory (d-2), and the
+// proxy's binaries (hooks/bin/OS-ARCH/): a project gets the `sh` picker, the binary goes to the user's cache (d-13).
+const BUILD_ONLY = /\.(?:mts|cts|map|tsbuildinfo)$|^(?:darwin|linux)-(?:arm64|amd64)$/;
 
 /** A file's text, or null when it is missing, not a file or larger than 8 MB; never throws. */
 export function readText(path: string): string | null {
