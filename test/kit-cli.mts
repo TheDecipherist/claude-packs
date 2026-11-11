@@ -10,6 +10,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { put } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
+import { readLayout } from '../packs/base/hooks/lib/layout.mts';
+import { proved, remember, selftestKey, sharedHash } from '../lib/selftest-cache.mts';
 
 export { default as assert } from 'node:assert/strict';
 export { test } from 'node:test';
@@ -83,3 +85,16 @@ export const selftest = (dir: string, hook: string): Spawned =>
 /** doctor with the selftests run, not taken as proved by the gate (a test whose subject is doctor's selftests; KWB-166). */
 export const doctorRunning = (dir: string, ...args: string[]): Spawned =>
   spawnSync('node', [CLI, 'doctor', ...args, '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTESTS: 'run' } });
+/** A hook's `--selftest` in an install, once per run: one that already passed on the same bytes (the hook, the install's libs and
+ *  guards, the machine: lib/selftest-cache.mts) is not run again, whether the test run or doctor proved it. A pass is remembered
+ *  for both; a failure never is, so a changed or broken hook always runs. */
+export const selftestOnce = (dir: string, hook: string): Pick<Spawned, 'status' | 'stdout' | 'stderr'> => {
+  const claudeDir = join(dir, '.claude');
+  const file = join(claudeDir, 'hooks', hook);
+  const guards = readLayout(dir).guards;
+  const key = selftestKey(file, sharedHash(claudeDir, guards));
+  if (proved(key)) return { status: 0, stdout: 'selftest: OK (proved earlier in this run)\n', stderr: '' };
+  const r = selftest(dir, hook);
+  if (r.status === 0) remember(key);
+  return r;
+};
