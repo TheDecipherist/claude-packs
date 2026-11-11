@@ -86,7 +86,7 @@ export function writesOfTurn(turn, cwd = process.cwd()) {
     else if (u.name === 'Edit' && i.file_path) out.push({ path: at(i.file_path), text: i.new_string ?? '', tool: u.name });
     else if (u.name === 'MultiEdit' && i.file_path) out.push({ path: at(i.file_path), text: (i.edits ?? []).map((e) => e.new_string ?? '').join('\n'), tool: u.name });
     else if (u.name === 'NotebookEdit' && i.notebook_path) out.push({ path: at(i.notebook_path), text: i.new_source ?? '', tool: u.name });
-    else if (u.name === 'Bash') for (const w of shellWrites(i.command ?? '', u.cwd ?? cwd)) if (w.op !== 'delete') out.push({ path: w.path, text: w.content ?? (w.sed ? w.sed.scripts.join('\n') : null), tool: 'Bash' });
+    else if (u.name === 'Bash') for (const w of shellWrites(i.command ?? '', u.cwd ?? cwd, process.env)) if (w.op !== 'delete') out.push({ path: w.path, text: w.content ?? (w.sed ? w.sed.scripts.join('\n') : null), tool: 'Bash' });
   }
   return out;
 }
