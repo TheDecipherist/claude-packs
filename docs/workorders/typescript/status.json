@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T15:41:24Z",
+  "updated": "2026-11-11T16:29:25Z",
   "steps": [
     {
       "id": "W0",
@@ -33,8 +33,8 @@
       "id": "W4",
       "title": "The slices, in parallel",
       "items": 7,
-      "done": 1,
-      "agent": "w4-lib-c1, w4-lib-c2, w4-synth, w4-audio, w4-packs, w4-global"
+      "done": 2,
+      "agent": "w4-sync, w4-doctor, w4-test-helpers"
     },
     {
       "id": "W5",
@@ -95,40 +95,22 @@
   ],
   "agents": [
     {
-      "name": "w4-lib-c1",
-      "worktree": ".claude/worktrees/w4-lib-c1",
+      "name": "w4-sync",
+      "worktree": ".claude/worktrees/w4-sync",
       "step": "W4",
-      "started": "2026-11-11T15:41:24Z"
+      "started": "2026-11-11T16:29:25Z"
     },
     {
-      "name": "w4-lib-c2",
-      "worktree": ".claude/worktrees/w4-lib-c2",
+      "name": "w4-doctor",
+      "worktree": ".claude/worktrees/w4-doctor",
       "step": "W4",
-      "started": "2026-11-11T15:41:24Z"
+      "started": "2026-11-11T16:29:25Z"
     },
     {
-      "name": "w4-synth",
-      "worktree": ".claude/worktrees/w4-synth",
+      "name": "w4-test-helpers",
+      "worktree": ".claude/worktrees/w4-test-helpers",
       "step": "W4",
-      "started": "2026-11-11T15:41:24Z"
-    },
-    {
-      "name": "w4-audio",
-      "worktree": ".claude/worktrees/w4-audio",
-      "step": "W4",
-      "started": "2026-11-11T15:41:24Z"
-    },
-    {
-      "name": "w4-packs",
-      "worktree": ".claude/worktrees/w4-packs",
-      "step": "W4",
-      "started": "2026-11-11T15:41:24Z"
-    },
-    {
-      "name": "w4-global",
-      "worktree": ".claude/worktrees/w4-global",
-      "step": "W4",
-      "started": "2026-11-11T15:41:24Z"
+      "started": "2026-11-11T16:29:25Z"
     }
   ]
 }
