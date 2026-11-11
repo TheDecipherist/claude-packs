@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T21:11:16Z",
+  "updated": "2026-11-11T22:04:48Z",
   "steps": [
     {
       "id": "W0",
@@ -55,7 +55,7 @@
       "id": "W7",
       "title": "Packs from one template, facts generated",
       "items": 4,
-      "done": 0,
+      "done": 4,
       "agent": null
     },
     {
