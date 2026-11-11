@@ -31,7 +31,7 @@
     "build": "node scripts/clean-emitted.mts && tsc -b",
     "check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p test/tsconfig.json",
     "pretest": "npm run build",
-    "test": "node --import ./test/fresh-tmp.mts --test test/*.test.mjs \"test/**/*.test.mts\"",
+    "test": "node --import ./test/fresh-tmp.mts --test --test-concurrency=6 test/*.test.mjs \"test/**/*.test.mts\"",
     "test:changed": "node scripts/test-changed.mjs",
     "prepack": "npm run build",
     "prepare": "npm run build",
