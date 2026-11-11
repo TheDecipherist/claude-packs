@@ -34,10 +34,10 @@ export const hookStatus = (dir, name, payload) => hookRun(dir, name, payload).st
 export const lessonWrite = (dir, rel, content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
 // One test per [pack, file, bad, good]: the pack installs, refuses the fault and takes the fix.
 export function holdsEachCase(cases, ...initArgs) {
-  for (const [pack, file, bad, good] of cases) {
+  for (const [pack, file, bad, good, ...needs] of cases) {   // `needs`: the packs this one requires (pack.json requires)
     test(`${pack}: ${file} is refused its fault and takes the fix`, () => {
       const dir = fresh(`case-${pack}-`);
-      const r = cli(dir, 'init', pack, ...initArgs);
+      const r = cli(dir, 'init', pack, ...needs, ...initArgs);
       assert.equal(r.status, 0, r.stdout + r.stderr);
       mkdirSync(join(dir, file, '..'), { recursive: true });
       assert.equal(lessonWrite(dir, file, bad).status, 2);
