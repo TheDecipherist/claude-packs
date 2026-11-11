@@ -35,6 +35,14 @@ export function enable(dir: string, ...names: string[]): void {
   assert.equal(r.status, 0, r.stdout + r.stderr);
 }
 
+/** A copy of the run's install of a configuration with these opt-in hooks enabled: the `enable` and its update are done once per
+ *  run (under `name`), not once per test. */
+export function enabledFixture(name: string, base: FixtureName, ...hooks: string[]): string {
+  const root = process.env.CLAUDE_PACKS_FIXTURES ?? join(tmpdir(), `claude-packs-fixtures-${process.pid}`);
+  const built = buildOnce(root, `enabled-${name}`, (into) => { copyInstall(fixture(base), into); enable(into, ...hooks); });
+  return copyInstall(built, scratchDir(`fixture-${name.replace(/\W+/g, '-')}-`));
+}
+
 /** `checkoutsOf` a copy of the run's install of a configuration. */
 export const worktreeOf = (name: FixtureName): Checkouts => checkoutsOf(fixture(name));
 
