@@ -7,7 +7,8 @@ import { projectGroups, runRows, runsReport } from '../lib/run-status.mjs';
 import { statusReport } from '../lib/status-cli.mjs';
 import { runsSegments } from '../packs/base/tools/statusline-runs.mjs';
 
-const MAC = { name: 'mac', ssh: 'mac', dir: '~/projects/shop' };
+const HERE = { env: process.env, platform: process.platform };
+const MAC ={ name: 'mac', ssh: 'mac', dir: '~/projects/shop' };
 const RUN = { project: '/Users/u/projects/shop', order: 'shop', items: 10, done: 5, percent: 50, finished: false,
   steps: [{ id: 'W1', title: 'The import', items: 10, done: 5 }], agents: [{ name: 'api', step: 'W1', title: 'The import', percent: 50, now: '' }] };
 const answers = (text) => () => text;
@@ -51,7 +52,7 @@ test('a machine that cannot be asked, or whose kit gives no status, is a row tha
 });
 
 test('status and the status line show a remote run beside the local ones, and an unreachable machine in red', () => {
-  const report = runsReport({ remotes: [MAC], ask: answers(toJson({ runs: [RUN] })) });
+  const report = runsReport({ ...HERE, remotes: [MAC], ask: answers(toJson({ runs: [RUN] })) });
   assert.ok(report.runs.some((r) => r.host === 'mac'));
   const lines = statusReport({ remotes: [MAC], ask: fails('Connection refused') });
   assert.ok(lines.includes('MAC: not reached (Connection refused)'));
@@ -73,9 +74,9 @@ test('with other machines listed every run says where it runs, this machine\'s t
   assert.equal(machineName(file, 'linux'), 'pc');
   writeFileSync(file, toJson({ name: 'studio', remotes: [] }));
   assert.equal(machineName(file, 'linux'), 'studio');
-  const report = runsReport({ remotes: [MAC], ask: answers(toJson({ runs: [RUN] })), here: 'pc' });
+  const report = runsReport({ ...HERE, remotes: [MAC], ask: answers(toJson({ runs: [RUN] })), here: 'pc' });
   assert.ok(report.runs.length > 0 && report.runs.every((r) => r.host === 'pc' || r.host === 'mac'), report.runs.map((r) => r.host).join());
-  assert.ok(runsReport({ remotes: [], here: 'pc' }).runs.every((r) => !r.host), 'one machine alone: no names');
+  assert.ok(runsReport({ ...HERE, remotes: [], here: 'pc' }).runs.every((r) => !r.host), 'one machine alone: no names');
 });
 
 test('a project with two orders is one row with both under it, its percent theirs together; a project with one keeps its row', () => {
@@ -98,6 +99,6 @@ test('a project with two orders is one row with both under it, its percent their
 
 test('one project\'s report (--dir) asks no machine', () => {
   let asked = 0;
-  runsReport({ dir: fresh('remotes-dir-'), remotes: [MAC], ask: () => { asked += 1; return '{}'; } });
+  runsReport({ ...HERE, dir: fresh('remotes-dir-'), remotes: [MAC], ask: () => { asked += 1; return '{}'; } });
   assert.equal(asked, 0);
 });

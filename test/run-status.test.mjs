@@ -6,7 +6,8 @@ import { orderStatus, progressOf, runRows, runnersIn, runsReport, stepsOf, workI
 import { bar, statusCommand, statusLines } from '../lib/status-cli.mjs';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
 
-const ORDER = '# Work order: demo\n\n## W0. Set up\n\n1. one\n2. two\n\n**Done when:** x\n\n## W1. The import\n\n1. read\n\n**Done when:** y\n\n## L2. The look\n\n**Done when:** z\n';
+const HERE = { env: process.env, platform: process.platform };
+const ORDER ='# Work order: demo\n\n## W0. Set up\n\n1. one\n2. two\n\n**Done when:** x\n\n## W1. The import\n\n1. read\n\n**Done when:** y\n\n## L2. The look\n\n**Done when:** z\n';
 
 function project({ progress = '', status = null } = {}) {
   const dir = fresh('runstatus-');
@@ -30,7 +31,7 @@ test('the steps and their items come from the order: numbered items plus its Don
 
 test('with no status.json the progress is derived from the progress lines, a finished step counted whole', () => {
   const { dir } = project({ progress: '- W0.1 a\n- W0.2 b\n- W1 done: c\n' });
-  const s = orderStatus(dir, 'demo');
+  const s = orderStatus(dir, 'demo', HERE);
   assert.equal(s.source, 'progress lines');
   assert.deepEqual(s.steps.map((x) => `${x.id}:${x.done}/${x.items}`), ['W0:2/3', 'W1:2/2', 'L2:0/1']);
   assert.equal(s.percent, 66.7);
@@ -43,7 +44,7 @@ test('a run\'s status.json wins, and an agent\'s own file in its worktree gives 
   git('worktree', 'add', '-q', '.claude/worktrees/reader', '-b', 'work/reader');
   mkdirSync(join(dir, '.claude/worktrees/reader/docs/workorders/demo/agents'), { recursive: true });
   writeFileSync(join(dir, '.claude/worktrees/reader/docs/workorders/demo/agents/reader.json'), toJson({ name: 'reader', step: 'W1', items: 4, done: 3, now: 'rejecting bad rows' }));
-  const s = orderStatus(dir, 'demo');
+  const s = orderStatus(dir, 'demo', HERE);
   assert.equal(s.source, 'status.json');
   assert.equal(s.percent, 87.5);   // the run's file says 1 of W1's 4; its agent's own file says 3: the agent's count moves the total
   assert.deepEqual(s.agents.map((a) => `${a.name}:${a.step}:${a.percent}:${a.now}`), ['reader:W1:75:rejecting bad rows']);
@@ -110,8 +111,8 @@ test('an agent shows from its first minute, by its worktree on the order\'s bran
   const gitdir = join(dir, '.git', 'worktrees', 'old');
   const hoursAgo = (Date.now() - 3 * 3600_000) / 1000;
   for (const f of ['HEAD', 'index', 'logs/HEAD']) { try { utimesSync(join(gitdir, f), hoursAgo, hoursAgo); } catch { /* not every file is there */ } }
-  assert.deepEqual(orderStatus(dir, 'demo').agents.map((a) => a.name).sort(), ['fresh', 'old']);
-  const report = runsReport({ dir, order: 'demo' });
+  assert.deepEqual(orderStatus(dir, 'demo', HERE).agents.map((a) => a.name).sort(), ['fresh', 'old']);
+  const report = runsReport({ ...HERE, dir, order: 'demo' });
   assert.deepEqual(report.runs[0].agents.map((a) => a.name), ['fresh'], 'the finished agent left out');
   assert.ok(Date.now() - Date.parse(report.runs[0].agents[0].updated) < 60_000, 'its clock: git\'s last touch of its worktree');
   // a worktree made for an agent, its branch with no commit of its own and nothing running: waiting for its agent
@@ -119,13 +120,13 @@ test('an agent shows from its first minute, by its worktree on the order\'s bran
   assert.equal(waiting.title, 'not started yet');
   writeFileSync(join(dir, '.claude/worktrees/fresh/notes.txt'), 'x');
   execFileSync('git', ['-C', join(dir, '.claude/worktrees/fresh'), '-c', 'user.email=t@local', '-c', 'user.name=t', 'commit', '-q', '-m', 'one', '--allow-empty']);
-  assert.equal(runRows(runsReport({ dir, order: 'demo' }).runs[0], Date.now()).agents[0].title, 'no status file yet', 'its first commit: started');
+  assert.equal(runRows(runsReport({ ...HERE, dir, order: 'demo' }).runs[0], Date.now()).agents[0].title, 'no status file yet', 'its first commit: started');
 });
 
 test('a status file that is not JSON is ignored and the progress is derived instead, never a crash', () => {
   const { dir } = project({ progress: '- W0.1 a\n' });
   writeFileSync(join(dir, 'docs/workorders/demo/status.json'), '{ not json');
-  assert.equal(orderStatus(dir, 'demo').source, 'progress lines');
+  assert.equal(orderStatus(dir, 'demo', HERE).source, 'progress lines');
 });
 
 test('the runs alive are found from their runner processes, never from a Claude session that names the runner', () => {
