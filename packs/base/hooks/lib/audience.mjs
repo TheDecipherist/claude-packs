@@ -8,8 +8,9 @@ export const AUDIENCE_MARKER = '<!-- audience: outside -->';
 const DOCUMENT = /\.(md|txt)$/i;
 const HEAD_LINES = 5;
 const MARKER = /^\s*<!--\s*audience:\s*outside\s*-->\s*$/i;
-
+/** `text` is outside data (a payload field), so it is narrowed here. */
 export function addressedOutside(rel, text) {
-  if (!DOCUMENT.test(rel) || typeof text !== 'string') return false;
-  return text.split('\n', HEAD_LINES).some((l) => MARKER.test(l));
+    if (!DOCUMENT.test(rel) || typeof text !== 'string')
+        return false;
+    return text.split('\n', HEAD_LINES).some((l) => MARKER.test(l));
 }

@@ -4,7 +4,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readlinkSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { slotOwners } from './build-slots.mjs';
+import { buildSlots, slotOwners } from './build-slots.mjs';
 import { sessionOrders } from './run-claudes.mjs';
 
 const RUNNER = /\bdocs\/workorders\/([\w.-]+)\/run\.sh\b/;
@@ -30,7 +30,7 @@ export function runnersIn(psText) {
 function processes() {
   let ps = '';
   try { ps = execFileSync('ps', ['-eo', 'pid=,pcpu=,rss=,args='], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }); } catch { return []; }
-  const owners = slotOwners();
+  const owners = slotOwners(buildSlots(process.env).dir);
   const rows = ps.split('\n').map((l) => l.trim().match(/^(\d+)\s+([\d.]+)\s+(\d+)\s+(.*)$/)).filter(Boolean)
     .map(([, pid, cpu, rss, args]) => ({ pid: Number(pid), cpu: Number(cpu) || 0, rssKb: Number(rss) || 0,
       queued: /^node\s+\S*buildq\.mjs\s+(?!--status)/.test(args) && !owners.has(Number(pid)) }));
