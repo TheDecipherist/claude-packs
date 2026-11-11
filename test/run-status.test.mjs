@@ -49,7 +49,7 @@ test('a run\'s status.json wins, and an agent\'s own file in its worktree gives 
   const lines = statusLines(s);
   assert.match(lines[0], /^DEMO|^RUNSTATUS/i);
   assert.match(lines[0], /\[█{18}░{2}\]  88%   1 of 8 items left, 1 agent/);
-  assert.match(lines[1], /^  > reader     > W1 The import\s+\[█{8}░{2}\]  75%\s+♡\s+rejecting bad rows$/);
+  assert.match(lines[1], /^└ reader     > W1 The import\s+\[█{8}░{2}\]  75%\s+♡\s+rejecting bad rows$/);   // an agent hangs from its order
 });
 
 test('an agent is QUIET after 5 minutes with no call, or a call running with nothing working in its worktree; a busy call never', () => {

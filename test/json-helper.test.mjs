@@ -11,6 +11,17 @@ test('toJson writes what JSON.stringify throws on or loses: a circle, a BigInt, 
   assert.equal(toJson({ a: 1, toJSON() { throw new Error('no'); } }), '{"a":1}');
 });
 
+test('an object written twice side by side is written in full both times: only an object inside itself is a circle', () => {
+  const steps = [{ id: 'W1' }];
+  assert.equal(toJson({ runs: [{ steps }, { steps }] }), '{"runs":[{"steps":[{"id":"W1"}]},{"steps":[{"id":"W1"}]}]}');
+  const shared = { a: 1 };
+  const loop = { shared, again: shared };
+  loop.self = { back: loop };
+  assert.equal(toJson(loop), '{"shared":{"a":1},"again":{"a":1},"self":{"back":"[Circular]"}}');
+  // the same through the copy a throwing toJSON falls back to
+  assert.equal(toJson({ x: shared, y: shared, toJSON() { throw new Error('no'); } }), '{"x":{"a":1},"y":{"a":1}}');
+});
+
 test('toJson gives its fallback for a value with no JSON, and indents when asked', () => {
   assert.equal(toJson(undefined), 'null');
   assert.equal(toJson(() => 1, { fallback: '' }), '');

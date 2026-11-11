@@ -46,8 +46,9 @@ test('the second line has the branch, then the last tool and its target and the 
 test('each run is its project\'s row, with when it was checked, and one row per agent with its bar; a still agent says so', () => {
   const { lines } = scene();
   assert.match(lines[2], /^BANDWARP {14} █{8}░{12}  40%  6 of 10 items left, 2 agents, checked 0s ago$/);
-  assert.match(lines[3], /^  > dsp {8}> W3 The cluster {14}█{5}░{5}  50%  ♡\s+COMB width$/);
-  assert.match(lines[4], /^  > panel {6}> W8 The panel {16}█{3}░{7}  25%  ♡ 1h00m$/);   // no heartbeat, its file still an hour: red
+  assert.match(lines[3], /^├ dsp {8}> W3 The cluster\s+█{5}░{5}  50%  ♡\s+COMB width$/);
+  assert.match(lines[4], /^└ panel {6}> W8 The panel\s+█{3}░{7}  25%  ♡ 1h00m$/);   // no heartbeat, its file still an hour: red
+  assert.equal(lines[3].indexOf('█'), lines[4].indexOf('█'), 'the agents\' bars in one column');
 });
 
 test('the last heartbeat says what each agent did last and how long ago, a long call with what runs in its worktree', () => {
@@ -74,8 +75,9 @@ test('the last heartbeat says what each agent did last and how long ago, a long 
 
 test('a run with no agent shows the lead on its current step; a stale cache says how old it is', () => {
   const { lines } = scene({ runs: [{ ...RUN, agents: [] }], cacheAge: 10 * 60_000 });
-  assert.match(lines[2], /0 agents, checked 10m ago  \(as of 10m ago\)$/);
-  assert.match(lines[3], /^  > lead {7}> W3 The cluster .* 33%  ♡$/);
+  // the lead working alone is said on its order's row, never as a row of its own
+  assert.match(lines[2], /6 of 10 items left, lead on W3 The cluster, checked 10m ago  \(as of 10m ago\)$/);
+  assert.equal(lines.length, 3);
 });
 
 test('a broken session, transcript or cache draws what it can and never throws', () => {

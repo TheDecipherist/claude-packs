@@ -170,16 +170,24 @@ function liveOf(beat, updated, work, nowMs) {
   return { beat: beatText, work, action, quiet };
 }
 
+/** ", checked 8s ago" from when the runs were checked (the status line's cache), or '' when that is not known. */
+export const checkedText = (checkedAt, nowMs) =>
+  (Number.isNaN(Date.parse(checkedAt ?? '')) ? '' : `, checked ${ago(Math.max(0, Math.round((nowMs - Date.parse(checkedAt)) / 1000)))} ago`);
+
+// a run in a worktree is its project's: VSYNTHGT, never the worktree's folder W12-LOOK (the user: "what is W12-LOOK?")
+export const projectOf = (path) => path.replace(/\/\.claude\/worktrees\/[^/]+(?:\/.*)?$/, '');
+
 /** One order's rows, the same for `status` and the status line: the project's, then one per agent, or the lead's current step
  *  when no agent runs. { project: { name, percent, state }, agents: [{ who, id, title, percent, now, live, quiet }] }.
  *  `checkedAt`: when the runs were last checked (the status line's cache), said on the project's row. */
 export function runRows(s, nowMs = Date.now(), checkedAt = null) {
-  // a run in a worktree is its project's: VSYNTHGT (ui-look), never the worktree's folder W12-LOOK (the user: "what is W12-LOOK?")
-  const base = basename(s.project.replace(/\/\.claude\/worktrees\/[^/]+(?:\/.*)?$/, '')).toUpperCase();
+  const base = basename(projectOf(s.project)).toUpperCase();
   const name = (s.host ? `${s.host.toUpperCase()}: ` : '') + base + (s.order && s.order.toUpperCase() !== base ? ` (${s.order})` : '');
   const n = s.agents.length;
-  const checked = Number.isNaN(Date.parse(checkedAt ?? '')) ? '' : `, checked ${ago(Math.max(0, Math.round((nowMs - Date.parse(checkedAt)) / 1000)))} ago`;
-  const state = (s.finished ? 'done' : `${s.items - s.done} of ${s.items} items left, ${n} agent${n === 1 ? '' : 's'}`) + checked;
+  const checked = checkedText(checkedAt, nowMs);
+  const left = s.finished ? 'done' : `${s.items - s.done} of ${s.items} items left`;
+  const crew = s.finished ? '' : `, ${n} agent${n === 1 ? '' : 's'}`;
+  const state = left + crew + checked;
   const stepOf = (id) => s.steps.find((x) => x.id === id);
   const agents = s.finished ? [] : s.agents.map((a) => {
     const step = stepOf(a.step);
@@ -190,7 +198,7 @@ export function runRows(s, nowMs = Date.now(), checkedAt = null) {
   if (!s.finished && n === 0 && current) {
     agents.push({ who: 'lead', id: current.id, title: current.title, percent: percent(current.done, current.items), now: '', ...liveOf(s.lead, null, null, nowMs) });
   }
-  return { project: { name, percent: s.percent, state }, agents: alignLive(agents) };
+  return { project: { name, percent: s.percent, state, left, checked }, agents: alignLive(agents) };
 }
 
 function ordersIn(project, only) {

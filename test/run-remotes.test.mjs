@@ -3,7 +3,7 @@
 import { assert, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
 import { askCommand, machineName, remoteRuns, remotesOf, remotesReport } from '../packs/base/hooks/lib/run-remotes.mjs';
-import { runRows, runsReport } from '../lib/run-status.mjs';
+import { projectGroups, runRows, runsReport } from '../lib/run-status.mjs';
 import { statusReport } from '../lib/status-cli.mjs';
 import { runsSegments } from '../packs/base/tools/statusline-runs.mjs';
 
@@ -76,6 +76,24 @@ test('with other machines listed every run says where it runs, this machine\'s t
   const report = runsReport({ remotes: [MAC], ask: answers(toJson({ runs: [RUN] })), here: 'pc' });
   assert.ok(report.runs.length > 0 && report.runs.every((r) => r.host === 'pc' || r.host === 'mac'), report.runs.map((r) => r.host).join());
   assert.ok(runsReport({ remotes: [], here: 'pc' }).runs.every((r) => !r.host), 'one machine alone: no names');
+});
+
+test('a project with two orders is one row with both under it, its percent theirs together; a project with one keeps its row', () => {
+  const a = { ...RUN, host: 'pc', project: '/p/vsynthgt', order: 'rebuild', items: 80, done: 48, percent: 60 };
+  const b = { ...RUN, host: 'pc', project: '/p/vsynthgt/.claude/worktrees/W12-look', order: 'ui-look', items: 20, done: 10, percent: 50 };
+  const groups = projectGroups([a, b, { ...RUN, host: 'mac' }]);
+  assert.deepEqual(groups.map((g) => `${g.name}:${g.runs.length}:${g.percent}`), ['PC: VSYNTHGT:2:58', 'MAC: SHOP:1:50']);
+  const dir = fresh('remotes-group-');
+  const cache = join(dir, 'runs.json');
+  writeFileSync(cache, toJson({ runs: [a, b, { ...RUN, host: 'mac' }] }));
+  const rows = runsSegments(cache, Date.now(), (t) => t, 'none');
+  assert.match(rows[0], /^PC: VSYNTHGT .* 58%  42 of 100 items left, 2 orders$/);
+  assert.match(rows[1], /^├ rebuild /);     // the orders hang from their project
+  assert.match(rows[2], /^│ └ api /);       // an order's agents from the order
+  assert.match(rows[3], /^└ ui-look /);
+  assert.match(rows[4], /^  └ api /);
+  assert.match(rows[5], /^MAC: SHOP /);
+  assert.equal(new Set(rows.filter((r) => !r.includes('>')).map((r) => r.indexOf('█'))).size, 1, 'every head row\'s bar in one column');
 });
 
 test('one project\'s report (--dir) asks no machine', () => {

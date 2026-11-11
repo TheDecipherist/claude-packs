@@ -11,7 +11,8 @@ import { mkdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readJson, writeJson } from '../hooks/lib/json.mjs';
-import { percentLabel, runRows, runsReport } from '../hooks/lib/run-status.mjs';
+import { percentLabel, runsReport } from '../hooks/lib/run-status.mjs';
+import { runTree } from '../hooks/lib/run-tree.mjs';
 import { bold, COLOURS as C, meter } from './statusline-paint.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
@@ -48,13 +49,19 @@ export function runsSegments(cache, nowMs, paint, mode) {
   const age = ageOf(cache, nowMs);
   const stale = age !== null && age > STALE_MS;
   const tint = (colour) => (stale ? C.dim : colour);
-  const rows = runs.flatMap((r) => {
-    const { project, agents } = runRows(r, nowMs, report.updated);
-    const head = `${bold(paint(project.name.padEnd(22), tint(C.white)), mode)} ${meter(project.percent, 20, paint)} ${paint(percentLabel(project.percent), tint(C.white))}  ${paint(project.state, C.dim)}`;
-    return [head, ...agents.map((a) => `  ${paint('>', C.dim)} ${paint(a.who.padEnd(10), a.quiet ? C.red : tint(C.lavender))} ${paint('>', C.dim)} ` +
-      `${paint(`${a.id ?? '?'} ${a.title.slice(0, 22)}`.padEnd(27), tint(C.teal))} ${meter(a.percent, 10, paint)} ${paint(percentLabel(a.percent), tint(C.white))}` +
-      `  ${paint(a.live, a.quiet ? C.red : C.green)}${a.now ? paint(`  ${a.now.slice(0, 60)}`, C.dim) : ''}`.trimEnd())];
-  });
+  // the tree (run-tree.mjs): every head row's bar in one column, every agent row's bar in another, whatever its depth
+  const draw = (row) => {
+    const tree = paint(row.prefix, C.dim);
+    const live = row.live ? `  ${paint(row.live, row.quiet ? C.red : C.green)}` : '';
+    if (row.kind !== 'agent') {
+      return `${tree}${bold(paint(row.name.padEnd(22 - row.prefix.length), tint(C.white)), mode)} ${meter(row.percent, 20, paint)} ` +
+        `${paint(percentLabel(row.percent), tint(C.white))}  ${paint(row.state, C.dim)}${live}`;
+    }
+    return `${tree}${paint(row.who.padEnd(10), row.quiet ? C.red : tint(C.lavender))} ${paint('>', C.dim)} ` +
+      `${paint(`${row.id ?? '?'} ${row.title.slice(0, 22)}`.padEnd(27 - row.prefix.length), tint(C.teal))} ${meter(row.percent, 10, paint)} ` +
+      `${paint(percentLabel(row.percent), tint(C.white))}${live}${row.now ? paint(`  ${row.now.slice(0, 60)}`, C.dim) : ''}`.trimEnd();
+  };
+  const rows = runTree(runs, nowMs, report.updated).map(draw);
   if (stale) rows[0] += paint(`  (as of ${Math.round(age / 60_000)}m ago)`, C.red);
   return [...rows, ...far];
 }

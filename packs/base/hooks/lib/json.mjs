@@ -5,16 +5,19 @@
 import { renameSync, writeFileSync } from 'node:fs';
 import { readText } from './shell-writes.mjs';
 
-/** A replacer that never throws: a circular reference becomes "[Circular]", a BigInt its digits, an Error its fields. */
+/** A replacer that never throws: a circular reference becomes "[Circular]", a BigInt its digits, an Error its fields. A
+ *  circle is an object inside itself, on its own path from the top; one object written twice side by side (three runs that
+ *  share one steps list) is no circle, and is written in full each time. `this` is the object that holds `key`, so the path
+ *  is cut back to it before each value. */
 function safeReplacer() {
-  const seen = new WeakSet();
+  const path = [];
   return function replace(_key, value) {
     if (typeof value === 'bigint') return value.toString();
     if (value instanceof Error) return { name: value.name, message: value.message, ...(value.code ? { code: value.code } : {}) };
-    if (value && typeof value === 'object') {
-      if (seen.has(value)) return '[Circular]';
-      seen.add(value);
-    }
+    if (!value || typeof value !== 'object') return value;
+    while (path.length > 0 && path.at(-1) !== this) path.pop();
+    if (path.includes(value)) return '[Circular]';
+    path.push(value);
     return value;
   };
 }
@@ -26,17 +29,20 @@ export function toJson(value, { pretty = false, fallback = 'null' } = {}) {
     return JSON.stringify(value, safeReplacer(), indent) ?? fallback;   // undefined, a function or a symbol has no JSON
   } catch {
     // a toJSON that throws: the value's own data, without its methods
-    try { return JSON.stringify(plainCopy(value, new WeakSet()), safeReplacer(), indent) ?? fallback; } catch { return fallback; }
+    try { return JSON.stringify(plainCopy(value, new Set()), safeReplacer(), indent) ?? fallback; } catch { return fallback; }
   }
 }
 
-/** The value's own data, every method (a toJSON among them) left out, a circle cut: what a throwing toJSON hid. */
-function plainCopy(value, seen) {
+/** The value's own data, every method (a toJSON among them) left out, a circle cut: what a throwing toJSON hid. `path`
+ *  holds the objects above this one, so only an object inside itself is a circle, as in safeReplacer. */
+function plainCopy(value, path) {
   if (!value || typeof value !== 'object' || value instanceof Error) return value;
-  if (seen.has(value)) return '[Circular]';
-  seen.add(value);
-  if (Array.isArray(value)) return value.map((v) => plainCopy(v, seen));
-  return Object.fromEntries(Object.entries(value).filter(([, v]) => typeof v !== 'function').map(([k, v]) => [k, plainCopy(v, seen)]));
+  if (path.has(value)) return '[Circular]';
+  path.add(value);
+  const copy = Array.isArray(value) ? value.map((v) => plainCopy(v, path))
+    : Object.fromEntries(Object.entries(value).filter(([, v]) => typeof v !== 'function').map(([k, v]) => [k, plainCopy(v, path)]));
+  path.delete(value);
+  return copy;
 }
 
 /** JSON text as a value, or `fallback` (null) when it is empty or not JSON; never throws. */
