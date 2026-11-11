@@ -104,3 +104,12 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Chosen: keep tracking `.claude/`. The rule is about the source folders (d-2): an install is what a project commits (bandwarp
   tracks 398 files there), and the kit's own hooks must work in a fresh clone before any build.
 - Why: easiest to reverse; nothing a project receives changes.
+
+## d-18 When the owners inside existing modules are made {#d-18}
+- Question: W2.5 lists owners that live in modules W3 converts (`runAsHook` in hook-log, shell-lex's heredoc cutting, quote
+  blanking, command splitting and `installedPackages`, selftest's `runHook` returning the full result, json a leaf). Make them in
+  W2 by converting those modules early, or as their layer is reached?
+- Chosen: the new modules now (files, git-run, hash, source-exts, and `HOOK_FILE` in lib/packs.mjs); the owners inside existing
+  modules as W3 converts each (shell-lex and selftest at L0, json at the W2.10 pilot, hook-log at L2), each before its first user
+  converts onto it, so a file still imports only converted files.
+- Why: converting hook-log in W2 drags its layer (layout, event-log) with it; W3's order is what keeps every slice green.

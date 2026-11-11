@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-11T11:15:39.175Z",
+  "updated": "2026-11-11T11:20:54.736Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/agents-held.md": "0da8fb50ef828b0440389751254c16ae1cf9dd21c78fc23a7d957b221674a409",
@@ -71,6 +71,7 @@
     ".claude/hooks/lib/git-guard-selftest.mjs": "5b7b3baad5d0325b8de763dc9d188a885cc2bee1fd3d35d4d596b61dc59ad092",
     ".claude/hooks/lib/git-run.mjs": "72d1982013fe35473213b1d01dbc31cc245c2d7dbf311846d5deeb0330acc245",
     ".claude/hooks/lib/glob.mjs": "ef96f30a68a7da275ab0fa11be56331d03e086cb055dd4e19069a5d73c9b2cd2",
+    ".claude/hooks/lib/hash.mjs": "9eb544ec9da3a1e20b8935940eface8a3e6f4f9f4581fb7d074c591c6433dc1c",
     ".claude/hooks/lib/hook-log.mjs": "16cda511394fa520f318d45c8f4fd9a4628693bd21565ea09088fbf3583499bc",
     ".claude/hooks/lib/house.py": "0c8a2e113eec53c48caa8e11f5dd8f1d611ed239cc137c246d8d7bab8e4aa661",
     ".claude/hooks/lib/hub-rig.mjs": "49332a493a1d5e2f3d40fc3575ae95b4793f3d9491ede596609ded9cbfb00c81",
