@@ -180,12 +180,22 @@ Every project with the kit shows, under the prompt, what is working and where it
 ```
 claude-packs 1.8.0 | opus md | CTX 41% (1.0M) | 5h 38% | 7d 81%
 ⎇ work/panel ✱3 ↑1↓0 | Edit src/ui/Panel.cpp | $ npm run test:changed
-BANDWARP               █████████░░░░░░░░░░░  47%  40 of 76 items left, 4 agents
-  > dsp        > W3b The cluster             ████░░░░░░  40%  COMB's WIDTH against the reference
-  > panel      > W8 The main panel           ██░░░░░░░░  20%  quiet 34m
+BANDWARP               ███████████░░░░░░░░░  55%  34 of 76 items left, 4 agents, checked 8s ago
+  > dsp        > W3b The cluster             ██████░░░░  60%  ♥ 12s ⚙ 13 proc · 1.3 cpu · 322M ram        WRITE src/dsp/Comb.cpp
+  > panel      > W8 The main panel           ██░░░░░░░░  20%  ♥ 4m  ⚙ 17 proc · 2.3 cpu · 1.5G ram queued ⟳ RUN cmake --build
 ```
 
-The first field is the kit version the project runs. Then the model and its effort (red if a fallback swapped it from the one you pinned), the context used, and the 5h and 7d quotas on a subscription or the session's cost on API billing. The second line is the branch, the last tool and the last shell command. Below them is every unattended run on the machine, per project and per agent, the same numbers as `status`; an agent whose own file has not moved in 30 minutes is red. The runs are read in the background every 30 seconds, so the bar never waits.
+The first field is the kit version the project runs. Then the model and its effort (red if a fallback swapped it from the one you pinned), the context used, and the 5h and 7d quotas on a subscription or the session's cost on API billing. The second line is the branch, the last tool and the last shell command.
+
+Below them is every unattended run on the machine, per project and per agent, the same numbers as `status`. A project's percent counts each agent's own progress, so it moves with every item an agent finishes, not only when the lead merges. Each agent's row then says, in columns that stand under each other:
+
+| Symbol | What it says |
+|---|---|
+| `♥ 12s` | its last heartbeat: the hooks record every tool call the agent makes, before and after, so this is how long ago its last one was. `♡` means the project's install has no heartbeat hook yet |
+| `⚙ 13 proc · 1.3 cpu · 322M ram` | what really runs in its worktree now: processes, cores, memory. `queued`: its build waits for a slot of the build queue. `⚙ 0 proc`: nothing runs there, it is thinking or reading |
+| `READ`, `WRITE`, `RUN`, `AGENT` | its last action and what it worked on; `⟳` while that call still runs |
+
+An agent turns red when it is stuck by the evidence: no tool call for 5 minutes, or a call that still runs with nothing working in its worktree. The runs are checked in the background every 30 seconds, so the bar never waits.
 
 `init` and `update` wire it (`.claude/tools/statusline.mjs`) into `.claude/settings.json` where the project has no status line; one you already have is kept. `"disable": ["tools/statusline.mjs"]` in `layout.json` takes it out.
 
@@ -382,7 +392,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, a settings layer with the standard settings | 53 | 12 | 3 | 8 |
-| `base` | Universal engineering, in every configuration | 25 | 8 | 22 | 15 |
+| `base` | Universal engineering, in every configuration | 25 | 8 | 23 | 15 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
@@ -524,6 +534,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `inside-the-project` | Write, Bash | Refuses work for the project done outside it: a worktree added or moved beside the project, and any write, `cd` or `git -C` into a checkout of the same repo kept outside it, where no other hook can see |
 | `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
+| `heartbeat` | Every call | Records what each agent did last and when, for the status line; refuses nothing |
 
 Packs add their own: `realtime-guard`, `param-id-lock` and `settings-layer` (`audio-core`; every plugin has a settings layer with the standard settings, and its standalone no JUCE Options button), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, `chart-first`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 

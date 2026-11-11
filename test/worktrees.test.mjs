@@ -7,6 +7,7 @@ import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { CLI, PIN_GUARD, bash, fire, fireAs, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
+import { readJson } from '../packs/base/hooks/lib/json.mjs';
 import { COMMAND_CASES } from './worktree-cases-commands.mjs';
 import { PACK_CASES } from './worktree-cases-packs.mjs';
 
@@ -113,6 +114,16 @@ const CASES = {
     const call = 'const r = await client.messages.create({ messages: [{ role: "user", content: page }] });\n';
     assert.equal(fire(here, 'untrusted-boundary.mjs', join(wt, 'tools/ask.mjs'), call), 2);
     assert.equal(fire(here, 'untrusted-boundary.mjs', join(wt, 'tools/ask.mjs'), `const page = wrapUntrusted(html);\n${call}`), 0);
+  },
+  // 1.8.0: a call in the worktree is that agent's heartbeat, written in the main checkout where the status reads it, never
+  // into the worktree; a call in the main checkout is the lead's
+  'heartbeat.mjs': ({ here, wt }) => {
+    const beat = (name, root = here) => readJson(join(root, '.claude/logs/heartbeats', `${name}.json`));
+    assert.equal(fireAs(here, 'heartbeat.mjs', { hook_event_name: 'PreToolUse', cwd: wt, tool_name: 'Edit', tool_input: { file_path: join(wt, 'src/x.cpp') } }).status, 0);
+    assert.equal(beat('agent-x')?.tool, 'Edit');
+    assert.equal(beat('agent-x', wt), null);
+    assert.equal(fireAs(here, 'heartbeat.mjs', { hook_event_name: 'PostToolUse', cwd: here, tool_name: 'Read', tool_input: { file_path: join(here, 'CLAUDE.md') } }).status, 0);
+    assert.equal(beat('lead')?.event, 'post');
   },
   'stage-guard.mjs': ({ here, wt }) => {
     assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add -A`), 2);

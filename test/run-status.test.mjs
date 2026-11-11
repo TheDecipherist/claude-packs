@@ -44,11 +44,11 @@ test('a run\'s status.json wins, and an agent\'s own file in its worktree gives 
   writeFileSync(join(dir, '.claude/worktrees/reader/docs/workorders/demo/agents/reader.json'), toJson({ name: 'reader', step: 'W1', items: 4, done: 3, now: 'rejecting bad rows' }));
   const s = orderStatus(dir, 'demo');
   assert.equal(s.source, 'status.json');
-  assert.equal(s.percent, 62.5);
+  assert.equal(s.percent, 87.5);   // the run's file says 1 of W1's 4; its agent's own file says 3: the agent's count moves the total
   assert.deepEqual(s.agents.map((a) => `${a.name}:${a.step}:${a.percent}:${a.now}`), ['reader:W1:75:rejecting bad rows']);
   const lines = statusLines(s);
   assert.match(lines[0], /^DEMO|^RUNSTATUS/i);
-  assert.match(lines[0], /\[█{13}░{7}\]  63%   3 of 8 items left, 1 agent/);
+  assert.match(lines[0], /\[█{18}░{2}\]  88%   1 of 8 items left, 1 agent/);
   assert.match(lines[1], /^  > reader     > W1 The import\s+\[█{8}░{2}\]  75%\s+♡\s+rejecting bad rows$/);
 });
 

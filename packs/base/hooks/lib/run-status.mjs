@@ -72,6 +72,19 @@ function derivedSteps(project, order, trees) {
   }));
 }
 
+/** The items the agents are ahead of the run's own count. The lead writes status.json when it starts and when an agent's
+ *  work is merged, and while its agents work its turn waits on them, so its count stands still for hours (the user: "none
+ *  of the percent numbers have moved in a long time"). Each agent's own file moves after every item: for the steps it owns,
+ *  its percent of their items counts where that is further along than the run's. */
+function agentsAhead(steps, agents) {
+  return agents.filter((a) => a.percent !== null).reduce((n, a) => {
+    const owned = steps.filter((s) => s.agent === a.name);
+    const items = owned.reduce((m, s) => m + s.items, 0);
+    const counted = owned.reduce((m, s) => m + s.done, 0);
+    return n + Math.max(0, Math.round((items * a.percent) / 100) - counted);
+  }, 0);
+}
+
 /** One order's progress: { project, order, steps, agents, items, done, percent, source, finished }. */
 export function orderStatus(project, order) {
   const folder = join(project, 'docs', 'workorders', order);
@@ -93,7 +106,7 @@ export function orderStatus(project, order) {
         percent: f.items ? percent(f.done ?? 0, f.items) : null, beat: t.beat ?? null, path: t.path };
     });
   const items = steps.reduce((n, s) => n + s.items, 0);
-  const done = steps.reduce((n, s) => n + s.done, 0);
+  const done = steps.reduce((n, s) => n + s.done, 0) + agentsAhead(steps, agents);
   return { project, order, steps, agents, items, done, percent: percent(done, items), source: fromRun ? 'status.json' : 'progress lines',
     finished: existsSync(join(folder, 'DONE')), lead: beatOf('lead') };
 }

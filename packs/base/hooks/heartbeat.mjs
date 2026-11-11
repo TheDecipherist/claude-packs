@@ -64,10 +64,12 @@ function selftest() {
     ['a long call is marked as begun', beat('dsp')?.event, 'pre'],
     ['its end is marked too', runHook(hook, dir, { hook_event_name: 'PostToolUse', cwd: tree, tool_name: 'Bash', tool_input: { command: 'make' } }) === 0 && beat('dsp')?.event, 'post'],
     ['a call from the main checkout naming a worktree path is that agent\'s', call({ cwd: dir, tool_name: 'Edit', tool_input: { file_path: join(dir, '.claude/worktrees/panel/src/Panel.cpp') } }) && beat('panel')?.tool, 'Edit'],
+    ['a command from the main checkout that names a worktree is that agent\'s', call({ cwd: dir, tool_name: 'Bash', tool_input: { command: 'cd .claude/worktrees/ui && make' } }) && beat('ui')?.tool, 'Bash'],
     ['a call naming no worktree is its agent id\'s last worktree', call({ cwd: dir, tool_name: 'Read', tool_input: { file_path: join(dir, 'README.md') }, agent_id: 'a1' }) && beat('dsp')?.tool, 'Read'],
     ['the lead\'s own call is the lead\'s', call({ cwd: dir, tool_name: 'Grep', tool_input: { pattern: 'kSlots' } }) && beat('lead')?.what, 'kSlots'],
     ['a call in a sibling project writes nothing', call({ cwd: join(dir, '..', 'sibling'), tool_name: 'Read', tool_input: { file_path: '/elsewhere/x' } }) && beat('sibling'), null],
     ['a broken event lets the call through', runHook(hook, dir, null), 0],
+    ['broken event text never throws', (() => { try { return main('{ "hook_event_name": "PreToolUse", '); } catch { return 'threw'; } })(), 0],
   ];
   return verdicts('heartbeat', cases);
 }
