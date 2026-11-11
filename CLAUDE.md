@@ -92,15 +92,25 @@ Always do:
   - versions and notes → `docs/`
   - the planner skills a person uses in claude.ai → `planner/`
 - The other folders:
+  - `.claude-plugin/`: the kit's Claude Code plugin declaration: the TypeScript language server (lspServers)
   - `bin/`: the claude-packs command (bin/claude-packs.mjs)
+  - `build/evidence/`: measured evidence per step (ignored by git)
   - `configurations/`: the configurations: one config.json per kind of project (its packs, layout template, hook order, preamble)
+  - `docs/workorders/typescript/probes/`: the typescript order's probes: the daemon prototype and review-2's probe scripts
   - `global/`: the global part: latest-versions, gnu-shell, shell-traps (global add)
   - `lib/`: the command's library: sync, settings, layout, doctor, scan, suggest, fix, the kit lock
   - `packs/`: the packs a project installs: rules, checks, hooks, skills, tools (list shows them)
+  - `packs/base/hooks/bin/`: the built hook-proxy binaries, one folder per OS-ARCH (built, never committed) and the sh picker
   - `profiles/`: tailored seed layouts shipped in the package
   - `prompts/`: prompts the command prints (survey.md, scan-review.md)
+  - `proxy/`: the Go hook proxy's client (the one hand-written non-TypeScript source) and its tests
   - `scripts/`: the kit's own development scripts (test-changed.mjs); never shipped
   - `site/`: the web page: the design, and the numbers a test holds true; never shipped in the npm package
+  - `test/fixtures/profiles/`: the seed layout profiles used by tests (--profile takes a path)
+  - `test/hooks/`: hook tests: test/hooks/PACK/HOOK.test.mts
+  - `test/integration/`: integration flows that install on purpose: test/integration/FLOW.test.mts
+  - `test/tools/`: tool tests: test/tools/PACK/TOOL.test.mts
+  - `test/unit/`: unit tests: test/unit/lib/NAME.test.mts and test/unit/hooks-lib/NAME.test.mts
 - Ask the user before inventing a new folder. A new folder goes into `.claude/layout.json` first.
 - When a hook, check or guard blocks work that is correct, stop and report its exact message. A blocking hook is a red check: fix the hook first, with a selftest, then continue.
 - When a command is refused or fails, the step fails loudly. Never report a refused write or a failed command as done.

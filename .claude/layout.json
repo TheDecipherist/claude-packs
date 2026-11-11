@@ -49,6 +49,46 @@
     "site": {
       "path": "site",
       "purpose": "the web page: the design, and the numbers a test holds true; never shipped in the npm package"
+    },
+    "claude-plugin": {
+      "path": ".claude-plugin",
+      "purpose": "the kit's Claude Code plugin declaration: the TypeScript language server (lspServers)"
+    },
+    "proxy": {
+      "path": "proxy",
+      "purpose": "the Go hook proxy's client (the one hand-written non-TypeScript source) and its tests"
+    },
+    "proxy-bin": {
+      "path": "packs/base/hooks/bin",
+      "purpose": "the built hook-proxy binaries, one folder per OS-ARCH (built, never committed) and the sh picker"
+    },
+    "test-unit": {
+      "path": "test/unit",
+      "purpose": "unit tests: test/unit/lib/NAME.test.mts and test/unit/hooks-lib/NAME.test.mts"
+    },
+    "test-hooks": {
+      "path": "test/hooks",
+      "purpose": "hook tests: test/hooks/PACK/HOOK.test.mts"
+    },
+    "test-tools": {
+      "path": "test/tools",
+      "purpose": "tool tests: test/tools/PACK/TOOL.test.mts"
+    },
+    "test-integration": {
+      "path": "test/integration",
+      "purpose": "integration flows that install on purpose: test/integration/FLOW.test.mts"
+    },
+    "test-fixtures-profiles": {
+      "path": "test/fixtures/profiles",
+      "purpose": "the seed layout profiles used by tests (--profile takes a path)"
+    },
+    "workorder-probes": {
+      "path": "docs/workorders/typescript/probes",
+      "purpose": "the typescript order's probes: the daemon prototype and review-2's probe scripts"
+    },
+    "evidence": {
+      "path": "build/evidence",
+      "purpose": "measured evidence per step (ignored by git)"
     }
   },
   "concepts": {

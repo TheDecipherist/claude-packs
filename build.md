@@ -11,6 +11,10 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0, the kit in TypeScript (work/2.0.0-typescript, from work/1.9.0-platforms), started 2026-11-11, the order docs/workorders/typescript/ (W0-W12), run unattended from its PROMPT.
+  making: W0 set up (decisions d-1..d-13, the order's folders in layout.json, the admiral merge, the four stale KWB rows closed, the version pins, the baseline (a)-(l), suite-once's two planted prompts); then each step as workorder.md says; concepts: none (design/shape.json declares none); reuse: the foundation workorder.md lists (lib/sync.mjs, run-hooks.mjs, selftest.mjs, json.mjs, shell-lex.mjs, scripts/test-changed.mjs, scripts/release.mjs).
+  done when: as each step of docs/workorders/typescript/workorder.md says; progress in docs/workorders/typescript/progress.md.
+
 - 1.9.0, the same on Linux, macOS and Windows (work/1.9.0-platforms, stacked on work/1.8.2-agents), started 2026-11-11, from the user: "you need to go over all bash commands and verify what works on windows vs mac and fix all of them in one go" (KWB-152; the audit of 25 places, 2026-11-11).
   making: the status line's git in one `git status --porcelain=v2 --branch`, cached on the index and HEAD; the hooks of one event in one runner process (heartbeat in it); shell-traps refusing a BSD form only where the GNU build is first on PATH; `global add` setting the Bash tool's shell to a bash 5 it finds; quiet-test polling the front app once a second with one call; Windows: `fileURLToPath` in every selftest, no `sh`/`touch` fakes, `shell: true` for `.cmd` programs, `py -3`; a `sed -i` judged in JS where no GNU sed is found; pdf-to-md without `pgrep -c`, the audio rule without `xvfb-run`; `workorder start` (detached on every system); time-guard reading `\` paths; concepts: none; reuse: gnu-shell's `prefix`/`gnubin`, the runner's `throughRunner`, shell-writes' `afterText`.
   done when: each fix has a test that runs it as the other system would (a planted platform, a planted PATH), seen red before the fix; the kit's suite green on the Mac; the tests the branch reaches green against main.

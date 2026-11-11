@@ -11,3 +11,4 @@ node_modules/
 .claude/kit-lock.log
 .claude/logs/
 .env
+build/
