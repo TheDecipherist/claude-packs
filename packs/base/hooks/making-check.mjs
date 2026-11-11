@@ -145,7 +145,7 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   const path = event.hook_event_name === 'SubagentStop' ? event.agent_transcript_path ?? event.transcript_path : event.transcript_path;
   const turn = lastTurn(path ?? '');
   const text = `${turn.text}\n${event.last_assistant_message ?? ''}`;
-  const writes = writesOfTurn(turn, cwd).filter((w) => insideProject(projectRoot(), w.path, process.cwd()));
+  const writes = writesOfTurn(turn, cwd, process.env).filter((w) => insideProject(projectRoot(), w.path, process.cwd()));
   const problems = [];
   const rel = (p) => relative(checkoutRoot(projectRoot(), p, process.cwd()), p).replace(/\\/g, '/');
   // Each write is judged against its own checkout (a worktree's own build.md, manifest and layout), never the session's folder:

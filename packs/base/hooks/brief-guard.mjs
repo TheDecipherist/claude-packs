@@ -46,7 +46,7 @@ function main(text) {
     const hits = find(shape)(text);
     return hits.length ? refuse('the agent brief', hits, shape) : 0;
   }
-  for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
+  for (const w of writesOf(payload, payload.cwd ?? process.cwd(), process.env)) {
     if (w.after === null || w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd())) continue;
     const rel = relInCheckout(projectRoot(), w.path, process.cwd());
     if (!BRIEFS.test(rel)) continue;

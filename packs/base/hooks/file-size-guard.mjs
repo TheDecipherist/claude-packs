@@ -7,7 +7,7 @@
 // `--selftest` proves it.
 import { readFileSync } from 'node:fs';
 import { extname, relative } from 'node:path';
-import { writesOf } from './lib/writes.mjs';
+import { readPayload, writesOf } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -32,9 +32,9 @@ export function verdict(rel, before, after, limit) {
 }
 
 function main(text) {
-  let payload;
-  try { payload = JSON.parse(text); } catch { return 0; }
-  for (const w of writesOf(payload)) {
+  const payload = readPayload(text);
+  if (!payload) return 0;
+  for (const w of writesOf(payload, process.cwd(), process.env)) {
     if (w.after === null || relative(projectRoot(), w.path).startsWith('..')) continue;
     const rel = relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path);
     const msg = verdict(rel, w.before, w.after, readLayout(claudeRoot(projectRoot(), w.path, process.cwd())).maxFileLines ?? 300);

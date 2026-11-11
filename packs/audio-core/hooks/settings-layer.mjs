@@ -81,7 +81,7 @@ function main(text) {
       const root = checkoutRoot(projectRoot(), w.path, process.cwd());
       return judgeLayer(w, rel, root, claudeRoot(projectRoot(), w.path, process.cwd())) ?? judgeCmake(w, rel, root);
     },
-  });
+  }, process);
 }
 
 // What a project still lacks, for doctor: one line each.

@@ -118,9 +118,9 @@ const use = (name, input) => ({ name, input, cwd: '/p' });
 
 test('KF-34: what a turn landed is over: only the writes after its last landing are this step\'s', () => {
   const turn = { uses: [use('Write', { file_path: '/p/tools/a.py', content: 'x' }), use('Bash', { command: 'git merge --ff-only work/x 2>&1 | tail -1' }), use('Write', { file_path: '/p/tools/b.py', content: 'y' })] };
-  assert.deepEqual(writesOfTurn(turn, '/p').map((w) => w.path), ['/p/tools/b.py']);
-  assert.deepEqual(writesOfTurn({ uses: turn.uses.slice(0, 2) }, '/p'), []);
-  assert.deepEqual(writesOfTurn({ uses: [turn.uses[0], use('Bash', { command: "git commit -m 'merge --ff-only'" })] }, '/p').map((w) => w.path), ['/p/tools/a.py'], 'words about a merge land nothing');
+  assert.deepEqual(writesOfTurn(turn, '/p', process.env).map((w) => w.path), ['/p/tools/b.py']);
+  assert.deepEqual(writesOfTurn({ uses: turn.uses.slice(0, 2) }, '/p', process.env), []);
+  assert.deepEqual(writesOfTurn({ uses: [turn.uses[0], use('Bash', { command: "git commit -m 'merge --ff-only'" })] }, '/p', process.env).map((w) => w.path), ['/p/tools/a.py'], 'words about a merge land nothing');
 });
 
 const event = (dir, transcript) => ({ hook_event_name: 'Stop', session_id: `s${Math.random()}`, cwd: dir, transcript_path: transcript });

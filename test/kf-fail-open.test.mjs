@@ -25,7 +25,7 @@ E`;
 
 test('KF-40: an inline edit through a local helper is read, not crashed on, and names the files it writes', () => {
   const dir = fresh('kf40-');
-  const ws = writesOf({ tool_name: 'Bash', cwd: dir, tool_input: { command: HELPER_EDIT } }, dir);
+  const ws = writesOf({ tool_name: 'Bash', cwd: dir, tool_input: { command: HELPER_EDIT } }, dir, process.env);
   assert.deepEqual(ws.map((w) => w.path).sort(), [join(dir, 'src/app/panel/PanelShading.h'), join(dir, 'tests/panel_drawn.cpp')]);
   assert.ok(ws.every((w) => w.after === null), 'what it writes is not known');
 });

@@ -45,7 +45,7 @@ function judge(root, file, base, op = 'write') {
 // Every file the call writes, by any route (lib/writes.mjs): Write, Edit, MultiEdit, NotebookEdit, and the
 // shell's >, >>, tee, sed -i, perl -i, cp, mv (its source too), ln, rm, truncate, touch, dd of=, a heredoc.
 export function verdict(payload, root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()) {
-  for (const w of writesOf(payload, payload.cwd ?? root)) {
+  for (const w of writesOf(payload, payload.cwd ?? root, process.env)) {
     const hit = judge(root, w.path, root, w.op);
     if (hit) return { ...hit, why: payload.tool_name === 'Bash' ? `the command writes ${hit.rel}` : hit.rel };
   }

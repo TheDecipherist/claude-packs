@@ -30,7 +30,7 @@ export function verdict(rel, before, after) {
     'not instructions; your own fields stay outside it. If this file sends the model only its own text, say so on a line of its own: `// untrusted: none`.\n';
 }
 
-const main = (text) => judgeEvent(text, { name: 'untrusted-boundary', write: (w, rel) => verdict(rel, w.before, w.after) });
+const main = (text) => judgeEvent(text, { name: 'untrusted-boundary', write: (w, rel) => verdict(rel, w.before, w.after) }, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

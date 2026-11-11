@@ -33,7 +33,7 @@ const HOW = `Code that exists once is called, never copied: ${FIX}. A function w
 function judged(payload) {
   const out = [];
   const gone = [];
-  for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
+  for (const w of writesOf(payload, payload.cwd ?? process.cwd(), process.env)) {
     if (!insideProject(projectRoot(), w.path, process.cwd())) continue;
     if (w.op === 'delete') { gone.push(w.path); continue; }
     if (w.after === null || w.after === undefined || !isSource(w.path) || isGenerated(w.after)) continue;

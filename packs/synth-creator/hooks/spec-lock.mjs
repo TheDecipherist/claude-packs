@@ -79,7 +79,7 @@ function main(text) {
 
 // Every file the call writes, whichever tool: the lock file never, a locked spec file not while locked.
 function judgeWrites(payload, state, howTo) {
-  for (const w of writesOf(payload)) {
+  for (const w of writesOf(payload, process.cwd(), process.env)) {
     if (!insideProject(projectRoot(), w.path, process.cwd())) continue;
     const rel = relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path);
     if (rel === join('.claude', 'spec-lock.json')) return block(`the lock file can't be edited. ${howTo}`);

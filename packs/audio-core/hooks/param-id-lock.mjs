@@ -101,7 +101,7 @@ function main(text) {
     // run by hand without stdin
   }
   // Run by hand (no tool): the main checkout. Otherwise every checkout a write of an id file landed in.
-  const files = payload.tool_name ? writesOf(payload).map((w) => w.path).filter((f) => insideProject(projectRoot(), f, process.cwd())) : [null];
+  const files = payload.tool_name ? writesOf(payload, process.cwd(), process.env).map((w) => w.path).filter((f) => insideProject(projectRoot(), f, process.cwd())) : [null];
   const seen = new Set();
   for (const file of files) {
     const root = file ? checkoutRoot(projectRoot(), file, process.cwd()) : projectRoot();
