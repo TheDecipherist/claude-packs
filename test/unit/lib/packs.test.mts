@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { planFiles } from '../../../lib/packs.mjs';
+import { PRESETS, availablePacks, isDisabled, kitHookScripts, normalisePacks, planFiles, readPack, registerPack } from '../../../lib/packs.mjs';
 import { notInstalled, put, scratchDir, walk } from '../../../packs/base/hooks/lib/files.mts';
 
 const KIT = fileURLToPath(new URL('../../../', import.meta.url));
@@ -26,4 +26,35 @@ test('the walk the installer uses skips build-only files and junk; the default w
   const names = (files: string[]) => files.map((f) => f.slice(dir.length + 1));
   assert.deepEqual(names(walk(dir, notInstalled)), ['a.mjs']);
   assert.deepEqual(names(walk(dir)), ['a.mjs', 'a.mjs.map', 'a.mts', 'b.tsbuildinfo', 'types.d.mts']);
+});
+
+test('readPack names an unknown pack and a pack.json that is not JSON; a custom pack\'s hooks are opt-in', () => {
+  assert.throws(() => readPack('no-such-pack'), /unknown pack "no-such-pack" \(available: [a-z]/);
+  const dir = scratchDir('packs-custom-');
+  put(join(dir, 'pack.json'), '{ nope');
+  registerPack('custom-bad', dir);
+  assert.throws(() => readPack('custom-bad'), /is not valid JSON/);
+  put(join(dir, 'pack.json'), '{"name":"custom-ok","optIn":["hooks/own.mjs"]}');
+  put(join(dir, 'hooks/h.mjs'), '');
+  put(join(dir, 'hooks/h.mts'), '');
+  registerPack('custom-ok', dir);
+  assert.deepEqual(readPack('custom-ok').optIn, ['hooks/own.mjs', 'hooks/h.mjs']);
+  assert.ok(availablePacks().includes('custom-ok'));
+});
+
+test('normalisePacks puts base first, expands a preset, drops duplicates and refuses an unknown name', () => {
+  assert.deepEqual(normalisePacks(['node-lib', 'js-ts', 'base']), ['base', ...(PRESETS['node-lib'] ?? [])]);
+  assert.throws(() => normalisePacks(['nope']), /unknown pack/);
+});
+
+test('isDisabled matches a file, a folder and a folder with a trailing slash, not a name that merely starts alike', () => {
+  const layout = { disable: ['hooks/x.mjs', 'skills/gpu/'] };
+  assert.equal(isDisabled(layout, 'hooks/x.mjs'), true);
+  assert.equal(isDisabled(layout, 'skills\\gpu\\SKILL.md'), true);
+  assert.equal(isDisabled(layout, 'hooks/x.mjs.bak'), false);
+  assert.equal(isDisabled({}, 'hooks/x.mjs'), false);
+});
+
+test('kitHookScripts lists the emitted hook files of every pack', () => {
+  assert.ok(kitHookScripts().has('no-find.mjs'));
 });
