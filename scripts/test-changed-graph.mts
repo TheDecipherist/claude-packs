@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { usesAny } from './changed-functions.mts';
+import { pathTests } from './test-changed-paths.mts';
 import { GENERIC, HUBS, MAX_HOPS, MODULE, SKIP_DIRS, TABLE, TEST } from './test-changed-table.mts';
 import { walk as walkFolder } from '../packs/base/hooks/lib/files.mts';
 import { emittedFrom } from '../packs/base/hooks/lib/source-exts.mts';
@@ -40,6 +41,14 @@ export function graph(root: string): Graph {
     }
   }
   return { files, importers };
+}
+
+/** Every module that imports `file`, directly or through others (the file itself left out). */
+export function importersOf(file: string, importers: ReadonlyMap<string, readonly string[]>): Set<string> {
+  const found = new Set<string>();
+  const pending = [file];
+  for (let at = pending.pop(); at !== undefined; at = pending.pop()) for (const by of importers.get(at) ?? []) if (by !== file && !found.has(by)) { found.add(by); pending.push(by); }
+  return found;
 }
 
 /** What a change reaches: the tests chosen with their reasons, the changed files no test covers, and every test file. */
@@ -84,6 +93,8 @@ export function choose(root: string, changed: readonly string[], g: Graph = grap
     const whole = (t: string): boolean => new RegExp(`import\\s*(?:\\*\\s*as\\s+\\w+\\s+from\\s*)?['"][^'"]*${(c.split('/').pop() ?? '').replace(/\./g, '\\.')}['"]`).test(textOf(t));
     const usesChanged = (t: string): boolean => !names || whole(t) || usesAny(textOf(t) + [...importsOf(t)].map((h) => helperText[h] ?? '').join('\n'), names);
     if (names && names.size === 0) { uncovered.push(`${c} (imports or comments only)`); continue; }
+    // d-7: the path function, the tier a test lives in and the manifest's `tests` and `requires`
+    for (const [t, why] of pathTests(root, c, g.files, (f) => importersOf(f, g.importers))) { add(t, why); hit = true; }
     for (const t of tests) if (t !== c && seen.has(t) && usesChanged(t)) {
       const chain: string[] = [];
       for (let f = seen.get(t); f; f = seen.get(f)) chain.push(f);

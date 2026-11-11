@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import type { DetectorEnv } from '../lib/once-only-report.mts';
 import { useJscpd } from '../lib/once-only-report.mts';
-import { graph } from './test-changed-graph.mts';
+import { graph, importersOf } from './test-changed-graph.mts';
 import type { Graph } from './test-changed-graph.mts';
 import { HOOK } from './test-changed-table.mts';
 
@@ -13,11 +13,7 @@ import { HOOK } from './test-changed-table.mts';
 export function selftestsOf(root: string, changed: readonly string[], g: Graph = graph(root)): string[] {
   const isHook = (f: string): boolean => HOOK.test(f);
   const hooks = new Set(changed.filter(isHook));
-  for (const c of changed.filter((f) => /^packs\/[\w-]+\/hooks\/lib\//.test(f))) {
-    const seen = new Set([c]);
-    const queue = [c];
-    while (queue.length) for (const m of g.importers.get(queue.shift() ?? '') ?? []) if (!seen.has(m)) { seen.add(m); queue.push(m); if (isHook(m)) hooks.add(m); }
-  }
+  for (const c of changed.filter((f) => /^packs\/[\w-]+\/hooks\/lib\//.test(f))) for (const m of importersOf(c, g.importers)) if (isHook(m)) hooks.add(m);
   return [...hooks].filter((h) => existsSync(join(root, h))).sort();
 }
 
