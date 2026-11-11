@@ -128,36 +128,9 @@ export function bareNpx(root: string): string[] {
 }
 
 // readme and site: the front page and the web page cannot fall behind what the kit holds.
-const countIn = (root: string, pack: string, kind: string, keep: (f: string) => boolean = () => true): number => namesIn(join(root, 'packs', pack, kind)).filter(keep).length;
-interface HookGroup { hooks: { command: string }[] }
-const hooksOf = (root: string, pack: string): Set<string> =>
-  new Set(Object.values(json<{ hooks?: Record<string, HookGroup[]> }>(join(root, 'packs', pack, 'pack.json'))?.hooks ?? {}).flat().flatMap((g) => g.hooks.map((h) => h.command)));
-const rowOf = (page: string, name: string): string | undefined => lines(page).find((l) => l.startsWith(`| \`${name}\` |`));
+// The page's counts and tables are written by scripts/counts.mts and held by `counts --check` (test/counts.test.mts, W7 c).
 const rustCheck = (root: string): { id: string; why: string; rule: string } => json<{ id: string; why: string; rule: string }>(join(root, 'packs/rust/checks/rust-unwrap-in-library.json')) ?? { id: '', why: '', rule: '' };
 
-export function readmePackRows(root: string): string[] {
-  const page = readText(join(root, 'README.md')) ?? '';
-  return dirs(join(root, 'packs')).flatMap((pack) => {
-    const row = rowOf(page, pack);
-    if (row === undefined) return [`${pack} has no row`];
-    const cells = row.split('|').map((c) => c.trim()).filter(Boolean).slice(-4).map(Number).join(',');
-    const want = [countIn(root, pack, 'rules'), countIn(root, pack, 'checks'), hooksOf(root, pack).size, countIn(root, pack, 'skills')].join(',');
-    return cells === want ? [] : [`${pack}: the row says ${cells}, the pack holds ${want}`];
-  });
-}
-export function readmeNames(root: string, presets: Readonly<Record<string, readonly string[]>>): string[] {
-  const page = readText(join(root, 'README.md')) ?? '';
-  const configs = dirs(join(root, 'configurations')).filter((c) => !new RegExp(`^\\| \`${c}\` \\|`, 'm').test(page)).map((c) => `configuration ${c} is not named`);
-  const rows = Object.entries(presets).flatMap(([name, packs]) => {
-    const row = rowOf(page, name);
-    return row === undefined ? [`preset ${name} is not named`] : packs.filter((p) => !row.includes(`\`${p}\``)).map((p) => `preset ${name}: ${p} missing`);
-  });
-  return [...configs, ...rows];
-}
-export function readmeMissingCommands(root: string, help: string): string[] {
-  const page = readText(join(root, 'README.md')) ?? '';
-  return [...help.matchAll(/^ {2}([a-z][a-z-]+)\b/gm)].map((m) => m[1] ?? '').filter((command) => !page.includes(`\`${command}`));
-}
 export function readmeRefusal(root: string): string[] {
   const page = readText(join(root, 'README.md')) ?? '';
   const check = rustCheck(root);
@@ -168,20 +141,6 @@ export function readmeOrder(root: string): string[] {
   const order = page.indexOf('## See it work') < page.indexOf('## Start here') && page.indexOf('rules') < page.indexOf('npx') ? [] : ['the reader meets a command before what the kit is'];
   const missing = ['## Install one pack', '## What is whose', '## Questions', '## Add your own rule', '## Words', '`init mongo`', '`add docker`', '`remove docker`', '`list`'].filter((h) => !page.includes(h));
   return [...order, ...missing.map((m) => `no ${m}`), ...(/Hooks and rules don't work in Claude Desktop/.test(page) ? [] : ['no Claude Desktop note'])];
-}
-export function readmeBaseHooks(root: string): string[] {
-  const page = readText(join(root, 'README.md')) ?? '';
-  return [...hooksOf(root, 'base')].map((c) => /hooks\/([\w-]+)\.mjs/.exec(c)?.[1] ?? c).filter((name) => !new RegExp(`^\\| \`${name}\` \\|`, 'm').test(page));
-}
-
-export function siteCounts(root: string): string[] {
-  const page = readText(join(root, 'site/index.html')) ?? '';
-  const packs = dirs(join(root, 'packs'));
-  const inPacks = (kind: string, keep: (f: string) => boolean): number => packs.reduce((n, p) => n + countIn(root, p, kind, keep), 0);
-  const shown = (name: string): number => Number(new RegExp(`data-count="${name}">(\\d+)<`).exec(page)?.[1]);
-  const want: Record<string, number> = { packs: packs.length, rules: inPacks('rules', (f) => f.endsWith('.md')), checks: inPacks('checks', (f) => f.endsWith('.json')),
-    hooks: inPacks('hooks', (f) => /\.(mjs|py)$/.test(f)), skills: inPacks('skills', () => true), configurations: dirs(join(root, 'configurations')).length };
-  return Object.entries(want).filter(([name, n]) => shown(name) !== n).map(([name, n]) => `${name}: the page says ${shown(name)}, the kit holds ${n}`);
 }
 export function siteFiles(root: string): string[] {
   const page = readText(join(root, 'site/index.html')) ?? '';

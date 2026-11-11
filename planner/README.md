@@ -187,7 +187,7 @@ All in the kit's own `test/`, run with `npm run test:changed` while working:
 
 ## Status
 
-Real at 1.6.0, each with its test in the kit's `test/`:
+Real at 1.9.0, each with its test in the kit's `test/`:
 
 - the three skills here, under 8,000 characters each, with their references; `design-a-preset` (the patch document: the method, the gate, fifteen categories, the tables, what a synth needs) and `synth-cost` (the cost ledger) in their packs;
 - `workorder <name> --template generic|plugin|rebuild`, `workorder check <name>`, `init --from` and `new --from` with the install block, `planner-skills --zip`;
