@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { readJson } from '../packs/base/hooks/lib/json.mjs';
 import { coreBudget, projectLayout } from '../packs/base/hooks/lib/core-budget.mjs';
 import { PRESETS } from '../lib/packs.mjs';
+import { useJscpd } from '../lib/once-only-report.mjs';
 import { changedNames, usesAny } from './changed-functions.mjs';
 export { changedNames };
 
@@ -180,6 +181,7 @@ export function selftestsOf(root, changed, g = graph(root)) {
 // with no install and no doctor: seconds, not the 166 s a fresh install's doctor takes on the Mac. Returns the failures.
 export function proveHooks(root, hooks, concurrency = 4) {
   if (!hooks.length) return [];
+  useJscpd(root); // the temp folder has no node_modules above it: the selftests take the kit's jscpd (KWB-169)
   const dir = join(mkdtempSync(join(tmpdir(), 'test-changed-hooks-')), '.claude', 'hooks');
   mkdirSync(dir, { recursive: true });
   for (const pack of ['base', ...new Set(hooks.map((h) => h.split('/')[1]))]) cpSync(join(root, 'packs', pack, 'hooks'), dir, { recursive: true });

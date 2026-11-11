@@ -7,7 +7,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { choose, graph } from '../scripts/test-changed.mjs';
 
 const SCRIPT = fileURLToPath(new URL('../scripts/test-changed.mjs', import.meta.url));
@@ -132,4 +132,16 @@ test('a changed function picks the tests that use it; a change to imports or com
   writeFileSync(join(dir, 'lib/two.mjs'), '// a header comment\nexport function one() { return 1; }\n\nexport function two() { return 2; }\n');
   const c = spawnSync(process.execPath, [SCRIPT, '--dry-run', '--base', 'HEAD', '--root', dir], { encoding: 'utf8' });
   assert.match(c.stdout, /chose 0 of/, c.stdout);
+});
+
+// KWB-169: the gate proves a changed hook's selftest in a temp folder, where no node_modules lies above it; jscpd (once-only's
+// detector) must be the kit's own, or every gate that touches once-only or making-check is refused before a test runs.
+test('the gate proves once-only in its temp folder with the kit\'s jscpd, with no CLAUDE_PACKS_JSCPD set (KWB-169)', () => {
+  const env = { ...process.env };
+  delete env.CLAUDE_PACKS_JSCPD;
+  const prove = `import { proveHooks } from '${pathToFileURL(SCRIPT).href}';
+const [r] = await proveHooks(process.argv[1], ['packs/base/hooks/once-only.mjs'], 1);
+console.log(r.code, r.out.split('\\n').pop());`;
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', prove, KIT], { cwd: tmpdir(), env, encoding: 'utf8' });
+  assert.match(r.stdout, /^0 once-only selftest: OK/, r.stdout + r.stderr);
 });
