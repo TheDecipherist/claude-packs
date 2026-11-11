@@ -126,3 +126,9 @@ test('v8: web, tui, nginx packs and the fastify security switch', () => {
   assert.equal(lintWrite(dir, 'src/plugins/proxy.ts', "const app = Fastify({ trustProxy: true });\n").status, 2);
   assert.equal(lintWrite(dir, 'src/routes/login.ts', "if (token === expected) ok();\nreturn reply.code(500).send({ error: { message: err.message } });\n").status, 2);
 });
+
+test('entry-registers-shutdown reads its signal names, which are strings', () => {
+  const dir = fixture('js-ts');
+  const body = "process.on('SIGTERM', stop);\nprocess.on('SIGINT', stop);\nprocess.on('uncaughtException', die);\nprocess.on('unhandledRejection', die);\napp.listen({ port });\n";
+  assert.equal(lintWrite(dir, 'src/server.ts', body).status, 0);
+});
