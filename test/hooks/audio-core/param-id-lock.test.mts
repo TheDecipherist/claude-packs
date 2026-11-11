@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { put } from '../../../packs/base/hooks/lib/files.mts';
-import { parseJson } from '../../../packs/base/hooks/lib/json.mts';
-import { write } from '../../fixtures/installs.mts';
-import { spawnSync } from '../../kit-cli.mts';
+import { parseJson, readJson, toJson } from '../../../packs/base/hooks/lib/json.mts';
+import { withLayout, write } from '../../fixtures/installs.mts';
+import { cli, hookRun, spawnSync, test } from '../../kit-cli.mts';
+import { logLines, runner, workProject } from '../work-project.mts';
 import { fireAs } from '../../worktree-rig.mts';
 import type { Checkouts } from '../../worktree-rig.mts';
 import { fixture, holdsTheContract, installedWorktreeCase } from '../hook-rig.mts';
@@ -48,4 +49,46 @@ holdsTheContract({
     put(join(project, PARAMS_H), PARAMS('cutoff'));
     return { payload: write(join(project, PARAMS_H)), status: 2 };
   },
+});
+
+test('KF-18: a config regex param-id-lock cannot compile is reported by name, and is no crash', () => {
+  const dir = workProject('audio-core');
+  put(join(dir, '.claude/param-ids.config.json'), toJson({ patterns: ['(?m)^([a-z]+)$'] }));
+  const file = join(dir, 'src/params/Ids.h');
+  put(file, '// ids\n');
+  const r = runner(dir, { hook_event_name: 'PostToolUse', session_id: 's1', cwd: dir, tool_name: 'Write', tool_input: { file_path: file, content: '// ids\n' } }, '.claude/hooks/param-id-lock.mjs');
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /param-ids\.config\.json/);
+  assert.match(r.stderr, /\(\?m\)/);
+  assert.equal(logLines(dir, 'crashes.jsonl').length, 0);
+});
+
+const juceParam = (id: string): string => `auto p_${id} = juce::ParameterID { "${id}", 1 };\n`;
+const paramWrite = (dir: string, rel: string, id: string) => {
+  put(join(dir, rel), juceParam(id));
+  return { hook_event_name: 'PostToolUse', cwd: dir, tool_name: 'Write', tool_input: { file_path: join(dir, rel), content: juceParam(id) } };
+};
+const lockIds = (dir: string): unknown => readJson(join(dir, '.claude/param-ids.lock.json'));
+
+test('KF-15: param-id-lock protects from the first id it sees, with no --init', () => {
+  const dir = workProject('audio-core');
+  assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'cutoff')).status, 0);
+  assert.deepEqual(lockIds(dir), ['cutoff']);
+  assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'renamed')).status, 2);
+});
+
+test('KF-15: ids under the build output are not the unit\'s, whatever the folder is called', () => {
+  const dir = workProject('audio-core');
+  withLayout(dir, { buildOutput: ['elsewhere/**'] });
+  for (const rel of ['elsewhere/_deps/juce/Param.h', 'out/_deps/juce/Param.h']) put(join(dir, rel), juceParam('juceProgramParameter'));
+  assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'cutoff')).status, 0);
+  assert.deepEqual(lockIds(dir), ['cutoff']);
+});
+
+test('KF-15: doctor is red for a unit with parameters the lock cannot see', () => {
+  const dir = workProject('audio-core');
+  put(join(dir, 'src/params/Table.cpp'), 'for (auto& row : rows) layout.add (std::make_unique<juce::AudioParameterFloat> (row.id, row.name, row.range, row.init));\n');
+  assert.match(cli(dir, 'doctor').stdout, /param-id-lock.*no ids/s);
+  put(join(dir, '.claude/param-ids.lock.json'), '["cutoff"]\n');
+  assert.doesNotMatch(cli(dir, 'doctor').stdout, /param-id-lock.*no ids/s);
 });
