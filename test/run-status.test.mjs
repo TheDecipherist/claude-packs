@@ -59,7 +59,7 @@ test('a status file that is not JSON is ignored and the progress is derived inst
 });
 
 test('the runs alive are found from their runner processes, never from a Claude session that names the runner', () => {
-  const ps = ['  101 bash docs/workorders/bandwarp/run.sh', '  102 claude -p Run docs/workorders/bandwarp/PROMPT.md', '  103 bash docs/workorders/rebuild/run.sh', '  104 vim docs/workorders/x/run.sh'].join('\n');
+  const ps = ['  101 bash docs/workorders/bandwarp/run.sh', '  102 claude -p start it with bash docs/workorders/bandwarp/run.sh', '  103 bash docs/workorders/rebuild/run.sh', '  104 vim docs/workorders/x/run.sh'].join('\n');
   assert.deepEqual(runnersIn(ps), [{ pid: 101, order: 'bandwarp' }, { pid: 103, order: 'rebuild' }]);
 });
 
