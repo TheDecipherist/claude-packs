@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync, appendFileSync, rmSync } from 'node:fs';
 import { loadavg, tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { parseJson, readJson, toJson } from '../../../../packs/base/hooks/lib/json.mjs';
 
 const kit = resolve(new URL('../../../..', import.meta.url).pathname);
 const [outDir = 'build/evidence/W0', ...only] = process.argv.slice(2);
@@ -89,30 +90,30 @@ function update() {
   line('f', 'update on a copy of (e)', 'claude-packs update --dir <copy of (e)>', r);
 }
 
-const bashEvent = (dir) => JSON.stringify({ session_id: 'baseline', transcript_path: '', cwd: dir, hook_event_name: 'PreToolUse',
+const settingsOf = (dir) => readJson(join(dir, '.claude', 'settings.json'), {});
+const bashEvent = (dir) => toJson({ session_id: 'baseline', transcript_path: '', cwd: dir, hook_event_name: 'PreToolUse',
   tool_name: 'Bash', tool_input: { command: 'ls', description: 'List files' } });
-// (h): one Bash event through the PreToolUse runner entry with the most hooks, 10 starts.
+// (h): one Bash event through a base install's runner entry for Bash alone (base's six Bash hooks), 10 starts.
 function runner() {
-  const { dir } = ensureInstall();
-  const settings = JSON.parse(readFileSync(join(dir, '.claude', 'settings.json'), 'utf8'));
-  const matches = (g) => !g.matcher || g.matcher === '*' || g.matcher.split('|').includes('Bash');
-  const entries = (settings.hooks.PreToolUse ?? []).filter(matches).flatMap((g) => g.hooks.map((h) => h.command)).filter((c) => c.includes('run-hooks'));
-  const command = entries.sort((a, b) => b.split('.mjs').length - a.split('.mjs').length)[0];
+  const dir = scratch();
+  run('node', [cli, 'init', '--dir', dir]);
+  const settings = settingsOf(dir);
+  const entries = (settings.hooks.PreToolUse ?? []).filter((g) => g.matcher === 'Bash').flatMap((g) => g.hooks.map((h) => h.command));
+  const command = entries.find((c) => c.includes('run-hooks')) ?? entries[0];
   const hooks = command.split('.mjs').length - 2;
   const env = { CLAUDE_PROJECT_DIR: dir };
   const times = Array.from({ length: 10 }, () => run('sh', ['-c', command], { cwd: dir, env, input: bashEvent(dir) }).ms).sort((a, b) => a - b);
-  say(`- (h) one Bash event through the runner and its ${hooks} hooks, 10 starts: **${times[5]} ms** median ` +
-    `(all: ${times.join(', ')}; load ${load()}); PreToolUse runner entries a Bash call starts: ${entries.length}\n` +
-    `  command: \`${command.replace(dir, '<install>')}\``);
+  say(`- (h) one Bash event through the runner and its ${hooks} hooks (a base install), 10 starts: **${times[5]} ms** median ` +
+    `(all: ${times.join(', ')}; load ${load()})\n  command: \`${command.replace(dir, '<install>')}\``);
 }
 
 // (i): the status line, a render's wall (median of 10) and its CPU (user+sys) times the renders a minute at its refreshInterval.
 function statusLine() {
   const { dir } = ensureInstall();
-  const settings = JSON.parse(readFileSync(join(dir, '.claude', 'settings.json'), 'utf8'));
+  const settings = settingsOf(dir);
   const every = settings.statusLine?.refreshInterval ?? 1;
   const tool = join(dir, '.claude', 'tools', 'statusline.mjs');
-  const session = JSON.stringify({ session_id: 'baseline', cwd: dir, workspace: { current_dir: dir, project_dir: dir }, model: { display_name: 'Opus' } });
+  const session = toJson({ session_id: 'baseline', cwd: dir, workspace: { current_dir: dir, project_dir: dir }, model: { display_name: 'Opus' } });
   const renders = Array.from({ length: 10 }, () => {
     const r = run('/usr/bin/time', ['-p', 'node', tool], { cwd: dir, env: { CLAUDE_PROJECT_DIR: dir }, input: session });
     const cpu = ['user', 'sys'].map((k) => Number(r.out.match(new RegExp(`^${k}\\s+([\\d.]+)`, 'm'))?.[1] ?? 0)).reduce((a, b) => a + b, 0);
@@ -126,7 +127,7 @@ function statusLine() {
 
 // (j): tsc's build, warm; 0 where the kit has no build.
 function build() {
-  const pkg = JSON.parse(readFileSync(join(kit, 'package.json'), 'utf8'));
+  const pkg = readJson(join(kit, 'package.json'), {});
   if (!pkg.scripts?.build) return say('- (j) tsc build: **0 ms** (no build step: package.json has no `build` script)\n  command: `npm run build`');
   line('j', 'tsc build, warm', 'npm run build', twice('j', () => run('npm', ['run', 'build'])));
 }
@@ -134,7 +135,7 @@ function build() {
 // (k): the npm package, its size and file count.
 function pack() {
   const r = run('npm', ['pack', '--dry-run', '--json']);
-  const [p] = JSON.parse(r.out.slice(r.out.indexOf('[')));
+  const [p] = parseJson(r.out.slice(r.out.indexOf('[')), [{}]);
   say(`- (k) npm pack: **${(p.size / 1048576).toFixed(2)} MB** packed, ${(p.unpackedSize / 1048576).toFixed(2)} MB unpacked, ` +
     `**${p.entryCount} files** (load ${load()})\n  command: \`npm pack --dry-run --json\``);
 }

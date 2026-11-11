@@ -9,6 +9,7 @@
 // the tool are kept (a tool outside Claude Code's own names becomes `mcp`).
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { toJson } from '../../../../packs/base/hooks/lib/json.mjs';
 
 const GAP = 250;
 const args = process.argv.slice(2);
@@ -40,7 +41,7 @@ const fixture = events.map((e) => ({ t: e.start - t0, event: e.event, tool: e.to
 
 if (out) {
   mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(out, fixture.map((e) => JSON.stringify(e)).join('\n') + '\n');
+  writeFileSync(out, fixture.map((e) => toJson(e)).join('\n') + '\n');
 }
 
 const pct = (xs, p) => { const s = [...xs].sort((a, b) => a - b); return s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))] : 0; };
