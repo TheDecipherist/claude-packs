@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T10:49:34Z",
+  "updated": "2026-11-11T11:05:50Z",
   "steps": [
     {
       "id": "W0",
@@ -12,7 +12,7 @@
       "id": "W1",
       "title": "Find out, before building",
       "items": 7,
-      "done": 0,
+      "done": 7,
       "agent": null
     },
     {

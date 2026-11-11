@@ -82,3 +82,54 @@ TypeScript 7.0.2 native), 2026-11-11.
 - The rewrite the copier needs: **none in the install's files**. It copies a fresh install (or leaves out `.claude/logs/`,
   `.claude/hooks.log` and `.claude/state/` from a used one) and runs each test with `CLAUDE_PROJECT_DIR` set to the copy. W5.4's
   plant (a copy with a stale absolute path fails) plants such a path, since a clean install has none.
+
+## W1.6 The readers blind to `.mts` {#w1-6}
+
+- The probe (`build/evidence/W1/readers.mjs`, `readers-before.txt`): in a scratch project with `src/a.mjs` holding a 44-line function
+  and `maxFileLines` 300, the same Write as `.mjs`, `.mts` and `.cts`: a 400-line file through `file-size-guard`, and a copy of the
+  function under another name through `once-only`.
+  - `.mjs` (the control): file-size-guard **exit 2**, once-only **exit 2**: both judged.
+  - `.mts`: file-size-guard **exit 0**, once-only **exit 0**: neither judged.
+  - `.cts`: file-size-guard **exit 0**, once-only **exit 0**: neither judged.
+- The causes, as the repeats survey found: `file-size-guard.mjs` `SOURCE`, `dup.mjs` `SOURCE` (once-only's), `elements.mjs` `CODE` and
+  `MARKUP`, `shape-code.mjs` `CODE` each list `.ts` but not `.mts` or `.cts`. W2.5's `source-exts.mts` is the one table they read;
+  W2.8 runs this probe again and wants exit 2 on all six.
+
+## W1.5 The daemon, nine probes {#w1-5}
+
+The prototype (`probes/proxy/daemon.mjs`, `client.go`) captured output by reassigning stderr and failed open, so d-10's
+mechanisms were probed on a fuller pair written for this step: `probes/proxy/resident-probe.mjs` (framed requests, a worker pool
+with one hook per worker at a time, refusals in table order after a 30 ms grace, the index on the main thread) with
+`resident-probe-worker.mjs`, and `probes/proxy/client-probe/main.go` (the socket named by sha256 of uid, project realpath, the
+lock's hash and node's path, in a mode-700 folder, `/tmp/claude-packs-UID/` past 100 bytes; any failure runs the TypeScript runner
+on the same stdin and starts one daemon under an exclusive start lock). The driver is `probes/proxy/probe-w1-5.mjs`; its output
+is `build/evidence/W1/daemon-probes.md` (load 3.14) and `daemon-probe5.md`. A base install's six Bash hooks are the table.
+
+1. **Eight clients racing, no daemon:** all eight exit 2 (each judged by the TypeScript path), **one daemon** started; their walls
+   629 to 726 ms (the TypeScript runner plus the starter waiting up to its `ready` line); the next event **exit 2 in 11 ms** by the socket.
+2. **A hook holding a worker 1.7 s while six events ask:** pool 4: the slow event 1,714 ms, the six others **18 to 34 ms**; pool 1: the
+   six others **1,664 to 1,668 ms** (each waits for the slow one). So no head-of-line wait while the pool has a free worker; W8.2's
+   `min(16, cores)` pool is what keeps it so.
+3. **JSON on stdout:** 99 bytes (with `é` and `✓`) through a framed reply, **byte for byte equal** to what the hook printed.
+4. **The lock changed during an event:** the event in flight finished on the old daemon (exit 0); the next event's socket name
+   differed, so it took the TypeScript path (exit 2) and started a new daemon; the one after was answered by the new socket (exit 2).
+   Two daemons were running: the old one idles until W8.2's 15-minute idle exit.
+5. **The daemon killed mid-event** (SIGKILL at 300 ms of a 1.7 s event): the client read "reply cut before its length: EOF" and
+   returned **exit 2 in 466 ms** from the TypeScript path (git-guard refusing the force push). Never exit 0. (A first run of this
+   probe was answered before the kill: git-guard refused at once and the 30 ms grace returned without waiting for the slow hook.)
+6. **A stale socket file** (the daemon SIGKILLed, its socket left): connect refused, the socket unlinked after the failed connect,
+   **exit 2 in 166 ms** by the TypeScript path, then **exit 2 in 18 ms** by a new daemon's socket.
+7. **A socket path over 100 bytes:** in the cache folder it would be 153 bytes (macOS takes at most 104); the client used
+   `/tmp/claude-packs-502/<key>.sock` (43 bytes); **exit 2 in 15 ms** by that socket.
+8. **A repetition-index query from a worker to the main thread** by message, on bandwarp's index (196 files, 4,224 statement
+   shapes, loaded once in the main thread): 200 lines asked, the round trip **0.06 to 0.10 ms** (five runs).
+9. **An unattended client starts the daemon, then an interactive one asks:** the daemon judged each by its own event's env:
+   the unattended event **exit 2** ("CLAUDE_PACKS_UNATTENDED=1"), the interactive one **exit 0** ("CLAUDE_PACKS_UNATTENDED=");
+   one daemon. (Today's hooks read `process.env` at import, so the probe sets each event's env around the hook in its worker; W3's
+   `ctx.env` does it without touching the process.)
+
+Learned for W8.2: (a) the starter should not hold its event for the daemon's `ready` line: the first event waited about 500 ms
+for it; the start lock can be released by the daemon itself once it listens; (b) a judge that refuses at once ends the event
+after 30 ms, so a slow judge's result for that event is `late` (W8.2's log line); (c) `project.mjs` `ROOT` frozen at import
+makes the daemon's hooks judge the first project only: the probe passed `CLAUDE_PROJECT_DIR` in the daemon's env, which W3's
+`ctx.projectDir` replaces.
