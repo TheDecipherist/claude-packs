@@ -153,13 +153,10 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   for (const w of writes) { const r = checkoutRoot(w.path); if (!byRoot.has(r)) byRoot.set(r, []); byRoot.get(r).push(w); }
   if (!byRoot.size) byRoot.set(checkoutRoot(join(cwd, 'x')), []);
   const judged = [];
-  let shape = null, root = null, layout = null;
   for (const [r, ws] of byRoot) {
     const lay = readLayout(r);
     const sh = readShape(r) ?? readShape(ROOT);
     const mine = ws.filter((w) => !matchesAny(rel(w.path), [...PLAN, ...excludeGlobs(lay, sh)]));
-    // once-only (below) judges the checkout the source went to: the first checkout that holds a judged source
-    if (!root || (mine.some((w) => isSource(w.path)) && !judged.some((w) => isSource(w.path)))) { root = r; layout = lay; shape = sh; }
     judged.push(...mine);
 
     // 1. the concepts written, the making line, the manifest
@@ -189,20 +186,25 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   // 2. once-only on the source the turn wrote. The tools' writes passed once-only itself when it is installed; running its detector again on them at
   // every Stop cost over the kit's own 500 ms line (KF-33). The shell's writes stay: much of what they write is unknown at write time.
   const atWrite = existsSync(join(claudeRoot(join(cwd, 'x')), '.claude/hooks/once-only.mjs'));
-  const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))]
-    .filter((p) => !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
-  if (sources.length) {
+  const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))];
+  // each checkout's sources against that checkout's own index, layout and manifest: a file in one worktree is never judged
+  // against its twin in another worktree of the same repo (KWB-155)
+  const found = new Set();
+  for (const root of byRoot.keys()) {
+    const layout = readLayout(root);
+    const shape = readShape(root) ?? readShape(ROOT);
+    const mine = sources.filter((p) => checkoutRoot(p) === root && !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
+    if (!mine.length) continue;
     // once-only's index finds the candidates, jscpd confirms on those files alone (lib/dup-index.mjs; KWB-24: no whole-repo scan)
-    const added = addedRanges(root, sources);
-    const writes = sources.map((p) => ({ path: p, after: readFileSync(p, 'utf8'), ranges: added.get(p) })).filter((w) => w.ranges.length);
+    const added = addedRanges(root, mine);
+    const writes = mine.map((p) => ({ path: p, after: readFileSync(p, 'utf8'), ranges: added.get(p) })).filter((w) => w.ranges.length);
     const r = writes.length ? judgeWrites(root, writes, { layout, shape }) : { clones: [] };
     if (r.error) problems.push(`once-only could not judge this turn's writes: ${r.error}`);
     const base = real(root);
     const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
-    const found = new Set();
     for (const c of r.clones) found.add(`${show(c.at)} repeats ${show(c.other)} (${c.lines} lines)`);
-    if (found.size) problems.push(`this turn's writes did not pass once-only: ${[...found].slice(0, 5).join('; ')}. ${FIX}`);
   }
+  if (found.size) problems.push(`this turn's writes did not pass once-only: ${[...found].slice(0, 5).join('; ')}. ${FIX}`);
 
   // 3. the override rule
   const claims = text.replace(/"[^"\n]*"|`[^`\n]*`/g, '""'); // a quotation reports words, it claims nothing (KWB-47)

@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/suite-once.mjs .claude/hooks/no-find.mjs .claude/hooks/repo-litter.mjs .claude/hooks/look-gate.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/kit-fresh.mjs .claude/hooks/suite-once.mjs .claude/hooks/no-find.mjs .claude/hooks/repo-litter.mjs .claude/hooks/look-gate.mjs",
             "timeout": 60
           }
         ]
@@ -102,6 +102,17 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/look-gate.mjs",
             "timeout": 20
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/kit-fresh.mjs",
+            "timeout": 30
           }
         ]
       }

@@ -18,6 +18,7 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { selftest } from './lib/skill-first-selftest.mjs';
+import { fileURLToPath } from 'node:url';
 
 const PICTURE = /\.(pdf|png|jpe?g|webp|gif|bmp|tiff?)$/i;
 const PICTURE_END = String.raw`[^'"\n|;&]*\.(?:pdf|png|jpe?g|webp|gif|bmp|tiff?)\b`;
@@ -117,4 +118,4 @@ function main(text) {
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest(new URL(import.meta.url).pathname) : await asHook('skill-first', main));
+if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest(fileURLToPath(import.meta.url)) : await asHook('skill-first', main));

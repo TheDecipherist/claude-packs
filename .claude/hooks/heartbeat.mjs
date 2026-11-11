@@ -11,6 +11,7 @@ import { isAbsolute, join, resolve } from 'node:path';
 import { parseJson, readJson, writeJson } from './lib/json.mjs';
 import { runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const TREE = /\.claude\/worktrees\/([\w.-]+)/;
 const EVENTS = { PreToolUse: 'pre', PostToolUse: 'post' };
@@ -53,7 +54,7 @@ function main(text) {
 }
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'README.md': '# x\n' });
   const beat = (name) => readJson(join(dir, '.claude', 'logs', 'heartbeats', `${name}.json`));
   const call = (ev) => { runHook(hook, dir, { hook_event_name: 'PreToolUse', ...ev }); return true; };

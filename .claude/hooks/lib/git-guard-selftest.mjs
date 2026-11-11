@@ -4,7 +4,7 @@
 //   commit passes; a push earlier in the same command counts; the remote out of reach lets it through with a warning;
 //   Stop is refused while a local branch is ahead of the remote or missing there, and passes once all are pushed;
 //   the refusals name the push and never offer deleting a branch; three identical Stop refusals end the session.
-import { rmSync } from 'node:fs';
+import { renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { git, put } from './selftest.mjs';
 import { hubRepo } from './hub-rig.mjs';
@@ -85,6 +85,42 @@ export function pushedCases(hookFile) {
   rmSync(top, { recursive: true, force: true });
   return cases;
 }
+// KWB-157: guards.git.pushNeedsYes, every push the owner's (here with trunkNeedsYes, as a new install has it). No commit and
+// no session end waits for a push; at Stop the branches holding commits no GitHub branch has, the trunk with them, are told
+// once a session and never refused; a branch missing on GitHub by name only, every commit of it there, is not told.
+export function ownerCases(hookFile) {
+  const { top, dir, hub, commit, push, run: runAt } = hubRepo('git-guard-owner-');
+  put(join(dir, '.claude/layout.json'), JSON.stringify({ folders: {}, guards: { git: { house: true, trunkNeedsYes: true, pushNeedsYes: true } } }));
+  const bash = (command) => runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } });
+  const stop = () => runAt(hookFile, { hook_event_name: 'Stop', stop_hook_active: false });
+  const told = (r) => { try { return JSON.parse(r.stdout).systemMessage ?? ''; } catch { return ''; } };
+  const cases = [];
+  commit('first');
+  push('main');
+  git(dir, 'branch', 'work/merged'); // never pushed, every commit of it on GitHub's main
+  git(dir, 'switch', '-q', '-c', 'work/x');
+  commit('one');
+  cases.push(['an earlier commit never pushed: the next commit passes', bash("git commit -m 'next' -- a.txt").status, 0]);
+  const s1 = stop();
+  cases.push(['Stop with a branch holding a commit GitHub lacks: goes ahead', s1.status, 0]);
+  cases.push(['and the user is told the branch and its count', /work\/x: 1 commit/.test(told(s1)), true]);
+  cases.push(['a branch missing on GitHub by name only: not told', /work\/merged/.test(told(s1)), false]);
+  cases.push(['the note never offers deleting a branch', /branch -[dD]|--delete|delete the branch/.test(told(s1)), false]);
+  renameSync(hub, `${hub}.away`); // the same URL, its cache kept: a live look now fails, and would say so
+  const s2 = stop();
+  renameSync(`${hub}.away`, hub);
+  cases.push(['the same again in this session: not told twice', s2.status === 0 && !/work\/x/.test(told(s2)), true]);
+  cases.push(['and nothing new to tell is judged by the cached look, with no network call', /could not be reached/.test(told(s2)), false]);
+  git(dir, 'switch', '-q', 'main');
+  commit('two');
+  const s3 = stop();
+  cases.push(["the trunk's own commit: the list changed, told again, the trunk in it", s3.status === 0 && /main: 1 commit/.test(told(s3)) && /work\/x/.test(told(s3)), true]);
+  push('main', 'work/x');
+  const s4 = stop();
+  cases.push(['everything pushed: Stop passes, nothing told', s4.status === 0 && told(s4) === '', true]);
+  rmSync(top, { recursive: true, force: true });
+  return cases;
+}
 // The token law and the house laws, read from the hook's own exports.
 export async function selftest(hookFile, { problem, house }) {
   const bad = [];
@@ -113,8 +149,11 @@ export async function selftest(hookFile, { problem, house }) {
   if (problem('git push -u https://u:SECRET@h/x.git b')?.includes('SECRET')) bad.push('the refusal prints the token');
 
   // the house laws
-  const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true };
+  // login: gh's account planted, so no case starts gh (it writes its state into the home: `new`'s "nothing global")
+  const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true, login: () => 'selftest-account' };
   const clean = { ...isDirty, dirty: () => [] };
+  // KWB-147: only untracked entries (a worktree's node_modules link, the status line's own state file): an undo of tracked files never touches them
+  const untrackedOnly = { ...isDirty, dirty: () => ['?? node_modules', '?? .claude/statusbar-activity.json'] };
   const on = (branch, env = clean) => ({ ...env, branch: typeof branch === 'function' ? branch : () => branch });
   const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/HouseOwner/app.git main';
   const remote = (url) => ({ ...clean, remoteUrl: () => url });   // a remote whose URL is url (KWB-39: SSH names the repo)
@@ -123,7 +162,7 @@ export async function selftest(hookFile, { problem, house }) {
     ['git -C /Users/someone/projects/other add -A', clean], ['cd ~/projects/other && git add -A', clean],
     ['cd ~/projects/other && git checkout -- tools/bank/kept.json', isDirty],
     ['git checkout -- design/gen_panel.py', isDirty], ['git stash', isDirty], ['git restore .', isDirty], ['git reset --hard HEAD~1', isDirty],
-    ['git clean -fd', isDirty], ['GUARD_OK=1 git checkout -- x.h', isDirty], ['GUARD_OK=1 git restore build/Testing/Temporary/LastTest.log', isDirty],
+    ['git clean -fd', isDirty], ['git clean -fd', untrackedOnly], ['GUARD_OK=1 git checkout -- x.h', isDirty], ['GUARD_OK=1 git restore build/Testing/Temporary/LastTest.log', isDirty],
     ['GUARD_OK=1 git restore --staged --worktree a.md', isDirty], ['git restore --staged --worktree a.md', isDirty],
     ['git push', clean], ['git push origin main', clean], [`${push} --force`, clean],
     ['git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/other-org/app.git main', clean],
@@ -141,6 +180,7 @@ export async function selftest(hookFile, { problem, house }) {
   const mustPass = [
     ['git add build.md src/Row.h', isDirty], ["git commit -m 'C1: row clock' -- build.md src/Row.h", isDirty],
     ['cd ~/projects/other && git add tools/bank/kept.json', isDirty], ['git status', isDirty], ['git checkout -- x.h', clean],
+    ['git checkout -- x.h', untrackedOnly], ['git checkout work/1.9.0-x', untrackedOnly], ['git stash', untrackedOnly], ['git reset --hard HEAD', untrackedOnly],
     ['git restore --staged x.h', isDirty], ['python3 tools/safe_restore.py x.h', isDirty], ['git stash list', isDirty],
     ['git checkout -b c2-filter', isDirty], [push, isDirty],
     ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create HouseOwner/app --private', clean],
@@ -179,10 +219,12 @@ export async function selftest(hookFile, { problem, house }) {
   // the pushed laws (KWB-26), on a real repo and a bare "GitHub" beside it
   const pushed = pushedCases(hookFile);
   for (const [label, got, want] of pushed) if (got !== want) bad.push(`pushed law: ${label} (got ${got}, wanted ${want})`);
+  const owner = ownerCases(hookFile); // guards.git.pushNeedsYes (KWB-157)
+  for (const [label, got, want] of owner) if (got !== want) bad.push(`owner pushes: ${label} (got ${got}, wanted ${want})`);
   // the trunk a landing leaves behind in the main checkout (KWB-96)
   const lag = lagCases(hookFile);
   for (const [label, got, want] of lag) if (got !== want) bad.push(`trunk law: ${label} (got ${got}, wanted ${want})`);
   for (const b of bad) console.error(`git-guard selftest FAILED: ${b}`);
-  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases, ${lag.length} trunk-law cases)`);
+  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases, ${owner.length} owner-push cases, ${lag.length} trunk-law cases)`);
   return bad.length ? 1 : 0;
 }

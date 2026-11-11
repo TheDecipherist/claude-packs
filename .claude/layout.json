@@ -174,7 +174,10 @@
     "hooks/skill-first.mjs",
     "hooks/look-gate.mjs",
     "hooks/inside-the-project.mjs",
-    "hooks/agents-held.mjs"
+    "hooks/agents-held.mjs",
+    "hooks/no-find.mjs",
+    "hooks/heartbeat.mjs",
+    "hooks/kit-fresh.mjs"
   ],
   "commands": {
     "test": "npm test",

@@ -1,6 +1,7 @@
 // pushed: what a repo holds that GitHub does not (KWB-26: eight kit branches lived on one machine only, and nothing said so).
 // git-guard reads it twice: before a `git commit` (the branch's earlier commits must be on GitHub; the first commit of a new
 // branch passes, the next waits for its push) and at Stop (no local branch may be ahead of GitHub or missing there).
+// With guards.git.pushNeedsYes neither waits: Stop tells the owner what GitHub lacks (KWB-157).
 // GitHub's branch heads come from `git ls-remote --heads <remote>`: no objects are fetched and nothing local changes. The last
 // look is kept in the repo's git dir (claude-packs-heads.json) and only ever lets work through: a commit seen on GitHub stays
 // there (the house laws never force a push or delete a branch), so a commit or a Stop the last look already clears makes no
@@ -100,7 +101,7 @@ export function withHeads(cwd, remote, cfg, judge) {
   let h = remoteHeads(cwd, remote, cfg);
   if (h.error) return { error: `${h.url ?? remote} could not be reached (${h.error})` };
   let found = judge(h);
-  if (found && h.cached) {
+  if (found && h.cached && !cfg.cachedOnly) {
     h = remoteHeads(cwd, remote, { ...cfg, live: true });
     if (h.error) return { error: `${h.url} could not be reached (${h.error})` };
     found = judge(h);
@@ -139,14 +140,20 @@ export function othersBranches(cwd) {
   return others;
 }
 
+// Whether only the owner pushes this branch: every branch with guards.git.pushNeedsYes (KWB-157), the trunk with trunkNeedsYes.
+export const ownerPushes = (cfg, branch) => !!cfg.pushNeedsYes || (!!cfg.trunkNeedsYes && (cfg.trunks ?? []).includes(branch));
+
+// With guards.git.pushNeedsYes the list is what to tell, not what to push: every branch, the trunk with them, and only those
+// holding commits no GitHub branch has (one missing there by name only risks nothing) (KWB-157).
 export function localBranches(cwd, cfg = {}) {
   // every branch, its commit and its upstream in one call
   const r = out(git(cwd, ['for-each-ref', '--format=%(refname:short)%09%(objectname)%09%(upstream:remotename)%09%(upstream:remoteref)', 'refs/heads']));
   if (r === null) return null;
   const byRemote = new Map();
   const others = othersBranches(cwd);
+  const told = !!cfg.pushNeedsYes;
   for (const [branch, sha, up, ref] of r.split('\n').filter(Boolean).map((l) => l.split('\t'))) {
-    if (cfg.trunkNeedsYes && (cfg.trunks ?? []).includes(branch)) continue; // only the owner pushes it
+    if (!told && ownerPushes(cfg, branch)) continue; // only the owner pushes it
     if (others.has(branch)) continue;
     const remote = up && up !== '.' ? up : 'origin';
     const name = up && up !== '.' && ref ? ref.replace(/^refs\/heads\//, '') : branch;
@@ -161,11 +168,11 @@ export function localBranches(cwd, cfg = {}) {
       let have = null;
       for (const { branch, sha: local, name } of branches) {
         const sha = h.heads.get(name);
-        if (!sha) { off.push({ branch, url: h.url, missing: true }); continue; }
+        if (!sha && !told) { off.push({ branch, url: h.url, missing: true }); continue; }
         if (local === sha) continue;
         have ??= known(cwd, h.heads);
         const ahead = ownCommits(cwd, branch, h.heads, have)?.length ?? 0;
-        if (ahead) off.push({ branch, url: h.url, ahead });
+        if (ahead) off.push({ branch, url: h.url, ahead, missing: !sha });
       }
       return off.length ? off : null;
     });
@@ -198,19 +205,31 @@ export function unpushedMessage(u, cfg = {}) {
     `Every branch is pushed from its first commit (KWB-26): push, then commit:\n  ${pushCommand(u.url, [u.branch], cfg)}\n${NEVER_DELETE}`;
 }
 
+// What lives on this machine only, left for the owner to push (guards.git.pushNeedsYes, KWB-157).
+const hereOnly = (found) => `git-guard: ${found.length} local branch(es) hold commits that no GitHub branch has, left for you to push (guards.git.pushNeedsYes):\n` +
+  found.map((f) => `    ${f.branch}: ${f.ahead} commit(s)${f.missing ? ', the branch not on GitHub' : ''}`).join('\n');
+
 // Stop: -> { code, stdout, stderr }. Refused: a local branch not on GitHub, and the main checkout's trunk a landing left behind
 // (`lag`, lib/trunk-lag.mjs, KWB-96). What could not be judged, or cannot be fixed by the session, goes to the user as a message.
-// Three refusals with the same list end the session, the list going to the user.
+// Three refusals with the same list end the session, the list going to the user. With guards.git.pushNeedsYes no branch is
+// refused: what GitHub lacks is told once a session, by the cached look unless it would tell something new (KWB-157).
 export const MAX_SENDS = 3;
 export function stopVerdict(root, cfg = {}, session = 'session', stateDir = process.env.TMPDIR ?? '/tmp', { lag = () => null } = {}) {
-  const found = localBranches(root, cfg);
+  const file = join(stateDir, `git-guard-stop-${String(session).replace(/[^\w-]/g, '')}.json`);
+  let st = {};
+  try { st = JSON.parse(readFileSync(file, 'utf8')); } catch { /* first */ }
+  const owner = !!cfg.pushNeedsYes;
+  let found = localBranches(root, owner ? { ...cfg, cachedOnly: true } : cfg);
+  if (owner && found?.length && hereOnly(found) !== st.told) found = localBranches(root, cfg); // looked up live before telling
   const behind = lag(root, cfg);
   const notes = [];
   if (found?.error) notes.push(`git-guard: GitHub was not checked at the end of this session: ${found.error}. Check by hand that every branch is pushed (KWB-26).`);
   if (behind?.error) notes.push(`git-guard: the main checkout's trunk was not compared with the remote's: ${behind.error} (KWB-96).`);
   if (behind?.warn) notes.push(`git-guard: ${behind.warn}`);
+  const tell = owner && !found?.error && found?.length ? hereOnly(found) : undefined;
+  if (tell && tell !== st.told) notes.push(tell);
   const parts = [];
-  if (!found?.error && found?.length) {
+  if (!owner && !found?.error && found?.length) {
     const byUrl = new Map();
     for (const f of found) byUrl.set(f.url, [...(byUrl.get(f.url) ?? []), f.branch]);
     parts.push(`${found.length} local branch(es) are not on GitHub:\n` +
@@ -218,14 +237,11 @@ export function stopVerdict(root, cfg = {}, session = 'session', stateDir = proc
       `\nPush them before the session ends (KWB-26):\n${[...byUrl].map(([url, b]) => `  ${pushCommand(url, b, cfg)}`).join('\n')}\n${NEVER_DELETE}`);
   }
   if (behind?.refuse) parts.push(behind.refuse);
-  const file = join(stateDir, `git-guard-stop-${String(session).replace(/[^\w-]/g, '')}.json`);
   const said = notes.length ? JSON.stringify({ systemMessage: notes.join('\n') }) : undefined;
-  if (!parts.length) { try { writeFileSync(file, '{}'); } catch { /* nothing to count */ } return { code: 0, stdout: said }; }
+  if (!parts.length) { try { writeFileSync(file, JSON.stringify({ told: tell })); } catch { /* nothing to count */ } return { code: 0, stdout: said }; }
   const text = parts.join('\n');
-  let st = {};
-  try { st = JSON.parse(readFileSync(file, 'utf8')); } catch { /* first */ }
   const count = st.text === text ? (st.count ?? 0) + 1 : 1;
-  try { writeFileSync(file, JSON.stringify({ text, count })); } catch { /* still refused */ }
+  try { writeFileSync(file, JSON.stringify({ text, count, told: tell })); } catch { /* still refused */ }
   if (count > MAX_SENDS) return { code: 0, stdout: JSON.stringify({ systemMessage: [`git-guard refused the end of this session ${MAX_SENDS} times; it ends here for you to decide.\n${text}`, ...notes].join('\n') }) };
   return { code: 2, stderr: `git-guard: ${[text, ...notes].join('\n')}\n` };
 }

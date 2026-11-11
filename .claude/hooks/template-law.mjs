@@ -18,6 +18,7 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
+import { fileURLToPath } from 'node:url';
 
 
 // { id: [{ file, line, what }] } over every other file.
@@ -101,7 +102,7 @@ function judgeWrite(w, rel) {
 const main = (text) => judgeEvent(text, { name: 'template-law', write: judgeWrite });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const card = (t) => `<div class="card"><h3 class="t">${t}</h3><p>${t} text</p><button type="button">Go</button></div>\n`;
   const knob = (n) => `  ${n}.setRange (0.0, 1.0);\n  ${n}.setValue (0.5);\n  ${n}.setSliderStyle (Rotary);\n  addAndMakeVisible (${n});\n`;
   // Stellix's way: many statements on one line, and a helper copied from file to file with other names.

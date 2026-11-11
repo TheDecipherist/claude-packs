@@ -13,6 +13,7 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readJson } from '../hooks/lib/json.mjs';
+import { checkoutVersion, lockVersion, packageVersion } from '../hooks/lib/kit-version.mjs';
 import { bold, COLOURS as C, fitWidth, paintMode, painter } from './statusline-paint.mjs';
 import { refreshRuns, runsSegments } from './statusline-runs.mjs';
 import { contextSegment, modelSegment, sessionOf, usageSegments } from './statusline-session.mjs';
@@ -21,10 +22,16 @@ import { activitySegments, gitSegment, gitState, lastActivity } from './statusli
 const SELF = fileURLToPath(import.meta.url);
 const SEPARATOR = ' | ';
 
-/** The kit version of the install this tool belongs to: .claude/claude-packs.lock.json, one folder up from .claude/tools;
- *  else the session's project's lock (a tool run from outside an install, the kit's own checkout among them). */
-export const kitVersion = (toolDir, projectDir) => [join(toolDir, '..', 'claude-packs.lock.json'), projectDir && join(projectDir, '.claude', 'claude-packs.lock.json')]
-  .filter(Boolean).map((f) => readJson(f)?.kit).find((v) => typeof v === 'string') ?? null;
+/** The kit version the project runs (KWB-162, lib/kit-version.mjs): the installed package of the install this tool belongs to
+ *  (.claude/tools, two folders up) or of the session's project, its lock where no package is installed; the kit's own checkout
+ *  (packs/base/tools) reads its package.json only with no project of its own. */
+export function kitVersion(toolDir, projectDir) {
+  const install = join(toolDir, '..', '..');
+  // the project's own install first, package before lock; the kit checkout's own version last: only with no project, or in the
+  // kit itself (KWB-165: before a project's lock, it showed the kit's version for another project's install)
+  return packageVersion(install) ?? packageVersion(projectDir) ?? checkoutVersion(projectDir) ?? lockVersion(install) ?? lockVersion(projectDir) ??
+    checkoutVersion(join(toolDir, '..', '..', '..'));
+}
 
 /** Where the RUNS cache lives: the user's cache folder, shared by every project's bar. */
 export const runsCache = (env) => join(env.XDG_CACHE_HOME || join(env.HOME || homedir(), '.cache'), 'claude-packs', 'runs.json');

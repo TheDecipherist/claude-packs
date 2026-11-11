@@ -18,7 +18,9 @@
 //   8. With guards.git.refuseTrunk true: no commit straight onto a trunk (main, master); guards.git.branchStart says how.
 //   9. No commit while the branch's earlier commits are not on GitHub (a new branch's first commit passes; a push earlier
 //      in the same command counts), and at Stop no local branch ahead of GitHub or missing there (KWB-26; lib/pushed.mjs:
-//      GitHub's heads looked up at most once a minute, out of reach means a warning, never a refusal).
+//      GitHub's heads looked up at most once a minute, out of reach means a warning, never a refusal). With
+//      guards.git.pushNeedsYes every push is the owner's: neither half refuses, and Stop tells, once a session, the
+//      branches holding commits no GitHub branch has (KWB-157).
 //  10. At Stop, no landing leaves the main checkout's trunk behind the remote's (KWB-96, lib/trunk-lag.mjs): refused while the
 //      main checkout holds the trunk with nothing uncommitted; with uncommitted work or another branch there, the user is told.
 // Only a real git or gh call is judged: heredoc bodies and quoted text are blanked, and a part counts only when its
@@ -32,8 +34,8 @@ import { bareWords } from './lib/command-prefix.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
-import { NEW_INSTALL_GIT, ghLaw, pushLaw } from './lib/git-auth.mjs';
-import { forRepo, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
+import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mjs';
+import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 import { trunkLag } from './lib/trunk-lag.mjs';
 
 // ---------- always: a token never stored ----------
@@ -73,6 +75,7 @@ export const DEFAULTS = {
   tokenVar: 'PERSONAL_GITHUB_TOKEN',
   ghAuth: 'token',       // 'cli': gh is logged in on this machine, so no call names a token
   trunkNeedsYes: false,  // true: only the owner pushes the trunk, so neither a commit nor the session's end waits for it
+  pushNeedsYes: false,   // true: only the owner pushes, any branch: no commit or session end waits; Stop tells what GitHub lacks (KWB-157)
   trunks: ['main', 'master'],
   refuseTrunk: false,
   neverStage: ['~/firmware'],
@@ -83,6 +86,7 @@ export const DEFAULTS = {
 
 const gitOut = (cwd, ...a) => { try { return execFileSync('git', a, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 10000 }); } catch { return null; } };
 const real = {
+  login: loggedInAs,
   dirty: (cwd) => (gitOut(cwd, '--no-optional-locks', 'status', '--porcelain') ?? '').split('\n').filter((l) => l.trim()),
   branch: (cwd) => (gitOut(cwd, 'rev-parse', '--abbrev-ref', 'HEAD') ?? '').trim(),
   hasHead: (cwd) => gitOut(cwd, 'rev-parse', '-q', '--verify', 'HEAD') !== null,
@@ -126,7 +130,9 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
         (verb === 'clean' && /\s-[a-zA-Z]*n/.test(rest)) ||
         (verb === 'checkout' && /\s--(?:theirs|ours)\b/.test(rest) && env.merging?.(here)); // KF-21: a conflict resolved, not an undo
       if (!harmless) {
-        const d = env.dirty(here);
+        // an untracked file is touched only by clean: checkout, restore, stash and reset --hard leave it, and git itself refuses a
+        // checkout that would overwrite one (KWB-147: a worktree's node_modules link, the status line's state file)
+        const d = env.dirty(here).filter((l) => verb === 'clean' || !l.startsWith('??'));
         if (d.length) {
           const safe = c.safeRestore
             ? `Commit it, or use the safe form: ${c.safeRestore} (git status, every dirty file copied aside and checked, then only those paths restored).`
@@ -146,7 +152,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
       return `This is the trunk. Every task is built on its own branch and merged when complete: ${c.branchStart}.`;
     }
     // WB-107: an agent's isolated worktree cannot push (its harness refuses), so the lead pushes its branch; Stop still holds it
-    if (!pushedBefore && env.unpushed && sub === 'commit' && !/\/\.claude\/worktrees\/agent-[^/]+(\/|$)/.test(here) && !(c.trunkNeedsYes && (c.trunks ?? []).includes(env.branch(here)))) {
+    if (!pushedBefore && env.unpushed && sub === 'commit' && !/\/\.claude\/worktrees\/agent-[^/]+(\/|$)/.test(here) && !ownerPushes(c, env.branch(here))) {
       const u = env.unpushed(here, c);
       if (u?.error) env.warn?.(`git-guard: GitHub was not checked before this commit (${u.error}); the commit goes ahead unchecked. Push when it is back (KWB-26).`);
       else if (u?.commits?.length) return unpushedMessage(u, c);
@@ -157,7 +163,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
       if (refused) return refused;
       pushedBefore = true;
     }
-    const ghRefused = ghLaw(cmd, p, c);
+    const ghRefused = ghLaw(cmd, p, c, env.login);   // env.login: gh's own account, asked only when a gh call is refused
     if (ghRefused) return ghRefused;
     if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
     if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${esc(tok)}`).test(p)) {

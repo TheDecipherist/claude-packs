@@ -1,7 +1,7 @@
 // What kit-fresh looks at (KWB-156): a project's installed kit against npm's newest, and the kit's own checkout against
 // origin/main and the newest origin/work/<version>-* branch. Every outside call (npm, git) comes in as a function, so a selftest
 // plants it and no test reaches the network.
-//   parseVersion(v) -> [major, minor, patch] | null        compareVersions(a, b) -> <0 | 0 | >0 (a missing version is lowest)
+//   parseVersion(v) -> its three numbers | null        compareVersions(a, b) -> <0 | 0 | >0 (a missing version is lowest)
 //   cacheDir(env) -> the user's cache folder on this system  newestOnNpm({ now, dir, ask }) -> { version } | { error }
 //   projectVerdict(root, { unattended, npm }) -> null | { say, block }
 //   kitVerdict(root, { git, fetch }) -> null | { say, refuseCommit }

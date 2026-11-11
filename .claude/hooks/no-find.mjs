@@ -11,6 +11,7 @@ import { bashOf, promptFile, runHook, scratchProject, verdicts } from './lib/sel
 import { lastPrompt } from './lib/turn.mjs';
 import { judgeEvent, readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const SEARCHERS = new Set(['find', 'gfind', 'bfs', 'fd', 'fdfind', 'locate', 'mlocate', 'plocate', 'mdfind']);
 const RUNNERS = new Set(['xargs', 'exec', 'command', 'builtin', 'time']);   // run the command they are given
@@ -52,7 +53,7 @@ function main(text) {
 }
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'a.txt': 'one\n' });
   const plain = promptFile(dir, 'plain', 'build the settings layer');
   const told = promptFile(dir, 'told', 'use find to list every wav under reference/');

@@ -11,6 +11,7 @@ import { basename, join } from 'node:path';
 import { put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const ANCESTORS = 8;
 
@@ -60,7 +61,7 @@ function main(text) {
 }
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'src/a.ts': 'a\n' });
   const agent = (input) => ({ tool_name: 'Agent', tool_input: { description: 'W3 part', prompt: 'Read the brief.', ...input } });
   const as = (said, payload) => {

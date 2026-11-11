@@ -12,6 +12,6 @@ Always do:
 Never do:
 - Leave finished work on a branch waiting for someone to ask.
 - Land work that is unfinished, or has a red test. A branch that cannot land yet says why.
-- Ask before pushing a work branch: a work branch always pushes, from its first commit, with no yes needed.
+- Ask before pushing a work branch: a work branch always pushes, from its first commit, with no yes needed. Where `guards.git.pushNeedsYes` is set, every push waits for the owner's yes: land locally and say what is ready to push (KWB-157).
 - Land on the trunk over a project's own law: only the trunk can need a yes. Where its CLAUDE.md says so, ask once, with the branch pushed and ready.
 </constraints>

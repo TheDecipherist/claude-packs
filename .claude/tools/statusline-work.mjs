@@ -2,8 +2,11 @@
 // upstream, then the session's last tool with its target and its last shell command. Those two come from the session's own
 // transcript (its path is on stdin), read from the end, so no hook has to record them.
 import { execFileSync } from 'node:child_process';
-import { closeSync, fstatSync, openSync, readSync } from 'node:fs';
-import { parseJson } from '../hooks/lib/json.mjs';
+import { createHash } from 'node:crypto';
+import { closeSync, fstatSync, openSync, readFileSync, readSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { parseJson, readJson, writeJson } from '../hooks/lib/json.mjs';
 
 const TAIL_BYTES = 256 * 1024;
 
@@ -12,13 +15,42 @@ function git(args, cwd) {
   try { return execFileSync('git', ['--no-optional-locks', '-C', cwd, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return null; }
 }
 
-/** { branch, uncommitted, ahead, behind }, or {} outside a repo. */
-export function gitState(cwd) {
-  const branch = git(['branch', '--show-current'], cwd);
-  if (branch === null) return {};
-  const uncommitted = (git(['status', '--porcelain'], cwd) ?? '').split('\n').filter((l) => l.trim()).length;
-  const [behind, ahead] = (git(['rev-list', '--left-right', '--count', '@{u}...HEAD'], cwd) ?? '').split(/\s+/).map(Number);
-  return { branch, uncommitted, ahead: ahead || 0, behind: behind || 0 };
+/** `git status --porcelain=v2 --branch` read: { branch, uncommitted, ahead, behind }. */
+export function parseStatusV2(text) {
+  const head = text.match(/^# branch\.head (.+)$/m)?.[1];
+  const ab = text.match(/^# branch\.ab \+(\d+) -(\d+)$/m);
+  return { branch: head && head !== '(detached)' ? head : '', uncommitted: text.split('\n').filter((l) => l && !l.startsWith('#')).length,
+    ahead: Number(ab?.[1] ?? 0), behind: Number(ab?.[2] ?? 0) };
+}
+
+/** The repo's own git folder from a working folder: `.git` itself, or the folder a worktree's `.git` file names. */
+function gitDirOf(cwd) {
+  for (let d = cwd; d && d !== dirname(d); d = dirname(d)) {
+    const dot = join(d, '.git');
+    try {
+      if (statSync(dot).isDirectory()) return dot;
+      return readFileSync(dot, 'utf8').match(/^gitdir: (.+)$/m)?.[1]?.trim() ?? null;
+    } catch { /* not here: the folder above */ }
+  }
+  return null;
+}
+
+const CACHE_MS = 30_000;   // KWB-152: the bar runs every second; on a Mac a git call costs ~0.1 s, so an unchanged repo is not asked
+
+/** { branch, uncommitted, ahead, behind }, or {} outside a repo: one git call (it was three), and none while the repo's index,
+ *  HEAD and fetched refs are as they were at the last call, for up to 30 s. */
+export function gitState(cwd, { cacheDir = tmpdir(), nowMs = Date.now(), run = git } = {}) {
+  const gitDir = gitDirOf(cwd);
+  if (!gitDir) return {};
+  const stamp = ['index', 'HEAD', 'FETCH_HEAD', 'logs/HEAD'].map((f) => { try { return statSync(join(gitDir, f)).mtimeMs; } catch { return 0; } }).join(':');
+  const file = join(cacheDir, `claude-packs-statusline-git-${createHash('sha1').update(cwd).digest('hex').slice(0, 12)}.json`);
+  const cached = readJson(file);
+  if (cached?.stamp === stamp && nowMs - cached.at < CACHE_MS) return cached.state;
+  const text = run(['status', '--porcelain=v2', '--branch', '--untracked-files=normal'], cwd);
+  if (text === null) return {};
+  const state = parseStatusV2(text);
+  writeJson(file, { stamp, at: nowMs, state });
+  return state;
 }
 
 function tailOf(file) {

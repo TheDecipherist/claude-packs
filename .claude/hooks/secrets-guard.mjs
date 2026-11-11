@@ -18,6 +18,7 @@ import { bashOf, git, runHook, scratchProject, verdicts, writeOf } from './lib/s
 import { gitAdds } from './lib/git-adds.mjs';
 import { SECRETS } from './lib/secret-patterns.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const ENV = /^\.env(\..+)?$/;
 const ENV_OK = /\.(example|sample|template|dist)$/;
@@ -66,7 +67,7 @@ const main = (text) => judgeEvent(text, {
 });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const gh = `gh${'p'}_${'a1B2'.repeat(9)}`;   // built here, so this file holds no token
   const pem = `-----BEGIN RSA ${'PRIVATE'} KEY-----`;
   const dir = scratchProject({ '.gitignore': '.env\n', 'src/app.ts': 'export const x = 1;\n', 'src/old.ts': `const t = '${gh}';\nconst x = 1;\n` });

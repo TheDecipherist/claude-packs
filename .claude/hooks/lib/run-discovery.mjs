@@ -1,9 +1,11 @@
 // The work orders running on this machine (1.7.3): every process running a kit runner, `bash docs/workorders/<order>/run.sh`,
-// with the project it runs in (the process's working folder: /proc on Linux, lsof on macOS).
+// with the project it runs in (the process's working folder: /proc on Linux, lsof on macOS), and every order a Claude Code
+// session works on (run-claudes.mjs, KWB-161).
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readlinkSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { slotOwners } from './build-slots.mjs';
+import { sessionOrders } from './run-claudes.mjs';
 
 const RUNNER = /\bdocs\/workorders\/([\w.-]+)\/run\.sh\b/;
 
@@ -91,14 +93,18 @@ export function mergedInto(project, branch, into) {
   try { execFileSync('git', ['-C', project, 'merge-base', '--is-ancestor', branch, into], { stdio: 'ignore' }); return true; } catch { return false; }
 }
 
-/** The runs alive now: [{ project, order, pid }], one per project and order. */
-export function runningOrders() {
+/** The runs alive now: [{ project, order, pid }], one per project and order, whichever way it was found: a run.sh process, or
+ *  a Claude Code session working on the order (KWB-161). What could not be looked at goes into `notes` (Windows' sessions). */
+export function runningOrders({ notes = [], nowMs = Date.now(), platform = process.platform } = {}) {
   let ps = '';
-  try { ps = execFileSync('ps', ['-eo', 'pid=,args='], { encoding: 'utf8' }); } catch { return []; }
+  try { ps = execFileSync('ps', ['-eo', 'pid=,args='], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }); } catch { /* no ps (Windows): no runner found; the sessions say why */ }
   const runs = new Map();
   for (const r of runnersIn(ps)) {
     const project = cwdOf(r.pid);
     if (project) runs.set(`${project}\0${r.order}`, { project, order: r.order, pid: r.pid });
   }
+  const sessions = sessionOrders({ ps, platform, nowMs, trees: worktreesOf });
+  if (sessions.unsupported) notes.push(sessions.unsupported);
+  for (const r of sessions.runs) if (!runs.has(`${r.project}\0${r.order}`)) runs.set(`${r.project}\0${r.order}`, r);
   return [...runs.values()];
 }
