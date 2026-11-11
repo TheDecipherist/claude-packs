@@ -2,35 +2,20 @@
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { HOOK_EXPORT, NODE_HOOK, RUNNER, forSettings, orderHooks, readSettings, runnable, syncSettings, throughRunner, unfold } from '../../../lib/settings.mjs';
+import { HOOK_EXPORT, NODE_HOOK, RUNNER, forSettings, orderHooks, readSettings, runnable, syncSettings, unfold } from '../../../lib/settings.mjs';
 import { put, readText, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { parseJson } from '../../../packs/base/hooks/lib/json.mts';
 
 const node = (name: string, extra: object = {}) => ({ type: 'command', command: `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${name}"`, timeout: 5, ...extra });
 
-test('node hooks of one entry become one runner command at the first one\'s place, their timeouts summed', () => {
-  const out = throughRunner([node('a.mjs'), { type: 'command', command: 'echo mine' }, node('b.mjs')]);
-  assert.equal(out.length, 2);
-  assert.equal(out[0]?.command, `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${RUNNER}" .claude/hooks/a.mjs .claude/hooks/b.mjs`);
-  assert.equal(out[0]?.timeout, 10);
-  assert.equal(out[1]?.command, 'echo mine');
-});
-
-test('an async hook and a hook that does not export hook keep their own entries', () => {
-  const out = throughRunner([node('a.mjs'), node('slow.mjs', { async: true }), node('old.mjs')], (name) => name !== 'old.mjs');
-  assert.deepEqual(out.map((h) => h.command?.split('/').pop()), ['a.mjs', 'slow.mjs"', 'old.mjs"']);
-  assert.match(out[0]?.command ?? '', new RegExp(`${RUNNER.replace('.', '\\.')}" \\.claude/hooks/a\\.mjs$`));
-});
-
 test('the kit-only keys role and order never reach a project\'s settings', () => {
-  const out = throughRunner([node('a.mjs', { role: 'judge', order: 3 }), node('x.mjs', { async: true, role: 'recorder' })]);
-  for (const h of out) assert.deepEqual(Object.keys(h).filter((k) => k === 'role' || k === 'order'), []);
   assert.deepEqual(forSettings({ command: 'c', role: 'judge', order: 1 }), { command: 'c' });
 });
 
-test('unfold turns a runner command back into one entry per hook, other entries untouched', () => {
-  const folded = throughRunner([node('a.mjs'), node('b.mjs')]);
-  assert.deepEqual(unfold([...folded, { command: 'mine' }]).map((h) => h.command), [node('a.mjs').command, node('b.mjs').command, 'mine']);
+test('unfold turns an older install\'s runner command back into one entry per hook, other entries untouched', () => {
+  const folded = { type: 'command', command: `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${RUNNER}" .claude/hooks/a.mjs .claude/hooks/b.mjs`, timeout: 10 };
+  assert.deepEqual(unfold([folded, { command: 'mine' }]).map((h) => h.command), [node('a.mjs').command, node('b.mjs').command, 'mine']);
+  assert.deepEqual(unfold([{ command: `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${RUNNER}"` }]).map((h) => h.command), [`node "$CLAUDE_PROJECT_DIR/.claude/hooks/${RUNNER}"`], 'the new runner entry names no hook: left as it is');
 });
 
 test('HOOK_EXPORT takes a hook on either contract, and refuses a file with no export hook', () => {

@@ -120,15 +120,19 @@ test('doctor: a hook whose median is over 500 ms is a red check, with its median
   assert.equal(r.status, 1);
 });
 
-// One node process per settings entry (KWB-24): every kit node hook of an entry is named in one run-hooks.mjs command, and
-// each exports hook(text) for it; an async hook (idle-wake waits for minutes; heartbeat, 1.8.0, never holds a call) keeps
-// its own entry, as throughRunner leaves it.
+// One runner entry per event (KWB-24, W8.1): every kit node hook is a row of the table the runner reads, and each exports hook for
+// it; an async hook (idle-wake waits for minutes; heartbeat, 1.8.0, never holds a call) keeps its own entry.
 test('settings run the kit node hooks through run-hooks.mjs, and every such hook exports hook(text)', () => {
   const dir = stellix();
   const commands = Object.values(settingsOf(dir).hooks).flatMap((gs) => gs.flatMap((g) => g.hooks));
   const direct = commands.filter((h) => !h.async && !h.asyncRewake && /^node "\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/(?!run-hooks\.mjs)[\w-]+\.mjs"$/.test(h.command));
   assert.deepEqual(direct.map((h) => h.command), [], 'no kit node hook runs as its own process');
-  const named = new Set(commands.filter((h) => h.command.includes('run-hooks.mjs')).flatMap((h) => [...h.command.matchAll(/\.claude\/hooks\/([\w-]+)\.mjs/g)].map((m) => m[1])).filter((n) => n !== 'run-hooks'));
+  const runners = commands.filter((h) => h.command.includes('run-hooks.mjs'));
+  assert.ok(runners.every((h) => h.command === 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs"'), 'the runner entry names no hook: the table does');
+  const events = Object.entries(settingsOf(dir).hooks).map(([event, gs]) => gs.filter((g) => g.hooks.some((h) => h.command.includes('run-hooks.mjs'))).length);
+  assert.ok(events.every((n) => n <= 1), `one runner entry per event: ${events.join(',')}`);
+  const table = JSON.parse(readFileSync(join(dir, '.claude/hooks/hooks.json'), 'utf8')) as { hook: string; async?: boolean }[];
+  const named = new Set(table.filter((r) => !r.async).map((r) => r.hook));
   assert.ok(named.size >= 15, `${named.size} hooks through the runner`);
   for (const n of named) assert.match(readFileSync(join(dir, '.claude/hooks', `${n}.mjs`), 'utf8'), /^export (?:const|function) hook\b/m, `${n} exports hook`);
   for (const p of PACKS) {

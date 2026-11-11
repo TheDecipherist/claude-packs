@@ -11,7 +11,7 @@ import { buildQueueProblems } from './build-queue.mts';
 import { configProblems, sourceFilesOf } from './configs.mts';
 import { coverage } from './coverage.mts';
 import { tokenProblems } from './git-tokens.mts';
-import { hookProofProblems, statusProblems } from './hook-proof.mts';
+import { hookProofProblems, isRegistered, statusProblems } from './hook-proof.mts';
 import { timingProblems } from './hook-timing.mts';
 import { hoverGateProblems, pageGateProblems } from './hover-gate.mts';
 import { isModified, readLock } from './manifest.mts';
@@ -149,7 +149,7 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
   for (const f of Object.values(layout.folders)) if (!isPlanned(f) && !existsSync(join(projectDir, f.path))) problems.push(`layout folder missing: ${f.path}/`);
 
   const settings = readText(join(claudeDir, 'settings.json')) ?? '';
-  if (!settings.includes('.claude/hooks/lesson-checks.mjs')) problems.push('hooks not registered in .claude/settings.json');
+  if (!isRegistered(projectDir, settings, 'lesson-checks.mjs')) problems.push('hooks not registered in .claude/settings.json');
 
   try {
     execFileSync('node', [join(claudeDir, 'hooks', 'lesson-checks.mjs'), '--selftest'], { env: { ...env, CLAUDE_PROJECT_DIR: projectDir }, stdio: 'pipe' });

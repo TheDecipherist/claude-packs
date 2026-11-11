@@ -21,42 +21,11 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/lesson-checks.mjs .claude/hooks/file-size-guard.mjs .claude/hooks/frozen-files.mjs .claude/hooks/placement-law.mjs .claude/hooks/protect-vendor.mjs .claude/hooks/spec-lock.mjs .claude/hooks/folder-law.mjs .claude/hooks/shape-law.mjs .claude/hooks/brief-guard.mjs .claude/hooks/once-only.mjs .claude/hooks/realtime-guard.mjs .claude/hooks/browser-guard.mjs .claude/hooks/brief-guard-count.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
             "timeout": 60
-          }
-        ]
-      },
-      {
-        "matcher": "Agent|Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/brief-guard.mjs .claude/hooks/brief-guard-count.mjs",
-            "timeout": 20
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/build-guard.mjs .claude/hooks/no-find.mjs",
-            "timeout": 40
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/time-guard.mjs",
-            "timeout": 15
           }
         ]
       }
@@ -73,22 +42,11 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/param-id-lock.mjs .claude/hooks/once-only-index.mjs",
-            "timeout": 40
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/time-guard.mjs",
-            "timeout": 15
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
+            "timeout": 55
           }
         ]
       }
@@ -98,14 +56,18 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.mjs\"",
             "asyncRewake": true,
             "timeout": 1000
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/making-check.mjs .claude/hooks/git-guard.mjs .claude/hooks/making-check-count.mjs",
-            "timeout": 60
           }
         ]
       }
@@ -115,18 +77,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/build-sweep.mjs",
-            "timeout": 15
-          }
-        ]
-      },
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/user-asks.mjs",
-            "timeout": 15
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
+            "timeout": 30
           }
         ]
       }
@@ -136,7 +88,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/build-sweep.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
             "timeout": 15
           }
         ]
@@ -147,7 +99,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/making.mjs",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\"",
             "timeout": 10
           }
         ]

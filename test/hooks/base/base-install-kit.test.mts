@@ -8,7 +8,7 @@ import { KIT, assert, join, put, run, spawnSync, test } from '../../kit-cli.mts'
 interface SettingsFile { hooks: Record<string, { matcher?: string; hooks: { command: string }[] }[]>; permissions?: unknown }
 const commandsOf = (settings: SettingsFile, event: string): string[] => (settings.hooks[event] ?? []).flatMap((g) => g.hooks).map((h) => h.command);
 
-test('a project\'s own node hook with no hook(text) export keeps its own settings entry; one with it joins the runner', () => {
+test('a project\'s own node hooks, with or without an export, keep their own settings entries through install and updates (KWB-26)', () => {
   const dir = scratchDir('cpk-');
   put(join(dir, '.claude/hooks/own-alone.mjs'), 'process.exit(0);\n');
   put(join(dir, '.claude/hooks/own-hook.mjs'), 'export const hook = () => 0;\n');
@@ -19,9 +19,11 @@ test('a project\'s own node hook with no hook(text) export keeps its own setting
     if (pass !== 'init') run(dir, 'update');
     const pre = commandsOf(readJson<SettingsFile>(join(dir, '.claude/settings.json')) ?? { hooks: {} }, 'PreToolUse');
     assert.ok(pre.includes('node "$CLAUDE_PROJECT_DIR/.claude/hooks/own-alone.mjs"'), `${pass}: own entry kept:\n${pre.join('\n')}`);
-    assert.ok(pre.some((c) => c.includes('run-hooks.mjs') && c.includes('.claude/hooks/own-hook.mjs')), `${pass}: a hook written for the runner joins it, and an update keeps it:\n${pre.join('\n')}`);
-    assert.ok(!pre.some((c) => c.includes('run-hooks.mjs') && c.includes('own-alone.mjs')), `${pass}: never folded into the runner`);
-    assert.equal(pre.join('\n').match(/own-hook\.mjs/g)?.length, 1, `${pass}: once`);
+    assert.ok(pre.includes('node "$CLAUDE_PROJECT_DIR/.claude/hooks/own-hook.mjs"'), `${pass}: a project's hook written for the runner keeps its own entry too (W8.1: the runner runs the kit's table):\n${pre.join('\n')}`);
+    assert.equal(pre.filter((c) => c.includes('own-hook.mjs')).length, 1, `${pass}: once`);
+    const table = readJson<{ hook: string }[]>(join(dir, '.claude/hooks/hooks.json')) ?? [];
+    assert.ok(table.length > 0 && !table.some((r) => r.hook.startsWith('own-')), `${pass}: the kit's table names none of the project's hooks`);
+    assert.equal(pre.filter((c) => c === 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs"').length, 1, `${pass}: one runner entry for the event`);
   }
 });
 
@@ -30,7 +32,9 @@ test('the kit repo has its own base pack installed: kit-lock and every base hook
   assert.deepEqual(lock?.packs, ['base']);
   const settings = readJson<SettingsFile>(join(KIT, '.claude/settings.json'));
   assert.ok(settings, 'the kit has settings');
-  const all = Object.values(settings.hooks).flat().flatMap((g) => g.hooks).map((h) => h.command).join('\n');
+  // a hook is registered by a settings entry, or by a row of the table the runner reads (W8.1)
+  const rows = (readJson<{ hook: string }[]>(join(KIT, '.claude/hooks/hooks.json')) ?? []).map((r) => `.claude/hooks/${r.hook}.mjs`);
+  const all = [...Object.values(settings.hooks).flat().flatMap((g) => g.hooks).map((h) => h.command), ...rows].join('\n');
   const base = readJson<{ hooks: Record<string, { hooks: { command: string }[] }[]> }>(join(KIT, 'packs/base/pack.json'));
   for (const g of Object.values(base?.hooks ?? {}).flat()) {
     for (const h of g.hooks) {
