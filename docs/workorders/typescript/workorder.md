@@ -401,6 +401,15 @@ same log line, per event. Two agents in parallel on (1) and (2), merged in that 
    TypeScript runner of (1) where no binary fits; Go's version looked up and pinned with its row (`latest-versions`); the selftest of the
    client (a planted stale socket, a planted dead daemon, a planted path over 104 bytes) and of the daemon (a planted hook that throws,
    a planted lock change) each seen red.
+   Hooks in parallel (the user, 2026-11-11: "like a promise all for hooks ... if any of them says exit 2 it stops"): the runner's
+   table marks each hook `parallel` (the default: a pure judge of the event) or `serial` (it writes shared state: the event log, the
+   heartbeat, `once-only`'s index update, `time-guard`'s scan); the daemon keeps a pool of warm worker threads and runs an event's
+   parallel hooks at once, returns at the first exit 2 with every refusal that has arrived (the rest finish in the background, logged),
+   then the serial ones in table order; the repetition index is one in-memory copy owned by the daemon, read by the workers and
+   updated by the serial hook; a sync hook never runs on the daemon's own thread. Measured: an event's wall equals its slowest hook plus
+   the proxy, not the sum (a Write today sums about 212 ms of medians with `chart-first` at 93; a Bash event 69). A test plants two
+   hooks that sleep 100 ms each in one event and sees the event under 150 ms; another plants a refusing hook beside a slow one and
+   sees the refusal returned before the slow one ends; another plants two serial hooks and sees their order kept.
 3. The heavy hooks: git-guard at Stop served from a cache keyed by remote URL plus the sorted local branch tips (60 s, invalidated by a
    ref change), the live look capped at 1 s with the existing "not checked" note, a detached refresh after a push or commit; a
    per-session git state file (HEAD, branch, dirty list, keyed by the mtimes the status line already uses) kept by the resident runner
@@ -411,7 +420,8 @@ same log line, per event. Two agents in parallel on (1) and (2), merged in that 
    (its render under 80 ms, a refresh every 5 s); the selftest cache per hook plus imports in `~/.cache/claude-packs`.
 
 **Done when:** a Bash call waits on 2 proxy processes (from 7 node runners), counted in a fresh install's settings and seen in its log,
-each under 20 ms on this Mac without the hooks' own work (from 85 ms); a Write 2 (from 4); the proxy's and the daemon's selftests
+each under 20 ms on this Mac without the hooks' own work (from 85 ms); a Write 2 (from 4); a Write event's hooks under 110 ms p50
+in bandwarp's log (from about 212 ms of summed medians) and a Bash event's under 20 (from 69), the parallel set measured as one line; the proxy's and the daemon's selftests
 green with every plant seen red; an install on a machine with no fitting binary runs the TypeScript runner of (1) and passes the same
 tests; Stop's p50 under 200 ms and p95 under 1,000 ms over 50 Stops on bandwarp (from 1,880 and 7,785); no hook over its budget in a
 day's log of bandwarp with its agents running; `doctor` red on a planted hook that sleeps 300 ms at one event (seen red); `init` plus
