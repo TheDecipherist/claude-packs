@@ -173,6 +173,22 @@ The kit is strict about what counts as proof:
 - **Finished work lands.** Green work is merged to the trunk and pushed in the same turn (`land-branch`), and it isn't called landed until the remote agrees.
 - **The guards are tested too.** Every hook has a `--selftest`, every lesson check proves its `bad` and `good` example, and `doctor` runs them all.
 
+## The status line
+
+Every project with the kit shows, under the prompt, what is working and where it is:
+
+```
+claude-packs 1.8.0 | opus md | CTX 41% (1.0M) | 5h 38% | 7d 81%
+⎇ work/panel ✱3 ↑1↓0 | Edit src/ui/Panel.cpp | $ npm run test:changed
+BANDWARP               █████████░░░░░░░░░░░  47%  40 of 76 items left, 4 agents
+  > dsp        > W3b The cluster             ████░░░░░░  40%  COMB's WIDTH against the reference
+  > panel      > W8 The main panel           ██░░░░░░░░  20%  quiet 34m
+```
+
+The first field is the kit version the project runs. Then the model and its effort (red if a fallback swapped it from the one you pinned), the context used, and the 5h and 7d quotas on a subscription or the session's cost on API billing. The second line is the branch, the last tool and the last shell command. Below them is every unattended run on the machine, per project and per agent, the same numbers as `status`; an agent whose own file has not moved in 30 minutes is red. The runs are read in the background every 30 seconds, so the bar never waits.
+
+`init` and `update` wire it (`.claude/tools/statusline.mjs`) into `.claude/settings.json` where the project has no status line; one you already have is kept. `"disable": ["tools/statusline.mjs"]` in `layout.json` takes it out.
+
 ## Let it build on its own
 
 A work order is a written brief that a project can build from with nobody there. It suits anything that takes many sessions: a new product, a port, a big migration, a rebuild from a spec.

@@ -1,9 +1,9 @@
 // 1.7.3: `claude-packs status`, where every unattended run stands. The user: "it reports which projects its working on, how many
 // agents per project, where they are, and how much is left", "PROJECT NAME (PROGRESS 0% - 100%) > AGENT X > STEP (PROGRESS)".
 import { assert, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
-import { orderStatus, progressOf, stepsOf } from '../lib/run-status.mjs';
-import { runnersIn } from '../lib/run-discovery.mjs';
+import { orderStatus, progressOf, runnersIn, stepsOf } from '../lib/run-status.mjs';
 import { bar, statusCommand, statusLines } from '../lib/status-cli.mjs';
+import { toJson } from '../packs/base/hooks/lib/json.mjs';
 
 const ORDER = '# Work order: demo\n\n## W0. Set up\n\n1. one\n2. two\n\n**Done when:** x\n\n## W1. The import\n\n1. read\n\n**Done when:** y\n\n## L2. The look\n\n**Done when:** z\n';
 
@@ -13,7 +13,7 @@ function project({ progress = '', status = null } = {}) {
   mkdirSync(join(dir, 'docs/workorders/demo'), { recursive: true });
   writeFileSync(join(dir, 'docs/workorders/demo/workorder.md'), ORDER);
   writeFileSync(join(dir, 'docs/workorders/demo/progress.md'), progress);
-  if (status) writeFileSync(join(dir, 'docs/workorders/demo/status.json'), JSON.stringify(status));
+  if (status) writeFileSync(join(dir, 'docs/workorders/demo/status.json'), toJson(status));
   git('init', '-q', '-b', 'main');
   git('add', '.');
   git('commit', '-q', '-m', 'start');
@@ -41,7 +41,7 @@ test('a run\'s status.json wins, and an agent\'s own file in its worktree gives 
   const { dir, git } = project({ status });
   git('worktree', 'add', '-q', '.claude/worktrees/reader', '-b', 'work/reader');
   mkdirSync(join(dir, '.claude/worktrees/reader/docs/workorders/demo/agents'), { recursive: true });
-  writeFileSync(join(dir, '.claude/worktrees/reader/docs/workorders/demo/agents/reader.json'), JSON.stringify({ name: 'reader', step: 'W1', items: 4, done: 3, now: 'rejecting bad rows' }));
+  writeFileSync(join(dir, '.claude/worktrees/reader/docs/workorders/demo/agents/reader.json'), toJson({ name: 'reader', step: 'W1', items: 4, done: 3, now: 'rejecting bad rows' }));
   const s = orderStatus(dir, 'demo');
   assert.equal(s.source, 'status.json');
   assert.equal(s.percent, 62.5);

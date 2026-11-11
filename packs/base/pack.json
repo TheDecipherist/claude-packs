@@ -71,6 +71,12 @@
     ]
   },
   "skillsIn": null,
+  "statusLine": {
+    "type": "command",
+    "command": "node \"$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs\"",
+    "padding": 0,
+    "refreshInterval": 1
+  },
   "hooks": {
     "PreToolUse": [
       {
