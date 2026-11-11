@@ -27,6 +27,13 @@ test('git-guard: gh logged in needs no token named; trunkNeedsYes leaves the tru
   assert.equal(house("git commit -m x -- a", '.', waiting, { trunkNeedsYes: true, trunks: ['main'] }), null);
 });
 
+test('git-guard: pushNeedsYes leaves every push to the owner, a work branch too (KWB-157)', () => {
+  const work = { ...clean, branch: () => 'work/x', unpushed: () => ({ branch: 'work/x', url: 'u', commits: [{ sha: 'a', subject: 's' }] }) };
+  assert.match(house("git commit -m x -- a", '.', work, { trunkNeedsYes: true, trunks: ['main'] }), /not on GitHub/);
+  assert.equal(house("git commit -m x -- a", '.', work, { pushNeedsYes: true }), null);
+  assert.match(house("git push -f origin work/x", '.', work, { pushNeedsYes: true }), /Never force/);
+});
+
 test('a kit-lock lease held by this same process under an old session id is this session\'s (KWB-40)', () => {
   const dir = fresh('fix-kl-');
   execFileSync('git', ['init', '-q'], { cwd: dir });

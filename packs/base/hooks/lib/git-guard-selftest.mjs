@@ -4,7 +4,7 @@
 //   commit passes; a push earlier in the same command counts; the remote out of reach lets it through with a warning;
 //   Stop is refused while a local branch is ahead of the remote or missing there, and passes once all are pushed;
 //   the refusals name the push and never offer deleting a branch; three identical Stop refusals end the session.
-import { rmSync } from 'node:fs';
+import { renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { git, put } from './selftest.mjs';
 import { hubRepo } from './hub-rig.mjs';
@@ -82,6 +82,42 @@ export function pushedCases(hookFile) {
   put(join(dir, '.claude/layout.json'), JSON.stringify({ folders: {} }));
   cases.push(['house laws off: an unpushed commit is not judged', bash(C).status, 0]);
   cases.push(['house laws off: Stop is not judged', stop().status, 0]);
+  rmSync(top, { recursive: true, force: true });
+  return cases;
+}
+// KWB-157: guards.git.pushNeedsYes, every push the owner's (here with trunkNeedsYes, as a new install has it). No commit and
+// no session end waits for a push; at Stop the branches holding commits no GitHub branch has, the trunk with them, are told
+// once a session and never refused; a branch missing on GitHub by name only, every commit of it there, is not told.
+export function ownerCases(hookFile) {
+  const { top, dir, hub, commit, push, run: runAt } = hubRepo('git-guard-owner-');
+  put(join(dir, '.claude/layout.json'), JSON.stringify({ folders: {}, guards: { git: { house: true, trunkNeedsYes: true, pushNeedsYes: true } } }));
+  const bash = (command) => runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } });
+  const stop = () => runAt(hookFile, { hook_event_name: 'Stop', stop_hook_active: false });
+  const told = (r) => { try { return JSON.parse(r.stdout).systemMessage ?? ''; } catch { return ''; } };
+  const cases = [];
+  commit('first');
+  push('main');
+  git(dir, 'branch', 'work/merged'); // never pushed, every commit of it on GitHub's main
+  git(dir, 'switch', '-q', '-c', 'work/x');
+  commit('one');
+  cases.push(['an earlier commit never pushed: the next commit passes', bash("git commit -m 'next' -- a.txt").status, 0]);
+  const s1 = stop();
+  cases.push(['Stop with a branch holding a commit GitHub lacks: goes ahead', s1.status, 0]);
+  cases.push(['and the user is told the branch and its count', /work\/x: 1 commit/.test(told(s1)), true]);
+  cases.push(['a branch missing on GitHub by name only: not told', /work\/merged/.test(told(s1)), false]);
+  cases.push(['the note never offers deleting a branch', /branch -[dD]|--delete|delete the branch/.test(told(s1)), false]);
+  renameSync(hub, `${hub}.away`); // the same URL, its cache kept: a live look now fails, and would say so
+  const s2 = stop();
+  renameSync(`${hub}.away`, hub);
+  cases.push(['the same again in this session: not told twice', s2.status === 0 && !/work\/x/.test(told(s2)), true]);
+  cases.push(['and nothing new to tell is judged by the cached look, with no network call', /could not be reached/.test(told(s2)), false]);
+  git(dir, 'switch', '-q', 'main');
+  commit('two');
+  const s3 = stop();
+  cases.push(["the trunk's own commit: the list changed, told again, the trunk in it", s3.status === 0 && /main: 1 commit/.test(told(s3)) && /work\/x/.test(told(s3)), true]);
+  push('main', 'work/x');
+  const s4 = stop();
+  cases.push(['everything pushed: Stop passes, nothing told', s4.status === 0 && told(s4) === '', true]);
   rmSync(top, { recursive: true, force: true });
   return cases;
 }
@@ -179,10 +215,12 @@ export async function selftest(hookFile, { problem, house }) {
   // the pushed laws (KWB-26), on a real repo and a bare "GitHub" beside it
   const pushed = pushedCases(hookFile);
   for (const [label, got, want] of pushed) if (got !== want) bad.push(`pushed law: ${label} (got ${got}, wanted ${want})`);
+  const owner = ownerCases(hookFile); // guards.git.pushNeedsYes (KWB-157)
+  for (const [label, got, want] of owner) if (got !== want) bad.push(`owner pushes: ${label} (got ${got}, wanted ${want})`);
   // the trunk a landing leaves behind in the main checkout (KWB-96)
   const lag = lagCases(hookFile);
   for (const [label, got, want] of lag) if (got !== want) bad.push(`trunk law: ${label} (got ${got}, wanted ${want})`);
   for (const b of bad) console.error(`git-guard selftest FAILED: ${b}`);
-  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases, ${lag.length} trunk-law cases)`);
+  if (!bad.length) console.log(`git-guard selftest: OK (${tokenCases.length + 1} token cases, ${mustBlock.length + 7} house refusals, ${mustPass.length + 4} passes, ${pushed.length} pushed-law cases, ${owner.length} owner-push cases, ${lag.length} trunk-law cases)`);
   return bad.length ? 1 : 0;
 }
