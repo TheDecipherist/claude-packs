@@ -6,7 +6,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, PIN_GUARD, bash, fire, fireAs, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
+import { CLI, PIN_GUARD, bash, caseFrom, fire, fireAs, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
 import { readJson } from '../packs/base/hooks/lib/json.mjs';
 import { COMMAND_CASES } from './worktree-cases-commands.mjs';
 import { PACK_CASES } from './worktree-cases-packs.mjs';
@@ -55,10 +55,7 @@ const CASES = {
     assert.equal(fire(here, 'folder-law.mjs', join(wt, 'src/dsp/Svf.cpp')), 0);
     assert.equal(fire(here, 'folder-law.mjs', join(wt, 'stray/Svf.cpp')), 2);
   },
-  'file-size-guard.mjs': ({ here, wt }) => {
-    assert.equal(fire(here, 'file-size-guard.mjs', join(wt, 'src/dsp/Small.cpp')), 0);
-    assert.equal(fire(here, 'file-size-guard.mjs', join(wt, 'src/dsp/Huge.cpp'), 'x\n'.repeat(400)), 2);
-  },
+  'file-size-guard.mjs': caseFrom('file-size-guard.mjs', (await import('../packs/base/hooks/file-size-guard.mjs')).worktreeCase),
   'placement-law.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'placement-law.mjs', join(wt, 'src/painter/shaders/glow.wgsl'), '@fragment fn fs() {}'), 0);
     assert.equal(fire(here, 'placement-law.mjs', join(wt, 'src/dsp/glow.wgsl'), '@fragment fn fs() {}'), 2);
@@ -159,13 +156,7 @@ const CASES = {
     assert.equal(fire(here, 'template-law.mjs', join(wt, 'src/app/two.html'), el('Two')), 2);
     assert.equal(fire(here, 'template-law.mjs', join(here, 'src/app/two.html'), el('Two')), 0);
   },
-  'dispatch-once.mjs': ({ here, wt }) => {
-    // The worktree's branch already switches on blendStyle; main does not. Each checkout is scanned on its own.
-    put(join(wt, 'src/dsp/Blend.cpp'), 'float blend (Layer& l) { switch (l.blendStyle) { default: return 0.0f; } }\n');
-    const second = 'int label (Layer& l) { switch (l.blendStyle) { default: return 0; } }\n';
-    assert.equal(fire(here, 'dispatch-once.mjs', join(wt, 'src/dsp/Label.cpp'), second), 2);
-    assert.equal(fire(here, 'dispatch-once.mjs', join(here, 'src/dsp/Label.cpp'), second), 0);
-  },
+  'dispatch-once.mjs': caseFrom('dispatch-once.mjs', (await import('../packs/base/hooks/dispatch-once.mjs')).worktreeCase),
   'once-only.mjs': ({ here, wt }) => {
     // the function lives only in the worktree: a near-copy is refused there, and judged against main's tree in main
     put(join(wt, 'src/dsp/Svf.cpp'), `#include "Svf.h"\n\n${SVF('Svf')}\n`);
@@ -173,13 +164,7 @@ const CASES = {
     assert.equal(fire(here, 'once-only.mjs', join(wt, 'src/dsp/Voice.cpp'), 'float Voice::render (float x) noexcept { return svf.process (x); }\n'), 0);
     assert.equal(fire(here, 'once-only.mjs', join(here, 'src/dsp/Copy.cpp'), SVF('Copy', '1.5f')), 0);
   },
-  'code-shape.mjs': ({ here, wt }) => {
-    // The worktree's layout lifts the limit; main's does not. A file is judged by its own checkout's layout.
-    const packed = 'void f() {\n  a(); b(); c();\n}\n';
-    put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), guards: { codeShape: { maxStatementsPerLine: 9 } } }));
-    assert.equal(fire(here, 'code-shape.mjs', join(wt, 'src/app/one.cpp'), packed), 0);
-    assert.equal(fire(here, 'code-shape.mjs', join(here, 'src/app/one.cpp'), packed), 2);
-  },
+  'code-shape.mjs': caseFrom('code-shape.mjs', (await import('../packs/base/hooks/code-shape.mjs')).worktreeCase),
   'reuse-hint.mjs': ({ here, wt }) => {
     // The worktree's branch has this helper; main does not. A prompt is judged by the checkout it was typed in.
     put(join(wt, 'src/app/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');
