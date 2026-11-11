@@ -9,7 +9,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { readJson } from './json.mjs';
-import { commitsAhead, mergedInto, runningOrders, workIn, worktreesOf } from './run-discovery.mjs';
+import { commitsAhead, mergedInto, processesOf, runningOrders, workIn, worktreesOf } from './run-discovery.mjs';
 import { machineName, remotesOf, remotesReport } from './run-remotes.mjs';
 import { transcriptBeats } from './run-transcripts.mjs';
 import { readText } from './shell-writes.mjs';
@@ -80,7 +80,7 @@ function agentsAhead(steps, agents) {
 /** One order's progress: { project, order, steps, agents, items, done, percent, source, finished }. */
 export function orderStatus(project, order) {
   const folder = join(project, 'docs', 'workorders', order);
-  const trees = worktreesOf(project);
+  const trees = worktreesOf(project, process.env);
   const status = readJson(join(folder, 'status.json'));   // the run's file: a broken one is no file, never a crash
   const fromRun = Array.isArray(status?.steps) && status.steps.length > 0;
   const steps = fromRun
@@ -94,11 +94,11 @@ export function orderStatus(project, order) {
   // an agent of this order with nothing written yet still counts: its worktree is on the order's own branch, work/<order>-<name>
   // (the user: "I dont see those 5 agents"); one merged back and untouched for KIN_MS is a finished agent, unless work runs in it
   const kin = (t) => typeof t.branch === 'string' && t.branch.startsWith(`work/${order}-`);
-  const stale = (t) => Date.now() - t.touched > KIN_MS && mergedInto(project, t.branch, `work/${order}`);
+  const stale = (t) => Date.now() - t.touched > KIN_MS && mergedInto(project, t.branch, `work/${order}`, process.env);
   const agents = trees.map((t) => ({ ...t, file: readJson(join(t.path, 'docs', 'workorders', order, 'agents', `${t.name}.json`)), beat: beatOf(t.name) }))
     .map((t) => { const known = Boolean(t.file || listed.has(t.name) || alive(t.beat)); return { ...t, known, kinOnly: !known && kin(t) }; })
     .filter((t) => t.known || t.kinOnly)
-    .map((t) => ({ ...t, stale: t.kinOnly && stale(t), fresh: t.kinOnly && commitsAhead(project, t.branch, `work/${order}`) === 0 }))   // runsReport drops a stale one unless work runs in it
+    .map((t) => ({ ...t, stale: t.kinOnly && stale(t), fresh: t.kinOnly && commitsAhead(project, t.branch, `work/${order}`, process.env) === 0 }))   // runsReport drops a stale one unless work runs in it
     .map((t) => {
       const f = t.file ?? {};
       const step = f.step ?? listed.get(t.name)?.step ?? null;
@@ -223,10 +223,10 @@ function ordersIn(project, only) {
  *  and on every machine remotes.json lists (1.8.1), or one project's orders here (`dir`). */
 export function runsReport({ dir = null, order = null, remotes = undefined, ask = undefined, here = undefined } = {}) {
   const notes = [];   // what could not be looked at (KWB-161: Windows' sessions), said, never silence
-  const runs = (dir ? ordersIn(dir, order).map((o) => ({ project: dir, order: o })) : runningOrders({ notes })).map((r) => orderStatus(r.project, r.order));
+  const runs = (dir ? ordersIn(dir, order).map((o) => ({ project: dir, order: o })) : runningOrders({ env: process.env, platform: process.platform, notes })).map((r) => orderStatus(r.project, r.order));
   // the check: what really runs in each agent's worktree now, and in the checkout the lead works in (the user: "and what
   // happened to the heartbeat and cores and all that?"); a process counts for the deepest folder, so an agent's build is its own
-  const work = workIn([...runs.map((r) => r.project), ...runs.flatMap((r) => r.agents.map((a) => a.path))]);
+  const work = workIn([...runs.map((r) => r.project), ...runs.flatMap((r) => r.agents.map((a) => a.path))], processesOf(process.env));
   for (const a of runs.flatMap((r) => r.agents)) a.work = work?.[a.path] ?? null;
   for (const r of runs) r.agents = r.agents.filter((a) => !a.stale || a.work?.procs);   // a finished agent's worktree, unless work runs in it
   for (const r of runs) r.leadWork = work?.[r.project] ?? null;

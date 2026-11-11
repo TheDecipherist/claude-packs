@@ -1,7 +1,7 @@
 // 0.29.0: until a project knows which hooks work, it needs all of its history, with as much detail as it can keep. Nothing is cleared, and every refusal can be judged.
 import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, readdirSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
 import { maskSecrets } from '../packs/base/hooks/lib/secret-patterns.mjs';
-import { headOf } from '../packs/base/hooks/lib/event-log.mjs';
+import { checkoutHead } from '../packs/base/hooks/lib/event-log.mjs';
 
 const lines = (dir, f) => readFileSync(join(dir, '.claude/logs', f), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
 const key = ['ghp', 'a1B2'.repeat(10)].join('_');
@@ -87,6 +87,6 @@ test('the logs stay out of git, and a hook is never stopped by its log', () => {
 
 test('the branch and commit are read from the checkout, a worktree too', () => {
   const dir = project();
-  assert.equal(headOf(dir).branch, 'work/x');
-  assert.deepEqual(headOf(join(dir, 'nowhere')), {});
+  assert.equal(checkoutHead(dir).branch, 'work/x');
+  assert.deepEqual(checkoutHead(join(dir, 'nowhere')), {});
 });

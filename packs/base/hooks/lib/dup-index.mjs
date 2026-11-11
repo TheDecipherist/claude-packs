@@ -20,7 +20,7 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, relative } from 'node:path';
-import { clonesOf, excludeGlobs, LIMITS, real, scan, SOURCE } from './dup.mjs';
+import { clonesOf, excludeGlobs, LIMITS, realPath, scan, SOURCE } from './dup.mjs';
 import { matchesAny } from './glob.mjs';
 
 export const WINDOW = 20;
@@ -67,7 +67,7 @@ export function windows(t) {
   return out;
 }
 
-const fileOf = (root) => join(process.env.TMPDIR ?? tmpdir(), 'claude-packs-dup-index', `${createHash('sha1').update(real(root)).digest('hex').slice(0, 16)}.json`);
+const fileOf = (root) => join(process.env.TMPDIR ?? tmpdir(), 'claude-packs-dup-index', `${createHash('sha1').update(realPath(root)).digest('hex').slice(0, 16)}.json`);
 
 // Every source file under root that the index judges: { rel: { m, s } }. Folders an exclude covers are never entered.
 function walk(root, ex) {
@@ -90,7 +90,7 @@ export function loadIndex(root, { layout = {}, shape = null } = {}) {
   const file = fileOf(root);
   let old = null;
   try { old = JSON.parse(readFileSync(file, 'utf8')); } catch { /* built below */ }
-  if (old?.v !== VERSION || old.root !== real(root)) old = null;
+  if (old?.v !== VERSION || old.root !== realPath(root)) old = null;
   const ex = excludeGlobs(layout, shape);
   const now = walk(root, ex);
   const files = {};
@@ -109,17 +109,17 @@ export function loadIndex(root, { layout = {}, shape = null } = {}) {
     try {
       mkdirSync(join(file, '..'), { recursive: true });
       const tmp = `${file}.${process.pid}`;
-      writeFileSync(tmp, JSON.stringify({ v: VERSION, root: real(root), files }));
+      writeFileSync(tmp, JSON.stringify({ v: VERSION, root: realPath(root), files }));
       renameSync(tmp, file);
     } catch { /* judged all the same */ }
   }
-  return { root: real(root), files, built: !old, read };
+  return { root: realPath(root), files, built: !old, read };
 }
 
 // The clones the writes add: each write's windows on its changed lines, against every other file (the index, minus the
 // written files and `ignore`; each other write of the call as it will be; the write itself elsewhere in its own text).
 export function clonesIn(index, writes, { ignore = [] } = {}) {
-  const skip = new Set([...ignore, ...writes.map((w) => w.path)].map((p) => relative(index.root, real(p))));
+  const skip = new Set([...ignore, ...writes.map((w) => w.path)].map((p) => relative(index.root, realPath(p))));
   const texts = writes.map((w) => { const { t, l } = tokenize(w.after, w.path); return { w, l, h: windows(t), n: t.length }; });
   const found = [];
   for (const q of texts) {
@@ -133,7 +133,7 @@ export function clonesIn(index, writes, { ignore = [] } = {}) {
     if (!want.size) continue;
     const others = [];
     for (const [rel, f] of Object.entries(index.files)) if (!skip.has(rel)) others.push({ file: join(index.root, rel), h: f.h, l: f.l });
-    for (const o of texts) others.push({ file: real(o.w.path), h: o.h, l: o.l, self: o === q });
+    for (const o of texts) others.push({ file: realPath(o.w.path), h: o.h, l: o.l, self: o === q });
     const pairs = new Map(); // other -> [[i, j]]
     const seen = new Map();
     for (const o of others) {
@@ -150,7 +150,7 @@ export function clonesIn(index, writes, { ignore = [] } = {}) {
         // either side's lines (jscpd counts a block written on 3 long lines that repeats one of 7 lines)
         const lines = Math.max(q.l[c.end - 1] - q.l[c.start] + 1, o.l[c.jhi - 1] - o.l[c.jlo] + 1);
         if (c.covered < LOOSE.tokens || lines < LOOSE.lines) continue;
-        found.push({ at: { file: real(q.w.path), start: q.l[c.start], end: q.l[c.end - 1] }, other: { file: o.file, start: o.l[c.jlo], end: o.l[c.jhi - 1] }, lines, tokens: c.covered });
+        found.push({ at: { file: realPath(q.w.path), start: q.l[c.start], end: q.l[c.end - 1] }, other: { file: o.file, start: o.l[c.jlo], end: o.l[c.jhi - 1] }, lines, tokens: c.covered });
       }
     }
   }
@@ -193,9 +193,9 @@ export function judgeWrites(root, writes, { layout = {}, shape = null, ignore = 
       writeFileSync(path, w.after);
       return { path, as: w.path };
     });
-    const written = new Set(writes.map((w) => real(w.path)));
-    const paths = [...new Set(maybe.map((c) => c.other.file))].filter((f) => !written.has(real(f)));
-    const r = scan(root, { extra, ignore, layout, shape, paths });
+    const written = new Set(writes.map((w) => realPath(w.path)));
+    const paths = [...new Set(maybe.map((c) => c.other.file))].filter((f) => !written.has(realPath(f)));
+    const r = scan(root, { env: process.env, extra, ignore, layout, shape, paths });
     if (r.error) return { clones: [], error: r.error, index };
     return { clones: writes.flatMap((w) => (w.ranges ?? [w.range]).flatMap((range) => clonesOf(r.clones, w.path, range)).filter((c) => holdsLogic(w.after, c.at))), index };
   } finally {

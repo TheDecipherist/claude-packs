@@ -16,7 +16,7 @@ const BUILD = (making) => `# x: the build\n\n## In progress\n\n| Started | Step 
 
 export function selftest(hookUrl) {
   const hook = fileURLToPath(hookUrl);
-  if (!findJscpd([process.cwd()])) { console.error('making-check selftest FAILED: jscpd not found (once-only\'s detector)'); return 1; }
+  if (!findJscpd(process.env, [process.cwd()])) { console.error('making-check selftest FAILED: jscpd not found (once-only\'s detector)'); return 1; }
   const dir = scratchProject({ 'design/shape.json': JSON.stringify(SHAPE), 'src/slot/filter.cpp': `#include "filter.h"\n\n${FN('slotFilter')}`, 'build.md': BUILD('') });
   git(dir, 'init', '-q', '-b', 'work/s1');
   git(dir, 'add', '-A');
