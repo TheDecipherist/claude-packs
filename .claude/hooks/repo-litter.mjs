@@ -51,7 +51,7 @@ function judgeAdd(command, cwd) {
   return null;
 }
 
-const main = (text) => judgeEvent(text, { name: 'repo-litter', command: judgeAdd });
+const main = (text) => judgeEvent(text, { name: 'repo-litter', command: judgeAdd }, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);

@@ -21,7 +21,7 @@ export const isSource = (file) => { const re = readLayout(claudeRoot(projectRoot
 const main = (text) => judgeEvent(text, {
   name: 'folder-law',
   write: (w) => (w.op === 'delete' || w.op === 'edit' || existsSync(w.path) || !isSource(w.path) ? null : judge(w.path)),
-});
+}, process);
 
 function judge(file) {
   if (relative(projectRoot(), file).startsWith('..')) return null;

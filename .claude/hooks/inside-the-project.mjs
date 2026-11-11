@@ -118,7 +118,7 @@ function main(text) {
     const msg = judgeCommand(payload.tool_input?.command ?? '', cwd);
     if (msg) return refuse(msg);
   }
-  for (const w of writesOf(payload, cwd)) if (besideTheProject(w.path)) return refuse(why(w.path));
+  for (const w of writesOf(payload, cwd, process.env)) if (besideTheProject(w.path)) return refuse(why(w.path));
   return 0;
 }
 

@@ -65,7 +65,7 @@ function judgeWrite(w, rel) {
   return faults.length ? `${faults.join('\n')}\nIf one truly must stay, say so above it: \`one-off: <reason>\`.\n` : null;
 }
 
-const main = (text) => judgeEvent(text, { name: 'code-shape', write: judgeWrite });
+const main = (text) => judgeEvent(text, { name: 'code-shape', write: judgeWrite }, process);
 
 function selftest() {
   const hook = fileURLToPath(import.meta.url);
