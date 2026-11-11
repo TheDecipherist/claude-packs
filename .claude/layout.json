@@ -58,10 +58,6 @@
       "path": "proxy",
       "purpose": "the Go hook proxy's client (the one hand-written non-TypeScript source) and its tests"
     },
-    "proxy-bin": {
-      "path": "packs/base/hooks/bin",
-      "purpose": "the built hook-proxy binaries, one folder per OS-ARCH (built, never committed) and the sh picker"
-    },
     "test-unit": {
       "path": "test/unit",
       "purpose": "unit tests: test/unit/lib/NAME.test.mts and test/unit/hooks-lib/NAME.test.mts"
@@ -85,10 +81,6 @@
     "workorder-probes": {
       "path": "docs/workorders/typescript/probes",
       "purpose": "the typescript order's probes: the daemon prototype and review-2's probe scripts"
-    },
-    "evidence": {
-      "path": "build/evidence",
-      "purpose": "measured evidence per step (ignored by git)"
     }
   },
   "concepts": {

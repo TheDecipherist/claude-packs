@@ -129,3 +129,10 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Chosen: those modules are left out of gates 11 and 12 (repo-lint `SELFTEST_ONLY`); every other hook and hook-lib module is held.
 - Why: a selftest module runs only under `--selftest` (W3.2 moves look-gate's and skill-first's to a dynamic import there), never
   inside the resident runner, which is what the two gates protect.
+
+## d-21 A layout folder holds a file from the day it is named {#d-21}
+- Question: W0.1 named folders ahead of their content; a fresh clone has none of them and the kit's doctor is red there (KWB-175).
+- Chosen: the five source folders hold a README.md saying what goes there and which step fills it (test/hooks, test/tools,
+  test/integration, test/fixtures/profiles, proxy); `packs/base/hooks/bin` leaves the layout until W8 writes its first file (the
+  sh picker), since anything in it installs into every project; `build/evidence` leaves it for good (ignored, never source).
+- Why: the layout says what exists; a README is the cheapest true first file, and no project receives one.
