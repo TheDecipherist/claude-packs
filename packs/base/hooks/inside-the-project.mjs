@@ -15,6 +15,7 @@ import { ROOT, commonGitDir, insideProject } from './lib/project.mjs';
 import { bashOf, git, put, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { readPayload, writesOf } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const WORKTREE_VALUE_OPTIONS = new Set(['-b', '-B', '--reason']);
 const home = (p) => p.replace(/^~(?=\/|$)/, process.env.HOME ?? '~');
@@ -121,7 +122,7 @@ function main(text) {
 }
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const parent = scratchProject({ 'proj/src/a.ts': 'a\n', 'other/b.ts': 'b\n' });
   const proj = join(parent, 'proj');
   git(proj, 'init', '-q');

@@ -12,6 +12,7 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { bashOf, git, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 export const BIG_MB = 10;
 const MB = 1024 * 1024;
@@ -52,7 +53,7 @@ function judgeAdd(command, cwd) {
 const main = (text) => judgeEvent(text, { name: 'repo-litter', command: judgeAdd });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'src/a.pdf:Zone.Identifier': 'x', 'shot.png': 'x', 'favicon.png': 'x', 'src/a.ts': 'x', 'src/hero.png': 'x', 'trace.har': 'x', 'kept.png': 'x', '.claude/layout.json': JSON.stringify({ guards: { repoLitter: { maxFileMb: 1, allow: ['kept.png'] } } }) });
   git(dir, 'init', '-q');
   put(join(dir, 'media/big.bin'), 'x'.repeat(2 * MB));

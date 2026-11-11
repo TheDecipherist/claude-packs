@@ -16,6 +16,7 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const SWITCH = /\bswitch\s*\(\s*([^()]*?(?:\([^()]*\))?)\s*\)\s*\{/g;
 const JUDGED = new Set([...CODE, '.rs']);
@@ -92,7 +93,7 @@ function judgeWrite(w, rel) {
 const main = (text) => judgeEvent(text, { name: 'dispatch-once', write: judgeWrite });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const rustTable = (kind, name) => `pub fn ${name}(s: &${kind}) -> u8 {\n    match s {\n        ${kind}::Open => 1,\n        ${kind}::Paid => 2,\n        ${kind}::Closed => 3,\n        ${kind}::Low => 4,\n        ${kind}::Mid => 5,\n    }\n}\n`;
   const dir = scratchProject({
     'src/state.rs': `pub enum State { Open, Paid, Closed, Low, Mid }\n${rustTable('State', 'label')}`,

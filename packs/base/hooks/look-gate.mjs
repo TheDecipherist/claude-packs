@@ -23,6 +23,7 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { selftest } from './lib/look-gate-selftest.mjs';
+import { fileURLToPath } from 'node:url';
 
 const TRUNKS = ['main', 'master'];
 const BUILD = /\b(?:buildq|cmake\s+--build|ninja|make|npm\s+run\s+build|cargo\s+build|vite\s+build)\b/;
@@ -109,4 +110,4 @@ function printKey(name) {
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
 const keyAt = process.argv.indexOf('--key');
-if (isMain(import.meta.url)) process.exit(keyAt > 0 ? printKey(process.argv[keyAt + 1]) : process.argv.includes('--selftest') ? selftest(new URL(import.meta.url).pathname) : await asHook('look-gate', main));
+if (isMain(import.meta.url)) process.exit(keyAt > 0 ? printKey(process.argv[keyAt + 1]) : process.argv.includes('--selftest') ? selftest(fileURLToPath(import.meta.url)) : await asHook('look-gate', main));

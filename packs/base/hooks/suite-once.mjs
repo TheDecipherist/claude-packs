@@ -15,6 +15,7 @@ import { bashOf, git, promptFile, put, runHook, scratchProject, verdicts } from 
 import { lastPrompt } from './lib/turn.mjs';
 import { judgeEvent, readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b|-N\b|--show-only\b|--print-labels\b)\S+)*|cargo\s+(?:test|nextest\s+run)(?:\s+-\S+)*)$/;
 const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec|\S*buildq)\s+|timeout\s+\S+\s+)+/;
@@ -71,7 +72,7 @@ function main(text) {
 }
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'a.txt': 'one\n', '.claude/layout.json': JSON.stringify({ commands: { test: 'bash tools/all.sh', 'test-changed': 'npm run test:changed' } }) });
   git(dir, 'init', '-q');
   git(dir, 'add', 'a.txt', '.claude/layout.json');

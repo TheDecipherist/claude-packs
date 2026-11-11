@@ -14,6 +14,7 @@ import { extname, join } from 'node:path';
 import { judgeEvent } from './lib/writes.mjs';
 import { runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const CODE = new Set(['.js', '.mjs', '.cjs', '.ts', '.mts', '.cts', '.tsx', '.jsx', '.py']);
 const CALL = /\bmessages\.(?:create|stream)\s*\(|\bchat\.completions\.create\s*\(|\bresponses\.create\s*\(|\b(?:generateText|streamText|generateObject|streamObject)\s*\(/g;
@@ -32,7 +33,7 @@ export function verdict(rel, before, after) {
 const main = (text) => judgeEvent(text, { name: 'untrusted-boundary', write: (w, rel) => verdict(rel, w.before, w.after) });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'src/ask.ts': 'export const x = 1;\n' });
   const run = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text));
   const call = 'const r = await client.messages.create({ model, messages: [{ role: "user", content: page }] });\n';

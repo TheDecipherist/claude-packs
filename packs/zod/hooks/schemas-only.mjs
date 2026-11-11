@@ -14,6 +14,7 @@ import { blankCode } from './lib/cpp-scan.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const CODE = new Set(['.js', '.mjs', '.cjs', '.ts', '.mts', '.cts', '.tsx', '.jsx']);
 const SCHEMA = /\bz\.(?:object|strictObject|looseObject)\s*\(/g;
@@ -32,7 +33,7 @@ const main = (text) => judgeEvent(text, {
 });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const layout = { folders: { schemas: { path: 'packages/core/src/schemas', purpose: 'schemas' } }, concepts: { schemas: ['schemas'] } };
   const dir = scratchProject({ 'api/src/routes/old.ts': 'const Q = z.object({ id: z.string() });\n' }, layout);
   const w = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text));

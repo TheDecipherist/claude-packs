@@ -11,6 +11,7 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { bashOf, git, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const FIRMWARE = /\.(bin|rom|eprom|epr|hex|srec|s19|mot|ic\d+|lod|syx|mid|dis|disasm|asm\.txt|lst|wiz|mfw|raf)$/i;
 const OWN_BUILD = /(^|\/)(build|out|dist|target)\//;
@@ -32,7 +33,7 @@ function judgeAdd(command, cwd) {
 const main = (text) => judgeEvent(text, { name: 'firmware-out-of-git', command: judgeAdd });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'roms/os.bin': 'x', 'banks/factory.syx': 'x', 'test/fixtures/one.syx': 'x', 'src/a.cpp': 'x', '.claude/layout.json': JSON.stringify({ guards: { firmware: { fixtures: ['test/fixtures/**'] } } }) });
   git(dir, 'init', '-q');
   const add = (p) => runHook(hook, dir, bashOf(`git add ${p}`, dir));

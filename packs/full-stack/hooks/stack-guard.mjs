@@ -11,6 +11,7 @@ import { basename, extname, join } from 'node:path';
 import { judgeEvent } from './lib/writes.mjs';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { fileURLToPath } from 'node:url';
 
 const BANNED = /^(express|vite|@vitejs\/.+)$/;
 const CODE = new Set(['.js', '.mjs', '.cjs', '.ts', '.mts', '.cts', '.tsx', '.jsx']);
@@ -62,7 +63,7 @@ const main = (text) => judgeEvent(text, {
 });
 
 function selftest() {
-  const hook = new URL(import.meta.url).pathname;
+  const hook = fileURLToPath(import.meta.url);
   const pkg = (deps) => JSON.stringify({ name: 'x', dependencies: deps }, null, 2);
   const dir = scratchProject({ 'api/package.json': pkg({ fastify: '5.6.1' }), 'api/src/old.ts': "import express from 'express';\n" });
   const w = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text));
