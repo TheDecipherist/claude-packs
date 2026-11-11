@@ -6,10 +6,12 @@ import { findViolations, violationKey } from './lib/realtime-checks.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { judgeSmoothing, smoothingConfig } from './lib/smoothing-checks.mjs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const CPP = /\.(cpp|cc|cxx|h|hh|hpp|mm)$/;
 
@@ -21,7 +23,7 @@ function main(text) {
     return 0;
   }
   for (const w of writesOf(payload)) {
-    if (w.after === null || !CPP.test(w.path) || !insideProject(w.path)) continue;
+    if (w.after === null || !CPP.test(w.path) || !insideProject(ROOT, w.path, process.cwd())) continue;
     const code = judge(w.path, w) || judgeSmooth(w);
     if (code) return code;
   }
@@ -30,8 +32,8 @@ function main(text) {
 
 // KWB-126, 1.7.2: a control smoothed outside the project's smoothing module is refused too, always (lib/smoothing-checks.mjs).
 function judgeSmooth(w) {
-  const cfg = smoothingConfig(readLayout(claudeRoot(w.path)));
-  const msg = judgeSmoothing(w, relative(checkoutRoot(w.path), w.path), cfg);
+  const cfg = smoothingConfig(readLayout(claudeRoot(ROOT, w.path, process.cwd())));
+  const msg = judgeSmoothing(w, relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path), cfg);
   if (!msg) return 0;
   process.stderr.write(msg);
   return 2;
@@ -61,12 +63,12 @@ function selftest() {
   const block = (body) => `void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m)\n{\n    juce::ScopedNoDenormals nd;\n${body}\n}\n`;
   const old = block('    auto* x = new float[64]; // legacy');
   const dir = scratchProject({ 'src/audio/Old.cpp': old });
-  const w = (file, body) => runHook(hook, dir, writeOf(join(dir, file), block(body)));
+  const w = (file, body) => runHook(hook, dir, writeOf(join(dir, file), block(body))).status;
   const cfg = { guards: { smoothing: { module: 'src/dsp/smooth/**', namespace: 'smooth', scope: ['src/audio/**', 'src/dsp/**', 'src/app/PluginProcessor*'] } } };
   const sm = scratchProject({ 'src/audio/Old.cpp': 'void Old::f()\n{\n    level += 0.1f * (target - level);\n}\n' }, cfg);
   const none = scratchProject({});
   const off = scratchProject({}, { guards: { smoothing: { off: 'a tool with no audio thread' } } });
-  const s = (file, body, d = sm) => runHook(hook, d, writeOf(join(d, file), `void X::f()\n{\n${body}\n}\n`));
+  const s = (file, body, d = sm) => runHook(hook, d, writeOf(join(d, file), `void X::f()\n{\n${body}\n}\n`)).status;
   return verdicts('realtime-guard', [
     ['smoothing: the shipped per-block gain', s('src/audio/Out.cpp', '    audio.applyGain (link.volume() * outputGain);'), 2],
     ['smoothing: applyGain on a member', s('src/audio/Out.cpp', '    b.applyGain (outputGain);'), 2],
@@ -91,7 +93,7 @@ function selftest() {
     ['smoothing: a marker without a reason', s('src/dsp/Comp.cpp', '    env += atk * (peak - env); // smooth-ok:'), 2],
     ['smoothing: the module itself', s('src/dsp/smooth/Smoother.h', '    juce::SmoothedValue<float> v;\n    x += k * (t - x);'), 0],
     ['smoothing: outside the scope', s('src/ui/Meter.cpp', '    level += k * (target - level);'), 0],
-    ['smoothing: a slew already there is not added', runHook(hook, sm, editOf(join(sm, 'src/audio/Old.cpp'), 'void Old::f()', 'void Old::g()')), 0],
+    ['smoothing: a slew already there is not added', runHook(hook, sm, editOf(join(sm, 'src/audio/Old.cpp'), 'void Old::f()', 'void Old::g()')).status, 0],
     // 1.7.2: always on. With no guards.smoothing the module is any folder named smooth and the scope the audio code; off only with a reason
     ['smoothing: no guards.smoothing, still judged', s('src/audio/Out.cpp', '    b.applyGain (outputGain);', none), 2],
     ['smoothing: no guards.smoothing, a folder named smooth is the module', s('src/dsp/smooth/Smooth.h', '    juce::SmoothedValue<float> v;', none), 0],
@@ -106,9 +108,9 @@ function selftest() {
     ['a lock in processBlock', w('src/audio/Voice.cpp', '    const juce::ScopedLock sl (lock);'), 2],
     ['plain arithmetic', w('src/audio/Voice.cpp', '    b.applyGain (0.5f);'), 0],
     ['an rt-ok exception', w('src/audio/Voice.cpp', '    auto* x = new float[64]; // rt-ok: test only'), 0],
-    ['a fault already there is not added', runHook(hook, dir, editOf(join(dir, 'src/audio/Old.cpp'), 'ScopedNoDenormals nd;', 'ScopedNoDenormals noDenormals;')), 0],
-    ['not C++', runHook(hook, dir, writeOf(join(dir, 'tools/x.py'), 'x = [1]\n')), 0],
-    ['another project is not ours', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/Voice.cpp'), block('    auto* x = new float[64];'))), 0],
+    ['a fault already there is not added', runHook(hook, dir, editOf(join(dir, 'src/audio/Old.cpp'), 'ScopedNoDenormals nd;', 'ScopedNoDenormals noDenormals;')).status, 0],
+    ['not C++', runHook(hook, dir, writeOf(join(dir, 'tools/x.py'), 'x = [1]\n')).status, 0],
+    ['another project is not ours', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/Voice.cpp'), block('    auto* x = new float[64];'))).status, 0],
   ]);
 }
 

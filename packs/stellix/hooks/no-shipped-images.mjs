@@ -29,9 +29,9 @@ const allowed = (root) => readLayout(root).guards?.images?.allowed ?? ALLOWED;
 // A path is judged in its own checkout, so an image written into an agent worktree is caught too.
 const isBlocked = (p, base = ROOT) => {
   const abs = resolve(base, p);
-  if (!IMAGE.test(abs) || !insideProject(abs)) return false;
-  const rel = relInCheckout(abs).replace(/^\.claude\/worktrees\/[^/]+\//, '');
-  const root = claudeRoot(abs);
+  if (!IMAGE.test(abs) || !insideProject(ROOT, abs, process.cwd())) return false;
+  const rel = relInCheckout(ROOT, abs, process.cwd()).replace(/^\.claude\/worktrees\/[^/]+\//, '');
+  const root = claudeRoot(ROOT, abs, process.cwd());
   return !rel.startsWith('.claude/') && matchesAny(rel, guarded(root)) && !matchesAny(rel, allowed(root));
 };
 
@@ -58,7 +58,7 @@ function main(text) {
   }
   const input = payload.tool_input ?? {};
   const bad = writesOf(payload, payload.cwd ?? ROOT).filter((w) => w.op !== 'delete' && isBlocked(w.path)).map((w) => w.path);
-  if (payload.tool_name === 'Bash' && !commandLeavesProject(input.command)) {
+  if (payload.tool_name === 'Bash' && !commandLeavesProject(ROOT, input.command, process.cwd(), process.env.HOME)) {
     const tokens = (input.command ?? '').split(/\s+/).map((t) => t.replace(/^['"]|['"]$/g, ''));
     if (/\b(curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b/.test(input.command ?? '')) bad.push(...tokens.filter((t) => t && isBlocked(t, payload.cwd ?? ROOT)));
   }
@@ -68,7 +68,7 @@ function main(text) {
 function selftest() {
   const me = fileURLToPath(import.meta.url);
   const dir = scratchProject({}, { folders: { app: { path: 'lib/app/src', purpose: 'app' }, docs: { path: 'docs', purpose: 'docs' } }, concepts: {} });
-  const w = (file) => runHook(me, dir, writeOf(join(dir, file), 'x'));
+  const w = (file) => runHook(me, dir, writeOf(join(dir, file), 'x')).status;
   return verdicts('no-shipped-images', [
     ['an image in a code folder', w('lib/app/src/logo.png'), 2],
     ['an image in src/', w('src/icon.svg'), 2],
@@ -76,8 +76,8 @@ function selftest() {
     ['a font is data, not a picture', w('resources/Inter.ttf'), 0],
     ['a golden render under tests/', w('tests/goldens/panel.png'), 0],
     ['a picture in docs/', w('docs/shot.png'), 0],
-    ['cp of an image into a code folder', runHook(me, dir, bashOf('cp /tmp/a.png lib/app/src/a.png', dir)), 2],
-    ['cp into tests/', runHook(me, dir, bashOf('cp /tmp/a.png tests/goldens/a.png', dir)), 0],
+    ['cp of an image into a code folder', runHook(me, dir, bashOf('cp /tmp/a.png lib/app/src/a.png', dir)).status, 2],
+    ['cp into tests/', runHook(me, dir, bashOf('cp /tmp/a.png tests/goldens/a.png', dir)).status, 0],
   ]);
 }
 

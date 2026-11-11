@@ -38,6 +38,8 @@ import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './
 import { trunkLag } from './lib/trunk-lag.mjs';
 import { gitLines, gitOut, gitRun } from './lib/git-run.mjs';
 
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
+
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
 const SECRET_USER = /:|\$|^(gh[pousr]_|github_pat_|glpat-|x-access-token|oauth2)/i;
@@ -179,7 +181,7 @@ function main(text) {
   try { payload = JSON.parse(text); } catch { return 0; }
   const command = payload.tool_input?.command ?? '';
   // the project's laws: its own layout (a worktree with its own layout.json is judged by it, else the project's)
-  const layout = readLayout(claudeRoot(join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json')));
+  const layout = readLayout(claudeRoot(ROOT, join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.claude', 'layout.json'), process.cwd()));
   const cfg = { ...DEFAULTS, ...(layout.enable?.includes('guards/git-house') ? NEW_INSTALL_GIT : {}), ...(layout.guards?.git ?? {}) }; // KF-8: an existing project opts in
   if (payload.hook_event_name === 'Stop') {
     if (!cfg.house) return 0;

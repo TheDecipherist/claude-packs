@@ -60,12 +60,12 @@ function main(text) {
     if (/spec-lock\.json/.test(bare) && WRITE_CMD.test(bare)) return block(`the lock file can't be edited. ${howTo}`);
     const routed = judgeWrites(payload, state, howTo);
     if (routed) return routed;
-    if (!state.locked || commandLeavesProject(cmd)) return 0;
+    if (!state.locked || commandLeavesProject(ROOT, cmd, process.cwd(), process.env.HOME)) return 0;
     // Each word as a path in its own checkout, so a worktree's spec/ is the spec too.
     const base = payload.cwd ?? ROOT;
     const toRel = (t) => {
       const abs = resolve(base, t.replace(/^['"]|['"]$/g, ''));
-      return insideProject(abs) ? relInCheckout(abs) : null;
+      return insideProject(ROOT, abs, process.cwd()) ? relInCheckout(ROOT, abs, process.cwd()) : null;
     };
     const touched = cmd.split(/\s+/).filter((t) => {
       const rel = t && toRel(t);
@@ -81,8 +81,8 @@ function main(text) {
 // Every file the call writes, whichever tool: the lock file never, a locked spec file not while locked.
 function judgeWrites(payload, state, howTo) {
   for (const w of writesOf(payload)) {
-    if (!insideProject(w.path)) continue;
-    const rel = relative(checkoutRoot(w.path), w.path);
+    if (!insideProject(ROOT, w.path, process.cwd())) continue;
+    const rel = relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path);
     if (rel === join('.claude', 'spec-lock.json')) return block(`the lock file can't be edited. ${howTo}`);
     if (state.locked && matchesAny(rel, state.globs)) return block(`${rel} is locked since ${state.since} (${state.reason}). ${howTo}`);
   }
@@ -94,8 +94,8 @@ function selftest() {
   const state = (locked) => JSON.stringify({ locked, globs: DEFAULT_GLOBS, reason: 'build running', since: 'now' });
   const dir = scratchProject({ '.claude/spec-lock.json': state(true), 'spec/plan.md': 'x\n' });
   const open = scratchProject({ '.claude/spec-lock.json': state(false) });
-  const w = (root, file) => runHook(hook, root, writeOf(join(root, file)));
-  const sh = (root, cmd) => runHook(hook, root, bashOf(cmd, root));
+  const w = (root, file) => runHook(hook, root, writeOf(join(root, file))).status;
+  const sh = (root, cmd) => runHook(hook, root, bashOf(cmd, root)).status;
   return verdicts('spec-lock', [
     ['a locked spec file', w(dir, 'spec/plan.md'), 2],
     ['a panel.json anywhere', w(dir, 'panel/panel.json'), 2],

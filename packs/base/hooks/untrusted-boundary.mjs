@@ -35,7 +35,7 @@ const main = (text) => judgeEvent(text, { name: 'untrusted-boundary', write: (w,
 function selftest() {
   const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'src/ask.ts': 'export const x = 1;\n' });
-  const run = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text));
+  const run = (rel, text) => runHook(hook, dir, writeOf(join(dir, rel), text)).status;
   const call = 'const r = await client.messages.create({ model, messages: [{ role: "user", content: page }] });\n';
   const cases = [
     ['a model call fed a page, no boundary (Anthropic)', run('src/ask.ts', call), 2],

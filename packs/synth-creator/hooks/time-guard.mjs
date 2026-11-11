@@ -148,7 +148,7 @@ export function run(event, { now = Date.now() / 1000, rows = null, own, commitMi
   if (now - (st.looked ?? 0) >= LOOK_EVERY_S || rows !== null) {
     st.looked = now;
     const table = rows === null ? processTable() : null;
-    const found = rows !== null ? machineFindings(rows, own ?? null) : machineFindings(table.map((r) => [r.pid, r.age, r.cmd]), ownProcesses(table));
+    const found = rows !== null ? machineFindings(rows, own ?? null) : machineFindings(table.map((r) => [r.pid, r.age, r.cmd]), ownProcesses(table, process.ppid));
     for (const [key, msg] of found) { const m = sayOnce(key, msg, now, st); if (m) said.push(m); }
   }
   // 3. each agent's own worktree, learned from the commands it runs (.claude/worktrees/<name>)

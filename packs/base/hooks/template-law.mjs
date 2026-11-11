@@ -5,7 +5,7 @@
 // reason is left alone, and so are tests, `protected` globs, generated and built code. The other files' shapes are kept between calls, keyed by
 // time and size, so a write reads only what changed. `--selftest` proves it.
 import { readFileSync } from 'node:fs';
-import { extname, join } from 'node:path';
+import { extname, join, resolve } from 'node:path';
 import { parametersOf } from './lib/code-shapes.mjs';
 import { isContent } from './lib/content.mjs';
 import { languageOf } from './lib/languages.mjs';
@@ -19,6 +19,8 @@ import { readLayout } from './lib/layout.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { fileURLToPath } from 'node:url';
+
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 
 // { id: [{ file, line, what }] } over every other file.
@@ -84,10 +86,10 @@ function judgeWrite(w, rel) {
   const fresh = after.shapes.filter((s, i) => after.shapes.findIndex((x) => x.id === s.id) === i && here.get(s.id) > (was.get(s.id) ?? 0));
   const { statements, defs } = addedTo(before, after);
   if (!fresh.length && !statements.length && !defs.length) return null;
-  const layout = readLayout(claudeRoot(w.path));
+  const layout = readLayout(claudeRoot(ROOT, w.path, process.cwd()));
   const skip = skippedBy(layout);
   if (matchesAny(rel, skip) || isContent(rel, layout)) return null;
-  const root = checkoutRoot(w.path);
+  const root = checkoutRoot(ROOT, w.path, process.cwd());
   const entries = repoIndex(root, [...TESTS, ...skip], layout);
   const others = copiesElsewhere(entries, rel);
   for (const s of fresh) {
@@ -114,7 +116,7 @@ function selftest() {
   const steps = (n, odd) => `def ${n}(rows, limit):\n${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => `    value_${i} = compute_step(rows[${i}], limit, scale=${i}, name="k${i}") + other(rows, ${i})\n${i % 3 === 2 && odd ? `    note_${i}(limit)\n` : ''}`).join('')}    return rows\n`;
   const dir = scratchProject({ 'src/steps.py': steps('load_all', false), 'src/dates.ts': 'export function formatDateRange(a, b) {\n  return a + b;\n}\n', 'src/a.html': card('One'), 'src/ctl.cpp': `void build() {\n${knob('cutoff')}}\n`, 'tests/t.cpp': `void t() {\n${knob('probe')}}\n`, 'src/gate_a.h': reader('pressOf', 'id'), 'src/rows.cpp': table('kOne'), 'vendored/gate.h': reader('tapOf', 'key'), 'kept/gate.h': reader('holdOf', 'key'),
     '.claude/layout.json': JSON.stringify({ folders: { vendored: { path: 'vendored', kind: 'copy' } }, guards: { templates: { exclude: ['kept/**'] } } }) });
-  const w = (file, content) => runHook(hook, dir, writeOf(join(dir, file), content));
+  const w = (file, content) => runHook(hook, dir, writeOf(join(dir, file), content)).status;
   return verdicts('template-law', [
     ['a second card, in another file', w('src/b.html', card('Two')), 2],
     ['two cards in one new file', w('src/c.tsx', card('A') + card('B')), 2],
@@ -139,9 +141,9 @@ function selftest() {
     ['calls on one object are one set-up', w('src/ctx.ts', 'ctx.save();\nctx.fill();\nctx.restore();\nf();\nctx.save();\nctx.fill();\nctx.restore();\n'), 0],
     ['a marked one-off', w('src/odd.html', `<!-- one-off: the print view -->\n${card('Odd')}`), 0],
     ['a test file', w('tests/x_test.cpp', `void x() {\n${knob('q')}}\n`), 0],
-    ['an edit that adds no copy', runHook(hook, dir, editOf(join(dir, 'src/a.html'), 'One text', 'Uno text')), 0],
-    ['a heredoc that adds a copy', runHook(hook, dir, bashOf(`cat > src/h.html <<'EOF'\n${card('H')}EOF`, dir)), 2],
-    ['another project is not ours', runHook(hook, dir, writeOf(join(dir, '..', 'elsewhere', 'x.html'), card('X'))), 0],
+    ['an edit that adds no copy', runHook(hook, dir, editOf(join(dir, 'src/a.html'), 'One text', 'Uno text')).status, 0],
+    ['a heredoc that adds a copy', runHook(hook, dir, bashOf(`cat > src/h.html <<'EOF'\n${card('H')}EOF`, dir)).status, 2],
+    ['another project is not ours', runHook(hook, dir, writeOf(join(dir, '..', 'elsewhere', 'x.html'), card('X'))).status, 0],
   ]);
 }
 

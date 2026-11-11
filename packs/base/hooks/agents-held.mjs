@@ -66,7 +66,7 @@ function selftest() {
   const agent = (input) => ({ tool_name: 'Agent', tool_input: { description: 'W3 part', prompt: 'Read the brief.', ...input } });
   const as = (said, payload) => {
     process.env.CLAUDE_PACKS_UNATTENDED = said;
-    return runHook(hook, dir, payload);
+    return runHook(hook, dir, payload).status;
   };
   // the parents read for real: the hook run by a stand-in `claude -p`, with nothing said in the environment
   put(join(dir, 'bin/claude'), `#!/bin/sh\n"${process.execPath}" "${hook}"\n`);

@@ -156,7 +156,7 @@ function main(text) {
     return 0;
   }
   for (const w of writesOf(payload)) {
-    if (w.after === null || !insideProject(w.path)) continue;
+    if (w.after === null || !insideProject(ROOT, w.path, process.cwd())) continue;
     const code = judge(w.path, { before: w.before, after: w.after });
     if (code) return code;
   }
@@ -164,9 +164,9 @@ function main(text) {
 }
 
 function judge(file, result) {
-  const checks = loadChecks(claudeRoot(file));
-  const rel = relative(checkoutRoot(file), file);
-  const published = isContent(rel, readLayout(claudeRoot(file)));
+  const checks = loadChecks(claudeRoot(ROOT, file, process.cwd()));
+  const rel = relative(checkoutRoot(ROOT, file, process.cwd()), file);
+  const published = isContent(rel, readLayout(claudeRoot(ROOT, file, process.cwd())));
   const relevant = checks.filter((c) => matchesAny(rel, c.globs) && !matchesAny(rel, c.exclude ?? []) && (!published || c.prose));
   if (relevant.length === 0) return 0;
 

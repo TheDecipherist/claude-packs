@@ -56,15 +56,16 @@ export function judgeEvent(text, { name, command = null, write = null }) {
   const payload = readPayload(text);
   if (!payload) return 0;
   const cwd = payload.cwd ?? process.cwd();
+  const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
   const refuse = (msg) => { process.stderr.write(msg.startsWith('BLOCKED') ? msg : `BLOCKED by ${name}: ${msg}\n`); return 2; };
   const cmd = payload.tool_input?.command ?? '';
-  if (command && payload.tool_name === 'Bash' && !commandLeavesProject(cmd)) {
+  if (command && payload.tool_name === 'Bash' && !commandLeavesProject(ROOT, cmd, process.cwd(), process.env.HOME)) {
     const msg = command(cmd, cwd);
     if (msg) return refuse(msg);
   }
   if (write) for (const w of writesOf(payload, cwd)) {
-    if (!insideProject(w.path, cwd)) continue;
-    const msg = write(w, relative(checkoutRoot(w.path), w.path));
+    if (!insideProject(ROOT, w.path, cwd)) continue;
+    const msg = write(w, relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path));
     if (msg) return refuse(msg);
   }
   return 0;

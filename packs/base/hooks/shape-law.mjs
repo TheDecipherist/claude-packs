@@ -11,9 +11,9 @@
 //   - a selector for a concept (pickSlot, slotFor, firstSlot, ownerSlot) not listed in the manifest;
 //   - a new type that holds instances (an index member, or made N times in an array) whose concept has no row.
 // No design/shape.json: nothing is declared, so nothing is judged (doctor fails a project of a configuration that needs one). `--selftest`.
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkoutRoot, insideProject, relInCheckout, ROOT } from './lib/project.mjs';
+import { checkoutRoot, insideProject, relInCheckout } from './lib/project.mjs';
 import { addedFindings, findInstanceLiterals, formatFinding, isExcluded, isTestFile, logRefusal, readShape } from './lib/shape.mjs';
 import { addedDefs, findSelectorDefs, findUnknownTypes } from './lib/shape-code.mjs';
 import { addressedOutside } from './lib/audience.mjs';
@@ -21,6 +21,8 @@ import { declaredAmount } from './lib/shape-prose.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const TEST_NOTE = 'a test that drives one instance proves that instance only: loop over every instance, or take the instance as a parameter';
 
@@ -41,11 +43,11 @@ function main(text) {
   let payload;
   try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
-    if (w.after === null || w.op === 'delete' || !insideProject(w.path) || w.after.includes('\0')) continue;
-    const root = checkoutRoot(w.path);
+    if (w.after === null || w.op === 'delete' || !insideProject(ROOT, w.path, process.cwd()) || w.after.includes('\0')) continue;
+    const root = checkoutRoot(ROOT, w.path, process.cwd());
     const shape = readShape(root) ?? readShape(ROOT);
     if (!shape || shape.error) continue;
-    const rel = relInCheckout(w.path);
+    const rel = relInCheckout(ROOT, w.path, process.cwd());
     if (rel.startsWith('..') || isExcluded(rel, shape) || addressedOutside(rel, w.after)) continue;
     const { out, concepts } = judgeText(rel, w.before, w.after, shape, root);
     if (!out.length) continue;
@@ -78,8 +80,8 @@ function selftest() {
   const layout = { folders: { engines: { path: 'src/engines', purpose: 'engines' }, world: { path: 'src/world', purpose: 'world' }, ui: { path: 'src/ui', purpose: 'ui' }, tests: { path: 'tests', purpose: 'tests' }, docs: { path: 'docs', purpose: 'docs' } }, concepts: {} };
   const dir = scratchProject({ 'design/shape.json': JSON.stringify(SELFTEST_SHAPE), 'src/world/Old.cpp': 'void f() { if (slot == 2) g(); }\n// PLACE\n' }, layout);
   const bare = scratchProject({}, layout);
-  const w = (rel, text, at = dir) => runHook(hook, at, writeOf(join(at, rel), text));
-  const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir));
+  const w = (rel, text, at = dir) => runHook(hook, at, writeOf(join(at, rel), text)).status;
+  const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir)).status;
   const loop = 'for (int slot = 0; slot < kSlots; ++slot) set(slotId(slot, "reverb.mix"), v);\n';
   return verdicts('shape-law', [
     // planted: an engine file
@@ -131,9 +133,9 @@ function selftest() {
     ['a short key in a string is still an instance (KF-17)', w('tests/key_test.cpp', 'set ("slot 2", 3);\n'), 2],
     ['the first of the concept is still an instance (KF-17)', w('docs/notes.md', 'The first slot holds the pad.\n'), 2],
     ['allowed: the whole range "slots 1-4"', w('docs/notes.md', 'Slots 1-4 all play every note.\n'), 0],
-    ['allowed: a line already there, edited and moved (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), 'void f() { if (slot == 2) g(); }\n// PLACE', '// PLACE\nvoid f() { if (slot == 2) g(); } // closed: B-1')), 0],
-    ['an edit adding a second copy of a literal already there (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', 'void h() { if (slot == 2) g(); }')), 2],
-    ['allowed: a literal already there, untouched', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', '// nothing')), 0],
+    ['allowed: a line already there, edited and moved (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), 'void f() { if (slot == 2) g(); }\n// PLACE', '// PLACE\nvoid f() { if (slot == 2) g(); } // closed: B-1')).status, 0],
+    ['an edit adding a second copy of a literal already there (KWB-23)', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', 'void h() { if (slot == 2) g(); }')).status, 2],
+    ['allowed: a literal already there, untouched', runHook(hook, dir, editOf(join(dir, 'src/world/Old.cpp'), '// PLACE', '// nothing')).status, 0],
     ['allowed: the type of a camelCase concept, made a count of times (KWB-93)', w('src/world/Bank.h', 'struct PadBank { int bankIndex; };\nstd::array<PadBank, kBanks> banks {};\n'), 0],
     ['a selector of a camelCase concept not listed (KWB-93)', w('src/world/Pick.cpp', 'int pickPadBank(int pad) {\n  return pad % 4;\n}\n'), 2],
     ['allowed: a type inside a string is a fixture, not a type (KWB-94)', w('src/ui/fixtures.mjs', "export const RAIL = 'struct Rail { int index; float gain; };';\n"), 0],
@@ -146,7 +148,7 @@ function selftest() {
     ['code: a .md marker line in a .cpp first line exempts nothing (KWB-127)', w('src/engines/Bank.cpp', '<!-- audience: outside -->\nauto& s = slots[1];\n'), 2],
     ['allowed: excluded (build/)', w('build/gen/Table.cpp', 'auto& s = slots[1];\n'), 0],
     ['allowed: no design/shape.json', w('src/engines/Engine.cpp', 'if (slotIx == 1) go();\n', bare), 0],
-    ['allowed: another project', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/src/x.cpp'), 'if (slotIx == 1) go();\n')), 0],
+    ['allowed: another project', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/src/x.cpp'), 'if (slotIx == 1) go();\n')).status, 0],
   ]);
 }
 

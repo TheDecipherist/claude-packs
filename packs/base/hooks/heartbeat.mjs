@@ -57,19 +57,19 @@ function selftest() {
   const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'README.md': '# x\n' });
   const beat = (name) => readJson(join(dir, '.claude', 'logs', 'heartbeats', `${name}.json`));
-  const call = (ev) => { runHook(hook, dir, { hook_event_name: 'PreToolUse', ...ev }); return true; };
+  const call = (ev) => { runHook(hook, dir, { hook_event_name: 'PreToolUse', ...ev }).status; return true; };
   const tree = join(dir, '.claude', 'worktrees', 'api');
   mkdirSync(tree, { recursive: true });
   const cases = [
     ['a call in an agent\'s worktree is that agent\'s', call({ cwd: tree, tool_name: 'Bash', tool_input: { command: 'make', description: 'build the server' }, agent_id: 'a1' }) && beat('api')?.what, 'build the server'],
     ['a long call is marked as begun', beat('api')?.event, 'pre'],
-    ['its end is marked too', runHook(hook, dir, { hook_event_name: 'PostToolUse', cwd: tree, tool_name: 'Bash', tool_input: { command: 'make' } }) === 0 && beat('api')?.event, 'post'],
+    ['its end is marked too', runHook(hook, dir, { hook_event_name: 'PostToolUse', cwd: tree, tool_name: 'Bash', tool_input: { command: 'make' } }).status === 0 && beat('api')?.event, 'post'],
     ['a call from the main checkout naming a worktree path is that agent\'s', call({ cwd: dir, tool_name: 'Edit', tool_input: { file_path: join(dir, '.claude/worktrees/web/src/page.ts') } }) && beat('web')?.tool, 'Edit'],
     ['a command from the main checkout that names a worktree is that agent\'s', call({ cwd: dir, tool_name: 'Bash', tool_input: { command: 'cd .claude/worktrees/docs && make' } }) && beat('docs')?.tool, 'Bash'],
     ['a call naming no worktree is its agent id\'s last worktree', call({ cwd: dir, tool_name: 'Read', tool_input: { file_path: join(dir, 'README.md') }, agent_id: 'a1' }) && beat('api')?.tool, 'Read'],
     ['the lead\'s own call is the lead\'s', call({ cwd: dir, tool_name: 'Grep', tool_input: { pattern: 'parseRow' } }) && beat('lead')?.what, 'parseRow'],
     ['a call in a sibling project writes nothing', call({ cwd: join(dir, '..', 'sibling'), tool_name: 'Read', tool_input: { file_path: '/elsewhere/x' } }) && beat('sibling'), null],
-    ['a broken event lets the call through', runHook(hook, dir, null), 0],
+    ['a broken event lets the call through', runHook(hook, dir, null).status, 0],
     ['broken event text never throws', (() => { try { return main('{ "hook_event_name": "PreToolUse", '); } catch { return 'threw'; } })(), 0],
   ];
   return verdicts('heartbeat', cases);

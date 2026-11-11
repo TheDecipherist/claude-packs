@@ -15,10 +15,10 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mjs';
 import { foldersOfKind, readLayout } from './lib/layout.mjs';
-import * as project from './lib/project.mjs';
+import { claudeRoot, insideProject, relInCheckout } from './lib/project.mjs';
 import { editOf, git, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
@@ -27,14 +27,14 @@ const DEFAULT_GLOBS = ['JUCE/**', '**/JUCE/modules/**', 'JuceLibraryCode/**', 'l
 // The build output; a project whose build lives elsewhere names it in layout.json "buildOutput" (a build in out/, while build/
 // holds the report and the pictures, which agents write). Any nested clone under build/_deps stays vendored either way.
 const buildGlobs = (layout) => [...(layout.buildOutput ?? ['build/**']), 'build/_deps/**'];
-// What makes a write to this file wrong, or null. `p` is the project library (lib/project.mjs).
+// What makes a write to this file wrong, or null. `root` is the project's folder.
 // layout.json "writeOnce" globs (KWB-21): evidence a command leaves; a new file may be added, an existing one is never changed,
 // moved or deleted, so what a gate recorded stays what it recorded.
-function judge(p, file, base, op = 'write') {
+function judge(root, file, base, op = 'write') {
   const abs = resolve(base, file);
-  if (!p.insideProject(abs)) return null;
-  const rel = p.relInCheckout(abs).replace(/^\.claude\/worktrees\/[^/]+\//, '');
-  const layout = readLayout(p.claudeRoot(abs));
+  if (!insideProject(root, abs, base)) return null;
+  const rel = relInCheckout(root, abs, base).replace(/^\.claude\/worktrees\/[^/]+\//, '');
+  const layout = readLayout(claudeRoot(root, abs, base));
   const tree = foldersOfKind(layout, 'copy').find((t) => rel === t || rel.startsWith(`${t}/`));
   if (tree) return { rel, tree, layout };
   if (matchesAny(rel, [...DEFAULT_GLOBS, ...buildGlobs(layout), ...(layout.protected ?? [])])) return { rel, layout };
@@ -44,9 +44,9 @@ function judge(p, file, base, op = 'write') {
 
 // Every file the call writes, by any route (lib/writes.mjs): Write, Edit, MultiEdit, NotebookEdit, and the
 // shell's >, >>, tee, sed -i, perl -i, cp, mv (its source too), ln, rm, truncate, touch, dd of=, a heredoc.
-export function verdict(payload, p = project) {
-  for (const w of writesOf(payload, payload.cwd ?? p.ROOT)) {
-    const hit = judge(p, w.path, p.ROOT, w.op);
+export function verdict(payload, root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()) {
+  for (const w of writesOf(payload, payload.cwd ?? root)) {
+    const hit = judge(root, w.path, root, w.op);
     if (hit) return { ...hit, why: payload.tool_name === 'Bash' ? `the command writes ${hit.rel}` : hit.rel };
   }
   return null;
@@ -89,10 +89,6 @@ async function selftest() {
     protected: ['design/reference/**'],
     guards: { copy: { tools: ['tools/copy_tabula.py', 'tools/copy_reimport.py', 'tools/copy_promote.py'] } },
   }));
-  const saved = process.env.CLAUDE_PROJECT_DIR;
-  process.env.CLAUDE_PROJECT_DIR = root;
-  const p = await import(`${pathToFileURL(join(import.meta.dirname, 'lib', 'project.mjs')).href}?selftest`);
-  process.env.CLAUDE_PROJECT_DIR = saved;
   const W = (f) => ({ tool_name: 'Write', tool_input: { file_path: join(root, f) } });
   const E = (f) => ({ tool_name: 'Edit', tool_input: { file_path: join(root, f), old_string: 'a', new_string: 'b' } });
   const N = (f) => ({ tool_name: 'NotebookEdit', tool_input: { notebook_path: join(root, f) } });
@@ -115,7 +111,7 @@ async function selftest() {
   ];
   const cwd = process.cwd();
   process.chdir(root); // a hook runs in the project's folder
-  const bad = [...refused.filter((x) => !verdict(x, p)), ...passed.filter((x) => verdict(x, p))];
+  const bad = [...refused.filter((x) => !verdict(x, root)), ...passed.filter((x) => verdict(x, root))];
   process.chdir(cwd);
   for (const x of bad) console.error(`protect-vendor selftest FAILED on ${JSON.stringify(x.tool_input)}`);
   rmSync(root, { recursive: true, force: true });
@@ -134,15 +130,15 @@ function selftestRepo() {
   put(join(dir, 'build/_deps/juce-src/modules/juce_core/juce_core.h'), '// juce\n');
   git(join(dir, 'build/_deps/juce-src'), 'init', '-q');
   const wt = join(dir, '.claude/worktrees/agent-x');
-  const e = (file) => runHook(hook, dir, editOf(join(dir, file)));
+  const e = (file) => runHook(hook, dir, editOf(join(dir, file))).status;
   return verdicts('protect-vendor', [
     ['our own source', e('src/dsp/Svf.cpp'), 0],
     ['JUCE modules', e('JUCE/modules/juce_core/juce_core.h'), 2],
     ['a nested clone under build/_deps (Sub37 WB-2)', e('build/_deps/juce-src/modules/juce_core/juce_core.h'), 2],
     ['a layout "protected" glob', e('design/ref.md'), 2],
-    ['a worktree file is judged in the worktree', runHook(hook, dir, editOf(join(wt, 'src/dsp/Svf.cpp'))), 0],
-    ['a worktree\'s vendored folder', runHook(hook, dir, editOf(join(wt, 'third_party/lib/lib.h'))), 2],
-    ['another project is not ours', runHook(hook, dir, editOf(join(dirname(dir), 'elsewhere/JUCE/x.h'))), 0],
+    ['a worktree file is judged in the worktree', runHook(hook, dir, editOf(join(wt, 'src/dsp/Svf.cpp'))).status, 0],
+    ['a worktree\'s vendored folder', runHook(hook, dir, editOf(join(wt, 'third_party/lib/lib.h'))).status, 2],
+    ['another project is not ours', runHook(hook, dir, editOf(join(dirname(dir), 'elsewhere/JUCE/x.h'))).status, 0],
     ['build/ is the build output by default', e('build/report.md'), 2],
   ]) | selftestBuildOutput(hook);
 }
@@ -152,9 +148,9 @@ function selftestBuildOutput(hook) {
   const dir = scratchProject({ 'src/a.cpp': '//\n', 'build/evidence/s1/run.txt': 'measured\n' },
     { folders: {}, concepts: {}, buildOutput: ['out/**'], writeOnce: ['build/evidence/**'] });
   git(dir, 'init', '-q');
-  const e = (file) => runHook(hook, dir, editOf(join(dir, file)));
-  const w = (file) => runHook(hook, dir, { tool_name: 'Write', tool_input: { file_path: join(dir, file), content: 'x\n' } });
-  const b = (command) => runHook(hook, dir, { tool_name: 'Bash', tool_input: { command }, cwd: dir });
+  const e = (file) => runHook(hook, dir, editOf(join(dir, file))).status;
+  const w = (file) => runHook(hook, dir, { tool_name: 'Write', tool_input: { file_path: join(dir, file), content: 'x\n' } }).status;
+  const b = (command) => runHook(hook, dir, { tool_name: 'Bash', tool_input: { command }, cwd: dir }).status;
   return verdicts('protect-vendor buildOutput', [
     ['build/for-you.md under buildOutput out/**', e('build/for-you.md'), 0],
     ['out/ under buildOutput out/**', e('out/lib/x.o'), 2],
