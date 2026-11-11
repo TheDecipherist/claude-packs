@@ -1,6 +1,7 @@
 // 1.1.0: a project can build itself, and a reader can find out how. The templates come from two whole builds run with nobody there. KWB-84: `new` used to
 // install a synth's laws on any project.
-import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, statSync, test, writeFileSync } from './kit-cli.mts';
+import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readdirSync, readFileSync, spawnSync, statSync, test, writeFileSync } from '../kit-cli.mts';
+import type { Spawned } from '../kit-cli.mts';
 
 const FOLDER = 'docs/workorders/billing';
 const TEMPLATES = 'prompts/workorder/templates';
@@ -66,12 +67,12 @@ test('the runner dates its log with a format BSD and GNU date both take (KWB-95)
 
 // The runner in a scratch repo, with stand-ins on PATH: `claude` runs `session` (a bash body), and `npx` is the kit's pre-flight,
 // `workorder check`, which exits `check` (0 passes the order, 1 refuses it).
-function runOrder(prefix, session, { check = 0, env = {} } = {}) {
+function runOrder(prefix: string, session: string, { check = 0, env = {} }: { check?: number; env?: Readonly<Record<string, string>> } = {}): { dir: string; run: Spawned } {
   const dir = fresh(prefix);
   execFileSync('git', ['init', '-q'], { cwd: dir });
   assert.equal(cli(dir, 'workorder', 'billing').status, 0);
   const bin = join(dir, '.bin');
-  execFileSync('mkdir', ['-p', bin]);
+  mkdirSync(bin, { recursive: true });
   writeFileSync(join(bin, 'claude'), `#!/usr/bin/env bash\n${session}\n`, { mode: 0o755 });
   writeFileSync(join(bin, 'npx'), `#!/usr/bin/env bash\necho "check: $*" >> "${join(dir, '.checks')}"\nexit ${check}\n`, { mode: 0o755 });
   const run = spawnSync('bash', [join(dir, FOLDER, 'run.sh')], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, ...env } });
@@ -93,7 +94,7 @@ test('the runner keeps its session logs out of git (KWB-98)', () => {
 // KWB-125: a session refused for the account's usage limit moved nothing because it could not run, not because the work is stuck.
 // The stand-in `claude` is refused four times, more than the three still sessions that stop a run, then finishes the order.
 test('the runner waits out a usage limit and carries on, never counting it as a still session (KWB-125)', () => {
-  const refused = `{"type":"result","is_error":true,"api_error_status":429,"api_error":"usage_limit_reached","result":"You have hit your weekly limit"}`;
+  const refused = '{"type":"result","is_error":true,"api_error_status":429,"api_error":"usage_limit_reached","result":"You have hit your weekly limit"}';
   const session = `echo x >> "$PWD/.calls"\nif [ "$(wc -l < "$PWD/.calls")" -le 4 ]; then echo '${refused}'; exit 1; fi\ntouch "$PWD/${FOLDER}/DONE"`;
   const { dir, run } = runOrder('wo-limit-', session, { env: { LIMIT_WAIT: '0' } });
   assert.equal(run.status, 0, run.stdout + run.stderr);
@@ -131,7 +132,7 @@ test('workorder --template rebuild writes the rebuild steps; an unknown template
   assert.equal(cli(plain, 'workorder', 'billing').status, 0);
   const blank = readFileSync(join(plain, FOLDER, 'workorder.md'), 'utf8');
   assert.match(blank, /^# Work order: billing/, 'the plain form keeps the blank steps');
-  assert.equal(blank, readFileSync(join(KIT, `${TEMPLATES}/generic.md`), 'utf8').replaceAll('{{name}}', 'billing').replace(/\{\{date\}\}/, blank.match(/Written (\S+)\./)[1]), 'no flag is generic');
+  assert.equal(blank, readFileSync(join(KIT, `${TEMPLATES}/generic.md`), 'utf8').replaceAll('{{name}}', 'billing').replace(/\{\{date\}\}/, blank.match(/Written (\S+)\./)?.[1] ?? ''), 'no flag is generic');
   const bad = fresh('wo-bad-');
   const r = cli(bad, 'workorder', 'x', '--template', 'nope');
   assert.notEqual(r.status, 0);
@@ -149,8 +150,8 @@ test('each template writes from a scratch folder with nothing left to fill in by
 });
 
 const HTML_NEVER = '- Prototype the panel or a page in HTML or a web page: it is a second design that drifts from the first. The reference picture is measured into numbers and the panel is drawn in code from that table.';
-const template = (t) => readFileSync(join(KIT, `${TEMPLATES}/${t}.md`), 'utf8');
-const unfenced = (text) => text.replace(/^```[\s\S]*?^```/gm, '').replace(/<\/?constraints>/g, '');
+const template = (t: string): string => readFileSync(join(KIT, `${TEMPLATES}/${t}.md`), 'utf8');
+const unfenced = (text: string): string => text.replace(/^```[\s\S]*?^```/gm, '').replace(/<\/?constraints>/g, '');
 
 test('the plugin template is the house decided: no angle bracket from the stack on, the HTML line, the install block', () => {
   const text = template('plugin');
@@ -184,8 +185,8 @@ test('the prompt lands one branch per order and gates it with the tests the bran
 test('the rebuild template names only skills, rules and tools the kit has', () => {
   const text = template('rebuild');
   // **The foundation** lists them as "its skills `a`, `b`; its tool `c`; and its rules `d` and `e`."
-  const named = (kind) => [...text.matchAll(new RegExp(`its ${kind} ([^;.]*)`, 'g'))].flatMap((m) => [...m[1].matchAll(/`([\w-]+)`/g)].map((n) => n[1]));
-  const have = (kind, name) => readdirSync(join(KIT, 'packs')).some((p) => existsSync(join(KIT, 'packs', p, kind, name)));
+  const named = (kind: string): string[] => [...text.matchAll(new RegExp(`its ${kind} ([^;.]*)`, 'g'))].flatMap((m) => [...(m[1] ?? '').matchAll(/`([\w-]+)`/g)].map((n) => n[1] ?? ''));
+  const have = (kind: string, name: string): boolean => readdirSync(join(KIT, 'packs')).some((p) => existsSync(join(KIT, 'packs', p, kind, name)));
   const skills = named('skills');
   assert.ok(skills.length >= 10, `the foundation names its skills: ${skills}`);
   for (const s of skills) assert.ok(have('skills', s), `skill ${s}`);
@@ -197,16 +198,16 @@ test('a new project with no packs named takes base alone, never a synth pack (KW
   const parent = fresh('new-');
   const r = spawnSync('node', [CLI, 'new', 'shop', '--dir', parent], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.deepEqual(JSON.parse(readFileSync(join(parent, 'shop/.claude/claude-packs.lock.json'), 'utf8')).packs, ['base']);
+  assert.deepEqual((JSON.parse(readFileSync(join(parent, 'shop/.claude/claude-packs.lock.json'), 'utf8')) as { packs: string[] }).packs, ['base']);
 });
 
 test('a new reader meets the benefits first, and every file the page says a project keeps is one the kit names', () => {
   assert.ok(README.indexOf('https://www.npmjs.com/package/@thedecipherist/claude-packs') < README.indexOf('## Getting started'), 'the npm link is at the top');
   assert.ok(README.indexOf('## Getting started') < README.indexOf('## See it work'));
   for (const heading of ['## What a project keeps', '## How it is tested', '## Let it build on its own']) assert.ok(README.includes(heading), heading);
-  const made = readFileSync(join(KIT, 'lib/new.mjs'), 'utf8');
+  const made = readFileSync(join(KIT, 'lib/new.mts'), 'utf8');
   for (const file of ['CLAUDE.md', 'build.md', 'bugs.md', 'workflow-bugs.md', 'docs/versions.md']) assert.ok(made.includes(file), file);
-  const logged = readFileSync(join(KIT, 'packs/base/hooks/lib/event-log.mjs'), 'utf8') + readFileSync(join(KIT, 'packs/base/hooks/lib/hook-log.mjs'), 'utf8');
+  const logged = readFileSync(join(KIT, 'packs/base/hooks/lib/event-log.mts'), 'utf8') + readFileSync(join(KIT, 'packs/base/hooks/lib/hook-log.mts'), 'utf8');
   for (const file of ['events.jsonl', 'refusals.jsonl', 'crashes.jsonl', 'hooks.log']) assert.ok(logged.includes(file), file);
 });
 
@@ -214,10 +215,11 @@ test('every template ends its build with the README, written by its skill, befor
   // the user: "a final step when the UI is completed that a full pro README.md is made with a screnshot of the unit on top"
   for (const name of ['plugin', 'rebuild', 'generic']) {
     const text = readFileSync(join(KIT, TEMPLATES, `${name}.md`), 'utf8');
-    const steps = [...text.matchAll(/^## W(\d+)\. (.+)$/gm)].map((m) => ({ n: Number(m[1]), title: m[2] }));
+    const steps = [...text.matchAll(/^## W(\d+)\. (.+)$/gm)].map((m) => ({ n: Number(m[1]), title: m[2] ?? '' }));
     const readme = steps.find((s) => s.title === 'The README');
     assert.ok(readme, `${name}: a README step`);
     const review = steps.find((s) => /^Before (you call it|calling it) finished/.test(s.title));
+    assert.ok(review, `${name}: a last review step`);
     assert.equal(review.n, readme.n + 1, `${name}: the README comes right before the last review`);
     assert.deepEqual(steps.map((s) => s.n), steps.map((_, i) => i), `${name}: the steps are numbered in order, none skipped`);
     const body = text.slice(text.indexOf(`## W${readme.n}. The README`), text.indexOf(`## W${review.n}.`));
