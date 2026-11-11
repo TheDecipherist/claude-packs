@@ -11,6 +11,7 @@ import { basename, join } from 'node:path';
 import { readJson } from './json.mjs';
 import { commitsAhead, mergedInto, runningOrders, workIn, worktreesOf } from './run-discovery.mjs';
 import { machineName, remotesOf, remotesReport } from './run-remotes.mjs';
+import { transcriptBeats } from './run-transcripts.mjs';
 import { readText } from './shell-writes.mjs';
 
 const ID = String.raw`[A-Z]+\d+[a-z]?`;   // W3, W3b, L5: any order's step ids
@@ -86,7 +87,9 @@ export function orderStatus(project, order) {
     ? status.steps.map((s) => ({ id: s.id, title: s.title ?? '', items: s.items || 1, done: Math.min(s.done ?? 0, s.items || 1), agent: s.agent ?? null }))
     : derivedSteps(project, order, trees);
   const listed = new Map((status?.agents ?? []).map((a) => [a.name, a]));
-  const beatOf = (name) => readJson(join(project, '.claude', 'logs', 'heartbeats', `${name}.json`));   // the heartbeat hook's
+  // the heartbeat hook's file, else the agent's last call in Claude Code's own transcripts (an install with no heartbeat yet)
+  const fromTranscripts = transcriptBeats(project);
+  const beatOf = (name) => readJson(join(project, '.claude', 'logs', 'heartbeats', `${name}.json`)) ?? fromTranscripts[name] ?? null;
   const alive = (beat) => beat && Date.now() - Date.parse(beat.t ?? '') < LIVE_MS;
   // an agent of this order with nothing written yet still counts: its worktree is on the order's own branch, work/<order>-<name>
   // (the user: "I dont see those 5 agents"); one merged back and untouched for KIN_MS is a finished agent, unless work runs in it

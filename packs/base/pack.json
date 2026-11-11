@@ -189,6 +189,11 @@
           },
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-find.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/repo-litter.mjs\"",
             "timeout": 10
           },
@@ -272,7 +277,8 @@
     "hooks/making.mjs",
     "hooks/making-check.mjs",
     "hooks/run-hooks.mjs",
-    "hooks/heartbeat.mjs"
+    "hooks/heartbeat.mjs",
+    "hooks/no-find.mjs"
   ],
   "optIn": []
 }

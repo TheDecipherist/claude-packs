@@ -1,12 +1,12 @@
 // The runs as a tree, the one shape `status` and the status line both draw (1.8.1): a project, its orders under it when it has
 // more than one, each order's agents under the order. The user: "but why is that not under the VSYNTHGT project?", "> lead
 // should not be on a new line should it? it looks confusing. cant see what really belongs to the VSYNTHGT project".
-//   PC: VSYNTHGT     ...  59%  41 of 99 items left, 2 orders
-//   ├ rebuild        ...  60%  32 of 80 items left, lead on W9 The engine: the sound
-//   └ ui-look        ...  53%  9 of 19 items left, lead on L2 The panel fixed
-//   MAC: BANDWARP    ...  47%  40 of 76 items left, 4 agents
-//   ├ dsp      > W3b The cluster   ...
-//   └ panel    > W8 The main panel ...
+//   PC: SHOP         ...  59%  41 of 99 items left, 2 orders
+//   ├ api            ...  60%  32 of 80 items left, lead on W9 The import
+//   └ web            ...  53%  9 of 19 items left, lead on L2 The checkout page
+//   MAC: BILLING     ...  47%  40 of 76 items left, 4 agents
+//   ├ invoices > W3b The ledger    ...
+//   └ emails   > W8 The templates  ...
 // A lead working alone is said on its order's row, never as a row of its own.
 import { basename } from 'node:path';
 import { checkedText, percent, projectOf, runRows, workLine } from './run-status.mjs';
