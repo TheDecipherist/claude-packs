@@ -42,7 +42,9 @@ export function refreshRuns(cache, nowMs, start = startRefresh) {
 export function runsSegments(cache, nowMs, paint, mode) {
   const report = readJson(cache);
   const runs = Array.isArray(report?.runs) ? report.runs.filter((r) => r?.project && Array.isArray(r.agents) && Array.isArray(r.steps)) : [];
-  if (runs.length === 0) return [];
+  const far = (Array.isArray(report?.unreachable) ? report.unreachable : []).filter((u) => typeof u?.host === 'string')
+    .map((u) => `${bold(paint(`${u.host.toUpperCase()}:`, C.red), mode)} ${paint(`not reached (${u.why ?? '?'})`, C.red)}`);   // never silence
+  if (runs.length === 0) return far;
   const age = ageOf(cache, nowMs);
   const stale = age !== null && age > STALE_MS;
   const tint = (colour) => (stale ? C.dim : colour);
@@ -54,7 +56,7 @@ export function runsSegments(cache, nowMs, paint, mode) {
       `  ${paint(a.live, a.quiet ? C.red : C.green)}${a.now ? paint(`  ${a.now.slice(0, 60)}`, C.dim) : ''}`.trimEnd())];
   });
   if (stale) rows[0] += paint(`  (as of ${Math.round(age / 60_000)}m ago)`, C.red);
-  return rows;
+  return [...rows, ...far];
 }
 
 if (process.argv[1] === SELF && process.argv[2] === '--refresh' && process.argv[3]) writeJson(process.argv[3], runsReport());

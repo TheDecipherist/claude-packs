@@ -11,6 +11,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { readJson } from './json.mjs';
 import { runningOrders, workIn } from './run-discovery.mjs';
+import { remotesReport } from './run-remotes.mjs';
 import { readText } from './shell-writes.mjs';
 
 const ID = String.raw`[A-Z]+\d+[a-z]?`;   // W3, W3b, L5: any order's step ids
@@ -174,7 +175,7 @@ function liveOf(beat, updated, work, nowMs) {
  *  `checkedAt`: when the runs were last checked (the status line's cache), said on the project's row. */
 export function runRows(s, nowMs = Date.now(), checkedAt = null) {
   const base = basename(s.project).toUpperCase();
-  const name = base + (s.order && s.order.toUpperCase() !== base ? ` (${s.order})` : '');
+  const name = (s.host ? `${s.host.toUpperCase()}: ` : '') + base + (s.order && s.order.toUpperCase() !== base ? ` (${s.order})` : '');
   const n = s.agents.length;
   const checked = Number.isNaN(Date.parse(checkedAt ?? '')) ? '' : `, checked ${ago(Math.max(0, Math.round((nowMs - Date.parse(checkedAt)) / 1000)))} ago`;
   const state = (s.finished ? 'done' : `${s.items - s.done} of ${s.items} items left, ${n} agent${n === 1 ? '' : 's'}`) + checked;
@@ -196,10 +197,12 @@ function ordersIn(project, only) {
   try { return readdirSync(join(project, 'docs', 'workorders'), { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name); } catch { return []; }
 }
 
-/** Every run's progress: { updated, dir, runs: [orderStatus] }, the runs alive on this machine, or one project's orders. */
-export function runsReport({ dir = null, order = null } = {}) {
+/** Every run's progress: { updated, dir, runs: [orderStatus], unreachable: [{ host, why }] }: the runs alive on this machine
+ *  and on every machine remotes.json lists (1.8.1), or one project's orders here (`dir`). */
+export function runsReport({ dir = null, order = null, remotes = undefined, ask = undefined } = {}) {
   const runs = (dir ? ordersIn(dir, order).map((o) => ({ project: dir, order: o })) : runningOrders()).map((r) => orderStatus(r.project, r.order));
   const work = workIn(runs.flatMap((r) => r.agents.map((a) => a.path)));   // the check: what really runs in each worktree now
   for (const a of runs.flatMap((r) => r.agents)) a.work = work?.[a.path] ?? null;
-  return { updated: new Date().toISOString(), dir, runs };
+  const far = dir ? { runs: [], unreachable: [] } : remotesReport(remotes, ask);
+  return { updated: new Date().toISOString(), dir, runs: [...runs, ...far.runs], unreachable: far.unreachable };
 }

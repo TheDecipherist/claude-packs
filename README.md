@@ -199,6 +199,14 @@ An agent turns red when it is stuck by the evidence: no tool call for 5 minutes,
 
 `init` and `update` wire it (`.claude/tools/statusline.mjs`) into `.claude/settings.json` where the project has no status line; one you already have is kept. `"disable": ["tools/statusline.mjs"]` in `layout.json` takes it out.
 
+A run on another machine shows here too. List the machines in `~/.config/claude-packs/remotes.json`:
+
+```json
+{ "remotes": [ { "name": "mac", "ssh": "mac", "dir": "~/projects/shop" } ] }
+```
+
+`ssh` is the host as your `~/.ssh/config` names it, with a key, since nothing waits for a password. `dir` is a project on that machine whose kit answers. Each refresh asks every machine for its `status --json`, so its processes, cores and memory are measured there, and its rows read `MAC: SHOP`. A machine that cannot be reached gets a red row that says so.
+
 ## Let it build on its own
 
 A work order is a written brief that a project can build from with nobody there. It suits anything that takes many sessions: a new product, a port, a big migration, a rebuild from a spec.

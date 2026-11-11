@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.1 (2026-11-10)
+
+- The runs of other machines: `~/.config/claude-packs/remotes.json` lists them (`name`, `ssh` as `~/.ssh/config` names the host, and `dir`, a project there whose kit answers). `status` and the status line ask each for its `status --json` over ssh, with no password prompt, a 5-second connect limit and 20 seconds in all, from the background refresh, so nothing waits on a machine that is asleep; its runs show as `MAC: SHOP` with their agents, measured on that machine. A machine that cannot be reached, or whose kit has no `status`, is a red row that says so. `status --dir` asks no machine. `test/run-remotes.test.mjs`.
+
 ## 1.8.0 (2026-11-10)
 
 - The kit's status line (`base`): every project shows what is working and where it is. The top line starts with the kit version that project runs (from its lock), then the model and effort, the context used, and the 5h and 7d quotas on a subscription or the session's cost on API billing; the model shows red when a fallback swapped it from the one pinned in the user's settings. The second line has the branch, its uncommitted files, ahead and behind, the last tool with its target and the last shell command, read from the session's own transcript. Below them, every unattended run on the machine: `PROJECT [bar] NN% > agent > step [bar] NN%`, an agent quiet for 30 minutes in red. The runs are found in the background at most every 30 seconds and drawn from a cache, so a render never waits (about 70 ms); any feed that is missing or broken draws nothing. `init` and `update` wire it in `.claude/settings.json` with `refreshInterval: 1` where the project has no status line of its own; a project's own is kept and the install says so; `layout.json` `"disable": ["tools/statusline.mjs"]` takes the kit's out. `test/statusline.test.mjs`.
