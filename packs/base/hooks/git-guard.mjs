@@ -129,7 +129,9 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
         (verb === 'clean' && /\s-[a-zA-Z]*n/.test(rest)) ||
         (verb === 'checkout' && /\s--(?:theirs|ours)\b/.test(rest) && env.merging?.(here)); // KF-21: a conflict resolved, not an undo
       if (!harmless) {
-        const d = env.dirty(here);
+        // an untracked file is touched only by clean: checkout, restore, stash and reset --hard leave it, and git itself refuses a
+        // checkout that would overwrite one (KWB-147: a worktree's node_modules link, the status line's state file)
+        const d = env.dirty(here).filter((l) => verb === 'clean' || !l.startsWith('??'));
         if (d.length) {
           const safe = c.safeRestore
             ? `Commit it, or use the safe form: ${c.safeRestore} (git status, every dirty file copied aside and checked, then only those paths restored).`

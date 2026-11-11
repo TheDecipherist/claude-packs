@@ -151,6 +151,8 @@ export async function selftest(hookFile, { problem, house }) {
   // the house laws
   const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true };
   const clean = { ...isDirty, dirty: () => [] };
+  // KWB-147: only untracked entries (a worktree's node_modules link, the status line's own state file): an undo of tracked files never touches them
+  const untrackedOnly = { ...isDirty, dirty: () => ['?? node_modules', '?? .claude/statusbar-activity.json'] };
   const on = (branch, env = clean) => ({ ...env, branch: typeof branch === 'function' ? branch : () => branch });
   const push = 'git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/HouseOwner/app.git main';
   const remote = (url) => ({ ...clean, remoteUrl: () => url });   // a remote whose URL is url (KWB-39: SSH names the repo)
@@ -159,7 +161,7 @@ export async function selftest(hookFile, { problem, house }) {
     ['git -C /Users/someone/projects/other add -A', clean], ['cd ~/projects/other && git add -A', clean],
     ['cd ~/projects/other && git checkout -- tools/bank/kept.json', isDirty],
     ['git checkout -- design/gen_panel.py', isDirty], ['git stash', isDirty], ['git restore .', isDirty], ['git reset --hard HEAD~1', isDirty],
-    ['git clean -fd', isDirty], ['GUARD_OK=1 git checkout -- x.h', isDirty], ['GUARD_OK=1 git restore build/Testing/Temporary/LastTest.log', isDirty],
+    ['git clean -fd', isDirty], ['git clean -fd', untrackedOnly], ['GUARD_OK=1 git checkout -- x.h', isDirty], ['GUARD_OK=1 git restore build/Testing/Temporary/LastTest.log', isDirty],
     ['GUARD_OK=1 git restore --staged --worktree a.md', isDirty], ['git restore --staged --worktree a.md', isDirty],
     ['git push', clean], ['git push origin main', clean], [`${push} --force`, clean],
     ['git push https://x-access-token:$PERSONAL_GITHUB_TOKEN@github.com/other-org/app.git main', clean],
@@ -177,6 +179,7 @@ export async function selftest(hookFile, { problem, house }) {
   const mustPass = [
     ['git add build.md src/Row.h', isDirty], ["git commit -m 'C1: row clock' -- build.md src/Row.h", isDirty],
     ['cd ~/projects/other && git add tools/bank/kept.json', isDirty], ['git status', isDirty], ['git checkout -- x.h', clean],
+    ['git checkout -- x.h', untrackedOnly], ['git checkout work/1.9.0-x', untrackedOnly], ['git stash', untrackedOnly], ['git reset --hard HEAD', untrackedOnly],
     ['git restore --staged x.h', isDirty], ['python3 tools/safe_restore.py x.h', isDirty], ['git stash list', isDirty],
     ['git checkout -b c2-filter', isDirty], [push, isDirty],
     ['source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create HouseOwner/app --private', clean],
