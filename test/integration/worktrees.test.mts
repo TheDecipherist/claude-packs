@@ -12,6 +12,7 @@ import { readJson } from '../../packs/base/hooks/lib/json.mts';
 import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
 import { COMMAND_CASES } from '../worktree-cases-commands.mts';
 import { PACK_CASES } from '../worktree-cases-packs.mts';
+import { RESIDENT_CASE } from '../worktree-cases-resident.mts';
 import { worktreeCase as CODE_SHAPE } from '../../packs/base/hooks/code-shape.mts';
 import { worktreeCase as DISPATCH_ONCE } from '../../packs/base/hooks/dispatch-once.mts';
 import { worktreeCase as FILE_SIZE_GUARD } from '../../packs/base/hooks/file-size-guard.mts';
@@ -38,6 +39,7 @@ const SHAPE = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(
 const CASES: Record<string, (checkouts: Checkouts) => void | Promise<void>> = {
   ...PACK_CASES,
   ...COMMAND_CASES,
+  ...RESIDENT_CASE,
   // the runner as settings.json runs it (KWB-24): the hooks it names judge a worktree file against the worktree, and the
   // timing lines go to the main checkout's log (CLAUDE_PROJECT_DIR)
   'run-hooks.mjs': ({ here, wt }) => {
