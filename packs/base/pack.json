@@ -84,6 +84,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
+            "role": "recorder",
             "async": true,
             "timeout": 5
           }
@@ -101,6 +102,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lesson-checks.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -112,11 +114,13 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/placement-law.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/folder-law.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -146,6 +150,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/secrets-guard.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -192,6 +197,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/agents-held.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]
@@ -214,6 +220,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/suite-once.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -225,11 +232,13 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/repo-litter.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/look-gate.mjs\"",
+            "role": "judge",
             "timeout": 20
           }
         ]
@@ -294,6 +303,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
+            "role": "recorder",
             "async": true,
             "timeout": 5
           }
@@ -305,6 +315,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/look-gate.mjs\"",
+            "role": "judge",
             "timeout": 20
           }
         ]
