@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
 import { checkoutRoot } from './lib/project.mts';
 import { bashOf, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
@@ -56,7 +57,7 @@ function targetOf(command: string, cwd: string, where: Where): Target {
 }
 
 export function refusal(command: string, cwd: string, where: Where): string | null {
-  const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const body = blankQuotes(dropHeredocs(command));
   const wipe = WIPES.find(([re]) => re.test(body))?.[1] ?? (RAW_WIPE.test(command) ? 'psql with DROP' : null);
   if (!wipe) return null;
   const { host, from } = targetOf(command, cwd, where);

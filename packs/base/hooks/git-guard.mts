@@ -39,6 +39,7 @@ import { escapeRegExp } from './lib/glob.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mts';
 import { failed } from './lib/remote-heads.mts';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
 import type { GitEnv, GitGuards } from './lib/remote-heads.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { trunkLag } from './lib/trunk-lag.mts';
@@ -158,8 +159,7 @@ export function house(cmd: string, cwd: string, env: HouseEnv, cfg: HouseCfg = {
   const c: HouseCfg = { ...DEFAULTS, ...cfg };
   const owner = c.owner;
   const tok = c.tokenVar ?? 'PERSONAL_GITHUB_TOKEN';
-  let body = cmd.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '');
-  body = body.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const body = blankQuotes(dropHeredocs(cmd));
   let here = cwd;
   let pushedBefore = false;
   for (const part of body.split(/&&|\|\||;|\||\n|\(|\)|\x60|\$\(/)) {

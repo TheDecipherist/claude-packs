@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { git as gitIn } from './kit-cli.mts';
 
 const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
 const ENV = { ...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t' };
@@ -22,7 +23,7 @@ test('new <name> scaffolds the project, installs the kit and starts it on a work
   assert.deepEqual(JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8')).packs, ['base', 'audio-core', 'gpu-painter']);
   assert.ok(existsSync(join(dir, 'src/dsp')) && existsSync(join(dir, 'src/painter')), 'the layout folders');
   assert.match(r.stdout, /OK: base, audio-core, gpu-painter/);
-  const git = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8' }).trim();
+  const git = (...a) => gitIn(dir, ...a).trim();
   assert.equal(git('rev-parse', '--abbrev-ref', 'HEAD'), 'work/start', 'work goes on from a work/ branch');
   assert.equal(git('log', '--format=%s', 'main'), 'synthx: the house structure and claude-packs', 'the scaffold is main\'s first commit');
   assert.equal(git('status', '--porcelain'), '', 'nothing left over');

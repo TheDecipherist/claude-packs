@@ -10,6 +10,7 @@
 import { resolve } from 'node:path';
 import { gitLines } from './lib/git-run.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
 import { readLayout } from './lib/layout.mts';
 import { checkoutRoot, claudeRoot } from './lib/project.mts';
 import { bashOf, git, promptFile, put, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
@@ -54,7 +55,7 @@ export interface SuiteWhere {
 }
 
 export function refusal(command: string, cwd: string, asked: boolean, where: SuiteWhere): string | null {
-  const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const body = blankQuotes(dropHeredocs(command));
   let here = cwd;
   for (const part of body.split(/&&|\|\||;|\||\n|(?<![&>])&(?![&>])/)) {
     const cd = part.trim().match(/^cd\s+(\S+)$/);

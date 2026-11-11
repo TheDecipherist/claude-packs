@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { put } from '../packs/base/hooks/lib/files.mts';
+import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
 
 export { default as assert } from 'node:assert/strict';
 export { test } from 'node:test';
@@ -24,6 +25,13 @@ export const CLI: string = join(KIT, 'bin/claude-packs.mjs');
 export const run = (dir: string, ...args: string[]): string => execFileSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 export const cli = (dir: string, ...args: string[]): Spawned => spawnSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 export const fresh = (prefix: string): string => mkdtempSync(join(tmpdir(), prefix));
+const TEST_IDENTITY = { name: 't', email: 't@local' };
+/** git in a test's folder, as the test's own identity: its stdout, or a throw with git's message, since the setup failed. */
+export function git(cwd: string, ...args: string[]): string {
+  const r = gitRun(args, { cwd, env: process.env, identity: TEST_IDENTITY });
+  if (!r.ok) throw new Error(`git ${args.join(' ')}: ${r.stderr.trim()}`);
+  return r.stdout;
+}
 /** A fresh folder holding these files: { "rel/path": "text" }. */
 export function projectWith(files: Readonly<Record<string, string>>, prefix = 'find-'): string {
   const dir = fresh(prefix);

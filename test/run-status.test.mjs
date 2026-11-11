@@ -1,7 +1,7 @@
 // 1.7.3: `claude-packs status`, where every unattended run stands. The user: "it reports which projects its working on, how many
 // agents per project, where they are, and how much is left", "PROJECT NAME (PROGRESS 0% - 100%) > AGENT X > STEP (PROGRESS)".
 import { utimesSync } from 'node:fs';
-import { assert, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mts';
+import { assert, execFileSync, fresh, git as gitIn, join, mkdirSync, test, writeFileSync } from './kit-cli.mts';
 import { orderStatus, progressOf, runRows, runnersIn, runsReport, stepsOf, workIn } from '../lib/run-status.mjs';
 import { bar, statusCommand, statusLines } from '../lib/status-cli.mjs';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
@@ -11,7 +11,7 @@ const ORDER ='# Work order: demo\n\n## W0. Set up\n\n1. one\n2. two\n\n**Done wh
 
 function project({ progress = '', status = null } = {}) {
   const dir = fresh('runstatus-');
-  const git = (...a) => execFileSync('git', ['-c', 'user.email=t@local', '-c', 'user.name=t', ...a], { cwd: dir, stdio: 'pipe' });
+  const git = (...a) => gitIn(dir, ...a);
   mkdirSync(join(dir, 'docs/workorders/demo'), { recursive: true });
   writeFileSync(join(dir, 'docs/workorders/demo/workorder.md'), ORDER);
   writeFileSync(join(dir, 'docs/workorders/demo/progress.md'), progress);

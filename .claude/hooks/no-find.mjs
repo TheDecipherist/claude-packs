@@ -9,6 +9,7 @@
 // returns its Verdict, reads nothing of the process, and its worktree case is data beside its selftest.
 import { bareWords } from './lib/command-prefix.mjs';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mjs';
 import { bashOf, promptFile, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mjs';
 import { lastPrompt } from './lib/turn.mjs';
 import { judgeVerdict } from './lib/writes.mjs';
@@ -24,7 +25,7 @@ export const askedFor = (prompt) => (prompt ?? '').split(/(?<=[.!?\n])/).some((s
 /** The search command a line runs, or null: a part's first real word, past wrappers and runners. Quoted text and heredoc
  *  bodies are no commands. */
 export function searcherIn(command) {
-    const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+    const body = blankQuotes(dropHeredocs(command));
     for (const part of body.split(/&&|\|\||;|\||\n|(?<![&>])&(?![&>])|\$\(|\x60/)) {
         let words = bareWords(part.trim().split(/\s+/).filter(Boolean));
         while (words.length && RUNNERS.has(words[0] ?? ''))

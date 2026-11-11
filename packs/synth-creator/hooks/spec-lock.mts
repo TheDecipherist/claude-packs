@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mts';
 import { isMain, projectRoot, runAsHook } from './lib/hook-log.mts';
 import type { FlagHandler } from './lib/hook-log.mts';
+import { blankQuotes, cutHeredocs } from './lib/shell-lex.mts';
 import { readJson, writeJson } from './lib/json.mts';
 import { checkoutRoot, commandLeavesProject, insideProject, relInCheckout } from './lib/project.mts';
 import { bashOf, put, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
@@ -58,7 +59,7 @@ function judgeWrites(event: HookEvent, state: SpecLockState, ctx: HookContext): 
 // A shell command: Claude unlocking, the lock file written, a locked path named by a command that writes.
 function judgeShell(event: HookEvent, state: SpecLockState, ctx: HookContext): Verdict | null {
   const cmd = event.tool_input?.command ?? '';
-  const bare = cmd.replace(/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?\n\s*\2\s*(?:\n|$)/g, '\n').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const bare = blankQuotes(cutHeredocs(cmd).text);
   if (/spec-lock/.test(bare) && /\bunlock\b/.test(bare)) return block(`Claude may not unlock the spec. ${HOW_TO}`);
   if (/spec-lock\.json/.test(bare) && WRITE_CMD.test(bare)) return block(`the lock file can't be edited. ${HOW_TO}`);
   const routed = judgeWrites(event, state, ctx);

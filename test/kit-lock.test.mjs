@@ -8,9 +8,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { git } from './kit-cli.mts';
 
 const HOOK = fileURLToPath(new URL('../.claude/hooks/kit-lock.mjs', import.meta.url));
-const git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: 'ignore' });
 
 function repo() {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'kl-')));

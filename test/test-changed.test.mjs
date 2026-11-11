@@ -9,10 +9,10 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { choose, graph } from '../scripts/test-changed.mjs';
+import { git } from './kit-cli.mts';
 
 const SCRIPT = fileURLToPath(new URL('../scripts/test-changed.mjs', import.meta.url));
 const KIT = fileURLToPath(new URL('..', import.meta.url));
-const git = (cwd, ...a) => execFileSync('git', ['-c', 'user.email=t@local', '-c', 'user.name=t', ...a], { cwd, stdio: 'pipe' });
 
 function scratchRepo() {
   const dir = mkdtempSync(join(tmpdir(), 'cps-changed-'));

@@ -7,10 +7,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { git } from './kit-cli.mts';
 
 const PKG = fileURLToPath(new URL('..', import.meta.url));
 const CLI = join(PKG, 'bin/claude-packs.mjs');
-const git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: 'ignore' });
 const put = (file, text) => { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, text); };
 const init = (...packs) => {
   const dir = mkdtempSync(join(tmpdir(), 'cps-'));

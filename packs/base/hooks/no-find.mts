@@ -9,6 +9,7 @@
 // returns its Verdict, reads nothing of the process, and its worktree case is data beside its selftest.
 import { bareWords } from './lib/command-prefix.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
 import { bashOf, promptFile, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { lastPrompt } from './lib/turn.mts';
@@ -29,7 +30,7 @@ export const askedFor = (prompt: string | null | undefined): boolean => (prompt 
 /** The search command a line runs, or null: a part's first real word, past wrappers and runners. Quoted text and heredoc
  *  bodies are no commands. */
 export function searcherIn(command: string): string | null {
-  const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const body = blankQuotes(dropHeredocs(command));
   for (const part of body.split(/&&|\|\||;|\||\n|(?<![&>])&(?![&>])|\$\(|\x60/)) {
     let words = bareWords(part.trim().split(/\s+/).filter(Boolean));
     while (words.length && RUNNERS.has(words[0] ?? '')) words = words.slice(1).filter((w, i) => i > 0 || !w.startsWith('-'));

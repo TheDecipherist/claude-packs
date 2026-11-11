@@ -21,6 +21,7 @@
 // runs detached as before (lib/time-state.mts; findings in lib/time-findings.mts).
 import { fileURLToPath } from 'node:url';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
+import { cutHeredocs } from './lib/shell-lex.mts';
 import { ownProcesses, processTable } from './lib/own-processes.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { DEFAULTS, LIMITS, machineFindings, readOnlyCommand } from './lib/time-findings.mts';
@@ -33,7 +34,6 @@ import { pass, refuse } from './lib/verdict.mts';
 export { DEFAULTS };
 
 const CLAIM_LAPSE_MIN = 15;
-const HEREDOC = /<<-?\s*['"]?(\w+)['"]?[^\n]*\n[\s\S]*?\n\s*\1\s*(?:\n|$)/g;   // a heredoc body is text, not a loop
 const WORKTREE = /(\/[^\s'"]*?\/\.claude\/worktrees\/([\w.-]+))/;
 
 /** What one call to `run` needs. The hook gives the first group from its context; a selftest gives the second (a made-up process table, its own state). */
@@ -72,7 +72,7 @@ export function run(event: HookEvent, opts: RunOptions): string[] {
   const tid = typeof event['tool_use_id'] === 'string' ? event['tool_use_id'] : '';
   const input = event.tool_input ?? {};
   if (event.hook_event_name === 'PreToolUse') {
-    const cmd = (event.tool_name === 'Bash' ? String(input.command ?? '') : '').replace(HEREDOC, '\n');
+    const cmd = (event.tool_name === 'Bash' ? cutHeredocs(String(input.command ?? '')).text : '');   // a heredoc body is text, not a loop
     if (/until\s+!\s*pgrep\s+-[a-z]*f\s+(['"])(?!\[)/.test(cmd)) {
       return ['REFUSED: `until ! pgrep -f "..."` never ends: pgrep -f finds the loop\'s own command line, which holds the same words. Run the work ' +
         "with run_in_background and wait for its notification; or, if you must poll, make the pattern unable to match itself: pgrep -f '[T]abulaFaceProbe --x'"];

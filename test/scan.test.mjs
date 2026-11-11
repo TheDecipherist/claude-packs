@@ -1,6 +1,6 @@
 // 0.16.0: `scan` reports on a project before anything is installed. Its first promise is that it touches nothing: a real project, with
 // real secrets, is the input.
-import { CLI, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, readdirSync, statSync, test, writeFileSync } from './kit-cli.mts';
+import { CLI, assert, cli, execFileSync, existsSync, fresh, git as gitIn, join, mkdirSync, readFileSync, readdirSync, statSync, test, writeFileSync } from './kit-cli.mts';
 import { createHash } from 'node:crypto';
 
 const TOKEN = `ghp_${'a1B2'.repeat(10)}`;
@@ -15,7 +15,7 @@ function project(git = true) {
   put(dir, 'src/db/reads.ts', 'export const all = async (q) => {\n  return collection.find(q).toArray();\n};\n');
   put(dir, 'Dockerfile', 'FROM node:latest\nCMD node dist/index.js\n');
   if (git) {
-    const g = (...a) => execFileSync('git', ['-c', 'user.email=t@t', '-c', 'user.name=t', ...a], { cwd: dir, stdio: 'ignore' });
+    const g = (...a) => gitIn(dir, ...a);
     g('init', '-q'); g('add', '.gitignore', 'package.json', 'src', 'Dockerfile'); g('commit', '-qm', 'x');
   }
   return dir;

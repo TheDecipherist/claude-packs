@@ -2,11 +2,11 @@
 // problem as a line. Split out of the hook (typescript W4) so the judge (making-check) and the recorder that counts its send-backs
 // (making-check-count) read the turn one way and neither repeats it. It reads the transcript and the checkout's files, and
 // writes nothing; the project, the folder and the environment come in as `ctx`.
-import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './dup.mts';
 import { judgeCopyWrites } from './dup-index.mts';
+import { gitLines, gitRun } from './git-run.mts';
 import { matchesAny } from './glob.mts';
 import { readLayout } from './layout.mts';
 import { conceptsIn, makingLines, unknownConcepts } from './making-concepts.mts';
@@ -15,7 +15,7 @@ import { readShape } from './shape.mts';
 import type { LoadedShape } from './shape.mts';
 import { lastTurn, writesOfTurn } from './turn.mts';
 import type { TurnWrite } from './turn.mts';
-import type { HookContext, HookEvent, Layout, ShapeManifest } from './types.d.mts';
+import type { Env, HookContext, HookEvent, Layout, ShapeManifest } from './types.d.mts';
 
 type Where = Pick<HookContext, 'projectDir' | 'cwd' | 'env'>;
 
@@ -48,12 +48,12 @@ type Range = readonly [number, number];
 
 // Added line ranges of each file against HEAD (the whole file when it is new or there is no git): two git processes for all
 // the files of a checkout, not two per file. -> Map(file -> [[lo, hi]])
-function addedRanges(root: string, files: readonly string[]): Map<string, Range[]> {
+function addedRanges(root: string, files: readonly string[], env: Env): Map<string, Range[]> {
   const rels = files.map((f) => relative(root, f));
   const out = new Map<string, Range[]>();
-  const tracked = new Set((spawnSync('git', ['-C', root, 'ls-files', '--', ...rels], { encoding: 'utf8' }).stdout ?? '').split('\n').filter(Boolean));
-  const diffArgs = ['-C', root, 'diff', '--relative', '-U0', 'HEAD', '--', ...rels.filter((r) => tracked.has(r))];
-  const diff = tracked.size ? spawnSync('git', diffArgs, { encoding: 'utf8' }).stdout ?? '' : '';
+  const tracked = new Set(gitLines(['ls-files', '--', ...rels], { cwd: root, env }));
+  const diffArgs = ['diff', '--relative', '-U0', 'HEAD', '--', ...rels.filter((r) => tracked.has(r))];
+  const diff = tracked.size ? gitRun(diffArgs, { cwd: root, env }).stdout : '';
   let cur: string | null = null;
   for (const line of diff.split('\n')) {
     const f = line.match(/^\+\+\+ b\/(.+)$/);
@@ -133,7 +133,7 @@ function copyProblems(roots: Iterable<string>, judged: readonly TurnWrite[], at:
     const mine = sources.filter(own);
     if (!mine.length) continue;
     // once-only's index finds the candidates, jscpd confirms on those files alone (lib/dup-index.mjs; KWB-24: no whole-repo scan)
-    const added = addedRanges(root, mine);
+    const added = addedRanges(root, mine, at.env);
     const writes = mine.map((p) => ({ path: p, after: readFileSync(p, 'utf8'), ranges: added.get(p) ?? [] })).filter((w) => w.ranges.length);
     const r = writes.length ? judgeCopyWrites(root, writes, { env: at.env, layout, shape }) : { clones: [], error: undefined };
     if (r.error) problems.push(`once-only could not judge this turn's writes: ${r.error}`);

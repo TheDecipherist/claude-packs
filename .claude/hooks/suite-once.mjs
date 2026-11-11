@@ -10,6 +10,7 @@
 import { resolve } from 'node:path';
 import { gitLines } from './lib/git-run.mjs';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { bashOf, git, promptFile, put, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mjs';
@@ -40,7 +41,7 @@ const ASKS_FULL = /\b(?:run|start|do|launch|kick off)\s+(?:\w+\s+){0,2}?(?:full|
 const GRANTS_FULL = /\bthis\s+session\s+(?:may\s+)?runs?\s+the\s+(?:full|whole|complete|entire)\s+(?:test\s+)?suite\b/i;
 export const askedForFull = (prompt) => ASKS_FULL.test(prompt ?? '') || GRANTS_FULL.test(prompt ?? '');
 export function refusal(command, cwd, asked, where) {
-    const body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+    const body = blankQuotes(dropHeredocs(command));
     let here = cwd;
     for (const part of body.split(/&&|\|\||;|\||\n|(?<![&>])&(?![&>])/)) {
         const cd = part.trim().match(/^cd\s+(\S+)$/);

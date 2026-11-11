@@ -3,6 +3,7 @@
 //   machineFindings(rows, own, cfg) -> [[key, message]]   a panel export, headless Chromes and, among the processes this session
 //     started (own-processes.mts, KWB-87), a build, a ctest run, a probe and a wait loop that has run too long
 //   readOnlyCommand(cmd) -> true when every part of the command only looks (a `cd` first is only where)
+import { cutHeredocs } from './shell-lex.mts';
 
 /** One process: its pid, its age in seconds and its command line. */
 export type Row = readonly [pid: number, age: number, cmd: string];
@@ -61,7 +62,7 @@ const LOOKS: ReadonlySet<string> = new Set(['ls', 'cat', 'head', 'tail', 'grep',
 const GIT_LOOKS: ReadonlySet<string> = new Set(['status', 'log', 'diff', 'show', 'branch', 'rev-parse', 'ls-files', 'ls-remote', 'worktree', 'remote', 'blame']);
 
 export function readOnlyCommand(cmd: string): boolean {
-  const body = cmd.replace(/<<-?\s*['"]?(\w+)['"]?[^\n]*\n[\s\S]*?\n\s*\1\s*(?:\n|$)/g, '\n');
+  const body = cutHeredocs(cmd).text;
   if (/(?:^|[^-=])>|\btee\b|\$\(|`/.test(body.replace(/2>&1|>\s*\/dev\/null/g, ''))) return false;
   const segs = body.split(/&&|\|\||;|\||\n/).map((x) => x.trim()).filter((x) => x && !/^cd(\s|$)/.test(x));
   return segs.length > 0 && segs.every((x) => {

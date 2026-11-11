@@ -3,19 +3,23 @@
 // law this way, so nobody probes a hook by pasting payloads into a shell command, where a guard
 // that judges command text can refuse the probe itself (Sub37 WB-4). doctor runs every selftest.
 // A selftest module is left out of the repo lint's no-process gates (d-20): it is the one place that runs as a process.
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { put, scratchDir, walk } from './files.mts';
+import { gitRun } from './git-run.mts';
 import { toJson } from './json.mts';
 import type { Layout, VerdictRow } from './types.d.mts';
 
 const made: string[] = [];
 
 export { put };   // its importers' name for writing a file; files.mts owns it
+const SELFTEST_IDENTITY = { name: 'selftest', email: 'selftest@local' };
+/** git in a selftest's scratch project, as the selftest; a failure throws, since the selftest's setup failed. */
 export const git = (cwd: string, ...a: string[]): void => {
-  execFileSync('git', ['-c', 'user.email=selftest@local', '-c', 'user.name=selftest', ...a], { cwd, stdio: 'ignore' });
+  const r = gitRun(a, { cwd, env: process.env, identity: SELFTEST_IDENTITY });
+  if (!r.ok) throw new Error(`selftest setup: git ${a.join(' ')}: ${r.stderr.trim()}`);
 };
 
 /** files: { "rel/path": "text" }; layout, when given, becomes .claude/layout.json. The folder is removed by `verdicts`. */

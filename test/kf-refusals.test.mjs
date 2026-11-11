@@ -1,6 +1,6 @@
 // 1.1.0, group 2: false refusals. Every test here was seen red first (docs/1.1-progress.md). shape-law is held against the MPX 500's real refusals in
 // test/fixtures/mpx-shape-refusals.json, both ways: what was marked wrong passes, and what was marked right stays refused.
-import { assert, cli, execFileSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
+import { assert, cli, execFileSync, fresh, git, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
 import { conceptsIn, unknownConcepts } from '../packs/base/hooks/lib/making-concepts.mjs';
 import { normaliseShape } from '../packs/base/hooks/lib/shape-model.mjs';
 import { writesOfTurn } from '../packs/base/hooks/lib/turn.mjs';
@@ -8,7 +8,6 @@ import { statementsOf } from '../packs/base/hooks/lib/code-shapes.mjs';
 import { languageOf } from '../packs/base/hooks/lib/languages.mjs';
 
 const put = (dir, rel, text) => { mkdirSync(join(dir, rel, '..'), { recursive: true }); writeFileSync(join(dir, rel), text); };
-const git = (dir, ...a) => execFileSync('git', ['-c', 'user.email=t@l', '-c', 'user.name=t', ...a], { cwd: dir, stdio: 'pipe', encoding: 'utf8' });
 function installed(...packs) {
   const dir = fresh('kfr-');
   git(dir, 'init', '-q', '--initial-branch', 'work/x');

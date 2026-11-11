@@ -38,6 +38,7 @@ import { escapeRegExp } from './lib/glob.mjs';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 import { failed } from './lib/remote-heads.mjs';
+import { blankQuotes, dropHeredocs } from './lib/shell-lex.mjs';
 import { trunkLag } from './lib/trunk-lag.mjs';
 import { pass, refuse } from './lib/verdict.mjs';
 // ---------- always: a token never stored ----------
@@ -145,8 +146,7 @@ export function house(cmd, cwd, env, cfg = {}) {
     const c = { ...DEFAULTS, ...cfg };
     const owner = c.owner;
     const tok = c.tokenVar ?? 'PERSONAL_GITHUB_TOKEN';
-    let body = cmd.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '');
-    body = body.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+    const body = blankQuotes(dropHeredocs(cmd));
     let here = cwd;
     let pushedBefore = false;
     for (const part of body.split(/&&|\|\||;|\||\n|\(|\)|\x60|\$\(/)) {

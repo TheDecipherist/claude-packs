@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { gitOut } from '../packs/base/hooks/lib/git-run.mjs';
 import { git, put, scratchProject } from '../packs/base/hooks/lib/selftest.mjs';
 
 const HOOK = new URL('../packs/base/hooks/look-gate.mjs', import.meta.url).pathname;
@@ -15,7 +16,7 @@ function twoBranches(writeReport) {
   const dir = scratchProject({ 'src/ui/Card.cpp': 'v1\n', 'src/core/Engine.cpp': 'e1\n', 'design/reference/home.webp': 'x' }, LOOKS);
   const commit = (msg) => { git(dir, 'add', '-A'); git(dir, 'commit', '-qm', msg); };
   git(dir, 'init', '-q', '-b', 'main'); commit('base');
-  const head = () => spawnSync('git', ['-C', dir, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout.trim();
+  const head = () => gitOut(['rev-parse', 'HEAD'], { cwd: dir, env: process.env });
   const key = () => spawnSync(process.execPath, [HOOK, '--key', 'home'], { cwd: dir, encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir } }).stdout.trim();
   for (const name of ['a', 'b']) {
     git(dir, 'switch', '-q', '-c', `work/${name}`, 'main');

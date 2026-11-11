@@ -1,9 +1,8 @@
 // 0.21.0: if a person makes something for their employer's internals, it is easy to make a repo and share it with their team.
-import { CLI, assert, execFileSync, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
+import { CLI, assert, execFileSync, existsSync, fresh, git, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 
 const env = () => ({ ...process.env, CLAUDE_PACKS_CACHE: join(process.env.TMPDIR, 'pack-cache') });
 const kit = (dir, ...a) => spawnSync('node', [CLI, ...a, '--dir', dir], { encoding: 'utf8', env: env() });
-const git = (cwd, ...a) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd, stdio: 'pipe', encoding: 'utf8' });
 const lockOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
 
 // A team's pack, made by new-pack and pushed to a "host" (a bare repository), with a project to install it in.

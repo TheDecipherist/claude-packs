@@ -1,5 +1,5 @@
 // 1.1.0: the postgres pack. Every check was measured on 5,653 real .sql files and 5,520 source files; the cases here are what that reading taught.
-import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
+import { assert, cli, execFileSync, existsSync, fresh, git as gitIn, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
 
 function project(deps = { pg: '8.0.0' }) {
   const dir = fresh('pg-');
@@ -102,7 +102,7 @@ test('a value in SQL text is refused in each language; a bound value, a tag and 
 
 test('a wipe is judged against the worktree it runs in, by that checkout\'s .env', () => {
   const dir = installed();
-  const git = (...a) => execFileSync('git', ['-c', 'user.email=t@e.c', '-c', 'user.name=t', ...a], { cwd: dir, stdio: 'ignore' });
+  const git = (...a) => gitIn(dir, ...a);
   git('init', '-q');
   git('add', 'package.json');
   git('commit', '-qm', 'one');

@@ -6,6 +6,7 @@ import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gitLines } from '../packs/base/hooks/lib/git-run.mts';
+import { isMain } from '../packs/base/hooks/lib/hook-log.mts';
 import { emittedFrom } from '../packs/base/hooks/lib/source-exts.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
@@ -17,7 +18,7 @@ export function strayEmitted(root: string, env: Readonly<Record<string, string |
   return ignored.filter((rel) => /\.(?:mjs|cjs|js)$/.test(rel) && !rel.includes('node_modules/') && emittedFrom(join(root, rel)) === null);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMain(import.meta.url)) {
   const dry = process.argv.includes('--dry-run');
   const stray = strayEmitted(KIT, process.env);
   for (const rel of stray) {

@@ -26,11 +26,12 @@ import type * as GitRun from '../../packs/base/hooks/lib/git-run.mts';
 import type * as Json from '../../packs/base/hooks/lib/json.mts';
 import type * as HookLog from '../../packs/base/hooks/lib/hook-log.mts';
 import type * as Selftest from '../../packs/base/hooks/lib/selftest.mts';
+import type * as ShellLex from '../../packs/base/hooks/lib/shell-lex.mts';
 import type { HookEvent } from '../../packs/base/hooks/lib/types.d.mts';
 const installed = <T,>(name: string): Promise<T> => import(new URL(`./lib/${name}.mjs`, import.meta.url).href);
-const [{ writesOf }, { scratchDir }, { gitRun }, { parseJson, toJson }, { projectRoot, runAsHook }, { verdicts }] = await Promise.all([
+const [{ writesOf }, { scratchDir }, { gitRun }, { parseJson, toJson }, { projectRoot, runAsHook }, { verdicts }, { blankQuotes, dropHeredocs }] = await Promise.all([
   installed<typeof Writes>('writes'), installed<typeof Files>('files'), installed<typeof GitRun>('git-run'), installed<typeof Json>('json'),
-  installed<typeof HookLog>('hook-log'), installed<typeof Selftest>('selftest'),
+  installed<typeof HookLog>('hook-log'), installed<typeof Selftest>('selftest'), installed<typeof ShellLex>('shell-lex'),
 ]);
 // the lock's one format and lease, read in every form (lib/kit-lock.mts, emitted; `claude-packs lock status|take|release`, KWB-25)
 import { acquire, checkouts, describe, LOCK, LEASE_MIN, readLease, renew, takeLock as take, type Held } from '../../lib/kit-lock.mts';
@@ -51,8 +52,7 @@ const subAt = (w: readonly string[]): number => {
 
 /** The first command in a shell line that lands work (a commit, a merge, a release step) in a folder `ours` accepts, or null. */
 export function guardedAction(command: string, cwd: string, ours: (dir: string) => boolean, home: string = homedir()): string | null {
-  let body = command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '');
-  body = body.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const body = blankQuotes(dropHeredocs(command));
   let here = cwd;
   for (const part of body.split(/&&|\|\||;|\||\n|\(|\)|`|\$\(/)) {
     let w = part.trim().split(/\s+/).filter(Boolean);

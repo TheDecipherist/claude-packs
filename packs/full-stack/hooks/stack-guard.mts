@@ -10,6 +10,7 @@ import { basename, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { parseJson } from './lib/json.mts';
+import { dropHeredocs } from './lib/shell-lex.mts';
 import { bashOf, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook } from './lib/types.d.mts';
@@ -49,7 +50,7 @@ export function judgeCode(before: string | null, after: string | null): string |
 }
 
 export function judgeInstall(command: string): string | null {
-  for (const part of command.replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?\n\1\b/g, '').split(/&&|\|\||;|\|/)) {
+  for (const part of dropHeredocs(command).split(/&&|\|\||;|\|/)) {
     const w = part.trim().split(/\s+/);
     const at = w.findIndex((x, i) => ['npm', 'pnpm', 'yarn', 'bun'].includes(w[i - 1] ?? '') && ['i', 'install', 'add'].includes(x));
     if (at < 0) continue;
