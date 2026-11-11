@@ -10,7 +10,7 @@ import { refreshRuns } from '../packs/base/tools/statusline-runs.mjs';
 import { syncSettings } from '../lib/settings.mjs';
 
 const NOW = Date.parse('2026-11-10T22:00:00Z');
-const RUN = { project: '/p/bandwarp', order: 'bandwarp', items: 10, done: 4, percent: 40, finished: false,
+const RUN = { lead: null, project: '/p/bandwarp', order: 'bandwarp', items: 10, done: 4, percent: 40, finished: false,
   steps: [{ id: 'W3', title: 'The cluster', items: 6, done: 2 }, { id: 'W8', title: 'The panel', items: 4, done: 2 }],
   agents: [{ name: 'dsp', step: 'W3', title: 'The cluster', percent: 50, now: 'COMB width', updated: '2026-11-10T21:55:00Z' },
     { name: 'panel', step: 'W8', title: 'The panel', percent: 25, now: '', updated: '2026-11-10T21:00:00Z' }] };
@@ -22,7 +22,7 @@ function scene({ runs = [RUN], cacheAge = 0, session = {}, transcript = [] } = {
   writeFileSync(join(home, 'project', '.claude', 'claude-packs.lock.json'), toJson({ kit: '9.8.7', files: {} }));
   const cache = join(home, 'cache', 'claude-packs', 'runs.json');
   mkdirSync(join(home, 'cache', 'claude-packs'), { recursive: true });
-  if (runs) writeFileSync(cache, toJson({ runs }));
+  if (runs) writeFileSync(cache, toJson({ updated: new Date(NOW - cacheAge).toISOString(), runs }));
   if (runs) utimesSync(cache, (NOW - cacheAge) / 1000, (NOW - cacheAge) / 1000);   // on the test's clock, not the machine's
   const log = join(home, 'session.jsonl');
   writeFileSync(log, transcript.map((t) => toJson(t)).join('\n'));
@@ -43,17 +43,39 @@ test('the second line has the branch, then the last tool and its target and the 
   assert.equal(lines[1], '⎇ work/x ✱2 ↑1↓0 | Read /a/b.mjs | $ npm test');
 });
 
-test('each run is its project\'s row and one row per agent, each with its bar; an agent quiet for 30 minutes says so', () => {
+test('each run is its project\'s row, with when it was checked, and one row per agent with its bar; a still agent says so', () => {
   const { lines } = scene();
-  assert.match(lines[2], /^BANDWARP {14} █{8}░{12}  40%  6 of 10 items left, 2 agents$/);
-  assert.match(lines[3], /^  > dsp {8}> W3 The cluster {14}█{5}░{5}  50%  COMB width$/);
-  assert.match(lines[4], /^  > panel {6}> W8 The panel {16}█{3}░{7}  25%  quiet 60m$/);
+  assert.match(lines[2], /^BANDWARP {14} █{8}░{12}  40%  6 of 10 items left, 2 agents, checked 0s ago$/);
+  assert.match(lines[3], /^  > dsp {8}> W3 The cluster {14}█{5}░{5}  50%  ♡\s+COMB width$/);
+  assert.match(lines[4], /^  > panel {6}> W8 The panel {16}█{3}░{7}  25%  ♡ 1h00m$/);   // no heartbeat, its file still an hour: red
+});
+
+test('the last heartbeat says what each agent did last and how long ago, a long call with what runs in its worktree', () => {
+  const at = (sec) => new Date(NOW - sec * 1000).toISOString();
+  const agents = [
+    { ...RUN.agents[0], updated: at(3600), beat: { t: at(12), event: 'post', tool: 'Edit', what: 'src/Comb.cpp' } },
+    { ...RUN.agents[1], updated: at(3600), beat: { t: at(1200), event: 'pre', tool: 'Bash', what: 'cmake --build' }, work: { procs: 3, cores: 2.4, memMb: 1229 } },
+    { name: 'demo', step: 'W8', title: 'The panel', percent: 0, now: '', updated: null, beat: { t: at(420), event: 'post', tool: 'Grep', what: 'kSlots' } },
+    { name: 'gate', step: 'W8', title: 'The panel', percent: 0, now: '', updated: null, beat: { t: at(420), event: 'pre', tool: 'Bash', what: 'ctest' }, work: { procs: 0, cores: 0, memMb: 0 } },
+    { name: 'old', step: 'W8', title: 'The panel', percent: 0, now: '', updated: null, beat: null, work: { procs: 2, cores: 0.5, memMb: 300 } },
+  ];
+  const { lines } = scene({ runs: [{ ...RUN, agents }] });
+  assert.match(lines[3], /  50%  ♥ 12s\s+WRITE src\/Comb\.cpp  COMB width$/);
+  assert.match(lines[4], /  25%  ♥ 20m ⚙ 3 proc · 2\.4 cpu · 1\.2G ram ⟳ RUN cmake --build$/);
+  assert.match(lines[5], /   0%  ♥ 7m\s+READ kSlots$/);
+  assert.match(lines[6], /   0%  ♥ 7m  ⚙ 0 proc · 0\.0 cpu ·   0M ram ⟳ RUN ctest$/);
+  assert.match(lines[7], /   0%  ♡     ⚙ 2 proc · 0\.5 cpu · 300M ram$/);
+  // every value stands under the same value of the row above: the heartbeat, the processes, the cores, the memory, the action
+  for (const mark of ['♥', '⚙', ' cpu', ' ram', 'RUN']) {
+    const at = lines.slice(3, 8).map((l) => l.indexOf(mark)).filter((i) => i >= 0);
+    assert.equal(new Set(at).size, 1, `${mark} at columns ${at}`);
+  }
 });
 
 test('a run with no agent shows the lead on its current step; a stale cache says how old it is', () => {
   const { lines } = scene({ runs: [{ ...RUN, agents: [] }], cacheAge: 10 * 60_000 });
-  assert.match(lines[2], /0 agents  \(as of 10m ago\)$/);
-  assert.match(lines[3], /^  > lead {7}> W3 The cluster .* 33%$/);
+  assert.match(lines[2], /0 agents, checked 10m ago  \(as of 10m ago\)$/);
+  assert.match(lines[3], /^  > lead {7}> W3 The cluster .* 33%  ♡$/);
 });
 
 test('a broken session, transcript or cache draws what it can and never throws', () => {

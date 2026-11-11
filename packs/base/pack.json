@@ -80,6 +80,16 @@
   "hooks": {
     "PreToolUse": [
       {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
+            "async": true,
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
         "hooks": [
           {
@@ -234,6 +244,16 @@
     ],
     "PostToolUse": [
       {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
+            "async": true,
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
@@ -251,7 +271,8 @@
     "hooks/once-only.mjs",
     "hooks/making.mjs",
     "hooks/making-check.mjs",
-    "hooks/run-hooks.mjs"
+    "hooks/run-hooks.mjs",
+    "hooks/heartbeat.mjs"
   ],
   "optIn": []
 }

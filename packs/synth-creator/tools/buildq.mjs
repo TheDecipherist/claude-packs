@@ -8,31 +8,13 @@
 // KWB-111: every job takes its share of one core budget (BUILDQ_CORES, layout guards.buildq.cores, or a third of the
 // machine): its -j or --jobs is cut to it and CMake, CTest and make are told it; it runs at a low priority (BUILDQ_PRIORITY=normal: not).
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { DIR, isLive, ownerOf, SLOTS, slotAt } from '../hooks/lib/build-slots.mjs';
 import { budgetEnv, capJobs, coreBudget, gentle, projectLayout, shareOf } from '../hooks/lib/core-budget.mjs';
 
-const DIR = process.env.BUILDQ_DIR ?? join(tmpdir(), 'claude-packs-buildq');
-const SLOTS = Number(process.env.BUILDQ_SLOTS ?? 2);
 const WAIT_MS = 500;
-const slotAt = (n) => join(DIR, `slot-${n}`);
 const nap = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-
-function ownerOf(slot) {
-  try { return Number(readFileSync(join(slot, 'pid'), 'utf8')); } catch { return null; }
-}
-
-function isLive(slot) {
-  const pid = ownerOf(slot);
-  if (pid === null) return false;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (e) {
-    return e.code === 'EPERM'; // another user's job holds it
-  }
-}
 
 function claim() {
   mkdirSync(DIR, { recursive: true });

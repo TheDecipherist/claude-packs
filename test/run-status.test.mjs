@@ -1,7 +1,7 @@
 // 1.7.3: `claude-packs status`, where every unattended run stands. The user: "it reports which projects its working on, how many
 // agents per project, where they are, and how much is left", "PROJECT NAME (PROGRESS 0% - 100%) > AGENT X > STEP (PROGRESS)".
 import { assert, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
-import { orderStatus, progressOf, runnersIn, stepsOf } from '../lib/run-status.mjs';
+import { orderStatus, progressOf, runRows, runnersIn, stepsOf, workIn } from '../lib/run-status.mjs';
 import { bar, statusCommand, statusLines } from '../lib/status-cli.mjs';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
 
@@ -49,7 +49,37 @@ test('a run\'s status.json wins, and an agent\'s own file in its worktree gives 
   const lines = statusLines(s);
   assert.match(lines[0], /^DEMO|^RUNSTATUS/i);
   assert.match(lines[0], /\[█{13}░{7}\]  63%   3 of 8 items left, 1 agent/);
-  assert.match(lines[1], /^  > reader     > W1 The import\s+\[█{8}░{2}\]  75%   rejecting bad rows$/);
+  assert.match(lines[1], /^  > reader     > W1 The import\s+\[█{8}░{2}\]  75%\s+♡\s+rejecting bad rows$/);
+});
+
+test('an agent is QUIET after 5 minutes with no call, or a call running with nothing working in its worktree; a busy call never', () => {
+  const now = Date.parse('2026-11-10T22:00:00Z');
+  const at = (min) => new Date(now - min * 60_000).toISOString();
+  const beat = (min, event) => ({ t: at(min), event, tool: event === 'pre' ? 'Bash' : 'Read', what: 'x' });
+  const s = { project: '/p/demo', order: 'demo', items: 2, done: 0, percent: 0, finished: false, steps: [{ id: 'W1', title: 'x', items: 2, done: 0 }],
+    agents: [{ name: 'a', step: 'W1', updated: at(60), beat: beat(4, 'post') },
+      { name: 'b', step: 'W1', updated: at(60), beat: beat(6, 'post') },
+      { name: 'c', step: 'W1', updated: at(60), beat: beat(45, 'pre'), work: { procs: 3, cores: 2, memMb: 850 } },
+      { name: 'd', step: 'W1', updated: at(60), beat: beat(6, 'pre'), work: { procs: 0, cores: 0, memMb: 0 } },
+      { name: 'e', step: 'W1', updated: at(60), beat: beat(20, 'pre'), work: null },
+      { name: 'f', step: 'W1', updated: at(60), beat: beat(31, 'pre'), work: null },
+      { name: 'g', step: 'W1', updated: at(60), beat: beat(40, 'pre'), work: { procs: 2, cores: 0, memMb: 60, queued: true } }] };
+  const { agents } = runRows(s, now);
+  assert.deepEqual(agents.map((a) => a.quiet), [0, 6, 0, 6, 0, 31, 0]);
+  assert.equal(agents[2].live, '♥ 45m ⚙ 3 proc · 2.0 cpu · 850M ram        ⟳ RUN x');
+  assert.equal(agents[6].live, '♥ 40m ⚙ 2 proc · 0.0 cpu ·  60M ram queued ⟳ RUN x');
+  const plain = statusLines(s, now);
+  assert.match(plain[2], / ! ♥ 6m\s+READ x$/);
+});
+
+test('the check counts each process for the deepest folder it works in, its cores and memory summed, a build waiting its slot', () => {
+  const all = [{ pid: 1, cpu: 150, rssKb: 512 * 1024, cwd: '/p/.claude/worktrees/dsp/build' }, { pid: 2, cpu: 50, rssKb: 256 * 1024, cwd: '/p/.claude/worktrees/dsp' },
+    { pid: 3, cpu: 90, rssKb: 1024, cwd: '/p' }, { pid: 4, cpu: 10, rssKb: 1024, cwd: '/elsewhere' },
+    { pid: 5, cpu: 0, rssKb: 1024, cwd: '/p/.claude/worktrees/panel', queued: true }];
+  assert.deepEqual(workIn(['/p', '/p/.claude/worktrees/dsp', '/p/.claude/worktrees/panel'], all), {
+    '/p': { procs: 1, cores: 0.9, memMb: 1, queued: false }, '/p/.claude/worktrees/dsp': { procs: 2, cores: 2, memMb: 768, queued: false },
+    '/p/.claude/worktrees/panel': { procs: 1, cores: 0, memMb: 1, queued: true } });
+  assert.equal(workIn(['/p'], []), null);
 });
 
 test('a status file that is not JSON is ignored and the progress is derived instead, never a crash', () => {

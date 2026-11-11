@@ -47,11 +47,11 @@ export function runsSegments(cache, nowMs, paint, mode) {
   const stale = age !== null && age > STALE_MS;
   const tint = (colour) => (stale ? C.dim : colour);
   const rows = runs.flatMap((r) => {
-    const { project, agents } = runRows(r, nowMs);
+    const { project, agents } = runRows(r, nowMs, report.updated);
     const head = `${bold(paint(project.name.padEnd(22), tint(C.white)), mode)} ${meter(project.percent, 20, paint)} ${paint(percentLabel(project.percent), tint(C.white))}  ${paint(project.state, C.dim)}`;
     return [head, ...agents.map((a) => `  ${paint('>', C.dim)} ${paint(a.who.padEnd(10), a.quiet ? C.red : tint(C.lavender))} ${paint('>', C.dim)} ` +
       `${paint(`${a.id ?? '?'} ${a.title.slice(0, 22)}`.padEnd(27), tint(C.teal))} ${meter(a.percent, 10, paint)} ${paint(percentLabel(a.percent), tint(C.white))}` +
-      `${a.quiet ? paint(`  quiet ${a.quiet}m`, C.red) : ''}${a.now ? paint(`  ${a.now.slice(0, 60)}`, C.dim) : ''}`)];
+      `  ${paint(a.live, a.quiet ? C.red : C.green)}${a.now ? paint(`  ${a.now.slice(0, 60)}`, C.dim) : ''}`.trimEnd())];
   });
   if (stale) rows[0] += paint(`  (as of ${Math.round(age / 60_000)}m ago)`, C.red);
   return rows;
