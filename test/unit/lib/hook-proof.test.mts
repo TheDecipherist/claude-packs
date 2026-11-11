@@ -31,6 +31,12 @@ test('a hook the runner\'s table has a row for is run; a row with no hook file, 
   ]);
 });
 
+test('the resident runner is not a hook: no entry or row names it, and it is not a problem (W8.2)', async () => {
+  const dir = scratchDir('proof-daemon-');
+  put(join(dir, '.claude/hooks/resident.mjs'), '');
+  assert.deepEqual(await hookProofProblems(dir, '{}'), []);
+});
+
 test('statusProblems reports what a hook\'s --status says when it exits non-zero', () => {
   const dir = scratchDir('proof-status-');
   put(join(dir, '.claude/hooks/param-id-lock.mjs'), 'console.log("no ids held"); process.exit(1);\n');

@@ -136,7 +136,7 @@ test('settings run the kit node hooks through run-hooks.mjs, and every such hook
   assert.ok(named.size >= 15, `${named.size} hooks through the runner`);
   for (const n of named) assert.match(readFileSync(join(dir, '.claude/hooks', `${n}.mjs`), 'utf8'), /^export (?:const|function) hook\b/m, `${n} exports hook`);
   for (const p of PACKS) {
-    for (const f of readdirSync(join(KIT, `packs/${p}/hooks`)).filter((x) => x.endsWith('.mjs') && !['run-hooks.mjs', 'idle-wake.mjs'].includes(x))) {
+    for (const f of readdirSync(join(KIT, `packs/${p}/hooks`)).filter((x) => x.endsWith('.mjs') && !['run-hooks.mjs', 'idle-wake.mjs', 'resident.mjs'].includes(x))) {
       assert.match(readFileSync(join(KIT, `packs/${p}/hooks/${f}`), 'utf8'), /^export (?:const|function) hook\b/m, `${p}/${f} exports hook`);
     }
   }

@@ -82,11 +82,13 @@ export const isMain = (url: string): boolean => Boolean(process.argv[1]) && real
 /** The project the hook runs for: CLAUDE_PROJECT_DIR, else the folder the process runs in. */
 export const projectRoot = (): string => resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
-export function logHook(root: string, { event = '-', hook, ms, code, tool = '-', queue, source }: HookLogCall): void {
+export function hookLogLine({ event = '-', hook, ms, code, tool = '-', queue, source }: HookLogCall): string {
   const clean = (v: unknown): string => String(v ?? '-').replace(/[\t\n]/g, ' ') || '-';
   const more = source === undefined ? '' : `\t${Math.round(queue ?? 0)}\t${clean(source)}`;
-  appendRotated(root, LOG, `${new Date().toISOString()}\t${clean(event)}\t${clean(hook)}\t${Math.round(ms)}\t${code ?? '-'}\t${clean(tool)}${more}\n`);
+  return `${new Date().toISOString()}\t${clean(event)}\t${clean(hook)}\t${Math.round(ms)}\t${code ?? '-'}\t${clean(tool)}${more}\n`;
 }
+
+export const logHook = (root: string, call: HookLogCall): void => appendRotated(root, LOG, hookLogLine(call));
 
 /** One line per refused concept in .claude/usage.log: time, hook, concept (the shape hooks count what they refuse). */
 export function logRefusal(root: string, hook: string, concepts: Iterable<string>): void {
