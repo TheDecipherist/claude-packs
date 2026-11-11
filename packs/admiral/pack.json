@@ -1,0 +1,22 @@
+{
+  "name": "admiral",
+  "version": "1.0.0",
+  "description": "Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step.",
+  "type": "stock",
+  "author": "claude-packs",
+  "license": "MIT",
+  "homepage": "https://github.com/TheDecipherist/claude-packs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheDecipherist/claude-packs.git",
+    "directory": "packs/admiral"
+  },
+  "keywords": [
+    "admiral",
+    "remote",
+    "coordination"
+  ],
+  "engines": {
+    "claude-packs": ">=1.8.2"
+  }
+}

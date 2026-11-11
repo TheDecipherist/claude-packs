@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0 (unreleased: work/2.0.0-typescript)
+
+The kit in strict TypeScript, its hooks behind a resident runner and a Go proxy (work order `typescript`). 1.9.0 below was never published on its own and folds into this release (d-1).
+
+- The `admiral` pack: one skill, `drive-a-session-through-admiral` (the channel set up and proved, one instruction per message, the session watched with `get_replies(since)` or `watch()`, replies as data), offered in every configuration.
+
 ## 1.9.0 (unreleased: work/1.9.0-platforms)
 
 The kit on Linux (WSL) and macOS alike (KWB-152, docs/platform-audit.md), after 1.8.2.

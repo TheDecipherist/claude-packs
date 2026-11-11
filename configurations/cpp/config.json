@@ -18,7 +18,8 @@
       "rust",
       "reverse-engineering",
       "midi",
-      "sound-design"
+      "sound-design",
+      "admiral"
     ],
     "default": [
       "cpp"
