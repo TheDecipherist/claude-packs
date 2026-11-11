@@ -189,14 +189,21 @@ packs: base
    own commit.
 4. Versions, with their rows in `docs/versions.md` (`latest-versions`): `typescript` 7.0.2 and `@types/node` 22.x newest, pinned in
    `package.json` as devDependencies; the language server's row after W1 decides it.
-5. The baseline: the whole suite once (`npm test`, the one full run this order allows before W5), its counts kept as the measure every
-   later step is held to: tests, pass, fail, each failing test's name, wall time, and the gate's time for a one-hook change
-   (`test:changed` with `packs/base/hooks/no-find.mjs` touched: today 9 files, 139 s to 1,456 s per the tests survey).
-
+5. The baseline, the "before" of the comparison the user asked for ("a comparison run to the new 2.0 kit with go and typescript vs
+   the old kit"): every number below measured on this Mac on the branch's first commit, by the method named, into
+   `build/evidence/W0/baseline.md`, so W11 can measure the "after" the same way: (a) the whole suite once (`npm test`, the one full run
+   this order allows before W5): tests, pass, fail, each failing test's name, wall; (b) a one-hook gate (`test:changed` with
+   `packs/base/hooks/no-find.mjs` touched): files picked, wall; (c) a one-lib gate (`lib/layout.mjs` touched); (d) a release rehearsal
+   (`npm run release --dry-run` after the gate, the steps by hand that it does not do, timed from the commit to what would be the
+   publish); (e) `init --config synth-creator cpp audio-core` plus `doctor` into a fresh folder, with the selftest cache empty and
+   then warm; (f) `update` in bandwarp's checkout (read-only elsewhere: its log's own timing); (g) a project's events from bandwarp's
+   `.claude/hooks.log`: node processes per Bash, Write, Read and Stop, p50 and p95 per event, Stop's p50 and p95; (h) one Bash event
+   through the runner and its six hooks, 10 starts timed (85 ms today); (i) the status line: a render's wall and the CPU a minute;
+   (j) `tsc`'s build time (0 before: no build); (k) `npm pack` size and file count.
 **Done when:** `docs/workorders/typescript/decisions.md` holds d-1 to d-10; the admiral pack is on the branch with its skill rule and
 `npm run test:changed` green for the merge; the four rows are closed; both version rows exist and `package.json` pins them;
-`build/evidence/W0/baseline.txt` holds the suite's counts and wall time and `build/evidence/W0/one-hook-gate.txt` the one-hook gate's
-time; every failing baseline test is named in `progress.md` with its reason.
+`build/evidence/W0/baseline.md` holds all eleven measurements (a) to (k), each with its command and its number; every failing
+baseline test is named in `progress.md` with its reason.
 
 ## W1. Find out, before building (the riskiest first)
 
@@ -433,12 +440,16 @@ changed.
 **Done when:** every finding is written in `progress.md` with its fix or why it stays, 0 left blank; the CARRY rows each say which step
 touched their files and that behaviour was kept.
 
-## W11. The report
+## W11. The report, with the comparison
 
-Write `docs/workorders/typescript/report.md`: what was converted (files and lines per folder, before and after), the owners made and the
-copies removed (counts against the surveys), what is proved and how, the times (build, one-hook gate, suite, release, a project's Bash
-call, Stop), the bugs typing found (each KWB), what is not done (other languages' LSP, the CARRY rows, Windows natively), and what the
-kit did well and badly with counts from `logs`.
+1. The "after": every measurement of W0.5 (a) to (k) taken again on the finished kit, by the same command on the same machine, into
+   `build/evidence/W11/after.md`; where a command changed (the release is now one command), the same thing measured end to end.
+2. `docs/workorders/typescript/report.md`: the comparison table first (one row per measurement, before, after, the ratio), then what was
+   converted (files and lines per folder, before and after), the owners made and the copies removed (counts against the surveys), what
+   is proved and how, the bugs typing found (each KWB), what is not done (other languages' LSP, the CARRY rows, Windows natively), and
+   what the kit did well and badly with counts from `logs`.
 
-**Done when:** each of the report's 8 sections holds at least one number or a stated reason there is none (0 blank); `npm run check` exits 0
-and `test/repo-lint.test.mts` is green on the final tree; the report is pushed and `docs/workorders/typescript/DONE` names the commit.
+**Done when:** the comparison table has all eleven rows with a before, an after and a ratio, each after measured in this step (its
+evidence file named); each of the report's 9 sections holds at least one number or a stated reason there is none (0 blank);
+`npm run check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the report is pushed and
+`docs/workorders/typescript/DONE` names the commit.
