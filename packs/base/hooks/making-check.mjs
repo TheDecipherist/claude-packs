@@ -19,7 +19,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
 import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './lib/dup.mjs';
-import { judgeWrites } from './lib/dup-index.mjs';
+import { judgeCopyWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
@@ -199,7 +199,7 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
     // once-only's index finds the candidates, jscpd confirms on those files alone (lib/dup-index.mjs; KWB-24: no whole-repo scan)
     const added = addedRanges(root, mine);
     const writes = mine.map((p) => ({ path: p, after: readFileSync(p, 'utf8'), ranges: added.get(p) })).filter((w) => w.ranges.length);
-    const r = writes.length ? judgeWrites(root, writes, { layout, shape }) : { clones: [] };
+    const r = writes.length ? judgeCopyWrites(root, writes, { env: process.env, layout, shape }) : { clones: [] };
     if (r.error) problems.push(`once-only could not judge this turn's writes: ${r.error}`);
     const base = realPath(root);
     const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
