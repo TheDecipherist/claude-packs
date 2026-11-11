@@ -13,6 +13,8 @@ import { ANSWERS, clearedAt, clearsOf } from './logs.mts';
 import { HOOK_FILE } from './packs.mts';
 
 const RUNNER = 'run-hooks.mjs';
+/** The resident runner (W8.2) is not a hook: the client starts it, and no settings entry or table row names it. */
+const DAEMON = 'resident.mjs';
 const hookName = (file: string): string => file.replace(HOOK_FILE, '');
 
 // The time a hook last changed: its own file, or anything it shares in hooks/lib.
@@ -38,7 +40,7 @@ export function isRegistered(projectDir: string, settingsText: string, file: str
 export async function hookProofProblems(projectDir: string, settingsText: string): Promise<string[]> {
   const dir = join(projectDir, '.claude', 'hooks');
   if (!existsSync(dir)) return [];
-  const hooks = readdirSync(dir).filter((f) => HOOK_FILE.test(f) && f !== RUNNER);
+  const hooks = readdirSync(dir).filter((f) => HOOK_FILE.test(f) && f !== RUNNER && f !== DAEMON);
   const problems = hooks.filter((f) => !isRegistered(projectDir, settingsText, f)).map((f) => `${f} is in .claude/hooks but no settings entry runs it, so it refuses nothing`);
   for (const row of readHookTable(dir) ?? []) {
     if (!hooks.some((f) => hookName(f) === row.hook)) problems.push(`hooks.json has a row for ${row.hook} but .claude/hooks has no such hook, so the runner crashes on it`);

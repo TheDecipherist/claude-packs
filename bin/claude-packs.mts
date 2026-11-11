@@ -15,6 +15,7 @@ import { fixPlan } from '../lib/fix-plan.mts';
 import { globalAdd, globalDoctor, globalRemove } from '../lib/global.mts';
 import { blockPacks, installFrom, readInstallBlock } from '../lib/install-block.mts';
 import { lockCommand } from '../lib/kit-lock.mts';
+import { daemonCommand } from '../lib/daemon-cli.mts';
 import { logsCommand } from '../lib/logs.mts';
 import { readLock } from '../lib/manifest.mts';
 import { newProject } from '../lib/new.mts';
@@ -239,6 +240,7 @@ const COMMANDS: Record<string, Command> = {
     return 0;
   },
   logs: (run) => logsCommand(run.dir, run.rest),
+  daemon: (run) => daemonCommand(run.dir, run.rest, console.log),
   status: (run) => statusCommand(run.argv.includes('--dir') ? [...run.rest, '--dir', run.dir] : run.rest), // no --dir: every run on the machine
   suggest: (run) => { suggest(run.dir); return 0; },
   fix: async (run) => { await fixPlan(run.dir, { from: pathOf(run, '--from'), out: pathOf(run, '--out') }); return 0; },

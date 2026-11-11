@@ -517,6 +517,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `suggest` | Which configuration and packs this project needs, read from its own files, with the evidence |
 | `fix [--from <scan.json>] [--out <file>]` | The last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none |
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook, over all the history |
+| `daemon status\|stop` | The project's resident hook runner, from its pid file: pid, age, kit hash, events served, memory; stop ends it |
 | `survey` | Print the prompt that makes Claude write docs/project.md for tailoring |
 | `list` | Show available packs |
 | `symmetry gen --cmake <out.cmake> \| --list` | The generated gate shape_symmetry: one test per many concept in design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines) |

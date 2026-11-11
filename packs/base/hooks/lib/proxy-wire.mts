@@ -87,6 +87,9 @@ export const overTime = (hooks: readonly string[]): string => `not judged by ${h
 
 const sha = (text: string): string => createHash('sha256').update(text).digest('hex');
 
+/** The first 16 hex characters of the lock's hash: what a daemon says its kit is, and what doctor compares with the project's lock. */
+export const lockHash = (lockText: string): string => sha(lockText).slice(0, 16);
+
 /** The 16 hex characters that name a daemon: the user, the project's real path, the lock's hash and node's path. A kit update changes
  *  the lock, so a new lock means a new name, and another project or kit version never shares a daemon (review-2 3.4). */
 export const daemonKey = (uid: number, projectReal: string, lockText: string, nodePath: string): string =>
