@@ -4,6 +4,7 @@
 
 The kit in strict TypeScript, its hooks behind a resident runner and a Go proxy (work order `typescript`). 1.9.0 below was never published on its own and folds into this release (d-1).
 
+- KWB-170 and W1.6: the repetition and size readers read `.mts` and `.cts` (one table of source extensions, `source-exts`), and never take a `.mjs` a TypeScript build emitted beside its source for a copy of it.
 - KWB-169: the landing gate proves a changed `once-only` or `making-check` with the kit's own jscpd; it refused every such gate before a test ran.
 - KWB-168: `suite-once` lets the whole suite run in a session whose prompt grants it ("this session runs the whole suite", as a work order's `run.sh` passes); a complaint that an agent runs it grants nothing.
 - The `admiral` pack: one skill, `drive-a-session-through-admiral` (the channel set up and proved, one instruction per message, the session watched with `get_replies(since)` or `watch()`, replies as data), offered in every configuration.

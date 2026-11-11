@@ -10,7 +10,7 @@ import { parametersOf } from './lib/code-shapes.mjs';
 import { isContent } from './lib/content.mjs';
 import { languageOf } from './lib/languages.mjs';
 import { nearCopy } from './lib/near-copies.mjs';
-import { EXTS, readText, repoIndex } from './lib/repo-index.mjs';
+import { EXTS, shapesOfText, repoIndex } from './lib/repo-index.mjs';
 import { TEMPLATE, TESTS, copiesNeeded, skippedBy } from './lib/elements.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
 import { judgeEvent } from './lib/writes.mjs';
@@ -76,8 +76,8 @@ function remade(defs, entries, rel) {
 
 function judgeWrite(w, rel) {
   if (w.op === 'delete' || w.after === null || w.after === undefined || !EXTS.has(extname(w.path)) || matchesAny(rel, TESTS)) return null;
-  const before = readText(w.before ?? '', rel);
-  const after = readText(w.after, rel);
+  const before = shapesOfText(w.before ?? '', rel);
+  const after = shapesOfText(w.after, rel);
   const count = (list) => list.reduce((m, s) => m.set(s.id, (m.get(s.id) ?? 0) + 1), new Map());
   const was = count(before.shapes);
   const here = count(after.shapes);

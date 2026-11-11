@@ -1,0 +1,15 @@
+{
+  "//": "The tests: checked, never emitted (d-2, d-16). A unit test imports the .mts it tests (d-4), so the language server sees it as a reference.",
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": false,
+    "rootDir": "..",
+    "tsBuildInfoFile": "../node_modules/.cache/claude-packs/tsc-test.tsbuildinfo"
+  },
+  "include": ["./**/*.mts"],
+  "exclude": ["../node_modules", "./fixtures"]
+}

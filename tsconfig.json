@@ -1,0 +1,33 @@
+{
+  "//": "The kit's sources: strict .mts, each emitted as .mjs beside it (d-2). rootDirs merges every pack's hooks/ and tools/ as an install does, so a pack hook's ./lib/x.mts and a tool's ../hooks/lib/x.mts resolve onto base's (W1.2); a new pack gets its row here (repo-lint holds it).",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2023",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
+    "useUnknownInCatchVariables": true,
+    "rewriteRelativeImportExtensions": true,
+    "allowJs": false,
+    "rootDir": ".",
+    "incremental": true,
+    "tsBuildInfoFile": "node_modules/.cache/claude-packs/tsc.tsbuildinfo",
+    "rootDirs": [
+      "packs/admiral", "packs/ai", "packs/audio-core", "packs/base", "packs/ci", "packs/content-site", "packs/cpp", "packs/docker",
+      "packs/dynamic-data", "packs/fastify", "packs/full-stack", "packs/go", "packs/gpu-painter", "packs/hook-proof", "packs/host-agent",
+      "packs/html-ui", "packs/http-api", "packs/instrument-shell", "packs/js-ts", "packs/midi", "packs/mongo", "packs/multi-tenant",
+      "packs/nginx", "packs/postgres", "packs/python", "packs/react", "packs/reverse-engineering", "packs/rust", "packs/shell",
+      "packs/shell-hooks", "packs/sound-design", "packs/stellix", "packs/stored-text", "packs/synth-creator", "packs/tui",
+      "packs/ui-craft", "packs/web", "packs/websocket", "packs/writing", "packs/zod"
+    ]
+  },
+  "include": ["bin/**/*.mts", "lib/**/*.mts", "global/**/*.mts", "scripts/**/*.mts", "packs/**/*.mts", ".claude/hooks/kit-lock.mts"],
+  "exclude": ["node_modules", "test", "site", "docs", "build"]
+}

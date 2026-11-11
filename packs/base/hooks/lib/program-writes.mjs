@@ -17,7 +17,7 @@ import { basename, join } from 'node:path';
 import { statSync } from 'node:fs';
 import { closeOf, evaluate, scan, splitArgs, statements } from './program-read.mjs';
 
-const isDir = (p) => { try { return statSync(p).isDirectory(); } catch { return false; } };
+import { isDir } from './files.mjs';
 
 export function programOf(exe, args, stdin) {
   const lang = /^python(\d+(\.\d+)*)?$|^pypy3?$/.test(exe) ? 'python' : /^(node|nodejs|bun)$/.test(exe) ? 'node' : exe === 'perl' ? 'perl' : exe === 'ruby' ? 'ruby' : null;

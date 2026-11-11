@@ -89,3 +89,18 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Chosen: a no-op statement on the first line of the file's first top-level function (`probes/baseline.mjs` `FIRST_FUNCTION`), the same
   at W6 and W11 on the `.mts`.
 - Why: a real one-hook change is a change inside the hook's code; a comment would measure a gate that runs nothing.
+
+## d-16 Where the tests' tsconfig lives {#d-16}
+- Question: W2.1 names `tsconfig.test.json` at the root; placement-law puts a file of the "tests" kind in `test/`.
+- Options: ask for a layout exception; `test/tsconfig.json` extending `../tsconfig.json`.
+- Chosen: `test/tsconfig.json`, and `npm run check` runs `tsc --noEmit -p test/tsconfig.json`.
+- Why: it meets the law as written, it is the usual place, and an editor finds it for every test file.
+
+## d-17 The kit's own install keeps being tracked {#d-17}
+- Question: `.claude/hooks/lib/` now holds installed copies of emitted files (`files.mjs`, `git-run.mjs`, `source-exts.mjs`); the
+  order says never commit an emitted `.mjs`.
+- Options: ignore the kit's installed copies too (a fresh clone has broken hooks until `update --dir .`); keep tracking the kit's
+  `.claude/` as it always was.
+- Chosen: keep tracking `.claude/`. The rule is about the source folders (d-2): an install is what a project commits (bandwarp
+  tracks 398 files there), and the kit's own hooks must work in a fresh clone before any build.
+- Why: easiest to reverse; nothing a project receives changes.

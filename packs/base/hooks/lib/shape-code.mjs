@@ -8,8 +8,9 @@
 import { extname } from 'node:path';
 import { languageOf } from './languages.mjs';
 import { conceptOfName, parts, SHAPE_FILE } from './shape.mjs';
+import { extPattern } from './source-exts.mjs';
 
-export const CODE = /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|inl|mm|m|js|mjs|cjs|ts|tsx|jsx|py|swift|rs|go|java|kt|cs)$/i;
+export const CODE = extPattern('c', 'cpp', 'objc', 'js', 'ts', 'python', 'swift', 'rust', 'go', 'java', 'kotlin', 'csharp');
 const KEYWORDS = new Set(['if', 'for', 'while', 'switch', 'catch', 'return', 'sizeof', 'else', 'new', 'delete', 'case', 'throw', 'co_return', 'do', 'function', 'await', 'typeof']);
 // The act of picking, never the thing that picks: a "picker" or "selector" is a component, and its accessor picks nothing (KWB-91).
 const COMPONENT = /^(?:picker|selector)s?$/;

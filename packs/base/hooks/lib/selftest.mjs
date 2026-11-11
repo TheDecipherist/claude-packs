@@ -7,10 +7,11 @@ import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { put } from './files.mjs';
 
 const made = [];
 
-export const put = (file, text) => { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, text); };
+export { put };   // its importers' name for writing a file; files.mts owns it
 export const git = (cwd, ...a) => execFileSync('git', ['-c', 'user.email=selftest@local', '-c', 'user.name=selftest', ...a], { cwd, stdio: 'ignore' });
 
 // files: { "rel/path": "text" }; layout, when given, becomes .claude/layout.json.

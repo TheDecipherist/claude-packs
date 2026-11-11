@@ -26,7 +26,6 @@
 // Only a real git or gh call is judged: heredoc bodies and quoted text are blanked, and a part counts only when its
 // first word (after VAR=value) is git or gh. `cd` and `git -C` move the folder the dirty-tree and trunk checks look at.
 // The laws hold in every repo a command reaches. `--selftest` proves both halves.
-import { execFileSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,6 +36,7 @@ import { asHook, isMain } from './lib/hook-log.mjs';
 import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mjs';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 import { trunkLag } from './lib/trunk-lag.mjs';
+import { gitLines, gitOut, gitRun } from './lib/git-run.mjs';
 
 // ---------- always: a token never stored ----------
 const URL_USER = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@/gi;
@@ -84,14 +84,14 @@ export const DEFAULTS = {
   accountNote: '',
 };
 
-const gitOut = (cwd, ...a) => { try { return execFileSync('git', a, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 10000 }); } catch { return null; } };
+const at = (cwd) => ({ cwd, env: process.env, timeoutMs: 10_000 });   // W4 passes the event's ctx.env
 const real = {
   login: loggedInAs,
-  dirty: (cwd) => (gitOut(cwd, '--no-optional-locks', 'status', '--porcelain') ?? '').split('\n').filter((l) => l.trim()),
-  branch: (cwd) => (gitOut(cwd, 'rev-parse', '--abbrev-ref', 'HEAD') ?? '').trim(),
-  hasHead: (cwd) => gitOut(cwd, 'rev-parse', '-q', '--verify', 'HEAD') !== null,
-  remoteUrl: (cwd, name) => gitOut(cwd, 'remote', 'get-url', name)?.trim() || null,
-  merging: (cwd) => gitOut(cwd, 'rev-parse', '-q', '--verify', 'MERGE_HEAD') !== null,
+  dirty: (cwd) => gitLines(['--no-optional-locks', 'status', '--porcelain'], at(cwd)).filter((l) => l.trim()),
+  branch: (cwd) => gitOut(['rev-parse', '--abbrev-ref', 'HEAD'], at(cwd)) ?? '',
+  hasHead: (cwd) => gitRun(['rev-parse', '-q', '--verify', 'HEAD'], at(cwd)).ok,
+  remoteUrl: (cwd, name) => gitOut(['remote', 'get-url', name], at(cwd)) || null,
+  merging: (cwd) => gitRun(['rev-parse', '-q', '--verify', 'MERGE_HEAD'], at(cwd)).ok,
 };
 // What a push sends to: the URL in the command, or the URL of the remote it names (null when neither is known).
 const pushTarget = (w, here, env) => { const a = w.slice(w.indexOf('push') + 1).filter((x) => !x.startsWith('-')); return !a.length ? null : /[:/]/.test(a[0]) ? a[0] : env.remoteUrl?.(here, a[0]) ?? null; };

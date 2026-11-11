@@ -12,3 +12,8 @@ node_modules/
 .claude/logs/
 .env
 build/
+# emitted by `npm run build` beside each .mts (d-2); a folder's lines become one rule when its last hand-written .mjs goes
+packs/base/hooks/lib/files.mjs
+packs/base/hooks/lib/git-run.mjs
+packs/base/hooks/lib/source-exts.mjs
+scripts/clean-emitted.mjs

@@ -18,9 +18,11 @@ import { tmpdir } from 'node:os';
 import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchesAny } from './glob.mjs';
+import { codeFiles } from './elements.mjs';
+import { extPattern, extsOf } from './source-exts.mjs';
 
 export const LIMITS = { tokens: 50, lines: 6, gap: 2 };
-export const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|hxx|inl|mm|m|py|js|mjs|cjs|jsx|ts|tsx|rs)$/i;
+export const SOURCE = extPattern('c', 'cpp', 'objc', 'python', 'js', 'ts', 'rust');
 const FORMATS = 'c,c-header,cpp,cpp-header,objectivec,python,javascript,jsx,typescript,tsx,rust';
 // A header and a source are one language: a function copied from a .cpp into a .h is a copy (jscpd compares within a format otherwise).
 const CROSS = 'c,c-header,cpp,cpp-header,objectivec;javascript,jsx,typescript,tsx';
@@ -80,12 +82,19 @@ export function changedLines(before, after) {
 // Real paths: /var and /private/var are one folder on a Mac, and jscpd prints the real one.
 export const real = (p) => { try { return realpathSync(p); } catch { const d = dirname(resolve(p)); return d === resolve(p) ? d : join(real(d), resolve(p).slice(d.length + 1)); } };
 
+// The files a TypeScript build emitted beside their sources: the build's output, never a copy in the repo (KWB-170).
+const TWIN = { '.mts': '.mjs', '.cts': '.cjs', '.ts': '.js', '.tsx': '.js' };
+function emittedTwins(abs) {
+  return codeFiles(abs, [], extsOf('ts')).map((rel) => join(abs, rel.replace(/\.(?:mts|cts|tsx|ts)$/, (ext) => TWIN[ext])))
+    .filter((twin) => existsSync(twin));
+}
+
 export function scan(root, { extra = [], ignore: alsoIgnore = [], layout = {}, shape = null, jscpd = null, timeoutMs = 8000, paths = null } = {}) {
   const bin = jscpd ?? findJscpd([root]);
   if (!bin) return { clones: [], error: 'jscpd not found (it is an optional dependency of @thedecipherist/claude-packs: npm install in the project, or set CLAUDE_PACKS_JSCPD)' };
   const out = mkdtempSync(join(process.env.TMPDIR ?? tmpdir(), 'once-only-'));
   const abs = real(root);
-  const ignore = [...excludeGlobs(layout, shape).map((g) => `${abs}/${g}`), ...extra.map((x) => real(x.as)), ...alsoIgnore.map(real)];
+  const ignore = [...excludeGlobs(layout, shape).map((g) => `${abs}/${g}`), ...extra.map((x) => real(x.as)), ...alsoIgnore.map(real), ...emittedTwins(abs)];
   const args = ['-a', '-s', '-k', String(LIMITS.tokens), '-l', String(LIMITS.lines), '--max-gap-lines', String(LIMITS.gap), '--exit-code', '0',
     '-f', FORMATS, '-r', 'json', '-o', out, '--cross-formats', CROSS, '-i', ignore.join(','), ...(paths ?? [abs]), ...extra.map((x) => x.path)];
   const t0 = Date.now();

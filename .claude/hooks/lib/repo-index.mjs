@@ -25,7 +25,7 @@ export function oneOffLines(text) {
 const distinct = (list) => list.filter((s, i) => s.kind !== 'setup' || list.findIndex((x) => x.id === s.id && x.what === s.what) === i);
 
 // What a text holds, with its marked one-offs left out: all the law ever compares.
-export function readText(text, rel) {
+export function shapesOfText(text, rel) {
   if (GENERATED.test(text.slice(0, 400))) return { shapes: [], st: [], defs: [] };
   const off = oneOffLines(text);
   const ext = extname(rel);
@@ -44,7 +44,7 @@ export function repoIndex(root, skip, layout = {}) {
     const st = statSync(join(root, rel));
     const had = old[rel];
     if (had && had.m === st.mtimeMs && had.s === st.size) { now[rel] = had; continue; }
-    const read = readText(readFileSync(join(root, rel), 'utf8'), rel);
+    const read = shapesOfText(readFileSync(join(root, rel), 'utf8'), rel);
     now[rel] = { m: st.mtimeMs, s: st.size, shapes: read.shapes.map((x) => [x.id, x.line, x.what]), st: read.st, defs: read.defs };
   }
   try { writeFileSync(file, JSON.stringify(now)); } catch { /* an index that cannot be kept is built again */ }

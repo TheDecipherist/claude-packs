@@ -19,6 +19,7 @@ import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bareWords } from './command-prefix.mjs';
+import { isDir, readText } from './files.mjs';
 import { programOf, programWrites } from './program-writes.mjs';
 import { cutHeredocs, lex } from './shell-lex.mjs';
 
@@ -27,16 +28,7 @@ const HOME = process.env.HOME ?? '';
 const expand = (p) => p.replace(/^(~|\$HOME|\$\{HOME\})(?=\/|$)/, HOME).replace(/^\$\{?([A-Za-z_]\w*)\}?(?=\/|$)/, (_, name) => process.env[name] ?? `/unresolved-${name}`);
 const NOT_FILES = new Set(['/dev/null', '/dev/stdout', '/dev/stderr', '/dev/tty']);
 
-export function readText(path) {
-  try {
-    const st = statSync(path);
-    if (!st.isFile() || st.size > 8 * 1024 * 1024) return null;
-    return readFileSync(path, 'utf8');
-  } catch {
-    return null;
-  }
-}
-const isDir = (p) => { try { return statSync(p).isDirectory(); } catch { return false; } };
+export { readText };   // its importers' name for the file reader; files.mts owns it
 
 function printf(args) {
   if (!args.length) return '';

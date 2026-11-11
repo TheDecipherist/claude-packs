@@ -14,10 +14,11 @@ import { readLayout } from './lib/layout.mjs';
 import { verdicts } from './lib/selftest.mjs';
 import { isContent } from './lib/content.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
+import { extsOf } from './lib/source-exts.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 // Code, scripts, shaders and CMake files (Stellix's source rule counted scripts and CMake too); docs and data are not code.
-const SOURCE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.m', '.inc', '.inl', '.ipp', '.tpp', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.wgsl', '.metal', '.hlsl', '.glsl', '.vert', '.frag', '.sh', '.bash', '.cmake']);
+const SOURCE = extsOf('c', 'cpp', 'objc', 'js', 'ts', 'python', 'shader', 'shell', 'cmake');
 const isSource = (rel) => SOURCE.has(extname(rel)) || /(^|\/)CMakeLists\.txt$/.test(rel);
 const EXEMPT = ['**/*.generated.*', '**/generated/**', 'build/**', '_deps/**'];
 
@@ -53,6 +54,8 @@ function selftest() {
     ['generated code is exempt', verdict('src/gen/Tables.generated.h', '', 'x\n'.repeat(900), 300) === null],
     ['a shell script is code', verdict('tools/plants.sh', '', 'x\n'.repeat(301), 300) !== null],
     ['a CMakeLists.txt is code', verdict('lib/app/CMakeLists.txt', '', 'x\n'.repeat(301), 300) !== null],
+    ['a .mts is code (W1.6)', verdict('lib/sync.mts', '', 'x\n'.repeat(301), 300) !== null],
+    ['a .cts is code (W1.6)', verdict('lib/old.cts', '', 'x\n'.repeat(301), 300) !== null],
   ];
   return verdicts('file-size-guard', cases.map(([label, ok]) => [label, ok, true]));
 }

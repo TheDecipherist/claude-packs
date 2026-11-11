@@ -9,9 +9,10 @@ import { readdirSync, statSync } from 'node:fs';
 import { extname, join, relative } from 'node:path';
 import { codeShapes } from './code-shapes.mjs';
 import { matchesAny } from './glob.mjs';
+import { emittedFrom, extsOf } from './source-exts.mjs';
 
-export const CODE = new Set(['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx']);
-export const MARKUP = new Set(['.html', '.htm', '.vue', '.svelte', '.tsx', '.jsx', '.ts', '.js', '.mjs']);
+export const CODE = extsOf('c', 'cpp', 'objc', 'js', 'ts');
+export const MARKUP = extsOf('markup', 'js', 'ts');
 export const SKIP = /(^|\/)(\.git|node_modules|build|Builds|dist|out|target|_deps|JUCE|JuceLibraryCode|third_party|vendor|Pods|venv|\.venv|site-packages|__pycache__|\.tox|\.next|coverage|cmake-build[^/]*|\.claude)(\/|$)/;
 export const TESTS = ['tests/**', 'test/**', '**/tests/**', '**/test/**', '**/*.test.*', '**/*.spec.*', '**/*_test.*'];
 
@@ -79,7 +80,7 @@ export function codeFiles(root, skipGlobs = [], exts = CODE) {
       const rel = relative(root, abs).replace(/\\/g, '/');
       if (SKIP.test(rel) || matchesAny(rel, skipGlobs)) continue;
       if (e.isDirectory()) walk(abs);
-      else if (exts.has(extname(e.name)) && statSync(abs).size < 400_000) out.push(rel);
+      else if (exts.has(extname(e.name)) && !emittedFrom(abs) && statSync(abs).size < 400_000) out.push(rel);   // an emitted twin is the build's (KWB-170)
     }
   };
   walk(root);
