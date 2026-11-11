@@ -104,7 +104,7 @@ export function orderStatus(project, order) {
       const step = f.step ?? listed.get(t.name)?.step ?? null;
       // no file of its own yet: git's last touch of its worktree is its clock
       const updated = f.updated ?? (t.kinOnly && t.touched ? new Date(t.touched).toISOString() : null);
-      return { name: t.name, step, title: steps.find((s) => s.id === step)?.title ?? '', now: f.now ?? '', updated,
+      return { name: t.name, step, title: steps.find((s) => s.id === step)?.title ?? '', now: f.now ?? '', state: f.state ?? null, updated,
         percent: f.items ? percent(f.done ?? 0, f.items) : null, beat: t.beat ?? null, path: t.path, stale: t.stale, fresh: t.fresh };
     });
   const items = steps.reduce((n, s) => n + s.items, 0);
@@ -157,6 +157,8 @@ function alignLive(rows) {
 /** What an agent is doing now, from its last heartbeat, its own file and the check of its worktree, as the parts alignLive
  *  sets in columns: { beat: "♥ 12s", work, action: "⟳ RUN make", quiet }. quiet is the minutes it has been still when
  *  that means stuck, else 0. `work` is null where the processes could not be read. */
+const STILL_ON_PURPOSE = new Set(['paused', 'waiting', 'finished']);
+
 function liveOf(beat, updated, work, nowMs) {
   const at = (iso) => { const t = Date.parse(iso ?? ''); return Number.isNaN(t) ? null : t; };
   const beatAt = at(beat?.t);
@@ -199,8 +201,11 @@ export function runRows(s, nowMs = Date.now(), checkedAt = null) {
     // no commit of its own and nothing running is one waiting for its agent (the user: "all the mac agents say they are not
     // doing anything")
     const waiting = !a.step && a.fresh && !a.work?.procs;
+    // still on purpose (its own file: "state" paused, waiting or finished, or `now` starting so) is never stuck: red means
+    // something is wrong (KWB-164)
+    const paused = STILL_ON_PURPOSE.has(a.state) || /^(?:paused|waiting|finished)\b/i.test(a.now ?? '');
     return { who: a.name, id: a.step ?? '', title: a.step ? (a.title || step?.title || '') : waiting ? 'not started yet' : 'no status file yet', percent: a.percent ?? (step ? percent(step.done, step.items) : 0),
-      now: a.now ?? '', ...liveOf(a.beat, a.updated, a.work ?? null, nowMs) };
+      now: a.now ?? '', ...liveOf(a.beat, a.updated, a.work ?? null, nowMs), ...(paused ? { quiet: 0, paused: true } : {}) };
   });
   const current = s.steps.find((x) => x.done < x.items);
   if (!s.finished && n === 0 && current) {

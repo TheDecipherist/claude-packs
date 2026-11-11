@@ -53,6 +53,21 @@ test('a run\'s status.json wins, and an agent\'s own file in its worktree gives 
   assert.match(lines[1], /^└ reader     > W1 The import\s+\[█{8}░{2}\]  75%\s+♡\s+rejecting bad rows$/);   // an agent hangs from its order
 });
 
+// KWB-164: a paused agent is not a stuck one: red means something is wrong
+test('an agent its own file calls paused, waiting or finished is never QUIET, and says so; a still agent that is not paused still is', () => {
+  const now = Date.parse('2026-11-10T22:00:00Z');
+  const at = (min) => new Date(now - min * 60_000).toISOString();
+  const beat = { t: at(40), event: 'post', tool: 'Bash', what: 'git push' };
+  const s = { project: '/p/demo', order: 'demo', items: 2, done: 0, percent: 0, finished: false, steps: [{ id: 'W1', title: 'x', items: 2, done: 0 }],
+    agents: [{ name: 'a', step: 'W1', updated: at(40), beat, now: 'paused for the kit update' },
+      { name: 'b', step: 'W1', updated: at(40), beat, now: 'waiting', state: 'paused' },
+      { name: 'c', step: 'W1', updated: at(40), beat, now: 'finished: item 5 open, waiting' },
+      { name: 'd', step: 'W1', updated: at(40), beat, now: 'building the gates' }] };
+  const { agents } = runRows(s, now);
+  assert.deepEqual(agents.map((a) => a.quiet), [0, 0, 0, 40]);
+  assert.deepEqual(agents.map((a) => Boolean(a.paused)), [true, true, true, false]);
+});
+
 test('an agent is QUIET after 5 minutes with no call, or a call running with nothing working in its worktree; a busy call never', () => {
   const now = Date.parse('2026-11-10T22:00:00Z');
   const at = (min) => new Date(now - min * 60_000).toISOString();
