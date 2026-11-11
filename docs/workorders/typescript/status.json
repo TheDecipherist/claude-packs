@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T14:42:53Z",
+  "updated": "2026-11-11T15:03:56Z",
   "steps": [
     {
       "id": "W0",
@@ -34,7 +34,7 @@
       "title": "The slices, in parallel",
       "items": 7,
       "done": 0,
-      "agent": null
+      "agent": "w4-hooks-a, w4-hooks-b, w4-hooks-c, w4-lib-a, w4-lib-b, w4-tools"
     },
     {
       "id": "W5",
@@ -93,5 +93,42 @@
       "agent": null
     }
   ],
-  "agents": []
+  "agents": [
+    {
+      "name": "w4-hooks-a",
+      "worktree": ".claude/worktrees/w4-hooks-a",
+      "step": "W4",
+      "started": "2026-11-11T15:03:56Z"
+    },
+    {
+      "name": "w4-hooks-b",
+      "worktree": ".claude/worktrees/w4-hooks-b",
+      "step": "W4",
+      "started": "2026-11-11T15:03:56Z"
+    },
+    {
+      "name": "w4-hooks-c",
+      "worktree": ".claude/worktrees/w4-hooks-c",
+      "step": "W4",
+      "started": "2026-11-11T15:03:56Z"
+    },
+    {
+      "name": "w4-lib-a",
+      "worktree": ".claude/worktrees/w4-lib-a",
+      "step": "W4",
+      "started": "2026-11-11T15:03:56Z"
+    },
+    {
+      "name": "w4-lib-b",
+      "worktree": ".claude/worktrees/w4-lib-b",
+      "step": "W4",
+      "started": "2026-11-11T15:03:56Z"
+    },
+    {
+      "name": "w4-tools",
+      "worktree": ".claude/worktrees/w4-tools",
+      "step": "W4",
+      "started": "2026-11-11T15:03:56Z"
+    }
+  ]
 }
