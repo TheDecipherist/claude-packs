@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { scratchDir } from './files.mjs';
 import { toJson } from './json.mjs';
 import { atCommit, atStart, compareVersions, KIT, newestOnNpm } from './kit-fresh-look.mjs';
-import { git, put, runHook, scratchProject, verdicts } from './selftest.mjs';
+import { git, put, runHook, scratchProject, snapshot, verdicts, writtenSince } from './selftest.mjs';
 const HOOK = fileURLToPath(new URL('../kit-fresh.mjs', import.meta.url));
 const run = (dir, payload) => runHook(HOOK, dir, payload);
 const lock = (kit) => ({ '.claude/claude-packs.lock.json': toJson({ kit }) });
@@ -69,8 +69,10 @@ export function selftest() {
     cases.push(['newer work in the kit is named', /lacks newer work: origin\/work\/1\.9\.0-x/.test(say(atStart(kit, START))), true]);
     cases.push(['a commit in the kit with newer work is refused', Boolean(atCommit(kit, COMMIT, { env: process.env })), true]);
     cases.push(['a command that is no commit is not judged', atCommit(kit, 'git status', { env: process.env }), null]);
+    const kitBefore = snapshot(kit); // the project's files as the judge finds them (its fetch moves only .git)
     cases.push(['through the runner, the commit is refused', run(kit, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: COMMIT }, cwd: kit }).status, 2]);
     cases.push(['through the runner, the session start names it', /work\/1\.9\.0-x/.test(run(kit, { hook_event_name: 'SessionStart', cwd: kit }).stdout), true]);
+    cases.push(['a judge writes no file of the project (the write trap)', writtenSince(kit, kitBefore).filter((f) => !f.startsWith('.git/')).join(','), '']);
     git(kit, 'merge', '-q', '--ff-only', 'origin/work/1.9.0-x');
     cases.push(['merged, the commit is allowed', atCommit(kit, COMMIT, { env: process.env }), null]);
     // 4. the kit's repo with origin unreachable: said, not blocked

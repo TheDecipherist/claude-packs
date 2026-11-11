@@ -8,7 +8,7 @@ import { isDir, readText, walk } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
 import type { InstalledGlobModule, InstalledLayoutModule } from '../packs/base/hooks/lib/types.d.mts';
 
-type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from '../packs/base/hooks/lib/types.d.mts';
 
 const SKIP = /(^|\/)(\.git|node_modules|build|Builds|_deps|JUCE|JuceLibraryCode|cmake-build[^/]*)(\/|$)/;
 // Inside any .claude/ only the kit's own files are walked: skills, rules and agents, which rules on

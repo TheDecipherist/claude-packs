@@ -14,7 +14,7 @@ const ASK_MS = 20_000;
 const SAFE_DIR = /^[\w./~-]+$/;   // a folder name goes into a remote shell command: plain path characters only
 
 /** The environment a caller passes. */
-type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from './types.d.mts';
 
 /** One machine remotes.json lists. */
 export interface Remote { name: string; ssh: string; dir?: string; kit?: string }

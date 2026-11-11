@@ -38,7 +38,7 @@ export type DeclaredLook = Look & { report: string };
 interface Report { verdict?: unknown; code?: unknown; commit?: unknown }
 
 /** What a git question needs of the caller: the folder to ask in is each call's own, the environment the event's. */
-type Env = HookContext['env'];
+import type { Env } from './lib/types.d.mts';
 
 const git = (root: string, env: Env, ...args: string[]): string | null => gitOut(args, { cwd: root, env });
 const pathspecs = (globs: readonly string[]): string[] => globs.map((g) => `:(glob)${g}`);

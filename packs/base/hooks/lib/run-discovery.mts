@@ -9,7 +9,8 @@ import { gitOut, gitRun } from './git-run.mts';
 import { sessionOrders } from './run-claudes.mts';
 
 /** The environment a caller passes. */
-export type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from './types.d.mts';
+export type { Env };
 /** A process of a runner of a work order. */
 export interface Runner { pid: number; order: string }
 /** One process, with the folder it works in. */

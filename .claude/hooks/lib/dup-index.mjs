@@ -112,7 +112,7 @@ function sourceStats(root, ex) {
     return out;
 }
 /** The checkout's index, read from the temp folder and brought up to date for the files that changed. */
-export function loadIndex(root, { layout = {}, shape = null } = {}) {
+export function loadIndex(root, { layout = {}, shape = null, persist = true } = {}) {
     const file = fileOf(root);
     const real = realPath(root);
     // read whole, not through readText: a big checkout's index is past its 8 MB cap
@@ -146,7 +146,7 @@ export function loadIndex(root, { layout = {}, shape = null } = {}) {
         read += 1;
     }
     const changed = read > 0 || !old || Object.keys(old.files).length !== Object.keys(files).length;
-    if (changed) {
+    if (changed && persist) {
         try {
             mkdirSync(join(file, '..'), { recursive: true });
         }
@@ -248,8 +248,8 @@ const DECLARATION = /^\s*(?:$|using\b|#\s*include\b|import\b|from\s+\S+\s+import
 const MIN_LOGIC_LINES = 3;
 const holdsLogic = (text, { start, end }) => text.split('\n').slice(start - 1, end).filter((l) => !DECLARATION.test(l)).length >= MIN_LOGIC_LINES;
 /** The clones the writes would add, as jscpd over the repo would find them: the index picks the candidates, jscpd confirms. */
-export function judgeCopyWrites(root, writes, { env, layout = {}, shape = null, ignore = [] }) {
-    const index = loadIndex(root, { layout, shape });
+export function judgeCopyWrites(root, writes, { env, layout = {}, shape = null, ignore = [], persist = true }) {
+    const index = loadIndex(root, { layout, shape, persist });
     const maybe = clonesIn(index, writes, { ignore });
     if (!maybe.length)
         return { clones: [], index };

@@ -13,92 +13,31 @@ node_modules/
 .env
 build/
 # emitted by `npm run build` beside each .mts (d-2); a folder's lines become one rule when its last hand-written .mjs goes
-packs/base/hooks/lib/files.mjs
-packs/base/hooks/lib/git-run.mjs
-packs/base/hooks/lib/hash.mjs
-packs/base/hooks/lib/source-exts.mjs
+# the base pack is TypeScript whole: every .mjs under its hooks and tools is emitted (d-2)
+packs/base/hooks/**/*.mjs
+packs/base/tools/**/*.mjs
 scripts/clean-emitted.mjs
-packs/base/hooks/lib/json.mjs
 lib/kit-lock.mjs
-# W3 layer 0 (base hooks lib), emitted
-packs/base/hooks/lib/apply-edit.mjs
-packs/base/hooks/lib/audience.mjs
-packs/base/hooks/lib/build-slots.mjs
-packs/base/hooks/lib/command-prefix.mjs
-packs/base/hooks/lib/compile-cache.mjs
-packs/base/hooks/lib/core-budget.mjs
-packs/base/hooks/lib/cpp-scan.mjs
-packs/base/hooks/lib/crash-policy.mjs
-packs/base/hooks/lib/git-adds.mjs
-packs/base/hooks/lib/glob.mjs
-packs/base/hooks/lib/identifier-runs.mjs
-packs/base/hooks/lib/layout.mjs
-packs/base/hooks/lib/own-processes.mjs
-packs/base/hooks/lib/program-read.mjs
-packs/base/hooks/lib/project.mjs
-packs/base/hooks/lib/prose.mjs
-packs/base/hooks/lib/run-claudes.mjs
-packs/base/hooks/lib/rust-scan.mjs
-packs/base/hooks/lib/secret-patterns.mjs
-packs/base/hooks/lib/selftest.mjs
-packs/base/hooks/lib/shell-lex.mjs
-# W3 layer 1, emitted
-packs/base/hooks/lib/content.mjs
-packs/base/hooks/lib/dup.mjs
-packs/base/hooks/lib/event-log.mjs
-packs/base/hooks/lib/hub-rig.mjs
-packs/base/hooks/lib/languages.mjs
-packs/base/hooks/lib/look-gate-selftest.mjs
-packs/base/hooks/lib/program-writes.mjs
-packs/base/hooks/lib/run-discovery.mjs
-packs/base/hooks/lib/skill-first-selftest.mjs
-# W3 layer 2, emitted
-packs/base/hooks/lib/code-shapes.mjs
-packs/base/hooks/lib/dup-index.mjs
-packs/base/hooks/lib/hook-log.mjs
-packs/base/hooks/lib/making-check-selftest.mjs
-packs/base/hooks/lib/shape-prose.mjs
-packs/base/hooks/lib/shell-writes.mjs
-packs/base/hooks/lib/shell-writes-selftest.mjs
-packs/base/hooks/lib/trunk-lag-selftest.mjs
-packs/base/hooks/lib/shell-sed.mjs
-# W3 layer 3, emitted
-packs/base/hooks/lib/elements.mjs
-packs/base/hooks/lib/function-shapes.mjs
-packs/base/hooks/lib/near-copies.mjs
-packs/base/hooks/lib/shape.mjs
-packs/base/hooks/lib/shape-lists.mjs
-packs/base/hooks/lib/turn.mjs
-packs/base/hooks/lib/writes.mjs
-packs/base/hooks/lib/shape-hits.mjs
-packs/base/hooks/lib/shape-lines.mjs
-packs/base/hooks/lib/shape-model.mjs
 .claude/hooks/kit-lock.mjs
-# W3 layers 4 to 6, emitted
-packs/base/hooks/lib/git-auth.mjs
-packs/base/hooks/lib/git-guard-selftest.mjs
-packs/base/hooks/lib/kit-fresh-look.mjs
-packs/base/hooks/lib/kit-fresh-selftest.mjs
-packs/base/hooks/lib/kit-version.mjs
-packs/base/hooks/lib/pushed.mjs
-packs/base/hooks/lib/repo-index.mjs
-packs/base/hooks/lib/run-remotes.mjs
-packs/base/hooks/lib/run-status.mjs
-packs/base/hooks/lib/run-transcripts.mjs
-packs/base/hooks/lib/run-tree.mjs
-packs/base/hooks/lib/shape-code.mjs
-packs/base/hooks/lib/trunk-lag.mjs
-packs/base/hooks/lib/unread-writes.mjs
-# W3 layers 4 to 6, split out
-packs/base/hooks/lib/remote-heads.mjs
-packs/base/hooks/lib/push-form.mjs
-packs/base/hooks/lib/branches-ahead.mjs
-packs/base/hooks/lib/stop-verdict.mjs
-packs/base/hooks/lib/pushed-selftest.mjs
-packs/base/hooks/lib/run-live.mjs
-packs/base/hooks/lib/run-progress.mjs
-packs/base/hooks/lib/run-rows.mjs
-packs/base/hooks/run-hooks.mjs
-packs/base/hooks/lib/verdict.mjs
-# W4: base hooks, emitted as each converts
-packs/base/hooks/no-find.mjs
+# W4: lib, emitted as each converts
+lib/backup.mjs
+lib/build-queue.mjs
+lib/coverage.mjs
+lib/git-tokens.mjs
+lib/hook-timing.mjs
+lib/kit-command.mjs
+lib/logs.mjs
+lib/manifest.mjs
+lib/pack-manifest.mjs
+lib/packs.mjs
+lib/global.mjs
+lib/once-only-report.mjs
+lib/repeats.mjs
+lib/repo-weight.mjs
+lib/rule-tests.mjs
+lib/rules.mjs
+lib/run-status.mjs
+lib/selftest-cache.mjs
+lib/shape.mjs
+lib/symmetry-doctor.mjs
+lib/zip.mjs

@@ -32,7 +32,7 @@ const TEST_NOTE = 'a test that drives one instance proves that instance only: lo
 const HOW = 'Build for the shape: a loop over every instance or the generator; an instance seen in a bug goes on a "seen in:" line.\n' +
   'A page for a person outside the project, about the real machine\'s own named controls (never a spec, brief or code), says so in its first 5 lines: <!-- audience: outside --> (.md or .txt only).\n';
 
-type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from './lib/types.d.mts';
 
 function judgeText(rel: string, before: string | null, after: string, shape: LoadedShape, root: string, env: Env): string[] {
   // a call that takes a count looks like one that takes an index; the declaration tells them apart (KF-17)

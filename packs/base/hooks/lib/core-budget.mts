@@ -8,7 +8,8 @@ import { join } from 'node:path';
 import { readJson } from './json.mts';
 
 /** The environment a caller passes. */
-export type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from './types.d.mts';
+export type { Env };
 
 /** The part of `.claude/layout.json` the budget reads. */
 export interface BudgetLayout { guards?: { buildq?: { cores?: unknown } } }

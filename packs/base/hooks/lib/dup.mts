@@ -28,7 +28,8 @@ import type { Layout, ShapeManifest } from './types.d.mts';
 export type ShapeExclude = Pick<ShapeManifest, 'exclude'>;
 
 /** The environment a caller passes: never this process's by default. */
-export type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from './types.d.mts';
+export type { Env };
 /** One side of a clone: a file and its lines (1-based). */
 export interface CloneSide { file: string; start: number; end: number }
 export interface Clone { a: CloneSide; b: CloneSide; lines: number; tokens: number }

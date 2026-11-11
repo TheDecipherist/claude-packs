@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // kit-fresh (SessionStart; PreToolUse Bash on a commit in the kit's own repo; run.sh before every session; KWB-156): a session never
 // starts work on an outdated kit. One session started on a kit clone at 1.5.13 while the work was at 1.9.0, and nothing said so.
 //   In a project: the installed kit (.claude/claude-packs.lock.json "kit") against npm's newest (`npm view`, asked at most once a
@@ -10,43 +9,41 @@
 //   node kit-fresh.mjs              the hook (the event on stdin)
 //   node kit-fresh.mjs --check      for run.sh: says what is outdated, exits 2 when the session must not start
 //   node kit-fresh.mjs --selftest
+// A judge on the hook contract (W4): it writes no file of the project. Its notice at SessionStart is `say`; its look is kept in
+// two places outside the project, npm's answer for a day (the user's cache folder) and the fetch of origin (.git).
 import { join } from 'node:path';
-import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
-import { parseJson } from './lib/json.mjs';
+import { contextOf, isMain, runAsHook, writeVerdict } from './lib/hook-log.mjs';
 import { atCommit, atStart } from './lib/kit-fresh-look.mjs';
+import { selftest as selftestOf } from './lib/kit-fresh-selftest.mjs';
 import { claudeRoot } from './lib/project.mjs';
-
-
+import { pass, refuse, say } from './lib/verdict.mjs';
 /** the checkout a session or a command in `cwd` works in: a worktree's own, never the main checkout's */
-const rootOf = (cwd) => claudeRoot(projectRoot(), join(cwd, 'x'), process.cwd());
-
-function main(text) {
-  const ev = parseJson(text);
-  if (!ev) return 0;   // not a refusal: nothing to judge
-  const root = rootOf(ev.cwd ?? process.cwd());
-  if (ev.hook_event_name === 'SessionStart') {
-    const v = atStart(root, { env: process.env, now: Date.now() });
-    if (!v) return 0;
-    if (v.block) { console.error(v.say); return 2; }
-    console.log(v.say);
-    return 0;
-  }
-  if (ev.hook_event_name === 'PreToolUse' && ev.tool_name === 'Bash') {
-    const refusal = atCommit(root, ev.tool_input?.command, { env: process.env });
-    if (refusal) { console.error(refusal); return 2; }
-  }
-  return 0;
+const rootOf = (cwd, ctx) => claudeRoot(ctx.projectDir, join(cwd, 'x'), ctx.cwd);
+/** What a session's start says: a notice on stdout, or a refusal when nobody is there and the kit is outdated. */
+function startVerdict(ctx, cwd) {
+    const v = atStart(rootOf(cwd, ctx), { env: ctx.env, now: ctx.now });
+    if (!v)
+        return pass;
+    return v.block ? refuse(v.say) : say(`${v.say}\n`);
 }
-
+export const hook = (event, ctx) => {
+    const cwd = event.cwd ?? ctx.cwd;
+    if (event.hook_event_name === 'SessionStart')
+        return startVerdict(ctx, cwd);
+    if (event.hook_event_name === 'PreToolUse' && event.tool_name === 'Bash') {
+        const refusal = atCommit(rootOf(cwd, ctx), event.tool_input?.command, { env: ctx.env });
+        if (refusal)
+            return refuse(refusal);
+    }
+    return pass;
+};
+/** `--check`, for run.sh: the start's verdict from this process, its words written, its code the exit code. */
 function check() {
-  const v = atStart(rootOf(process.cwd()), { env: process.env, now: Date.now() });
-  if (!v) return 0;
-  (v.block ? console.error : console.log)(v.say);
-  return v.block ? 2 : 0;
+    const ctx = contextOf();
+    const verdict = startVerdict(ctx, ctx.cwd);
+    writeVerdict(verdict);
+    return verdict.code;
 }
-
-export const hook = main;
-if (isMain(import.meta.url)) {
-  const { selftest } = process.argv.includes('--selftest') ? await import('./lib/kit-fresh-selftest.mjs') : {};
-  process.exit(selftest ? selftest() : process.argv.includes('--check') ? check() : await asHook('kit-fresh', main));
-}
+export const selftest = () => selftestOf();
+if (isMain(import.meta.url))
+    await runAsHook(import.meta.url, 'kit-fresh', hook, selftest, { flags: { '--check': check } });

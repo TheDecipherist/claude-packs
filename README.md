@@ -400,7 +400,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, a settings layer with the standard settings | 53 | 12 | 3 | 8 |
-| `base` | Universal engineering, in every configuration | 25 | 8 | 25 | 15 |
+| `base` | Universal engineering, in every configuration | 25 | 8 | 28 | 15 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
@@ -526,6 +526,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `lesson-checks` | Write | Runs the installed lesson checks on what a write adds |
 | `template-law` | Write | Refuses a copy, a near copy or a function made again |
 | `once-only` | Write | Refuses a duplicate of code as written |
+| `once-only-index` | After a write | Adds the written code to the copy index, only for a write that went through |
 | `code-shape` | Write | Refuses wide lines, packed lines, long functions, long parameter lists |
 | `file-size-guard` | Write | Refuses a source file past its line limit |
 | `dispatch-once` | Write | Refuses a `switch` on a kind already switched on in another file. In Rust, a second lookup table on an enum, outside the enum |
@@ -533,6 +534,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `placement-law` | Write | Refuses a kind of thing in the wrong folder |
 | `shape-law` | Write | Refuses a literal instance of a many concept |
 | `brief-guard` | Write | Refuses a brief that names a fixed instance |
+| `brief-guard-count` | Write | Logs each brief the brief guard refused |
 | `secrets-guard` | Write | Refuses a secret in code, or a secret file in git |
 | `untrusted-boundary` | Write | Refuses a model call with outside text and no per-call boundary |
 | `git-guard` | Bash | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
@@ -544,6 +546,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `inside-the-project` | Write, Bash | Refuses work for the project done outside it: a worktree added or moved beside the project, and any write, `cd` or `git -C` into a checkout of the same repo kept outside it, where no other hook can see |
 | `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
+| `making-check-count` | Stop | Counts the times a turn was sent back, so a repeat is known |
 | `heartbeat` | Every call | Records what each agent did last and when, for the status line; refuses nothing |
 | `kit-fresh` | Session start, Bash | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
 

@@ -31,7 +31,8 @@ import type { WriteOp } from './types.d.mts';
 export { readText };   // its importers' name for the file reader; files.mts owns it
 
 /** The variables a path may start with, as the caller read them from its process. */
-export type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from './types.d.mts';
+export type { Env };
 
 /** One file a shell command writes; `content` is the new text where it can be known, else null. */
 export interface ShellWrite {

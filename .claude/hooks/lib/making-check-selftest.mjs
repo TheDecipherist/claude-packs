@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { findJscpd } from './dup.mjs';
 import { gitRun } from './git-run.mjs';
-import { put, runHook, scratchProject, verdicts } from './selftest.mjs';
+import { put, runHook, scratchProject, snapshot, verdicts, writtenSince } from './selftest.mjs';
 import { toJson } from './json.mjs';
 const FN = (name, k = '2.0f') => `float ${name} (float x, int slot) noexcept\n{\n    const float g = std::tan (kPi * cutoff[slot] / sampleRate);\n    const float k = ${k} - 2.0f * resonance[slot];\n` +
     '    const float a1 = 1.0f / (1.0f + g * (g + k));\n    const float a2 = g * a1;\n    const float a3 = g * a2;\n    const float v3 = x - ic2eq[slot];\n' +
@@ -21,9 +21,12 @@ const OVERRIDE_CITED = 'The brief said to drive slot 2, but docs/laws.md L8 says
 const OVERRIDE_DECIDED = 'Overnight: the order did not name a fade, but no law covers it, so I decided it under Decisions (D-3) rather than what the brief said.';
 const MAKING_LANE = 'making: one filter per slot; concepts: slot (many, 4), lane (many); reuse: slotFilter in src/slot/filter.cpp';
 const MAKING_SEMICOLON = 'making: one filter per slot; concepts: slot (many, 4; slotId(i, field)), mixer (one); reuse: slotFilter in src/slot/filter.cpp';
-/** Runs every planted fault against the hook file named by `hookUrl` (its import.meta.url); the exit code. */
-export function selftest(hookUrl) {
+/** Runs every planted fault against the hook file named by `hookUrl` (its import.meta.url), then the recorder `recorderUrl` that
+ *  counts its send-backs, as the runner orders a Stop's hooks; the exit code. */
+export function selftest(hookUrl, recorderUrl) {
     const hook = fileURLToPath(hookUrl);
+    const recorder = fileURLToPath(recorderUrl);
+    const trapped = [];
     if (!findJscpd(process.env, [process.cwd()])) {
         console.error('making-check selftest FAILED: jscpd not found (once-only\'s detector)');
         return 1;
@@ -51,7 +54,12 @@ export function selftest(hookUrl) {
         const named = `${run}-${session}`;
         writeFileSync(join(dir, 'build.md'), BUILD(making));
         writeFileSync(T, [user('build the slot filter'), ...entries.flat()].map((e) => toJson(e)).join('\n'));
-        return runHook(hook, dir, { hook_event_name: 'Stop', transcript_path: T, cwd: dir, session_id: named, stop_hook_active: active, last_assistant_message: last }).status;
+        const stop = { hook_event_name: 'Stop', transcript_path: T, cwd: dir, session_id: named, stop_hook_active: active, last_assistant_message: last };
+        const before = snapshot(dir); // the judge's own run: it must leave the project as it is (the fixtures above are in place)
+        const status = runHook(hook, dir, stop).status;
+        trapped.push(...writtenSince(dir, before).filter((f) => !f.startsWith('.git/'))); // git's own index refresh is no write of the project
+        runHook(recorder, dir, stop); // the recorder counts the send-back after the judge, as the runner orders a Stop's hooks
+        return status;
     };
     const at = (f) => join(dir, f);
     const W = (f, content) => use('Write', { file_path: at(f), content });
@@ -140,5 +148,6 @@ export function selftest(hookUrl) {
         ['a concept word the turn put in and kept is written (KWB-122)', filtered((before) => `${before}// the mixer\n`, [editOf('x', '// the mixer\n')]), 2],
         ['the shape word the rule asks for is no concept (KF-24)', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: x; concepts: slot, many; mixer, one; reuse: none' }), 0],
     ];
+    cases.push(['a judge writes no file (the write trap)', trapped.join(','), '']);
     return verdicts('making-check', cases);
 }

@@ -53,6 +53,9 @@ export interface Verdict {
   stderr: string;
 }
 
+/** An environment: the event's, passed to whatever runs a child or reads a variable (never this process's own by default). */
+export type Env = Readonly<Record<string, string | undefined>>;
+
 /** A logger a hook or a command writes its lines through. */
 export type Logger = (line: string) => void;
 
@@ -110,7 +113,7 @@ export interface FileWrite {
 // ---- The project's own files ----
 
 export interface LayoutFolder { path: string; purpose?: string; kind?: string }
-export interface LayoutKind { what?: string; in?: string; concepts?: readonly string[]; content?: boolean; files?: readonly string[]; extensions?: readonly string[] }
+export interface LayoutKind { what?: string; in?: string; concepts?: readonly string[]; content?: boolean | string; files?: readonly string[]; extensions?: readonly string[] }
 export interface Look { name: string; reference: string; code?: readonly string[]; report?: string }
 
 /** `.claude/layout.json`: the project's one source of truth for where things go. Keys the kit does not know are kept. */
@@ -140,7 +143,7 @@ export interface Lock {
   kit: string;
   packs: readonly string[];
   installed?: readonly string[];
-  sources?: readonly { name: string; url: string; ref?: string }[];
+  sources?: Record<string, { url: string; commit?: string; ref?: string }>;   // by pack name (lib/sync, custom-packs)
   updated?: string;
   files: Record<string, string>;
 }
@@ -153,7 +156,7 @@ export interface ShapeConcept {
   selectors?: readonly string[];
   constants?: Record<string, unknown>;
   owns?: readonly string[];
-  symmetry?: readonly string[];
+  symmetry?: Readonly<Record<string, unknown>>;   // members, swap, instances, first (tools/shape-symmetry reads it)
   [key: string]: unknown;
 }
 
@@ -174,7 +177,7 @@ export interface PackManifest {
   version: string;
   description: string;
   type: 'stock' | 'custom';
-  author?: string;
+  author?: string | { name: string; email?: string; url?: string };
   license?: string;
   repository?: { type?: string; url: string };
   engines?: Record<string, string>;

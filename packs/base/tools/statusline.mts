@@ -24,7 +24,7 @@ import type { GitState } from './statusline-work.mts';
 const SELF = fileURLToPath(import.meta.url);
 const SEPARATOR = ' | ';
 
-type Env = Readonly<Record<string, string | undefined>>;
+import type { Env } from '../hooks/lib/types.d.mts';
 
 /** The kit version the project runs (KWB-162, lib/kit-version.mjs): the installed package of the install this tool belongs to
  *  (.claude/tools, two folders up) or of the session's project, its lock where no package is installed; the kit's own checkout
