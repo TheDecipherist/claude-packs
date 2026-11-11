@@ -1,5 +1,5 @@
 // 0.21.0: if a person makes something for their employer's internals, it is easy to make a repo and share it with their team.
-import { CLI, assert, execFileSync, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { CLI, assert, execFileSync, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 
 const env = () => ({ ...process.env, CLAUDE_PACKS_CACHE: join(process.env.TMPDIR, 'pack-cache') });
 const kit = (dir, ...a) => spawnSync('node', [CLI, ...a, '--dir', dir], { encoding: 'utf8', env: env() });

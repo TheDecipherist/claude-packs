@@ -1,5 +1,5 @@
 // 0.30.0: a name the manual prints is the fastest way into an image, and the test of every way of unwrapping it. Each image here is built wrapped the way a real one was.
-import { assert, cli, existsSync, fresh, join, readFileSync, readdirSync, spawnSync, test, writeFileSync, KIT } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, join, readFileSync, readdirSync, spawnSync, test, writeFileSync, KIT } from './kit-cli.mts';
 import { interleave, wrappings } from '../packs/reverse-engineering/tools/lib/unwrap.mjs';
 import { abbreviationOf, displayForms, readNames, report, sweep } from '../packs/reverse-engineering/tools/lib/names-report.mjs';
 

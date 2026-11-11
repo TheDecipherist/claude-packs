@@ -1,6 +1,6 @@
 // 1.1.0, group 1: the faults of the MPX 500 build that failed silently or failed open (KF-40, KF-18, KF-15, KF-23, KF-8, KF-12).
 // KF-31 is in rule-tests.test.mjs. Each test was seen red before its fix (docs/1.1-progress.md).
-import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, run, spawnSync, statSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, run, spawnSync, statSync, test, writeFileSync } from './kit-cli.mts';
 import { writesOf } from '../packs/base/hooks/lib/writes.mjs';
 
 const installed = (...packs) => {

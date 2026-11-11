@@ -1,7 +1,7 @@
 // 0.10.1 (the kit half of Stellix B-261): every element the pointer can act on has a cursor naming its interaction and a
 // small visible effect on the hovered thing itself. The law is a rule (gpu-painter for synths, full-stack for the web app), the how is the
 // skill hover-state, and doctor goes red when a project has UI code and declares no hover gate (layout.json "gates": {"hover": "<command>"}).
-import { KIT, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 
 const init = (args, prefix) => {
   const dir = fresh(prefix);

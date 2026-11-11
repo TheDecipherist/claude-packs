@@ -1,7 +1,7 @@
 // 0.13.0 (KWB-41): `sync` takes 0.1 s and doctor 7.4 s, all of it hooks proving a law they already proved. A selftest that passed is
 // not run again while the hook, its libs, node and the project's guards are the same; a changed hook is proved again; a failure is
 // never remembered; `doctor --fresh` runs them all.
-import { CLI, appendFileSync, assert, execFileSync, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { CLI, appendFileSync, assert, execFileSync, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 
 const doctor = (dir, cache, ...args) => spawnSync('node', [CLI, 'doctor', '--dir', dir, ...args], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache, CLAUDE_PACKS_SELFTESTS: 'run' } });
 const unchanged = (out) => Number(out.match(/selftests: (\d+) of \d+ unchanged/)?.[1] ?? 0);

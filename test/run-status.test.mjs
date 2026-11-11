@@ -1,7 +1,7 @@
 // 1.7.3: `claude-packs status`, where every unattended run stands. The user: "it reports which projects its working on, how many
 // agents per project, where they are, and how much is left", "PROJECT NAME (PROGRESS 0% - 100%) > AGENT X > STEP (PROGRESS)".
 import { utimesSync } from 'node:fs';
-import { assert, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mts';
 import { orderStatus, progressOf, runRows, runnersIn, runsReport, stepsOf, workIn } from '../lib/run-status.mjs';
 import { bar, statusCommand, statusLines } from '../lib/status-cli.mjs';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';

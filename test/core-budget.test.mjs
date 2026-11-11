@@ -1,7 +1,7 @@
 // KWB-111: the build queue limited how many jobs ran, never how big: two "allowed" jobs at -j18 and a fanned-out test run
 // filled 18 cores (load 22), the kit's own gate timed out, and the user's apps slowed. Every build and test run the queue or
 // quiet-test starts now takes its share of one machine-wide core budget, and runs at a low priority.
-import { assert, cli, execFileSync, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 import { capJobs, coreBudget, budgetEnv, gentle, shareOf } from '../packs/base/hooks/lib/core-budget.mjs';
 
 test('the budget comes from the environment, then the layout, then a third of the cores, never under 2', () => {

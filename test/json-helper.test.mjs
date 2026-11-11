@@ -1,5 +1,5 @@
 // KWB-146: the one JSON helper (packs/base/hooks/lib/json.mjs) never throws, and handles once each case a raw call gets wrong.
-import { assert, existsSync, fresh, join, test, writeFileSync } from './kit-cli.mjs';
+import { assert, existsSync, fresh, join, test, writeFileSync } from './kit-cli.mts';
 import { parseJson, readJson, toJson, writeJson } from '../packs/base/hooks/lib/json.mjs';
 
 test('toJson writes what JSON.stringify throws on or loses: a circle, a BigInt, an Error, a toJSON that throws', () => {

@@ -6,10 +6,10 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, PIN_GUARD, bash, caseFrom, fire, fireAs, installedCase, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
+import { CLI, PIN_GUARD, bash, caseFrom, fire, fireAs, installedCase, landFromWorktree, project, put, stellix } from './worktree-rig.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mjs';
-import { COMMAND_CASES } from './worktree-cases-commands.mjs';
-import { PACK_CASES } from './worktree-cases-packs.mjs';
+import { COMMAND_CASES } from './worktree-cases-commands.mts';
+import { PACK_CASES } from './worktree-cases-packs.mts';
 
 // the hooks moved onto the contract (W4) export their worktree case as data beside their selftest
 const [FOLDER_LAW, PLACEMENT_LAW, SECRETS_GUARD, LESSON_CHECKS, HEARTBEAT] = (await Promise.all([
@@ -39,8 +39,8 @@ const RT_BAD = 'void Voice::processBlock (juce::AudioBuffer<float>& b, juce::Mid
 const SHAPE = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'] } }, exclude: [] };
 
 // One case per installed hook: the worktree file it must allow and the one it must refuse, judged
-// from the worktree's own checkout. A hook added to the packs without a case here, in worktree-cases-commands.mjs (a base hook
-// that judges a command by its checkout's layout) or in worktree-cases-packs.mjs (a hook a pack other than base adds) fails the test.
+// from the worktree's own checkout. A hook added to the packs without a case here, in worktree-cases-commands.mts (a base hook
+// that judges a command by its checkout's layout) or in worktree-cases-packs.mts (a hook a pack other than base adds) fails the test.
 const CASES = {
   ...PACK_CASES,
   ...COMMAND_CASES,
@@ -49,9 +49,9 @@ const CASES = {
   'run-hooks.mjs': ({ here, wt }) => {
     const via = (file, content = '// new\n') => spawnSync('node', [join(here, '.claude/hooks/run-hooks.mjs'), '.claude/hooks/folder-law.mjs', '.claude/hooks/file-size-guard.mjs'],
       { input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: file, content } }), env: { ...process.env, CLAUDE_PROJECT_DIR: here }, encoding: 'utf8' });
-    assert.equal(via(join(wt, 'src/dsp/Svf.cpp')).status, 0);
+    assert.equal(via(join(wt, 'src/core/Svf.cpp')).status, 0);
     assert.equal(via(join(wt, 'stray/Svf.cpp')).status, 2);
-    assert.equal(via(join(wt, 'src/dsp/Huge.cpp'), 'x\n'.repeat(400)).status, 2);
+    assert.equal(via(join(wt, 'src/core/Huge.cpp'), 'x\n'.repeat(400)).status, 2);
     assert.match(readFileSync(join(here, '.claude/hooks.log'), 'utf8'), /\tfolder-law\t\d+\t2\tWrite/);
   },
   'folder-law.mjs': caseFrom('folder-law.mjs', FOLDER_LAW),
@@ -61,15 +61,15 @@ const CASES = {
   'lesson-checks.mjs': (checkouts) => {
     caseFrom('lesson-checks.mjs', LESSON_CHECKS)(checkouts);   // the worktree's own check; the step below moves a concept in its layout
     const { here, wt } = checkouts;
-    // The worktree's branch moved DSP into src/synth: its own layout.json decides, not main's.
+    // The worktree's branch moved the dsp concept into src/engine: its own layout.json decides, not main's.
     const layoutFile = join(wt, '.claude/layout.json');
     const layout = JSON.parse(readFileSync(layoutFile, 'utf8'));
-    layout.concepts.dsp = [...layout.concepts.dsp, 'src/synth/**'];
+    layout.concepts.dsp = [...layout.concepts.dsp, 'src/engine/**'];
     writeFileSync(layoutFile, JSON.stringify(layout, null, 2));
     assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), APVTS), 2);
-    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/synth/Filter.cpp'), APVTS), 2);
-    assert.equal(fire(here, 'lesson-checks.mjs', join(here, 'src/synth/Filter.cpp'), APVTS), 0);
-    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), 'void Filter::setParams (const P& p) noexcept {}\n'), 0);
+    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/engine/Filter.cpp'), APVTS), 2);
+    assert.equal(fire(here, 'lesson-checks.mjs', join(here, 'src/engine/Filter.cpp'), APVTS), 0);
+    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'),'void Filter::setParams (const P& p) noexcept {}\n'), 0);
   },
   'frozen-files.mjs': installedCase('frozen-files.mjs'),
   'spec-lock.mjs': installedCase('spec-lock.mjs'),

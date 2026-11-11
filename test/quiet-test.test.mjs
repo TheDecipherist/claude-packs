@@ -1,7 +1,7 @@
 // 1.2.0: tests stop reaching the user's desktop. On a build a gate run by hand opened its window on the real display for half
 // a minute at a time, and the same happened on macOS, so the settings live in one script and a skill sends every run through it.
 import { chmodSync } from 'node:fs';
-import { KIT, assert, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 import { QUIET_ENV, plan } from '../packs/base/tools/quiet-test.mjs';
 
 const TOOL = join(KIT, 'packs/base/tools/quiet-test.mjs');

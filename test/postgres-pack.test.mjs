@@ -1,5 +1,5 @@
 // 1.1.0: the postgres pack. Every check was measured on 5,653 real .sql files and 5,520 source files; the cases here are what that reading taught.
-import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
 
 function project(deps = { pg: '8.0.0' }) {
   const dir = fresh('pg-');

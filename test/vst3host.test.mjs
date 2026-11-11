@@ -1,6 +1,6 @@
 // 1.1.0: the offline VST3 renderer, from a project where it had been run on JE8086 and Osirus. It reaches a project through sound-design. Compiling it
 // needs a JUCE checkout, which this suite does not have, so what a real plugin did is measured by hand and recorded in the CHANGELOG.
-import { KIT, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, spawnSync, test } from './kit-cli.mjs';
+import { KIT, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, spawnSync, test } from './kit-cli.mts';
 
 const TOOL = join(KIT, 'packs/sound-design/tools/vst3host');
 const FILES = ['build.sh', 'host_events.h', 'options.h', 'render.cpp', 'session.h'];

@@ -1,7 +1,7 @@
 // planner W6: the claude.ai skills that plan a build. They must agree with the kit to the letter, so they are held here: their size and
 // trigger form, no placeholder left, no command, flag or skill the kit lacks, one skill per intent, and the bundle claude.ai takes.
 // Python's zipfile reads the bundle back, so the zip is judged by another reader than the code that wrote it.
-import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 import { CLAUDE_AI_SKILLS, claudeAiDescriptions, claudeAiSkillFiles, skillFor } from '../lib/planner.mjs';
 
 const PLANNER = join(KIT, 'planner');

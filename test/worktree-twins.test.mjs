@@ -6,7 +6,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
-import { fireAs, project, put } from './worktree-rig.mjs';
+import { fireAs, project, put } from './worktree-rig.mts';
 
 const git = (dir, ...a) => execFileSync('git', ['-C', dir, ...a], { encoding: 'utf8' });
 const SVF = 'float Svf::process (float x) noexcept\n{\n    const float g = std::tan (kPi * cutoff / sampleRate);\n    const float k = 2.0f - 2.0f * resonance;\n' +

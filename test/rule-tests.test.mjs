@@ -1,6 +1,6 @@
 // KF-31: a rule's own test can be missing for a whole build and nothing says so. The MPX 500's three rules each named a test that did not exist after
 // nine steps, and the gap held four real bugs. doctor is red for an installed, live rule whose Check names a test nothing in the project answers to.
-import { assert, cli, execFileSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 import { namesATest } from '../lib/rule-tests.mjs';
 
 const RULE = 'prepare-is-repeatable';

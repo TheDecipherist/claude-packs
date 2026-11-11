@@ -1,6 +1,6 @@
 // 0.15.0: text that goes public reads like a person wrote it. humanize split into small pieces: rules on public text,
 // one-job skills, and a lesson check for each tell a regex can see. "prose": true leaves code and URLs out.
-import { KIT, assert, cli, fresh, hookRun, join, readFileSync, readdirSync, run, test } from './kit-cli.mjs';
+import { KIT, assert, cli, fresh, hookRun, join, readFileSync, readdirSync, run, test } from './kit-cli.mts';
 
 const write = (dir, rel, content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
 const skills = readdirSync(join(KIT, 'packs/writing/skills'));

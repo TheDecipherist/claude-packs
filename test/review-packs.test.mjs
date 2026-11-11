@@ -1,6 +1,6 @@
 // 0.25.0: packs made from senior reviews of three real repos. The worst faults there had no check: one customer reading another's data, a guard that
 // passed on an empty list, a password in a log. Each pack here installs alone, and refuses what it says it refuses.
-import { assert, cli, existsSync, fresh, holdsEachCase, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, holdsEachCase, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 
 const CASES = [
   ['http-api', 'src/routes/segments.ts', 'const s = await findSegmentById(id);\nreturn json(s);\n', 'const s = await findSegmentById(id, session.user.id);\nreturn json(s);\n'],

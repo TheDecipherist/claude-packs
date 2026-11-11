@@ -1,6 +1,6 @@
 // The README is the kit's front page, and it had fallen a long way behind. It now cannot: every pack with its true counts, every configuration, preset
 // and command, and every hook base installs, or this test fails.
-import { CLI, KIT, assert, join, readdirSync, readFileSync, spawnSync, test } from './kit-cli.mjs';
+import { CLI, KIT, assert, join, readdirSync, readFileSync, spawnSync, test } from './kit-cli.mts';
 import { PRESETS } from '../lib/packs.mjs';
 
 const README = readFileSync(join(KIT, 'README.md'), 'utf8');

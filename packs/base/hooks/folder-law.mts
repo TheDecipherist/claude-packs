@@ -52,7 +52,7 @@ export const hook: Hook = (event, ctx) => judgeVerdict(event, {
 /** A new source file is judged by the worktree's own checkout: in its layout folder it passes, outside it it is refused. */
 export const worktreeCase: WorktreeCase = {
   steps: [
-    { label: 'a new file in a layout folder of the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/dsp/Svf.cpp', content: '// new\n' } }, want: 0 },
+    { label: 'a new file in a layout folder of the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/core/Svf.cpp', content: '// new\n' } }, want: 0 },
     { label: 'a new file outside the layout in the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/stray/Svf.cpp', content: '// new\n' } }, want: 2 },
   ],
 };

@@ -1,6 +1,6 @@
 // 0.25.0: every language has repetition and template things, because AI writes the same thing over and over. One row per language: a copy with
 // other names has the shape of the original, and a comment or a data table has none. The language table is packs/base/hooks/lib/languages.mjs.
-import { assert, cli, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, selftest, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, selftest, test, writeFileSync } from './kit-cli.mts';
 import { codeShapes } from '../packs/base/hooks/lib/code-shapes.mjs';
 import { definesOf } from '../packs/base/hooks/lib/near-copies.mjs';
 import { LANGUAGES } from '../packs/base/hooks/lib/languages.mjs';

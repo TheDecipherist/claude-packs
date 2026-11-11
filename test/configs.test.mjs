@@ -2,7 +2,7 @@
 // template, its hook order and the house-rules preamble of its CLAUDE.md block. `init --config <name>` stores the choice in
 // layout.json "configuration", `update` applies that one, `config <name>` switches and lists what changes, `configs` lists
 // them and doctor prints the one installed (KWB-31).
-import { assert, cli, existsSync, fresh, join, readFileSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, join, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
 
 const project = () => fresh('cfg-');
 const layoutOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));

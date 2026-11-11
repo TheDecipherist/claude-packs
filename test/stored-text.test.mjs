@@ -1,6 +1,6 @@
 // 0.14.0: a UI renders what comes from a database through one renderer: \r correct, code highlighted, markdown parsed,
 // and sanitized, because turning stored text into HTML is how a stored script reaches a page.
-import { assert, cli, fresh, hookRun, join, readFileSync, run, test } from './kit-cli.mjs';
+import { assert, cli, fresh, hookRun, join, readFileSync, run, test } from './kit-cli.mts';
 
 const write = (dir, rel, content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
 const refused = (dir, rel, content, id) => {

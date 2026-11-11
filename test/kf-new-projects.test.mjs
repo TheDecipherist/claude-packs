@@ -1,5 +1,5 @@
 // 1.1.0, group 3: what a new project met on the MPX 500 build (KF-1, 3, 4, 5, 6, 7, 9, 11, 16, 29, 37, 38, 41). Each test was seen red first (docs/1.1-progress.md).
-import { KIT, assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, rmSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, rmSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 
 const put = (dir, rel, text) => { mkdirSync(join(dir, rel, '..'), { recursive: true }); writeFileSync(join(dir, rel), text); };
 const pack = (rel) => readFileSync(join(KIT, 'packs', rel), 'utf8');

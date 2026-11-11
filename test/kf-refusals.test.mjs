@@ -1,6 +1,6 @@
 // 1.1.0, group 2: false refusals. Every test here was seen red first (docs/1.1-progress.md). shape-law is held against the MPX 500's real refusals in
 // test/fixtures/mpx-shape-refusals.json, both ways: what was marked wrong passes, and what was marked right stays refused.
-import { assert, cli, execFileSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
 import { conceptsIn, unknownConcepts } from '../packs/base/hooks/lib/making-concepts.mjs';
 import { normaliseShape } from '../packs/base/hooks/lib/shape-model.mjs';
 import { writesOfTurn } from '../packs/base/hooks/lib/turn.mjs';

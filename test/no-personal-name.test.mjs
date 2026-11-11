@@ -1,6 +1,6 @@
 // The kit is for everyone: nothing it ships or keeps in its repo names one person. lib/settings.mjs keeps one old hook name, so a project that
 // still runs it can be moved on. It reads every file the repo keeps, so a change under docs/ picks it (KWB-131).
-import { KIT, assert, execFileSync, join, readFileSync, test } from './kit-cli.mjs';
+import { KIT, assert, execFileSync, join, readFileSync, test } from './kit-cli.mts';
 
 const NAME = new RegExp(['\\b[Tt]' + 'im\\b', 'Clau' + 'sen', 'ti' + 'ms-', 'ti' + 'm-writing', 'tim_' + 'carter'].join('|'));
 const LEFT_OUT = new Set(['lib/settings.mjs']);

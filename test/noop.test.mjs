@@ -3,7 +3,7 @@
 // CLAUDE.md, copied 2026-11-03), expected/ is what the 0.9.15 kit's `update` made of it. The 0.10.0 update, in the
 // synth-creator configuration, must make the same: the same settings, the same CLAUDE.md, the same files in the lock, and
 // layout.json with "configuration" its one new key. Files whose content changed on purpose are listed below, each with why.
-import { KIT, assert, cli, copyFileSync, execFileSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, copyFileSync, execFileSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 
 // base files changed on purpose, what they do for a synth unchanged: their synth examples made neutral (item 2: base names no
 // synth word); lib/writes.mjs gains judgeEvent, the one guard frame the new hooks and folder-law share (once-only); placement-law

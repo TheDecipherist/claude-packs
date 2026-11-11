@@ -1,6 +1,6 @@
 // planner W3: a work order's install block (a ```claude-packs fence) is what `init --from` and `new --from` install, so the order is
 // the one source of a project's set-up. Its keys are the kit's own; an unknown one is refused by name and nothing is installed.
-import { assert, cli, execFileSync, existsSync, fresh, join, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, fresh, join, readFileSync, test, writeFileSync } from './kit-cli.mts';
 
 const layoutOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
 const lockOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
