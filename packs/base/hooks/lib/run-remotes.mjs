@@ -12,16 +12,27 @@ import { parseJson, readJson } from './json.mjs';
 
 const ASK_MS = 20_000;
 const SAFE_DIR = /^[\w./~-]+$/;   // a folder name goes into a remote shell command: plain path characters only
+const CONFIG = () => join(process.env.XDG_CONFIG_HOME || join(homedir(), '.config'), 'claude-packs', 'remotes.json');
 
-/** The machines to ask, from the user's remotes.json; [] when there is none or it is broken. */
-export function remotesOf(file = join(process.env.XDG_CONFIG_HOME || join(homedir(), '.config'), 'claude-packs', 'remotes.json')) {
-  const list = readJson(file)?.remotes;
-  return Array.isArray(list) ? list.filter((r) => typeof r?.name === 'string' && typeof r?.ssh === 'string' && (!r.dir || SAFE_DIR.test(r.dir))) : [];
+/** This machine's name on its own runs once other machines are listed (the user: "the statusbar needs to say which project
+ *  runs where so like a PC/MAC thing in the beginning"): remotes.json's "name", else mac on macOS and pc elsewhere. */
+export function machineName(file = CONFIG(), platform = process.platform) {
+  const named = readJson(file)?.name;
+  return typeof named === 'string' && named.trim() ? named.trim() : platform === 'darwin' ? 'mac' : 'pc';
 }
 
-/** The ssh command that asks one machine: [program, args]. A login shell, so the machine's own PATH (Homebrew's node) holds. */
+/** The machines to ask, from the user's remotes.json; [] when there is none or it is broken. */
+export function remotesOf(file = CONFIG()) {
+  const list = readJson(file)?.remotes;
+  const plain = (r) => [r.dir, r.kit].every((p) => !p || (typeof p === 'string' && SAFE_DIR.test(p)));
+  return Array.isArray(list) ? list.filter((r) => typeof r?.name === 'string' && typeof r?.ssh === 'string' && plain(r)) : [];
+}
+
+/** The ssh command that asks one machine: [program, args]. A login shell, so the machine's own PATH (Homebrew's node) holds.
+ *  kit: a checkout of the kit there (its bin/claude-packs.mjs), else dir's installed kit, else claude-packs on its PATH. */
 export function askCommand(remote) {
-  const kit = remote.dir ? `cd ${remote.dir} && npx --no-install @thedecipherist/claude-packs status --json` : 'claude-packs status --json';
+  const kit = remote.kit ? `node ${remote.kit}/bin/claude-packs.mjs status --json`
+    : remote.dir ? `cd ${remote.dir} && npx --no-install @thedecipherist/claude-packs status --json` : 'claude-packs status --json';
   return ['ssh', ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=5', remote.ssh, `$SHELL -lc '${kit}'`]];
 }
 

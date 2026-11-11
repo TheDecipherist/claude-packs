@@ -2,7 +2,7 @@
 // still need to get some kind of report here for whats happening". No test reaches a real machine: the ssh call is a stand-in.
 import { assert, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
-import { askCommand, remoteRuns, remotesOf, remotesReport } from '../packs/base/hooks/lib/run-remotes.mjs';
+import { askCommand, machineName, remoteRuns, remotesOf, remotesReport } from '../packs/base/hooks/lib/run-remotes.mjs';
 import { runRows, runsReport } from '../lib/run-status.mjs';
 import { statusReport } from '../lib/status-cli.mjs';
 import { runsSegments } from '../packs/base/tools/statusline-runs.mjs';
@@ -19,7 +19,7 @@ test('the machines come from remotes.json; a missing or broken file is none, and
   assert.deepEqual(remotesOf(file), []);
   writeFileSync(file, '{ half');
   assert.deepEqual(remotesOf(file), []);
-  writeFileSync(file, toJson({ remotes: [MAC, { name: 'x', ssh: 'x', dir: '~/a; rm -rf ~' }, { name: 'y' }] }));
+  writeFileSync(file, toJson({ remotes: [MAC, { name: 'x', ssh: 'x', dir: '~/a; rm -rf ~' }, { name: 'z', ssh: 'z', kit: '$(id)' }, { name: 'y' }] }));
   assert.deepEqual(remotesOf(file).map((r) => r.name), ['mac']);
 });
 
@@ -30,6 +30,7 @@ test('a machine is asked with no password prompt, a connect limit and its own lo
   assert.equal(args[4], 'mac');
   assert.equal(args[5], "$SHELL -lc 'cd ~/projects/shop && npx --no-install @thedecipherist/claude-packs status --json'");
   assert.match(askCommand({ name: 'b', ssh: 'b' })[1][5], /'claude-packs status --json'$/);
+  assert.equal(askCommand({ name: 'k', ssh: 'k', kit: '~/.cache/kit' })[1][5], "$SHELL -lc 'node ~/.cache/kit/bin/claude-packs.mjs status --json'");
 });
 
 test('a machine\'s runs come back marked with its name, and the rows put the name before the project', () => {
@@ -61,6 +62,18 @@ test('status and the status line show a remote run beside the local ones, and an
   assert.equal(rows.at(-1), 'PC: not reached (timed out)');
   writeFileSync(cache, toJson({ runs: [], unreachable: [{ host: 'mac', why: 'asleep' }] }));
   assert.deepEqual(runsSegments(cache, Date.now(), (t) => t, 'none'), ['MAC: not reached (asleep)']);
+});
+
+test('with other machines listed every run says where it runs, this machine\'s too: its name from remotes.json, else its platform', () => {
+  const dir = fresh('remotes-name-');
+  const file = join(dir, 'remotes.json');
+  assert.equal(machineName(file, 'darwin'), 'mac');
+  assert.equal(machineName(file, 'linux'), 'pc');
+  writeFileSync(file, toJson({ name: 'studio', remotes: [] }));
+  assert.equal(machineName(file, 'linux'), 'studio');
+  const report = runsReport({ remotes: [MAC], ask: answers(toJson({ runs: [RUN] })), here: 'pc' });
+  assert.ok(report.runs.length > 0 && report.runs.every((r) => r.host === 'pc' || r.host === 'mac'), report.runs.map((r) => r.host).join());
+  assert.ok(runsReport({ remotes: [], here: 'pc' }).runs.every((r) => !r.host), 'one machine alone: no names');
 });
 
 test('one project\'s report (--dir) asks no machine', () => {

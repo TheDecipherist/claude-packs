@@ -11,7 +11,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { readJson } from './json.mjs';
 import { runningOrders, workIn } from './run-discovery.mjs';
-import { remotesReport } from './run-remotes.mjs';
+import { machineName, remotesOf, remotesReport } from './run-remotes.mjs';
 import { readText } from './shell-writes.mjs';
 
 const ID = String.raw`[A-Z]+\d+[a-z]?`;   // W3, W3b, L5: any order's step ids
@@ -199,10 +199,14 @@ function ordersIn(project, only) {
 
 /** Every run's progress: { updated, dir, runs: [orderStatus], unreachable: [{ host, why }] }: the runs alive on this machine
  *  and on every machine remotes.json lists (1.8.1), or one project's orders here (`dir`). */
-export function runsReport({ dir = null, order = null, remotes = undefined, ask = undefined } = {}) {
+export function runsReport({ dir = null, order = null, remotes = undefined, ask = undefined, here = undefined } = {}) {
   const runs = (dir ? ordersIn(dir, order).map((o) => ({ project: dir, order: o })) : runningOrders()).map((r) => orderStatus(r.project, r.order));
   const work = workIn(runs.flatMap((r) => r.agents.map((a) => a.path)));   // the check: what really runs in each worktree now
   for (const a of runs.flatMap((r) => r.agents)) a.work = work?.[a.path] ?? null;
-  const far = dir ? { runs: [], unreachable: [] } : remotesReport(remotes, ask);
-  return { updated: new Date().toISOString(), dir, runs: [...runs, ...far.runs], unreachable: far.unreachable };
+  const listed = dir ? [] : (remotes ?? remotesOf());
+  const far = remotesReport(listed, ask);
+  // with other machines listed, every run says where it runs, this machine's own too; alone, no names
+  const name = listed.length ? (here ?? machineName()) : null;
+  const mine = name ? runs.map((r) => ({ ...r, host: name })) : runs;
+  return { updated: new Date().toISOString(), dir, runs: [...mine, ...far.runs], unreachable: far.unreachable };
 }
