@@ -1,23 +1,10 @@
-// End-to-end tests of the CLI against throwaway projects.
-import { appendFileSync, assert, cli, existsSync, fresh, hookStatus, join, mkdirSync, profile, readFileSync, readdirSync, run, test, writeFileSync } from '../kit-cli.mts';
-import { parseJson } from '../../packs/base/hooks/lib/json.mts';
-import type { Layout } from '../../packs/base/hooks/lib/types.d.mts';
+// End-to-end tests of the CLI against throwaway projects. (The edited rule and the existing .claude: install-update.test.mts and
+// install-existing.test.mts, split so no file sums over a minute.)
+import { assert, cli, existsSync, hookStatus, join, mkdirSync, profile, readdirSync, run, test, writeFileSync } from '../kit-cli.mts';
 import { fixture } from '../fixtures/installs.mts';
+import { project, text } from './install-rig.mts';
 
-interface Settings { model?: string; hooks: { Stop: { hooks: { command: string }[] }[] } }
-const project = (): string => fresh('cp-');
-const text = (dir: string, rel: string): string => readFileSync(join(dir, rel), 'utf8');
 const writeTool = (dir: string, p: string): number | null => hookStatus(dir, 'folder-law.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, p), content: 'x' } });
-
-test('audio-core alone installs without Stellix concepts', () => {
-  const dir = project();
-  const out = run(dir, 'init', 'audio-core');
-  assert.match(out, /OK: base, audio-core/);
-  assert.ok(!existsSync(join(dir, 'src', 'world')));
-  const rule = text(dir, '.claude/rules/math-domain-guards.md');
-  assert.match(rule, /src\/dsp\/\*\*/);
-  assert.doesNotMatch(rule, /src\/world/);
-});
 
 test('full Stellix install: nested GPU skills, CLAUDE.md block, hooks', () => {
   const dir = project();
@@ -30,30 +17,6 @@ test('full Stellix install: nested GPU skills, CLAUDE.md block, hooks', () => {
   assert.match(md, /`src\/world\/`/);
   const settings = text(dir, '.claude/settings.json');
   for (const h of ['lesson-checks', 'folder-law', 'realtime-guard', 'no-shipped-images', 'param-id-lock']) assert.match(settings, new RegExp(h));
-});
-
-test('an edited rule survives repeated updates', () => {
-  const dir = fixture('audio-core+gpu-painter');
-  const rule = join(dir, '.claude', 'rules', 'gpu-bloom.md');
-  appendFileSync(rule, '- my own note\n');
-  run(dir, 'update');
-  run(dir, 'update');
-  assert.match(readFileSync(rule, 'utf8'), /my own note/);
-  assert.ok(existsSync(`${rule}.pack-new`), 'new pack version saved beside the edited rule');
-  assert.match(run(dir, 'doctor'), /OK:/);
-  run(dir, 'update', '--force');
-  assert.doesNotMatch(readFileSync(rule, 'utf8'), /my own note/);
-});
-
-test('moving a folder in layout.json re-points every rule', () => {
-  const dir = fixture('audio-core+stellix');
-  const layoutFile = join(dir, '.claude', 'layout.json');
-  const layout = parseJson<Layout>(readFileSync(layoutFile, 'utf8'));
-  assert.ok(layout?.folders.world);
-  layout.folders.world.path = 'src/sim';
-  writeFileSync(layoutFile, JSON.stringify(layout));
-  run(dir, 'update');
-  assert.match(text(dir, '.claude/rules/world-fp-determinism.md'), /src\/sim\/\*\*/);
 });
 
 test('folder law refuses new source files outside the layout', () => {
@@ -70,30 +33,6 @@ test('removing a pack removes its rules and hooks', () => {
   const rules = readdirSync(join(dir, '.claude', 'rules'));
   assert.ok(!rules.includes('world-fp-determinism.md'));
   assert.doesNotMatch(text(dir, '.claude/settings.json'), /no-shipped-images/);
-});
-
-test('an existing .claude and CLAUDE.md are updated, never overwritten', () => {
-  const dir = project();
-  mkdirSync(join(dir, '.claude', 'rules'), { recursive: true });
-  writeFileSync(join(dir, '.claude', 'rules', 'gpu-bloom.md'), '# my own bloom rule\n');
-  writeFileSync(join(dir, '.claude', 'rules', 'my-law.md'), '# my law\n');
-  writeFileSync(join(dir, '.claude', 'settings.json'), JSON.stringify({ model: 'x', hooks: { Stop: [{ matcher: '', hooks: [{ type: 'command', command: 'echo mine' }] }] } }));
-  writeFileSync(join(dir, 'CLAUDE.md'), '# Project\nKeep this.\n');
-  writeFileSync(join(dir, '.gitignore'), 'build/');
-  run(dir, 'init', 'audio-core', 'gpu-painter');
-  run(dir, 'update');
-  assert.equal(text(dir, '.claude/rules/gpu-bloom.md'), '# my own bloom rule\n');
-  assert.ok(existsSync(join(dir, '.claude', 'rules', 'gpu-bloom.md.pack-new')));
-  assert.equal(text(dir, '.claude/rules/my-law.md'), '# my law\n');
-  const s = parseJson<Settings>(text(dir, '.claude/settings.json'));
-  assert.ok(s);
-  assert.equal(s.model, 'x');
-  assert.equal(s.hooks.Stop[0]?.hooks[0]?.command, 'echo mine');
-  const md = text(dir, 'CLAUDE.md');
-  assert.match(md, /^# Project\nKeep this\./);
-  assert.equal(md.match(/claude-packs:start/g)?.length, 1, 'one generated section after two runs');
-  assert.match(text(dir, '.gitignore'), /^build\/\n\.claude\/\.claude-packs-backup\/\n\.claude\/state\/\n\.claude\/usage\.log\n\.claude\/hooks\.log\n\.claude\/logs\/\n$/);
-  assert.ok(readdirSync(join(dir, '.claude', '.claude-packs-backup')).length >= 1);
 });
 
 test('a malformed settings.json stops the install before anything changes', () => {

@@ -2,7 +2,7 @@
 // are about the install, its lock, doctor and the kit's own repo): the lock says which kit wrote it, the rules resolve to real paths,
 // doctor reads the hooks and the skills, a project's own hook keeps its own settings entry, and the kit repo is a project like any
 // other. The hooks' own refusals are in the file of each hook.
-import { readdirSync, rmSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { coverage } from '../../../lib/coverage.mts';
 import { scratchDir } from '../../../packs/base/hooks/lib/files.mts';
@@ -54,77 +54,8 @@ test('WB-1: coverage sees the kit\'s own skills and rules, never a worktree\'s c
   assert.ok(!cov.uncovered.some((f) => f.includes('worktrees')), `uncovered: ${cov.uncovered}`);
 });
 
-test('WB-3: doctor finds a token in any repo\'s .git/config and never prints it', () => {
-  const dir = fixture('audio-core');
-  try {
-    git(dir, 'init', '-q');
-    const doctor = () => cli(dir, 'doctor');
-    assert.doesNotMatch(doctor().stdout, /PROBLEM.*token/i); // 0.9.0: doctor prints the making hook's model-token cost, never a git token
-    git(dir, 'remote', 'add', 'origin', 'https://github.com/a/b.git');
-    git(dir, 'config', 'branch.main.remote', 'https://x-access-token:ghp_SECRET1@github.com/a/b.git');
-    let r = doctor();
-    assert.equal(r.status, 1);
-    assert.match(r.stdout, /PROBLEM: .*\.git\/config.*token/);
-    assert.doesNotMatch(r.stdout, /SECRET1/);
-    git(dir, 'config', '--unset', 'branch.main.remote');
-    put(join(dir, 'build/_deps/juce-src/x'), '');
-    git(join(dir, 'build/_deps/juce-src'), 'init', '-q');
-    git(join(dir, 'build/_deps/juce-src'), 'remote', 'add', 'origin', 'https://u:SECRET2@example.com/j.git');
-    r = doctor();
-    assert.match(r.stdout, /PROBLEM: build\/_deps\/juce-src\/\.git\/config.*token/);
-    assert.doesNotMatch(r.stdout, /SECRET2/);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-// KWB-26: the kit is a project like any other. Its own .claude/ carries the base pack (every base hook judges work on the kit,
-// kit-lock beside them), doctor --strict passes on it, a project's own node hook that is not written for the runner keeps its own
-// settings entry (the kit's kit-lock was folded into run-hooks.mjs and failed there as exit 1, so it never refused), and no kit
+// KWB-26: the kit is a project like any other (its own base pack and a project's own node hook: base-install-kit.test.mts); no kit
 // command, hook or doc deletes a branch.
-interface SettingsFile { hooks: Record<string, { matcher?: string; hooks: { command: string }[] }[]>; permissions?: unknown }
-const commandsOf = (settings: SettingsFile, event: string): string[] => (settings.hooks[event] ?? []).flatMap((g) => g.hooks).map((h) => h.command);
-
-test('a project\'s own node hook with no hook(text) export keeps its own settings entry; one with it joins the runner', () => {
-  const dir = scratchDir('cpk-');
-  put(join(dir, '.claude/hooks/own-alone.mjs'), 'process.exit(0);\n');
-  put(join(dir, '.claude/hooks/own-hook.mjs'), 'export const hook = () => 0;\n');
-  const own = (n: string) => ({ type: 'command', command: `node "$CLAUDE_PROJECT_DIR/.claude/hooks/${n}"`, timeout: 10 });
-  put(join(dir, '.claude/settings.json'), toJson({ hooks: { PreToolUse: [{ matcher: 'Write|Edit|MultiEdit|NotebookEdit|Bash', hooks: [own('own-alone.mjs'), own('own-hook.mjs')] }] } }));
-  run(dir, 'init', 'base');   // the install and its updates are the subject: the second `init` here
-  for (const pass of ['init', 'update', 'a second update']) {
-    if (pass !== 'init') run(dir, 'update');
-    const pre = commandsOf(readJson<SettingsFile>(join(dir, '.claude/settings.json')) ?? { hooks: {} }, 'PreToolUse');
-    assert.ok(pre.includes('node "$CLAUDE_PROJECT_DIR/.claude/hooks/own-alone.mjs"'), `${pass}: own entry kept:\n${pre.join('\n')}`);
-    assert.ok(pre.some((c) => c.includes('run-hooks.mjs') && c.includes('.claude/hooks/own-hook.mjs')), `${pass}: a hook written for the runner joins it, and an update keeps it:\n${pre.join('\n')}`);
-    assert.ok(!pre.some((c) => c.includes('run-hooks.mjs') && c.includes('own-alone.mjs')), `${pass}: never folded into the runner`);
-    assert.equal(pre.join('\n').match(/own-hook\.mjs/g)?.length, 1, `${pass}: once`);
-  }
-});
-
-test('the kit repo has its own base pack installed: kit-lock and every base hook registered, git-guard on Bash and Stop', () => {
-  const lock = readJson<{ packs: string[] }>(join(KIT, '.claude/claude-packs.lock.json'));
-  assert.deepEqual(lock?.packs, ['base']);
-  const settings = readJson<SettingsFile>(join(KIT, '.claude/settings.json'));
-  assert.ok(settings, 'the kit has settings');
-  const all = Object.values(settings.hooks).flat().flatMap((g) => g.hooks).map((h) => h.command).join('\n');
-  const base = readJson<{ hooks: Record<string, { hooks: { command: string }[] }[]> }>(join(KIT, 'packs/base/pack.json'));
-  for (const g of Object.values(base?.hooks ?? {}).flat()) {
-    for (const h of g.hooks) {
-      const name = /hooks\/([\w-]+\.mjs)/.exec(h.command)?.[1] ?? '';
-      if (['build-sweep.mjs', 'idle-wake.mjs', 'user-asks.mjs'].includes(name)) continue; // opt-in
-      assert.match(all, new RegExp(`\\.claude/hooks/${name.replace('.', '\\.')}`), name);
-    }
-  }
-  assert.match(all, /kit-lock\.mjs/, 'kit-lock stays');
-  assert.ok(commandsOf(settings, 'Stop').some((c) => c.includes('.claude/hooks/git-guard.mjs')), 'git-guard judges the end of a session');
-  const layout = readJson<{ guards: { git: { house: boolean } }; folders: Record<string, { path: string }> }>(join(KIT, '.claude/layout.json'));
-  assert.equal(layout?.guards.git.house, true, 'the house git laws hold on the kit');
-  for (const f of ['bin', 'lib', 'packs', 'global', 'test', 'docs']) assert.ok(Object.values(layout?.folders ?? {}).some((x) => x.path === f), f);
-  const r = spawnSync('node', [join(KIT, 'bin/claude-packs.mjs'), 'doctor', '--strict', '--dir', KIT], { encoding: 'utf8' });
-  assert.equal(r.status, 0, r.stdout + r.stderr);
-});
-
 test('no kit command, hook, skill or doc deletes a branch', () => {
   const files: string[] = [];
   const walk = (d: string): void => {

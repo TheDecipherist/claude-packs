@@ -1,35 +1,9 @@
 // 0.21.0: if a person makes something for their employer's internals, it is easy to make a repo and share it with their team.
-import { CLI, assert, existsSync, fresh, git, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
-import type { Spawned } from '../kit-cli.mts';
-import { fixture, lockOf } from '../fixtures/installs.mts';
-import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+// (Update, restore and remove: custom-packs-update.test.mts, split so no file sums over a minute.)
+import { assert, existsSync, git, hookRun, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from '../kit-cli.mts';
+import { lockOf } from '../fixtures/installs.mts';
 import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
-import type { Lock } from '../../packs/base/hooks/lib/types.d.mts';
-
-interface Manifest { author?: string; hooks?: unknown }
-
-const env = (): NodeJS.ProcessEnv => ({ ...process.env, CLAUDE_PACKS_CACHE: join(process.env.TMPDIR ?? '', 'pack-cache') });
-const kit = (dir: string, ...a: string[]): Spawned => spawnSync('node', [CLI, ...a, '--dir', dir], { encoding: 'utf8', env: env() });
-const manifestOf = (file: string): Manifest => parseJson<Manifest>(readFileSync(file, 'utf8')) ?? {};
-const sourceOf = (dir: string, name: string): NonNullable<Lock['sources']>[string] => {
-  const s = lockOf(dir).sources?.[name];
-  assert.ok(s, `${name} has a source in the lock`);
-  return s;
-};
-
-// A team's pack, made by new-pack and pushed to a "host" (a bare repository), with a project to install it in.
-function team(name = 'acme-internal'): { name: string; repo: string; url: string; project: string } {
-  const home = fresh('cp-team-');
-  const host = join(home, 'host.git');
-  git(home, 'init', '-q', '--bare', '--initial-branch', 'main', host);
-  const url = `file://${host}`;
-  const r = kit(home, 'new-pack', name, '--repo', url);
-  assert.equal(r.status, 0, r.stdout + r.stderr);
-  const repo = join(home, name);
-  git(repo, 'remote', 'add', 'origin', url);
-  git(repo, 'push', '-q', 'origin', 'main');
-  return { name, repo, url, project: fixture('base') };
-}
+import { kit, manifestOf, sourceOf, team } from './custom-packs-rig.mts';
 
 test('new-pack makes a repository that add --from installs, in any configuration; its check fires', () => {
   const { name, url, project } = team();
@@ -65,25 +39,6 @@ test('a custom hook stays off until the project enables it', () => {
   assert.equal(kit(project, 'update').status, 0);
   assert.ok(existsSync(join(project, '.claude/hooks/acme-guard.mjs')), 'on once named');
   assert.match(readFileSync(join(project, '.claude/settings.json'), 'utf8'), /acme-guard/);
-});
-
-test('update pulls the newest; a teammate restores the locked commit; remove drops the source', () => {
-  const { name, repo, url, project } = team();
-  assert.equal(kit(project, 'add', name, '--from', url).status, 0);
-  const first = sourceOf(project, name).commit;
-  writeFileSync(join(repo, `packs/${name}/rules/${name}-second.md`), '---\n# concepts: js\npaths:\n  - "placeholder"\n---\n\n# A second law\n');
-  git(repo, 'add', '.'); git(repo, 'commit', '-qm', 'a second rule'); git(repo, 'push', '-q', 'origin', 'main');
-  const doctor = kit(project, 'doctor');
-  assert.equal(doctor.status, 0, `doctor reads the locked commit: ${doctor.stdout}`);
-  assert.equal(sourceOf(project, name).commit, first);
-  const r = kit(project, 'update');
-  assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.match(r.stdout, /acme-internal: now 0\.1\.0/);
-  assert.notEqual(sourceOf(project, name).commit, first);
-  assert.ok(existsSync(join(project, `.claude/rules/${name}-second.md`)));
-  assert.equal(kit(project, 'remove', name).status, 0);
-  assert.equal(lockOf(project).sources, undefined);
-  assert.ok(!existsSync(join(project, `.claude/rules/${name}-example.md`)));
 });
 
 test('a repository without a real manifest is refused before anything is installed', () => {

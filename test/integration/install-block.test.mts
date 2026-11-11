@@ -1,43 +1,18 @@
 // planner W3: a work order's install block (a ```claude-packs fence) is what `init --from` and `new --from` install, so the order is
 // the one source of a project's set-up. Its keys are the kit's own; an unknown one is refused by name and nothing is installed.
+// (The rebuild template and the plugin templates: install-block-rebuild and install-block-plugin, split so no file sums over a minute.)
 import { assert, cli, existsSync, fresh, git, join, readFileSync, test, writeFileSync } from '../kit-cli.mts';
 import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
-import { parseJson } from '../../packs/base/hooks/lib/json.mts';
-import { lockOf } from '../fixtures/installs.mts';
+import { holdsTemplates, initFrom, orderWith } from './install-block-rig.mts';
 
-const layoutOf = readLayout;
-const group = (text: string, re: RegExp): string => text.match(re)?.[1] ?? '';
-
-// An order holding `block` as its install block, written to a scratch file.
-function orderWith(block: string): string {
-  const file = join(fresh('order-'), 'workorder.md');
-  writeFileSync(file, `# Work order: x\n\n## W0. Set up\n\n\`\`\`claude-packs\n${block}\`\`\`\n\n**Done when:** 1 install.\n`);
-  return file;
-}
-
-// `init --from <order>` in `dir`: the one place this file starts an install from a block, which is every test's subject.
-const initFrom = (dir: string, order: string) => cli(dir, 'init', '--from', order);
-
-for (const template of ['generic', 'plugin', 'rebuild']) {
-  test(`the ${template} template's own block installs with init --from, and doctor --strict is green there`, () => {
-    const dir = fresh(`from-${template}-`);
-    assert.equal(cli(dir, 'workorder', 'o', '--template', template).status, 0);
-    const r = initFrom(dir, join(dir, 'docs/workorders/o/workorder.md'));
-    assert.equal(r.status, 0, r.stdout + r.stderr);
-    const strict = cli(dir, 'doctor', '--strict');
-    assert.equal(strict.status, 0, strict.stdout);
-    const text = readFileSync(join(dir, 'docs/workorders/o/workorder.md'), 'utf8');
-    assert.equal(layoutOf(dir).configuration, group(text, /^configuration: (\S+)$/m));
-    for (const pack of group(text, /^packs: (.*)$/m).split(',').map((p) => p.trim())) assert.ok(lockOf(dir).packs?.includes(pack) || pack === 'base', pack);
-  });
-}
+holdsTemplates(['generic']);
 
 test('the block\'s own layout keys land in layout.json, and what enable names switches on', () => {
   const dir = fresh('from-keys-');
   const order = orderWith('configuration: synth-creator\npacks:\n  - cpp\n  - audio-core\nenable:\n  - hooks/user-asks.mjs\ncommands:\n  test: ctest --preset dev\n');
   const r = initFrom(dir, order);
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  const layout = layoutOf(dir);
+  const layout = readLayout(dir);
   assert.deepEqual(layout.enable, ['hooks/user-asks.mjs']);
   assert.equal(layout.commands?.test, 'ctest --preset dev');
   assert.ok(existsSync(join(dir, '.claude/hooks/user-asks.mjs')), 'the opt-in hook enable names is installed');
@@ -66,23 +41,7 @@ test('new --from installs the block and commits it with the scaffold', () => {
   const r = cli(parent, 'new', 'scratch', '--config', 'synth-creator', '--from', order);
   assert.equal(r.status, 0, r.stdout + r.stderr);
   const dir = join(parent, 'scratch');
-  assert.equal(layoutOf(dir).looks?.[0]?.name, 'panel');
+  assert.equal(readLayout(dir).looks?.[0]?.name, 'panel');
   assert.equal(git(dir, 'status', '--porcelain'), '', 'the block is in the first commit');
   assert.match(cli(parent, 'new', 'other', '--config', 'base', '--from', order).stderr, /--config base and the install block's configuration synth-creator differ/);
-});
-
-// planner W9's Done when, end to end: a project made with its work order from the plugin template installs from that order's own
-// block, and doctor --strict is green there. An unknown template makes nothing.
-test('new --template plugin, then init --from its own order, is green under doctor --strict', () => {
-  const parent = fresh('new-template-');
-  const made = cli(parent, 'new', 'scratch', '--config', 'synth-creator', '--template', 'plugin');
-  assert.equal(made.status, 0, made.stdout + made.stderr);
-  const dir = join(parent, 'scratch');
-  const r = initFrom(dir, join(dir, 'docs/workorders/scratch/workorder.md'));
-  assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.equal(layoutOf(dir).looks?.[0]?.name, 'panel', 'the template block\'s looks');
-  const strict = cli(dir, 'doctor', '--strict');
-  assert.equal(strict.status, 0, strict.stdout);
-  assert.equal(cli(parent, 'new', 'other', '--template', 'nope').status, 2);
-  assert.ok(!existsSync(join(parent, 'other')), 'nothing was made');
 });

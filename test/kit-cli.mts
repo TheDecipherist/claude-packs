@@ -3,7 +3,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import type { SpawnSyncReturns } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readdirSync as hookFiles, rmSync as dropHook } from 'node:fs';
 import { test } from 'node:test';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -98,3 +98,14 @@ export const selftestOnce = (dir: string, hook: string): Pick<Spawned, 'status' 
   if (r.status === 0) remember(key);
   return r;
 };
+
+// W5-h: a test about what doctor does with selftests (the cache, a failing one) runs them on a few hooks, not on all of an install's:
+// the 30 of a base install take 28 s to prove, the ten kept 8 s, and the subject (what is remembered, what fails) is the same.
+const FEW_HOOKS = ['folder-law.mjs', 'secrets-guard.mjs', 'untrusted-boundary.mjs', 'skill-first.mjs', 'suite-once.mjs', 'heartbeat.mjs', 'placement-law.mjs', 'file-size-guard.mjs', 'inside-the-project.mjs', 'no-find.mjs'];
+/** `dir`'s `.claude/hooks` cut down to ten quick ones, the hooks named in `also`, the runner, the lesson checks and `lib/`; settings and the lock stay as they were. */
+export function keepHooks(dir: string, also: readonly string[] = []): string {
+  for (const f of hookFiles(join(dir, '.claude/hooks'))) {
+    if (f.endsWith('.mjs') && f !== 'run-hooks.mjs' && f !== 'lesson-checks.mjs' && !FEW_HOOKS.includes(f) && !also.includes(f)) dropHook(join(dir, '.claude/hooks', f));
+  }
+  return dir;
+}
