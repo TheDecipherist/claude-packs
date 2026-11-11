@@ -2,7 +2,7 @@
 // filled 18 cores (load 22), the kit's own gate timed out, and the user's apps slowed. Every build and test run the queue or
 // quiet-test starts now takes its share of one machine-wide core budget, and runs at a low priority.
 import { assert, cli, execFileSync, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
-import { capJobs, coreBudget, budgetEnv, gentle } from '../packs/base/hooks/lib/core-budget.mjs';
+import { capJobs, coreBudget, budgetEnv, gentle, shareOf } from '../packs/base/hooks/lib/core-budget.mjs';
 
 test('the budget comes from the environment, then the layout, then a third of the cores, never under 2', () => {
   assert.equal(coreBudget({ BUILDQ_CORES: '5' }, { guards: { buildq: { cores: 9 } } }, 18), 5);
@@ -30,11 +30,23 @@ test('the environment carries the share to the tools that read it', () => {
   assert.equal(env.PATH, '/bin');
 });
 
-test('a job runs at a low priority unless the user asks for normal, and timing tests are never throttled to slow cores', () => {
-  assert.deepEqual(gentle(['ninja'], { platform: 'darwin', env: {} }), ['taskpolicy', '-b', 'ninja']);
+// KWB-149: background QoS (taskpolicy -b) kept a Mac's builds on its efficiency cores, about 2.5 of 18 (the user: "I can
+// literally hear the mac when it really works ... Nothing is happening"); a build yields with nice, on every core
+test('a job runs at a low priority unless the user asks for normal, on every core: never throttled to slow cores', () => {
+  assert.deepEqual(gentle(['ninja'], { platform: 'darwin', env: {} }), ['nice', '-n', '10', 'ninja']);
   assert.deepEqual(gentle(['ninja'], { platform: 'linux', env: {} }), ['nice', '-n', '10', 'ninja']);
   assert.deepEqual(gentle(['ninja'], { platform: 'darwin', env: { BUILDQ_PRIORITY: 'normal' } }), ['ninja']);
   assert.deepEqual(gentle(['ctest'], { platform: 'darwin', env: {}, timing: true }), ['nice', '-n', '10', 'ctest']);
+});
+
+// KWB-150: a build alone took budget ÷ slots, 3 of a 14-core budget on an idle Mac, for 12 minutes
+test('a job takes the budget divided by the jobs running as it starts, its own counted: alone, all of it; never less than its slot\'s share', () => {
+  assert.equal(shareOf(16, 2, 1), 16);
+  assert.equal(shareOf(16, 2, 2), 8);
+  assert.equal(shareOf(14, 4, 1), 14);
+  assert.equal(shareOf(14, 4, 3), 4);
+  assert.equal(shareOf(14, 4, 9), 3);    // more jobs than slots (one being taken back): never under budget ÷ slots
+  assert.equal(shareOf(6, 2), 3);        // no count given: the slot's share, as before
 });
 
 test('a test run through quiet-test takes the same share: its --jobs is cut and CTest is told', async () => {
@@ -58,5 +70,5 @@ test('the queue runs a command with its share: a -j asked for is cut, and the sh
     cwd: dir, encoding: 'utf8', env: { ...outer, BUILDQ_DIR: fresh('buildq-slots-'), BUILDQ_SLOTS: '2', BUILDQ_PRIORITY: 'normal' },
   });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /-j 2\|2/, 'two slots share four cores: two each');
+  assert.match(r.stdout, /-j 4\|4/, 'a job alone takes the whole budget of four cores (KWB-150), not the slot\'s two');
 });

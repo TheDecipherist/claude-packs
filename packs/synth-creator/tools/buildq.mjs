@@ -42,9 +42,11 @@ function run(asked) {
   let slot = claim();
   for (; slot === null; slot = claim()) nap(WAIT_MS);
   try {
-    // KWB-111: the job takes its share of the machine's core budget, at a low priority
+    // KWB-111: the job takes its share of the machine's core budget, at a low priority; KWB-150: by the jobs running as it
+    // starts, its own counted, so a build alone takes the whole budget
     const root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-    const most = shareOf(coreBudget(process.env, projectLayout(root)), SLOTS);
+    const running = Array.from({ length: SLOTS }, (_, n) => slotAt(n)).filter(isLive).length;
+    const most = shareOf(coreBudget(process.env, projectLayout(root)), SLOTS, running);
     const command = gentle(capJobs(asked, most));
     const r = spawnSync(command[0], command.slice(1), { stdio: 'inherit', env: budgetEnv(process.env, most) });
     if (r.error) console.error(`buildq: ${command[0]}: ${r.error.message}`);
