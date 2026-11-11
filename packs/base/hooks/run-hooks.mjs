@@ -85,7 +85,7 @@ export async function runAll(args, text, root = projectRoot()) {
   const crash = crashVerdict(root, ev, judged, Date.now());
   if (crash.stderr) err.push(crash.stderr);
   if (crash.code === 2) code = 2;
-  outs.push(...[crash.stdout, code === 0 ? unreadWrites(ev, root) : ''].filter(Boolean));
+  outs.push(...[crash.stdout, code === 0 ? unreadWrites(ev, root, process.env) : ''].filter(Boolean));
   return { code, stdout: mergeOut(outs), stderr: err.join('') };
 }
 

@@ -25,21 +25,21 @@ function main(text) {
   if (!ev) return 0;   // not a refusal: nothing to judge
   const root = rootOf(ev.cwd ?? process.cwd());
   if (ev.hook_event_name === 'SessionStart') {
-    const v = atStart(root);
+    const v = atStart(root, { env: process.env, now: Date.now() });
     if (!v) return 0;
     if (v.block) { console.error(v.say); return 2; }
     console.log(v.say);
     return 0;
   }
   if (ev.hook_event_name === 'PreToolUse' && ev.tool_name === 'Bash') {
-    const refusal = atCommit(root, ev.tool_input?.command);
+    const refusal = atCommit(root, ev.tool_input?.command, { env: process.env });
     if (refusal) { console.error(refusal); return 2; }
   }
   return 0;
 }
 
 function check() {
-  const v = atStart(rootOf(process.cwd()));
+  const v = atStart(rootOf(process.cwd()), { env: process.env, now: Date.now() });
   if (!v) return 0;
   (v.block ? console.error : console.log)(v.say);
   return v.block ? 2 : 0;
