@@ -86,11 +86,13 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   assert.ok(pick('packs/gpu-painter/skills/gpu-frame-bench/SKILL.md').some((t) => t === 'frame-bench' || t === 'repo-lint'));
   const lock = pick('.claude/hooks/kit-lock.mjs');
   assert.ok(lock.includes('kit-lock') && !lock.includes('install'), lock.join(' '));
-  // (the tier folders' path function is W6's: until it maps a lib to the integration flow named for it, the unit tests of doctor stand for "the tests about it")
   const doctor = pick('lib/doctor.mts');
   assert.ok(doctor.some((t) => t.startsWith('doctor')) && !doctor.includes('install'), `a CLI module: the tests about it, not every test that runs the CLI: ${doctor.join(' ')}`);
-  assert.deepEqual(pick('scripts/test-changed.mjs'), ['test-changed']);
-  assert.ok(pick('test/fresh-tmp.mts').includes('fresh-tmp') && pick('test/fresh-tmp.mts').length < 5, 'the preload: its own test, not every test that loads it');
+  assert.deepEqual(pick('scripts/test-changed.mjs').sort(), ['test-changed', 'test-changed-plants']);
+  // W6 (d-7): the preload reaches its own test and the integration tier (what builds on it), never the unit or hook tiers
+  const preload = [...choose(KIT, ['test/fresh-tmp.mts'], g).chosen.keys()];
+  assert.ok(preload.includes('test/unit/fresh-tmp.test.mts'), 'the preload: its own test');
+  assert.deepEqual(preload.filter((t) => !t.startsWith('test/integration/') && !/^test\/(?:unit\/fresh-tmp|repo-lint-suite)\.test\.mts$/.test(t)), [], 'the preload: no test outside the integration tier, its own and the repo lint');
   assert.deepEqual(choose(KIT, ['CHANGELOG.md'], g).uncovered, ['CHANGELOG.md']);
   // KWB-141: the planner test reads every planner file through join(KIT, 'planner'), which no import or path literal shows
   assert.ok(pick('planner/ui-mockup/SKILL.md').includes('planner'), 'a planner skill: the planner test');

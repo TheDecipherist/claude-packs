@@ -2,7 +2,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { usesAny } from './changed-functions.mts';
-import { GENERIC, HUBS, MAX_HOPS, MODULE, SKIP_DIRS, TABLE, TEST } from './test-changed-table.mts';
+import { pathTests } from './test-changed-paths.mts';
+import { GENERIC, HOOK, HUBS, MAX_HOPS, MODULE, SKIP_DIRS, TABLE, TEST } from './test-changed-table.mts';
 import { walk as walkFolder } from '../packs/base/hooks/lib/files.mts';
 import { emittedFrom } from '../packs/base/hooks/lib/source-exts.mts';
 
@@ -40,6 +41,14 @@ export function graph(root: string): Graph {
     }
   }
   return { files, importers };
+}
+
+/** Every module that imports `file`, directly or through others (the file itself left out). */
+export function importersOf(file: string, importers: ReadonlyMap<string, readonly string[]>): Set<string> {
+  const found = new Set<string>();
+  const pending = [file];
+  for (let at = pending.pop(); at !== undefined; at = pending.pop()) for (const by of importers.get(at) ?? []) if (by !== file && !found.has(by)) { found.add(by); pending.push(by); }
+  return found;
 }
 
 /** What a change reaches: the tests chosen with their reasons, the changed files no test covers, and every test file. */
@@ -84,13 +93,17 @@ export function choose(root: string, changed: readonly string[], g: Graph = grap
     const whole = (t: string): boolean => new RegExp(`import\\s*(?:\\*\\s*as\\s+\\w+\\s+from\\s*)?['"][^'"]*${(c.split('/').pop() ?? '').replace(/\./g, '\\.')}['"]`).test(textOf(t));
     const usesChanged = (t: string): boolean => !names || whole(t) || usesAny(textOf(t) + [...importsOf(t)].map((h) => helperText[h] ?? '').join('\n'), names);
     if (names && names.size === 0) { uncovered.push(`${c} (imports or comments only)`); continue; }
-    for (const t of tests) if (t !== c && seen.has(t) && usesChanged(t)) {
+    // d-7: the path function, the tier a test lives in and the manifest's `tests` and `requires`
+    for (const [t, why] of pathTests(root, c, g.files, (f) => importersOf(f, g.importers))) { add(t, why); hit = true; }
+    // a hook is run by its own test and proved by its selftest, never imported: what a test names of it is not a test of it (d-7)
+    const byContent = HOOK.test(c) ? [] : tests;
+    for (const t of byContent) if (t !== c && seen.has(t) && usesChanged(t)) {
       const chain: string[] = [];
       for (let f = seen.get(t); f; f = seen.get(f)) chain.push(f);
       add(t, chain.length > 1 ? `reaches ${c} through ${chain.slice(0, -1).join(' → ')}` : `reaches ${c}`); hit = true;
     }
     const base = c.split('/').pop() ?? '';
-    for (const t of tests) {
+    for (const t of byContent) {
       if (seen.has(t)) continue; // already reached by import
       // a named FILE covers it; a folder a test builds a path from (`packs/`, `${KIT}/packs/base/`) covers nothing by itself (KWB-166)
       const named = [...textOf(t).matchAll(/['"`]((?:\.\.\/)?(?:packs|lib|bin|global|profiles|prompts|scripts|test|\.claude)\/[^'"`$]*)(.)/g)]
@@ -100,7 +113,7 @@ export function choose(root: string, changed: readonly string[], g: Graph = grap
       else if (!GENERIC.has(base) && base.length > 5 && new RegExp(`[/'"\`\\s]${escapeRe(base)}['"\`\\s)]`).test(textOf(t))) { add(t, `names ${base} (${c})`); hit = true; }
     }
     // a helper under test/ that names the file (worktree-cases-commands.mjs names each hook) covers it for every test importing it
-    for (const h of helpers) if (namesIt(helperText[h] ?? '', c)) for (const t of tests) if (importsOf(t).has(h)) { add(t, `names ${c} through ${h}`); hit = true; }
+    for (const h of helpers) if (namesIt(helperText[h] ?? '', c)) for (const t of byContent) if (importsOf(t).has(h)) { add(t, `names ${c} through ${h}`); hit = true; }
     for (const row of TABLE) if (row.files.test(c) && (row.when?.(c, status[c] ?? 'M') ?? true)) for (const t of tests) if (row.tests(textOf(t), c, root, t)) { add(t, `${c}: ${row.why}`); hit = true; }
     if (!hit) uncovered.push(c);
   }
