@@ -1,7 +1,8 @@
 // 1.7.3: `claude-packs status`, where every unattended run stands. The user: "it reports which projects its working on, how many
 // agents per project, where they are, and how much is left", "PROJECT NAME (PROGRESS 0% - 100%) > AGENT X > STEP (PROGRESS)".
+import { utimesSync } from 'node:fs';
 import { assert, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
-import { orderStatus, progressOf, runRows, runnersIn, stepsOf, workIn } from '../lib/run-status.mjs';
+import { orderStatus, progressOf, runRows, runnersIn, runsReport, stepsOf, workIn } from '../lib/run-status.mjs';
 import { bar, statusCommand, statusLines } from '../lib/status-cli.mjs';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
 
@@ -80,6 +81,21 @@ test('the check counts each process for the deepest folder it works in, its core
     '/p': { procs: 1, cores: 0.9, memMb: 1, queued: false }, '/p/.claude/worktrees/dsp': { procs: 2, cores: 2, memMb: 768, queued: false },
     '/p/.claude/worktrees/panel': { procs: 1, cores: 0, memMb: 1, queued: true } });
   assert.equal(workIn(['/p'], []), null);
+});
+
+test('an agent shows from its first minute, by its worktree on the order\'s branch; a merged one untouched for two hours does not, unless work runs in it', () => {
+  const { dir, git } = project({ status: { steps: [{ id: 'W1', title: 'x', items: 2, done: 0 }], agents: [] } });
+  git('branch', 'work/demo');
+  git('worktree', 'add', '-q', '.claude/worktrees/fresh', '-b', 'work/demo-fresh');   // just started: no file, no commit
+  git('worktree', 'add', '-q', '.claude/worktrees/old', '-b', 'work/demo-old');       // finished long ago, merged
+  git('worktree', 'add', '-q', '.claude/worktrees/other', '-b', 'work/someone-else'); // another order's or a person's
+  const gitdir = join(dir, '.git', 'worktrees', 'old');
+  const hoursAgo = (Date.now() - 3 * 3600_000) / 1000;
+  for (const f of ['HEAD', 'index', 'logs/HEAD']) { try { utimesSync(join(gitdir, f), hoursAgo, hoursAgo); } catch { /* not every file is there */ } }
+  assert.deepEqual(orderStatus(dir, 'demo').agents.map((a) => a.name).sort(), ['fresh', 'old']);
+  const report = runsReport({ dir, order: 'demo' });
+  assert.deepEqual(report.runs[0].agents.map((a) => a.name), ['fresh'], 'the finished agent left out');
+  assert.ok(Date.now() - Date.parse(report.runs[0].agents[0].updated) < 60_000, 'its clock: git\'s last touch of its worktree');
 });
 
 test('a status file that is not JSON is ignored and the progress is derived instead, never a crash', () => {

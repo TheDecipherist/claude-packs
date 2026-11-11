@@ -6,11 +6,10 @@
 //   - Without it the progress is derived: the steps and their item counts from workorder.md, the items done from the
 //     `W<n>.<item>` progress lines of the main checkout and of every agent worktree, a step counted whole once a line says done.
 // It lives with the hooks (1.8.0) because every project's status line runs it from there; lib/run-status.mjs re-exports it.
-import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { readJson } from './json.mjs';
-import { runningOrders, workIn } from './run-discovery.mjs';
+import { mergedInto, runningOrders, workIn, worktreesOf } from './run-discovery.mjs';
 import { machineName, remotesOf, remotesReport } from './run-remotes.mjs';
 import { readText } from './shell-writes.mjs';
 
@@ -22,6 +21,7 @@ const QUIET_MIN = 5;       // it made no call for this long (longer than any ans
                            // nothing left working in its worktree for this long
 const RUNNING_MIN = 30;    // where the processes cannot be read: one call running this long
 const LIVE_MS = 60 * 60_000;   // a worktree whose heartbeat is younger than this is a live agent, file or not
+const KIN_MS = 2 * 60 * 60_000; // an agent branch merged back and untouched this long is a finished agent
 const textIn = (file) => readText(file) ?? '';
 
 /** The order's steps from workorder.md: [{ id, title, items }], items its numbered lines plus its Done when. */
@@ -42,16 +42,6 @@ export function progressOf(lines) {
     for (const [, id] of line.matchAll(new RegExp(String.raw`\b(${ID})(?: measured,)? done\b`, 'g'))) done.add(id);
   }
   return { seen, done };
-}
-
-/** The agent worktrees of a project: [{ name, path }]. */
-export function worktreesOf(project) {
-  let out = '';
-  try { out = execFileSync('git', ['-C', project, 'worktree', 'list', '--porcelain'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return []; }
-  return out.split('\n').filter((l) => l.startsWith('worktree ') && l.includes('/.claude/worktrees/')).map((l) => {
-    const path = l.slice('worktree '.length);
-    return { name: basename(path), path };
-  });
 }
 
 export const percent = (done, items) => (items ? Math.round((1000 * done) / items) / 10 : 0);
@@ -98,13 +88,21 @@ export function orderStatus(project, order) {
   const listed = new Map((status?.agents ?? []).map((a) => [a.name, a]));
   const beatOf = (name) => readJson(join(project, '.claude', 'logs', 'heartbeats', `${name}.json`));   // the heartbeat hook's
   const alive = (beat) => beat && Date.now() - Date.parse(beat.t ?? '') < LIVE_MS;
+  // an agent of this order with nothing written yet still counts: its worktree is on the order's own branch, work/<order>-<name>
+  // (the user: "I dont see those 5 agents"); one merged back and untouched for KIN_MS is a finished agent, unless work runs in it
+  const kin = (t) => typeof t.branch === 'string' && t.branch.startsWith(`work/${order}-`);
+  const stale = (t) => Date.now() - t.touched > KIN_MS && mergedInto(project, t.branch, `work/${order}`);
   const agents = trees.map((t) => ({ ...t, file: readJson(join(t.path, 'docs', 'workorders', order, 'agents', `${t.name}.json`)), beat: beatOf(t.name) }))
-    .filter((t) => t.file || listed.has(t.name) || alive(t.beat))
+    .map((t) => { const known = Boolean(t.file || listed.has(t.name) || alive(t.beat)); return { ...t, known, kinOnly: !known && kin(t) }; })
+    .filter((t) => t.known || t.kinOnly)
+    .map((t) => ({ ...t, stale: t.kinOnly && stale(t) }))   // runsReport drops a stale one unless work runs in it
     .map((t) => {
       const f = t.file ?? {};
       const step = f.step ?? listed.get(t.name)?.step ?? null;
-      return { name: t.name, step, title: steps.find((s) => s.id === step)?.title ?? '', now: f.now ?? '', updated: f.updated ?? null,
-        percent: f.items ? percent(f.done ?? 0, f.items) : null, beat: t.beat ?? null, path: t.path };
+      // no file of its own yet: git's last touch of its worktree is its clock
+      const updated = f.updated ?? (t.kinOnly && t.touched ? new Date(t.touched).toISOString() : null);
+      return { name: t.name, step, title: steps.find((s) => s.id === step)?.title ?? '', now: f.now ?? '', updated,
+        percent: f.items ? percent(f.done ?? 0, f.items) : null, beat: t.beat ?? null, path: t.path, stale: t.stale };
     });
   const items = steps.reduce((n, s) => n + s.items, 0);
   const done = steps.reduce((n, s) => n + s.done, 0) + agentsAhead(steps, agents);
@@ -214,6 +212,7 @@ export function runsReport({ dir = null, order = null, remotes = undefined, ask 
   // happened to the heartbeat and cores and all that?"); a process counts for the deepest folder, so an agent's build is its own
   const work = workIn([...runs.map((r) => r.project), ...runs.flatMap((r) => r.agents.map((a) => a.path))]);
   for (const a of runs.flatMap((r) => r.agents)) a.work = work?.[a.path] ?? null;
+  for (const r of runs) r.agents = r.agents.filter((a) => !a.stale || a.work?.procs);   // a finished agent's worktree, unless work runs in it
   for (const r of runs) r.leadWork = work?.[r.project] ?? null;
   const listed = dir ? [] : (remotes ?? remotesOf());
   const far = remotesReport(listed, ask);

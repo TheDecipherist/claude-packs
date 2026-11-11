@@ -1,7 +1,8 @@
 // The work orders running on this machine (1.7.3): every process running a kit runner, `bash docs/workorders/<order>/run.sh`,
 // with the project it runs in (the process's working folder: /proc on Linux, lsof on macOS).
 import { execFileSync } from 'node:child_process';
-import { readlinkSync } from 'node:fs';
+import { readFileSync, readlinkSync, statSync } from 'node:fs';
+import { basename, join } from 'node:path';
 import { slotOwners } from './build-slots.mjs';
 
 const RUNNER = /\bdocs\/workorders\/([\w.-]+)\/run\.sh\b/;
@@ -62,6 +63,27 @@ export function workIn(dirs, all = processes()) {
     work[dir].memMb = Math.round(work[dir].memMb + p.rssKb / 1024);
   }
   return work;
+}
+
+const lastTouched = (gitdir) => Math.max(0, ...['logs/HEAD', 'index', 'HEAD'].map((f) => { try { return statSync(join(gitdir, f)).mtimeMs; } catch { return 0; } }));
+
+/** The agent worktrees of a project: [{ name, path, branch, touched }], `touched` when git last wrote its HEAD or index
+ *  there (its checkout, a commit, an add). */
+export function worktreesOf(project) {
+  let out = '';
+  try { out = execFileSync('git', ['-C', project, 'worktree', 'list', '--porcelain'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return []; }
+  return out.split('\n\n').map((block) => {
+    const path = block.match(/^worktree (.+)$/m)?.[1];
+    if (!path || !path.includes('/.claude/worktrees/')) return null;
+    let gitdir = null;
+    try { gitdir = readFileSync(join(path, '.git'), 'utf8').match(/^gitdir: (.+)$/m)?.[1]?.trim() ?? null; } catch { /* a removed worktree */ }
+    return { name: basename(path), path, branch: block.match(/^branch refs\/heads\/(.+)$/m)?.[1] ?? null, touched: gitdir ? lastTouched(gitdir) : 0 };
+  }).filter(Boolean);
+}
+
+/** Whether `branch` is merged into `into`: every commit of it is there. False when either cannot be read. */
+export function mergedInto(project, branch, into) {
+  try { execFileSync('git', ['-C', project, 'merge-base', '--is-ancestor', branch, into], { stdio: 'ignore' }); return true; } catch { return false; }
 }
 
 /** The runs alive now: [{ project, order, pid }], one per project and order. */
