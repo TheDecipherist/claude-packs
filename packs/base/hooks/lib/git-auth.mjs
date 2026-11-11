@@ -24,7 +24,7 @@ export function pushLaw(p, target, c) {
   return null;
 }
 
-function loggedInAs() {
+export function loggedInAs() {
   try {
     return execFileSync('gh', ['config', 'get', 'user', '-h', 'github.com'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 3000 }).trim();
   } catch {

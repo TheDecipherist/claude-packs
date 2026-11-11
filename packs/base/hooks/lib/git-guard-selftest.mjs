@@ -149,7 +149,8 @@ export async function selftest(hookFile, { problem, house }) {
   if (problem('git push -u https://u:SECRET@h/x.git b')?.includes('SECRET')) bad.push('the refusal prints the token');
 
   // the house laws
-  const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true };
+  // login: gh's account planted, so no case starts gh (it writes its state into the home: `new`'s "nothing global")
+  const isDirty = { dirty: () => [' M design/gen_panel.py'], branch: () => 'step/C1-the-ribbon', hasHead: () => true, login: () => 'selftest-account' };
   const clean = { ...isDirty, dirty: () => [] };
   // KWB-147: only untracked entries (a worktree's node_modules link, the status line's own state file): an undo of tracked files never touches them
   const untrackedOnly = { ...isDirty, dirty: () => ['?? node_modules', '?? .claude/statusbar-activity.json'] };

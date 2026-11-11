@@ -34,7 +34,7 @@ import { bareWords } from './lib/command-prefix.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
-import { NEW_INSTALL_GIT, ghLaw, pushLaw } from './lib/git-auth.mjs';
+import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mjs';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 import { trunkLag } from './lib/trunk-lag.mjs';
 
@@ -86,6 +86,7 @@ export const DEFAULTS = {
 
 const gitOut = (cwd, ...a) => { try { return execFileSync('git', a, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 10000 }); } catch { return null; } };
 const real = {
+  login: loggedInAs,
   dirty: (cwd) => (gitOut(cwd, '--no-optional-locks', 'status', '--porcelain') ?? '').split('\n').filter((l) => l.trim()),
   branch: (cwd) => (gitOut(cwd, 'rev-parse', '--abbrev-ref', 'HEAD') ?? '').trim(),
   hasHead: (cwd) => gitOut(cwd, 'rev-parse', '-q', '--verify', 'HEAD') !== null,
@@ -162,7 +163,7 @@ export function house(cmd, cwd = '.', env = real, cfg = {}) {
       if (refused) return refused;
       pushedBefore = true;
     }
-    const ghRefused = ghLaw(cmd, p, c);
+    const ghRefused = ghLaw(cmd, p, c, env.login);   // env.login: gh's own account, asked only when a gh call is refused
     if (ghRefused) return ghRefused;
     if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
     if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${esc(tok)}`).test(p)) {
