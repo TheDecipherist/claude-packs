@@ -2,6 +2,7 @@
 // (1.1.0, KWB-75 to KWB-80). Each case was met on a real crate. The hook's own contract is in test/hooks/base/lesson-checks.test.mts.
 import { assert, lessonWrite, test } from '../../kit-cli.mts';
 import { fixture } from '../hook-rig.mts';
+import { holdsEachCaseIn, reviewPacksInstall } from '../lesson-cases.mts';
 
 test('.unwrap() is refused in library code, and left alone in a test, in main.rs and behind a lifetime is no hiding place', () => {
   const dir = fixture('rust');
@@ -50,3 +51,8 @@ test('a stub, a lint off with no reason, a static mut and a * version are refuse
   assert.equal(lessonWrite(dir, 'Cargo.toml', '[dependencies]\nserde = "*"\n').status, 2);
   assert.equal(lessonWrite(dir, 'Cargo.toml', '[dependencies]\nserde = "1.0"\n').status, 0);
 });
+
+// 0.25.0 (review-packs): a public function returns an error a caller can match on, with the pack taken in a mixed install.
+holdsEachCaseIn(reviewPacksInstall, [
+  ['rust', 'src/a.rs', 'pub fn f(x: &str) -> u32 {\n    x.parse().unwrap()\n}\n', 'pub fn f(x: &str) -> Result<u32, E> {\n    Ok(x.parse()?)\n}\n'],
+]);

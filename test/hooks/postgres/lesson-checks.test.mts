@@ -3,6 +3,7 @@
 import { assert, cli, existsSync, join, lessonWrite, test } from '../../kit-cli.mts';
 import { withLayout } from '../../fixtures/installs.mts';
 import { extraFixture } from '../hook-rig.mts';
+import { holdsEachCaseIn, reviewPacksInstall } from '../lesson-cases.mts';
 
 const installed = (): string => extraFixture('postgres', ['postgres']);
 const sql = (dir: string, text: string): number | null => lessonWrite(dir, 'db/migrations/002_change.sql', text).status;
@@ -63,3 +64,8 @@ test('a value in SQL text is refused in each language; a bound value, a tag and 
   assert.equal(code('src/i.go', 'query := fmt.Sprintf("DELETE FROM %s WHERE id IN (%s)", table, marks)\n'), 0);
   assert.equal(code('src/j.ts', "const q = `SELECT 1 WHERE a = ${A}`; // pg: allow A is a constant\n"), 0);
 });
+
+// 0.25.0 (review-packs): the pack's check on a column added with a default.
+holdsEachCaseIn(reviewPacksInstall, [
+  ['postgres', 'db/1.sql', 'ALTER TABLE t ADD COLUMN a uuid DEFAULT gen_random_uuid();\n', 'ALTER TABLE t ADD COLUMN a timestamptz DEFAULT now();\n'],
+]);
