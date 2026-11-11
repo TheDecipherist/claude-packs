@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { usesAny } from './changed-functions.mts';
 import { pathTests } from './test-changed-paths.mts';
-import { GENERIC, HUBS, MAX_HOPS, MODULE, SKIP_DIRS, TABLE, TEST } from './test-changed-table.mts';
+import { GENERIC, HOOK, HUBS, MAX_HOPS, MODULE, SKIP_DIRS, TABLE, TEST } from './test-changed-table.mts';
 import { walk as walkFolder } from '../packs/base/hooks/lib/files.mts';
 import { emittedFrom } from '../packs/base/hooks/lib/source-exts.mts';
 
@@ -95,13 +95,15 @@ export function choose(root: string, changed: readonly string[], g: Graph = grap
     if (names && names.size === 0) { uncovered.push(`${c} (imports or comments only)`); continue; }
     // d-7: the path function, the tier a test lives in and the manifest's `tests` and `requires`
     for (const [t, why] of pathTests(root, c, g.files, (f) => importersOf(f, g.importers))) { add(t, why); hit = true; }
-    for (const t of tests) if (t !== c && seen.has(t) && usesChanged(t)) {
+    // a hook is run by its own test and proved by its selftest, never imported: what a test names of it is not a test of it (d-7)
+    const byContent = HOOK.test(c) ? [] : tests;
+    for (const t of byContent) if (t !== c && seen.has(t) && usesChanged(t)) {
       const chain: string[] = [];
       for (let f = seen.get(t); f; f = seen.get(f)) chain.push(f);
       add(t, chain.length > 1 ? `reaches ${c} through ${chain.slice(0, -1).join(' → ')}` : `reaches ${c}`); hit = true;
     }
     const base = c.split('/').pop() ?? '';
-    for (const t of tests) {
+    for (const t of byContent) {
       if (seen.has(t)) continue; // already reached by import
       // a named FILE covers it; a folder a test builds a path from (`packs/`, `${KIT}/packs/base/`) covers nothing by itself (KWB-166)
       const named = [...textOf(t).matchAll(/['"`]((?:\.\.\/)?(?:packs|lib|bin|global|profiles|prompts|scripts|test|\.claude)\/[^'"`$]*)(.)/g)]
@@ -111,7 +113,7 @@ export function choose(root: string, changed: readonly string[], g: Graph = grap
       else if (!GENERIC.has(base) && base.length > 5 && new RegExp(`[/'"\`\\s]${escapeRe(base)}['"\`\\s)]`).test(textOf(t))) { add(t, `names ${base} (${c})`); hit = true; }
     }
     // a helper under test/ that names the file (worktree-cases-commands.mjs names each hook) covers it for every test importing it
-    for (const h of helpers) if (namesIt(helperText[h] ?? '', c)) for (const t of tests) if (importsOf(t).has(h)) { add(t, `names ${c} through ${h}`); hit = true; }
+    for (const h of helpers) if (namesIt(helperText[h] ?? '', c)) for (const t of byContent) if (importsOf(t).has(h)) { add(t, `names ${c} through ${h}`); hit = true; }
     for (const row of TABLE) if (row.files.test(c) && (row.when?.(c, status[c] ?? 'M') ?? true)) for (const t of tests) if (row.tests(textOf(t), c, root, t)) { add(t, `${c}: ${row.why}`); hit = true; }
     if (!hit) uncovered.push(c);
   }
