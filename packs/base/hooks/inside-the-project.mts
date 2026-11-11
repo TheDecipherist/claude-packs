@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // PreToolUse (Write, Edit, MultiEdit, NotebookEdit, Bash): work for a project happens inside that project, always. Every
 // other hook judges only paths inside the project and lets a command that leaves it pass, so a checkout of this repo kept
 // beside the project (a worktree made with `git worktree add ../x`, or a clone of the same origin) is outside the kit: no
@@ -8,22 +7,28 @@
 //   - a write into a checkout of this repo that lies outside the project;
 //   - a `cd`, `pushd`, `git -C`, `make -C`, `ninja -C` or `cmake --build` into one.
 // A sibling project (another repo) is never judged here: editing other projects from one session stays allowed.
+// A judge on the hook contract (W4): the project, the folder and HOME come from `ctx`; it writes nothing.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { bareWords } from './lib/command-prefix.mjs';
-import { commonGitDir, insideProject } from './lib/project.mjs';
-import { bashOf, git, put, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { readPayload, writesOf } from './lib/writes.mjs';
-import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
+import { bareWords } from './lib/command-prefix.mts';
+import { isMain, runAsHook } from './lib/hook-log.mts';
+import { commonGitDir, insideProject } from './lib/project.mts';
+import { bashOf, git, put, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
+import type { WorktreeCase } from './lib/selftest.mts';
+import type { Hook } from './lib/types.d.mts';
+import { refuse as refusing, pass } from './lib/verdict.mts';
+import { writesOf } from './lib/writes.mts';
 
+/** What a judgement is measured from: the project's root, the folder the command runs in, and the caller's HOME. */
+interface Where { root: string; cwd: string; home: string | undefined }
 
-const WORKTREE_VALUE_OPTIONS = new Set(['-b', '-B', '--reason']);
-const home = (p) => p.replace(/^~(?=\/|$)/, process.env.HOME ?? '~');
-const unquote = (w) => w.replace(/^(['"])(.*)\1$/, '$2');
+const WORKTREE_VALUE_OPTIONS: ReadonlySet<string> = new Set(['-b', '-B', '--reason']);
+const homePath = (p: string, home: string | undefined): string => p.replace(/^~(?=\/|$)/, home ?? '~');
+const unquote = (w: string): string => w.replace(/^(['"])(.*)\1$/, '$2');
 
 // The repo a checkout belongs to, by its origin URL: host/owner/name, so the SSH and HTTPS forms of one remote agree.
-function originOf(dir) {
+function originOf(dir: string): string | null {
   const common = commonGitDir(dir);
   if (!common) return null;
   try {
@@ -36,7 +41,7 @@ function originOf(dir) {
 }
 
 // The checkout a path lies in: the nearest folder above it holding a .git, or null.
-function checkoutOf(path) {
+function checkoutOf(path: string): string | null {
   for (let dir = resolve(path); ; dir = dirname(dir)) {
     if (existsSync(join(dir, '.git'))) return dir;
     if (dirname(dir) === dir) return null;
@@ -44,86 +49,97 @@ function checkoutOf(path) {
 }
 
 // True when a path is outside the project but inside a checkout of this same repo.
-function besideTheProject(path) {
-  if (insideProject(projectRoot(), path, process.cwd())) return false;
+function besideTheProject(path: string, at: Where): boolean {
+  if (insideProject(at.root, path, at.cwd)) return false;
   const checkout = checkoutOf(path);
   if (!checkout) return false;
-  const ours = commonGitDir(projectRoot());
+  const ours = commonGitDir(at.root);
   if (ours && commonGitDir(checkout) === ours) return true;
-  const origin = originOf(projectRoot());
+  const origin = originOf(at.root);
   return origin !== null && originOf(checkout) === origin;
 }
 
-const why = (path) => [
+const why = (path: string): string => [
   `${path} is a checkout of this project kept outside it.`,
   'Work for a project happens inside that project, always: outside it no hook of the kit judges anything (KWB-103).',
   'A worktree goes in .claude/worktrees/<name>: git worktree add .claude/worktrees/<name> -b <branch> origin/<trunk>.',
 ].join(' ');
 
 // The folder a git command works in, from its -C options.
-function gitFolder(words, here) {
+function gitFolder(words: readonly string[], here: string, home: string | undefined): { dir: string; next: number } {
   let dir = here;
   let i = 1;
-  for (; i < words.length && /^-[Cc]$/.test(words[i]); i += 2) if (words[i] === '-C') dir = resolve(dir, home(words[i + 1] ?? '.'));
+  for (; i < words.length && /^-[Cc]$/.test(words[i] ?? ''); i += 2) if (words[i] === '-C') dir = resolve(dir, homePath(words[i + 1] ?? '.', home));
   return { dir, next: i };
 }
 
 // Where `git worktree add|move` puts a worktree, or null for any other git command.
-function worktreeTarget(words, i) {
-  if (words[i] !== 'worktree' || !['add', 'move'].includes(words[i + 1])) return null;
-  const positional = [];
+function worktreeTarget(words: readonly string[], i: number): string | null {
+  const verb = words[i + 1] ?? '';
+  if (words[i] !== 'worktree' || !['add', 'move'].includes(verb)) return null;
+  const positional: string[] = [];
   for (let j = i + 2; j < words.length; j += 1) {
-    if (WORKTREE_VALUE_OPTIONS.has(words[j])) j += 1;
-    else if (!words[j].startsWith('-')) positional.push(words[j]);
+    const word = words[j] ?? '';
+    if (WORKTREE_VALUE_OPTIONS.has(word)) j += 1;
+    else if (!word.startsWith('-')) positional.push(word);
   }
-  return (words[i + 1] === 'add' ? positional[0] : positional[1]) ?? null;
+  return (verb === 'add' ? positional[0] : positional[1]) ?? null;
 }
 
 // The folders a command works in, and the targets of its worktree commands, each resolved from where it runs.
-function judgeCommand(command, cwd) {
-  let here = cwd;
+export function judgeCommand(command: string, at: Where): string | null {
+  let here = at.cwd;
   for (const raw of command.split(/&&|\|\||;|\n|\|/)) {
     const words = bareWords(raw.trim().split(/\s+/).filter(Boolean).map(unquote));
-    if (!words.length) continue;
-    const at = (p) => resolve(here, home(p));
-    const into = (p) => (p && besideTheProject(at(p)) ? why(at(p)) : null);
-    if (words[0] === 'cd' || words[0] === 'pushd') {
-      if (words[1]) here = at(words[1]);
+    const first = words[0];
+    if (first === undefined) continue;
+    const from = (p: string): string => resolve(here, homePath(p, at.home));
+    const into = (p: string | undefined): string | null => (p && besideTheProject(from(p), at) ? why(from(p)) : null);
+    if (first === 'cd' || first === 'pushd') {
+      if (words[1]) here = from(words[1]);
       const found = into(words[1]);
       if (found) return found;
-    } else if (words[0] === 'make' || words[0] === 'ninja') {
+    } else if (first === 'make' || first === 'ninja') {
       const c = words.indexOf('-C');
-      const found = into(c > 0 ? words[c + 1] : null);
+      const found = into(c > 0 ? words[c + 1] : undefined);
       if (found) return found;
-    } else if (words[0] === 'cmake' && words[1] === '--build') {
+    } else if (first === 'cmake' && words[1] === '--build') {
       const found = into(words[2]);
       if (found) return found;
-    } else if (words[0] === 'git') {
-      const { dir, next } = gitFolder(words, here);
-      if (besideTheProject(dir)) return why(dir);
+    } else if (first === 'git') {
+      const { dir, next } = gitFolder(words, here, at.home);
+      if (besideTheProject(dir, at)) return why(dir);
       // A worktree command on another project's repo is that project's business (KWB-104): judge the target only here.
-      const target = insideProject(projectRoot(), dir, process.cwd()) ? worktreeTarget(words, next) : null;
-      if (target && !insideProject(projectRoot(), resolve(dir, home(target)), process.cwd())) return why(resolve(dir, home(target)));
+      const target = insideProject(at.root, dir, at.cwd) ? worktreeTarget(words, next) : null;
+      if (target && !insideProject(at.root, resolve(dir, homePath(target, at.home)), at.cwd)) return why(resolve(dir, homePath(target, at.home)));
     }
   }
   return null;
 }
 
-function main(text) {
-  const payload = readPayload(text);
-  if (!payload) return 0; // not a refusal: an event that cannot be parsed has nothing to judge
-  const cwd = payload.cwd ?? process.cwd();
-  const refuse = (msg) => { process.stderr.write(`BLOCKED by inside-the-project: ${msg}\n`); return 2; };
-  if (payload.tool_name === 'Bash') {
-    const msg = judgeCommand(payload.tool_input?.command ?? '', cwd);
-    if (msg) return refuse(msg);
+export const hook: Hook = (event, ctx) => {
+  const cwd = event.cwd ?? ctx.cwd;
+  const at: Where = { root: ctx.projectDir, cwd, home: ctx.env.HOME };
+  const said = (msg: string) => refusing(`BLOCKED by inside-the-project: ${msg}`);
+  if (event.tool_name === 'Bash') {
+    const msg = judgeCommand(event.tool_input?.command ?? '', at);
+    if (msg) return said(msg);
   }
-  for (const w of writesOf(payload, cwd, process.env)) if (besideTheProject(w.path)) return refuse(why(w.path));
-  return 0;
-}
+  for (const w of writesOf(event, cwd, ctx.env)) if (besideTheProject(w.path, at)) return said(why(w.path));
+  return pass;
+};
 
-function selftest() {
-  const hook = fileURLToPath(import.meta.url);
+/** A worktree inside the project is the project's: work there passes (the worktree kept beside it is outside the kit, a case
+ *  that needs a real `git worktree add` and stays in worktrees.test.mjs). */
+export const worktreeCase: WorktreeCase = {
+  steps: [
+    { label: 'a write into the worktree inside the project', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/n.ts', content: 'x' }, cwd: '{here}' }, want: 0 },
+    { label: 'a worktree added beside the project', event: { tool_name: 'Bash', tool_input: { command: 'git worktree add ../beside-x -b beside-x' }, cwd: '{here}' }, want: 2 },
+  ],
+};
+
+export function selftest(): number {
+  const hookFile = fileURLToPath(import.meta.url);
   const parent = scratchProject({ 'proj/src/a.ts': 'a\n', 'other/b.ts': 'b\n' });
   const proj = join(parent, 'proj');
   git(proj, 'init', '-q');
@@ -134,8 +150,9 @@ function selftest() {
   git(join(parent, 'other'), 'init', '-q');
   put(join(parent, 'clone/.git/config'), '[remote "origin"]\n\turl = https://github.com/owner/proj.git\n');
   put(join(parent, 'clone/src/c.ts'), 'c\n');
-  const run = (payload) => runHook(hook, proj, payload).status;
-  const sh = (command) => run(bashOf(command, proj));
+  const before = snapshot(parent);   // the folders as the judge finds them: the rows below must leave them as they are
+  const run = (payload: unknown): number | null => runHook(hookFile, proj, payload).status;
+  const sh = (command: string): number | null => run(bashOf(command, proj));
   return verdicts('inside-the-project', [
     ['a worktree added beside the project', sh('git worktree add -q ../proj-W2 -b w2 origin/main'), 2],
     ['a worktree added beside it, after a fetch and with git -C', sh('git fetch -q && git -C . worktree add --lock --reason x ../w -b w'), 2],
@@ -153,8 +170,8 @@ function selftest() {
     ['a worktree added inside another project (KWB-104)', sh('cd ../other && git worktree add -q .claude/worktrees/w -b w main'), 0],
     ['a worktree added in another project with git -C (KWB-104)', sh('git -C ../other worktree add .claude/worktrees/w -b w'), 0],
     ['a plain command', sh('git status'), 0],
+    ['a judge writes no file (the write trap)', writtenSince(parent, before).join(','), ''],
   ]);
 }
 
-export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest() : await asHook('inside-the-project', main));
+if (isMain(import.meta.url)) await runAsHook(import.meta.url, 'inside-the-project', hook, selftest);

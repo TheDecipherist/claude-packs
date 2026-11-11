@@ -13,10 +13,14 @@ const withLayout = (wt, keys) => {
   put(join(wt, '.claude/layout.json'), JSON.stringify({ ...layout, ...keys(layout) }));
 };
 
+const insideCase = (await import('../packs/base/hooks/inside-the-project.mjs')).worktreeCase;
+
 export const COMMAND_CASES = {
   'inside-the-project.mjs': ({ here, wt }) => {
     // A worktree inside the project (.claude/worktrees/) is the project's, and work there passes; a worktree of the same repo
-    // kept beside the project is outside the kit, and a write into it is refused (KWB-103).
+    // kept beside the project is outside the kit, and a write into it is refused (KWB-103). The hook's own data case first; the
+    // beside-the-project write needs a real `git worktree add`, so it stays here until slice 6.
+    caseFrom('inside-the-project.mjs', insideCase)({ here, wt });
     const write = (file) => fireAs(here, 'inside-the-project.mjs', { tool_name: 'Write', tool_input: { file_path: file, content: 'x' }, cwd: here }).status;
     assert.equal(write(join(wt, 'src/n.ts')), 0);
     const beside = `${here}-beside`;
@@ -46,6 +50,12 @@ export const COMMAND_CASES = {
   },
   // a hook moved onto the contract (W4) exports its own worktree case as data, beside its selftest
   'no-find.mjs': caseFrom('no-find.mjs', (await import('../packs/base/hooks/no-find.mjs')).worktreeCase),
+  'untrusted-boundary.mjs': caseFrom('untrusted-boundary.mjs', (await import('../packs/base/hooks/untrusted-boundary.mjs')).worktreeCase),
+  'template-law.mjs': caseFrom('template-law.mjs', (await import('../packs/base/hooks/template-law.mjs')).worktreeCase),
+  'brief-guard.mjs': caseFrom('brief-guard.mjs', (await import('../packs/base/hooks/brief-guard.mjs')).worktreeCase),
+  'brief-guard-count.mjs': caseFrom('brief-guard-count.mjs', (await import('../packs/base/hooks/brief-guard-count.mjs')).worktreeCase),
+  'making-check.mjs': caseFrom('making-check.mjs', (await import('../packs/base/hooks/making-check.mjs')).worktreeCase),
+  'making-check-count.mjs': caseFrom('making-check-count.mjs', (await import('../packs/base/hooks/making-check-count.mjs')).worktreeCase),
   'repo-litter.mjs': ({ here, wt }) => {
     // The worktree's layout allows this asset; main's does not.
     put(join(wt, 'hero.png'), 'x');

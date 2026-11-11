@@ -71,12 +71,6 @@ const CASES = {
     assert.equal(fire(here, 'shape-law.mjs', join(wt, 'src/dsp/Lanes.cpp'), 'for (int lane = 0; lane < kLanes; ++lane) go(lane);\n'), 0);
     assert.equal(fire(here, 'shape-law.mjs', join(here, 'src/dsp/Lanes.cpp'), 'if (laneIx == 3) go();\n'), 0);
   },
-  'brief-guard.mjs': ({ here, wt }) => {
-    const shape = { concepts: { lane: { shape: 'many', count: 8, generator: 'laneId(i)', words: ['lane', 'lanes'] } }, exclude: [] };
-    put(join(wt, 'design/shape.json'), JSON.stringify(shape));
-    assert.equal(fire(here, 'brief-guard.mjs', join(wt, 'docs/brief.md'), 'Drive lane 3.\n'), 2);
-    assert.equal(fire(here, 'brief-guard.mjs', join(wt, 'docs/brief.md'), 'seen in: lane 3; build for every lane\n'), 0);
-  },
   'lesson-checks.mjs': ({ here, wt }) => {
     // The worktree's branch moved DSP into src/synth: its own layout.json decides, not main's.
     const layoutFile = join(wt, '.claude/layout.json');
@@ -109,11 +103,6 @@ const CASES = {
     assert.equal(fire(here, 'secrets-guard.mjs', join(wt, '.env'), 'A=1\n'), 0, 'ignored by the worktree');
     assert.equal(fire(here, 'secrets-guard.mjs', join(here, '.env'), 'A=1\n'), 2, 'not ignored by main');
     assert.equal(bash(here, 'secrets-guard.mjs', `git -C ${wt} add .env`), 2);
-  },
-  'untrusted-boundary.mjs': ({ here, wt }) => {
-    const call = 'const r = await client.messages.create({ messages: [{ role: "user", content: page }] });\n';
-    assert.equal(fire(here, 'untrusted-boundary.mjs', join(wt, 'tools/ask.mjs'), call), 2);
-    assert.equal(fire(here, 'untrusted-boundary.mjs', join(wt, 'tools/ask.mjs'), `const page = wrapUntrusted(html);\n${call}`), 0);
   },
   // 1.8.0: a call in the worktree is that agent's heartbeat, written in the main checkout where the status reads it, never
   // into the worktree; a call in the main checkout is the lead's
@@ -152,13 +141,6 @@ const CASES = {
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
   },
-  'template-law.mjs': ({ here, wt }) => {
-    // The worktree's branch already has this element; main does not. Each checkout is read on its own.
-    const el = (t) => `<div class="tile"><h3 class="name">${t}</h3><p>${t}</p></div>\n`;
-    put(join(wt, 'src/app/one.html'), el('One'));
-    assert.equal(fire(here, 'template-law.mjs', join(wt, 'src/app/two.html'), el('Two')), 2);
-    assert.equal(fire(here, 'template-law.mjs', join(here, 'src/app/two.html'), el('Two')), 0);
-  },
   'dispatch-once.mjs': ({ here, wt }) => {
     // The worktree's branch already switches on blendStyle; main does not. Each checkout is scanned on its own.
     put(join(wt, 'src/dsp/Blend.cpp'), 'float blend (Layer& l) { switch (l.blendStyle) { default: return 0.0f; } }\n');
@@ -192,20 +174,6 @@ const CASES = {
     const said = (cwd) => fireAs(here, 'making.mjs', { hook_event_name: 'UserPromptSubmit', prompt: 'drive slot 2 louder', cwd }).stdout;
     assert.match(said(wt), /you named slot 2: building for all slots/);
     assert.doesNotMatch(said(here), /you named/, 'main has no manifest yet');
-  },
-  'making-check.mjs': ({ here, wt }) => {
-    put(join(wt, 'design/shape.json'), JSON.stringify(SHAPE));
-    put(join(wt, 'build.md'), '# x\n\n## In progress\n\n| when | work/x | the gain; making: one gain per slot; concepts: slot (many, 4); reuse: slotGain in src/dsp/Gain.cpp | started |\n\n## Steps\n');
-    const stop = (cwd, into = cwd) => {
-      const t = join(cwd, 'transcript.jsonl');
-      const use = { type: 'assistant', cwd, message: { content: [{ type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: join(into, 'src/dsp/Gain.cpp'), content: 'float slotGain (int slot) { return gains[slot]; }\n' } }] } };
-      writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, use].map((e) => JSON.stringify(e)).join('\n'));
-      return fireAs(here, 'making-check.mjs', { hook_event_name: 'Stop', transcript_path: t, cwd, session_id: `wt-${cwd.length}` }).status;
-    };
-    assert.equal(stop(wt), 0, 'the worktree has its manifest and its making line');
-    assert.equal(stop(here), 2, 'main has neither');
-    // Stellix WB-86: a session sitting in the main checkout that writes into a worktree is judged by the worktree's build.md
-    assert.equal(stop(here, wt), 0, 'a write into the worktree, from the main checkout, is judged by the worktree');
   },
 };
 
