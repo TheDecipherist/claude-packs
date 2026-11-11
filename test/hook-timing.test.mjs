@@ -116,12 +116,13 @@ test('doctor: a hook whose median is over 500 ms is a red check, with its median
 });
 
 // One node process per settings entry (KWB-24): every kit node hook of an entry is named in one run-hooks.mjs command, and
-// each exports hook(text) for it; an async hook (idle-wake waits for minutes) keeps its own entry.
+// each exports hook(text) for it; an async hook (idle-wake waits for minutes; heartbeat, 1.8.0, never holds a call) keeps
+// its own entry, as throughRunner leaves it.
 test('settings run the kit node hooks through run-hooks.mjs, and every such hook exports hook(text)', () => {
   const dir = stellix();
   const settings = JSON.parse(readFileSync(join(dir, '.claude/settings.json'), 'utf8'));
   const commands = Object.values(settings.hooks).flatMap((gs) => gs.flatMap((g) => g.hooks));
-  const direct = commands.filter((h) => !h.asyncRewake && /^node "\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/(?!run-hooks\.mjs)[\w-]+\.mjs"$/.test(h.command));
+  const direct = commands.filter((h) => !h.async && !h.asyncRewake && /^node "\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/(?!run-hooks\.mjs)[\w-]+\.mjs"$/.test(h.command));
   assert.deepEqual(direct.map((h) => h.command), [], 'no kit node hook runs as its own process');
   const named = new Set(commands.filter((h) => h.command.includes('run-hooks.mjs')).flatMap((h) => [...h.command.matchAll(/\.claude\/hooks\/([\w-]+)\.mjs/g)].map((m) => m[1])).filter((n) => n !== 'run-hooks'));
   assert.ok(named.size >= 15, `${named.size} hooks through the runner`);

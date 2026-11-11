@@ -1,8 +1,8 @@
 // The status line's RUNS rows (1.8.0): where every unattended work order on this machine stands, the user's form:
 // "PROJECT NAME (PROGRESS 0% - 100%) > AGENT X > STEP (PROGRESS 0% - 100%)".
 //
-//   BANDWARP               ████████░░░░░░░░░░░░  47%  40 of 76 items left, 4 agents
-//     > dsp        > W3b The cluster           ██░░░░░░░░  23%  SPACING modes against the reference
+//   SHOP                   ████████░░░░░░░░░░░░  47%  40 of 76 items left, 4 agents
+//     > api        > W3b The import            ██░░░░░░░░  23%  ♥ 12s ⚙ 3 proc · 1.2 cpu · 300M ram READ src/import.ts
 //
 // Finding the runs costs ps and git, too much for a bar drawn every second, so it runs detached (this file with --refresh)
 // at most every TTL_MS and the bar draws from its cache: a slow refresh never holds a render, a missing cache draws nothing.

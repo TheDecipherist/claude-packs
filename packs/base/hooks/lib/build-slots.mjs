@@ -1,4 +1,4 @@
-// The machine-wide build queue's slots (buildq, synth-creator's tool): a slot is a folder made atomically, holding its
+// The machine-wide build queue's slots (the buildq tool, where a pack ships it): a slot is a folder made atomically, holding its
 // owner's pid. buildq takes and frees them; the status check reads them (1.8.0), so an agent whose build waits for a slot
 // shows as waiting its turn, never as stuck. One layout, here, for both.
 //   BUILDQ_DIR: where the slots live (default: the machine's temp folder). BUILDQ_SLOTS: how many (default 2).
