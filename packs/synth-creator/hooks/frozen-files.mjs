@@ -12,23 +12,22 @@ import { insideProject, checkoutRoot } from './lib/project.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { fileURLToPath } from 'node:url';
 import { bashOf, editOf, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-const STATE = join(ROOT, '.claude', 'state', 'frozen.json');
+const stateFile = () => join(projectRoot(), '.claude', 'state', 'frozen.json');
 
 function main(text) {
-  if (!existsSync(STATE)) return 0;
+  if (!existsSync(stateFile())) return 0;
   let payload;
   let state;
   try {
     payload = JSON.parse(text);
-    state = JSON.parse(readFileSync(STATE, 'utf8'));
+    state = JSON.parse(readFileSync(stateFile(), 'utf8'));
   } catch {
     return 0;
   }
   if (!Array.isArray(state.files) || state.files.length === 0) return 0;
-  const hit = writesOf(payload, payload.cwd ?? process.cwd()).map((w) => w.path).filter((f) => insideProject(ROOT, f, process.cwd())).map((f) => relative(checkoutRoot(ROOT, f, process.cwd()), f))
+  const hit = writesOf(payload, payload.cwd ?? process.cwd()).map((w) => w.path).filter((f) => insideProject(projectRoot(), f, process.cwd())).map((f) => relative(checkoutRoot(projectRoot(), f, process.cwd()), f))
     .find((rel) => rel === '.claude/state/frozen.json' || matchesAny(rel, state.files));
   if (!hit) return 0;
   const rel = hit;

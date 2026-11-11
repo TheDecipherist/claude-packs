@@ -19,10 +19,9 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readText } from './lib/shell-writes.mjs';
 import { judgeEvent } from './lib/writes.mjs';
 import { runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { missingIn, requiredSettings } from './lib/settings-standard.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const CMAKE = /(^|\/)CMakeLists\.txt$|\.cmake$/;
 const SKIP_DIRS = /^(out|build|Builds|_deps|JuceLibraryCode|JUCE|node_modules|\.git|\.claude|cmake-build.*)$/;
 const PLUGIN = /\bjuce_add_plugin\s*\(/;
@@ -79,8 +78,8 @@ function main(text) {
   return judgeEvent(text, {
     name: 'settings-layer',
     write: (w, rel) => {
-      const root = checkoutRoot(ROOT, w.path, process.cwd());
-      return judgeLayer(w, rel, root, claudeRoot(ROOT, w.path, process.cwd())) ?? judgeCmake(w, rel, root);
+      const root = checkoutRoot(projectRoot(), w.path, process.cwd());
+      return judgeLayer(w, rel, root, claudeRoot(projectRoot(), w.path, process.cwd())) ?? judgeCmake(w, rel, root);
     },
   });
 }
@@ -147,7 +146,7 @@ function selftest() {
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-const BY_HAND = { '--selftest': selftest, '--status': () => status(ROOT) };
+const BY_HAND = { '--selftest': selftest, '--status': () => status(projectRoot()) };
 if (isMain(import.meta.url)) {
   const byHand = Object.keys(BY_HAND).find((flag) => process.argv.includes(flag));
   process.exit(byHand ? BY_HAND[byHand]() : await asHook('settings-layer', main));

@@ -15,15 +15,14 @@ import { commandLeavesProject, insideProject, checkoutRoot, relInCheckout } from
 import { writesOf } from './lib/writes.mjs';
 import { fileURLToPath } from 'node:url';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-const STATE = join(ROOT, '.claude', 'spec-lock.json');
+const specLockFile = () => join(projectRoot(), '.claude', 'spec-lock.json');
 const DEFAULT_GLOBS = ['spec/**', 'specs/**', 'docs/stellix-*.md', '**/*-spec.md', '**/*.mmd', '**/panel.json', '**/build.md', '**/decisions*.md'];
 const WRITE_CMD = /(>|>>|\btee\b|\bsed\s+-i|\bperl\s+-i|\bmv\b|\bcp\b|\brm\b|\btruncate\b|\bgit\s+(checkout|restore)\b)/;
 
-const read = () => (existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : { locked: false });
-const write = (s) => writeFileSync(STATE, JSON.stringify(s, null, 2) + '\n');
+const read = () => (existsSync(specLockFile()) ? JSON.parse(readFileSync(specLockFile(), 'utf8')) : { locked: false });
+const write = (s) => writeFileSync(specLockFile(), JSON.stringify(s, null, 2) + '\n');
 
 function cli(args) {
   const [cmd, reason, ...globs] = args;
@@ -60,12 +59,12 @@ function main(text) {
     if (/spec-lock\.json/.test(bare) && WRITE_CMD.test(bare)) return block(`the lock file can't be edited. ${howTo}`);
     const routed = judgeWrites(payload, state, howTo);
     if (routed) return routed;
-    if (!state.locked || commandLeavesProject(ROOT, cmd, process.cwd(), process.env.HOME)) return 0;
+    if (!state.locked || commandLeavesProject(projectRoot(), cmd, process.cwd(), process.env.HOME)) return 0;
     // Each word as a path in its own checkout, so a worktree's spec/ is the spec too.
-    const base = payload.cwd ?? ROOT;
+    const base = payload.cwd ?? projectRoot();
     const toRel = (t) => {
       const abs = resolve(base, t.replace(/^['"]|['"]$/g, ''));
-      return insideProject(ROOT, abs, process.cwd()) ? relInCheckout(ROOT, abs, process.cwd()) : null;
+      return insideProject(projectRoot(), abs, process.cwd()) ? relInCheckout(projectRoot(), abs, process.cwd()) : null;
     };
     const touched = cmd.split(/\s+/).filter((t) => {
       const rel = t && toRel(t);
@@ -81,8 +80,8 @@ function main(text) {
 // Every file the call writes, whichever tool: the lock file never, a locked spec file not while locked.
 function judgeWrites(payload, state, howTo) {
   for (const w of writesOf(payload)) {
-    if (!insideProject(ROOT, w.path, process.cwd())) continue;
-    const rel = relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path);
+    if (!insideProject(projectRoot(), w.path, process.cwd())) continue;
+    const rel = relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path);
     if (rel === join('.claude', 'spec-lock.json')) return block(`the lock file can't be edited. ${howTo}`);
     if (state.locked && matchesAny(rel, state.globs)) return block(`${rel} is locked since ${state.since} (${state.reason}). ${howTo}`);
   }

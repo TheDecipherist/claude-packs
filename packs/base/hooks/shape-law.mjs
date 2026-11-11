@@ -11,7 +11,7 @@
 //   - a selector for a concept (pickSlot, slotFor, firstSlot, ownerSlot) not listed in the manifest;
 //   - a new type that holds instances (an index member, or made N times in an array) whose concept has no row.
 // No design/shape.json: nothing is declared, so nothing is judged (doctor fails a project of a configuration that needs one). `--selftest`.
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkoutRoot, insideProject, relInCheckout } from './lib/project.mjs';
 import { addedFindings, findInstanceLiterals, formatFinding, isExcluded, isTestFile, logRefusal, readShape } from './lib/shape.mjs';
@@ -20,9 +20,8 @@ import { addressedOutside } from './lib/audience.mjs';
 import { declaredAmount } from './lib/shape-prose.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const TEST_NOTE = 'a test that drives one instance proves that instance only: loop over every instance, or take the instance as a parameter';
 
@@ -43,15 +42,15 @@ function main(text) {
   let payload;
   try { payload = JSON.parse(text); } catch { return 0; }
   for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
-    if (w.after === null || w.op === 'delete' || !insideProject(ROOT, w.path, process.cwd()) || w.after.includes('\0')) continue;
-    const root = checkoutRoot(ROOT, w.path, process.cwd());
-    const shape = readShape(root) ?? readShape(ROOT);
+    if (w.after === null || w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd()) || w.after.includes('\0')) continue;
+    const root = checkoutRoot(projectRoot(), w.path, process.cwd());
+    const shape = readShape(root) ?? readShape(projectRoot());
     if (!shape || shape.error) continue;
-    const rel = relInCheckout(ROOT, w.path, process.cwd());
+    const rel = relInCheckout(projectRoot(), w.path, process.cwd());
     if (rel.startsWith('..') || isExcluded(rel, shape) || addressedOutside(rel, w.after)) continue;
     const { out, concepts } = judgeText(rel, w.before, w.after, shape, root);
     if (!out.length) continue;
-    logRefusal(ROOT, 'shape-law', concepts);
+    logRefusal(projectRoot(), 'shape-law', concepts);
     process.stderr.write(`BLOCKED by shape-law: this write names one instance of a concept that design/shape.json declares (KWB-1).\n${out.slice(0, 10).map((l) => `  ${l}`).join('\n')}${out.length > 10 ? `\n  ... and ${out.length - 10} more` : ''}\n` +
       'Build for the shape: a loop over every instance or the generator; an instance seen in a bug goes on a "seen in:" line.\n' +
       'A page for a person outside the project, about the real machine\'s own named controls (never a spec, brief or code), says so in its first 5 lines: <!-- audience: outside --> (.md or .txt only).\n');

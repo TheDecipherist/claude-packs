@@ -6,7 +6,7 @@
 // Every write route (lib/writes.mjs judgeEvent); a file is judged against its own checkout (a worktree against the worktree);
 // tests, `protected` globs, vendored and built folders are never scanned. `--selftest` proves it.
 import { readFileSync } from 'node:fs';
-import { extname, join, resolve } from 'node:path';
+import { extname, join } from 'node:path';
 import { blankCode } from './lib/cpp-scan.mjs';
 import { lookupMatches } from './lib/rust-scan.mjs';
 import { CODE, TESTS, codeFiles } from './lib/elements.mjs';
@@ -15,10 +15,9 @@ import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const SWITCH = /\bswitch\s*\(\s*([^()]*?(?:\([^()]*\))?)\s*\)\s*\{/g;
 const JUDGED = new Set([...CODE, '.rs']);
@@ -86,7 +85,7 @@ function judgeWrite(w, rel) {
   if (added.length === 0) return null;
   const twice = added.find((s, i) => added.some((t, j) => i !== j && sameKind(s, t) && s.labels.size && t.labels.size));
   if (twice) return `${rel} branches on "${twice.kind}" twice in this file.\n${FIX}`;
-  const found = elsewhere(checkoutRoot(ROOT, w.path, process.cwd()), rel, added, readLayout(claudeRoot(ROOT, w.path, process.cwd())));
+  const found = elsewhere(checkoutRoot(projectRoot(), w.path, process.cwd()), rel, added, readLayout(claudeRoot(projectRoot(), w.path, process.cwd())));
   if (found.size === 0) return null;
   const lines = [...found].map(([k, files]) => `  "${k}" is already switched on in: ${files.slice(0, 5).join(', ')}`).join('\n');
   return `${rel} adds a second place that branches on the same kind.\n${lines}\n${FIX}`;

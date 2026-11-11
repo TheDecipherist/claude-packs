@@ -14,10 +14,9 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { bashOf, git, promptFile, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { lastPrompt } from './lib/turn.mjs';
 import { judgeEvent, readPayload } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const WHOLE = /^(?:(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test|ctest(?:\s+(?!-R\b|--tests-regex\b|-L\b|-I\b|-N\b|--show-only\b|--print-labels\b)\S+)*|cargo\s+(?:test|nextest\s+run)(?:\s+-\S+)*)$/;
 const PREFIX = /^(?:[A-Za-z_]\w*=\S*\s+|(?:env|command|nohup|time|exec|\S*buildq)\s+|timeout\s+\S+\s+)+/;
@@ -58,10 +57,10 @@ export function refusal(command, cwd, asked = false) {
     const cd = part.trim().match(/^cd\s+(\S+)$/);
     if (cd) { here = resolve(here, cd[1]); continue; }
     const words = clean(part);
-    const { commands = {} } = readLayout(claudeRoot(ROOT, resolve(here, 'x'), process.cwd())); // claudeRoot takes a file: a worktree's own layout, not main's
+    const { commands = {} } = readLayout(claudeRoot(projectRoot(), resolve(here, 'x'), process.cwd())); // claudeRoot takes a file: a worktree's own layout, not main's
     if (!WHOLE.test(words) && !WRAPPER.test(bare(words)) && !ownSuite(words, commands.test)) continue;
     if (asked) continue;
-    const dirty = uncommitted(checkoutRoot(ROOT, resolve(here, 'x'), process.cwd()));
+    const dirty = uncommitted(checkoutRoot(projectRoot(), resolve(here, 'x'), process.cwd()));
     const changed = commands['test-changed'] ? `\`${commands['test-changed']}\`, against the trunk` : 'the pick-tests skill, against the trunk';
     return `\`${words}\` runs the whole suite${dirty.length ? `, on uncommitted work:\n    ${dirty.slice(0, 8).join('\n    ')}` : '.'}\n` +
       `The gate before landing and before a release is the tests the branch's changes reach (${changed}). The whole suite runs only when the user asks for a full run, in that turn.\n`;

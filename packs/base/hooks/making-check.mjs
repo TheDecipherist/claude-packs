@@ -25,9 +25,8 @@ import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { readShape } from './lib/shape.mjs';
 import { lastTurn, writesOfTurn } from './lib/turn.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const MAX_SENDS = 3;
 const NOT_CONCEPTS = new Set(['none', 'no', '-', 'n/a', 'one', 'many', 'ids']);
@@ -110,7 +109,7 @@ const headBranch = (gitDir) => { try { return readFileSync(join(gitDir, 'HEAD'),
 
 // The making lines of build.md's In progress section: those on this branch's entry, else every one there.
 export function makingLines(root) {
-  const file = [join(root, 'build.md'), join(ROOT, 'build.md')].find((f) => existsSync(f));
+  const file = [join(root, 'build.md'), join(projectRoot(), 'build.md')].find((f) => existsSync(f));
   if (!file) return [];
   const text = readFileSync(file, 'utf8');
   const at = text.search(/^##\s+In progress\b/im);
@@ -146,18 +145,18 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
   const path = event.hook_event_name === 'SubagentStop' ? event.agent_transcript_path ?? event.transcript_path : event.transcript_path;
   const turn = lastTurn(path ?? '');
   const text = `${turn.text}\n${event.last_assistant_message ?? ''}`;
-  const writes = writesOfTurn(turn, cwd).filter((w) => insideProject(ROOT, w.path, process.cwd()));
+  const writes = writesOfTurn(turn, cwd).filter((w) => insideProject(projectRoot(), w.path, process.cwd()));
   const problems = [];
-  const rel = (p) => relative(checkoutRoot(ROOT, p, process.cwd()), p).replace(/\\/g, '/');
+  const rel = (p) => relative(checkoutRoot(projectRoot(), p, process.cwd()), p).replace(/\\/g, '/');
   // Each write is judged against its own checkout (a worktree's own build.md, manifest and layout), never the session's folder:
   // a lead in the main checkout writing in a worktree has its making line in that worktree's build.md (Stellix WB-86).
   const byRoot = new Map();
-  for (const w of writes) { const r = checkoutRoot(ROOT, w.path, process.cwd()); if (!byRoot.has(r)) byRoot.set(r, []); byRoot.get(r).push(w); }
-  if (!byRoot.size) byRoot.set(checkoutRoot(ROOT, join(cwd, 'x'), process.cwd()), []);
+  for (const w of writes) { const r = checkoutRoot(projectRoot(), w.path, process.cwd()); if (!byRoot.has(r)) byRoot.set(r, []); byRoot.get(r).push(w); }
+  if (!byRoot.size) byRoot.set(checkoutRoot(projectRoot(), join(cwd, 'x'), process.cwd()), []);
   const judged = [];
   for (const [r, ws] of byRoot) {
     const lay = readLayout(r);
-    const sh = readShape(r) ?? readShape(ROOT);
+    const sh = readShape(r) ?? readShape(projectRoot());
     const mine = ws.filter((w) => !matchesAny(rel(w.path), [...PLAN, ...excludeGlobs(lay, sh)]));
     judged.push(...mine);
 
@@ -187,15 +186,15 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
 
   // 2. once-only on the source the turn wrote. The tools' writes passed once-only itself when it is installed; running its detector again on them at
   // every Stop cost over the kit's own 500 ms line (KF-33). The shell's writes stay: much of what they write is unknown at write time.
-  const atWrite = existsSync(join(claudeRoot(ROOT, join(cwd, 'x'), process.cwd()), '.claude/hooks/once-only.mjs'));
+  const atWrite = existsSync(join(claudeRoot(projectRoot(), join(cwd, 'x'), process.cwd()), '.claude/hooks/once-only.mjs'));
   const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))];
   // each checkout's sources against that checkout's own index, layout and manifest: a file in one worktree is never judged
   // against its twin in another worktree of the same repo (KWB-155)
   const found = new Set();
   for (const root of byRoot.keys()) {
     const layout = readLayout(root);
-    const shape = readShape(root) ?? readShape(ROOT);
-    const mine = sources.filter((p) => checkoutRoot(ROOT, p, process.cwd()) === root && !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
+    const shape = readShape(root) ?? readShape(projectRoot());
+    const mine = sources.filter((p) => checkoutRoot(projectRoot(), p, process.cwd()) === root && !matchesAny(rel(p), copyGlobs(layout)) && !isGenerated(readFileSync(p, 'utf8')));
     if (!mine.length) continue;
     // once-only's index finds the candidates, jscpd confirms on those files alone (lib/dup-index.mjs; KWB-24: no whole-repo scan)
     const added = addedRanges(root, mine);

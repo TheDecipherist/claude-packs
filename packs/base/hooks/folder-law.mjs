@@ -11,13 +11,12 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|mm|m|wgsl|metal|glsl|hlsl|slang)$/i;
 
 // What is source: layout.json "sourceFiles" (a regex the configuration writes, e.g. full-stack's TypeScript; KWB-37), else SOURCE.
-export const isSource = (file) => { const re = readLayout(claudeRoot(ROOT, file, process.cwd())).sourceFiles; return (re ? new RegExp(re, 'i') : SOURCE).test(file); };
+export const isSource = (file) => { const re = readLayout(claudeRoot(projectRoot(), file, process.cwd())).sourceFiles; return (re ? new RegExp(re, 'i') : SOURCE).test(file); };
 
 const main = (text) => judgeEvent(text, {
   name: 'folder-law',
@@ -25,12 +24,12 @@ const main = (text) => judgeEvent(text, {
 });
 
 function judge(file) {
-  if (relative(ROOT, file).startsWith('..')) return null;
-  const root = checkoutRoot(ROOT, file, process.cwd());
+  if (relative(projectRoot(), file).startsWith('..')) return null;
+  const root = checkoutRoot(projectRoot(), file, process.cwd());
   const rel = relative(root, file).replace(/\\/g, '/');
   if (rel.startsWith('..')) return null;
 
-  const layout = readLayout(claudeRoot(ROOT, file, process.cwd()));
+  const layout = readLayout(claudeRoot(projectRoot(), file, process.cwd()));
   const folders = codeFolders(layout);
   if (folders.length === 0) return null;
   if (folders.some((f) => rel.startsWith(`${f}/`))) {

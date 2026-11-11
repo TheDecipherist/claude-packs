@@ -6,12 +6,11 @@ import { findViolations, violationKey } from './lib/realtime-checks.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { judgeSmoothing, smoothingConfig } from './lib/smoothing-checks.mjs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const CPP = /\.(cpp|cc|cxx|h|hh|hpp|mm)$/;
 
@@ -23,7 +22,7 @@ function main(text) {
     return 0;
   }
   for (const w of writesOf(payload)) {
-    if (w.after === null || !CPP.test(w.path) || !insideProject(ROOT, w.path, process.cwd())) continue;
+    if (w.after === null || !CPP.test(w.path) || !insideProject(projectRoot(), w.path, process.cwd())) continue;
     const code = judge(w.path, w) || judgeSmooth(w);
     if (code) return code;
   }
@@ -32,8 +31,8 @@ function main(text) {
 
 // KWB-126, 1.7.2: a control smoothed outside the project's smoothing module is refused too, always (lib/smoothing-checks.mjs).
 function judgeSmooth(w) {
-  const cfg = smoothingConfig(readLayout(claudeRoot(ROOT, w.path, process.cwd())));
-  const msg = judgeSmoothing(w, relative(checkoutRoot(ROOT, w.path, process.cwd()), w.path), cfg);
+  const cfg = smoothingConfig(readLayout(claudeRoot(projectRoot(), w.path, process.cwd())));
+  const msg = judgeSmoothing(w, relative(checkoutRoot(projectRoot(), w.path, process.cwd()), w.path), cfg);
   if (!msg) return 0;
   process.stderr.write(msg);
   return 2;

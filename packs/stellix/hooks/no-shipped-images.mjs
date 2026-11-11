@@ -17,9 +17,8 @@ import { codeFolders, readLayout } from './lib/layout.mjs';
 import { claudeRoot, commandLeavesProject, insideProject, relInCheckout } from './lib/project.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const IMAGE = /\.(png|jpe?g|gif|bmp|tiff?|webp|heic|ico|icns|svg|psd|tga|exr|hdr|ktx2?|dds|astc)$/i;
 // Guarded: every code folder in the layout, plus anything that would be bundled as a resource.
 const guarded = (root) => readLayout(root).guards?.images?.guarded ?? [...new Set(['src/**', 'Resources/**', 'resources/**', 'assets/**', ...codeFolders(readLayout(root)).map((f) => `${f}/**`)])];
@@ -27,11 +26,11 @@ const ALLOWED = ['tests/**', '**/tests/**', 'goldens/**', '**/goldens/**', 'docs
 const allowed = (root) => readLayout(root).guards?.images?.allowed ?? ALLOWED;
 
 // A path is judged in its own checkout, so an image written into an agent worktree is caught too.
-const isBlocked = (p, base = ROOT) => {
+const isBlocked = (p, base = projectRoot()) => {
   const abs = resolve(base, p);
-  if (!IMAGE.test(abs) || !insideProject(ROOT, abs, process.cwd())) return false;
-  const rel = relInCheckout(ROOT, abs, process.cwd()).replace(/^\.claude\/worktrees\/[^/]+\//, '');
-  const root = claudeRoot(ROOT, abs, process.cwd());
+  if (!IMAGE.test(abs) || !insideProject(projectRoot(), abs, process.cwd())) return false;
+  const rel = relInCheckout(projectRoot(), abs, process.cwd()).replace(/^\.claude\/worktrees\/[^/]+\//, '');
+  const root = claudeRoot(projectRoot(), abs, process.cwd());
   return !rel.startsWith('.claude/') && matchesAny(rel, guarded(root)) && !matchesAny(rel, allowed(root));
 };
 
@@ -44,7 +43,7 @@ function fail(files) {
 }
 
 function gitStaged() {
-  const out = execFileSync('git', ['diff', '--cached', '--name-only', '--diff-filter=AR'], { cwd: ROOT, encoding: 'utf8' });
+  const out = execFileSync('git', ['diff', '--cached', '--name-only', '--diff-filter=AR'], { cwd: projectRoot(), encoding: 'utf8' });
   const bad = out.split('\n').filter((f) => f && isBlocked(f));
   return bad.length ? (fail(bad), 1) : 0;
 }
@@ -57,10 +56,10 @@ function main(text) {
     return 0;
   }
   const input = payload.tool_input ?? {};
-  const bad = writesOf(payload, payload.cwd ?? ROOT).filter((w) => w.op !== 'delete' && isBlocked(w.path)).map((w) => w.path);
-  if (payload.tool_name === 'Bash' && !commandLeavesProject(ROOT, input.command, process.cwd(), process.env.HOME)) {
+  const bad = writesOf(payload, payload.cwd ?? projectRoot()).filter((w) => w.op !== 'delete' && isBlocked(w.path)).map((w) => w.path);
+  if (payload.tool_name === 'Bash' && !commandLeavesProject(projectRoot(), input.command, process.cwd(), process.env.HOME)) {
     const tokens = (input.command ?? '').split(/\s+/).map((t) => t.replace(/^['"]|['"]$/g, ''));
-    if (/\b(curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b/.test(input.command ?? '')) bad.push(...tokens.filter((t) => t && isBlocked(t, payload.cwd ?? ROOT)));
+    if (/\b(curl|wget|convert|magick|sips|rsvg-convert|ffmpeg)\b/.test(input.command ?? '')) bad.push(...tokens.filter((t) => t && isBlocked(t, payload.cwd ?? projectRoot())));
   }
   return bad.length ? fail([...new Set(bad)]) : 0;
 }

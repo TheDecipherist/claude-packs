@@ -9,16 +9,15 @@
 // it here (a brief says "initSlot", not "slot 1"). The refusal quotes the manifest row and the fix: name the shape and
 // the generator; the instance is the example. Every refusal is counted per concept in .claude/usage.log. `--selftest`.
 import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkoutRoot, insideProject, relInCheckout } from './lib/project.mjs';
 import { addedFindings, ASK, findInstanceLiterals, isExcluded, logRefusal, quoteRow, readShape } from './lib/shape.mjs';
 import { addressedOutside } from './lib/audience.mjs';
 import { bashOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { writesOf } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const BRIEFS = /^(docs|inbox)\//;
 const find = (shape) => (t) => findInstanceLiterals(t, 'brief.md', shape, { only: 'brief' });
@@ -30,7 +29,7 @@ function refuse(where, findings, shape) {
     const how = k.shape === 'many' ? `many${k.count ? `(${k.count})` : ''}, made by ${k.row.generator}` : `one, id ${k.id}`;
     return `  ${quoteRow(c, shape)}\n    fix: name the shape and the generator (every ${c}: ${how}); the instance is the example, on its own "seen in:" or "example:" line`;
   });
-  logRefusal(ROOT, 'brief-guard', findings.map((f) => f.concept));
+  logRefusal(projectRoot(), 'brief-guard', findings.map((f) => f.concept));
   process.stderr.write(`BLOCKED by brief-guard: ${where} names one instance of a concept outside a "seen in:" or "example:" line — ${ASK}\n${lines.join('\n')}${findings.length > 8 ? `\n  ... and ${findings.length - 8} more` : ''}\n${rows.join('\n')}\n` +
     'A page for a person outside the project, about the real machine\'s own named controls (never a spec, brief or recipe), says so in its first 5 lines: <!-- audience: outside --> (.md or .txt only).\n');
   return 2;
@@ -41,17 +40,17 @@ function main(text) {
   try { payload = JSON.parse(text); } catch { return 0; }
   const tool = payload.tool_name;
   if (tool === 'Agent' || tool === 'Task') {
-    const shape = readShape(ROOT);
+    const shape = readShape(projectRoot());
     if (!shape || shape.error) return 0;
     const text = [payload.tool_input?.description, payload.tool_input?.prompt].filter((t) => typeof t === 'string').join('\n');
     const hits = find(shape)(text);
     return hits.length ? refuse('the agent brief', hits, shape) : 0;
   }
   for (const w of writesOf(payload, payload.cwd ?? process.cwd())) {
-    if (w.after === null || w.op === 'delete' || !insideProject(ROOT, w.path, process.cwd())) continue;
-    const rel = relInCheckout(ROOT, w.path, process.cwd());
+    if (w.after === null || w.op === 'delete' || !insideProject(projectRoot(), w.path, process.cwd())) continue;
+    const rel = relInCheckout(projectRoot(), w.path, process.cwd());
     if (!BRIEFS.test(rel)) continue;
-    const shape = readShape(checkoutRoot(ROOT, w.path, process.cwd())) ?? readShape(ROOT);
+    const shape = readShape(checkoutRoot(projectRoot(), w.path, process.cwd())) ?? readShape(projectRoot());
     if (!shape || shape.error || isExcluded(rel, shape) || addressedOutside(rel, w.after)) continue;
     const hits = addedFindings(w.before, w.after, find(shape));
     if (hits.length) return refuse(rel, hits, shape);

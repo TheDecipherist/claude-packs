@@ -6,17 +6,16 @@
 // to a JS or TS file outside the layout's "schemas" concept (default: any schemas/ folder). env.ts is the one other place a
 // shape lives (the environment's names and types); it is let through. Another project's files are not judged.
 //   node schemas-only.mjs --selftest
-import { basename, extname, join, resolve } from 'node:path';
+import { basename, extname, join } from 'node:path';
 import { judgeEvent } from './lib/writes.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { conceptGlobs, readLayout } from './lib/layout.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
 import { claudeRoot } from './lib/project.mjs';
 import { runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const CODE = new Set(['.js', '.mjs', '.cjs', '.ts', '.mts', '.cts', '.tsx', '.jsx']);
 const SCHEMA = /\bz\.(?:object|strictObject|looseObject)\s*\(/g;
@@ -31,7 +30,7 @@ export function verdict(rel, before, after, globs) {
 
 const main = (text) => judgeEvent(text, {
   name: 'schemas-only',
-  write: (w, rel) => verdict(rel, w.before, w.after, conceptGlobs(readLayout(claudeRoot(ROOT, w.path, process.cwd())), 'schemas') ?? ['**/schemas/**']),
+  write: (w, rel) => verdict(rel, w.before, w.after, conceptGlobs(readLayout(claudeRoot(projectRoot(), w.path, process.cwd())), 'schemas') ?? ['**/schemas/**']),
 });
 
 function selftest() {

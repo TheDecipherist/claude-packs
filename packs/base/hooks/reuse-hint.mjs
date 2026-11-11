@@ -2,15 +2,13 @@
 // UserPromptSubmit: repetition is cheapest to stop before a line is drafted. When a prompt's words name something the repo already has, what exists
 // goes in front of the prompt, so it is called and never written again. Only real matches, six at most; a prompt that matches nothing adds nothing.
 // `--selftest` proves it.
-import { resolve } from 'node:path';
 import { TESTS, skippedBy } from './lib/elements.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { repoIndex } from './lib/repo-index.mjs';
 import { scratchProject, verdicts } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 const SHOWN = 6;
 const COMMON = new Set(`this that with from have make need want when what where which their there then them they will would should could into only also more
@@ -52,7 +50,7 @@ export function matches(prompt, index) {
 function main(text) {
   const event = JSON.parse(text || '{}');
   const at = `${event.cwd ?? process.cwd()}/x`;
-  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(ROOT, at, process.cwd()), [...TESTS, ...skippedBy(readLayout(claudeRoot(ROOT, at, process.cwd())))], readLayout(claudeRoot(ROOT, at, process.cwd()))));
+  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(projectRoot(), at, process.cwd()), [...TESTS, ...skippedBy(readLayout(claudeRoot(projectRoot(), at, process.cwd())))], readLayout(claudeRoot(projectRoot(), at, process.cwd()))));
   if (found.length) console.log(`Already in this repo, call it rather than write it again:\n${found.map((f) => `- ${f.name} (${f.at})`).join('\n')}`);
   return 0;
 }

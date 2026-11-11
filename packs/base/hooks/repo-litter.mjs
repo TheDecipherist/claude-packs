@@ -11,10 +11,9 @@ import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { bashOf, git, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
 export const BIG_MB = 10;
 const MB = 1024 * 1024;
@@ -42,8 +41,8 @@ function staged(dir, arg) {
 
 function judgeAdd(command, cwd) {
   for (const { dir, args } of gitAdds(command, cwd)) {
-    const root = checkoutRoot(ROOT, join(dir, 'x'), process.cwd());
-    const cfg = readLayout(claudeRoot(ROOT, join(dir, 'x'), process.cwd())).guards?.repoLitter ?? {};
+    const root = checkoutRoot(projectRoot(), join(dir, 'x'), process.cwd());
+    const cfg = readLayout(claudeRoot(projectRoot(), join(dir, 'x'), process.cwd())).guards?.repoLitter ?? {};
     for (const abs of args.filter((a) => !a.startsWith('-')).flatMap((a) => staged(dir, a))) {
       const fault = faultOf(relative(root, abs).replace(/\\/g, '/'), abs, cfg);
       if (fault) return `${fault}\nA real asset can be named in guards.repoLitter.allow.\n`;

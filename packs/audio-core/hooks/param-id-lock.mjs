@@ -19,9 +19,8 @@ import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
 import { writesOf } from './lib/writes.mjs';
 import { put, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 // .claude is skipped so the worktrees under .claude/worktrees/ never stand in for this checkout's code.
 const SKIP_DIRS = /^out(\/|$)|(^|\/)(build|Builds|_deps|JuceLibraryCode|JUCE|node_modules|\.git|\.claude|cmake-build[^/]*)(\/|$)/;
 const PARAMETER_WORDS = /\b(?:ParameterID|AudioParameter(?:Float|Int|Bool|Choice)|AudioProcessorValueTreeState|addParameter)\b/;
@@ -87,11 +86,11 @@ function status(root) {
 
 function main(text) {
   if (process.argv.includes('--init')) {
-    const config = loadConfig(ROOT);
+    const config = loadConfig(projectRoot());
     if (config.error) { process.stderr.write(config.error); return 2; }
-    const ids = collectIds(ROOT, config);
-    save(ROOT, ids);
-    console.log(`Locked ${ids.size} parameter IDs in ${relative(ROOT, lockFile(ROOT))}`);
+    const ids = collectIds(projectRoot(), config);
+    save(projectRoot(), ids);
+    console.log(`Locked ${ids.size} parameter IDs in ${relative(projectRoot(), lockFile(projectRoot()))}`);
     return 0;
   }
 
@@ -102,12 +101,12 @@ function main(text) {
     // run by hand without stdin
   }
   // Run by hand (no tool): the main checkout. Otherwise every checkout a write of an id file landed in.
-  const files = payload.tool_name ? writesOf(payload).map((w) => w.path).filter((f) => insideProject(ROOT, f, process.cwd())) : [null];
+  const files = payload.tool_name ? writesOf(payload).map((w) => w.path).filter((f) => insideProject(projectRoot(), f, process.cwd())) : [null];
   const seen = new Set();
   for (const file of files) {
-    const root = file ? checkoutRoot(ROOT, file, process.cwd()) : ROOT;
+    const root = file ? checkoutRoot(projectRoot(), file, process.cwd()) : projectRoot();
     if (seen.has(root)) continue;
-    const config = loadConfig(file ? claudeRoot(ROOT, file, process.cwd()) : ROOT);
+    const config = loadConfig(file ? claudeRoot(projectRoot(), file, process.cwd()) : projectRoot());
     if (config.error) { process.stderr.write(config.error); return 2; }
     if (file && !config.extensions.test(file)) continue; // not a file ids are written in
     seen.add(root);
@@ -165,7 +164,7 @@ function selftest() {
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-const BY_HAND = { '--selftest': selftest, '--status': () => status(ROOT), '--init': () => main('') };
+const BY_HAND = { '--selftest': selftest, '--status': () => status(projectRoot()), '--init': () => main('') };
 if (isMain(import.meta.url)) {
   const byHand = Object.keys(BY_HAND).find((flag) => process.argv.includes(flag));
   process.exit(byHand ? BY_HAND[byHand]() : await asHook('param-id-lock', main));
