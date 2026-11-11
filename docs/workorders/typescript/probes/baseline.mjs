@@ -42,12 +42,19 @@ function scratch() {
   return dir;
 }
 
-// (b), (c): the changed-tests gate with one file touched (a comment line appended), the files picked and the wall.
+// (b), (c): the changed-tests gate with one file touched, the files picked and the wall. The touch is a change inside a function
+// (a no-op statement on the first line of the file's first top-level function), since the picker rightly picks nothing for a
+// comment outside every function.
+const FIRST_FUNCTION = /^(?:export\s+)?(?:async\s+)?function\s+[\w$]+.*\{\s*$/m;
 function gate(id, rel) {
   const file = join(kit, rel);
   const original = readFileSync(file);
   try {
-    writeFileSync(file, Buffer.concat([original, Buffer.from('\n// baseline touch\n')]));
+    const text = original.toString('utf8');
+    const at = FIRST_FUNCTION.exec(text);
+    if (!at) throw new Error(`${rel}: no top-level function to touch`);
+    const end = at.index + at[0].length;
+    writeFileSync(file, `${text.slice(0, end)}\n  void 0; // baseline touch${text.slice(end)}`);
     const picked = run('node', ['scripts/test-changed.mjs', '--dry-run']).out.match(/chose (\d+) of (\d+)/);
     const r = twice(id, () => run('node', ['.claude/tools/quiet-test.mjs', 'node', 'scripts/test-changed.mjs']));
     writeFileSync(join(outDir, `gate-${id}.log`), r.out);
@@ -96,7 +103,7 @@ const bashEvent = (dir) => toJson({ session_id: 'baseline', transcript_path: '',
 // (h): one Bash event through a base install's runner entry for Bash alone (base's six Bash hooks), 10 starts.
 function runner() {
   const dir = scratch();
-  run('node', [cli, 'init', '--dir', dir]);
+  run('node', [cli, 'init', '--config', 'base', '--dir', dir]);
   const settings = settingsOf(dir);
   const entries = (settings.hooks.PreToolUse ?? []).filter((g) => g.matcher === 'Bash').flatMap((g) => g.hooks.map((h) => h.command));
   const command = entries.find((c) => c.includes('run-hooks')) ?? entries[0];
