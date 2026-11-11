@@ -19,7 +19,8 @@
       "reverse-engineering",
       "midi",
       "sound-design",
-      "instrument-shell"
+      "instrument-shell",
+      "admiral"
     ],
     "default": [
       "cpp",

@@ -23,7 +23,8 @@
       "dynamic-data",
       "web",
       "ui-craft",
-      "content-site"
+      "content-site",
+      "admiral"
     ],
     "default": [
       "go"

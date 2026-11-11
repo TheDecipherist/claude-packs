@@ -30,7 +30,8 @@
       "postgres",
       "ai",
       "nginx",
-      "content-site"
+      "content-site",
+      "admiral"
     ],
     "default": [
       "js-ts",

@@ -34,7 +34,8 @@
       "ci",
       "dynamic-data",
       "zod",
-      "content-site"
+      "content-site",
+      "admiral"
     ],
     "default": [
       "js-ts"

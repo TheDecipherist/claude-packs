@@ -435,6 +435,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `ui-craft` | Application and page design in any web stack | 17 | 24 | 0 | 9 |
 | `web` | Web UI: Next.js, HTML, CSS, Tailwind | 8 | 22 | 0 | 5 |
 | `websocket` | WebSocket services: identity from the connection | 1 | 3 | 0 | 0 |
+| `admiral` | Driving a session on another machine through AdmiralMCP | 0 | 0 | 0 | 1 |
 | `writing` | Text that goes public reads like a person wrote it | 9 | 11 | 0 | 10 |
 | `zod` | Zod 4 schemas written once, in one folder | 2 | 0 | 1 | 0 |
 

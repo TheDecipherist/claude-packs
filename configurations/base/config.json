@@ -13,7 +13,8 @@
       "docker",
       "web",
       "ui-craft",
-      "content-site", "reverse-engineering"
+      "content-site", "reverse-engineering",
+      "admiral"
     ],
     "default": []
   },
