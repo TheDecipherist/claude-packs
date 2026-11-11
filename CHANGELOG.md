@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.9.0 (unreleased: work/1.9.0-platforms)
+
+The kit on Linux, macOS and Windows (KWB-152, docs/platform-audit.md), with 1.8.1 folded in (never published).
+
+- KWB-155: making-check judges each checkout's writes against that checkout's own index; a file in one worktree is never a copy of itself in another. `test/worktree-twins.test.mjs`.
+- KWB-147: git-guard counts untracked files only for `git clean`: a checkout, a branch switch, a stash or `reset --hard` never touches them. git-guard's selftest.
+- KWB-157 (a contributor's patch): `guards.git.pushNeedsYes`, every push the owner's.
+- KWB-158: a tool started by a linked path runs (`isMain` by real paths: macOS's `/var`, Windows' `/C:/`); the suite's temp folder is real. `prove-a-bank started through a linked folder`.
+- KWB-159: shape-law finds a call's declaration on macOS (git grep's BSD regex has no `\b`).
+- The Mac suite's other reds: quiet-test's Linux case asks the Linux plan on any system; the 0.5.x update test fails by name on a missing commit; no-find has its worktree case.
+
 ## 1.8.1 (2026-11-11)
 
 1.8.0 was never published: its work is here, with what followed it.
