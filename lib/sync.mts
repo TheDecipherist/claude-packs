@@ -4,23 +4,29 @@
 //   - a pack file the user edited is kept; the new version goes beside it as <file>.pack-new
 //   - CLAUDE.md: only the marked claude-packs section is written; settings.json: only our hooks
 //   - CLAUDE.md, settings.json and layout.json are backed up before every run
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { backup, ensureGitignore } from './backup.mjs';
-import { writeClaudeMd } from './claude-md.mjs';
-import { listedPacks, packsFor, resolveConfig } from './configs.mjs';
-import { buildLayout } from './layout.mjs';
-import { withFoundFolders } from './found-folders.mjs';
-import { hashFile, isModified, readLock, writeLock } from './manifest.mjs';
-import { normalisePacks, planFiles } from './packs.mjs';
-import { applyPaths, renderRule } from './rules.mjs';
-import { readSettings, syncSettings } from './settings.mjs';
-import { reportSwitches, switches } from './switches.mjs';
+import { fileURLToPath } from 'node:url';
+import { readText } from '../packs/base/hooks/lib/files.mts';
+import { parseJson, readJson } from '../packs/base/hooks/lib/json.mts';
+import type { Configuration, Layout, Lock, Logger } from '../packs/base/hooks/lib/types.d.mts';
+import { backup, ensureGitignore } from './backup.mts';
+import type { Preamble } from './claude-md.mts';
+import { writeClaudeMd } from './claude-md.mts';
+import { listedPacks, packsFor, resolveConfig } from './configs.mts';
+import { withFoundFolders } from './found-folders.mts';
+import { buildLayout } from './layout.mts';
+import { hashFile, isModified, readLock, writeLock } from './manifest.mts';
+import { normalisePacks, planFiles } from './packs.mts';
+import { applyPaths, renderRule } from './rules.mts';
+import { readSettings, syncSettings } from './settings.mts';
+import { reportSwitches, switches } from './switches.mts';
 
 const NEW_SUFFIX = '.pack-new';
-const KIT_VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version; // the lock says which kit wrote it (AdmiralMCP B-13)
+// the lock says which kit wrote it (AdmiralMCP B-13)
+const KIT_VERSION: string = readJson<{ version: string }>(fileURLToPath(new URL('../package.json', import.meta.url)))?.version ?? '';
 
-function placeBeside(src, dest, why, log) {
+function placeBeside(src: string, dest: string, why: string, log: Logger): void {
   copyFileSync(src, dest + NEW_SUFFIX);
   log(`  ${why}: kept yours, new version saved as ${dest.split('/').slice(-3).join('/')}${NEW_SUFFIX}`);
 }
@@ -29,17 +35,19 @@ function placeBeside(src, dest, why, log) {
 // itself, or, for a rule, the pack rule with this layout's paths written in. Such a file is the
 // package's whatever the lock says (the user took a .pack-new, or an older install's copy already
 // matches), so it is taken over and tracked; a .pack-new beside it would be a copy of itself.
-function isPackVersion(src, dest, rel, layout) {
+function isPackVersion(src: string, dest: string, rel: string, layout: Layout): boolean {
   if (!existsSync(dest)) return false;
   if (hashFile(src) === hashFile(dest)) return true;
   if (!/(^|[\\/])rules[\\/][^\\/]+\.md$/.test(rel)) return false;
-  const rendered = renderRule(readFileSync(src, 'utf8'), layout);
-  return rendered !== null && rendered === readFileSync(dest, 'utf8');
+  const rendered = renderRule(readText(src) ?? '', layout);
+  return rendered !== null && rendered === readText(dest);
 }
 
-function copyPackFiles(projectDir, packNames, layout, lock, force, log) {
-  const files = {};
-  const untouchable = new Set();
+interface Copied { files: Record<string, string>; untouchable: Set<string> }
+
+function copyPackFiles(projectDir: string, packNames: readonly string[], layout: Layout, lock: Lock, force: boolean, log: Logger): Copied {
+  const files: Record<string, string> = {};
+  const untouchable = new Set<string>();
   for (const name of packNames) {
     for (const { src, rel, userOwned } of planFiles(name, layout)) {
       const dest = join(projectDir, rel);
@@ -53,7 +61,8 @@ function copyPackFiles(projectDir, packNames, layout, lock, force, log) {
       }
       if (!force && !same && isModified(projectDir, rel, lock)) {
         placeBeside(src, dest, `you edited ${rel}`, log);
-        files[rel] = lock.files[rel];
+        const kept = lock.files[rel];
+        if (kept !== undefined) files[rel] = kept;
         untouchable.add(rel);
         continue;
       }
@@ -66,7 +75,7 @@ function copyPackFiles(projectDir, packNames, layout, lock, force, log) {
   return { files, untouchable };
 }
 
-function removeDropped(projectDir, lock, files, log) {
+function removeDropped(projectDir: string, lock: Lock, files: Readonly<Record<string, string>>, log: Logger): void {
   for (const rel of Object.keys(lock.files)) {
     if (files[rel] !== undefined) continue;
     if (isModified(projectDir, rel, lock)) {
@@ -78,18 +87,49 @@ function removeDropped(projectDir, lock, files, log) {
   }
 }
 
-export function createFolders(projectDir, layout) {
+/** The folders a layout names, made (a planned one is not made yet). */
+export function createFolders(projectDir: string, layout: { folders: Record<string, { path: string; planned?: boolean }> }): void {
   for (const f of Object.values(layout.folders)) if (!f.planned) mkdirSync(join(projectDir, f.path), { recursive: true });
 }
 
-// The layout.json a project has now, or null (read before anything is written, to know its configuration).
-function currentLayout(claudeDir) {
+// The layout.json a project has now, or null (read before anything is written, to know its configuration). One that is not JSON stops the install.
+function currentLayout(claudeDir: string): Layout | null {
   const file = join(claudeDir, 'layout.json');
-  return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+  if (!existsSync(file)) return null;
+  const layout = parseJson<Layout>(readText(file));
+  if (layout === null) throw new Error(`${file} is not valid JSON; fix it first, nothing was changed`);
+  return layout;
 }
 
-// `config`: a configuration named now (init --config, `config <name>`); otherwise layout.json's, else the one of its packs.
-export async function sync(projectDir, requested, { force = false, mkdirs = false, seedLayout = null, config: named = null, sources = null, log = console.log } = {}) {
+// A configuration's preamble is a house-rules object; one without it adds no rules.
+function preambleOf(config: Configuration): Preamble {
+  const p: unknown = config.preamble;
+  const lines = (key: string): readonly string[] => {
+    const list = typeof p === 'object' && p !== null && key in p ? (p as Record<string, unknown>)[key] : [];
+    return Array.isArray(list) ? list.filter((l): l is string => typeof l === 'string') : [];
+  };
+  return { always: lines('always'), never: lines('never') };
+}
+
+export interface SyncOptions {
+  /** Replace files the user edited. */
+  force?: boolean;
+  /** Make the layout's folders. */
+  mkdirs?: boolean;
+  /** The layout a first install starts from. */
+  seedLayout?: Partial<Layout> | null;
+  /** A configuration named now (init --config, `config <name>`); otherwise layout.json's, else the one of its packs. */
+  config?: string | null;
+  /** Where each custom pack was fetched from. */
+  sources?: Lock['sources'] | null;
+  log?: Logger;
+}
+export interface SyncOutcome { packNames: string[]; layout: Layout; config: Configuration }
+
+/** Installs or updates the packs in one project, in this order: resolve the configuration, back up, write the layout,
+ *  decide what switches on, copy the pack files, drop the ones no pack has, merge the hooks into settings, rewrite the
+ *  rules' paths, write the CLAUDE.md block, write the lock. */
+export async function sync(projectDir: string, requested: readonly string[] | null, { force = false, mkdirs = false, seedLayout = null, config: named = null, sources = null, log = console.log }: SyncOptions = {}): Promise<SyncOutcome> {
   const claudeDir = join(projectDir, '.claude');
   const lock = readLock(claudeDir);
   const before = currentLayout(claudeDir);
@@ -112,14 +152,14 @@ export async function sync(projectDir, requested, { force = false, mkdirs = fals
   const kept = lock.packs.length > 0 && (!before?.configuration || before.configuration === config.name);
   const sw = switches(projectDir, packNames, layout, { ...lock, packs: kept ? [...lock.packs, ...config.packs.always] : lock.packs });
   reportSwitches(sw, log);
-  const installed = { ...layout, disable: [...(layout.disable ?? []), ...sw.held, ...(config.leaveOut ?? [])] };
+  const installed: Layout = { ...layout, disable: [...(layout.disable ?? []), ...sw.held, ...(Array.isArray(config['leaveOut']) ? (config['leaveOut'] as string[]) : [])] };
   const { files, untouchable } = copyPackFiles(projectDir, packNames, installed, lock, force, log);
   removeDropped(projectDir, lock, files, log);
   const { retired, statusLine } = syncSettings(claudeDir, packNames, installed, Object.keys(lock.files), config.hookOrder);
   if (retired.length) log(`  retired settings entries (merged into protect-vendor, or global by design): ${retired.join(', ')}`);
   if (statusLine === 'kept') log('  status line: the project has its own, kept; the kit\'s is .claude/tools/statusline.mjs, to wire by hand');
   const { stale } = await applyPaths(projectDir, { skip: untouchable });
-  writeClaudeMd(projectDir, layout, listed, config.preamble);
+  writeClaudeMd(projectDir, layout, listed, preambleOf(config));
 
   // Rules were rewritten from the layout, so record their final hashes (never for files we left alone).
   for (const rel of Object.keys(files)) {
