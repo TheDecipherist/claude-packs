@@ -1,17 +1,21 @@
 // 0.13.0 (KWB-41): `sync` takes 0.1 s and doctor 7.4 s, all of it hooks proving a law they already proved. A selftest that passed is
 // not run again while the hook, its libs, node and the project's guards are the same; a changed hook is proved again; a failure is
 // never remembered; `doctor --fresh` runs them all.
-import { CLI, appendFileSync, assert, execFileSync, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
+import { CLI, appendFileSync, assert, fresh, join, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
+import type { Spawned } from '../kit-cli.mts';
+import { fixture } from '../fixtures/installs.mts';
 
-const doctor = (dir, cache, ...args) => spawnSync('node', [CLI, 'doctor', '--dir', dir, ...args], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache, CLAUDE_PACKS_SELFTESTS: 'run' } });
-const unchanged = (out) => Number(out.match(/selftests: (\d+) of \d+ unchanged/)?.[1] ?? 0);
+const doctor = (dir: string, cache: string, ...args: string[]): Spawned =>
+  spawnSync('node', [CLI, 'doctor', '--dir', dir, ...args], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache, CLAUDE_PACKS_SELFTESTS: 'run' } });
+const unchanged = (out: string): number => Number(out.match(/selftests: (\d+) of \d+ unchanged/)?.[1] ?? 0);
 
-function install() {
-  const dir = fresh('dcache-');
+// The fixture is a copy, so the cache store starts empty; the first doctor (the init of the old flow proved them too) fills it.
+const install = (): { dir: string; cache: string } => {
+  const dir = fixture('base');
   const cache = fresh('dcache-store-');
-  execFileSync('node', [CLI, 'init', '--config', 'base', '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache, CLAUDE_PACKS_SELFTESTS: 'run' } });
+  doctor(dir, cache);
   return { dir, cache };
-}
+};
 
 test('a second doctor runs no selftest whose hook has not changed, and a changed hook is proved again', () => {
   const { dir, cache } = install();
@@ -39,8 +43,7 @@ test('a failing selftest is never remembered, and --fresh runs them all', () => 
 });
 
 test('under the kit\'s default test env doctor takes every selftest as proved by the gate and runs none', () => {
-  const dir = fresh('dgate-');
-  execFileSync('node', [CLI, 'init', '--config', 'base', '--dir', dir], { encoding: 'utf8' });
+  const dir = fixture('base');
   const r = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stdout);
   assert.equal(process.env.CLAUDE_PACKS_SELFTESTS, 'gate', 'the test run is under the gate');

@@ -1,12 +1,16 @@
 // planner W3: a work order's install block (a ```claude-packs fence) is what `init --from` and `new --from` install, so the order is
 // the one source of a project's set-up. Its keys are the kit's own; an unknown one is refused by name and nothing is installed.
-import { assert, cli, execFileSync, existsSync, fresh, join, readFileSync, test, writeFileSync } from './kit-cli.mts';
+import { assert, cli, existsSync, fresh, git, join, readFileSync, test, writeFileSync } from '../kit-cli.mts';
+import { parseJson } from '../../packs/base/hooks/lib/json.mts';
 
-const layoutOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
-const lockOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
+interface Layout { configuration?: string; enable?: string[]; commands?: { test?: string }; looks?: { name: string }[] }
+interface Lock { packs: string[] }
+const layoutOf = (dir: string): Layout => parseJson<Layout>(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) ?? {};
+const lockOf = (dir: string): Lock => parseJson<Lock>(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8')) ?? { packs: [] };
+const group = (text: string, re: RegExp): string => text.match(re)?.[1] ?? '';
 
 // An order holding `block` as its install block, written to a scratch file.
-function orderWith(block) {
+function orderWith(block: string): string {
   const file = join(fresh('order-'), 'workorder.md');
   writeFileSync(file, `# Work order: x\n\n## W0. Set up\n\n\`\`\`claude-packs\n${block}\`\`\`\n\n**Done when:** 1 install.\n`);
   return file;
@@ -21,9 +25,8 @@ for (const template of ['generic', 'plugin', 'rebuild']) {
     const strict = cli(dir, 'doctor', '--strict');
     assert.equal(strict.status, 0, strict.stdout);
     const text = readFileSync(join(dir, 'docs/workorders/o/workorder.md'), 'utf8');
-    const configuration = text.match(/^configuration: (\S+)$/m)[1];
-    assert.equal(layoutOf(dir).configuration, configuration);
-    for (const pack of text.match(/^packs: (.*)$/m)[1].split(',').map((p) => p.trim())) assert.ok(lockOf(dir).packs.includes(pack) || pack === 'base', pack);
+    assert.equal(layoutOf(dir).configuration, group(text, /^configuration: (\S+)$/m));
+    for (const pack of group(text, /^packs: (.*)$/m).split(',').map((p) => p.trim())) assert.ok(lockOf(dir).packs.includes(pack) || pack === 'base', pack);
   });
 }
 
@@ -34,7 +37,7 @@ test('the block\'s own layout keys land in layout.json, and what enable names sw
   assert.equal(r.status, 0, r.stdout + r.stderr);
   const layout = layoutOf(dir);
   assert.deepEqual(layout.enable, ['hooks/user-asks.mjs']);
-  assert.equal(layout.commands.test, 'ctest --preset dev');
+  assert.equal(layout.commands?.test, 'ctest --preset dev');
   assert.ok(existsSync(join(dir, '.claude/hooks/user-asks.mjs')), 'the opt-in hook enable names is installed');
   assert.match(readFileSync(join(dir, '.claude/settings.json'), 'utf8'), /user-asks\.mjs/, 'and runs');
 });
@@ -61,8 +64,8 @@ test('new --from installs the block and commits it with the scaffold', () => {
   const r = cli(parent, 'new', 'scratch', '--config', 'synth-creator', '--from', order);
   assert.equal(r.status, 0, r.stdout + r.stderr);
   const dir = join(parent, 'scratch');
-  assert.equal(layoutOf(dir).looks[0].name, 'panel');
-  assert.equal(execFileSync('git', ['status', '--porcelain'], { cwd: dir, encoding: 'utf8' }), '', 'the block is in the first commit');
+  assert.equal(layoutOf(dir).looks?.[0]?.name, 'panel');
+  assert.equal(git(dir, 'status', '--porcelain'), '', 'the block is in the first commit');
   assert.match(cli(parent, 'new', 'other', '--config', 'base', '--from', order).stderr, /--config base and the install block's configuration synth-creator differ/);
 });
 
@@ -75,7 +78,7 @@ test('new --template plugin, then init --from its own order, is green under doct
   const dir = join(parent, 'scratch');
   const r = cli(dir, 'init', '--from', join(dir, 'docs/workorders/scratch/workorder.md'));
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.equal(layoutOf(dir).looks[0].name, 'panel', 'the template block\'s looks');
+  assert.equal(layoutOf(dir).looks?.[0]?.name, 'panel', 'the template block\'s looks');
   const strict = cli(dir, 'doctor', '--strict');
   assert.equal(strict.status, 0, strict.stdout);
   assert.equal(cli(parent, 'new', 'other', '--template', 'nope').status, 2);

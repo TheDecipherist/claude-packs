@@ -1,46 +1,52 @@
 // KWB-24: every installed hook writes one timing line per call to .claude/hooks.log (one helper per language), the log
 // stays bounded, and doctor reads it: per hook the median and the worst of its last 100 calls, a median over 500 ms red.
-import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
-import { isDisabled, readPack } from '../lib/packs.mjs';
+import { KIT, assert, cli, existsSync, fresh, join, mkdirSync, readFileSync, readdirSync, spawnSync, statSync, test, writeFileSync } from '../kit-cli.mts';
+import { fixture } from '../fixtures/installs.mts';
+import { isDisabled, readPack } from '../../lib/packs.mts';
+import { LOG_MAX_BYTES, logHook } from '../../packs/base/hooks/lib/hook-log.mts';
+import { parseJson } from '../../packs/base/hooks/lib/json.mts';
 
-const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
-const run = (dir, ...args) => spawnSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 const PACKS = ['base', 'audio-core', 'gpu-painter', 'stellix'];
 
-function stellix() {
-  const dir = mkdtempSync(join(tmpdir(), 'cpt-'));
-  execFileSync('node', [CLI, 'init', 'audio-core', 'gpu-painter', 'stellix', '--profile', 'stellix', '--dir', dir], { encoding: 'utf8' });
+interface HookCommand { command: string; asyncRewake?: boolean; async?: boolean }
+interface HookGroup { matcher?: string; hooks: HookCommand[] }
+type Hooks = Record<string, HookGroup[]>;
+interface Settings { hooks: Hooks }
+interface EventPayload { hook_event_name: string; tool_name?: string; source?: string; tool_input?: unknown; session_id?: string; transcript_path?: string }
+
+function stellix(): string {
+  const dir = fixture('stellix-profile');
   for (const d of ['lib/app/src', 'lib/world/src']) mkdirSync(join(dir, d), { recursive: true });
   return dir;
 }
 
+const matches = (matcher: string | undefined, target: string): boolean => !matcher || matcher === '*' || new RegExp(`^(?:${matcher})$`).test(target);
+const settingsOf = (dir: string): Settings => parseJson<Settings>(readFileSync(join(dir, '.claude/settings.json'), 'utf8')) ?? { hooks: {} };
+
 // The hooks the packs register for an event and a tool (or a SessionStart source), async-rewake ones and the ones the
 // project's layout switches off aside.
-function expected(dir, event, target) {
-  const layout = JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
-  const out = new Set();
-  for (const p of PACKS) for (const g of readPack(p).hooks?.[event] ?? []) {
-    if (g.matcher && g.matcher !== '*' && !new RegExp(`^(?:${g.matcher})$`).test(target)) continue;
-    for (const h of g.hooks) {
-      const [file, name] = h.command.match(/hooks\/(([\w-]+)\.(?:mjs|py))/).slice(1);
-      if (!h.asyncRewake && !isDisabled(layout, `hooks/${file}`)) out.add(name);
+function expected(dir: string, event: string, target: string): string[] {
+  const layout = parseJson<Parameters<typeof isDisabled>[0]>(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) ?? {};
+  const out = new Set<string>();
+  for (const p of PACKS) {
+    const groups = (readPack(p).hooks as Hooks | undefined)?.[event] ?? [];
+    for (const g of groups) {
+      if (!matches(g.matcher, target)) continue;
+      for (const h of g.hooks) {
+        const found = h.command.match(/hooks\/(([\w-]+)\.(?:mjs|py))/);
+        const [file, name] = [found?.[1], found?.[2]];
+        if (file && name && !h.asyncRewake && !isDisabled(layout, `hooks/${file}`)) out.add(name);
+      }
     }
   }
   return [...out];
 }
 
 // Every settings entry of the event that matches, run the way Claude Code runs it.
-function fireEvent(dir, payload) {
-  const settings = JSON.parse(readFileSync(join(dir, '.claude/settings.json'), 'utf8'));
+function fireEvent(dir: string, payload: EventPayload): void {
   const target = payload.tool_name ?? payload.source ?? '';
-  for (const g of settings.hooks[payload.hook_event_name] ?? []) {
-    if (g.matcher && g.matcher !== '*' && !new RegExp(`^(?:${g.matcher})$`).test(target)) continue;
+  for (const g of settingsOf(dir).hooks[payload.hook_event_name] ?? []) {
+    if (!matches(g.matcher, target)) continue;
     for (const h of g.hooks) {
       if (h.asyncRewake) continue;
       spawnSync('bash', ['-c', h.command], { input: JSON.stringify(payload), cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir, PYTHONDONTWRITEBYTECODE: '1' }, encoding: 'utf8' });
@@ -48,12 +54,12 @@ function fireEvent(dir, payload) {
   }
 }
 
-const logged = (dir) => (existsSync(join(dir, '.claude/hooks.log')) ? readFileSync(join(dir, '.claude/hooks.log'), 'utf8') : '')
+const logged = (dir: string): string[][] => (existsSync(join(dir, '.claude/hooks.log')) ? readFileSync(join(dir, '.claude/hooks.log'), 'utf8') : '')
   .split('\n').filter(Boolean).map((l) => l.split('\t'));
 
 test('every installed hook writes one timing line per call: time, event, hook, ms, exit code', () => {
   const dir = stellix();
-  const cases = [
+  const cases: [EventPayload, string][] = [
     [{ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: join(dir, 'lib/world/src/a.h'), content: '// a\n' } }, 'Write'],
     [{ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'rm lib/world/src/none.h' } }, 'Bash'],
     [{ hook_event_name: 'PostToolUse', tool_name: 'Edit', tool_input: { file_path: join(dir, 'lib/world/src/a.h'), old_string: 'a', new_string: 'b' } }, 'Edit'],
@@ -65,19 +71,18 @@ test('every installed hook writes one timing line per call: time, event, hook, m
     const rows = logged(dir).slice(before);
     for (const r of rows) {
       assert.equal(r.length >= 5, true, `a line has time, event, hook, ms, exit: ${r.join(' | ')}`);
-      assert.ok(!Number.isNaN(Date.parse(r[0])), `ISO time: ${r[0]}`);
+      assert.ok(!Number.isNaN(Date.parse(r[0] ?? '')), `ISO time: ${r[0]}`);
       assert.equal(r[1], payload.hook_event_name);
-      assert.match(r[3], /^\d+$/);
-      assert.match(r[4], /^-?\d+$/);
+      assert.match(r[3] ?? '', /^\d+$/);
+      assert.match(r[4] ?? '', /^-?\d+$/);
     }
     const names = new Set(rows.map((r) => r[2]));
     for (const h of expected(dir, payload.hook_event_name, target)) assert.ok(names.has(h), `${h} wrote no timing line on ${payload.hook_event_name} ${target}`);
   }
 });
 
-test('a full log rotates and nothing is lost', async () => {
-  const { logHook, LOG_MAX_BYTES } = await import('../packs/base/hooks/lib/hook-log.mjs');
-  const dir = mkdtempSync(join(tmpdir(), 'cpt-log-'));
+test('a full log rotates and nothing is lost', () => {
+  const dir = fresh('cpt-log-');
   mkdirSync(join(dir, '.claude'));
   const n = 60000;
   for (let i = 0; i < n; i += 1) logHook(dir, { event: 'PreToolUse', hook: `h${i % 17}`, ms: i % 900, code: 0 });
@@ -100,7 +105,7 @@ test('browser-guard, ported from python, writes the same line through the hook t
 // The planted fault: a hook that sleeps 600 ms on every call makes doctor red; one that does not, does not.
 test('doctor: a hook whose median is over 500 ms is a red check, with its median and worst', () => {
   const dir = stellix();
-  const fake = (name, ms) => {
+  const fake = (name: string, ms: number): void => {
     const file = join(dir, '.claude/hooks', `${name}.mjs`);
     writeFileSync(file, `import { asHook, isMain } from './lib/hook-log.mjs';\nconst hook = () => { const t = Date.now(); while (Date.now() - t < ${ms}); return 0; };\n` +
       `if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? 0 : await asHook('${name}', hook));\n`);
@@ -108,7 +113,7 @@ test('doctor: a hook whose median is over 500 ms is a red check, with its median
   };
   fake('slow-fake', 600);
   fake('quick-fake', 0);
-  const r = run(dir, 'doctor');
+  const r = cli(dir, 'doctor');
   assert.match(r.stdout, /PROBLEM: slow-fake: median [0-9]+ ms over its last 3 calls \(worst [0-9]+ ms\), over 500 ms/);
   assert.doesNotMatch(r.stdout, /PROBLEM: quick-fake: median/);   // the fakes are in no settings entry, which doctor says too (0.18.0)
   assert.match(r.stdout, /hook timing/);
@@ -120,15 +125,16 @@ test('doctor: a hook whose median is over 500 ms is a red check, with its median
 // its own entry, as throughRunner leaves it.
 test('settings run the kit node hooks through run-hooks.mjs, and every such hook exports hook(text)', () => {
   const dir = stellix();
-  const settings = JSON.parse(readFileSync(join(dir, '.claude/settings.json'), 'utf8'));
-  const commands = Object.values(settings.hooks).flatMap((gs) => gs.flatMap((g) => g.hooks));
+  const commands = Object.values(settingsOf(dir).hooks).flatMap((gs) => gs.flatMap((g) => g.hooks));
   const direct = commands.filter((h) => !h.async && !h.asyncRewake && /^node "\$CLAUDE_PROJECT_DIR\/\.claude\/hooks\/(?!run-hooks\.mjs)[\w-]+\.mjs"$/.test(h.command));
   assert.deepEqual(direct.map((h) => h.command), [], 'no kit node hook runs as its own process');
   const named = new Set(commands.filter((h) => h.command.includes('run-hooks.mjs')).flatMap((h) => [...h.command.matchAll(/\.claude\/hooks\/([\w-]+)\.mjs/g)].map((m) => m[1])).filter((n) => n !== 'run-hooks'));
   assert.ok(named.size >= 15, `${named.size} hooks through the runner`);
   for (const n of named) assert.match(readFileSync(join(dir, '.claude/hooks', `${n}.mjs`), 'utf8'), /^export (?:const|function) hook\b/m, `${n} exports hook`);
-  for (const p of PACKS) for (const f of readdirSync(new URL(`../packs/${p}/hooks/`, import.meta.url)).filter((x) => x.endsWith('.mjs') && !['run-hooks.mjs', 'idle-wake.mjs'].includes(x))) {
-    assert.match(readFileSync(new URL(`../packs/${p}/hooks/${f}`, import.meta.url), 'utf8'), /^export (?:const|function) hook\b/m, `${p}/${f} exports hook`);
+  for (const p of PACKS) {
+    for (const f of readdirSync(join(KIT, `packs/${p}/hooks`)).filter((x) => x.endsWith('.mjs') && !['run-hooks.mjs', 'idle-wake.mjs'].includes(x))) {
+      assert.match(readFileSync(join(KIT, `packs/${p}/hooks/${f}`), 'utf8'), /^export (?:const|function) hook\b/m, `${p}/${f} exports hook`);
+    }
   }
   assert.equal(spawnSync('node', [join(dir, '.claude/hooks/run-hooks.mjs'), '--selftest'], { encoding: 'utf8' }).status, 0, 'the runner\'s own selftest');
 });

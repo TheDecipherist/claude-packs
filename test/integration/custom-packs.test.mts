@@ -1,12 +1,25 @@
 // 0.21.0: if a person makes something for their employer's internals, it is easy to make a repo and share it with their team.
-import { CLI, assert, execFileSync, existsSync, fresh, git, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
+import { CLI, assert, existsSync, fresh, git, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
+import type { Spawned } from '../kit-cli.mts';
+import { fixture } from '../fixtures/installs.mts';
+import { parseJson } from '../../packs/base/hooks/lib/json.mts';
 
-const env = () => ({ ...process.env, CLAUDE_PACKS_CACHE: join(process.env.TMPDIR, 'pack-cache') });
-const kit = (dir, ...a) => spawnSync('node', [CLI, ...a, '--dir', dir], { encoding: 'utf8', env: env() });
-const lockOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
+interface Lock { packs: string[]; sources?: Record<string, { url: string; commit: string }> }
+interface Manifest { author?: string; hooks?: unknown }
+interface Layout { enable?: string[] }
+
+const env = (): NodeJS.ProcessEnv => ({ ...process.env, CLAUDE_PACKS_CACHE: join(process.env.TMPDIR ?? '', 'pack-cache') });
+const kit = (dir: string, ...a: string[]): Spawned => spawnSync('node', [CLI, ...a, '--dir', dir], { encoding: 'utf8', env: env() });
+const lockOf = (dir: string): Lock => parseJson<Lock>(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8')) ?? { packs: [] };
+const manifestOf = (file: string): Manifest => parseJson<Manifest>(readFileSync(file, 'utf8')) ?? {};
+const sourceOf = (dir: string, name: string): { url: string; commit: string } => {
+  const s = lockOf(dir).sources?.[name];
+  assert.ok(s, `${name} has a source in the lock`);
+  return s;
+};
 
 // A team's pack, made by new-pack and pushed to a "host" (a bare repository), with a project to install it in.
-function team(name = 'acme-internal') {
+function team(name = 'acme-internal'): { name: string; repo: string; url: string; project: string } {
   const home = fresh('cp-team-');
   const host = join(home, 'host.git');
   git(home, 'init', '-q', '--bare', '--initial-branch', 'main', host);
@@ -16,9 +29,7 @@ function team(name = 'acme-internal') {
   const repo = join(home, name);
   git(repo, 'remote', 'add', 'origin', url);
   git(repo, 'push', '-q', 'origin', 'main');
-  const project = fresh('cp-project-');
-  assert.equal(kit(project, 'init', '--config', 'base').status, 0);
-  return { name, repo, url, project };
+  return { name, repo, url, project: fixture('base') };
 }
 
 test('new-pack makes a repository that add --from installs, in any configuration; its check fires', () => {
@@ -33,8 +44,8 @@ test('new-pack makes a repository that add --from installs, in any configuration
   assert.match(refused.stderr, /acme-internal-example/);
   const lock = lockOf(project);
   assert.ok(lock.packs.includes(name));
-  assert.equal(lock.sources[name].url, url);
-  assert.match(lock.sources[name].commit, /^[0-9a-f]{40}$/);
+  assert.equal(sourceOf(project, name).url, url);
+  assert.match(sourceOf(project, name).commit, /^[0-9a-f]{40}$/);
 });
 
 test('a custom hook stays off until the project enables it', () => {
@@ -42,7 +53,7 @@ test('a custom hook stays off until the project enables it', () => {
   mkdirSync(join(repo, `packs/${name}/hooks`));
   writeFileSync(join(repo, `packs/${name}/hooks/acme-guard.mjs`), '// --selftest\nprocess.exit(0);\n');
   const pack = join(repo, `packs/${name}/pack.json`);
-  const manifest = JSON.parse(readFileSync(pack, 'utf8'));
+  const manifest = manifestOf(pack);
   manifest.hooks = { PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/acme-guard.mjs"', timeout: 10 }] }] };
   writeFileSync(pack, JSON.stringify(manifest, null, 2));
   git(repo, 'add', '.'); git(repo, 'commit', '-qm', 'a hook'); git(repo, 'push', '-q', 'origin', 'main');
@@ -50,7 +61,7 @@ test('a custom hook stays off until the project enables it', () => {
   assert.ok(!existsSync(join(project, '.claude/hooks/acme-guard.mjs')), 'held back');
   assert.doesNotMatch(readFileSync(join(project, '.claude/settings.json'), 'utf8'), /acme-guard/);
   const layoutFile = join(project, '.claude/layout.json');
-  const layout = JSON.parse(readFileSync(layoutFile, 'utf8'));
+  const layout = parseJson<Layout>(readFileSync(layoutFile, 'utf8')) ?? {};
   writeFileSync(layoutFile, JSON.stringify({ ...layout, enable: [...(layout.enable ?? []), 'hooks/acme-guard.mjs'] }, null, 2));
   assert.equal(kit(project, 'update').status, 0);
   assert.ok(existsSync(join(project, '.claude/hooks/acme-guard.mjs')), 'on once named');
@@ -60,16 +71,16 @@ test('a custom hook stays off until the project enables it', () => {
 test('update pulls the newest; a teammate restores the locked commit; remove drops the source', () => {
   const { name, repo, url, project } = team();
   assert.equal(kit(project, 'add', name, '--from', url).status, 0);
-  const first = lockOf(project).sources[name].commit;
+  const first = sourceOf(project, name).commit;
   writeFileSync(join(repo, `packs/${name}/rules/${name}-second.md`), '---\n# concepts: js\npaths:\n  - "placeholder"\n---\n\n# A second law\n');
   git(repo, 'add', '.'); git(repo, 'commit', '-qm', 'a second rule'); git(repo, 'push', '-q', 'origin', 'main');
   const doctor = kit(project, 'doctor');
   assert.equal(doctor.status, 0, `doctor reads the locked commit: ${doctor.stdout}`);
-  assert.equal(lockOf(project).sources[name].commit, first);
+  assert.equal(sourceOf(project, name).commit, first);
   const r = kit(project, 'update');
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.match(r.stdout, /acme-internal: now 0\.1\.0/);
-  assert.notEqual(lockOf(project).sources[name].commit, first);
+  assert.notEqual(sourceOf(project, name).commit, first);
   assert.ok(existsSync(join(project, `.claude/rules/${name}-second.md`)));
   assert.equal(kit(project, 'remove', name).status, 0);
   assert.equal(lockOf(project).sources, undefined);
@@ -79,8 +90,7 @@ test('update pulls the newest; a teammate restores the locked commit; remove dro
 test('a repository without a real manifest is refused before anything is installed', () => {
   const { name, repo, url, project } = team();
   const pack = join(repo, `packs/${name}/pack.json`);
-  const manifest = JSON.parse(readFileSync(pack, 'utf8'));
-  delete manifest.author;
+  const { author: _author, ...manifest } = manifestOf(pack);
   writeFileSync(pack, JSON.stringify(manifest, null, 2));
   git(repo, 'add', '.'); git(repo, 'commit', '-qm', 'no author'); git(repo, 'push', '-q', 'origin', 'main');
   const r = kit(project, 'add', name, '--from', url);

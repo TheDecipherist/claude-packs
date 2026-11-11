@@ -2,11 +2,13 @@
 // template, its hook order and the house-rules preamble of its CLAUDE.md block. `init --config <name>` stores the choice in
 // layout.json "configuration", `update` applies that one, `config <name>` switches and lists what changes, `configs` lists
 // them and doctor prints the one installed (KWB-31).
-import { assert, cli, existsSync, fresh, join, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
+import { assert, cli, existsSync, fresh, join, readFileSync, run, test, writeFileSync } from '../kit-cli.mts';
+import { parseJson } from '../../packs/base/hooks/lib/json.mts';
 
-const project = () => fresh('cfg-');
-const layoutOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
-const lockOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
+type Layout = Record<string, unknown> & { configuration?: string };
+const project = (): string => fresh('cfg-');
+const layoutOf = (dir: string): Layout => parseJson<Layout>(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) ?? {};
+const lockOf = (dir: string): { packs: string[] } => parseJson<{ packs: string[] }>(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8')) ?? { packs: [] };
 const SYNTH_LINE = 'Put drawing code in audio or world folders';
 
 test('configs lists every configuration with what it installs', () => {
@@ -56,8 +58,7 @@ test('init without --config takes the configuration its packs belong to', () => 
 test('a layout without the key (an install before 0.10.0) gets the configuration of its packs on update', () => {
   const dir = project();
   run(dir, 'init', 'audio-core');
-  const layout = layoutOf(dir);
-  delete layout.configuration;
+  const { configuration: _gone, ...layout } = layoutOf(dir);
   writeFileSync(join(dir, '.claude/layout.json'), JSON.stringify(layout, null, 2));
   assert.match(run(dir, 'update'), /configuration: synth-creator \(from its packs: base, audio-core\)/);
   assert.equal(layoutOf(dir).configuration, 'synth-creator');

@@ -1,9 +1,19 @@
 // 0.10.0 (STEP 3 item 5): every configuration installs into a fresh repo and `doctor --strict` passes there; the
 // planner-skills generator emits one project-layout skill body per configuration, from its layout template (KWB-35).
-import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, test } from './kit-cli.mts';
+import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, test } from '../kit-cli.mts';
+import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+
+interface Folder { path: string; planned?: boolean }
+interface Config { layout: { folders: Record<string, Folder> }; preamble: { never: string[] } }
+interface PackJson { hooks?: unknown }
+interface Lock { packs: string[] }
 
 const CONFIGS = readdirSync(join(KIT, 'configurations')).sort();
-const config = (name) => JSON.parse(readFileSync(join(KIT, 'configurations', name, 'config.json'), 'utf8'));
+const config = (name: string): Config => {
+  const c = parseJson<Config>(readFileSync(join(KIT, 'configurations', name, 'config.json'), 'utf8'));
+  assert.ok(c, `${name} has a config.json`);
+  return c;
+};
 
 test('the kit ships its configurations', () => {
   assert.deepEqual(CONFIGS, ['base', 'cpp', 'full-stack', 'go', 'node', 'python', 'rust', 'synth-creator']);   // node: 0.11.0, the v7 additions' packs and presets
@@ -30,7 +40,8 @@ test('full-stack installs web, go, host-agent and shell-hooks when chosen: their
   execFileSync('git', ['init', '-q'], { cwd: dir });
   const init = cli(dir, 'init', '--config', 'full-stack', ...FLEET);
   assert.equal(init.status, 0, init.stdout + init.stderr);
-  const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
+  const lock = parseJson<Lock>(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
+  assert.ok(lock);
   const settings = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
   for (const pack of FLEET) {
     assert.ok(lock.packs.includes(pack), `${pack} in the lock`);
@@ -39,7 +50,8 @@ test('full-stack installs web, go, host-agent and shell-hooks when chosen: their
       const files = existsSync(join(src, kind)) ? readdirSync(join(src, kind)) : [];
       for (const f of files) assert.equal(readFileSync(join(dir, '.claude', kind, f), 'utf8').length > 0, true, `${pack}: ${kind}/${f}`);
     }
-    const hooks = JSON.stringify(JSON.parse(readFileSync(join(src, 'pack.json'), 'utf8')).hooks ?? {}).match(/hooks\/[\w.-]+\.(?:mjs|py|sh)/g) ?? [];
+    const manifest = parseJson<PackJson>(readFileSync(join(src, 'pack.json'), 'utf8'));
+    const hooks = JSON.stringify(manifest?.hooks ?? {}).match(/hooks\/[\w.-]+\.(?:mjs|py|sh)/g) ?? [];
     for (const h of hooks) assert.ok(settings.includes(`.claude/${h}`) && existsSync(join(dir, '.claude', h)), `${pack}: ${h} merged into settings.json`);
   }
 });
@@ -57,5 +69,5 @@ test('planner-skills: one project-layout body per configuration, from its layout
     for (const line of config(name).preamble.never) assert.ok(body.includes(line), `${name}: preamble`);
   }
   const printed = execFileSync('node', [CLI, 'planner-skills'], { encoding: 'utf8' });
-  assert.equal(printed.match(/^==> .*\/project-layout\/SKILL\.md$/gm).length, CONFIGS.length);
+  assert.equal(printed.match(/^==> .*\/project-layout\/SKILL\.md$/gm)?.length, CONFIGS.length);
 });
