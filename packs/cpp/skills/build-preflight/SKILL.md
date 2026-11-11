@@ -1,9 +1,9 @@
 ---
 name: build-preflight
-description: Use before a C or C++ project's first build, in a new worktree, when its CMake setup changes, when a build seems slow, or when compile-cache refused a build.
+description: Use when a C or C++ project is about to have its first build, in a new worktree, when its CMake setup changes, when a build seems slow, or when compile-cache refused a build.
 ---
 
-# Build preflight: know what a build will do, and make it reuse everything it can
+# Build preflight (one job: know what a build will do, and make it reuse everything it can)
 
 A build's cost is mostly work it did not need to do: files compiled again in every worktree, a framework built into every target, tests run for code the change never touched. Answer these with numbers before the build, and write the answers down (the step's evidence folder).
 

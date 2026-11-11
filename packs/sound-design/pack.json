@@ -13,7 +13,9 @@
     "tools/vst3host/render.cpp": ["test/hooks/sound-design/sound-design-pack.test.mts", "test/tools/sound-design/prove-a-bank.test.mts"],
     "tools/vst3host/session.h": ["test/hooks/sound-design/sound-design-pack.test.mts"]
   },
-  "concepts": {},
+  "concepts": {
+    "preset-files": ["data/factory.csv", "data/params.csv", "presets/**", "banks/**", "**/*[Pp]reset*", "**/*[Bb]ank*"]
+  },
   "folders": {},
   "hooks": {},
   "skillsIn": null,

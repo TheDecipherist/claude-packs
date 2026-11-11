@@ -1,7 +1,7 @@
 {
   "id": "no-inline-binary",
   "why": "A base64 blob in a .ts file is a binary asset pretending to be source: unreviewable, undiffable, and loaded into memory on import. Serve the file as a file.",
-  "rule": ".claude/rules/stack-is-fastify-and-nextjs.md",
+  "rule": ".claude/rules/ts-source-stays-plain.md",
   "concepts": [
     "js"
   ],

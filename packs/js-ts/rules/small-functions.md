@@ -6,15 +6,17 @@ paths:
 
 # Functions stay under 50 lines
 
-## The law
-A function does one thing and fits on one screen: 50 lines max, blanks and comments excluded. When it grows past that, extract the named steps into their own functions.
+A function does one thing and fits on one screen.
 
-## Exceptions
-- React components whose body is mostly JSX markup: split the markup into subcomponents rather than raising the limit.
-- Test files (a `describe` block is a function).
+<constraints>
+Always do:
+- Keep a function at 50 lines or fewer, blanks and comments excluded.
+- Extract the named steps into their own functions when it grows past that.
+- Split a React component whose body is mostly JSX into subcomponents, rather than raising the limit.
+
+Never do:
+- Raise the limit to fit a function. Test files are the exception: a `describe` block is a function.
+</constraints>
 
 ## Check
-```js
-'max-lines-per-function': ['error', { max: 50, skipBlankLines: true, skipComments: true }],
-{ files: ['**/*.test.*', '**/*.spec.*'], rules: { 'max-lines-per-function': 'off' } },
-```
+Where the project has ESLint: `max-lines-per-function` at 50, blank lines and comments skipped, off for test files.

@@ -33,7 +33,7 @@ test('one template: a thousand instances cost one read and a handful of swaps, n
 });
 
 test('no law still asks to walk every instance: one per template, the rest by a read', () => {
-  for (const rel of ['audio-core/rules/house-control-behaviours.md', 'audio-core/skills/prove-control/SKILL.md', 'gpu-painter/skills/hover-state/SKILL.md', 'ui-craft/skills/hover-state/SKILL.md']) {
+  for (const rel of ['audio-core/rules/house-control-behaviours.md', 'audio-core/skills/prove-control/SKILL.md', 'gpu-painter/skills/painter-hover-state/SKILL.md', 'ui-craft/skills/hover-state/SKILL.md']) {
     assert.match(readPack(rel), /one (?:control|item|element) of (?:this|each) (?:template|component)/, rel);
     assert.doesNotMatch(readPack(rel), /walk every control|for every interactive element|on every slot it appears/, rel);
   }

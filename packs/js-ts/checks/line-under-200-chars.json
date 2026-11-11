@@ -1,7 +1,7 @@
 {
   "id": "line-under-200-chars",
   "why": "A 200+ character line hides awaits inside ternaries inside object literals, or holds a 1,100-character description string. Split it, or move the text to a descriptions table.",
-  "rule": ".claude/rules/stack-is-fastify-and-nextjs.md",
+  "rule": ".claude/rules/ts-source-stays-plain.md",
   "concepts": [
     "js"
   ],
@@ -30,5 +30,5 @@
   "flags": "m",
   "pattern": "^(?!\\s*(?:import\\b|export \\{|export \\*)).{201,}$",
   "bad": "const x = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';",
-  "good": "const x = 'short';"
+  "good": "const x = DESCRIPTIONS.longTool;   // the long text lives in descriptions.ts"
 }

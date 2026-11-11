@@ -117,8 +117,8 @@ test('the block, control, look and anchor laws and their skills install', () => 
   const house = rule('house-control-behaviours');
   assert.match(house, /"src\/app\/\*\*"/, 'loads on the UI folders');
   for (const clause of [/Double click returns it to its parameter's default/, /Fine drag/, /mouse wheel/, /value is readable while it is moved/, /never takes keyboard focus/, /One gesture is one undo step/, /built once in the shared control piece/]) assert.match(house, clause);
-  const look = rule('ui-matches-reference-look');
-  assert.match(look, /"src\/app\/\*\*"/);
+  const look = rule('page-matches-reference-look');   // W7 (a): ui-matches-reference-look folded into it, in base
+  assert.match(look, /# hook: skill-first\.mjs/, 'held with its hook, loaded wherever the hook is');
   for (const clause of [/glow/, /surfaces/, /every control's parts/, /gaps between elements/, /contrast/, /Gate the look/, /picture stop/]) assert.match(look, clause);
   const anchors = rule('references-use-anchors');
   assert.match(anchors, /"docs\/\*\*"/);

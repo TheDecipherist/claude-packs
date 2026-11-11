@@ -6,23 +6,16 @@ paths:
 
 # Never mutate a function's inputs
 
-## The law
-A function must not change the objects or arrays passed to it. Return a new value instead. Callers should never have their data changed under them.
+A caller never has its data changed under it.
 
-```ts
-// NO
-function rename(user: User, name: string) { user.name = name; return user; }
+<constraints>
+Always do:
+- Return a new value instead of changing an object or array passed in: `return { ...user, name }`, with the parameter `Readonly<User>`.
+- Build up a local array or object that the function created itself, freely: the law is about inputs, not a blanket ban on mutation.
 
-// YES
-function rename(user: Readonly<User>, name: string): User {
-  return { ...user, name };
-}
-```
-
-## Not covered
-Building up a local array or object that the function itself created is fine. This law is about *inputs*, not a blanket ban on mutation (the source templates said "never mutate anything", which is impractical and was dropped).
+Never do:
+- Change an object or array passed to a function: `user.name = name; return user;`.
+</constraints>
 
 ## Check
-```js
-'no-param-reassign': ['error', { props: true }],
-```
+Where the project has ESLint: `no-param-reassign` with `props: true`.

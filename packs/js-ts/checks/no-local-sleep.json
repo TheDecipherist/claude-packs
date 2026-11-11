@@ -1,7 +1,7 @@
 {
   "id": "no-local-sleep",
   "why": "Five hand-rolled sleep() helpers in one package. node:timers/promises exports setTimeout(ms, value, { signal }) which also cancels.",
-  "rule": ".claude/rules/stack-is-fastify-and-nextjs.md",
+  "rule": ".claude/rules/ts-source-stays-plain.md",
   "concepts": [
     "js"
   ],

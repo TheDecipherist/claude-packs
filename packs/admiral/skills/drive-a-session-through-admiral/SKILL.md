@@ -31,7 +31,7 @@ Always do:
    reports (a commit, a branch) against GitHub before building on it.
 6. Keep one session changing a shared repo at a time. Say which session lands a branch; the other merges the trunk afterwards,
    never a rebase, and keeps one copy where both changed the same file.
-7. When you must look at the channel's config, print key paths, commands and names only. The `admiral` entry carries a database
+7. When the channel's config has to be read, print key paths, commands and names only. The `admiral` entry carries a database
    password in `MONGODB_URI`: mask it (`sed -E 's#mongodb(\+srv)?://[^ "]+#<uri>#g'`), and copy it between machines through stdin
    into `claude mcp add`, never on a line you print.
 

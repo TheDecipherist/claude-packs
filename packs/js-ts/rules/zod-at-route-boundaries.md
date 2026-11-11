@@ -6,35 +6,18 @@ paths:
 
 # Every Fastify route declares a Zod schema
 
-## The law
-Each route validates its input (`body`, `querystring`, `params`, `headers` as needed) with Zod through Fastify's type provider. Handlers only ever see parsed data. No route reads `request.body` unvalidated.
+Untyped input matters for MongoDB too: an unvalidated `{ "email": { "$ne": null } }` body becomes a query operator, and Zod keeps `email` a string.
 
-Make it structural: routes are registered **only** through one helper whose type requires a schema.
+<constraints>
+Always do:
+- Validate each route's input (`body`, `querystring`, `params`, `headers` as needed) with Zod through Fastify's type provider, so handlers only ever see parsed data.
+- Register routes only through one helper whose type requires a schema (`defineRoute({ method, url, schema, handler })`, `schema` required, not optional).
+- Adjust any lint selector to the folder where the project's routes live.
 
-```ts
-// lib/define-route.ts (the single base every route comes from)
-export function defineRoute<S extends RouteSchema>(def: {
-  method: HTTPMethods; url: string; schema: S; // required, not optional
-  handler: RouteHandler<S>;
-}) { return def; }
-
-// routes/users.ts
-export default defineRoute({
-  method: 'POST', url: '/users',
-  schema: { body: CreateUserSchema, response: { 201: UserSchema } },
-  handler: async (req) => createUser(req.body), // req.body is typed + validated
-});
-```
-
-## Why
-Untyped input also matters for MongoDB: an unvalidated `{ "email": { "$ne": null } }` body becomes a query operator. Zod forces `email` to stay a string.
+Never do:
+- Read `request.body` unvalidated.
+- Register a route directly on `app`, `fastify` or `server` (`.get`, `.post`, `.route`), outside the helper.
+</constraints>
 
 ## Check
-Ban direct route registration outside the helper:
-```js
-'no-restricted-syntax': ['error', {
-  selector: "CallExpression[callee.property.name=/^(get|post|put|patch|delete|route)$/][callee.object.name=/^(app|fastify|server)$/]",
-  message: 'Register routes through defineRoute() so a schema is required.',
-}],
-```
-Adjust the paths above to match where your routes live.
+Where the project has ESLint: `no-restricted-syntax` on a `CallExpression` whose callee is `app|fastify|server` with `get|post|put|patch|delete|route`, with the message "Register routes through defineRoute() so a schema is required."

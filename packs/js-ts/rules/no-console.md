@@ -6,25 +6,16 @@ paths:
 
 # No `console.*` in application code
 
-## The law
-Log through the app logger (Fastify's built-in pino: `request.log` in handlers, `app.log` elsewhere). That gives you levels, structured JSON and request IDs. Never leave `console.log` debugging behind.
+The app logger gives levels, structured JSON and request IDs; `console.log` gives none of them.
 
-```ts
-// NO
-console.log('user created', user.id);
+<constraints>
+Always do:
+- Log through the app logger: Fastify's built-in pino, `request.log` in handlers and `app.log` elsewhere (`request.log.info({ userId }, 'user created')`).
+- Use `console` in CLI scripts and build tooling (`scripts/**`, `bin/**`), where stdout is the interface.
 
-// YES
-request.log.info({ userId: user.id }, 'user created');
-```
-
-## Exceptions
-- CLI scripts and build tooling (`scripts/**`, `bin/**`), where stdout is the interface.
+Never do:
+- Leave a `console.log` (or any `console.*`) debugging call in application code.
+</constraints>
 
 ## Check
-```js
-'no-console': 'error',
-{ files: ['scripts/**', 'bin/**'], rules: { 'no-console': 'off' } },
-```
-
-## Enforced
-`.claude/checks/no-console-in-app.json` refuses new `console.*` calls in application code (tests, `bin/`, `scripts/`, `tools/` and CLIs excepted).
+`no-console-in-app` refuses new `console.*` calls in application code (tests, `bin/`, `scripts/`, `tools/` and CLIs excepted). Where the project has ESLint: `no-console`, off for `scripts/**` and `bin/**`.

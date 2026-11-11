@@ -10,10 +10,10 @@ import { dirname, join, resolve } from 'node:path';
 import { childError, put } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
 import type { GitIdentity } from '../packs/base/hooks/lib/git-run.mts';
-import { toJson } from '../packs/base/hooks/lib/json.mts';
 import type { Env, Logger, PackManifest } from '../packs/base/hooks/lib/types.d.mts';
 import { readLock } from './manifest.mts';
 import { manifestProblems } from './pack-manifest.mts';
+import { packFiles } from './pack-template.mts';
 import { readPack, registerPack } from './packs.mts';
 
 /** What a command of this module reads from outside: the environment (the cache's place) and where its lines go. */
@@ -100,92 +100,24 @@ const README = (name: string, repo: string): string => [
   '',
 ].join('\n');
 
-const PACK_JSON = (name: string, author: string, repo: string): unknown => ({
-  name,
-  version: '0.1.0',
-  description: `What ${name} is for.`,
-  type: 'custom',
-  author,
-  license: 'UNLICENSED',
-  homepage: repo,
-  repository: { type: 'git', url: repo, directory: `packs/${name}` },
-  keywords: [],
-  engines: { 'claude-packs': '>=0.21.0' },
-  folders: {},
-  concepts: {},
-  skillsIn: null,
-  hooks: {},
-});
+/** `new-pack`'s extras: where the repository's url points, an example hook too, and what git and the environment say. */
+export interface NewPackOptions extends CustomPackOptions { repo?: string | null; hook?: boolean }
 
-const CHECK_JSON = (name: string): unknown => ({
-  id: `${name}-example`,
-  why: 'Why this pattern is refused.',
-  rule: `.claude/rules/${name}-example.md`,
-  concepts: ['js'],
-  globs: [],
-  code: true,
-  pattern: '\\bOLD_API_NAME\\b',
-  bad: 'OLD_API_NAME();\n',
-  good: 'newApiName();\n',
-});
-
-const EXAMPLE_RULE = [
-  '---',
-  '# concepts: js',
-  'paths:',
-  '  - "placeholder"',
-  '---',
-  '',
-  '# State the law in one line',
-  '',
-  '<constraints>',
-  'Always do:',
-  '- What the rule asks for.',
-  '',
-  'Never do:',
-  '- What it refuses.',
-  '</constraints>',
-  '',
-].join('\n');
-
-const EXAMPLE_SKILL = (name: string): string => [
-  '---',
-  `name: ${name}-example`,
-  'description: Use when the situation this skill is for comes up.',
-  '---',
-  '',
-  '# One job',
-  '',
-  '<constraints>',
-  'Always do:',
-  '1. The first step.',
-  '',
-  'Never do:',
-  '- What goes wrong without this skill.',
-  '</constraints>',
-  '',
-].join('\n');
-
-const FILES = (name: string, author: string, repo: string): Record<string, string> => ({
-  'README.md': README(name, repo),
-  [`packs/${name}/pack.json`]: `${toJson(PACK_JSON(name, author, repo), { pretty: true })}\n`,
-  [`packs/${name}/rules/${name}-example.md`]: EXAMPLE_RULE,
-  [`packs/${name}/checks/${name}-example.json`]: `${toJson(CHECK_JSON(name), { pretty: true })}\n`,
-  [`packs/${name}/skills/${name}-example/SKILL.md`]: EXAMPLE_SKILL(name),
-});
-
-export function newPack(dir: string, name: string | null | undefined, { repo = null, env = process.env, log = console.log }: CustomPackOptions & { repo?: string | null } = {}): number {
+/** A new pack repository from the template (lib/pack-template.mts): the files, then one commit. */
+export function newPack(dir: string, name: string | null | undefined, { repo = null, hook = false, env = process.env, log = console.log }: NewPackOptions = {}): number {
   if (!name || !/^[a-z][a-z0-9-]*$/.test(name)) throw new Error('name the pack in lower case: `new-pack acme-internal`');
   const root = join(dir, name);
   if (existsSync(root)) throw new Error(`${root} already exists`);
   const url = repo ?? `git@git.example.com:team/${name}.git`;
-  for (const [rel, text] of Object.entries(FILES(name, gitConfig('user.name', env) || 'Your team', url))) put(join(root, rel), text);
+  const files = { 'README.md': README(name, url), ...packFiles({ name, author: gitConfig('user.name', env) || 'Your team', repo: url, withHook: hook }) };
+  for (const [rel, text] of Object.entries(files)) put(join(root, rel), text);
   git(root, env, ['init', '--quiet', '--initial-branch', 'main']);
   git(root, env, ['add', '.']);
   git(root, env, ['commit', '--quiet', '-m', `${name}: the scaffold`], { name: 'claude-packs', email: 'claude-packs@localhost' });
   log(`A new pack repository: ${root}`);
   log(`  1. Edit packs/${name}/ (pack.json says who made it and its git url${repo ? '' : ': set repository.url'}).`);
-  log(`  2. Push it to your git host.`);
-  log(`  3. In a project: npx --no-install @thedecipherist/claude-packs add ${name} --from ${url}`);
+  log(`  2. Add a lesson check with \`add-lesson-check\`: it fills exclude, rule and kind and proves the examples.`);
+  log(`  3. Push it to your git host.`);
+  log(`  4. In a project: npx --no-install @thedecipherist/claude-packs add ${name} --from ${url}`);
   return 0;
 }

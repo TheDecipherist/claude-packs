@@ -6,29 +6,25 @@ paths:
 
 # No `any`
 
-## The law
-Never type anything as `any`. Use `unknown` for data you don't control yet, then narrow it (Zod parse, `instanceof`, type guard). Use a generic when the type depends on the caller.
+`any` switches the compiler off for everything it touches.
 
+<constraints>
+Always do:
+- Use `unknown` for data not yet controlled, then narrow it (a Zod parse, `instanceof`, a type guard).
+- Use a generic when the type depends on the caller.
+- For a third-party type gap, wrap the untyped call once in a typed adapter, put the single `any` there, and give the reason in an eslint-disable comment.
+
+Never do:
+- Type anything as `any`: `: any`, `as any`, `<any>`, `any[]`, `Record<…, any>`.
+</constraints>
+
+## Example
 ```ts
-// NO
-function handle(data: any) { return data.id; }
-
-// YES
 function handle(data: unknown) {
   const { id } = IdSchema.parse(data);
   return id;
 }
 ```
 
-## Exceptions
-- Third-party type gaps: wrap the untyped call once in a typed adapter, put the single `any` there, and add an eslint-disable comment that gives the reason.
-
 ## Check
-```js
-'@typescript-eslint/no-explicit-any': 'error',
-'@typescript-eslint/no-unsafe-assignment': 'error',
-'@typescript-eslint/no-unsafe-member-access': 'error',
-```
-
-## Enforced
-`.claude/checks/no-any.json` refuses new `: any`, `as any`, `<any>`, `any[]` and `Record<…, any>` in TypeScript (tests and `.d.ts` excepted).
+`no-any` refuses new `any` in TypeScript at edit time (tests and `.d.ts` excepted). Where the project has ESLint: `@typescript-eslint/no-explicit-any`, `no-unsafe-assignment` and `no-unsafe-member-access`.

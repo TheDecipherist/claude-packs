@@ -6,24 +6,18 @@ paths:
 
 # Independent async work runs in parallel
 
-## The law
-When awaits don't depend on each other, start them together with `Promise.all` (or `Promise.allSettled` when partial failure is acceptable). Never `await` inside a loop over independent items.
+Awaits that do not depend on each other cost a round trip each when run in sequence.
 
-```ts
-// NO: three round trips in sequence
-const user = await getUser(id);
-const orders = await getOrders(id);
-const prefs = await getPrefs(id);
+<constraints>
+Always do:
+- Start awaits that do not depend on each other together with `Promise.all`, or `Promise.allSettled` when partial failure is acceptable: `const [user, orders] = await Promise.all([getUser(id), getOrders(id)])`.
+- Use a bounded-concurrency helper on purpose where order matters or a rate limit applies, and say so in a comment.
+- Use one `bulkWrite` for many MongoDB writes.
 
-// YES
-const [user, orders, prefs] = await Promise.all([getUser(id), getOrders(id), getPrefs(id)]);
-```
-
-## Exceptions
-- Order genuinely matters, or you must rate-limit. Then use a bounded-concurrency helper on purpose, and say so in a comment.
-- For many MongoDB writes, use one `bulkWrite`, not N parallel `insertOne` calls.
+Never do:
+- `await` inside a loop over independent items.
+- Run N parallel `insertOne` calls where one `bulkWrite` would do.
+</constraints>
 
 ## Check
-```js
-'no-await-in-loop': 'error',
-```
+Where the project has ESLint: `no-await-in-loop`.

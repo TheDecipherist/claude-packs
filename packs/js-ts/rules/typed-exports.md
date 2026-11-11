@@ -6,22 +6,16 @@ paths:
 
 # Explicit types on exports
 
-## The law
-Every exported function and public method declares its parameter types and return type. Inside a function, let TypeScript infer local variables.
+The export is the contract. An inferred return type silently changes when the body changes, and that breaks callers in a different file.
 
-```ts
-// NO
-export function formatUser(user) { return `${user.first} ${user.last}`; }
+<constraints>
+Always do:
+- Declare the parameter types and the return type of every exported function and public method: `export function formatUser(user: User): string`.
+- Let TypeScript infer local variables inside a function.
 
-// YES
-export function formatUser(user: User): string {
-  return `${user.first} ${user.last}`;
-}
-```
-
-Why: the export is the contract. An inferred return type silently changes when the body changes, and that breaks callers in a different file.
+Never do:
+- Export a function whose parameters or return type are inferred.
+</constraints>
 
 ## Check
-```js
-'@typescript-eslint/explicit-module-boundary-types': 'error',
-```
+Where the project has ESLint: `@typescript-eslint/explicit-module-boundary-types`.

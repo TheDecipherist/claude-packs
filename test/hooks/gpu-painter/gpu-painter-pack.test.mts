@@ -22,19 +22,19 @@ test('gpu-painter and ui-craft carry the hover rule, scoped to UI code, naming t
 });
 
 test('the skill hover-state: "Use when", under 8,000 characters, names the hover walk and the worked example', () => {
-  for (const pack of ['gpu-painter', 'ui-craft']) {
-    const text = readFileSync(join(KIT, 'packs', pack, 'skills/hover-state/SKILL.md'), 'utf8');
-    assert.match(text, /^---\nname: hover-state\ndescription: Use when /);
+  for (const [pack, name] of [['gpu-painter', 'painter-hover-state'], ['ui-craft', 'hover-state']]) {   // W7 (a): one name each
+    const text = readFileSync(join(KIT, 'packs', pack ?? '', 'skills', name ?? '', 'SKILL.md'), 'utf8');
+    assert.match(text, new RegExp(`^---\\nname: ${name}\\ndescription: Use when `));
     assert.ok(text.length < 8000, `${pack}: ${text.length}`);
     assert.match(text, /hover walk/i);
   }
-  assert.match(readFileSync(join(KIT, 'packs/gpu-painter/skills/hover-state/SKILL.md'), 'utf8'), /tools\/gates\/hover_gate\.sh[\s\S]*editor_hoverwalk_read\.h/);
+  assert.match(readFileSync(join(KIT, 'packs/gpu-painter/skills/painter-hover-state/SKILL.md'), 'utf8'), /tools\/gates\/hover_gate\.sh[\s\S]*editor_hoverwalk_read\.h/);
 });
 
 test('an installed synth gets the rule and the skill; full-stack gets its rule loaded on the web app', () => {
   const synth = synthInstall();
   assert.ok(existsSync(join(synth, '.claude/rules/hover-every-pressable.md')));
-  assert.ok(existsSync(join(synth, 'src/painter/.claude/skills/hover-state/SKILL.md')));
+  assert.ok(existsSync(join(synth, 'src/painter/.claude/skills/painter-hover-state/SKILL.md')));
   const web = fixture('full-stack');
   assert.ok(existsSync(join(web, '.claude/rules/pointer-feedback.md')));
   assert.ok(existsSync(join(web, '.claude/skills/hover-state/SKILL.md')));

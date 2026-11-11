@@ -10,7 +10,7 @@ const descriptor = (n: string, label: string): string => `  wgpu::BufferDescript
 
 test('the cpp pack installs its rules, skill and check; the configuration is the smallest that takes it', () => {
   const dir = fixture('cpp');
-  for (const f of ['rules/cpp-repeats-become-templates.md', 'rules/cpp-gates-share-one-reader.md', 'skills/cpp-extract-template/SKILL.md', 'skills/make-it-a-template/SKILL.md', 'checks/cpp-find-with-the-library.json', 'checks/one-walk-per-template.json']) {
+  for (const f of ['rules/repeats-become-templates.md', 'rules/cpp-gates-share-one-reader.md', 'skills/cpp-extract-template/SKILL.md', 'skills/make-it-a-template/SKILL.md', 'checks/cpp-find-with-the-library.json', 'checks/one-walk-per-template.json']) {
     assert.ok(existsSync(join(dir, '.claude', f)), f);
   }
   assert.equal((JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) as { configuration: string }).configuration, 'cpp');
@@ -20,7 +20,7 @@ test('the cpp pack installs its rules, skill and check; the configuration is the
 test('the synth preset takes the cpp pack too', () => {
   const dir = fresh('cpp-synth-');   // the preset is the subject, so it is installed here
   cli(dir, 'init', 'synth');   // a synth's doctor also asks for design/shape.json, which is not this test's
-  assert.ok(existsSync(join(dir, '.claude/rules/cpp-repeats-become-templates.md')));
+  assert.ok(existsSync(join(dir, '.claude/rules/repeats-become-templates.md')));
 });
 
 test('scan on C++: the cpp configuration, and every repeat with what it becomes and what differs', () => {

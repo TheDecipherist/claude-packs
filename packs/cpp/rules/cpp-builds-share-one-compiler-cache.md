@@ -4,7 +4,7 @@ paths:
   - "placeholder"
 ---
 
-# Compile once: every build goes through one shared compiler cache, and a build compiles only what its change reaches
+# Compile once: every build uses one shared compiler cache and compiles only what its change reaches
 
 A C++ project in worktrees compiled everything again in each one. A one-file fix cost 1,241 to 1,554 compile steps (a framework like JUCE included) in every new worktree, four worktrees at once held 18 cores at load 22, and ccache sat installed and unused. Another project had written the lesson down weeks before, in its own CMakeLists.txt, where no other project could read it.
 

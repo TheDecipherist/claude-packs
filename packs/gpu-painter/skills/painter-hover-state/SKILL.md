@@ -1,5 +1,5 @@
 ---
-name: hover-state
+name: painter-hover-state
 description: Use when a control, handle, tab, list row, key or button is added or changed in a drawn UI, when a user says something does not react under the mouse, or when a hover gate is written or fails.
 ---
 
@@ -7,13 +7,20 @@ description: Use when a control, handle, tab, list row, key or button is added o
 
 The law is the rule `hover-every-pressable`: a cursor naming the interaction, and a small visible effect on the hovered thing itself. The hover follows the press's own hit test.
 
-## Add the hover to a new control
+<constraints>
+Always do:
 1. Find the one function the press uses to find the item under the pointer (the hit test). If there is none, make one and have the press call it.
 2. Have the mouse-move path call that same function and store the result (the hovered id). Do not keep a second list of hoverable things.
 3. Pick the cursor from the interaction, not the look: drag up-down, drag left-right, drag both ways (a 2-D point), press (button, tab, row, key), text. Set it from the hovered id.
 4. Draw the effect on the item's own pixels from the hovered id: a lift, a ring, a brighten. Ease it over about 0.1 s on the frame clock (not the wall clock, or two runs differ). A neighbour must not change.
 5. Disabled looks are for what is truly disabled. If the press works, the hover shows.
 6. Add the item to the hover walk (below) in the same change.
+
+Never do:
+- Keep a second list of hoverable things beside the press's hit test.
+- Time the effect on the wall clock, or let a neighbour change.
+- Show a disabled look on an item whose press works.
+</constraints>
 
 ## Prove it: the hover walk
 A gate that runs the real window (or the real page) and, for one item of each template and every one-off the pointer can act on (`test-the-template-once`: a template's other instances are proved by a read that they are built from it):
@@ -30,4 +37,4 @@ Plant its faults so the gate is seen red: hover off altogether, one kind of item
 `layout.json`: `"gates": { "hover": "<the command>" }`. `doctor` is red while the project has UI code and no gate is declared, or the declared command names a file that is not there. A project with truly no pointer says `"hover": "none: <reason>"`.
 
 ## Worked example
-Stellix: `tools/gates/hover_gate.sh` (the runner and its `--selftest` plants), `lib/app/gates/editor_hoverwalk_read.h` (the walk that hovers every item through the mouse-move path), `tools/gates/hover_judge.py` (the judge: cursor per kind, own pixels change, ring does not, comes back). Read them for the shape; the numbers and names are that project's own.
+One project's gate: `tools/gates/hover_gate.sh` (the runner and its `--selftest` plants), `lib/app/gates/editor_hoverwalk_read.h` (the walk that hovers every item through the mouse-move path), `tools/gates/hover_judge.py` (the judge: cursor per kind, own pixels change, ring does not, comes back). Read them for the shape; the numbers and names are that project's own.

@@ -1,7 +1,7 @@
 {
   "id": "rust-if-chain-is-a-match",
   "why": "Three branches on one value are a match, which the compiler can hold to every case. A comparison a pattern cannot express is left alone.",
-  "rule": ".claude/rules/rust-repeats-become-templates.md",
+  "rule": ".claude/rules/repeats-become-templates.md",
   "globs": [
     "**/*.rs"
   ],
