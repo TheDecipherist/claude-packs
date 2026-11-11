@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-11T17:13:45.512Z",
+  "updated": "2026-11-11T17:26:40.813Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/agents-held.md": "0da8fb50ef828b0440389751254c16ae1cf9dd21c78fc23a7d957b221674a409",
@@ -86,8 +86,8 @@
     ".claude/hooks/lib/layout.mjs": "d206b8500b0058ed6221472419a03a956cd6b7b8e72a92ae3eec03fedb13e3e8",
     ".claude/hooks/lib/litter.mjs": "388746a3a5967e05a4f1ae841d918103fa38475d08e73ba0df3fa20da34c74bf",
     ".claude/hooks/lib/look-gate-selftest.mjs": "b7d7bd72d7406b094a66f9b01958da181d663cac45d10b483e6c66a8a0022630",
-    ".claude/hooks/lib/making-check-selftest.mjs": "0cadb14f79f1fc9a5352e7f4b1d52241fd1a88bb38959f5fa5a268efb4b9420f",
-    ".claude/hooks/lib/making-check-turn.mjs": "9255598059ef46ff21e3c9a491bf91961c0d189215e13b07406c8f047aace438",
+    ".claude/hooks/lib/making-check-selftest.mjs": "321e267ce7ff10fa0d3b9784e0ace2f7fecaab2d4207d6b94b00d49cc4b0bf10",
+    ".claude/hooks/lib/making-check-turn.mjs": "2470a2cb3a532e1c78f1bd558968de2c0a26e5fe058e0a4233b181b00c808198",
     ".claude/hooks/lib/making-concepts.mjs": "0e13cc34488806f72084d5d27641a9a025f1b54d5d15c0c57eacb76350fbed03",
     ".claude/hooks/lib/near-copies.mjs": "7d5cd3c380e7fa4480aa6ed59f0a7dd27b2bb5b5acc7d5d5f6f69f40a6cf781e",
     ".claude/hooks/lib/once-only-selftest.mjs": "4cb4d29b651f177b29980cbed6590b841d1e7a77f21393cac1924a0cbc97fc49",

@@ -12,6 +12,7 @@ import { readLayout } from './layout.mts';
 import { conceptsIn, makingLines, unknownConcepts } from './making-concepts.mts';
 import { checkoutRoot, claudeRoot, insideProject } from './project.mts';
 import { readShape } from './shape.mts';
+import { emittedFrom } from './source-exts.mts';
 import type { LoadedShape } from './shape.mts';
 import { lastTurn, writesOfTurn } from './turn.mts';
 import type { TurnWrite } from './turn.mts';
@@ -123,7 +124,9 @@ function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: 
 function copyProblems(roots: Iterable<string>, judged: readonly TurnWrite[], at: Where, rel: (p: string) => string, atWrite: boolean): string[] {
   // The tools' writes passed once-only itself when it is installed; running its detector again on them at every Stop cost over the
   // kit's own 500 ms line (KF-33). The shell's writes stay: much of what they write is unknown at write time.
-  const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))];
+  // an emitted twin beside its source is the build's output, never a copy (KWB-170, KWB-183)
+  const isOwnSource = (path: string): boolean => isSource(path) && existsSync(path) && emittedFrom(path) === null;
+  const sources = [...new Set(judged.filter((w) => isOwnSource(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))];
   const found = new Set<string>();
   const problems: string[] = [];
   for (const root of roots) {

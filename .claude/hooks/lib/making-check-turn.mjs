@@ -12,6 +12,7 @@ import { readLayout } from './layout.mjs';
 import { conceptsIn, makingLines, unknownConcepts } from './making-concepts.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './project.mjs';
 import { readShape } from './shape.mjs';
+import { emittedFrom } from './source-exts.mjs';
 import { lastTurn, writesOfTurn } from './turn.mjs';
 // the folder kinds a layout marks as code; a layout that marks none: any source file outside its docs folders
 const CODE_KINDS = new Set(['code', 'engine', 'ui', 'params', 'tests']);
@@ -135,7 +136,9 @@ function writtenConceptProblems(root, writes, at, rel) {
 function copyProblems(roots, judged, at, rel, atWrite) {
     // The tools' writes passed once-only itself when it is installed; running its detector again on them at every Stop cost over the
     // kit's own 500 ms line (KF-33). The shell's writes stay: much of what they write is unknown at write time.
-    const sources = [...new Set(judged.filter((w) => isSource(w.path) && existsSync(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))];
+    // an emitted twin beside its source is the build's output, never a copy (KWB-170, KWB-183)
+    const isOwnSource = (path) => isSource(path) && existsSync(path) && emittedFrom(path) === null;
+    const sources = [...new Set(judged.filter((w) => isOwnSource(w.path) && !(atWrite && w.tool !== 'Bash')).map((w) => w.path))];
     const found = new Set();
     const problems = [];
     for (const root of roots) {

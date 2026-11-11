@@ -80,6 +80,11 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
     const before = readFileSync(at('src/slot/filter.cpp'), 'utf8');
     try { put(at('src/slot/filter.cpp'), during(before)); return turn(edits); } finally { put(at('src/slot/filter.cpp'), before); }
   };
+  // a build's output beside its source, written in the turn: the .mjs and its .mts hold the same code (KWB-183)
+  const emitted = (): number | null => {
+    put(at('src/slot/meter.mts'), copy);
+    try { return landed('src/slot/meter.mjs', copy, () => turn([W('src/slot/meter.mjs', copy)])); } finally { rmSync(at('src/slot/meter.mts'), { force: true }); }
+  };
   const editOf = (oldText: string, newText: string): Entry[] => use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: oldText, new_string: newText });
 
   const cases: VerdictRow[] = [
@@ -103,6 +108,7 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
     // never match themselves; the same file edited in place is no copy
     ['the turn added a copy of slotFilter to a tracked file (Edit; git diff)', filtered((before) => `${before}\n${FN('slotFilterC', '1.25f')}`, [editOf('x', FN('slotFilterC', '1.25f'))]), 2],
     ['the turn changed one value of a tracked file in place', filtered((before) => before.replace('2.0f - 2.0f', '1.9f - 2.0f'), [editOf('2.0f', '1.9f')]), 0],
+    ['an emitted .mjs beside its .mts is the build\'s output, no copy (KWB-183)', emitted(), 0],
     ['the turn wrote code that calls slotFilter', landed('src/slot/level.cpp', LEVEL_CODE, () => turn([W('src/slot/level.cpp', LEVEL_CODE)])), 0],
     ['a view is no override: an estimate that differs from the user\'s', slotTurn({ last: 'You said it is small, but I would plan for hours. It is built as you asked.' }), 0],
     ['a view is no override, in the short form', slotTurn({ last: 'You said it is small, but I\'d plan for hours.' }), 0],
