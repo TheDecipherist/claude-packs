@@ -1,7 +1,8 @@
 // 1.1.0, group 2: false refusals. Every test here was seen red first (docs/1.1-progress.md). shape-law is held against the MPX 500's real refusals in
 // test/fixtures/mpx-shape-refusals.json, both ways: what was marked wrong passes, and what was marked right stays refused.
 import { assert, cli, execFileSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mjs';
-import { conceptsIn, unknownConcepts } from '../packs/base/hooks/making-check.mjs';
+import { conceptsIn, unknownConcepts } from '../packs/base/hooks/lib/making-concepts.mjs';
+import { normaliseShape } from '../packs/base/hooks/lib/shape-model.mjs';
 import { writesOfTurn } from '../packs/base/hooks/lib/turn.mjs';
 import { statementsOf } from '../packs/base/hooks/lib/code-shapes.mjs';
 import { languageOf } from '../packs/base/hooks/lib/languages.mjs';
@@ -101,7 +102,7 @@ test('KF-20: a library\'s call and a longer proper name are not this project\'s 
   assert.equal(write(dir, 'shape-law.mjs', 'src/a.cpp', '// the MIDI Program gets it\n').status, 2);
 });
 
-const MANIFEST = { concepts: { editPage: { shape: 'many', generator: 'pagesOf(p)', words: ['editPage', 'editPages'] }, paramSlot: { shape: 'many', generator: 'slotId(i)', words: ['paramSlot', 'paramSlots'] }, program: { shape: 'many', generator: 'programAt(i)' } } };
+const MANIFEST = normaliseShape({ concepts: { editPage: { shape: 'many', generator: 'pagesOf(p)', words: ['editPage', 'editPages'] }, paramSlot: { shape: 'many', generator: 'slotId(i)', words: ['paramSlot', 'paramSlots'] }, program: { shape: 'many', generator: 'programAt(i)' } } });
 
 test('KF-19, KF-39: a making line that names a camelCase concept names it, by row or by word', () => {
   assert.deepEqual([...conceptsIn('concepts: editPage, many; paramSlot (many)', MANIFEST)].sort(), ['editPage', 'paramSlot']);

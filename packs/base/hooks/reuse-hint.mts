@@ -1,0 +1,92 @@
+// UserPromptSubmit: repetition is cheapest to stop before a line is drafted. When a prompt's words name something the repo already has, what exists
+// goes in front of the prompt, so it is called and never written again. Only real matches, six at most; a prompt that matches nothing adds nothing.
+// A judge on the hook contract (W4): it says what exists on stdout (`say`), refuses nothing and writes nothing into the project.
+// `--selftest` proves it.
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { TESTS, skippedBy } from './lib/elements.mts';
+import { isMain, runAsHook } from './lib/hook-log.mts';
+import { readLayout } from './lib/layout.mts';
+import { checkoutRoot, claudeRoot } from './lib/project.mts';
+import { repoIndex } from './lib/repo-index.mts';
+import type { RepoIndex } from './lib/repo-index.mts';
+import { runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
+import type { Hook } from './lib/types.d.mts';
+import { pass, say } from './lib/verdict.mts';
+
+const SHOWN = 6;
+const COMMON: ReadonlySet<string> = new Set(`this that with from have make need want when what where which their there then them they will would should could into only also more
+  some just like been were does each every code file files function method class value data line test tests work works using used change update write read
+  please thing things sure right added adding`.split(/\s+/));
+
+const stem = (w: string): string => w.toLowerCase().replace(/(?:ing|ers|er|es|ed|s)$/, '');
+const piecesOf = (name: string): string[] => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/[\s_-]+/).filter((w) => w.length >= 3).map(stem);
+const NEAR = 5;   // the pieces of a name lie within this many words of each other: scattered over a long prompt they are chance
+const LONG = 150; // words: past this a prompt is a document, and any name can be spelled out of it
+
+// { word: [its places in the prompt] }.
+function placesOf(prompt: string): Map<string, number[]> {
+  const places = new Map<string, number[]>();
+  (prompt.match(/[A-Za-z]+/g) ?? []).forEach((w, i) => {
+    if (w.length < 4 || COMMON.has(w.toLowerCase())) return;
+    const k = stem(w);
+    places.set(k, [...(places.get(k) ?? []), i]);
+  });
+  return places;
+}
+
+const closeTogether = (pieces: readonly string[], places: ReadonlyMap<string, readonly number[]>): boolean =>
+  pieces.some((p) => (places.get(p) ?? []).some((at) => pieces.every((q) => (places.get(q) ?? []).some((x) => Math.abs(x - at) <= NEAR))));
+
+/** One name the repo has that the prompt spells out: the name, where it is, and how many pieces it has. */
+export interface Match { name: string; at: string; size: number }
+
+// A compound name, with all its pieces in the prompt, close together. One word in common says nothing.
+export function matches(prompt: string, index: RepoIndex): Match[] {
+  if (prompt.split(/\s+/).length > LONG) return [];
+  const places = placesOf(prompt);
+  const out: Match[] = [];
+  for (const [file, e] of Object.entries(index)) {
+    for (const [name, line] of e.defs) {
+      const pieces = piecesOf(name);
+      if (pieces.length >= 2 && closeTogether(pieces, places)) out.push({ name, at: `${file}:${line}`, size: pieces.length });
+    }
+  }
+  return out.sort((a, b) => b.size - a.size).slice(0, SHOWN);
+}
+
+export const hook: Hook = (event, ctx) => {
+  const at = `${event.cwd ?? ctx.cwd}/x`;
+  const layout = readLayout(claudeRoot(ctx.projectDir, at, ctx.cwd));
+  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(ctx.projectDir, at, ctx.cwd), [...TESTS, ...skippedBy(layout)], layout));
+  return found.length ? say(`Already in this repo, call it rather than write it again:\n${found.map((f) => `- ${f.name} (${f.at})`).join('\n')}\n`) : pass;
+};
+
+export function selftest(): number {
+  const hookFile = fileURLToPath(import.meta.url);
+  const dir = scratchProject({
+    'src/dates.ts': 'export function formatDateRange(a, b) { return a + b; }\n',
+    'src/a.py': 'def parse_price_table(text):\n    return text\n',
+    'src/one.ts': 'export function render(a) { return a; }\n',
+  });
+  const before = snapshot(dir);   // the project as the judge finds it: the rows below must leave it as it is
+  const index = repoIndex(dir, []);
+  const named = (prompt: string): string => matches(prompt, index).map((m) => m.name).join();
+  const said = (prompt: string): string => runHook(hookFile, dir, { hook_event_name: 'UserPromptSubmit', prompt, cwd: dir }).stdout;
+  return verdicts('reuse-hint', [
+    ['a prompt naming what exists, camelCase', named('add a page that will format the date range of a booking'), 'formatDateRange'],
+    ['a prompt naming what exists, snake_case', named('parse the price table from the upload'), 'parse_price_table'],
+    ['it says where', matches('format the date range', index)[0]?.at ?? null, 'src/dates.ts:1'],
+    ['one word in common says nothing', named('the date of the last deploy'), ''],
+    ['a one-word name is never matched', named('render the render view'), ''],
+    ['an empty prompt', named(''), ''],
+    ['the pieces far apart', named('format the page first, then later on, much further down, show a date and a range'), ''],
+    ['a long document', named(`format the date range ${'and more words here '.repeat(40)}`), ''],
+    ['a prompt about nothing here', named('rename the settings page title'), ''],
+    ['through the runner, a match is said on stdout', /formatDateRange \(src\/dates\.ts:1\)/.test(said('format the date range')), true],
+    ['through the runner, no match says nothing', said('rename the settings page title'), ''],
+    ['a judge writes no file (the write trap)', writtenSince(dir, before).join(','), ''],
+  ]);
+}
+
+if (isMain(import.meta.url)) await runAsHook(import.meta.url, 'reuse-hint', hook, selftest);

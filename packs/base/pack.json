@@ -95,6 +95,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/inside-the-project.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -125,6 +126,13 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/brief-guard.mjs\"",
+            "role": "judge",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/brief-guard-count.mjs\"",
+            "role": "recorder",
             "timeout": 10
           },
           {
@@ -140,6 +148,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/untrusted-boundary.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -150,6 +159,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/template-law.mjs\"",
+            "role": "judge",
             "timeout": 15
           },
           {
@@ -165,6 +175,13 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/brief-guard.mjs\"",
+            "role": "judge",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/brief-guard-count.mjs\"",
+            "role": "recorder",
             "timeout": 10
           },
           {
@@ -185,6 +202,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/kit-fresh.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -216,6 +234,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-first.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]
@@ -227,6 +246,13 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making-check.mjs\"",
+            "role": "judge",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making-check-count.mjs\"",
+            "role": "recorder",
             "timeout": 60
           },
           {
@@ -248,6 +274,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/reuse-hint.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]
@@ -281,6 +308,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/kit-fresh.mjs\"",
+            "role": "judge",
             "timeout": 30
           }
         ]
@@ -293,6 +321,8 @@
     "hooks/once-only.mjs",
     "hooks/making.mjs",
     "hooks/making-check.mjs",
+    "hooks/making-check-count.mjs",
+    "hooks/brief-guard-count.mjs",
     "hooks/run-hooks.mjs",
     "hooks/heartbeat.mjs",
     "hooks/no-find.mjs"

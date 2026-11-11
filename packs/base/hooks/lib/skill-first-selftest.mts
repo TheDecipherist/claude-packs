@@ -3,7 +3,7 @@
 // installed applies nowhere there; a project's own layout rows and circuit globs are honoured.
 import { join } from 'node:path';
 import { toJson } from './json.mts';
-import { put, runHook, scratchProject, verdicts } from './selftest.mts';
+import { put, runHook, scratchProject, snapshot, verdicts, writtenSince } from './selftest.mts';
 
 const skillFile = (skill: string): Record<string, string> => ({ [`.claude/skills/${skill}/SKILL.md`]: `---\nname: ${skill}\n---\n` });
 
@@ -27,6 +27,7 @@ export function selftest(hook: string): number {
   const circuit = transcript('circuit', [{ name: 'Skill', input: { skill: 'read-a-circuit-diagram' } }]);
   const look = transcript('look', [{ name: 'Read', input: { file_path: '/kit/packs/audio-core/skills/analyse-reference-look/SKILL.md' } }]);
   const scan = transcript('scan', [{ name: 'Skill', input: { skill: 'read-a-scan' } }]);
+  const before = snapshot(dir);   // the project as the judge finds it: the rows below must leave it as it is
   const read = (file: string, t: string | undefined, cwd: string = dir): number | null =>
     runHook(hook, cwd, { tool_name: 'Read', tool_input: { file_path: file }, cwd, transcript_path: t }).status;
   const bash = (command: string, t: string | undefined): number | null =>
@@ -48,5 +49,6 @@ export function selftest(hook: string): number {
     ['a plain source file', read(join(dir, 'src/a.cpp'), none), 0],
     ['a listing of the manual is not a reading', bash(`ls -la "${manual}"`, none), 0],
     ['no transcript: nothing to judge by', read(sheet, undefined), 0],
+    ['a judge writes no file (the write trap)', writtenSince(dir, before).join(','), ''],
   ]);
 }
