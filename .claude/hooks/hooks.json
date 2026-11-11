@@ -1,0 +1,327 @@
+[
+  {
+    "hook": "heartbeat",
+    "events": [
+      "PreToolUse",
+      "PostToolUse"
+    ],
+    "timeout": 5,
+    "async": true,
+    "order": 10,
+    "role": "recorder"
+  },
+  {
+    "hook": "inside-the-project",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 10,
+    "role": "judge"
+  },
+  {
+    "hook": "lesson-checks",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 20,
+    "role": "judge"
+  },
+  {
+    "hook": "file-size-guard",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 30,
+    "role": "judge"
+  },
+  {
+    "hook": "placement-law",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 50,
+    "role": "judge"
+  },
+  {
+    "hook": "folder-law",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 90,
+    "role": "judge"
+  },
+  {
+    "hook": "shape-law",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 15,
+    "order": 100,
+    "role": "judge"
+  },
+  {
+    "hook": "brief-guard",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 110,
+    "role": "judge"
+  },
+  {
+    "hook": "once-only",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 20,
+    "order": 120,
+    "role": "judge"
+  },
+  {
+    "hook": "secrets-guard",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 130,
+    "role": "judge"
+  },
+  {
+    "hook": "untrusted-boundary",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 140,
+    "role": "judge"
+  },
+  {
+    "hook": "brief-guard-count",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 190,
+    "role": "recorder"
+  },
+  {
+    "hook": "dispatch-once",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 15,
+    "order": 200,
+    "role": "judge"
+  },
+  {
+    "hook": "template-law",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 15,
+    "order": 210,
+    "role": "judge"
+  },
+  {
+    "hook": "code-shape",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 15,
+    "order": 220,
+    "role": "judge"
+  },
+  {
+    "hook": "brief-guard",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Agent|Task",
+    "timeout": 10,
+    "order": 10,
+    "role": "judge"
+  },
+  {
+    "hook": "agents-held",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Agent|Task",
+    "timeout": 10,
+    "order": 20,
+    "role": "judge"
+  },
+  {
+    "hook": "brief-guard-count",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Agent|Task",
+    "timeout": 10,
+    "order": 30,
+    "role": "recorder"
+  },
+  {
+    "hook": "git-guard",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 15,
+    "order": 20,
+    "role": "judge"
+  },
+  {
+    "hook": "kit-fresh",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 30,
+    "role": "judge"
+  },
+  {
+    "hook": "suite-once",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 50,
+    "role": "judge"
+  },
+  {
+    "hook": "no-find",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 60,
+    "role": "judge"
+  },
+  {
+    "hook": "repo-litter",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 70,
+    "role": "judge"
+  },
+  {
+    "hook": "look-gate",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 20,
+    "order": 80,
+    "role": "judge"
+  },
+  {
+    "hook": "skill-first",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Read|Bash",
+    "timeout": 10,
+    "order": 10,
+    "role": "judge"
+  },
+  {
+    "hook": "look-gate",
+    "events": [
+      "PostToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 20,
+    "order": 10,
+    "role": "judge"
+  },
+  {
+    "hook": "once-only-index",
+    "events": [
+      "PostToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 20,
+    "order": 20,
+    "role": "recorder"
+  },
+  {
+    "hook": "making-check",
+    "events": [
+      "Stop"
+    ],
+    "timeout": 60,
+    "order": 20,
+    "role": "judge"
+  },
+  {
+    "hook": "git-guard",
+    "events": [
+      "Stop"
+    ],
+    "timeout": 30,
+    "order": 30,
+    "role": "judge"
+  },
+  {
+    "hook": "making-check-count",
+    "events": [
+      "Stop"
+    ],
+    "timeout": 60,
+    "order": 40,
+    "role": "recorder"
+  },
+  {
+    "hook": "kit-fresh",
+    "events": [
+      "SessionStart"
+    ],
+    "timeout": 30,
+    "order": 10,
+    "role": "judge"
+  },
+  {
+    "hook": "making",
+    "events": [
+      "UserPromptSubmit"
+    ],
+    "timeout": 10,
+    "order": 10,
+    "role": "judge"
+  },
+  {
+    "hook": "reuse-hint",
+    "events": [
+      "UserPromptSubmit"
+    ],
+    "timeout": 10,
+    "order": 20,
+    "role": "judge"
+  }
+]

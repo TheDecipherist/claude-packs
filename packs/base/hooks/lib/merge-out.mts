@@ -61,5 +61,5 @@ export function mergeOut(outs: readonly string[]): string {
       else out[k] = v;
     }
   }
-  return capOut(JSON.stringify(out));
+  return capOut(toJson(out));
 }

@@ -44,7 +44,11 @@ test('the kit repo has its own base pack installed: kit-lock and every base hook
     }
   }
   assert.match(all, /kit-lock\.mjs/, 'kit-lock stays');
-  assert.ok(commandsOf(settings, 'Stop').some((c) => c.includes('.claude/hooks/git-guard.mjs')), 'git-guard judges the end of a session');
+  // since W8.1 the runner's entry names no hook: the table's git-guard row says which events it judges
+  const table = readJson<{ hook: string; events: string[] }[]>(join(KIT, '.claude/hooks/hooks.json')) ?? [];
+  const guard = table.filter((r) => r.hook === 'git-guard').flatMap((r) => r.events);
+  assert.ok(guard.includes('Stop') && guard.includes('PreToolUse'), `git-guard judges Bash and the end of a session: ${guard.join(', ')}`);
+  assert.ok(commandsOf(settings, 'Stop').some((c) => c.includes('.claude/hooks/run-hooks.mjs')), 'the runner answers Stop');
   const layout = readJson<{ guards: { git: { house: boolean } }; folders: Record<string, { path: string }> }>(join(KIT, '.claude/layout.json'));
   assert.equal(layout?.guards.git.house, true, 'the house git laws hold on the kit');
   for (const f of ['bin', 'lib', 'packs', 'global', 'test', 'docs']) assert.ok(Object.values(layout?.folders ?? {}).some((x) => x.path === f), f);

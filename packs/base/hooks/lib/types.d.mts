@@ -2,6 +2,8 @@
 // one module owns is defined beside it and exported there (the git result in git-run.mts); everything shared is here, and a
 // second definition of any of these is refused by the repo lint (gate 4). Only the lead edits this file.
 
+import type { FileStatements } from './near-copies.mts';
+
 // ---- The hook contract (Claude Code's hooks.md: stdin JSON, exit 0 or 2, stderr, JSON on stdout) ----
 
 export type HookEventName = 'PreToolUse' | 'PostToolUse' | 'UserPromptSubmit' | 'Stop' | 'SubagentStop' | 'SessionStart' | 'SessionEnd' | 'Notification' | 'PreCompact';
@@ -75,6 +77,8 @@ export interface HookContext {
   /** The project's layout, read for this event. */
   layout: Layout;
   log: Logger;
+  /** In the resident runner only: the files that hold these statement hashes, asked of the index on the daemon's main thread. */
+  candidates?: (hashes: readonly string[]) => Promise<FileStatements[]>;
 }
 
 /** A hook module's interface: judge one event, and say so. */

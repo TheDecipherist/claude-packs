@@ -108,4 +108,4 @@ processes took 86-121 ms wall (sequential sum 374 and 201 ms; Claude Code starts
 
 DONE_WITH_CONCERNS: three failures that were already red on `work/2.0.0-typescript` remain (named above); the lead should log them.
 
-Report: /Users/tim.clausen/projects/claude-packs/.claude/worktrees/w8-runner/docs/workorders/typescript/agents/w8-runner-report.md
+Report: docs/workorders/typescript/agents/w8-runner-report.md (written in the agent's worktree, .claude/worktrees/w8-runner)
