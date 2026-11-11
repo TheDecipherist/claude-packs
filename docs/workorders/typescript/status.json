@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T14:08:38Z",
+  "updated": "2026-11-11T14:42:53Z",
   "steps": [
     {
       "id": "W0",
@@ -26,8 +26,8 @@
       "id": "W3",
       "title": "The core: base hooks lib by layer",
       "items": 5,
-      "done": 0,
-      "agent": "w3-l4-git, w3-l4-status, w3-l4-fresh"
+      "done": 5,
+      "agent": null
     },
     {
       "id": "W4",
@@ -93,24 +93,5 @@
       "agent": null
     }
   ],
-  "agents": [
-    {
-      "name": "w3-l4-git",
-      "worktree": ".claude/worktrees/w3-l4-git",
-      "step": "W3",
-      "started": "2026-11-11T14:08:38Z"
-    },
-    {
-      "name": "w3-l4-status",
-      "worktree": ".claude/worktrees/w3-l4-status",
-      "step": "W3",
-      "started": "2026-11-11T14:08:38Z"
-    },
-    {
-      "name": "w3-l4-fresh",
-      "worktree": ".claude/worktrees/w3-l4-fresh",
-      "step": "W3",
-      "started": "2026-11-11T14:08:38Z"
-    }
-  ]
+  "agents": []
 }

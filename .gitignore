@@ -98,3 +98,4 @@ packs/base/hooks/lib/pushed-selftest.mjs
 packs/base/hooks/lib/run-live.mjs
 packs/base/hooks/lib/run-progress.mjs
 packs/base/hooks/lib/run-rows.mjs
+packs/base/hooks/run-hooks.mjs

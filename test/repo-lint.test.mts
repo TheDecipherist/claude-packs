@@ -15,7 +15,9 @@ const KIT = fileURLToPath(new URL('..', import.meta.url));
 const TSC = join(KIT, 'node_modules/.bin/tsc');
 const SOURCE_FOLDERS = ['bin', 'lib', 'global', 'scripts', 'packs', '.claude/hooks', 'test'];
 // The folders converted whole: no hand-written .mjs, .js or .py is left in them (the lead adds each as W3 and W4 finish it).
-const CONVERTED: readonly string[] = [];
+const CONVERTED: readonly string[] = ['packs/base/hooks/lib'];
+// A hand-written file a converted folder still holds on purpose, each with the step that removes it.
+const NOT_YET: ReadonlySet<string> = new Set(['packs/base/hooks/lib/house.py']);   // W4 slice 3 ports browser-guard.py and deletes it
 
 const rel = (root: string, file: string): string => relative(root, file).replace(/\\/g, '/');
 const skipped = (name: string): boolean => name === 'node_modules' || name === 'fixtures' || name === 'worktrees' || name === '.DS_Store';
@@ -116,7 +118,7 @@ test('gate 2: no any and no silenced error in a TypeScript source; a planted any
 });
 
 test('gate 3: a converted folder holds no hand-written .mjs; a stray one beside the emitted ones is found', () => {
-  assert.deepEqual(handWritten(KIT, CONVERTED), []);
+  assert.deepEqual(handWritten(KIT, CONVERTED).filter((f) => !NOT_YET.has(f)), []);
   const dir = planted({ 'lib/a.mts': 'export const a = 1;\n', 'lib/a.mjs': 'export const a = 1;\n', 'lib/b.mjs': 'export const b = 2;\n' });
   assert.deepEqual(handWritten(dir, ['lib']), ['lib/b.mjs']);
 });

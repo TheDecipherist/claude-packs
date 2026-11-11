@@ -8,7 +8,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-11T14:26:42.470Z",
+  "updated": "2026-11-11T14:42:25.086Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "385237722f4561d07ae9aaeb434b512c8061c754585dec0b7a8ca801dd6dd992",
     ".claude/rules/agents-held.md": "0da8fb50ef828b0440389751254c16ae1cf9dd21c78fc23a7d957b221674a409",
@@ -135,7 +135,7 @@
     ".claude/hooks/placement-law.mjs": "973523dfdd3f974ac5d4b2e907b0d5bff53793a8607aab2751f149a41337e91e",
     ".claude/hooks/repo-litter.mjs": "8334dd92bd0a4d652d4d1ca14ef69c8cb7d939516192994c673b926e654b2355",
     ".claude/hooks/reuse-hint.mjs": "ac012fcb8443cab49c32632048a84b91cdebec727789fc290240a3fff00b54fe",
-    ".claude/hooks/run-hooks.mjs": "abf4a4f6b32266439c300442b2386f5185c8a513b7a44ea4626f3d0a622e615b",
+    ".claude/hooks/run-hooks.mjs": "b3b891b6f58a23165ecf8b96de9a0d023793afe1d70e57c5bc1b97c64275abfe",
     ".claude/hooks/secrets-guard.mjs": "7b088b21056f7d23de086e22ea24e73442cda6b3873deb1503658a0ff26c6c27",
     ".claude/hooks/shape-law.mjs": "69c3735b0b0a0fbc614603defbbf99cb5622fc01565e42bbf11cc5673edcfcb1",
     ".claude/hooks/skill-first.mjs": "11f64605ad27165fcd1bc6a59b5eecc13ddfae14113bd247e83304e58650caa4",
