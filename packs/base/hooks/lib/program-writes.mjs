@@ -78,7 +78,7 @@ export function programWrites({ lang, code: src }, at, readText) {
   for (const s of stmts) { const m = s.match(ASSIGN); if (m) count.set(m[1], (count.get(m[1]) ?? 0) + 1); }
   const env = new Map();
   const reads = new Set();
-  const ctx = { env, lits, lang, at, readText, reads };
+  const ctx = { env, lits, lang, at, readText, reads, home: process.env.HOME };
   const val = (e) => (e === undefined ? null : evaluate(e, ctx));
   const pathOf = (e) => { const v = val(e); return v && (v.t === 'str' || v.t === 'path') && v.v ? at(v.v) : null; };
   const textOf = (e) => { const v = val(e); return !branchy && v && v.t === 'str' ? v.v : null; };
