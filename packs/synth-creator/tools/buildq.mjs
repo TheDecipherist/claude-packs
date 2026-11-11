@@ -10,16 +10,17 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { DIR, isLive, ownerOf, SLOTS, slotAt } from '../hooks/lib/build-slots.mjs';
+import { buildSlots, isLive, ownerOf, slotAt } from '../hooks/lib/build-slots.mjs';
 import { budgetEnv, capJobs, coreBudget, gentle, projectLayout, shareOf } from '../hooks/lib/core-budget.mjs';
 
+const { dir: DIR, slots: SLOTS } = buildSlots(process.env);
 const WAIT_MS = 500;
 const nap = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
 function claim() {
   mkdirSync(DIR, { recursive: true });
   for (let n = 0; n < SLOTS; n += 1) {
-    const slot = slotAt(n);
+    const slot = slotAt(DIR, n);
     try {
       mkdirSync(slot);
       writeFileSync(join(slot, 'pid'), `${process.pid}\n`);
@@ -33,7 +34,7 @@ function claim() {
 }
 
 function status() {
-  const taken = Array.from({ length: SLOTS }, (_, n) => slotAt(n)).filter(isLive).length;
+  const taken = Array.from({ length: SLOTS }, (_, n) => slotAt(DIR, n)).filter(isLive).length;
   console.log(`${taken} of ${SLOTS} slots taken`);
   return 0;
 }
@@ -45,9 +46,9 @@ function run(asked) {
     // KWB-111: the job takes its share of the machine's core budget, at a low priority; KWB-150: by the jobs running as it
     // starts, its own counted, so a build alone takes the whole budget
     const root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-    const running = Array.from({ length: SLOTS }, (_, n) => slotAt(n)).filter(isLive).length;
+    const running = Array.from({ length: SLOTS }, (_, n) => slotAt(DIR, n)).filter(isLive).length;
     const most = shareOf(coreBudget(process.env, projectLayout(root)), SLOTS, running);
-    const command = gentle(capJobs(asked, most));
+    const command = gentle(capJobs(asked, most), { platform: process.platform, env: process.env });
     const r = spawnSync(command[0], command.slice(1), { stdio: 'inherit', env: budgetEnv(process.env, most) });
     if (r.error) console.error(`buildq: ${command[0]}: ${r.error.message}`);
     return r.status ?? 1;
