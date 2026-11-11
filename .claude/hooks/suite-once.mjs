@@ -11,7 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
-import { bashOf, git, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
+import { bashOf, git, promptFile, put, runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { lastPrompt } from './lib/turn.mjs';
 import { judgeEvent, readPayload } from './lib/writes.mjs';
 import { asHook, isMain } from './lib/hook-log.mjs';
@@ -76,13 +76,8 @@ function selftest() {
   git(dir, 'init', '-q');
   git(dir, 'add', 'a.txt', '.claude/layout.json');
   git(dir, 'commit', '-qm', 'x');
-  const prompt = (name, words) => {
-    const file = `${dir}/${name}.jsonl`;
-    put(file, `${JSON.stringify({ type: 'user', message: { content: words } })}\n`);
-    return file;
-  };
-  const land = prompt('land', 'land the branch');
-  const full = prompt('full', 'something looks truly off, run the full suite');
+  const land = promptFile(dir, 'land', 'land the branch');
+  const full = promptFile(dir, 'full', 'something looks truly off, run the full suite');
   const asks = [
     ['a question about the suite is no request', askedForFull('why is the entire suite running?'), false],
     ['a sentence about full runs is no request', askedForFull('full complete runs should only be if I notice something off'), false],

@@ -6,12 +6,12 @@
 //   - Without it the progress is derived: the steps and their item counts from workorder.md, the items done from the
 //     `W<n>.<item>` progress lines of the main checkout and of every agent worktree, a step counted whole once a line says done.
 // It lives with the hooks (1.8.0) because every project's status line runs it from there; lib/run-status.mjs re-exports it.
-import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { readJson } from './json.mjs';
-import { runningOrders, workIn } from './run-discovery.mjs';
+import { commitsAhead, mergedInto, runningOrders, workIn, worktreesOf } from './run-discovery.mjs';
 import { machineName, remotesOf, remotesReport } from './run-remotes.mjs';
+import { transcriptBeats } from './run-transcripts.mjs';
 import { readText } from './shell-writes.mjs';
 
 const ID = String.raw`[A-Z]+\d+[a-z]?`;   // W3, W3b, L5: any order's step ids
@@ -22,6 +22,7 @@ const QUIET_MIN = 5;       // it made no call for this long (longer than any ans
                            // nothing left working in its worktree for this long
 const RUNNING_MIN = 30;    // where the processes cannot be read: one call running this long
 const LIVE_MS = 60 * 60_000;   // a worktree whose heartbeat is younger than this is a live agent, file or not
+const KIN_MS = 2 * 60 * 60_000; // an agent branch merged back and untouched this long is a finished agent
 const textIn = (file) => readText(file) ?? '';
 
 /** The order's steps from workorder.md: [{ id, title, items }], items its numbered lines plus its Done when. */
@@ -42,16 +43,6 @@ export function progressOf(lines) {
     for (const [, id] of line.matchAll(new RegExp(String.raw`\b(${ID})(?: measured,)? done\b`, 'g'))) done.add(id);
   }
   return { seen, done };
-}
-
-/** The agent worktrees of a project: [{ name, path }]. */
-export function worktreesOf(project) {
-  let out = '';
-  try { out = execFileSync('git', ['-C', project, 'worktree', 'list', '--porcelain'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return []; }
-  return out.split('\n').filter((l) => l.startsWith('worktree ') && l.includes('/.claude/worktrees/')).map((l) => {
-    const path = l.slice('worktree '.length);
-    return { name: basename(path), path };
-  });
 }
 
 export const percent = (done, items) => (items ? Math.round((1000 * done) / items) / 10 : 0);
@@ -96,15 +87,25 @@ export function orderStatus(project, order) {
     ? status.steps.map((s) => ({ id: s.id, title: s.title ?? '', items: s.items || 1, done: Math.min(s.done ?? 0, s.items || 1), agent: s.agent ?? null }))
     : derivedSteps(project, order, trees);
   const listed = new Map((status?.agents ?? []).map((a) => [a.name, a]));
-  const beatOf = (name) => readJson(join(project, '.claude', 'logs', 'heartbeats', `${name}.json`));   // the heartbeat hook's
+  // the heartbeat hook's file, else the agent's last call in Claude Code's own transcripts (an install with no heartbeat yet)
+  const fromTranscripts = transcriptBeats(project);
+  const beatOf = (name) => readJson(join(project, '.claude', 'logs', 'heartbeats', `${name}.json`)) ?? fromTranscripts[name] ?? null;
   const alive = (beat) => beat && Date.now() - Date.parse(beat.t ?? '') < LIVE_MS;
+  // an agent of this order with nothing written yet still counts: its worktree is on the order's own branch, work/<order>-<name>
+  // (the user: "I dont see those 5 agents"); one merged back and untouched for KIN_MS is a finished agent, unless work runs in it
+  const kin = (t) => typeof t.branch === 'string' && t.branch.startsWith(`work/${order}-`);
+  const stale = (t) => Date.now() - t.touched > KIN_MS && mergedInto(project, t.branch, `work/${order}`);
   const agents = trees.map((t) => ({ ...t, file: readJson(join(t.path, 'docs', 'workorders', order, 'agents', `${t.name}.json`)), beat: beatOf(t.name) }))
-    .filter((t) => t.file || listed.has(t.name) || alive(t.beat))
+    .map((t) => { const known = Boolean(t.file || listed.has(t.name) || alive(t.beat)); return { ...t, known, kinOnly: !known && kin(t) }; })
+    .filter((t) => t.known || t.kinOnly)
+    .map((t) => ({ ...t, stale: t.kinOnly && stale(t), fresh: t.kinOnly && commitsAhead(project, t.branch, `work/${order}`) === 0 }))   // runsReport drops a stale one unless work runs in it
     .map((t) => {
       const f = t.file ?? {};
       const step = f.step ?? listed.get(t.name)?.step ?? null;
-      return { name: t.name, step, title: steps.find((s) => s.id === step)?.title ?? '', now: f.now ?? '', updated: f.updated ?? null,
-        percent: f.items ? percent(f.done ?? 0, f.items) : null, beat: t.beat ?? null, path: t.path };
+      // no file of its own yet: git's last touch of its worktree is its clock
+      const updated = f.updated ?? (t.kinOnly && t.touched ? new Date(t.touched).toISOString() : null);
+      return { name: t.name, step, title: steps.find((s) => s.id === step)?.title ?? '', now: f.now ?? '', updated,
+        percent: f.items ? percent(f.done ?? 0, f.items) : null, beat: t.beat ?? null, path: t.path, stale: t.stale, fresh: t.fresh };
     });
   const items = steps.reduce((n, s) => n + s.items, 0);
   const done = steps.reduce((n, s) => n + s.done, 0) + agentsAhead(steps, agents);
@@ -131,6 +132,9 @@ export const actionOf = (tool) => (Object.hasOwn(ACTIONS, tool) ? ACTIONS[tool] 
 export const SYMBOLS = { beat: '♥', noBeat: '♡', running: '⟳', work: '⚙' };
 const memText = (mb) => (mb >= 1024 ? `${(mb / 1024).toFixed(1)}G` : `${Math.round(mb)}M`);
 const WORK_PARTS = { procs: (w) => String(w.procs), cores: (w) => (w.cores ?? 0).toFixed(1), mem: (w) => memText(w.memMb ?? 0) };
+
+/** What runs in one checkout, in a line: "⚙ 2 proc · 1.0 cpu · 300M ram" (an order's row, where the columns are its own). */
+export const workLine = (w) => `${SYMBOLS.work} ${WORK_PARTS.procs(w)} proc · ${WORK_PARTS.cores(w)} cpu · ${WORK_PARTS.mem(w)} ram${w.queued ? ' queued' : ''}`;
 
 /** Each agent's `live` from its parts: every column the width of its widest value among these rows, single spaces between,
  *  an empty column left out; processes, cores and memory always (zeros too), "queued" after them, so numbers line up. */
@@ -191,7 +195,11 @@ export function runRows(s, nowMs = Date.now(), checkedAt = null) {
   const stepOf = (id) => s.steps.find((x) => x.id === id);
   const agents = s.finished ? [] : s.agents.map((a) => {
     const step = stepOf(a.step);
-    return { who: a.name, id: a.step, title: a.title || step?.title || '', percent: a.percent ?? (step ? percent(step.done, step.items) : 0),
+    // an agent seen by its worktree alone has said nothing yet: no step, said in words (never "?"); a worktree whose branch has
+    // no commit of its own and nothing running is one waiting for its agent (the user: "all the mac agents say they are not
+    // doing anything")
+    const waiting = !a.step && a.fresh && !a.work?.procs;
+    return { who: a.name, id: a.step ?? '', title: a.step ? (a.title || step?.title || '') : waiting ? 'not started yet' : 'no status file yet', percent: a.percent ?? (step ? percent(step.done, step.items) : 0),
       now: a.now ?? '', ...liveOf(a.beat, a.updated, a.work ?? null, nowMs) };
   });
   const current = s.steps.find((x) => x.done < x.items);
@@ -214,6 +222,7 @@ export function runsReport({ dir = null, order = null, remotes = undefined, ask 
   // happened to the heartbeat and cores and all that?"); a process counts for the deepest folder, so an agent's build is its own
   const work = workIn([...runs.map((r) => r.project), ...runs.flatMap((r) => r.agents.map((a) => a.path))]);
   for (const a of runs.flatMap((r) => r.agents)) a.work = work?.[a.path] ?? null;
+  for (const r of runs) r.agents = r.agents.filter((a) => !a.stale || a.work?.procs);   // a finished agent's worktree, unless work runs in it
   for (const r of runs) r.leadWork = work?.[r.project] ?? null;
   const listed = dir ? [] : (remotes ?? remotesOf());
   const far = remotesReport(listed, ask);

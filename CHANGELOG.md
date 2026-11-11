@@ -1,8 +1,12 @@
 # Changelog
 
-## 1.8.1 (2026-11-11)
+## 1.8.2 (2026-11-11)
 
-1.8.0 was never published: its work is here, with what followed it.
+1.8.0 and 1.8.1 were never published: their work is here, with what followed them.
+
+- `no-find` (base, on in every project, `update` included): `find`, `bfs`, `fd`, `locate` and `mdfind` are refused as commands, anywhere in a line, past wrappers and `xargs`, unless the user's prompt that turn asks for one by name ("use find to …"; a question about one asks nothing). The refusal says where to look: the order's sources with their paths, the layout's folders, Glob and Grep on a named folder. A BANDWARP agent's `find / -name QwertyPlayer.h` searched a Mac's whole disk for a minute and a half for a file the order lists in `~/projects/synthcore` (KWB-154). Its selftest, 18 cases, each law seen red.
+- The status line and `status` show an agent from its first minute: a worktree on the order's own branch (`work/<order>-<name>`) is that order's agent, "not started yet" while its branch has nothing of its own and nothing runs in it; a merged one untouched for two hours is left out unless work runs in it. Where no heartbeat hook runs yet, an agent's last call comes from Claude Code's own transcripts. The lead's own work (its builds, its gates) shows on its order's row beside its agents.
+- Logged for the next release: KWB-151 (the same warning flags are not the same law on every compiler), KWB-152 (the kit is not proved the same on Linux, macOS and Windows), KWB-153 (a test the kit runs has no memory or time limit), KWB-155 (a file in one worktree read as a copy of itself in another).
 
 - The runs as a tree, in `status` and the status line: a project, its orders under it when it has more than one, each order's agents under the order (`├`, `└`, `│`); a lead working alone is said on its order's row ("lead on W9 …"), never as a row of its own; a run in a worktree is named by its project (`VSYNTHGT (ui-look)`), never the worktree's folder. Once other machines are listed every run says where it runs, this machine's too (`PC:`, `MAC:`; remotes.json's `"name"`, else `mac` on macOS and `pc` elsewhere). The process check measures the lead's checkout as well, so a lead's build shows its processes, cores and memory. `test/run-remotes.test.mjs`.
 - KWB-149: a build yields with `nice` on every system; on macOS it ran under `taskpolicy -b`, background work, which macOS keeps on the efficiency cores: a Mac's build used about 2.5 cores of 18. KWB-150: a job takes the core budget divided by the jobs running as it starts, its own counted, never less than its slot's share: a build alone on a quiet machine had compiled at `-j 3`. `test/core-budget.test.mjs`.

@@ -76,7 +76,8 @@ const COST = ['SKILL.md', 'cost-ledger.md'].map((f) => `.claude/skills/synth-cos
 const AUDIENCE = ['.claude/hooks/lib/audience.mjs'];   // 1.5.13 (KWB-127): the marker for a page addressed outside the project, read by shape-law and brief-guard
 // 1.8.1: the status line and what it reads (base): the heartbeat hook, on by default since it refuses nothing, its settings
 // entries and the statusLine in expected/settings.json; the JSON helper; the run readers; the build queue's slots
-const STATUS = ['.claude/hooks/heartbeat.mjs', ...['json', 'run-status', 'run-discovery', 'run-remotes', 'run-tree', 'build-slots'].map((f) => `.claude/hooks/lib/${f}.mjs`),
+// 1.8.2: no-find, on by default (KWB-154), and the transcripts reader the status line uses where no heartbeat runs
+const STATUS = ['.claude/hooks/heartbeat.mjs', '.claude/hooks/no-find.mjs', ...['json', 'run-status', 'run-discovery', 'run-remotes', 'run-tree', 'run-transcripts', 'build-slots'].map((f) => `.claude/hooks/lib/${f}.mjs`),
   ...['statusline', 'statusline-paint', 'statusline-runs', 'statusline-session', 'statusline-work'].map((f) => `.claude/tools/${f}.mjs`)];
 const BUDGET = ['core-budget', 'compile-cache'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.5.4 (KWB-111, KWB-112): the machine's core share for the queue and the tests; whether a build folder compiles through the shared cache
 // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
