@@ -1,6 +1,7 @@
 // planner W2: `workorder check <name>`, the pre-flight before a run. One planted fault per refusal, each refused with the line that
 // names it; a clean order passes; an order with no install block is warned and still passes.
-import { assert, cli, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mts';
+import { assert, cli, execFileSync, join, mkdirSync, test, writeFileSync } from '../kit-cli.mts';
+import { fixture } from '../fixtures/installs.mts';
 
 const CLEAN = `# Work order: billing
 
@@ -21,14 +22,13 @@ packs: base
 `;
 
 // One base install, shared: each case writes its own order into it.
-const project = (() => {
-  const dir = fresh('wo-check-');
+const project: string = (() => {
+  const dir = fixture('base');
   execFileSync('git', ['init', '-q'], { cwd: dir });
-  assert.equal(cli(dir, 'init', '--config', 'base').status, 0);
   return dir;
 })();
 
-function check(name, order) {
+function check(name: string, order: string): { status: number | null; out: string } {
   mkdirSync(join(project, 'docs/workorders', name), { recursive: true });
   writeFileSync(join(project, 'docs/workorders', name, 'workorder.md'), order);
   const r = cli(project, 'workorder', 'check', name);
@@ -42,7 +42,7 @@ test('a clean order passes', () => {
   assert.doesNotMatch(out, /WARNING/);
 });
 
-const FAULTS = {
+const FAULTS: Readonly<Record<string, readonly [order: string, said: RegExp]>> = {
   'a placeholder left outside a code fence': [CLEAN.replace('Invoices for the shop', 'Invoices for <the customer>'), /line 3: a placeholder is left: <the customer>/],
   'a step with no Done when line': [CLEAN.replace('**Done when:** test/invoice.test.mjs passes.\n', 'Write it.\n'), /step "W1\. The invoice" has no \*\*Done when:\*\* line/],
   'a Done when with no number and no path to a test': [CLEAN.replace('test/invoice.test.mjs passes.', 'the invoices look right.'), /line 16: the Done when of "W1\. The invoice" holds no number and no path to a test/],
@@ -73,8 +73,7 @@ test('a Done when written as a list under its line is read whole', () => {
 });
 
 test('refused: doctor --strict red', () => {
-  const dir = fresh('wo-check-red-');
-  assert.equal(cli(dir, 'init', '--config', 'base').status, 0);
+  const dir = fixture('base');
   writeFileSync(join(dir, '.claude/settings.json'), '{}\n');
   mkdirSync(join(dir, 'docs/workorders/red'), { recursive: true });
   writeFileSync(join(dir, 'docs/workorders/red/workorder.md'), CLEAN);

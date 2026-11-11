@@ -1,13 +1,12 @@
 // KWB-155: a session that works in two worktrees of one repo writes the same file in both (stacked branches). Each write is
 // judged against its own checkout; a file is never a copy of itself in another checkout.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { toJson } from '../packs/base/hooks/lib/json.mjs';
-import { git } from './kit-cli.mts';
-import { fireAs, project, put } from './worktree-rig.mts';
+import { toJson } from '../../packs/base/hooks/lib/json.mts';
+import { git } from '../kit-cli.mts';
+import { fireAs, project, put } from '../worktree-rig.mts';
 
 const SVF = 'float Svf::process (float x) noexcept\n{\n    const float g = std::tan (kPi * cutoff / sampleRate);\n    const float k = 2.0f - 2.0f * resonance;\n' +
   '    const float a1 = 1.0f / (1.0f + g * (g + k));\n    const float a2 = g * a1;\n    const float a3 = g * a2;\n    const float v3 = x - ic2eq;\n' +
@@ -23,8 +22,8 @@ test('making-check judges each worktree\'s writes against its own checkout: the 
   git(wt, '-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'manifest');
   git(here, 'worktree', 'add', '-q', '.claude/worktrees/agent-y', '-b', 'work/y', 'work/x');
   const wt2 = join(here, '.claude/worktrees/agent-y');
-  const bashWrite = (id, file) => ({ type: 'tool_use', id, name: 'Bash', input: { command: `cat > ${file} <<'EOF'\n${SVF}EOF` } });
-  const turn = [];
+  const bashWrite = (id: string, file: string): unknown => ({ type: 'tool_use', id, name: 'Bash', input: { command: `cat > ${file} <<'EOF'\n${SVF}EOF` } });
+  const turn: unknown[] = [];
   for (const [i, dir] of [wt, wt2].entries()) {
     const file = join(dir, 'src/dsp/Svf.cpp');
     put(file, SVF);

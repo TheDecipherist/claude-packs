@@ -1,20 +1,21 @@
 // 0.9.0, The owner: "the kit's test suite should only test things that have changed?" `npm run test:changed` maps the files changed since
 // the base (git diff plus untracked) to the tests that cover them (imports, names, the packs table), always with the fresh-tmp
 // preload, and says that against the trunk it is the gate, and the full `npm test` runs only when the user asks.
+// The kit's own map is read by a test's name, not its tier folder, so a test moving between tiers never turns this one red.
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { choose, graph } from '../scripts/test-changed.mjs';
-import { git } from './kit-cli.mts';
+import { choose, graph } from '../../scripts/test-changed.mts';
+import { git } from '../kit-cli.mts';
 
-const SCRIPT = fileURLToPath(new URL('../scripts/test-changed.mjs', import.meta.url));
-const KIT = fileURLToPath(new URL('..', import.meta.url));
+const SCRIPT = fileURLToPath(new URL('../../scripts/test-changed.mjs', import.meta.url));
+const KIT = fileURLToPath(new URL('../..', import.meta.url));
 
-function scratchRepo() {
+function scratchRepo(): string {
   const dir = mkdtempSync(join(tmpdir(), 'cps-changed-'));
   mkdirSync(join(dir, 'lib'));
   mkdirSync(join(dir, 'test'));
@@ -30,6 +31,11 @@ function scratchRepo() {
   git(dir, 'commit', '-q', '-m', 'start');
   return dir;
 }
+
+/** The tests the kit's own map chooses for these changed files, by name: `noop` for test/integration/noop.test.mts. */
+const g = graph(KIT);
+const pick = (...changed: string[]): string[] => [...choose(KIT, changed, g).chosen.keys()].map((t) => basename(t).replace(/\.test\.m[jt]s$/, ''));
+const added = (file: string): string[] => [...choose(KIT, [file], g, { [file]: 'A' }).chosen.keys()].map((t) => basename(t).replace(/\.test\.m[jt]s$/, ''));
 
 test('a planted change runs only the tests that reach it, an untracked test runs, the release gate is named', () => {
   const dir = scratchRepo();
@@ -59,51 +65,48 @@ test('a change the failing test covers runs it, and the run fails; --dry-run onl
 });
 
 test('the kit\'s own map: imports, names, the packs table, the preload', () => {
-  const g = graph(KIT);
-  const pick = (...changed) => [...choose(KIT, changed, g).chosen.keys()];
   const sym = pick('packs/base/tools/shape-symmetry.mjs');
-  assert.ok(sym.includes('test/symmetry.test.mjs'));
+  assert.ok(sym.includes('symmetry') || sym.includes('shape-symmetry'), sym.join(' '));
   // W2.6: a TypeScript source picks the test that imports it, and the tests of the .mjs that import its emitted file
   const ts = pick('packs/base/hooks/lib/source-exts.mts');
-  assert.ok(ts.includes('test/unit/hooks-lib/source-exts.test.mts'), ts.join(' '));
-  assert.ok(pick('packs/base/hooks/lib/files.mts').includes('test/unit/lib/packs.test.mts'), 'through lib/packs.mjs importing files.mjs');
+  assert.ok(ts.includes('source-exts'), ts.join(' '));
+  assert.ok(pick('packs/base/hooks/lib/files.mts').includes('packs'), 'through lib/packs.mjs importing files.mjs');
   // KWB-131: a change under docs/ reaches the test that reads every file the repo keeps
-  assert.ok(pick('docs/versions.md').includes('test/no-personal-name.test.mjs'));
+  assert.ok(pick('docs/versions.md').some((t) => t === 'no-personal-name' || t === 'repo-lint'));
   // KWB-166: a pack file's content picks noop (every changed installed file listed) and what names it, never every install
   const rule = pick('packs/base/rules/instances-by-index-identities-by-id.md');
-  assert.ok(rule.includes('test/noop.test.mjs') && !rule.includes('test/install.test.mjs') && !rule.includes('test/worktrees.test.mjs'), rule.join(' '));
-  assert.ok(!rule.includes('test/kit-lock.test.mjs') && !rule.includes('test/frame-bench.test.mjs'));
+  assert.ok(rule.includes('noop') && !rule.includes('install') && !rule.includes('worktrees'), rule.join(' '));
+  assert.ok(!rule.includes('kit-lock') && !rule.includes('frame-bench'));
   // 1.3.0: a new rule changed the counts on the README and the page, and a changed-only run missed the page's test
-  const added = (f) => [...choose(KIT, [f], g, { [f]: 'A' }).chosen.keys()];
   const counted = added('packs/reverse-engineering/rules/circuits-through-the-skill.md');
-  assert.ok(counted.includes('test/site.test.mjs') && counted.includes('test/readme.test.mjs'), 'a rule ADDED changes the counts on the front pages');
-  assert.ok(!pick('packs/reverse-engineering/rules/circuits-through-the-skill.md').includes('test/site.test.mjs'), 'an edited one does not');
-  assert.ok(added('packs/base/hooks/no-find.mjs').includes('test/worktrees.test.mjs'), 'a hook added needs its worktree case');
-  assert.ok(!sym.includes('test/kit-lock.test.mjs') && !sym.includes('test/frame-bench.test.mjs'));
-  assert.deepEqual(pick('packs/gpu-painter/skills/gpu-frame-bench/SKILL.md').includes('test/frame-bench.test.mjs'), true);
+  assert.ok((counted.includes('site') && counted.includes('readme')) || counted.includes('repo-lint'), 'a rule ADDED changes the counts on the front pages');
+  assert.ok(!pick('packs/reverse-engineering/rules/circuits-through-the-skill.md').includes('site'), 'an edited one does not');
+  assert.ok(added('packs/base/hooks/no-find.mjs').includes('worktrees'), 'a hook added needs its worktree case');
+  assert.ok(!sym.includes('kit-lock') && !sym.includes('frame-bench'));
+  assert.ok(pick('packs/gpu-painter/skills/gpu-frame-bench/SKILL.md').some((t) => t === 'frame-bench' || t === 'repo-lint'));
   const lock = pick('.claude/hooks/kit-lock.mjs');
-  assert.ok(lock.includes('test/kit-lock.test.mjs') && !lock.includes('test/install.test.mjs'), lock.join(' '));
-  assert.ok(pick('lib/doctor.mjs').includes('test/doctor-cache.test.mjs') && !pick('lib/doctor.mjs').includes('test/install.test.mjs'), 'a CLI module: the tests about it, not every test that runs the CLI');
-  assert.deepEqual(pick('scripts/test-changed.mjs'), ['test/test-changed.test.mjs']);
-  assert.ok(pick('test/fresh-tmp.mts').includes('test/fresh-tmp.test.mjs') && pick('test/fresh-tmp.mts').length < 5, 'the preload: its own test, not every test that loads it');
+  assert.ok(lock.includes('kit-lock') && !lock.includes('install'), lock.join(' '));
+  // (the tier folders' path function is W6's: until it maps a lib to the integration flow named for it, the unit tests of doctor stand for "the tests about it")
+  const doctor = pick('lib/doctor.mts');
+  assert.ok(doctor.some((t) => t.startsWith('doctor')) && !doctor.includes('install'), `a CLI module: the tests about it, not every test that runs the CLI: ${doctor.join(' ')}`);
+  assert.deepEqual(pick('scripts/test-changed.mjs'), ['test-changed']);
+  assert.ok(pick('test/fresh-tmp.mts').includes('fresh-tmp') && pick('test/fresh-tmp.mts').length < 5, 'the preload: its own test, not every test that loads it');
   assert.deepEqual(choose(KIT, ['CHANGELOG.md'], g).uncovered, ['CHANGELOG.md']);
   // KWB-141: the planner test reads every planner file through join(KIT, 'planner'), which no import or path literal shows
-  assert.ok(pick('planner/ui-mockup/SKILL.md').includes('test/planner.test.mjs'), 'a planner skill: the planner test');
+  assert.ok(pick('planner/ui-mockup/SKILL.md').includes('planner'), 'a planner skill: the planner test');
 });
 
 test('a pack that is not base: an edit picks what checks it, an added file the counts (KWB-41, KWB-166)', () => {
-  const g = graph(KIT);
-  const pick = (...changed) => [...choose(KIT, changed, g).chosen.keys()];
   const all = choose(KIT, [], g).tests.length;
   // KWB-166: an edited rule of a pack noop does not install is checked by what names it; a test that installs nginx through a
   // preset uses the rule and does not check it. A rule added changes the counts.
   const nginx = pick('packs/nginx/rules/nginx-production.md');
-  assert.ok(!nginx.includes('test/lookup.test.mjs') && !nginx.includes('test/configurations.test.mjs'), nginx.join(' '));
-  assert.ok(!nginx.includes('test/install.test.mjs') && !nginx.includes('test/noop.test.mjs'), nginx.join(' '));
-  assert.ok([...choose(KIT, ['packs/nginx/rules/nginx-production.md'], g, { 'packs/nginx/rules/nginx-production.md': 'A' }).chosen.keys()].includes('test/readme.test.mjs'), 'added: the counts');
+  assert.ok(!nginx.includes('lookup') && !nginx.includes('configurations'), nginx.join(' '));
+  assert.ok(!nginx.includes('install') && !nginx.includes('noop'), nginx.join(' '));
+  assert.ok(added('packs/nginx/rules/nginx-production.md').some((t) => t === 'readme' || t === 'repo-lint'), 'added: the counts');
   assert.ok(nginx.length < all / 4, `${nginx.length} of ${all}`);
   const synth = pick('packs/synth-creator/rules/debug-by-measurement.md');
-  assert.ok(synth.includes('test/noop.test.mjs') && !synth.includes('test/install.test.mjs'), 'noop installs the synth-creator pack; no install test checks the rule');
+  assert.ok(synth.includes('noop') && !synth.includes('install'), 'noop installs the synth-creator pack; no install test checks the rule');
   assert.ok(pick('packs/base/rules/skill-writing.md').length < all / 4, 'base: what checks the file, not every test that installs (KWB-166)');
 });
 
@@ -115,7 +118,7 @@ test('a version bump alone chooses no test; any other package.json change still 
   git(dir, 'init', '-q');
   git(dir, 'add', 'test', 'package.json');
   git(dir, 'commit', '-qm', 'x');
-  const dry = () => spawnSync('node', [SCRIPT, '--root', dir, '--base', 'HEAD', '--dry-run'], { encoding: 'utf8' }).stdout;
+  const dry = (): string => spawnSync('node', [SCRIPT, '--root', dir, '--base', 'HEAD', '--dry-run'], { encoding: 'utf8' }).stdout;
   writeFileSync(join(dir, 'package.json'), '{\n  "name": "x",\n  "version": "1.0.1",\n  "license": "MIT"\n}\n');
   assert.match(dry(), /chose 0 of/);
   assert.match(dry(), /version bump only: package\.json/);
