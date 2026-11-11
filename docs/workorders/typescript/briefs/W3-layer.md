@@ -47,6 +47,12 @@ d-20), and the owners you build on: `packs/base/hooks/lib/{files,git-run,hash,js
    output, so name only sources, tests and the importers you changed). Push the branch after each commit:
    `git push -u origin work/2.0.0-ts-<slice>`.
 
+## Never through the shell
+
+Write and edit every source and test with the Write and Edit tools, never a shell heredoc, `cat >`, `python3 -` or `sed -i`:
+the kit's hooks judge a Write or an Edit, and a source written through the shell is judged by nothing. Each refusal you meet:
+read it, then mark it, `node bin/claude-packs.mjs logs mark <id> right|wrong "<why>"` (`logs refusals --open` lists them).
+
 ## A fault you find
 
 Typing that shows a real bug, or an owner's merge that would change a result: do not fix it silently. Write it in your report

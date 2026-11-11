@@ -52,3 +52,12 @@ packs/base/hooks/lib/look-gate-selftest.mjs
 packs/base/hooks/lib/program-writes.mjs
 packs/base/hooks/lib/run-discovery.mjs
 packs/base/hooks/lib/skill-first-selftest.mjs
+# W3 layer 2, emitted
+packs/base/hooks/lib/code-shapes.mjs
+packs/base/hooks/lib/dup-index.mjs
+packs/base/hooks/lib/hook-log.mjs
+packs/base/hooks/lib/making-check-selftest.mjs
+packs/base/hooks/lib/shape-prose.mjs
+packs/base/hooks/lib/shell-writes.mjs
+packs/base/hooks/lib/shell-writes-selftest.mjs
+packs/base/hooks/lib/trunk-lag-selftest.mjs

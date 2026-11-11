@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T12:51:49Z",
+  "updated": "2026-11-11T13:09:28Z",
   "steps": [
     {
       "id": "W0",
@@ -27,7 +27,7 @@
       "title": "The core: base hooks lib by layer",
       "items": 5,
       "done": 0,
-      "agent": "w3-l1-writes, w3-l1-logs, w3-l1-selftests"
+      "agent": "w3-l2-shell, w3-l2-hooklog, w3-l2-index"
     },
     {
       "id": "W4",
@@ -95,22 +95,22 @@
   ],
   "agents": [
     {
-      "name": "w3-l1-writes",
-      "worktree": ".claude/worktrees/w3-l1-writes",
+      "name": "w3-l2-shell",
+      "worktree": ".claude/worktrees/w3-l2-shell",
       "step": "W3",
-      "started": "2026-11-11T12:51:49Z"
+      "started": "2026-11-11T13:09:28Z"
     },
     {
-      "name": "w3-l1-logs",
-      "worktree": ".claude/worktrees/w3-l1-logs",
+      "name": "w3-l2-hooklog",
+      "worktree": ".claude/worktrees/w3-l2-hooklog",
       "step": "W3",
-      "started": "2026-11-11T12:51:49Z"
+      "started": "2026-11-11T13:09:28Z"
     },
     {
-      "name": "w3-l1-selftests",
-      "worktree": ".claude/worktrees/w3-l1-selftests",
+      "name": "w3-l2-index",
+      "worktree": ".claude/worktrees/w3-l2-index",
       "step": "W3",
-      "started": "2026-11-11T12:51:49Z"
+      "started": "2026-11-11T13:09:28Z"
     }
   ]
 }

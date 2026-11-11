@@ -143,3 +143,11 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Chosen: project.mts `real` is the owner; dup.mts keeps `realPath`, built on it, for paths that may not exist (a new file's).
 - Why: the two give different results for a missing path (the order's own example of an owner's merge that would change a result);
   merging them changes what once-only matches, which wants its own KWB and test if it is ever wanted.
+
+## d-23 hook-log is the hooks' process boundary {#d-23}
+- Question: gate 11 forbids process globals in a hook-lib module; hook-log's `asHook` reads stdin, writes stderr and exits, and its
+  `projectRoot()` reads CLAUDE_PROJECT_DIR (31 hooks call it since W3 layer 0).
+- Chosen: hook-log.mts is left out of gates 11 and 12 by name, with the selftest modules (d-20); everything else in it is held to
+  the brief.
+- Why: it is the one module whose job is to bind a hook to its process; under the resident runner (W8) a hook is called with its
+  event and `ctx` and never touches hook-log's process side, and W4 replaces every `projectRoot()` call with `ctx.projectDir`.
