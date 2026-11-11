@@ -89,6 +89,12 @@ const AUDIENCE = ['.claude/hooks/lib/audience.mjs'];   // 1.5.13 (KWB-127): the 
 const KIT_FRESH = ['kit-fresh-look', 'kit-fresh-selftest', 'kit-version'].map((f) => `.claude/hooks/lib/${f}.mjs`);
 const STATUS = ['.claude/hooks/heartbeat.mjs', '.claude/hooks/no-find.mjs', ...['json', 'run-status', 'run-discovery', 'run-remotes', 'run-tree', 'run-transcripts', 'run-claudes', 'build-slots'].map((f) => `.claude/hooks/lib/${f}.mjs`),
   ...['statusline', 'statusline-paint', 'statusline-runs', 'statusline-session', 'statusline-work'].map((f) => `.claude/tools/${f}.mjs`)];
+// 2.0.0 (the typescript order, W3): installed files the conversion rewrote, the same law emitted from TypeScript, or an importer
+// that now passes the project root, env or pid a converted lib used to read itself (W3.3); each layer's merge adds its own
+const CONVERTED_CHANGED = [...['file-size-guard', 'folder-law', 'frozen-files', 'lesson-checks', 'making', 'once-only', 'placement-law', 'reuse-hint', 'run-hooks', 'spec-lock'].map((f) => `.claude/hooks/${f}.mjs`),
+  ...['apply-edit', 'cpp-scan', 'crash-policy', 'dup', 'elements', 'git-adds', 'glob', 'identifier-runs', 'layout', 'own-processes', 'program-read', 'program-writes', 'prose', 'repo-index', 'rust-scan', 'secret-patterns', 'shape-code', 'skill-first-selftest', 'unread-writes', 'writes'].map((f) => `.claude/hooks/lib/${f}.mjs`)];
+// 2.0.0 (the typescript order, W2.5): the shared owners every base lib reads through, new to every project
+const TYPESCRIPT = ['files', 'git-run', 'hash', 'source-exts'].map((f) => `.claude/hooks/lib/${f}.mjs`);
 const BUDGET = ['core-budget', 'compile-cache'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.5.4 (KWB-111, KWB-112): the machine's core share for the queue and the tests; whether a build folder compiles through the shared cache
 // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
 const MOVED = { '.claude/skills/analyse-reference-look/SKILL.md': 'packs/base/skills/analyse-reference-look/SKILL.md' };
@@ -110,10 +116,10 @@ for (const project of ['stellix', 'sub37']) {
     const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
     const was = JSON.parse(expected(project, 'lock.json'));
     assert.deepEqual(lock.packs, was.packs, 'the packs the lock names');
-    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...STATUS, ...KIT_FRESH, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST, ...SETTINGS] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
+    const added = [...V7, ...TIME, ...WRITING, ...LANDING, ...ELEMENTS, ...FAIL_OPEN, ...RUST, ...NEW_PROJECTS, ...QUIET, ...SKILL_FIRST, ...OWN, ...TRUNK, ...PREFIX, ...BUDGET, ...STATUS, ...KIT_FRESH, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...DRAWN, ...TYPESCRIPT, ...(lock.packs.includes('audio-core') ? [...EDITOR, ...SMOOTHING, ...RESEARCH, ...COST, ...SETTINGS] : []), ...(was.files['.claude/hooks/time-guard.mjs'] ? TIME_GUARD : []), ...(lock.packs.includes('gpu-painter') ? HOVER : [])];   // 0.10.1: the hover law's rule and skill, new to a project that has gpu-painter
     assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(was.files), ...added].sort(), 'the same files, no more, no fewer');
     const changed = Object.keys(was.files).filter((f) => lock.files[f] !== was.files[f]).sort();
-    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, ...SMOOTHING_CHANGED, ...BANK_PROOF_CHANGED, ...PROMPT_FILE_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
+    assert.deepEqual(changed.filter((f) => ![...CHANGED, ...REVIEWED, ...REPAIRED, ...SHELL_CHANGED, ...SMOOTHING_CHANGED, ...BANK_PROOF_CHANGED, ...PROMPT_FILE_CHANGED, ...CONVERTED_CHANGED, '.claude/rules/test-only-what-changed.md', '.claude/rules/audio-ui-thread-handoff.md'].includes(f)), [], 'only the base files changed on purpose differ in content');
     for (const [file, from] of Object.entries(MOVED)) {
       assert.ok(was.files[file] && lock.files[file], `${file}: kept in the lock after the move`);
       assert.equal(readFileSync(join(dir, file), 'utf8'), readFileSync(join(KIT, from), 'utf8'), `${file}: moved, not lost`);
@@ -133,7 +139,7 @@ test('an install that names no configuration gets synth-creator from its packs, 
 // changes on purpose later goes in FULL_STACK_CHANGED (look-gate and its selftest: a report is keyed by the code, KWB-121), and a new one in FULL_STACK_ADDED, with why.
 const FILE_URL_HOOKS = ['code-shape', 'dispatch-once', 'repo-litter', 'secrets-guard', 'skill-first', 'template-law', 'untrusted-boundary', 'stack-guard', 'schemas-only'].map((h) => `.claude/hooks/${h}.mjs`);
 const FULL_STACK_CHANGED = [...SWEEP_CHANGED.map((f) => `.claude/hooks/${f}`), '.claude/rules/instances-by-index-identities-by-id.md', '.claude/hooks/shape-law.mjs', '.claude/hooks/brief-guard.mjs', '.claude/skills/write-a-workorder/SKILL.md', '.claude/hooks/look-gate.mjs', '.claude/hooks/lib/look-gate-selftest.mjs', '.claude/hooks/git-guard.mjs', '.claude/hooks/lib/shell-writes.mjs', '.claude/hooks/lib/git-guard-selftest.mjs', '.claude/hooks/lib/project.mjs', '.claude/skills/pdf-to-md/SKILL.md', '.claude/tools/quiet-test.mjs', '.claude/skills/test-quietly/SKILL.md', '.claude/hooks/brief-guard.mjs', '.claude/hooks/lib/shape-prose.mjs', '.claude/hooks/lib/shape.mjs', '.claude/hooks/making-check.mjs', '.claude/hooks/lib/making-check-selftest.mjs', '.claude/hooks/lib/pushed.mjs', '.claude/rules/git-right-first-time.md', '.claude/rules/finished-work-lands.md', ...FILE_URL_HOOKS];   // KWB-163: nine more hooks take their own path from fileURLToPath   // KWB-157: guards.git.pushNeedsYes, in pushed.mjs and the two git rules   // 1.5.9 (KWB-122): making-check judges the file as it stands   // 1.4.7 (KWB-117): a path names a file   // 1.5.2 (KWB-106): test-quietly's step on the user's files   // 1.5.4 (KWB-111): quiet-test runs a test with the machine's core share   // 1.4.4 (KWB-103): project.mjs exports its common-dir reader; 1.4.5: pdf-to-md caps docling at two runs   // 1.4.1 (KWB-101): both read a command past its wrappers
-const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md', ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...STATUS, ...KIT_FRESH];   // W4: the skill in base, the page law in ui-craft
+const FULL_STACK_ADDED = ['.claude/skills/analyse-reference-look/SKILL.md', '.claude/rules/page-matches-reference-look.md', ...PREFIX, ...BUDGET, ...AUDIENCE, ...USER_FILES, ...START, ...SHELL_LEX, ...STATUS, ...KIT_FRESH, ...TYPESCRIPT];   // W4: the skill in base, the page law in ui-craft
 test('full-stack: an update keeps an existing project\'s own layout, and changes only the listed files', () => {
   const { dir } = updated('full-stack', 'full-stack');
   const before = (f) => readFileSync(join(FX, 'full-stack', 'before', f), 'utf8');
@@ -145,5 +151,5 @@ test('full-stack: an update keeps an existing project\'s own layout, and changes
   const lock = JSON.parse(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8'));
   const old = JSON.parse(before('lock.json'));
   assert.deepEqual(Object.keys(lock.files).sort(), [...Object.keys(old.files), ...FULL_STACK_ADDED].sort(), 'the same files, and the listed new ones');
-  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && ![...FULL_STACK_CHANGED, ...SHELL_CHANGED, ...PROMPT_FILE_CHANGED].includes(f)), [], 'only the listed files changed');
+  assert.deepEqual(Object.keys(old.files).filter((f) => lock.files[f] !== old.files[f] && ![...FULL_STACK_CHANGED, ...SHELL_CHANGED, ...PROMPT_FILE_CHANGED, ...CONVERTED_CHANGED].includes(f)), [], 'only the listed files changed');
 });
