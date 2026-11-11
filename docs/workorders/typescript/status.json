@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T16:29:25Z",
+  "updated": "2026-11-11T17:34:49Z",
   "steps": [
     {
       "id": "W0",
@@ -33,15 +33,15 @@
       "id": "W4",
       "title": "The slices, in parallel",
       "items": 7,
-      "done": 2,
-      "agent": "w4-sync, w4-doctor, w4-test-helpers"
+      "done": 7,
+      "agent": null
     },
     {
       "id": "W5",
       "title": "The tests: three tiers",
       "items": 6,
       "done": 0,
-      "agent": null
+      "agent": "w5-d, w5-a, w5-b, w5-c"
     },
     {
       "id": "W6",
@@ -95,22 +95,28 @@
   ],
   "agents": [
     {
-      "name": "w4-sync",
-      "worktree": ".claude/worktrees/w4-sync",
-      "step": "W4",
-      "started": "2026-11-11T16:29:25Z"
+      "name": "w5-d",
+      "worktree": ".claude/worktrees/w5-d",
+      "step": "W5",
+      "started": "2026-11-11T17:34:49Z"
     },
     {
-      "name": "w4-doctor",
-      "worktree": ".claude/worktrees/w4-doctor",
-      "step": "W4",
-      "started": "2026-11-11T16:29:25Z"
+      "name": "w5-a",
+      "worktree": ".claude/worktrees/w5-a",
+      "step": "W5",
+      "started": "2026-11-11T17:34:49Z"
     },
     {
-      "name": "w4-test-helpers",
-      "worktree": ".claude/worktrees/w4-test-helpers",
-      "step": "W4",
-      "started": "2026-11-11T16:29:25Z"
+      "name": "w5-b",
+      "worktree": ".claude/worktrees/w5-b",
+      "step": "W5",
+      "started": "2026-11-11T17:34:49Z"
+    },
+    {
+      "name": "w5-c",
+      "worktree": ".claude/worktrees/w5-c",
+      "step": "W5",
+      "started": "2026-11-11T17:34:49Z"
     }
   ]
 }
