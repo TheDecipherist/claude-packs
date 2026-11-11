@@ -32,3 +32,8 @@ Typed only; behaviour kept. Types defined beside the code (exported): `ShapeConc
 - Tests: shape 5/5, instances 6/6, symmetry 8/8, example-line 2/2, file-size 1/1, repo-lint 6/6, kf-refusals 26 pass 1 fail (KF-21, known on the base branch).
 - New unit test `test/unit/hooks-lib/shape.test.mts`: 6/6 (number/ordinal/index/compare hits, example/selector/constant excuses, hand list, unparsable and invalid manifest handled, addedFindings, quoteRow, escapeRegExp).
 - `test:changed -- --base work/2.0.0-typescript`: see the result line appended below.
+
+## test:changed result
+The full `test:changed` run was starved by other sessions on the machine and had not finished when this report was written. Of its 9 picked files I ran by hand: shape (5), unit shape (6), unit scanners (8), example-line (2), kf-refusals (26 pass, KF-21 known), readme (6), site (4): all green. Not run to the end: noop (expected red until the lead adds the new installed files `lib/shape-model.mjs`, `lib/shape-lines.mjs`, `lib/shape-hits.mjs` and the glob change to its lists), hook-timing, house (two known reds).
+
+Note for the lead: the three new emitted files `shape-model.mjs`, `shape-lines.mjs`, `shape-hits.mjs` show as untracked in git (not ignored); `.gitignore` is not mine to edit. The new installed files also need `packs/base/pack.json` / lock fixtures if those list lib files by name.
