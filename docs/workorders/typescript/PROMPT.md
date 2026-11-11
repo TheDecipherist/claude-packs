@@ -31,6 +31,7 @@ Always do:
 - Log every fault in `workflow-bugs.md` before fixing it (the kit has no `bugs.md`), with the `KWB-` number the lead hands out.
 - Follow every rule in `.claude/rules` and every skill that applies.
 - After a refusal, once you know the answer, mark it: `node bin/claude-packs.mjs logs mark <id> right|wrong "<why>"`.
+- Use the machine hard but never max it out (the user, 2026-11-11): this Mac has 18 cores and 128 GB. Before every wave of agents, read `uptime` and `memory_pressure`; start as many agents as the step allows while the 1-minute load stays under 14 and free memory over 30 %; when load passes 16 or free memory falls under 20 %, start nothing new until it falls back, and stop the newest agent's extra work (a test run, a build) if it stays there 5 minutes. Record each wave's agent count and the load seen in `progress.md`.
 - Write into this repository only. bandwarp's hook log is read once at W0 into a fixture; no file of bandwarp or any other project is changed.
 
 ## The user's yes for W12
