@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Smoothing is always on (KWB-145): `realtime-guard` judges every project with `audio-core`, with no setting that switches it off. Without `guards.smoothing` the smoothing module is any folder named `smooth` (and the copy trees) and the scope the project's audio code; the key only names them more exactly. Existing projects take it with `update`: only lines an edit adds are judged. It also refuses a bypass switched in one sample (`if (bypassed)`), which clicks, and `smooth-continuous-parameters` now says every switch that changes what is heard crossfades through the smoothing module, and the click gate covers stepped controls and bypass.
+
 ## 1.7.1 (2026-11-10)
 
 - Every work order ends its build with the README (`base`'s new skill `write-the-readme`, and a README step in the plugin, rebuild and generic templates, right before the last review): written last, when the UI is finished, the product's own screenshot on top (rendered by the product through its real code path, never a mock-up), what it does, install, first use, build, requirements, what is not done yet, the licence; every link and command checked, the `humanize` pass recorded. `test/workorder.test.mjs`.

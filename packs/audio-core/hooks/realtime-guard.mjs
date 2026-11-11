@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // PreToolUse hook (Write|Edit|MultiEdit|NotebookEdit|Bash, every route: lib/writes.mjs): blocks writes that ADD realtime-unsafe code to
 // audio-thread functions in C++ files. Exit 2 = block, stderr goes back to Claude. `--selftest` proves it.
-import { readFileSync } from 'node:fs';
 import { writesOf } from './lib/writes.mjs';
 import { findViolations, violationKey } from './lib/realtime-checks.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
@@ -29,10 +28,10 @@ function main(text) {
   return 0;
 }
 
-// KWB-126: with `guards.smoothing` in layout.json, a control smoothed outside the project's smoothing module is refused too.
+// KWB-126, 1.7.2: a control smoothed outside the project's smoothing module is refused too, always (lib/smoothing-checks.mjs).
 function judgeSmooth(w) {
   const cfg = smoothingConfig(readLayout(claudeRoot(w.path)));
-  const msg = cfg && judgeSmoothing(w, relative(checkoutRoot(w.path), w.path), cfg);
+  const msg = judgeSmoothing(w, relative(checkoutRoot(w.path), w.path), cfg);
   if (!msg) return 0;
   process.stderr.write(msg);
   return 2;
@@ -66,6 +65,7 @@ function selftest() {
   const cfg = { guards: { smoothing: { module: 'src/dsp/smooth/**', namespace: 'smooth', scope: ['src/audio/**', 'src/dsp/**', 'src/app/PluginProcessor*'] } } };
   const sm = scratchProject({ '.claude/layout.json': JSON.stringify(cfg), 'src/audio/Old.cpp': 'void Old::f()\n{\n    level += 0.1f * (target - level);\n}\n' });
   const none = scratchProject({});
+  const off = scratchProject({ '.claude/layout.json': JSON.stringify({ guards: { smoothing: { off: 'a tool with no audio thread' } } }) });
   const s = (file, body, d = sm) => runHook(hook, d, writeOf(join(d, file), `void X::f()\n{\n${body}\n}\n`));
   return verdicts('realtime-guard', [
     ['smoothing: the shipped per-block gain', s('src/audio/Out.cpp', '    audio.applyGain (link.volume() * outputGain);'), 2],
@@ -92,7 +92,15 @@ function selftest() {
     ['smoothing: the module itself', s('src/dsp/smooth/Smoother.h', '    juce::SmoothedValue<float> v;\n    x += k * (t - x);'), 0],
     ['smoothing: outside the scope', s('src/ui/Meter.cpp', '    level += k * (target - level);'), 0],
     ['smoothing: a slew already there is not added', runHook(hook, sm, editOf(join(sm, 'src/audio/Old.cpp'), 'void Old::f()', 'void Old::g()')), 0],
-    ['smoothing: no guards.smoothing, the check is off', s('src/audio/Out.cpp', '    b.applyGain (outputGain);', none), 0],
+    // 1.7.2: always on. With no guards.smoothing the module is any folder named smooth and the scope the audio code; off only with a reason
+    ['smoothing: no guards.smoothing, still judged', s('src/audio/Out.cpp', '    b.applyGain (outputGain);', none), 2],
+    ['smoothing: no guards.smoothing, a folder named smooth is the module', s('src/dsp/smooth/Smooth.h', '    juce::SmoothedValue<float> v;', none), 0],
+    ['smoothing: no guards.smoothing, outside the audio code', s('src/ui/Meter.cpp', '    level += k * (target - level);', none), 0],
+    ['smoothing: guards.smoothing cannot switch it off', s('src/audio/Out.cpp', '    b.applyGain (outputGain);', off), 2],
+    ['a bypass switched in one sample', s('src/audio/Path.cpp', '    if (bypassed)\n        wet.copyFrom (0, 0, dry, 0, 0, n);', none), 2],
+    ['a bypass read from a call', s('src/audio/Path.cpp', '    if (! isBypassed())\n        process (b);', none), 2],
+    ['a bypass through the module', s('src/dsp/smooth/Fade.h', '    if (bypassed) target = 0.0f;', none), 0],
+    ['a bypass marked with its reason', s('src/audio/Path.cpp', '    if (bypassed) return; // smooth-ok: the crossfade above has reached the dry side', none), 0],
 
     ['new in processBlock', w('src/audio/Voice.cpp', '    auto* x = new float[64];'), 2],
     ['a lock in processBlock', w('src/audio/Voice.cpp', '    const juce::ScopedLock sl (lock);'), 2],

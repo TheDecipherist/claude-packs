@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.7.2, smoothing always on (work/1.7.2-smoothing-always), started 2026-11-10, from the user: "smoothing should be completely automatic and never opt in".
+  making: realtime-guard's smoothing check on in every project with audio-core, by convention without guards.smoothing, never off; a bypass done in one sample refused; the rule saying so, and that every switch crossfades; KWB-145; concepts: none; reuse: lib/smoothing-checks.mjs's shapes, the hooks lib's conceptGlobs and foldersOfKind.
+  done when: realtime-guard --selftest passes 39 cases, the default-on and bypass cases seen red before the fix; the tests the branch reaches green against main.
 - 1.7.1, the README step (work/1.7.1-readme-step), started 2026-11-10, from the user: "a final step when the UI is completed that a full pro README.md is made with a screnshot of the unit on top".
   making: base's skill `write-the-readme` (a front page written last, the product's own screenshot on top, never a mock-up); a README step in the plugin, rebuild and generic work-order templates, after the UI and before the last review; concepts: none (design/shape.json declares none); reuse: the `humanize` skill for the last pass, the templates' step form.
   done when: every template has the README step naming the skill, test/workorder.test.mjs holds it (red without it); the skill passes doctor's form (Use when, under 8,000 characters) and base-neutral; the tests the branch reaches green against main.

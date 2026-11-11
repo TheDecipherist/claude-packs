@@ -1,5 +1,6 @@
 import { blankCode, lineAt } from './cpp-scan.mjs';
 import { matchesAny } from './glob.mjs';
+import { conceptGlobs, foldersOfKind } from './layout.mjs';
 
 // KWB-126: every continuous control runs through the project's one smoothing module, so a search for its namespace shows
 // what is smoothed and what is not. This judges the code outside that module for smoothing written by hand, or a gain
@@ -10,13 +11,19 @@ export const MARKER = /\/\/\s*smooth-ok:\s*\S/; // a marker carries its reason: 
 
 const list = (v) => (Array.isArray(v) ? v : typeof v === 'string' ? [v] : []);
 
-// The config, or null when the project has not opted in.
-export function smoothingConfig(layout) {
-  const g = layout?.guards?.smoothing;
-  if (!g || typeof g !== 'object') return null;
-  const module = list(g.module);
-  const scope = list(g.scope);
-  if (module.length === 0 || scope.length === 0) return null;
+// Smoothing is never optional (the user, 2026-11-10: "smoothing should be completely automatic and never opt in. there is no
+// reason to not do smoothing"). Without `guards.smoothing` the module is any folder named smooth, plus a project's copy trees
+// (another project's code, whose glides are its own), and the scope is the project's audio code. guards.smoothing can only
+// name the module and the scope more exactly; it cannot switch the check off.
+const DEFAULT_MODULE = ['**/smooth/**'];
+const DEFAULT_SCOPE = ['src/audio/**', 'src/dsp/**', 'src/engines/**', 'src/app/**'];
+const AUDIO_CONCEPTS = ['audio', 'dsp'];
+
+export function smoothingConfig(layout = {}) {
+  const g = layout?.guards?.smoothing && typeof layout.guards.smoothing === 'object' ? layout.guards.smoothing : {};
+  const concepts = AUDIO_CONCEPTS.flatMap((c) => conceptGlobs(layout, c) ?? []);
+  const module = [...new Set([...list(g.module), ...DEFAULT_MODULE, ...foldersOfKind(layout, 'copy').map((p) => `${p}/**`)])];
+  const scope = list(g.scope).length ? list(g.scope) : concepts.length ? [...new Set(concepts)] : DEFAULT_SCOPE;
   return { module, namespace: typeof g.namespace === 'string' && g.namespace ? g.namespace : 'smooth', scope };
 }
 
@@ -34,6 +41,8 @@ const SHAPES = [
   { re: new RegExp(String.raw`(${IDENT})\s*=\s*${IDENT}\s*\+\s*${DIFF}\s*\*\s*${IDENT}`, 'g'), why: 'a one-pole slew written out (`x = t + (x - t) * k`)' },
   { re: /\bexp\s*\(\s*-[^;\n]*\b(?:get)?(?:sampleRate|sample_rate|rate|fs|sr)\b/gi, why: 'a slew coefficient built from `exp (-... / (seconds * rate))`' },
   { re: /\.\s*applyGainRamp\s*\(/g, why: '`applyGainRamp` outside the smoothing module' },
+  // 1.7.2: a switch that changes what is heard, done in one sample, clicks: BANDWARP's BYPASS was one
+  { re: /\bif\s*\(\s*!?\s*[\w.\->:]*[Bb]ypass(?:ed)?\w*\s*(?:\(\s*\))?\s*\)/g, why: 'a bypass switched in one sample (a click): crossfade wet and dry through the smoothing module' },
 ];
 
 const LITERAL = /^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?[fFdD]?$/;
