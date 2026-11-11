@@ -1,5 +1,5 @@
 // 0.6.0: doctor --strict skips git-ignored build output, and doctor fails a hook that fails its selftest.
-import { CLI, assert, git, join, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
+import { CLI, assert, doctorRunning, git, join, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
 import { fixture } from '../fixtures/installs.mts';
 
 // Bug (3): build output the project ignores (Stellix's out/**) is not "source no rule covers".
@@ -25,12 +25,12 @@ test('doctor fails when a hook fails its selftest', () => {
   const dir = fixture('audio-core+gpu-painter');
   const hook = join(dir, '.claude/hooks/git-guard.mjs');
   const text = readFileSync(hook, 'utf8');
-  const law = "if (['rebase', 'filter-branch'].includes(sub)";
-  assert.ok(text.includes(law));
-  writeFileSync(hook, text.replace(law, 'if (false'));
+  const law = "return 'Nothing is rebased or amended. Make a new commit.';";
+  assert.ok(text.includes(law), 'the rebase law is in the emitted git-guard');
+  writeFileSync(hook, text.replace(law, 'return null;'));
   const guard = join(dir, '.claude/hooks/browser-guard.mjs');
   writeFileSync(guard, readFileSync(guard, 'utf8').replace('LAUNCH_BASH.some((rx) => rx.test(seg))', 'false'));
-  const r = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' });
+  const r = doctorRunning(dir);   // the selftests run: the gate would take them as proved (KWB-166)
   assert.equal(r.status, 1);
   assert.match(r.stdout, /git-guard\.mjs fails its selftest/);
   assert.match(r.stdout, /browser-guard\.mjs fails its selftest/, 'the ported browser-guard too');

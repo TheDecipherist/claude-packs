@@ -124,11 +124,11 @@ export function kitVerdict(root: string, { git, fetch }: { git: KitGit; fetch: b
 const COMMIT = /(?:^|[;&|(\s])git\b(?:\s+-C\s+\S+|\s+-c\s+\S+)*\s+commit\b/;
 
 /** What a session's start reads: the process's environment and the time are the caller's; `unattended`, `npm` and `git` are
- *  planted by a selftest (unattended is the environment's CLAUDE_PACKS_UNATTENDED when not given). */
+ *  planted by a selftest (unattended is, when not given, the environment's CLAUDE_PACKS_UNATTENDED=1; as in agents-held, 0 says someone is there, KWB-185). */
 export interface StartOptions { env: Env; now: number; unattended?: boolean; npm?: () => NpmAnswer; git?: KitGit }
 
 /** what to say at a session's start, and whether it must not start: { say, block } | null */
-export function atStart(root: string, { env, now, unattended = Boolean(env['CLAUDE_PACKS_UNATTENDED']), npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git = kitGit(root, env) }: StartOptions): FreshVerdict | null {
+export function atStart(root: string, { env, now, unattended = env['CLAUDE_PACKS_UNATTENDED'] === '1', npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git = kitGit(root, env) }: StartOptions): FreshVerdict | null {
   if (isKitRepo(root)) {
     const v = kitVerdict(root, { git, fetch: true });
     return v && { say: v.say, block: false };

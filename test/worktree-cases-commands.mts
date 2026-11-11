@@ -55,10 +55,11 @@ export const COMMAND_CASES: Record<string, CheckoutCase> = {
     assert.equal(bash(here, 'suite-once.mjs', `cd ${here} && bash tools/all.sh`), 0);
   },
   'kit-fresh.mjs': ({ here, wt }) => {
-    // a session in the worktree reads the worktree's own install: its lock older than npm's (the run's kept answer is this kit's
-    // version), and nothing installed there is newer; the main checkout's install of this kit is the newest and says nothing
-    put(join(wt, '.claude/claude-packs.lock.json'), toJson({ kit: '0.0.1' }));
-    const start = (cwd: string) => fireAs(here, 'kit-fresh.mjs', { hook_event_name: 'SessionStart', cwd });
+    // a session in the worktree reads the worktree's own install: its installed package older than npm's (the run's kept answer is
+    // this kit's version; the package wins over the lock, KWB-162); the main checkout's install of this kit is the newest and says
+    // nothing. Someone is there whatever the run's environment says (KWB-185): a block would put the notice on stderr.
+    put(join(wt, 'node_modules/@thedecipherist/claude-packs/package.json'), toJson({ name: '@thedecipherist/claude-packs', version: '0.0.1' }));
+    const start = (cwd: string) => fireAs(here, 'kit-fresh.mjs', { hook_event_name: 'SessionStart', cwd }, { CLAUDE_PACKS_UNATTENDED: '0' });
     assert.match(start(wt).stdout, /runs the kit 0\.0\.1/);
     assert.equal(start(here).stdout, '');
   },

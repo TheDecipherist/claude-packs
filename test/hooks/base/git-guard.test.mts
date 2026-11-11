@@ -39,14 +39,16 @@ test('KF-10: a dry run stages nothing, in both hooks', () => {
 test('KF-21: --theirs during a merge resolves it; outside a merge it is an undo', () => {
   const dir = workProject();
   put(join(dir, 'a.txt'), 'base\n');
-  git(dir, 'add', 'a.txt');
-  git(dir, 'commit', '-qm', 'base', '--', 'a.txt');
+  put(join(dir, 'b.txt'), 'committed\n');
+  git(dir, 'add', 'a.txt', 'b.txt');
+  git(dir, 'commit', '-qm', 'base', '--', 'a.txt', 'b.txt');
   git(dir, 'switch', '-qc', 'other');
   put(join(dir, 'a.txt'), 'other\n');
   git(dir, 'commit', '-qm', 'other', '--', 'a.txt');
   git(dir, 'switch', '-q', 'work/x');
   put(join(dir, 'a.txt'), 'mine\n');
   git(dir, 'commit', '-qm', 'mine', '--', 'a.txt');
+  // uncommitted work the undo would lose: a tracked file changed (an untracked one is not lost by a checkout, KWB-147, KWB-184)
   put(join(dir, 'b.txt'), 'uncommitted\n');
   assert.equal(push(dir, 'git checkout --theirs a.txt').status, 2, 'no merge: an undo');
   try { git(dir, 'merge', '-q', 'other'); } catch { /* the conflict is the point */ }
