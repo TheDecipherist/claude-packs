@@ -1,33 +1,46 @@
 // claude-packs fix: a scan's findings as a work order Claude can follow, step by step, with the kit's own laws. Each finding is a box to tick,
 // in the order a senior engineer would fix them: what can leak first, what loses data next, then the copies, then the rest.
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { kitCommand } from './kit-command.mjs';
-import { scan } from './scan.mjs';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { put, readText } from '../packs/base/hooks/lib/files.mts';
+import { readJson } from '../packs/base/hooks/lib/json.mts';
+import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
+import { kitCommand } from './kit-command.mts';
+import type { NearCopyRow, RemadeName, Repeat } from './repeats.mts';
+import { pointerOf, scan } from './scan.mts';
+import type { ScanPick, ScanResult, ScanSecret } from './scan.mts';
 
-const pointerOf = (dir) => join(tmpdir(), `claude-packs-last-scan-${createHash('sha256').update(resolve(dir)).digest('hex').slice(0, 12)}`);
-export const rememberScan = (dir, json) => writeFileSync(pointerOf(dir), json);
+/** `claude-packs-scan.json`, as a scan writes it; every part optional, since a plan is made from whatever the file holds. */
+export interface ScanFile {
+  pick?: { config?: string; packs?: readonly Pick<ScanPick['packs'][number], 'pack'>[] };
+  secrets?: readonly ScanSecret[];
+  results?: readonly ScanResult[];
+  repeats?: readonly Repeat[];
+  near?: readonly NearCopyRow[];
+  remade?: readonly RemadeName[];
+  longFiles?: readonly string[];
+  weight?: { big?: readonly { file: string; mb: number }[]; rootImages?: readonly string[] };
+}
 
-const box = (text) => `- [ ] ${text}`;
-const code = (text) => `\`${String(text).replace(/`/g, "'")}\``;
+const box = (text: string): string => `- [ ] ${text}`;
+const code = (text: unknown): string => `\`${String(text).replace(/`/g, "'")}\``;
 
-function checksOf(results, kind) {
+function checksOf(results: readonly ScanResult[], kind: string): string[] {
   return results.filter((r) => r.kind === kind).sort((a, b) => b.hits.length - a.hits.length)
     .flatMap((r) => [`### ${r.id} (${r.hits.length})`, '', r.why, r.rule ? `Law: \`${r.rule}\`` : '', '', ...r.hits.map((h) => box(`${h.file}:${h.line}: ${code(h.text)}`)), ''].filter((l, i, a) => l !== '' || a[i - 1] !== ''));
 }
 
-const section = (title, intro, lines) => (lines.length ? [`## ${title}`, '', intro, '', ...lines, ''] : []);
+const section = (title: string, intro: string, lines: readonly string[]): string[] => (lines.length ? [`## ${title}`, '', intro, '', ...lines, ''] : []);
 
-function repeatBox(r) {
+function repeatBox(r: Repeat): string {
   const differs = r.parameters?.length ? ` Differs in: ${r.parameters.map(code).join(', ')}.` : '';
   return box(`${r.copies} copies of ${r.what}: ${r.at.join(', ')}. Make it ${r.template}.${differs}`);
 }
 
-export function planText(dir, s) {
+/** The fix plan's text for a project, from its scan. */
+export function planText(dir: string, s: ScanFile): string {
   const CLI = kitCommand(dir);
-  const packs = [...(s.pick?.packs ?? []).map((p) => p.pack)];
+  const packs = (s.pick?.packs ?? []).map((p) => p.pack);
   const howMany = (s.secrets?.length ?? 0) + (s.results ?? []).reduce((n, r) => n + r.hits.length, 0) + (s.repeats?.length ?? 0) + (s.near?.length ?? 0) + (s.remade?.length ?? 0) + (s.longFiles?.length ?? 0);
   return [
     '# Fix plan', '',
@@ -59,13 +72,17 @@ export function planText(dir, s) {
   ].join('\n');
 }
 
-export async function fixPlan(dir, { from = null, out = null, log = console.log } = {}) {
+export interface FixPlanOptions { from?: string | null; out?: string | null; log?: Logger }
+
+/** Writes `.claude/fix-plan.md` (or `out`) from the scan `from` names, else the project's last scan, else a scan made now; the file. */
+export async function fixPlan(dir: string, { from = null, out = null, log = console.log }: FixPlanOptions = {}): Promise<string> {
   const pointer = pointerOf(dir);
-  let json = from ?? (existsSync(pointer) ? readFileSync(pointer, 'utf8').trim() : null);
+  let json = from ?? (existsSync(pointer) ? (readText(pointer) ?? '').trim() : null);
   if (!json || !existsSync(json)) json = join((await scan(dir, { log: () => {} })).copy, 'claude-packs-scan.json');
+  const found = readJson<ScanFile>(json);
+  if (found === null) throw new Error(`${json} is not valid JSON: run the scan again`);
   const file = out ?? join(dir, '.claude/fix-plan.md');
-  mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, planText(dir, JSON.parse(readFileSync(json, 'utf8'))));
+  put(file, planText(dir, found));
   log(`Fix plan: ${file}`);
   log('Give it to Claude: "work through .claude/fix-plan.md" (skill: fix-from-scan).');
   return file;
