@@ -118,7 +118,7 @@ function judge(cmd, cwd, stdin, writes, bodies) {
     for (const f of files) add(at(f), 'edit', null);
   }
   const program = programOf(exe, args, input);
-  if (program) for (const w of programWrites(program, at, readText)) add(w.path, w.op, w.content, w.from ? { from: w.from } : {});
+  if (program) for (const w of programWrites(program, at, readText, HOME)) add(w.path, w.op, w.content, w.from ? { from: w.from } : {});
   if (exe === 'dd') for (const a of args) if (a.startsWith('of=')) add(at(a.slice(3)), 'write', null);
   if (exe === 'truncate') {
     const k = args.findIndex((a) => a === '-s' || a.startsWith('--size'));
