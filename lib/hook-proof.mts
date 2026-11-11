@@ -7,37 +7,38 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { ANSWERS, clearedAt, clearsOf } from './logs.mjs';
-import { HOOK_FILE } from './packs.mjs';
+import type { Env, InstalledHookLogModule } from '../packs/base/hooks/lib/types.d.mts';
+import { ANSWERS, clearedAt, clearsOf } from './logs.mts';
+import { HOOK_FILE } from './packs.mts';
 
 const RUNNER = 'run-hooks.mjs';
-const hookName = (file) => file.replace(HOOK_FILE, '');
+const hookName = (file: string): string => file.replace(HOOK_FILE, '');
 
 // The time a hook last changed: its own file, or anything it shares in hooks/lib.
-const changedAt = (dir, file, libTimes) => Math.max(statSync(join(dir, file)).mtimeMs, ...libTimes);
+const changedAt = (dir: string, file: string, libTimes: readonly number[]): number => Math.max(statSync(join(dir, file)).mtimeMs, ...libTimes);
 
 // The hooks whose --status says what a project still lacks: a param-id-lock holding no ids (KF-15); a JUCE plugin with no settings
 // layer, one missing a standard setting, or a standalone in JUCE's own window (settings-layer, 1.7.0).
-const STATUS_HOOKS = ['param-id-lock.mjs', 'settings-layer.mjs'];
+const STATUS_HOOKS: readonly string[] = ['param-id-lock.mjs', 'settings-layer.mjs'];
 
-export function statusProblems(projectDir) {
+export function statusProblems(projectDir: string, env: Env = process.env): string[] {
   return STATUS_HOOKS.map((name) => join(projectDir, '.claude', 'hooks', name)).filter(existsSync).flatMap((hook) => {
-    const r = spawnSync('node', [hook, '--status'], { encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir } });
+    const r = spawnSync('node', [hook, '--status'], { encoding: 'utf8', env: { ...env, CLAUDE_PROJECT_DIR: projectDir } });
     return r.status === 0 ? [] : [r.stdout.trim() || r.stderr.trim()];
   });
 }
 
-export async function hookProofProblems(projectDir, settingsText) {
+export async function hookProofProblems(projectDir: string, settingsText: string): Promise<string[]> {
   const dir = join(projectDir, '.claude', 'hooks');
   if (!existsSync(dir)) return [];
   const hooks = readdirSync(dir).filter((f) => HOOK_FILE.test(f) && f !== RUNNER);
   const problems = hooks.filter((f) => !settingsText.includes(`.claude/hooks/${f}`)).map((f) => `${f} is in .claude/hooks but no settings entry runs it, so it refuses nothing`);
   const log = join(dir, 'lib', 'hook-log.mjs');
   if (!existsSync(log)) return problems;
-  const { readHookLog } = await import(pathToFileURL(log).href);
+  const { readHookLog }: InstalledHookLogModule = await import(pathToFileURL(log).href);
   const libTimes = readdirSync(join(dir, 'lib')).map((f) => statSync(join(dir, 'lib', f)).mtimeMs);
   const clears = clearsOf(projectDir);
-  const crashed = new Map();
+  const crashed = new Map<string, number>();
   for (const row of readHookLog(projectDir, { rotated: true })) {
     const file = hooks.find((f) => hookName(f) === row.hook);
     if (!file || ANSWERS.has(String(row.code))) continue;

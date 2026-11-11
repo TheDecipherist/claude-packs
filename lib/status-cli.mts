@@ -4,10 +4,13 @@
 //   status --dir <project> [--order <name>]   one project's orders, running or not
 //   status --watch <minutes>                  the same again every so many minutes
 //   status --json [--out <file>]              the same as data (1.8.0): what the status line draws from, --out written whole
-import { toJson, writeJson } from '../packs/base/hooks/lib/json.mjs';
-import { barCells, percentLabel as pct, runsReport, runTree } from './run-status.mjs';
+import { toJson, writeJson } from '../packs/base/hooks/lib/json.mts';
+import type { TreeRow } from '../packs/base/hooks/lib/run-tree.mts';
+import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
+import { barCells, percentLabel as pct, runsReport, runTree } from './run-status.mts';
+import type { OrderStatus, RunsInput } from './run-status.mts';
 
-export function bar(p, width) {
+export function bar(p: number, width: number): string {
   const [full, empty] = barCells(p, width);
   return `[${'█'.repeat(full)}${'░'.repeat(empty)}]`;
 }
@@ -16,7 +19,7 @@ const HEAD = 24;   // a project or order name, its tree prefix included: every h
 const STEP = 28;   // an agent's step, its prefix included: every agent row's bar in one column
 
 /** One row of the tree (run-tree.mjs) as plain text; ! marks a quiet agent or lead (the status line paints it red). */
-function plainRow(row) {
+function plainRow(row: TreeRow): string {
   if (row.kind === 'agent') {
     return `${row.prefix}${row.who.padEnd(10)} > ${[row.id, row.title].filter(Boolean).join(' ').slice(0, 25).padEnd(STEP - row.prefix.length)} ${bar(row.percent, 10)} ${pct(row.percent)}` +
       `  ${row.quiet ? '!' : ' '} ${row.live}${row.now ? `  ${row.now.slice(0, 50)}` : ''}`.trimEnd();
@@ -25,22 +28,34 @@ function plainRow(row) {
 }
 
 /** One order's lines: its row, the lead on it when no agent runs, else one line per agent under it. */
-export const statusLines = (s, nowMs = Date.now()) => runTree([s], nowMs).map(plainRow);
+export const statusLines = (s: OrderStatus, nowMs: number = Date.now()): string[] => runTree([s], nowMs).map(plainRow);
 
-export function statusReport(options = {}) {
+/** What a report is asked for: a project folder and an order, and (to plant them in a test) what `runsReport` takes. */
+export type StatusReportOptions = Partial<RunsInput>;
+
+export function statusReport(options: StatusReportOptions = {}): string[] {
   const { dir, runs, unreachable = [], notes = [] } = runsReport({ env: process.env, platform: process.platform, ...options });
   const far = unreachable.map((u) => `${u.host.toUpperCase()}: not reached (${u.why})`);   // a machine asleep is said, never silence
   if (runs.length === 0 && far.length === 0) return [dir ? `no work orders in ${dir}` : 'no run is alive on this machine', ...notes];
   return [...runTree(runs).map(plainRow), ...far, ...notes];
 }
 
-export async function statusCommand(args, { log = console.log, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), ticks = Infinity } = {}) {
-  const at = (flag) => (args.includes(flag) ? args[args.indexOf(flag) + 1] : null);
-  const options = { dir: at('--dir'), order: at('--order') };
+export interface StatusCommandOptions {
+  log?: Logger;
+  /** Waits this many milliseconds between two ticks of `--watch`. */
+  wait?: (ms: number) => Promise<void>;
+  /** How many ticks `--watch` runs; endless by default. */
+  ticks?: number;
+}
+
+export async function statusCommand(args: readonly string[], { log = console.log, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), ticks = Infinity }: StatusCommandOptions = {}): Promise<number> {
+  const at = (flag: string): string | null => (args.includes(flag) ? (args[args.indexOf(flag) + 1] ?? null) : null);
+  const options: StatusReportOptions = { dir: at('--dir'), order: at('--order') };
   if (args.includes('--json')) {
     const report = runsReport({ env: process.env, platform: process.platform, ...options });
-    if (!at('--out')) log(toJson(report, { pretty: true }));
-    else if (!writeJson(at('--out'), report)) { log(`status: could not write ${at('--out')}`); return 1; }
+    const out = at('--out');
+    if (!out) log(toJson(report, { pretty: true }));
+    else if (!writeJson(out, report)) { log(`status: could not write ${out}`); return 1; }
     return 0;
   }
   const every = Number(at('--watch'));
