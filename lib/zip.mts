@@ -1,20 +1,22 @@
 // A zip of text files, for a skill claude.ai takes as an upload (a zip of its folder). Written stored (no compression), which every
 // unzip reads, so the kit needs no zip library.
-const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
+const CRC_TABLE: readonly number[] = Array.from({ length: 256 }, (_, n) => {
   let c = n;
   for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
   return c >>> 0;
 });
-const crc32 = (buf) => {
+
+const crc32 = (buf: Uint8Array): number => {
   let c = 0xffffffff;
-  for (const byte of buf) c = CRC_TABLE[(c ^ byte) & 0xff] ^ (c >>> 8);
+  for (const byte of buf) c = (CRC_TABLE[(c ^ byte) & 0xff] ?? 0) ^ (c >>> 8);
   return (c ^ 0xffffffff) >>> 0;
 };
 
-// One zip of stored entries: a local header and the data per file, then the central directory and its end record.
-export function zipOf(files) {
-  const locals = [];
-  const centrals = [];
+/** One zip of stored entries: a local header and the data per file, then the central directory and its end record. `files`
+ *  maps each path inside the zip to its text. */
+export function zipOf(files: Readonly<Record<string, string>>): Buffer {
+  const locals: Buffer[] = [];
+  const centrals: Buffer[] = [];
   let offset = 0;
   for (const [path, text] of Object.entries(files)) {
     const name = Buffer.from(path, 'utf8');
