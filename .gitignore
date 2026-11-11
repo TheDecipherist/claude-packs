@@ -62,3 +62,11 @@ packs/base/hooks/lib/shell-writes.mjs
 packs/base/hooks/lib/shell-writes-selftest.mjs
 packs/base/hooks/lib/trunk-lag-selftest.mjs
 packs/base/hooks/lib/shell-sed.mjs
+# W3 layer 3, emitted
+packs/base/hooks/lib/elements.mjs
+packs/base/hooks/lib/function-shapes.mjs
+packs/base/hooks/lib/near-copies.mjs
+packs/base/hooks/lib/shape.mjs
+packs/base/hooks/lib/shape-lists.mjs
+packs/base/hooks/lib/turn.mjs
+packs/base/hooks/lib/writes.mjs
