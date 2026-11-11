@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.7.1 (2026-11-10)
 
 - Every work order ends its build with the README (`base`'s new skill `write-the-readme`, and a README step in the plugin, rebuild and generic templates, right before the last review): written last, when the UI is finished, the product's own screenshot on top (rendered by the product through its real code path, never a mock-up), what it does, install, first use, build, requirements, what is not done yet, the licence; every link and command checked, the `humanize` pass recorded. `test/workorder.test.mjs`.
 - KWB-144: `update` no longer writes `"settingsLayer": []` into a project that never had the key (1.7.0 did).
