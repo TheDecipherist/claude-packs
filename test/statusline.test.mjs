@@ -3,9 +3,10 @@
 // line should be the claude-packs version number". Every feed is a scratch file here: no test reads the user's own settings,
 // transcript or cache.
 import { utimesSync } from 'node:fs';
-import { assert, existsSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, execFileSync, existsSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
 import { readJson, toJson } from '../packs/base/hooks/lib/json.mjs';
 import { statusBar } from '../packs/base/tools/statusline.mjs';
+import { gitState, parseStatusV2 } from '../packs/base/tools/statusline-work.mjs';
 import { refreshRuns } from '../packs/base/tools/statusline-runs.mjs';
 import { syncSettings } from '../lib/settings.mjs';
 
@@ -87,6 +88,28 @@ test('a broken session, transcript or cache draws what it can and never throws',
   const env = { HOME: home, XDG_CACHE_HOME: join(home, 'cache'), CLAUDE_CONFIG_DIR: join(home, 'config'), NO_COLOR: '1' };
   const lines = statusBar('not json', { env, nowMs: NOW, toolDir: join(home, 'project', '.claude', 'tools'), refresh: false, git: () => ({}) });
   assert.deepEqual(lines, ['claude-packs 9.8.7']);
+});
+
+// KWB-152: the bar runs every second; it asked git three times a render, about 0.3 s on a Mac
+test('the bar asks git once for the branch, its changes and how far it is from its upstream, and not again while nothing moved', () => {
+  assert.deepEqual(parseStatusV2('# branch.oid abc\n# branch.head work/x\n# branch.upstream origin/work/x\n# branch.ab +2 -1\n1 .M N... 100644 100644 100644 a b src/x.cpp\n? notes.txt\n'),
+    { branch: 'work/x', uncommitted: 2, ahead: 2, behind: 1 });
+  assert.deepEqual(parseStatusV2('# branch.oid abc\n# branch.head (detached)\n'), { branch: '', uncommitted: 0, ahead: 0, behind: 0 });
+  const dir = fresh('statusline-git-');
+  execFileSync('git', ['init', '-q', '-b', 'work/x'], { cwd: dir });
+  const calls = [];
+  const run = (args) => { calls.push(args.join(' ')); return '# branch.head work/x\n'; };
+  const cacheDir = fresh('statusline-git-cache-');
+  gitState(dir, { cacheDir, nowMs: 1000, run });
+  gitState(dir, { cacheDir, nowMs: 2000, run });
+  assert.equal(calls.length, 1, 'the same repo a second later: the cached answer');
+  assert.match(calls[0], /^status --porcelain=v2 --branch/);
+  gitState(dir, { cacheDir, nowMs: 40_000, run });
+  assert.equal(calls.length, 2, 'past 30 s: asked again');
+  writeFileSync(join(dir, '.git', 'index'), 'x');
+  gitState(dir, { cacheDir, nowMs: 41_000, run });
+  assert.equal(calls.length, 3, 'its index changed: asked again');
+  assert.deepEqual(gitState(fresh('statusline-nogit-'), { cacheDir, run }), {});
 });
 
 test('the runs refresh starts only when the cache is old and no refresh is under way', () => {
