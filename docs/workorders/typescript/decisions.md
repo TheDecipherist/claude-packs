@@ -22,6 +22,9 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Options: `typescript` 7.0.2 alone with `tsc --lsp --stdio`; or that plus `typescript-language-server` 6.0.3 with `typescript` 6.0.2 aliased.
 - Chosen: `typescript` 7.0.2 and `@types/node` newest 22.x as devDependencies; Go pinned for the proxy build. The server: open until
   W1's probe (recommended: `tsc --lsp` if it answers definitions and references on `.mts` through the LSP tool in a fresh session).
+  **Completed at W1.1 (2026-11-11): `tsc --lsp --stdio` from `typescript` 7.0.2.** A fresh child session's `LSP` tool answered
+  goToDefinition, findReferences (75 references in 28 files) and incomingCalls (33) on a `.mts` (findings {#w1-1}); the pair with
+  TypeScript 6 is not taken, so the kit carries one dependency for both the build and the server.
   The LSP declaration ships as a plugin folder `.claude-plugin/` with `lspServers`, enabled in `.claude/settings.json`, the global
   `typescript-lsp` plugin disabled there.
 - Why: what ships is `.mjs`; typescript is not a runtime dependency.

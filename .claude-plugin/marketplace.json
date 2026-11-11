@@ -1,0 +1,14 @@
+{
+  "name": "claude-packs-kit",
+  "description": "The kit's own Claude Code plugins: the TypeScript language server the kit's sources are read with (typescript order d-3)",
+  "owner": { "name": "TheDecipherist" },
+  "plugins": [
+    {
+      "name": "kit-typescript-lsp",
+      "description": "TypeScript 7's own language server (tsc --lsp --stdio) from the project's node_modules, for .mts, .ts, .cts and .d.mts",
+      "version": "1.0.0",
+      "source": "./.claude-plugin/typescript-lsp",
+      "category": "development"
+    }
+  ]
+}

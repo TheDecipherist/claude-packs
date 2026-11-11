@@ -1,0 +1,18 @@
+{
+  "name": "kit-typescript-lsp",
+  "description": "TypeScript 7's own language server (tsc --lsp --stdio) from the project's node_modules, for .mts, .ts, .cts and .d.mts",
+  "version": "1.0.0",
+  "author": { "name": "TheDecipherist" },
+  "lspServers": {
+    "typescript": {
+      "command": "${CLAUDE_PROJECT_DIR}/node_modules/.bin/tsc",
+      "args": ["--lsp", "--stdio"],
+      "extensionToLanguage": {
+        ".ts": "typescript",
+        ".mts": "typescript",
+        ".cts": "typescript",
+        ".tsx": "typescriptreact"
+      }
+    }
+  }
+}
