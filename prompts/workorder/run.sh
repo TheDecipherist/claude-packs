@@ -42,6 +42,12 @@ while [[ "$session" -le "$max_sessions" ]]; do
     echo "done before session $session"
     exit 0
   fi
+  # before every session, not only the first: a session never starts on an outdated kit (KWB-156). kit-fresh says what is older
+  # and exits 2 while nobody is there (CLAUDE_PACKS_UNATTENDED); offline it says what it could not check and lets the run go on
+  if [[ -f "$root/.claude/hooks/kit-fresh.mjs" ]] && ! node "$root/.claude/hooks/kit-fresh.mjs" --check 2>&1 | tee -a "$logs/runner.log"; then
+    echo "$(date +%Y-%m-%dT%H:%M:%S%z) kit-fresh: the kit is older than npm's; update it, then start again" | tee -a "$logs/runner.log"
+    exit 6
+  fi
   before="$(moved)"
   echo "$(date +%Y-%m-%dT%H:%M:%S%z) session $session starts" | tee -a "$logs/runner.log"
   claude -p "Run docs/workorders/{{name}}/PROMPT.md" --permission-mode bypassPermissions --output-format stream-json --verbose \

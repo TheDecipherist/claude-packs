@@ -36,6 +36,14 @@ export const COMMAND_CASES = {
     assert.equal(bash(here, 'suite-once.mjs', `cd ${wt} && bash tools/all.sh`), 2);
     assert.equal(bash(here, 'suite-once.mjs', `cd ${here} && bash tools/all.sh`), 0);
   },
+  'kit-fresh.mjs': ({ here, wt }) => {
+    // a session in the worktree reads the worktree's own install: its lock older than npm's (the run's kept answer is this kit's
+    // version), and nothing installed there is newer; the main checkout's install of this kit is the newest and says nothing
+    put(join(wt, '.claude/claude-packs.lock.json'), JSON.stringify({ kit: '0.0.1' }));
+    const start = (cwd) => fireAs(here, 'kit-fresh.mjs', { hook_event_name: 'SessionStart', cwd });
+    assert.match(start(wt).stdout, /runs the kit 0\.0\.1/);
+    assert.equal(start(here).stdout, '');
+  },
   'no-find.mjs': ({ here, wt }) => {
     // no layout key: a search of the disk is refused from a worktree as from the main checkout, a plain command passes (KWB-154)
     assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && find . -name '*.cpp'`), 2);

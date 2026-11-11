@@ -400,7 +400,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, a settings layer with the standard settings | 53 | 12 | 3 | 8 |
-| `base` | Universal engineering, in every configuration | 25 | 8 | 23 | 15 |
+| `base` | Universal engineering, in every configuration | 25 | 8 | 25 | 15 |
 | `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
@@ -543,6 +543,8 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 | `heartbeat` | Every call | Records what each agent did last and when, for the status line; refuses nothing |
+| `no-find` | Bash | Refuses a search of the disk (`find`, `bfs`, `fd`, `locate`, `mdfind`): every location is named in the order, the layout or the brief; allowed when the prompt asks for one by name |
+| `kit-fresh` | Session start, Bash | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
 
 Packs add their own: `realtime-guard`, `param-id-lock` and `settings-layer` (`audio-core`; every plugin has a settings layer with the standard settings, and its standalone no JUCE Options button), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, `chart-first`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 

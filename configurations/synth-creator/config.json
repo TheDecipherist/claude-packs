@@ -105,6 +105,7 @@
     "PreToolUse Bash": [
       "stage-guard.mjs",
       "git-guard.mjs",
+      "kit-fresh.mjs",
       "build-guard.mjs"
     ],
     "PreToolUse *": [
@@ -122,6 +123,7 @@
       "user-asks.mjs"
     ],
     "SessionStart": [
+      "kit-fresh.mjs",
       "build-sweep.mjs"
     ],
     "SubagentStop": [

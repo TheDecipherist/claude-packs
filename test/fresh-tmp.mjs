@@ -1,7 +1,7 @@
 // Preloaded by `npm test`: every test process gets its own empty temp folder. Profiles with
 // `siblings: ["../"]` make doctor read the folder around a project, and the shared system temp
 // folder holds tens of thousands of other programs' files (and other tests' repos).
-import { existsSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,3 +22,10 @@ if (existsSync(jscpd)) process.env.CLAUDE_PACKS_JSCPD ??= jscpd;
 
 // A test's simulated sessions are not this Claude process: kit-lock reads CLAUDE_PID as its holder (KWB-40).
 delete process.env.CLAUDE_PID;
+
+// kit-fresh asks npm for the newest kit at most once a day (KWB-156): the run's own cache, holding today's answer as this kit's own
+// version, so no test reaches the network and an install of this kit reads as the newest
+process.env.CLAUDE_PACKS_CACHE_DIR ??= join(dir, 'cache');
+mkdirSync(process.env.CLAUDE_PACKS_CACHE_DIR, { recursive: true });
+const ownVersion = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
+writeFileSync(join(process.env.CLAUDE_PACKS_CACHE_DIR, 'kit-fresh.json'), JSON.stringify({ version: ownVersion, at: Date.now() }));
