@@ -66,6 +66,9 @@ test('an agent its own file calls paused, waiting or finished is never QUIET, an
   const { agents } = runRows(s, now);
   assert.deepEqual(agents.map((a) => a.quiet), [0, 0, 0, 40]);
   assert.deepEqual(agents.map((a) => Boolean(a.paused)), [true, true, true, false]);
+  // KWB-167: a stopped agent's row is cleared of its last action and its process counts; a working one keeps them
+  assert.doesNotMatch(agents[0].live, /RUN|⚙|⟳/, agents[0].live);
+  assert.match(agents[3].live, /RUN git push/, agents[3].live);
 });
 
 test('an agent is QUIET after 5 minutes with no call, or a call running with nothing working in its worktree; a busy call never', () => {

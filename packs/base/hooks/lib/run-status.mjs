@@ -205,7 +205,7 @@ export function runRows(s, nowMs = Date.now(), checkedAt = null) {
     // something is wrong (KWB-164)
     const paused = STILL_ON_PURPOSE.has(a.state) || /^(?:paused|waiting|finished)\b/i.test(a.now ?? '');
     return { who: a.name, id: a.step ?? '', title: a.step ? (a.title || step?.title || '') : waiting ? 'not started yet' : 'no status file yet', percent: a.percent ?? (step ? percent(step.done, step.items) : 0),
-      now: a.now ?? '', ...liveOf(a.beat, a.updated, a.work ?? null, nowMs), ...(paused ? { quiet: 0, paused: true } : {}) };
+      now: a.now ?? '', ...liveOf(a.beat, a.updated, a.work ?? null, nowMs), ...(paused ? { quiet: 0, paused: true, action: '', work: null } : {}) };   // KWB-167: a stopped agent shows no last action or counts
   });
   const current = s.steps.find((x) => x.done < x.items);
   if (!s.finished && n === 0 && current) {
