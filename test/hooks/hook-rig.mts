@@ -22,9 +22,11 @@ const PACKS = fileURLToPath(new URL('../../packs', import.meta.url));
 
 /** A copy of an install no fixture names (a pack the fixtures leave out: postgres, reverse-engineering, ...): built once per run
  *  under `name` by the same build lock, then copied. `args` are what `init` is given. */
-export function extraFixture(name: string, args: readonly string[]): string {
+export function extraFixture(name: string, args: readonly string[], { exitsRed = false } = {}): string {
   const root = process.env.CLAUDE_PACKS_FIXTURES ?? join(tmpdir(), `claude-packs-fixtures-${process.pid}`);
-  const built = buildOnce(root, `extra-${name}`, (into) => { run(into, 'init', ...args); });
+  // `exitsRed`: an install whose own check ends red (a new synth with no design/shape.json) is still the install the test wants
+  const build = (into: string): void => { if (exitsRed) cli(into, 'init', ...args); else run(into, 'init', ...args); };
+  const built = buildOnce(root, `extra-${name}`, build);
   return copyInstall(built, scratchDir(`fixture-${name.replace(/\W+/g, '-')}-`));
 }
 
