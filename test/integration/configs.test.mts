@@ -6,6 +6,7 @@ import { assert, cli, existsSync, fresh, join, readFileSync, run, test, writeFil
 import { parseJson } from '../../packs/base/hooks/lib/json.mts';
 import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
 import type { Layout } from '../../packs/base/hooks/lib/types.d.mts';
+import { fixture } from '../fixtures/installs.mts';
 
 const project = (): string => fresh('cfg-');
 const layoutOf = (dir: string): Layout => readLayout(dir);
@@ -51,14 +52,12 @@ test('a pack outside the configuration is refused, naming the ones it takes', ()
 });
 
 test('init without --config takes the configuration its packs belong to', () => {
-  const synth = project();
-  run(synth, 'init', 'audio-core', 'gpu-painter');
+  const synth = fixture('audio-core+gpu-painter');
   assert.equal(layoutOf(synth).configuration, 'synth-creator');
 });
 
 test('a layout without the key (an install before 0.10.0) gets the configuration of its packs on update', () => {
-  const dir = project();
-  run(dir, 'init', 'audio-core');
+  const dir = fixture('audio-core');
   const { configuration: _gone, ...layout } = layoutOf(dir);
   writeFileSync(join(dir, '.claude/layout.json'), JSON.stringify(layout, null, 2));
   assert.match(run(dir, 'update'), /configuration: synth-creator \(from its packs: base, audio-core\)/);
@@ -66,8 +65,7 @@ test('a layout without the key (an install before 0.10.0) gets the configuration
 });
 
 test('config <name> lists what changes and switches; --dry-run changes nothing', () => {
-  const dir = project();
-  run(dir, 'init', 'audio-core');
+  const dir = fixture('audio-core');
   const dry = run(dir, 'config', 'base', '--dry-run');
   assert.match(dry, /synth-creator -> base/);
   assert.match(dry, /packs dropped: audio-core/);
@@ -87,8 +85,7 @@ test('config <name> lists what changes and switches; --dry-run changes nothing',
 });
 
 test('doctor fails on a configuration the kit does not have, and on a pack outside it', () => {
-  const dir = project();
-  run(dir, 'init', 'audio-core');
+  const dir = fixture('audio-core');
   const lf = join(dir, '.claude/layout.json');
   writeFileSync(lf, JSON.stringify({ ...layoutOf(dir), configuration: 'gone' }, null, 2));
   assert.match(cli(dir, 'doctor').stdout, /PROBLEM: layout\.json names configuration "gone"/);

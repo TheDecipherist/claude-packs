@@ -2,7 +2,7 @@
 // verdict equal to the source's), then the refusals that sat in the old root test files.
 import { join } from 'node:path';
 import { write } from '../../fixtures/installs.mts';
-import { assert, fresh, hookRun, mkdirSync, readFileSync, rmSync, run, test, writeFileSync } from '../../kit-cli.mts';
+import { assert, fresh, hookRun, mkdirSync, readFileSync, rmSync, initAuto, test, writeFileSync } from '../../kit-cli.mts';
 import { fixture, holdsTheContract } from '../hook-rig.mts';
 import { ROUTES, routeProject, unrefused } from '../routes.mts';
 
@@ -33,7 +33,7 @@ test('a plain src/ takes new files, in every configuration that names nothing in
   const py = fresh('py-');   // a Python project is installed by `init --auto`: the install is what this half proves
   mkdirSync(join(py, 'src'));
   writeFileSync(join(py, 'src/a.py'), 'print(1)\n');
-  run(py, 'init', '--auto');
+  initAuto(py);
   assert.equal(fires(py, 'src/new.py', 'print(2)\n'), 0);
   assert.match(readFileSync(join(py, '.claude/rules/bug-fix-starts-red.md'), 'utf8'), /\*\*\/\*\.py/, 'a universal rule loads on Python (KWB-79)');
 });

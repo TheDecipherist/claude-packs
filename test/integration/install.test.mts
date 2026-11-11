@@ -2,6 +2,7 @@
 import { appendFileSync, assert, cli, existsSync, fresh, hookStatus, join, mkdirSync, profile, readFileSync, readdirSync, run, test, writeFileSync } from '../kit-cli.mts';
 import { parseJson } from '../../packs/base/hooks/lib/json.mts';
 import type { Layout } from '../../packs/base/hooks/lib/types.d.mts';
+import { fixture } from '../fixtures/installs.mts';
 
 interface Settings { model?: string; hooks: { Stop: { hooks: { command: string }[] }[] } }
 const project = (): string => fresh('cp-');
@@ -32,8 +33,7 @@ test('full Stellix install: nested GPU skills, CLAUDE.md block, hooks', () => {
 });
 
 test('an edited rule survives repeated updates', () => {
-  const dir = project();
-  run(dir, 'init', 'audio-core', 'gpu-painter');
+  const dir = fixture('audio-core+gpu-painter');
   const rule = join(dir, '.claude', 'rules', 'gpu-bloom.md');
   appendFileSync(rule, '- my own note\n');
   run(dir, 'update');
@@ -46,8 +46,7 @@ test('an edited rule survives repeated updates', () => {
 });
 
 test('moving a folder in layout.json re-points every rule', () => {
-  const dir = project();
-  run(dir, 'init', 'audio-core', 'stellix');
+  const dir = fixture('audio-core+stellix');
   const layoutFile = join(dir, '.claude', 'layout.json');
   const layout = parseJson<Layout>(readFileSync(layoutFile, 'utf8'));
   assert.ok(layout?.folders.world);
@@ -58,8 +57,7 @@ test('moving a folder in layout.json re-points every rule', () => {
 });
 
 test('folder law refuses new source files outside the layout', () => {
-  const dir = project();
-  run(dir, 'init', 'audio-core');
+  const dir = fixture('audio-core');
   assert.equal(writeTool(dir, 'src/Loose.cpp'), 2);
   assert.equal(writeTool(dir, 'Other/Thing.h'), 2);
   assert.equal(writeTool(dir, 'src/dsp/Svf.cpp'), 0);
@@ -67,8 +65,7 @@ test('folder law refuses new source files outside the layout', () => {
 });
 
 test('removing a pack removes its rules and hooks', () => {
-  const dir = project();
-  run(dir, 'init', 'audio-core', 'stellix');
+  const dir = fixture('audio-core+stellix');
   run(dir, 'remove', 'stellix');
   const rules = readdirSync(join(dir, '.claude', 'rules'));
   assert.ok(!rules.includes('world-fp-determinism.md'));

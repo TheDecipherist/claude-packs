@@ -22,6 +22,7 @@ export const FIXTURES = {
   'base': ['--config', 'base'],
   'audio-core': ['audio-core'],
   'audio-core+gpu-painter': ['audio-core', 'gpu-painter'],
+  'audio-core+stellix': ['audio-core', 'stellix'],
   'stellix-profile': ['audio-core', 'gpu-painter', 'stellix', '--profile', profile('stellix')],
   'synth-creator': ['--config', 'synth-creator'],
   'cpp': ['--config', 'cpp'],

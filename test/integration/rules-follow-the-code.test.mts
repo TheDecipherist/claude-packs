@@ -4,6 +4,7 @@
 import { assert, cli, execFileSync, existsSync, hookRun, join, mkdirSync, projectWith, readFileSync, run, test, writeFileSync } from '../kit-cli.mts';
 
 import type { Layout, LayoutFolder as Folder } from '../../packs/base/hooks/lib/types.d.mts';
+import { fixture } from '../fixtures/installs.mts';
 
 function repo(files: Readonly<Record<string, string>>): string {
   const dir = projectWith(files, 'follow-');
@@ -37,8 +38,7 @@ test('what is fetched, built or another project\'s is no source folder of the pr
 });
 
 test('a folder added to the layout later gets its rules on update; test/structure.test.mjs holds that a stray file is still reported', () => {
-  const dir = repo({ 'src/m.cpp': 'int a;\n' });
-  run(dir, 'init', '--config', 'cpp');
+  const dir = fixture('cpp');
   const mine = layoutOf(dir);
   mine.folders.engine = { path: 'engine', purpose: 'the engine' };
   writeFileSync(join(dir, '.claude/layout.json'), JSON.stringify(mine, null, 2));
@@ -49,8 +49,7 @@ test('a folder added to the layout later gets its rules on update; test/structur
 });
 
 test('an installed project keeps its own concepts and folders on update: a new law never moves under it', () => {
-  const dir = repo({ 'src/m.cpp': 'int a;\n' });
-  run(dir, 'init', '--config', 'cpp');
+  const dir = fixture('cpp');
   const mine = layoutOf(dir);
   mine.concepts.cpp = ['src/**/*.cpp'];
   delete mine.followFolders; // a project from before 1.1.0 has no such key
@@ -63,7 +62,6 @@ test('an installed project keeps its own concepts and folders on update: a new l
 });
 
 test('the new-project skill comes with every install', () => {
-  const dir = repo({ 'src/m.cpp': 'int a;\n' });
-  run(dir, 'init', '--config', 'cpp');
+  const dir = fixture('cpp');
   assert.ok(existsSync(join(dir, '.claude/skills/new-project/SKILL.md')));
 });

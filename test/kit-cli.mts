@@ -24,6 +24,8 @@ export const KIT: string = fileURLToPath(new URL('..', import.meta.url));
 export const CLI: string = join(KIT, 'bin/claude-packs.mjs');
 export const run = (dir: string, ...args: string[]): string => execFileSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
 export const cli = (dir: string, ...args: string[]): Spawned => spawnSync('node', [CLI, ...args, '--dir', dir], { encoding: 'utf8' });
+/** `init --auto` in a project: the install a suggest-then-install test ends with (its output, a throw on a non-zero exit). */
+export const initAuto = (dir: string): string => run(dir, 'init', '--auto');
 export const fresh = (prefix: string): string => mkdtempSync(join(tmpdir(), prefix));
 const TEST_IDENTITY = { name: 't', email: 't@local' };
 /** git in a test's folder, as the test's own identity: its stdout, or a throw with git's message, since the setup failed. */
