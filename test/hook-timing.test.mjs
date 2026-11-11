@@ -88,10 +88,10 @@ test('a full log rotates and nothing is lost', async () => {
   assert.equal(lines.length, n, 'every line is kept');
 });
 
-test('the python helper writes the same line', () => {
+test('browser-guard, ported from python, writes the same line through the hook tail', () => {
   const dir = stellix();
   const payload = { hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: join(dir, 'lib/world/src/b.h'), content: '// b\n' } };
-  spawnSync('python3', [join(dir, '.claude/hooks/browser-guard.py')], { input: JSON.stringify(payload), env: { ...process.env, CLAUDE_PROJECT_DIR: dir, PYTHONDONTWRITEBYTECODE: '1' } });
+  spawnSync('node', [join(dir, '.claude/hooks/browser-guard.mjs')], { input: JSON.stringify(payload), env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
   const row = logged(dir).find((r) => r[2] === 'browser-guard');
   assert.ok(row, 'browser-guard wrote a line');
   assert.deepEqual([row[1], row[4]], ['PreToolUse', '0']);

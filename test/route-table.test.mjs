@@ -5,7 +5,10 @@ import { judge, LAW_NAMES } from '../packs/instrument-shell/tools/lib/route-judg
 import { diagrams } from '../packs/instrument-shell/tools/lib/route-mermaid.mjs';
 import { CLEAN, PLANTS, planted } from '../packs/instrument-shell/tools/lib/route-plants.mjs';
 
-const TOOL = join(KIT, 'packs/instrument-shell/tools/route-table.mjs');
+// The command runs from an install, as a project runs it: it finds base's hook lib beside the tools (W4: isMain from hook-log).
+const INSTALL = fresh('route-tool-install-');
+run(INSTALL, 'init', 'instrument-shell', '--config', 'synth-creator', 'cpp', 'audio-core');
+const TOOL = join(INSTALL, '.claude/tools/route-table.mjs');
 const tool = (...args) => spawnSync('node', [TOOL, ...args], { encoding: 'utf8' });
 const tableFile = (table) => { const f = join(fresh('routes-'), 'routes.json'); writeFileSync(f, JSON.stringify(table)); return f; };
 

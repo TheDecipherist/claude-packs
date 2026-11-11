@@ -107,10 +107,14 @@ export const PRESETS: Readonly<Record<string, readonly string[]>> = {
   'rust-app': ['rust', 'shell', 'docker', 'ci'],
 };
 
-/** Base always first, no duplicates, presets expanded, in the order given; every name must be a pack (readPack throws). */
+/** Base always first, no duplicates, presets expanded, in the order given; every name must be a pack (readPack throws), and every
+ *  pack's `requires` must be in the install (sound-design requires audio-core). */
 export function normalisePacks(names: readonly string[]): string[] {
   const out = ['base'];
   for (const n of names.flatMap((p) => (Object.hasOwn(PRESETS, p) ? (PRESETS[p] ?? []) : [p]))) if (!out.includes(n)) out.push(n);
-  for (const n of out) readPack(n);
+  for (const n of out) {
+    const missing = (readPack(n).requires ?? []).filter((r) => !out.includes(r));
+    if (missing.length) throw new Error(`pack ${n} requires ${missing.join(', ')}: add ${missing.length > 1 ? 'them' : 'it'} to the install`);
+  }
   return out;
 }

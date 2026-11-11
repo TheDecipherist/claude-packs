@@ -1,8 +1,11 @@
 // 1.3.0: a ledger of every source, ticked only when read. On the Matrix-12 the owner's manual lost every graph to a
 // placeholder, and the service manual, which is scanned sheets, came out nearly empty, and nothing listed either as unread.
-import { KIT, assert, fresh, join, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, fresh, join, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
 
-const TOOL = join(KIT, 'packs/reverse-engineering/tools/source-ledger.mjs');
+// The command runs from an install, as a project runs it: it finds base's hook lib beside the tools (W4: isMain from hook-log).
+const INSTALL = fresh('ledger-install-');
+assert.equal(cli(INSTALL, 'init', 'reverse-engineering', '--config', 'cpp').status, 0);
+const TOOL = join(INSTALL, '.claude/tools/source-ledger.mjs');
 
 function project() {
   const dir = fresh('ledger-');

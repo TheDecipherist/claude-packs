@@ -53,7 +53,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/browser-guard.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/browser-guard.mjs\"",
+            "role": "judge",
             "timeout": 15
           }
         ]

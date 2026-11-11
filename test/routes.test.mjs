@@ -122,7 +122,7 @@ test('no-shipped-images refuses an image in the code by every route', () => {
 });
 
 test('browser-guard refuses code that starts a browser by every route', () => {
-  assert.deepEqual(unrefused(project(), 'browser-guard.py', 'tools/shot.mjs', '// shot\nPLACEHOLDER\n', LAUNCH), []);
+  assert.deepEqual(unrefused(project(), 'browser-guard.mjs', 'tools/shot.mjs', '// shot\nPLACEHOLDER\n', LAUNCH), []);
 });
 
 // once-only (0.9.0): a copy of a function the repo has, one line changed, is refused by every route that writes it.
