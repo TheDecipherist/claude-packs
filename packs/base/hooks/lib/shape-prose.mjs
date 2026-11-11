@@ -60,12 +60,13 @@ export function isLibraryCall(line, at, shape) {
   return LIBRARIES.has(path[1]) || shape.values?.has(last);
 }
 
-// The first parameter of each declaration of `name`, from the text being written and the project's files.
+// The first parameter of each declaration of `name`, from the text being written and the project's files. git grep only narrows the
+// files: its -E is the system's regex, and macOS's has no \b (KWB-159), so the word boundary is the JS pattern's.
 function firstParameters(root, name, text) {
   const shape = new RegExp(`\\b${name}\\s*\\(\\s*(?:const\\s+)?(?:[\\w:<>]+[\\s&*]+)+(\\w+)\\s*[,)=]`, 'g');
   let found = '';
   try {
-    found = execFileSync('git', ['-C', root, 'grep', '--untracked', '-hE', `\\b${name}[[:space:]]*\\(`, '--', ...SOURCE_FILES], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5000 });
+    found = execFileSync('git', ['-C', root, 'grep', '--untracked', '-hE', `${name}[[:space:]]*\\(`, '--', ...SOURCE_FILES], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5000 });
   } catch {
     found = ''; // no match, or no repository: nothing declares it, so the call stays an instance
   }
