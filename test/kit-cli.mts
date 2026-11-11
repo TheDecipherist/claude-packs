@@ -47,15 +47,18 @@ export const hookStatus = (dir: string, name: string, payload: Payload): number 
 export const lessonWrite = (dir: string, rel: string, content: string): Spawned =>
   hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });
 
-/** One test per [pack, file, bad, good, ...needs]: the pack installs, refuses the fault and takes the fix (`needs`: the packs this
- *  one requires, pack.json requires). */
+/** The path of a tailored seed layout (`--profile` takes a path): `profile('stellix')`. */
+export const profile = (name: string): string => join(KIT, 'test/fixtures/profiles', `${name}.layout.json`);
+
+/** One test per [pack, file, bad, good]: the one all-packs fixture (test/fixtures/installs.mts, copied once per call) refuses the
+ *  fault and takes the fix. The trailing `needs` (the packs a case's pack requires) are kept in the rows and not read: the one
+ *  install holds every pack. */
 export type EachCase = readonly [pack: string, file: string, bad: string, good: string, ...needs: string[]];
-export function holdsEachCase(cases: readonly EachCase[], ...initArgs: string[]): void {
-  for (const [pack, file, bad, good, ...needs] of cases) {
-    test(`${pack}: ${file} is refused its fault and takes the fix`, () => {
-      const dir = fresh(`case-${pack}-`);
-      const r = cli(dir, 'init', pack, ...needs, ...initArgs);
-      assert.equal(r.status, 0, r.stdout + r.stderr);
+export function holdsEachCase(cases: readonly EachCase[]): void {
+  let dir: string | null = null;
+  for (const [pack, file, bad, good] of cases) {
+    test(`${pack}: ${file} is refused its fault and takes the fix`, async () => {
+      dir ??= (await import('./fixtures/installs.mts')).fixture('all-packs');
       put(join(dir, file), '');
       assert.equal(lessonWrite(dir, file, bad).status, 2);
       assert.equal(lessonWrite(dir, file, good).status, 0);

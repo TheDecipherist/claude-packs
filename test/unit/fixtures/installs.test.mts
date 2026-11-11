@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { FIXTURES, bash, buildOnce, copyInstall, fixture, git, lockOf, strayPaths, transcript, withLayout, write } from '../../fixtures/installs.mts';
-import { cli } from '../../kit-cli.mts';
+import { cli, profile } from '../../kit-cli.mts';
 
 const INSTALLS = fileURLToPath(new URL('../../fixtures/installs.mts', import.meta.url));
 const countLines = (file: string): number => (existsSync(file) ? readFileSync(file, 'utf8').split('\n').filter(Boolean).length : 0);
@@ -100,6 +100,19 @@ test('withLayout merges key by key (an object, or a function of the layout), loc
   assert.deepEqual(lockOf(scratchDir('installs-nolock-')), {}, 'no lock reads as empty');
   const file = transcript(dir, [{ type: 'user' }, { type: 'assistant', n: 2 }]);
   assert.deepEqual(readFileSync(file, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)), [{ type: 'user' }, { type: 'assistant', n: 2 }]);
+});
+
+test('fixture(all-packs): the checks of the node and the synth-creator packs are in one install, and a copy names no stray path (W5.4)', () => {
+  const copy = fixture('all-packs');
+  for (const check of ['rust-unwrap-in-library.json', 'dsp-without-apvts.json']) assert.ok(existsSync(join(copy, '.claude/checks', check)), check);
+  assert.equal(existsSync(join(copy, '.claude/checks/fetch-needs-timeout.json')), false, 'the one check a case of another pack meets is left out');
+  assert.deepEqual(strayPaths(copy, join(process.env.CLAUDE_PACKS_FIXTURES ?? '', 'all-packs')), []);
+});
+
+test('--profile takes the path of a layout file, and the two profiles are fixtures (W5.4)', () => {
+  const dir = scratchDir('installs-profile-');
+  assert.equal(cli(dir, 'init', 'audio-core', '--profile', profile('sub37')).status, 0);
+  assert.notEqual(cli(scratchDir('installs-profile-missing-'), 'init', 'audio-core', '--profile', 'sub37').status, 0, 'a bare name is no longer a profile');
 });
 
 test('git commits as the one identity and throws with git\'s own words on a failure; write and bash build the payloads', () => {

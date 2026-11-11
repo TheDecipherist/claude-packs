@@ -3,13 +3,20 @@
 // npx-name, base-neutral, file-size; seen red on planted .mts, build/evidence/W2/gates-6-10-red.txt); W5 moves them in here.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { put, readText, scratchDir, walk } from '../packs/base/hooks/lib/files.mts';
 import { emittedFrom } from '../packs/base/hooks/lib/source-exts.mts';
 import { languageOf } from '../packs/base/hooks/lib/languages.mjs';
+import { manifestProblems } from '../lib/pack-manifest.mts';
+import { PRESETS, availablePacks, readPack } from '../lib/packs.mts';
+import { CLI } from './kit-cli.mts';
+import {
+  BARE, addedRawJson, bareNpx, configurationFaults, frameBenchFaults, lineLimit, overLimit, pathnameForms, personalNames, readmeBaseHooks,
+  readmeMissingCommands, readmeNames, readmeOrder, readmePackRows, readmeRefusal, siteCounts, siteFiles, siteShipped, siteWords, slowChecks, synthWordsInBase,
+} from './repo-readers.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
 const TSC = join(KIT, 'node_modules/.bin/tsc');
@@ -153,3 +160,118 @@ test('gates 11 and 12: no process global and no work at import in a converted ho
   assert.deepEqual(processGlobals(dir), ['packs/x/hooks/lib/a.mts:1', 'packs/x/hooks/lib/a.mts:2']);
   assert.deepEqual(workAtImport(dir), ['packs/x/hooks/lib/a.mts:2']);
 });
+
+// The picker reaches this file for a change under docs/ because it reads every file the repo keeps (KWB-131: no-personal-name).
+// The reader tests of W2.7 and the count and fact readers (test/repo-readers.mts, W5.4): each one asserts the real tree clean and a planted one found.
+const FACTS = (extra: Record<string, string> = {}): Record<string, string> => ({ 'packs/p/pack.json': '{}', ...extra });
+
+test('base and the base configuration name no synth word', () => {
+  assert.deepEqual(synthWordsInBase(KIT), []);
+  assert.equal(synthWordsInBase(planted({ 'packs/base/rules/a.md': 'tune the Voice\n', 'configurations/base/config.json': '{}' })).length, 1);
+});
+test('only the synth-creator configuration installs the synth-creator pack, and every configuration installs base first', () => {
+  assert.deepEqual(configurationFaults(KIT), { takers: ['synth-creator'], notBaseFirst: [] });
+  const bad = planted({ 'configurations/x/config.json': '{"name":"x","packs":{"always":["writing"],"choose":["synth-creator"]}}' });
+  assert.deepEqual(configurationFaults(bad), { takers: ['x'], notBaseFirst: ['x'] });
+});
+test('every lesson check gets through a large file within its budget', () => {
+  assert.deepEqual(slowChecks(KIT), []);
+  const slow = planted({ 'packs/p/checks/c.json': '{"id":"c","pattern":"(a|a)*b"}' });
+  assert.deepEqual(slowChecks(slow, -1).length, 3, 'a budget no check meets finds it in each large file');
+});
+test('every installed hook, check and tool file fits in the line limit, and every .mts it is built from', () => {
+  assert.deepEqual(overLimit(KIT, lineLimit(KIT)), []);
+  assert.deepEqual(overLimit(planted({ 'packs/p/hooks/a.mts': 'x\n'.repeat(5) }), 4), ['packs/p/hooks/a.mts']);
+});
+test('no source takes its own path from a URL\'s pathname (Windows reads it as /C:/...)', () => {
+  assert.deepEqual(pathnameForms(KIT), []);
+  assert.deepEqual(pathnameForms(planted({ 'lib/a.mts': 'export const f = new URL(\'.\', import.meta.url).pathname;\n' }), ['lib']), ['lib/a.mts']);
+});
+test('gpu-painter skills name Dawn timestamps, never GL timer queries', () => {
+  assert.deepEqual(frameBenchFaults(KIT), []);
+  assert.equal(frameBenchFaults(planted({ 'packs/gpu-painter/skills/gpu-frame-bench/SKILL.md': 'uses GL timer queries\n' })).length, 2);
+});
+test('a change adds no raw JSON.parse or JSON.stringify call: it calls toJson, parseJson, readJson or writeJson', () => {
+  const base = process.env.CLAUDE_PACKS_LINT_BASE ?? 'HEAD';   // a gate on committed work names the trunk it lands on
+  assert.deepEqual(addedRawJson(KIT, base), [], 'call the helper in packs/base/hooks/lib/json.mts');
+  const dir = planted({ 'lib/a.mts': 'export const a = 1;\n' });
+  for (const args of [['init', '-q'], ['add', '.'], ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'a']]) spawnSync('git', args, { cwd: dir });
+  put(join(dir, 'lib/a.mts'), 'export const a = JSON.parse(\'1\');\n');
+  put(join(dir, 'lib/new.mts'), 'export const b = JSON.stringify(1);\n// JSON.parse( in a comment is no call\n');
+  assert.deepEqual(addedRawJson(dir).map((h) => h.split(':')[0]), ['lib/a.mts', 'lib/new.mts']);
+});
+test('no file names a person', () => {
+  assert.deepEqual(personalNames(KIT), []);
+  const dir = planted({ 'docs/a.md': 'thanks to ' + ['T', 'im'].join('') + '\n' });
+  assert.equal(personalNames(dir, ['docs/a.md']).length, 1);
+});
+test('nothing in the kit names the bare `npx claude-packs` (it resolves to someone else\'s package)', () => {
+  assert.deepEqual(bareNpx(KIT), [], 'use `npx --no-install @thedecipherist/claude-packs ...` or the installed path');
+});
+test('the bare-name reader finds a planted line', () => {
+  assert.ok(BARE.test('run `npx claude-packs doctor`') && BARE.test('npx -y claude-packs update'));
+  assert.ok(!BARE.test('npx --no-install @thedecipherist/claude-packs doctor'));
+});
+test('recorded run output under evidence/ is left out, and the same line anywhere else is found (KWB-99)', () => {
+  const root = planted(Object.fromEntries(['build/evidence/W1/gate.txt', 'docs/how.md'].map((f) => [f, 'run `npx claude-packs doctor`\n'])));
+  assert.deepEqual(bareNpx(root), ['docs/how.md:1']);
+});
+
+test('every pack the kit ships is a stock pack with a full manifest', () => {
+  for (const name of availablePacks()) {
+    const p = readPack(name);
+    assert.deepEqual(manifestProblems(p, name), [], name);
+    assert.equal(p.type, 'stock', name);
+    assert.match(p.repository?.url ?? '', /TheDecipherist\/claude-packs/, name);
+    assert.equal((p.repository as { directory?: string } | undefined)?.directory, `packs/${name}`, name);
+  }
+});
+test('a custom pack passes with an author and a git url, and each missing field is named', () => {
+  const custom = { name: 'acme', version: '1.2.0', description: 'Acme laws', type: 'custom' as const, author: 'Acme Platform', license: 'UNLICENSED', repository: { type: 'git', url: 'git@git.acme.example:p/acme.git' } };
+  assert.deepEqual(manifestProblems(custom), []);
+  assert.deepEqual(manifestProblems({ ...custom, author: { name: 'Acme', email: 'a@acme.example' } }), []);
+  const faults: [string, unknown, RegExp][] = [['author', '', /needs an author/], ['repository', {}, /needs repository\.url/], ['repository', { url: 'not a url' }, /needs repository\.url/],
+    ['type', 'mine', /needs a type: stock or custom/], ['version', '1', /needs a version/], ['license', undefined, /needs a license/], ['description', ' ', /needs a description/]];
+  for (const [field, value, said] of faults) assert.match(manifestProblems({ ...custom, [field]: value }).join('\n'), said, field);
+  assert.match(manifestProblems(custom, 'other').join('\n'), /says its name is acme/);
+});
+test('list shows each pack\'s version, type and author', () => {
+  assert.match(execFileSync('node', [CLI, 'list'], { encoding: 'utf8' }), /^mongo +1\.0\.0 +stock +claude-packs: MongoDB/m);
+});
+
+test('every pack has its row, with its true counts', () => {
+  assert.deepEqual(readmePackRows(KIT), []);
+  assert.deepEqual(readmePackRows(planted(FACTS({ 'README.md': '| `p` | x | 9 | 9 | 9 | 9 |\n' }))), ['p: the row says 9,9,9,9, the pack holds 0,0,0,0']);
+});
+test('every configuration and preset is named', () => {
+  assert.deepEqual(readmeNames(KIT, PRESETS), []);
+  assert.deepEqual(readmeNames(planted({ 'README.md': '| `a` | x |\n', 'configurations/b/config.json': '{}' }), { a: ['p'] }), ['configuration b is not named', 'preset a: p missing']);
+});
+test('every command in the help is on the page', () => {
+  const r = spawnSync('node', [CLI], { encoding: 'utf8' });
+  assert.match(r.stdout + r.stderr, /usage:/);
+  assert.deepEqual(readmeMissingCommands(KIT, r.stdout + r.stderr), []);
+  assert.deepEqual(readmeMissingCommands(planted({ 'README.md': '`init`\n' }), '  init x\n  zap y\n'), ['zap']);
+});
+test('the refusal on the page is the check\'s own words, so the first thing a reader sees is true', () => assert.deepEqual(readmeRefusal(KIT), []));
+test('a new reader meets what it is before any command, and how to install one pack', () => assert.deepEqual(readmeOrder(KIT), []));
+test('every hook base installs is in the table', () => {
+  assert.deepEqual(readmeBaseHooks(KIT), []);
+  const hook = '{"hooks":{"PreToolUse":[{"hooks":[{"command":"node .claude/hooks/zap.mjs"}]}]}}';
+  assert.deepEqual(readmeBaseHooks(planted({ 'packs/base/pack.json': hook, 'README.md': '' })), ['zap']);
+});
+
+test('the numbers on the page are the kit\'s true counts', () => {
+  assert.deepEqual(siteCounts(KIT), []);
+  const page = ['packs', 'rules', 'checks', 'hooks', 'skills', 'configurations'].map((n) => `<b data-count="${n}">0</b>`).join('');
+  assert.deepEqual(siteCounts(planted(FACTS({ 'site/index.html': page }))), ['packs: the page says 0, the kit holds 1']);
+});
+test('every file the page loads is in the site, by a relative path, so it works under any repo name', () => {
+  assert.deepEqual(siteFiles(KIT), []);
+  assert.deepEqual(siteFiles(planted({ 'site/index.html': '<link href="a.css"><script src="/x.js">' })), ['a.css', '/x.js', 'an absolute path']);
+});
+test('the page carries no analytics, and the refusal it shows is the check\'s own words', () => {
+  assert.deepEqual(siteWords(KIT), []);
+  assert.ok(siteWords(planted({ 'site/index.html': 'gtag' })).includes('the page carries analytics'));
+});
+test('the site is not shipped in the npm package', () => assert.equal(siteShipped(KIT), false));
