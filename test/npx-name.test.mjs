@@ -23,7 +23,7 @@ export function bareNpx(root) {
       if (SKIP.has(f)) continue;
       const p = join(d, f);
       if (statSync(p).isDirectory()) { walk(p); continue; }
-      if (!/\.(mjs|js|cjs|py|sh|md|json|txt)$/.test(f)) continue;
+      if (!/\.(mjs|js|cjs|mts|cts|ts|py|sh|md|json|txt)$/.test(f)) continue;   // TypeScript sources too (W2.7 gate 8)
       readFileSync(p, 'utf8').split('\n').forEach((line, i) => { if (BARE.test(line) && !line.includes('BARE')) hits.push(`${relative(root, p)}:${i + 1}`); });
     }
   };

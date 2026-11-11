@@ -15,7 +15,7 @@ function sources(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const path = join(dir, e.name);
     if (e.isDirectory()) return e.name === 'node_modules' ? [] : sources(path);
-    return /\.(mjs|js|cjs)$/.test(e.name) ? [path] : [];
+    return /\.(mjs|js|cjs|mts|cts|ts)$/.test(e.name) ? [path] : [];   // TypeScript sources too (W2.7 gate 6)
   });
 }
 
