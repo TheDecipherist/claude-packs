@@ -18,42 +18,59 @@
 //   "guards":    { "git", "copy", "time", "browser", "images" }   the project's values for the house guards
 //                (repo owner and token, the sanctioned copy tools, ...); each hook has its defaults
 // A seed layout (a profile, or one written from docs/project.md) is used when no layout exists yet.
-// "configuration" names the project's configuration (lib/configs.mjs); its layout template is read like a pack's folders,
+// "configuration" names the project's configuration (lib/configs.mts); its layout template is read like a pack's folders,
 // before the packs', so a project gets the folder structure of its kind (0.10.0).
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { NEW_INSTALL_GIT } from '../packs/base/hooks/lib/git-auth.mjs';
-import { codeFolders } from '../packs/base/hooks/lib/layout.mjs';
-import { readPack } from './packs.mjs';
+import { readText } from '../packs/base/hooks/lib/files.mts';
+import { NEW_INSTALL_GIT } from '../packs/base/hooks/lib/git-auth.mts';
+import { parseJson, writeJson } from '../packs/base/hooks/lib/json.mts';
+import { codeFolders } from '../packs/base/hooks/lib/layout.mts';
+import type { Configuration, Layout, LayoutKind } from '../packs/base/hooks/lib/types.d.mts';
+import { readPack } from './packs.mts';
 
-export const OWNED = ['files', 'protected', 'buildOutput', 'writeOnce', 'keepWorktrees', 'disable', 'enable', 'commands', 'siblings', 'maxFileLines', 'paramIds',
+export const OWNED: readonly string[] = ['files', 'protected', 'buildOutput', 'writeOnce', 'keepWorktrees', 'disable', 'enable', 'commands', 'siblings', 'maxFileLines', 'paramIds',
   'guards', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart', 'settingsLayer'];
-const OPTIONAL = ['maxFileLines', 'paramIds', 'guards', 'buildOutput', 'writeOnce', 'keepWorktrees', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart',
+const OPTIONAL: readonly string[] = ['maxFileLines', 'paramIds', 'guards', 'buildOutput', 'writeOnce', 'keepWorktrees', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart',
   'settingsLayer'];   // KWB-144: written only when the project has it
 // "complete": true marks a tailored layout; see below.
 
+/** A kind as a pack or configuration ships it: "contentWas" lists the content patterns it used to ship (they are replaced, a project's own is kept). */
+type TemplateKind = LayoutKind & { contentWas?: readonly unknown[] };
+
+/** The layout as built here: its kinds are always present. */
+type BuiltLayout = Layout & { kinds: Record<string, LayoutKind> };
+
 // Base's language concepts name folders, where every other language's are `**`: a file in a layout folder could be legal and have no rules (KWB-83).
 // `**` would close that and hide a stray file from doctor --strict, so the concept follows the layout instead: a folder in it gets its rules, and one outside stays reported.
-const FOLLOWED = { cpp: ['c', 'cc', 'cpp', 'cxx', 'h', 'hh', 'hpp', 'mm'], js: ['{js,mjs,cjs,jsx,ts,tsx}'] };
+const FOLLOWED: Readonly<Record<string, readonly string[]>> = { cpp: ['c', 'cc', 'cpp', 'cxx', 'h', 'hh', 'hpp', 'mm'], js: ['{js,mjs,cjs,jsx,ts,tsx}'] };
 
-function followFolders(layout) {
+function followFolders(layout: Layout): void {
   for (const [concept, extensions] of Object.entries(FOLLOWED)) {
-    if (!layout.concepts[concept]) continue;
+    const entries = layout.concepts[concept];
+    if (!entries) continue;
     const globs = codeFolders(layout).flatMap((folder) => extensions.map((ext) => `${folder}/**/*.${ext}`));
-    layout.concepts[concept] = [...new Set([...layout.concepts[concept], ...globs])];
+    layout.concepts[concept] = [...new Set([...entries, ...globs])];
   }
 }
 
-export function buildLayout(claudeDir, packNames, seed = null, config = null) {
+/** The kinds a template (a pack, or the configuration's layout) declares. */
+const kindsOf = (source: { kinds?: Record<string, LayoutKind> }): [string, TemplateKind][] => Object.entries(source.kinds ?? {});
+
+/** Writes the project's layout.json from what it holds, the seed (a first install) and the packs' templates; returns the layout. */
+export function buildLayout(claudeDir: string, packNames: readonly string[], seed: Partial<Layout> | null = null, config: Configuration | null = null): Layout {
   const file = join(claudeDir, 'layout.json');
   const firstInstall = !existsSync(file);
-  const current = firstInstall ? (seed ?? {}) : JSON.parse(readFileSync(file, 'utf8'));
+  const current: Partial<Layout> = firstInstall ? (seed ?? {}) : (parseJson<Partial<Layout>>(readText(file)) ?? failedRead(file));
   // A project already installed changes only through "enable": "guards/git-house".
-  if (firstInstall) current.guards = { ...current.guards, git: { ...NEW_INSTALL_GIT, ...current.guards?.git } };
+  if (firstInstall) {
+    const git = current.guards?.git;
+    current.guards = { ...current.guards, git: { ...NEW_INSTALL_GIT, ...(typeof git === 'object' && git !== null ? git : {}) } };
+  }
   // The key is the choice: a new install is held to its rules' named tests, and one already installed is told, until it adds the key.
   if (firstInstall) current.ruleTests ??= {};
   if (firstInstall && !current.complete) current.followFolders ??= true;
-  const layout = {
+  const layout: BuiltLayout = {
     _comment: 'Where everything lives. folders = the folders; kinds = what goes where (CLAUDE.md shows it, placement-law enforces it); concepts = which rules fire where. Edit here, then run `npx --no-install @thedecipherist/claude-packs update`.',
     ...(config ? { configuration: config.name } : current.configuration ? { configuration: current.configuration } : {}),
     folders: { ...(current.folders ?? {}) },
@@ -64,6 +81,7 @@ export function buildLayout(claudeDir, packNames, seed = null, config = null) {
     if (current[key] !== undefined) layout[key] = current[key];
     else if (!OPTIONAL.includes(key)) layout[key] = key === 'files' || key === 'commands' ? {} : [];
   }
+  const files = (layout.files ??= {});   // set above (not optional); the guard is for the type
   // A kind's content pattern that is exactly a pattern the pack used to ship ("contentWas") is
   // replaced by the pack's current one; a pattern the project wrote itself is kept.
   // "sourceFiles" (what folder-law and doctor count as source; KWB-37) comes from the configuration once, then is the project's
@@ -75,7 +93,7 @@ export function buildLayout(claudeDir, packNames, seed = null, config = null) {
   // gave a project with channel/ a second web app folder). A pack's own folders and concepts still come with the pack.
   const seeding = config?.layout && (firstInstall || current.configuration !== config.name) ? sources : packs;
   for (const pack of sources) {
-    for (const [k, v] of Object.entries(pack.kinds ?? {})) {
+    for (const [k, v] of kindsOf(pack)) {
       const mine = layout.kinds[k];
       if (mine && v.contentWas?.includes(mine.content)) layout.kinds[k] = { ...mine, content: v.content };
     }
@@ -90,18 +108,34 @@ export function buildLayout(claudeDir, packNames, seed = null, config = null) {
         if (!layout.concepts[k] && v.every((e) => e.startsWith('kind:') || e.includes('/') || e.includes('*') || e.includes('.'))) layout.concepts[k] = v;
       }
     }
-    writeFileSync(file, JSON.stringify(layout, null, 2) + '\n');
+    save(file, layout);
     return layout;
   }
   for (const pack of seeding) {
     for (const [k, v] of Object.entries(pack.folders ?? {})) layout.folders[k] ??= v;
-    for (const [k, v] of Object.entries(pack.files ?? {})) layout.files[k] ??= v;
-    for (const [k, { contentWas, ...v }] of Object.entries(pack.kinds ?? {})) layout.kinds[k] ??= v;
+    for (const [k, v] of stringEntries(pack.files)) files[k] ??= v;
+    for (const [k, { contentWas, ...v }] of kindsOf(pack)) layout.kinds[k] ??= v;
     for (const [k, v] of Object.entries(pack.concepts ?? {})) {
       if (!current.concepts?.[k]) layout.concepts[k] = [...new Set([...(layout.concepts[k] ?? []), ...v])];
     }
   }
   if (layout.followFolders) followFolders(layout);
-  writeFileSync(file, JSON.stringify(layout, null, 2) + '\n');
+  save(file, layout);
   return layout;
+}
+
+/** layout.json written whole; a write the disk refuses stops the install, as it always did. */
+function save(file: string, layout: Layout): void {
+  if (!writeJson(file, layout, { pretty: true })) throw new Error(`${file} could not be written`);
+}
+
+/** The string entries of a pack's `files` map ({ alias: path }); anything else it holds is not a path. */
+function stringEntries(value: unknown): [string, string][] {
+  if (typeof value !== 'object' || value === null) return [];
+  return Object.entries(value).filter((e): e is [string, string] => typeof e[1] === 'string');
+}
+
+/** An existing layout.json that cannot be read stops the install, as it always did: it is never replaced by an empty one. */
+function failedRead(file: string): never {
+  throw new Error(`${file} is not valid JSON; fix it first, nothing was changed`);
 }
