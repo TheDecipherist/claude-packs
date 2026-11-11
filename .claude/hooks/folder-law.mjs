@@ -11,13 +11,12 @@ import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
 import { bashOf, editOf, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mjs';
 import { judgeEvent } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 
-const ROOT = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|mm|m|wgsl|metal|glsl|hlsl|slang)$/i;
 
 // What is source: layout.json "sourceFiles" (a regex the configuration writes, e.g. full-stack's TypeScript; KWB-37), else SOURCE.
-export const isSource = (file) => { const re = readLayout(claudeRoot(file)).sourceFiles; return (re ? new RegExp(re, 'i') : SOURCE).test(file); };
+export const isSource = (file) => { const re = readLayout(claudeRoot(projectRoot(), file, process.cwd())).sourceFiles; return (re ? new RegExp(re, 'i') : SOURCE).test(file); };
 
 const main = (text) => judgeEvent(text, {
   name: 'folder-law',
@@ -25,12 +24,12 @@ const main = (text) => judgeEvent(text, {
 });
 
 function judge(file) {
-  if (relative(ROOT, file).startsWith('..')) return null;
-  const root = checkoutRoot(file);
+  if (relative(projectRoot(), file).startsWith('..')) return null;
+  const root = checkoutRoot(projectRoot(), file, process.cwd());
   const rel = relative(root, file).replace(/\\/g, '/');
   if (rel.startsWith('..')) return null;
 
-  const layout = readLayout(claudeRoot(file));
+  const layout = readLayout(claudeRoot(projectRoot(), file, process.cwd()));
   const folders = codeFolders(layout);
   if (folders.length === 0) return null;
   if (folders.some((f) => rel.startsWith(`${f}/`))) {
@@ -49,23 +48,23 @@ function judge(file) {
 function selftest() {
   const hook = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'stray/Old.cpp': '// old\n', 'x.txt': 'int x;\n' }, { folders: { core: { path: 'src/core', purpose: 'core code' }, docs: { path: 'docs', purpose: 'docs' } }, concepts: {} });
-  const w = (file) => runHook(hook, dir, writeOf(join(dir, file)));
-  const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir));
+  const w = (file) => runHook(hook, dir, writeOf(join(dir, file))).status;
+  const sh = (cmd) => runHook(hook, dir, bashOf(cmd, dir)).status;
   const ts = scratchProject({}, { folders: { api: { path: 'api/src', purpose: 'the API' } }, concepts: {}, sourceFiles: '\\.(ts|tsx)$' });
   const plain = scratchProject({}, { folders: { src: { path: 'src', purpose: 'the code' } }, concepts: {}, sourceFiles: '\\.py$' });
   return verdicts('folder-law', [
     ['TypeScript is not source where the layout does not say so', w('stray/x.ts'), 0],
-    ['a layout whose sourceFiles name TypeScript: a new .ts outside its folders (KWB-37)', runHook(hook, ts, writeOf(join(ts, 'stray/x.ts'))), 2],
-    ['and inside them', runHook(hook, ts, writeOf(join(ts, 'api/src/x.ts'))), 0],
+    ['a layout whose sourceFiles name TypeScript: a new .ts outside its folders (KWB-37)', runHook(hook, ts, writeOf(join(ts, 'stray/x.ts'))).status, 2],
+    ['and inside them', runHook(hook, ts, writeOf(join(ts, 'api/src/x.ts'))).status, 0],
     ['a new file in a layout folder', w('src/core/Svf.cpp'), 0],
     ['a new file outside the layout', w('stray/New.cpp'), 2],
     ['a new file loose in src/', w('src/Loose.cpp'), 2],
-    ['a layout that names nothing inside src/: a file in src/ (KWB-78)', runHook(hook, plain, writeOf(join(plain, 'src/app.py'))), 0],
-    ['and a file outside it', runHook(hook, plain, writeOf(join(plain, 'stray/app.py'))), 2],
+    ['a layout that names nothing inside src/: a file in src/ (KWB-78)', runHook(hook, plain, writeOf(join(plain, 'src/app.py'))).status, 0],
+    ['and a file outside it', runHook(hook, plain, writeOf(join(plain, 'stray/app.py'))).status, 2],
     ['an existing file outside the layout', w('stray/Old.cpp'), 0],
-    ['an edit is never a new file', runHook(hook, dir, editOf(join(dir, 'stray/New.cpp'))), 0],
+    ['an edit is never a new file', runHook(hook, dir, editOf(join(dir, 'stray/New.cpp'))).status, 0],
     ['a doc is not source', w('stray/notes.md'), 0],
-    ['another project is not ours', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/x.cpp'))), 0],
+    ['another project is not ours', runHook(hook, dir, writeOf(join(dirname(dir), 'elsewhere/x.cpp'))).status, 0],
     ['a heredoc into a new file outside the layout', sh("cat > stray/B.cpp <<'EOF'\nint b;\nEOF"), 2],
     ['a copy into a layout folder', sh('cp x.txt src/core/C.cpp'), 0],
     ['a move outside the layout', sh('mv x.txt stray/D.cpp'), 2],

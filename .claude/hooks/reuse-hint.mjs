@@ -7,7 +7,8 @@ import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { repoIndex } from './lib/repo-index.mjs';
 import { scratchProject, verdicts } from './lib/selftest.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
+
 
 const SHOWN = 6;
 const COMMON = new Set(`this that with from have make need want when what where which their there then them they will would should could into only also more
@@ -49,7 +50,7 @@ export function matches(prompt, index) {
 function main(text) {
   const event = JSON.parse(text || '{}');
   const at = `${event.cwd ?? process.cwd()}/x`;
-  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(at), [...TESTS, ...skippedBy(readLayout(claudeRoot(at)))], readLayout(claudeRoot(at))));
+  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(projectRoot(), at, process.cwd()), [...TESTS, ...skippedBy(readLayout(claudeRoot(projectRoot(), at, process.cwd())))], readLayout(claudeRoot(projectRoot(), at, process.cwd()))));
   if (found.length) console.log(`Already in this repo, call it rather than write it again:\n${found.map((f) => `- ${f.name} (${f.at})`).join('\n')}`);
   return 0;
 }

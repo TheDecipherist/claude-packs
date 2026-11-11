@@ -11,13 +11,14 @@
 //   node kit-fresh.mjs --check      for run.sh: says what is outdated, exits 2 when the session must not start
 //   node kit-fresh.mjs --selftest
 import { join } from 'node:path';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { parseJson } from './lib/json.mjs';
 import { atCommit, atStart } from './lib/kit-fresh-look.mjs';
 import { claudeRoot } from './lib/project.mjs';
 
+
 /** the checkout a session or a command in `cwd` works in: a worktree's own, never the main checkout's */
-const rootOf = (cwd) => claudeRoot(join(cwd, 'x'));
+const rootOf = (cwd) => claudeRoot(projectRoot(), join(cwd, 'x'), process.cwd());
 
 function main(text) {
   const ev = parseJson(text);

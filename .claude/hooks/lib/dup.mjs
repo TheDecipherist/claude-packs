@@ -24,6 +24,10 @@ import { extPattern, extsOf } from './source-exts.mjs';
 export const LIMITS = { tokens: 50, lines: 6, gap: 2 };
 export const SOURCE = extPattern('c', 'cpp', 'objc', 'python', 'js', 'ts', 'rust');
 const FORMATS = 'c,c-header,cpp,cpp-header,objectivec,python,javascript,jsx,typescript,tsx,rust';
+// Import statements are never a copy: they cannot be made one function (KWB-176; languages.mjs's notCode leaves them out too).
+// jscpd takes the patterns comma-separated, so none holds a comma.
+const IMPORT_LINES = [String.raw`import\s[^;]*;`, String.raw`export\s[^;]*\sfrom\s[^;]*;`, String.raw`#include\s.*`,
+  String.raw`(from\s+\S+\s+)?import\s.*`, String.raw`use\s[^;]*;`].join(',');
 // A header and a source are one language: a function copied from a .cpp into a .h is a copy (jscpd compares within a format otherwise).
 const CROSS = 'c,c-header,cpp,cpp-header,objectivec;javascript,jsx,typescript,tsx';
 // Generated files, resources and vendored or built code are never judged (and never a match).
@@ -96,7 +100,7 @@ export function scan(root, { extra = [], ignore: alsoIgnore = [], layout = {}, s
   const abs = real(root);
   const ignore = [...excludeGlobs(layout, shape).map((g) => `${abs}/${g}`), ...extra.map((x) => real(x.as)), ...alsoIgnore.map(real), ...emittedTwins(abs)];
   const args = ['-a', '-s', '-k', String(LIMITS.tokens), '-l', String(LIMITS.lines), '--max-gap-lines', String(LIMITS.gap), '--exit-code', '0',
-    '-f', FORMATS, '-r', 'json', '-o', out, '--cross-formats', CROSS, '-i', ignore.join(','), ...(paths ?? [abs]), ...extra.map((x) => x.path)];
+    '-f', FORMATS, '-r', 'json', '-o', out, '--cross-formats', CROSS, '-i', ignore.join(','), '--ignore-pattern', IMPORT_LINES, ...(paths ?? [abs]), ...extra.map((x) => x.path)];
   const t0 = Date.now();
   const r = spawnSync(bin, args, { encoding: 'utf8', timeout: timeoutMs, cwd: abs });
   const ms = Date.now() - t0;

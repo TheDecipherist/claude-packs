@@ -10,10 +10,11 @@
 //   node making.mjs --selftest
 import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { checkoutRoot, ROOT } from './lib/project.mjs';
+import { checkoutRoot } from './lib/project.mjs';
 import { scratchProject } from './lib/selftest.mjs';
 import { findInstanceLiterals, readShape } from './lib/shape.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
+
 
 export const TEXT = "making: before the first write, answer in build.md's In progress entry for this step, one line: " +
   '`making: <what you are making>; concepts: <each you touch, its shape from design/shape.json>; reuse: <function, where it lives>`. ' +
@@ -92,9 +93,9 @@ function main(text) {
   let event = {};
   try { event = JSON.parse(text || '{}'); } catch { /* the text still goes */ }
   if (event.hook_event_name && event.hook_event_name !== 'UserPromptSubmit') return 0;
-  const root = event.cwd ? checkoutRoot(join(event.cwd, 'prompt')) : ROOT;
+  const root = event.cwd ? checkoutRoot(projectRoot(), join(event.cwd, 'prompt'), process.cwd()) : projectRoot();
   let shape = null;
-  try { shape = readShape(root) ?? readShape(ROOT); } catch { /* the text still goes */ }
+  try { shape = readShape(root) ?? readShape(projectRoot()); } catch { /* the text still goes */ }
   process.stdout.write(`${inject(event.prompt ?? '', shape)}\n`);
   return 0;
 }

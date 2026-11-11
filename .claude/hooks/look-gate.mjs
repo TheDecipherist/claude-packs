@@ -21,9 +21,9 @@ import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readPayload } from './lib/writes.mjs';
-import { asHook, isMain } from './lib/hook-log.mjs';
-import { selftest } from './lib/look-gate-selftest.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
+
 
 const TRUNKS = ['main', 'master'];
 const BUILD = /\b(?:buildq|cmake\s+--build|ninja|make|npm\s+run\s+build|cargo\s+build|vite\s+build)\b/;
@@ -34,7 +34,7 @@ const git = (root, ...args) => {
   catch { return null; }
 };
 const pathspecs = (globs) => globs.map((g) => `:(glob)${g}`);
-const looksOf = (root) => (readLayout(claudeRoot(join(root, 'x'))).looks ?? []).map((l) => ({ ...l, report: l.report ?? `build/evidence/looks/${l.name}.json` }));
+const looksOf = (root) => (readLayout(claudeRoot(projectRoot(), join(root, 'x'), process.cwd())).looks ?? []).map((l) => ({ ...l, report: l.report ?? `build/evidence/looks/${l.name}.json` }));
 
 // The looks whose code changed between two commits.
 const touched = (root, looks, from, to) => looks.filter((l) => (git(root, 'diff', '--name-only', `${from}...${to}`, '--', ...pathspecs(l.code ?? [])) ?? '') !== '');
@@ -67,7 +67,7 @@ function landing(payload) {
   const cwd = payload.cwd ?? process.cwd();
   const why = [];
   for (const m of (payload.tool_input?.command ?? '').matchAll(MERGE)) {
-    const root = checkoutRoot(join(m[1] ? join(cwd, m[1]) : cwd, 'x'));
+    const root = checkoutRoot(projectRoot(), join(m[1] ? join(cwd, m[1]) : cwd, 'x'), process.cwd());
     const ref = m[3];
     if (!TRUNKS.includes(git(root, 'branch', '--show-current')) || TRUNKS.some((t) => ref === t || ref.endsWith(`/${t}`))) continue;
     for (const look of touched(root, looksOf(root), 'HEAD', ref)) {
@@ -83,7 +83,7 @@ function landing(payload) {
 
 function afterBuild(payload) {
   if (!BUILD.test(payload.tool_input?.command ?? '')) return 0;
-  const root = checkoutRoot(join(payload.cwd ?? process.cwd(), 'x'));
+  const root = checkoutRoot(projectRoot(), join(payload.cwd ?? process.cwd(), 'x'), process.cwd());
   const trunk = TRUNKS.map((t) => `origin/${t}`).find((t) => git(root, 'rev-parse', '--verify', '-q', t) !== null);
   if (!trunk) return 0;
   const due = touched(root, looksOf(root), trunk, 'HEAD').filter((l) => verdictOf(root, l, 'HEAD') !== null);
@@ -101,7 +101,7 @@ function main(text) {
 }
 
 function printKey(name) {
-  const root = checkoutRoot(join(process.cwd(), 'x'));
+  const root = checkoutRoot(projectRoot(), join(process.cwd(), 'x'), process.cwd());
   const look = looksOf(root).find((l) => l.name === name);
   if (!look) { process.stderr.write(`look-gate: no look named "${name}" in layout.json\n`); return 1; }
   process.stdout.write(`${codeKey(root, look, 'HEAD')}\n`);
@@ -110,4 +110,8 @@ function printKey(name) {
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
 const keyAt = process.argv.indexOf('--key');
-if (isMain(import.meta.url)) process.exit(keyAt > 0 ? printKey(process.argv[keyAt + 1]) : process.argv.includes('--selftest') ? selftest(fileURLToPath(import.meta.url)) : await asHook('look-gate', main));
+// its selftest module loads only under --selftest, never on a real call (W3.2)
+if (isMain(import.meta.url)) {
+  process.exit(keyAt > 0 ? printKey(process.argv[keyAt + 1]) : process.argv.includes('--selftest')
+    ? (await import('./lib/look-gate-selftest.mjs')).selftest(fileURLToPath(import.meta.url)) : await asHook('look-gate', main));
+}

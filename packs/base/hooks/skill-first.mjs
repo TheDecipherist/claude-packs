@@ -16,8 +16,7 @@ import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot } from './lib/project.mjs';
 import { readPayload } from './lib/writes.mjs';
-import { asHook, projectRoot, isMain } from './lib/hook-log.mjs';
-import { selftest } from './lib/skill-first-selftest.mjs';
+import { asHook, isMain, projectRoot } from './lib/hook-log.mjs';
 import { fileURLToPath } from 'node:url';
 
 
@@ -119,4 +118,8 @@ function main(text) {
 }
 
 export const hook = main; // run-hooks.mjs calls it with the event's text (KWB-24)
-if (isMain(import.meta.url)) process.exit(process.argv.includes('--selftest') ? selftest(fileURLToPath(import.meta.url)) : await asHook('skill-first', main));
+// its selftest module loads only under --selftest, never on a real call (W3.2)
+if (isMain(import.meta.url)) {
+  process.exit(process.argv.includes('--selftest')
+    ? (await import('./lib/skill-first-selftest.mjs')).selftest(fileURLToPath(import.meta.url)) : await asHook('skill-first', main));
+}
