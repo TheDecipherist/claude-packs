@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T15:03:56Z",
+  "updated": "2026-11-11T15:41:24Z",
   "steps": [
     {
       "id": "W0",
@@ -33,8 +33,8 @@
       "id": "W4",
       "title": "The slices, in parallel",
       "items": 7,
-      "done": 0,
-      "agent": "w4-hooks-a, w4-hooks-b, w4-hooks-c, w4-lib-a, w4-lib-b, w4-tools"
+      "done": 1,
+      "agent": "w4-lib-c1, w4-lib-c2, w4-synth, w4-audio, w4-packs, w4-global"
     },
     {
       "id": "W5",
@@ -95,40 +95,40 @@
   ],
   "agents": [
     {
-      "name": "w4-hooks-a",
-      "worktree": ".claude/worktrees/w4-hooks-a",
+      "name": "w4-lib-c1",
+      "worktree": ".claude/worktrees/w4-lib-c1",
       "step": "W4",
-      "started": "2026-11-11T15:03:56Z"
+      "started": "2026-11-11T15:41:24Z"
     },
     {
-      "name": "w4-hooks-b",
-      "worktree": ".claude/worktrees/w4-hooks-b",
+      "name": "w4-lib-c2",
+      "worktree": ".claude/worktrees/w4-lib-c2",
       "step": "W4",
-      "started": "2026-11-11T15:03:56Z"
+      "started": "2026-11-11T15:41:24Z"
     },
     {
-      "name": "w4-hooks-c",
-      "worktree": ".claude/worktrees/w4-hooks-c",
+      "name": "w4-synth",
+      "worktree": ".claude/worktrees/w4-synth",
       "step": "W4",
-      "started": "2026-11-11T15:03:56Z"
+      "started": "2026-11-11T15:41:24Z"
     },
     {
-      "name": "w4-lib-a",
-      "worktree": ".claude/worktrees/w4-lib-a",
+      "name": "w4-audio",
+      "worktree": ".claude/worktrees/w4-audio",
       "step": "W4",
-      "started": "2026-11-11T15:03:56Z"
+      "started": "2026-11-11T15:41:24Z"
     },
     {
-      "name": "w4-lib-b",
-      "worktree": ".claude/worktrees/w4-lib-b",
+      "name": "w4-packs",
+      "worktree": ".claude/worktrees/w4-packs",
       "step": "W4",
-      "started": "2026-11-11T15:03:56Z"
+      "started": "2026-11-11T15:41:24Z"
     },
     {
-      "name": "w4-tools",
-      "worktree": ".claude/worktrees/w4-tools",
+      "name": "w4-global",
+      "worktree": ".claude/worktrees/w4-global",
       "step": "W4",
-      "started": "2026-11-11T15:03:56Z"
+      "started": "2026-11-11T15:41:24Z"
     }
   ]
 }
