@@ -174,7 +174,8 @@ function liveOf(beat, updated, work, nowMs) {
  *  when no agent runs. { project: { name, percent, state }, agents: [{ who, id, title, percent, now, live, quiet }] }.
  *  `checkedAt`: when the runs were last checked (the status line's cache), said on the project's row. */
 export function runRows(s, nowMs = Date.now(), checkedAt = null) {
-  const base = basename(s.project).toUpperCase();
+  // a run in a worktree is its project's: VSYNTHGT (ui-look), never the worktree's folder W12-LOOK (the user: "what is W12-LOOK?")
+  const base = basename(s.project.replace(/\/\.claude\/worktrees\/[^/]+(?:\/.*)?$/, '')).toUpperCase();
   const name = (s.host ? `${s.host.toUpperCase()}: ` : '') + base + (s.order && s.order.toUpperCase() !== base ? ` (${s.order})` : '');
   const n = s.agents.length;
   const checked = Number.isNaN(Date.parse(checkedAt ?? '')) ? '' : `, checked ${ago(Math.max(0, Math.round((nowMs - Date.parse(checkedAt)) / 1000)))} ago`;

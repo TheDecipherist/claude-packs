@@ -38,6 +38,8 @@ test('a machine\'s runs come back marked with its name, and the rows put the nam
   assert.equal(got.unreachable, null);
   assert.equal(got.runs[0].host, 'mac');
   assert.equal(runRows(got.runs[0], Date.now()).project.name, 'MAC: SHOP');
+  // a run in one of a project's worktrees is named by the project, its order beside it
+  assert.equal(runRows({ ...RUN, project: '/p/vsynthgt/.claude/worktrees/W12-look', order: 'ui-look' }, Date.now()).project.name, 'VSYNTHGT (ui-look)');
 });
 
 test('a machine that cannot be asked, or whose kit gives no status, is a row that says so, never silence', () => {
