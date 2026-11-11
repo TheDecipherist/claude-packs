@@ -12,54 +12,11 @@ node_modules/
 .claude/logs/
 .env
 build/
-# emitted by `npm run build` beside each .mts (d-2); a folder's lines become one rule when its last hand-written .mjs goes
-lib/kit-lock.mjs
+# emitted by `npm run build` beside each .mts (d-2)
 .claude/hooks/kit-lock.mjs
 # TypeScript whole: every .mjs here is emitted beside its .mts (d-2)
 packs/**/*.mjs
 global/**/*.mjs
 scripts/*.mjs
-# W4: lib, emitted as each converts
-lib/backup.mjs
-lib/build-queue.mjs
-lib/coverage.mjs
-lib/git-tokens.mjs
-lib/hook-timing.mjs
-lib/kit-command.mjs
-lib/logs.mjs
-lib/manifest.mjs
-lib/pack-manifest.mjs
-lib/packs.mjs
-lib/global.mjs
-lib/once-only-report.mjs
-lib/repeats.mjs
-lib/repo-weight.mjs
-lib/rule-tests.mjs
-lib/rules.mjs
-lib/run-status.mjs
-lib/selftest-cache.mjs
-lib/shape.mjs
-lib/symmetry-doctor.mjs
-lib/zip.mjs
-
-lib/configs.mjs
-lib/layout.mjs
-lib/settings.mjs
-lib/claude-md.mjs
-lib/custom-packs.mjs
-lib/hook-proof.mjs
-lib/hover-gate.mjs
-lib/shape-cli.mjs
-lib/status-cli.mjs
-lib/workorder.mjs
-lib/scan-detect.mjs
-lib/planner.mjs
-lib/doctor.mjs
-lib/workorder-check.mjs
-lib/switches.mjs
-lib/found-folders.mjs
-lib/scan.mjs
-lib/fix-plan.mjs
-lib/sync.mjs
-lib/install-block.mjs
-lib/project-files.mjs
+lib/*.mjs
+bin/*.mjs

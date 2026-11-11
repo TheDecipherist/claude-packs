@@ -1,0 +1,68 @@
+usage: npx --no-install @thedecipherist/claude-packs <command> [options]
+
+  new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
+                     workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
+                     --packs <a,b>     the packs (default base alone); --profile <name>, --config <name> as for init
+                     --from <workorder.md>  install from the order's install block, as init --from does
+                     --template <t>    and its work order, docs/workorders/<name>/, from that template
+  workorder <name>   a work order in docs/workorders/<name>: the steps, the prompt that runs them with nobody
+                     there, and a runner that starts session after session
+                     --template <generic|plugin|rebuild>  the steps to start from: generic (blank, the default),
+                                       plugin (a new synth or effect), rebuild (a hardware instrument as a plugin)
+  workorder check <name>  before a run: refuses a placeholder left, a step whose Done when has no number or test path,
+                     a skill named that is not installed (with the pack to add), and a red doctor --strict
+  status             every unattended run alive on this machine: each project with a progress bar, each agent with its
+                     step and its bar, and how much is left; --dir <project> [--order <name>] for one project, running or
+                     not; --watch <minutes> to print it again every so many minutes
+  claude-ai-skill    workorder-writer.zip in <dir>: the work order interview alone, as planner-skills --zip writes it
+  init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
+                     and create the layout folders
+                     --config <name>   the configuration (configs lists them; stored in layout.json
+                                       "configuration"); with no packs named, the ones it takes by default
+                     --profile <name>  start from a tailored layout shipped in the package (e.g. stellix)
+                     --layout <file>   start from your own layout.json
+                     --auto            the configuration and packs suggest finds, so nobody picks them by hand
+                     --from <workorder.md>  the order's install block (its claude-packs fence): its configuration
+                                       and packs, then its layout keys (enable, looks, guards, commands, ...), then update
+  add <pack...>      add packs to an existing install
+                     --from <git-url>  a custom pack from a team's repository; its hooks stay off until "enable" names them
+  new-pack <name> [--repo <git-url>]  a new repository for a team's own pack, ready to edit and push
+  remove <pack...>   remove packs (files you edited are kept)
+  update             re-sync installed packs from this package version, in the project's configuration
+  configs            list the configurations: what each installs, its packs and its folder template
+  config <name>      switch this project to another configuration; prints what changes first
+                     --dry-run         print what would change and stop
+  planner-skills [--out <dir>]   one project-layout skill body per configuration, from its layout template
+                     (printed, or written to <dir>/<configuration>/project-layout/SKILL.md), and the claude.ai skills
+                     --zip <dir>   one zip per claude.ai skill: workorder-writer, start-a-build, ui-mockup,
+                                   design-a-preset, synth-cost, each its SKILL.md and its references
+  update-all <dir...>  update every listed project that already has claude-packs
+                     (e.g. update-all ~/projects/*); folders without it are skipped
+  doctor [--strict] [--fresh]  verify the install (paths, folders, hooks, checks' own examples); a hook's selftest that
+                     passed is not run again until the hook changes (--fresh runs them all); --strict also fails
+                     when a rule matches no file or a source file is covered by no rule
+  shape scan         every instance literal in the repo (code, tests, docs, briefs), by file and concept,
+                     with a count, against design/shape.json; exit 1 when any
+  scan [--out <file>]  before installing anything: on a copy of the project, what to install and every issue the checks
+                     find; the project is never touched. scan --prompt prints the review brief for what checks cannot see
+  suggest            which configuration and packs this project needs, read from its own files, with the evidence
+  fix [--from <scan.json>] [--out <file>]  the last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none
+  logs               which hooks earn their place: calls, refusals and verdicts per hook, over all the history
+                     logs refusals [--hook <h>] [--open]; logs mark <id> right|wrong "<why>"
+                     logs crashes; logs clear <hook>|all fixed|superseded "<why>"
+  survey             print the prompt that makes Claude write docs/project.md for tailoring
+  list               show available packs
+  symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
+                     design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines)
+  symmetry run <concept>   that gate for one concept: every instance the same members, every pair swaps the same
+  dup scan           every duplicated block (jscpd, the once-only hook's detector), listed by file
+  lock status|take [--branch <b>]|release [--force]
+                     the claude-packs repo's kit lock, a lease, in each checkout: who holds it, since when, last seen,
+                     live or stale (30 min without renewal); take takes it for this session (a stale one is taken over
+                     and logged); release takes away your own lock or a stale one, never a live lease without --force
+  global add|remove|doctor
+                     the global part, exactly three pieces: latest-versions (skill and
+                     version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
+                     overwrites; --home <dir> to target another home)
+
+options: --dir <project> (default: current folder)   --force (replace files you edited)

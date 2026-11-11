@@ -15,7 +15,7 @@ const KIT = fileURLToPath(new URL('..', import.meta.url));
 const TSC = join(KIT, 'node_modules/.bin/tsc');
 const SOURCE_FOLDERS = ['bin', 'lib', 'global', 'scripts', 'packs', '.claude/hooks', 'test'];
 // The folders converted whole: no hand-written .mjs, .js or .py is left in them (the lead adds each as W3 and W4 finish it).
-const CONVERTED: readonly string[] = ['packs', 'global', 'scripts'];
+const CONVERTED: readonly string[] = ['packs', 'global', 'scripts', 'lib', 'bin'];
 // A hand-written file a converted folder still holds on purpose, each with the step that removes it (none since W4 wave 2).
 const NOT_YET: ReadonlySet<string> = new Set([]);
 

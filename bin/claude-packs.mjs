@@ -1,254 +1,226 @@
 #!/usr/bin/env node
-// claude-packs: per-project Claude Code rules, checks, hooks and skills for The Decipherist's synths.
+// claude-packs: per-project Claude Code rules, checks, hooks and skills, for any project.
 // Everything installs into the project's own .claude/ (and nested skill folders).
 // The one exception is `global`: latest-versions (skill and hook), gnu-shell and shell-traps.
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readJson } from '../packs/base/hooks/lib/json.mjs';
+import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
+import { addCustomPack, loadCustomPacks, newPack } from '../lib/custom-packs.mjs';
 import { doctor } from '../lib/doctor.mjs';
+import { fixPlan } from '../lib/fix-plan.mjs';
 import { globalAdd, globalDoctor, globalRemove } from '../lib/global.mjs';
+import { blockPacks, installFrom, readInstallBlock } from '../lib/install-block.mjs';
 import { lockCommand } from '../lib/kit-lock.mjs';
+import { logsCommand } from '../lib/logs.mjs';
 import { readLock } from '../lib/manifest.mjs';
 import { newProject } from '../lib/new.mjs';
 import { dupScan } from '../lib/once-only-report.mjs';
 import { PRESETS, availablePacks, readPack } from '../lib/packs.mjs';
-import { describeConfigs, layoutConfiguration, readConfig, switchConfig } from '../lib/config-cli.mjs';
 import { plannerSkills, writeClaudeAiZips } from '../lib/planner.mjs';
-import { addCustomPack, loadCustomPacks, newPack } from '../lib/custom-packs.mjs';
-import { fixPlan } from '../lib/fix-plan.mjs';
-import { logsCommand } from '../lib/logs.mjs';
 import { scan } from '../lib/scan.mjs';
-import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
-import { assertTemplate, newWorkorder } from '../lib/workorder.mjs';
-import { workorderCheck } from '../lib/workorder-check.mjs';
-import { blockPacks, installFrom, readInstallBlock } from '../lib/install-block.mjs';
-import { sync } from '../lib/sync.mjs';
-import { statusCommand } from '../lib/status-cli.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
-
+import { statusCommand } from '../lib/status-cli.mjs';
+import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mjs';
+import { sync } from '../lib/sync.mjs';
+import { workorderCheck } from '../lib/workorder-check.mjs';
+import { assertTemplate, newWorkorder } from '../lib/workorder.mjs';
 const INSTALLING = { installing: true }; // doctor at the end of an install: what the project has yet to do is a note
-
-const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [options]
-
-  new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
-                     workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
-                     --packs <a,b>     the packs (default base alone); --profile <name>, --config <name> as for init
-                     --from <workorder.md>  install from the order's install block, as init --from does
-                     --template <t>    and its work order, docs/workorders/<name>/, from that template
-  workorder <name>   a work order in docs/workorders/<name>: the steps, the prompt that runs them with nobody
-                     there, and a runner that starts session after session
-                     --template <generic|plugin|rebuild>  the steps to start from: generic (blank, the default),
-                                       plugin (a new synth or effect), rebuild (a hardware instrument as a plugin)
-  workorder check <name>  before a run: refuses a placeholder left, a step whose Done when has no number or test path,
-                     a skill named that is not installed (with the pack to add), and a red doctor --strict
-  status             every unattended run alive on this machine: each project with a progress bar, each agent with its
-                     step and its bar, and how much is left; --dir <project> [--order <name>] for one project, running or
-                     not; --watch <minutes> to print it again every so many minutes
-  claude-ai-skill    workorder-writer.zip in <dir>: the work order interview alone, as planner-skills --zip writes it
-  init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
-                     and create the layout folders
-                     --config <name>   the configuration (configs lists them; stored in layout.json
-                                       "configuration"); with no packs named, the ones it takes by default
-                     --profile <name>  start from a tailored layout shipped in the package (e.g. stellix)
-                     --layout <file>   start from your own layout.json
-                     --auto            the configuration and packs suggest finds, so nobody picks them by hand
-                     --from <workorder.md>  the order's install block (its claude-packs fence): its configuration
-                                       and packs, then its layout keys (enable, looks, guards, commands, ...), then update
-  add <pack...>      add packs to an existing install
-                     --from <git-url>  a custom pack from a team's repository; its hooks stay off until "enable" names them
-  new-pack <name> [--repo <git-url>]  a new repository for a team's own pack, ready to edit and push
-  remove <pack...>   remove packs (files you edited are kept)
-  update             re-sync installed packs from this package version, in the project's configuration
-  configs            list the configurations: what each installs, its packs and its folder template
-  config <name>      switch this project to another configuration; prints what changes first
-                     --dry-run         print what would change and stop
-  planner-skills [--out <dir>]   one project-layout skill body per configuration, from its layout template
-                     (printed, or written to <dir>/<configuration>/project-layout/SKILL.md), and the claude.ai skills
-                     --zip <dir>   one zip per claude.ai skill: workorder-writer, start-a-build, ui-mockup,
-                                   design-a-preset, synth-cost, each its SKILL.md and its references
-  update-all <dir...>  update every listed project that already has claude-packs
-                     (e.g. update-all ~/projects/*); folders without it are skipped
-  doctor [--strict] [--fresh]  verify the install (paths, folders, hooks, checks' own examples); a hook's selftest that
-                     passed is not run again until the hook changes (--fresh runs them all); --strict also fails
-                     when a rule matches no file or a source file is covered by no rule
-  shape scan         every instance literal in the repo (code, tests, docs, briefs), by file and concept,
-                     with a count, against design/shape.json; exit 1 when any
-  scan [--out <file>]  before installing anything: on a copy of the project, what to install and every issue the checks
-                     find; the project is never touched. scan --prompt prints the review brief for what checks cannot see
-  suggest            which configuration and packs this project needs, read from its own files, with the evidence
-  fix [--from <scan.json>] [--out <file>]  the last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none
-  logs               which hooks earn their place: calls, refusals and verdicts per hook, over all the history
-                     logs refusals [--hook <h>] [--open]; logs mark <id> right|wrong "<why>"
-                     logs crashes; logs clear <hook>|all fixed|superseded "<why>"
-  survey             print the prompt that makes Claude write docs/project.md for tailoring
-  list               show available packs
-  symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
-                     design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines)
-  symmetry run <concept>   that gate for one concept: every instance the same members, every pair swaps the same
-  dup scan           every duplicated block (jscpd, the once-only hook's detector), listed by file
-  lock status|take [--branch <b>]|release [--force]
-                     the claude-packs repo's kit lock, a lease, in each checkout: who holds it, since when, last seen,
-                     live or stale (30 min without renewal); take takes it for this session (a stale one is taken over
-                     and logged); release takes away your own lock or a stale one, never a live lease without --force
-  global add|remove|doctor
-                     the global part, exactly three pieces: latest-versions (skill and
-                     version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never
-                     overwrites; --home <dir> to target another home)
-
-options: --dir <project> (default: current folder)   --force (replace files you edited)`;
-
-function parse(argv) {
-  const opts = { dir: process.cwd(), force: false, strict: false, rest: [], seed: null, home: undefined, packs: null, config: null, dryRun: false };
-  for (let i = 0; i < argv.length; i += 1) {
-    if (argv[i] === '--dir') opts.dir = argv[++i];
-    else if (argv[i] === '--packs') opts.packs = argv[++i].split(',').map((p) => p.trim()).filter(Boolean);
-    else if (argv[i] === '--profile') opts.seed = fileURLToPath(new URL(`../profiles/${argv[++i]}.layout.json`, import.meta.url));
-    else if (argv[i] === '--layout') opts.seed = resolve(argv[++i]);
-    else if (argv[i] === '--config') opts.config = argv[++i];
-    else if (argv[i] === '--dry-run') opts.dryRun = true;
-    else if (argv[i] === '--force') opts.force = true;
-    else if (argv[i] === '--strict') opts.strict = true;
-    else if (argv[i] === '--fresh') opts.fresh = true;
-    else if (argv[i] === '--home') opts.home = resolve(argv[++i]);
-    else opts.rest.push(argv[i]);
-  }
-  opts.dir = resolve(opts.dir);
-  return opts;
+const SHAPE_WRITTEN = '  design/shape.json: written empty; add a row per concept (one or many) before building it';
+const HELP = readFileSync(fileURLToPath(new URL('../prompts/help.txt', import.meta.url)), 'utf8').trimEnd();
+// ---- The command line: switches, flags that take a value, and the words left ----
+const SWITCHES = { '--dry-run': 'dryRun', '--force': 'force', '--strict': 'strict', '--fresh': 'fresh' };
+const VALUE_FLAGS = ['--dir', '--packs', '--profile', '--layout', '--config', '--home', '--from', '--template', '--out', '--zip', '--repo', '--branch'];
+const isSwitch = (word) => Object.hasOwn(SWITCHES, word);
+const isValueFlag = (word) => VALUE_FLAGS.includes(word);
+const pathOf = (run, flag) => (run.value[flag] === undefined ? null : resolve(run.value[flag]));
+function seedOf(value) {
+    const file = value['--profile'] ? fileURLToPath(new URL(`../profiles/${value['--profile']}.layout.json`, import.meta.url)) : value['--layout'] ? resolve(value['--layout']) : null;
+    if (file === null)
+        return null;
+    const seed = readJson(file);
+    if (seed === null)
+        throw new Error(`${file}: not a layout (missing or not JSON)`);
+    return seed;
 }
-
-async function main() {
-  const [command, ...argv] = process.argv.slice(2);
-  const { dir, force, strict, fresh, rest, seed, home, packs, config, dryRun } = parse(argv);
-  const seedLayout = seed ? JSON.parse(readFileSync(seed, 'utf8')) : null;
-  const installed = readLock(resolve(dir, '.claude')).packs;
-  const fromUrl = rest.includes('--from') ? rest.splice(rest.indexOf('--from'), 2)[1] : null;
-  const fetched = ['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'claude-ai-skill', 'status'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
-
-  switch (command) {
-    case 'new': {
-      const block = fromUrl ? readInstallBlock(resolve(fromUrl)) : null;
-      if (block?.configuration && config && block.configuration !== config) throw new Error(`--config ${config} and the install block's configuration ${block.configuration} differ: name one`);
-      const named = config ?? block?.configuration ?? null;
-      const chosen = packs ?? (block ? blockPacks({ ...block, configuration: named }) : named ? readConfig(named).packs.default : ['base']);
-      // --template <t>: the project's work order too, docs/workorders/<name>/ from that template (checked before anything is made)
-      const template = rest.includes('--template') ? rest.splice(rest.indexOf('--template'), 2)[1] : null;
-      if (template) assertTemplate(template);
-      const made = await newProject(dir, rest[0], { packs: chosen, seedLayout, config: named, block });
-      if (template) newWorkorder(made.dir, rest[0], { template });
-      return made.code;
+// The commands that never load a team's custom packs (they read, or they make something new).
+const NO_CUSTOM_PACKS = new Set(['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'claude-ai-skill', 'status']);
+function parse(command, argv) {
+    const flags = { dryRun: false, force: false, strict: false, fresh: false };
+    const value = {};
+    const rest = [];
+    for (let i = 0; i < argv.length; i += 1) {
+        const word = argv[i] ?? '';
+        if (isSwitch(word))
+            flags[SWITCHES[word]] = true;
+        else if (isValueFlag(word)) {
+            i += 1;
+            value[word] = argv[i] ?? '';
+        }
+        else
+            rest.push(word);
     }
-    case 'claude-ai-skill':
-      return writeClaudeAiZips(dir, ['workorder-writer']);
-    case 'workorder': {
-      if (rest[0] === 'check') return workorderCheck(dir, rest[1]);
-      const template = rest.includes('--template') ? rest.splice(rest.indexOf('--template'), 2)[1] : undefined;
-      newWorkorder(dir, rest[0], { template });
-      console.log(`  What is left to fill in, as \`workorder check ${rest[0]}\` will judge it before a run starts:`);
-      await workorderCheck(dir, rest[0], { withDoctor: false });
-      return 0;
+    const dir = resolve(value['--dir'] ?? process.cwd());
+    const packs = value['--packs']?.split(',').map((p) => p.trim()).filter(Boolean) ?? null;
+    const fetched = command === undefined || NO_CUSTOM_PACKS.has(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
+    return { ...flags, argv, rest, dir, value, packs, seedLayout: seedOf(value), installed: readLock(resolve(dir, '.claude')).packs, fetched };
+}
+async function installAndCheck(run, packs, config = null) {
+    await sync(run.dir, packs, { force: run.force, mkdirs: true, seedLayout: run.seedLayout, config });
+    if (isSynth(packs) && ensureShape(run.dir))
+        console.log(SHAPE_WRITTEN);
+    return doctor(run.dir, console.log, INSTALLING);
+}
+async function init(run) {
+    const config = run.value['--config'] ?? null;
+    if (run.rest.includes('--auto')) {
+        const pick = suggestionOf(run.dir);
+        await sync(run.dir, pick.packs.map((p) => p.pack), { force: run.force, mkdirs: true, seedLayout: run.seedLayout, config: pick.config });
+        return doctor(run.dir, console.log, INSTALLING);
     }
-    case 'init': {
-      if (rest.includes('--auto')) {
-        const pick = suggestionOf(dir);
-        await sync(dir, pick.packs.map((p) => p.pack), { force, mkdirs: true, seedLayout, config: pick.config });
-        return doctor(dir, console.log, INSTALLING);
-      }
-      if (fromUrl) {
-        const block = await installFrom(dir, resolve(fromUrl), { force });
-        if (isSynth(blockPacks(block)) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
-        return doctor(dir, console.log, INSTALLING);
-      }
-      if (rest.length === 0 && !config) throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');
-      const chosen = rest.length ? rest : readConfig(config).packs.default;
-      await sync(dir, chosen, { force, mkdirs: true, seedLayout, config: config ?? detectedConfig(dir, chosen) });
-      if (isSynth(chosen) && ensureShape(dir)) console.log('  design/shape.json: written empty; add a row per concept (one or many) before building it');
-      return doctor(dir, console.log, INSTALLING);
+    const from = pathOf(run, '--from');
+    if (from) {
+        const block = await installFrom(run.dir, from, { force: run.force });
+        if (isSynth(blockPacks(block)) && ensureShape(run.dir))
+            console.log(SHAPE_WRITTEN);
+        return doctor(run.dir, console.log, INSTALLING);
     }
-    case 'planner-skills':
-      return plannerSkills(rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null, console.log, { zip: rest.includes('--zip') ? resolve(rest[rest.indexOf('--zip') + 1]) : null });
-    case 'configs':
-      console.log(describeConfigs(layoutConfiguration(dir)));
-      return 0;
-    case 'config':
-      return switchConfig(dir, rest[0], installed, { force, dryRun });
-    case 'add': {
-      const sources = fromUrl ? { ...fetched, [rest[0]]: addCustomPack(rest[0], fromUrl) } : fetched;
-      await sync(dir, [...installed, ...rest], { force, mkdirs: true, sources });
-      return doctor(dir, console.log, INSTALLING);
-    }
-    case 'remove':
-      await sync(dir, installed.filter((p) => p === 'base' || !rest.includes(p)), { force });
-      return doctor(dir, console.log, INSTALLING);
-    case 'update':
-      if (installed.length === 0) throw new Error('nothing installed here; run init first');
-      await sync(dir, installed, { force, mkdirs: true, sources: fetched });
-      return doctor(dir, console.log, INSTALLING);
-    case 'update-all': {
-      let failed = 0;
-      for (const d of rest.map((x) => resolve(x))) {
+    if (run.rest.length === 0 && !config)
+        throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');
+    const chosen = run.rest.length || !config ? run.rest : [...readConfig(config).packs.default];
+    return installAndCheck(run, chosen, config ?? detectedConfig(run.dir, chosen));
+}
+async function newCommand(run) {
+    const config = run.value['--config'] ?? null;
+    const from = pathOf(run, '--from');
+    const block = from ? readInstallBlock(from) : null;
+    if (block?.configuration && config && block.configuration !== config)
+        throw new Error(`--config ${config} and the install block's configuration ${block.configuration} differ: name one`);
+    const named = config ?? block?.configuration ?? null;
+    const fallback = named ? [...readConfig(named).packs.default] : ['base'];
+    const chosen = run.packs ?? (block ? blockPacks({ ...block, configuration: named }) : fallback);
+    // --template <t>: the project's work order too, docs/workorders/<name>/ from that template (checked before anything is made)
+    const template = run.value['--template'];
+    if (template)
+        assertTemplate(template);
+    const made = await newProject(run.dir, run.rest[0], { packs: chosen, seedLayout: run.seedLayout, config: named, block });
+    if (template)
+        newWorkorder(made.dir, run.rest[0], { template });
+    return made.code;
+}
+async function workorder(run) {
+    const [sub, name] = run.rest;
+    if (sub === 'check')
+        return workorderCheck(run.dir, name);
+    const template = run.value['--template'];
+    newWorkorder(run.dir, sub, template ? { template } : {});
+    console.log(`  What is left to fill in, as \`workorder check ${sub ?? ''}\` will judge it before a run starts:`);
+    await workorderCheck(run.dir, sub, { withDoctor: false });
+    return 0;
+}
+async function updateAll(run) {
+    let failed = 0;
+    for (const d of run.rest.map((x) => resolve(x))) {
         const lockPacks = readLock(resolve(d, '.claude')).packs;
-        if (lockPacks.length === 0) continue;
+        if (lockPacks.length === 0)
+            continue;
         console.log(`\n== ${d}`);
         try {
-          await sync(d, lockPacks, { force, mkdirs: true });
-          failed += await doctor(d, console.log, INSTALLING);
-        } catch (e) {
-          failed += 1;
-          console.log(`  PROBLEM: ${e.message}`);
+            await sync(d, lockPacks, { force: run.force, mkdirs: true });
+            failed += await doctor(d, console.log, INSTALLING);
         }
-      }
-      return failed ? 1 : 0;
+        catch (e) {
+            failed += 1;
+            console.log(`  PROBLEM: ${e instanceof Error ? e.message : String(e)}`);
+        }
     }
-    case 'doctor':
-      return doctor(dir, console.log, { strict, fresh });
-    case 'shape':
-      return shapeCommand(rest[0], dir);
-    case 'scan':
-      if (rest.includes('--prompt')) { process.stdout.write(readFileSync(fileURLToPath(new URL('../prompts/scan-review.md', import.meta.url)), 'utf8')); return 0; }
-      await scan(dir, { out: rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null });
-      return 0;
-    case 'logs':
-      return logsCommand(dir, rest);
-    case 'status':
-      return statusCommand(argv.includes('--dir') ? [...rest, '--dir', dir] : rest);   // no --dir: every run on the machine
-    case 'suggest':
-      suggest(dir);
-      break;
-    case 'fix':
-      await fixPlan(dir, { from: fromUrl ? resolve(fromUrl) : null, out: rest.includes('--out') ? resolve(rest[rest.indexOf('--out') + 1]) : null });
-      break;
-    case 'new-pack':
-      return newPack(dir, rest[0], { repo: rest.includes('--repo') ? rest[rest.indexOf('--repo') + 1] : null });
-    case 'survey':
-      process.stdout.write(readFileSync(fileURLToPath(new URL('../prompts/survey.md', import.meta.url)), 'utf8'));
-      return 0;
-    case 'global': {
-      const run = { add: globalAdd, remove: globalRemove, doctor: globalDoctor }[rest[0]];
-      if (!run) throw new Error('use `global add`, `global remove` or `global doctor`');
-      return run({ home, force });
-    }
-    case 'symmetry':
-      return (await import('../packs/base/tools/shape-symmetry.mjs')).main([...rest, '--dir', dir]);
-    case 'dup':
-      if (rest[0] !== 'scan') throw new Error('use `dup scan [--dir <project>]`');
-      return dupScan(dir);
-    case 'lock':
-      return lockCommand(rest[0], dir, { force, branch: rest.includes('--branch') ? rest[rest.indexOf('--branch') + 1] : undefined });
-    case 'list':
-      for (const name of availablePacks()) { const p = readPack(name); console.log(`${name.padEnd(14)}${p.version.padEnd(8)}${p.type.padEnd(7)}${p.author}: ${p.description}`); }
-      console.log('\npresets (init <preset> installs the packs that stack needs):');
-      for (const [name, packs] of Object.entries(PRESETS)) console.log(`${name.padEnd(12)} ${packs.join(', ')}`);
-      return 0;
-    default:
-      console.log(HELP);
-      return command ? 2 : 0;
-  }
+    return failed ? 1 : 0;
 }
-
-main().then(
-  (code) => process.exit(code ?? 0),
-  (err) => {
-    console.error(`claude-packs: ${err.message}`);
+const printPrompt = (name) => {
+    process.stdout.write(readFileSync(fileURLToPath(new URL(`../prompts/${name}`, import.meta.url)), 'utf8'));
+    return 0;
+};
+const GLOBAL = {
+    add: (run) => globalAdd({ home: pathOf(run, '--home') ?? undefined, force: run.force }),
+    remove: (run) => globalRemove({ home: pathOf(run, '--home') ?? undefined }),
+    doctor: (run) => globalDoctor({ home: pathOf(run, '--home') ?? undefined }),
+};
+function list() {
+    for (const name of availablePacks()) {
+        const p = readPack(name);
+        const author = typeof p.author === 'object' ? p.author.name : p.author ?? '';
+        console.log(`${name.padEnd(14)}${p.version.padEnd(8)}${p.type.padEnd(7)}${author}: ${p.description}`);
+    }
+    console.log('\npresets (init <preset> installs the packs that stack needs):');
+    for (const [name, packs] of Object.entries(PRESETS))
+        console.log(`${name.padEnd(12)} ${packs.join(', ')}`);
+    return 0;
+}
+const COMMANDS = {
+    new: newCommand,
+    'claude-ai-skill': (run) => writeClaudeAiZips(run.dir, ['workorder-writer']),
+    workorder,
+    init,
+    'planner-skills': (run) => plannerSkills(pathOf(run, '--out'), console.log, { zip: pathOf(run, '--zip') }),
+    configs: (run) => { console.log(describeConfigs(layoutConfiguration(run.dir))); return 0; },
+    config: (run) => switchConfig(run.dir, run.rest[0], run.installed, { force: run.force, dryRun: run.dryRun }),
+    add: async (run) => {
+        const from = run.value['--from'];
+        const sources = from ? { ...run.fetched, [run.rest[0] ?? '']: addCustomPack(run.rest[0], from) } : run.fetched;
+        await sync(run.dir, [...run.installed, ...run.rest], { force: run.force, mkdirs: true, sources });
+        return doctor(run.dir, console.log, INSTALLING);
+    },
+    remove: async (run) => {
+        await sync(run.dir, run.installed.filter((p) => p === 'base' || !run.rest.includes(p)), { force: run.force });
+        return doctor(run.dir, console.log, INSTALLING);
+    },
+    update: async (run) => {
+        if (run.installed.length === 0)
+            throw new Error('nothing installed here; run init first');
+        await sync(run.dir, run.installed, { force: run.force, mkdirs: true, sources: run.fetched });
+        return doctor(run.dir, console.log, INSTALLING);
+    },
+    'update-all': updateAll,
+    doctor: (run) => doctor(run.dir, console.log, { strict: run.strict, fresh: run.fresh }),
+    shape: (run) => shapeCommand(run.rest[0], run.dir),
+    scan: async (run) => {
+        if (run.rest.includes('--prompt'))
+            return printPrompt('scan-review.md');
+        await scan(run.dir, { out: pathOf(run, '--out') });
+        return 0;
+    },
+    logs: (run) => logsCommand(run.dir, run.rest),
+    status: (run) => statusCommand(run.argv.includes('--dir') ? [...run.rest, '--dir', run.dir] : run.rest), // no --dir: every run on the machine
+    suggest: (run) => { suggest(run.dir); return 0; },
+    fix: async (run) => { await fixPlan(run.dir, { from: pathOf(run, '--from'), out: pathOf(run, '--out') }); return 0; },
+    'new-pack': (run) => newPack(run.dir, run.rest[0], { repo: run.value['--repo'] ?? null }),
+    survey: () => printPrompt('survey.md'),
+    global: (run) => {
+        const command = run.rest[0] !== undefined && Object.hasOwn(GLOBAL, run.rest[0]) ? GLOBAL[run.rest[0]] : undefined;
+        if (!command)
+            throw new Error('use `global add`, `global remove` or `global doctor`');
+        return command(run);
+    },
+    symmetry: async (run) => (await import('../packs/base/tools/shape-symmetry.mjs')).main([...run.rest, '--dir', run.dir]),
+    dup: (run) => {
+        if (run.rest[0] !== 'scan')
+            throw new Error('use `dup scan [--dir <project>]`');
+        return dupScan(run.dir);
+    },
+    lock: (run) => lockCommand(run.rest[0] ?? '', run.dir, { force: run.force, branch: run.value['--branch'] }),
+    list,
+};
+async function main() {
+    const [command, ...argv] = process.argv.slice(2);
+    const run = command !== undefined && Object.hasOwn(COMMANDS, command) ? COMMANDS[command] : undefined;
+    if (!run) {
+        console.log(HELP);
+        return command ? 2 : 0;
+    }
+    return run(parse(command, argv));
+}
+main().then((code) => process.exit(code), (err) => {
+    console.error(`claude-packs: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(2);
-  },
-);
+});
