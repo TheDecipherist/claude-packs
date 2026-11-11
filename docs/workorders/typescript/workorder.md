@@ -17,11 +17,11 @@ every source file strict TypeScript (`.mts`), built by TypeScript 7's native com
 unchanged; one owner for every helper (a git runner, a JSON read, a payload parse, a hook's tail) instead of the 4 to 22 copies the
 survey counted; a test layout where a changed file's tests are a path function, so a one-hook change runs in seconds; packs written
 from one template and held to it by a gate; the counts, tables and lists the kit keeps by hand generated from the packs; the
-language server working on the kit for Claude Code's `LSP` tool; the checks a project pays per tool call held to a budget; and a
+language server working on the kit for Claude Code's `LSP` tool; the checks a project pays per tool call held to a budget, run through a Go proxy to one resident node process; and a
 release that goes from a commit to npm in under five minutes. Finished looks like: 0 hand-written `.mjs`, `.js` or `.py` source in
 the kit; `tsc --noEmit` 0 errors under the strict set; 0 `any` and 0 suppressed errors; every shape defined once; the whole suite
 green with every test of the baseline still present; `LSP` answering definitions, references and call hierarchy on the `.mts`; a
-one-hook gate under 60 s and a release under 300 s, both measured; a project's Bash call waiting on 2 node processes, not 9.
+one-hook gate under 60 s and a release under 300 s, both measured; a project's Bash call waiting on 2 proxy calls of under 20 ms each, not 9 node processes of about 85 ms.
 
 **The position.**
 - *Known (measured 2026-11-11):* TypeScript 7.0.2 compiles the current 105-file sample in 0.55 s cold and 0.10 s warm and reports
@@ -108,7 +108,7 @@ Never do:
 - Leave a decision open: take the recommended choice, record it, go on.
 </constraints>
 
-## Decisions taken by this order (recorded as d-1 to d-9 at W0; the user may overturn any)
+## Decisions taken by this order (recorded as d-1 to d-10 at W0; the user may overturn any)
 
 - **d-1 The branch.** `work/2.0.0-typescript` from `work/1.9.0-platforms` (every fix of 2026-11-11, unreleased, KWB-147 and 155 to 167).
   1.9.0 is not published separately; its CHANGELOG section folds into 2.0.0 (survey open-work section 1).
@@ -148,9 +148,24 @@ Never do:
   lists (replaced by a per-version manifest of installed files and hashes), `docs/rules-without-checks.md`, `docs/versions.md`'s rows:
   one generator, `scripts/counts.mts`, run by the release; the tests that held the numbers become one `--check` that the generated
   text equals the file. From the configurations survey section 8 (29 copies) and the tests survey section 3.
-- **d-9 Runtime in a project.** One runner process per event (the matcher table decided inside it), the heartbeat a file write in it,
-  git-guard's Stop verdict cached and capped at 1 s, a per-session git state file read by every hook that asked git, doctor holding
-  each hook per event (not pooled) to a budget. From the runtime-cost survey section 8.
+- **d-9 Runtime in a project.** One runner process per event as the first step (the matcher table decided inside it, the heartbeat
+  a file write in it), git-guard's Stop verdict cached and capped at 1 s, a per-session git state file read by every hook that asked
+  git, doctor holding each hook per event (not pooled) to a budget. From the runtime-cost survey section 8.
+- **d-10 A resident runner behind a Go proxy (the user, 2026-11-11: "use go as a proxy ... it somehow kept node open and every
+  request from a hook went to go then to node ... we keep the best of both worlds. we still use typescript. hooks are just run through
+  go as a proxy").** Every hook stays TypeScript. One node process per checkout and session holds the hooks loaded once and answers
+  events over a unix socket; the command Claude Code starts per event is a small Go client (one file, under 100 lines) that forwards
+  stdin to the socket and returns the verdict and exit code; with no daemon it says so once and starts one detached, failing open as
+  the crash policy already does for a hook that cannot run. Measured on this Mac, 2026-11-11, with a prototype (the session's
+  scratchpad `proxy/`): 16 ms per event through the proxy against 85 ms for a fresh node runner, the same six Bash-group hooks, the
+  planted `find /` refused and a plain `ls` allowed, 92 requests answered by one process; a native start costs 5 to 7 ms here, a
+  node start 57 ms. What it costs: Go as a build-time dependency of the kit (the client shipped as binaries for darwin-arm64,
+  darwin-amd64, linux-amd64 and linux-arm64, about 3 MB each, built by the release), a daemon's lifecycle (start at SessionStart,
+  stop at SessionEnd and after an idle hour, restart when the lock's hash changes after an update, one per checkout, a socket under
+  the user's cache folder with a short path: macOS allows 104 bytes), the socket mode 600, and hooks that are re-entrant (no
+  module-level state that one event leaves for the next: the base-hooks survey section 6 lists `ROOT` read at import,
+  `process.env` edited by agents-held, `process.stderr.write` reassigned, module singletons). The one-runner-per-event step stays
+  first because it is what makes the daemon's work table and is the fallback where no binary fits.
 
 ---
 
@@ -163,7 +178,7 @@ configuration: base
 packs: base
 ```
 
-1. The branch `work/2.0.0-typescript` from `work/1.9.0-platforms`, pushed (done: the order's first commit); d-1 to d-9 written to
+1. The branch `work/2.0.0-typescript` from `work/1.9.0-platforms`, pushed (done: the order's first commit); d-1 to d-10 written to
    `docs/workorders/typescript/decisions.md`.
 2. Merge `origin/work/1.9.1-admiral-skill` (5e19ef5: the `admiral` pack with one skill; survey open-work section 5, the one live branch)
    into the order's branch: one copy where the README row and site counts overlap, its CHANGELOG line under 2.0.0, the skill gains the
@@ -178,7 +193,7 @@ packs: base
    later step is held to: tests, pass, fail, each failing test's name, wall time, and the gate's time for a one-hook change
    (`test:changed` with `packs/base/hooks/no-find.mjs` touched: today 9 files, 139 s to 1,456 s per the tests survey).
 
-**Done when:** `docs/workorders/typescript/decisions.md` holds d-1 to d-9; the admiral pack is on the branch with its skill rule and
+**Done when:** `docs/workorders/typescript/decisions.md` holds d-1 to d-10; the admiral pack is on the branch with its skill rule and
 `npm run test:changed` green for the merge; the four rows are closed; both version rows exist and `package.json` pins them;
 `build/evidence/W0/baseline.txt` holds the suite's counts and wall time and `build/evidence/W0/one-hook-gate.txt` the one-hook gate's
 time; every failing baseline test is named in `progress.md` with its reason.
@@ -362,25 +377,38 @@ names every code file in it (a test).
 
 ## W8. What a project pays per tool call
 
-From the runtime-cost survey (section 8's budgets and the nine changes). Measured on bandwarp's `.claude/hooks.log` and on a fresh
-install, by the same log line, per event.
+From the runtime-cost survey (section 8's budgets) and d-10. Measured on bandwarp's `.claude/hooks.log` and on a fresh install, by the
+same log line, per event. Two agents in parallel on (1) and (2), merged in that order; (3) and (4) after.
 
-1. One runner per event: `settings.json` gets one entry per event; the runner reads a table the install writes (`.claude/hooks/hooks.json`:
-   hook, events, matcher, timeout, async) and decides the matcher itself; the heartbeat is a file write inside it; `update` migrates an
-   existing project's entries (noop's manifest records the change).
-2. git-guard at Stop: the verdict cached by remote URL plus the sorted local branch tips (60 s, invalidated by a ref change), the live
-   look capped at 1 s with the existing "not checked" note, a detached refresh after a push or commit.
-3. A per-session git state file (HEAD, branch, dirty list, keyed by the mtimes the status line already uses), written once per event by
-   the runner and read by `chart-first`, `look-gate`, `suite-once`, `stage-guard`, `repo-litter`; `time-guard`'s scans detached;
-   `lesson-checks` compiled at update by the lock hash.
+1. One runner per event, in TypeScript: `settings.json` gets one entry per event; the runner reads a table the install writes
+   (`.claude/hooks/hooks.json`: hook, events, matcher, timeout, async, order) and decides the matcher itself; the heartbeat is a file
+   write inside it; `update` migrates an existing project's entries (noop's manifest records the change). Hooks made re-entrant: `ROOT`
+   and the layout read per event from the payload's `cwd`, no `process.env` edits, no reassignment of `process.stderr.write` (the runner
+   captures output per hook), no module singleton that outlives an event; a test runs two events of different checkouts through one
+   runner process and sees each judged by its own checkout.
+2. The resident runner and the Go proxy (d-10): `packs/base/hooks/resident.mts` (the daemon: the socket, one hook table loaded once,
+   each event answered with the exit code and stderr, a reload when the lock hash changes, exit after an idle hour or at SessionEnd)
+   and `proxy/client.go` in the kit (the client: connect, forward stdin, half-close, return the verdict; no daemon: say so, start one
+   detached, exit 0); the release builds the four binaries through the build queue and `files` ships them under `packs/base/bin/`; the
+   install picks the binary for the machine and writes `settings.json` entries that run it (one per event), falling back to the
+   TypeScript runner of (1) where no binary fits; Go's version looked up and pinned with its row (`latest-versions`); the selftest of the
+   client (a planted stale socket, a planted dead daemon, a planted path over 104 bytes) and of the daemon (a planted hook that throws,
+   a planted lock change) each seen red.
+3. The heavy hooks: git-guard at Stop served from a cache keyed by remote URL plus the sorted local branch tips (60 s, invalidated by a
+   ref change), the live look capped at 1 s with the existing "not checked" note, a detached refresh after a push or commit; a
+   per-session git state file (HEAD, branch, dirty list, keyed by the mtimes the status line already uses) kept by the resident runner
+   and read by `chart-first`, `look-gate`, `suite-once`, `stage-guard`, `repo-litter`; `time-guard`'s scans detached; `lesson-checks`
+   compiled at update by the lock hash.
 4. Doctor holds each hook per event (not pooled) to the budget table: Pre Bash 100/250 ms p50/p95, Pre Write 120/300, Post 60/150,
-   Prompt 80/150, SessionStart 150/300, Stop 200/1,000, per hook 10/50, worst 200; the status line's refresh every 5 s; the selftest cache
-   per hook plus imports in `~/.cache/claude-packs`.
+   Prompt 80/150, SessionStart 150/300, Stop 200/1,000, per hook 10/50, worst 200; the status line served by the resident runner's state
+   (its render under 80 ms, a refresh every 5 s); the selftest cache per hook plus imports in `~/.cache/claude-packs`.
 
-**Done when:** a Bash call starts 2 node processes (from 9) and a Write 2 (from 6), counted in a fresh install's settings and seen in its
-log; Stop's p50 under 200 ms and p95 under 1,000 ms over 50 Stops on bandwarp (from 1,880 and 7,785); no hook over its budget in a day's
-log of bandwarp with its agents running; `doctor` red on a planted hook that sleeps 300 ms at one event (seen red); `init` plus `doctor`
-in a fresh project under 60 s and `update` under 60 s on this Mac.
+**Done when:** a Bash call waits on 2 proxy processes (from 7 node runners), counted in a fresh install's settings and seen in its log,
+each under 20 ms on this Mac without the hooks' own work (from 85 ms); a Write 2 (from 4); the proxy's and the daemon's selftests
+green with every plant seen red; an install on a machine with no fitting binary runs the TypeScript runner of (1) and passes the same
+tests; Stop's p50 under 200 ms and p95 under 1,000 ms over 50 Stops on bandwarp (from 1,880 and 7,785); no hook over its budget in a
+day's log of bandwarp with its agents running; `doctor` red on a planted hook that sleeps 300 ms at one event (seen red); `init` plus
+`doctor` in a fresh project under 60 s and `update` under 60 s on this Mac; the re-entrancy test green.
 
 ## W9. The release in five minutes
 
