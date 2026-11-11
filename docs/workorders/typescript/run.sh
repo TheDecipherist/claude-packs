@@ -30,7 +30,9 @@ refused() { tail -n 1 "$1" | grep -q '"api_error":"usage_limit_reached"'; }
 
 # the pre-flight: a run never starts on an order that cannot finish (a placeholder left, a step with no measured Done when, a skill
 # not installed, a red doctor). The order is fixed first, by the person, never by the run. A run already started (progress.md) goes on.
-if [[ ! -f "$order/progress.md" ]] && ! npx @thedecipherist/claude-packs workorder check typescript --dir "$root"; then
+# this is the kit's own repo: its command is the built tree, never the published package (the emitted .mjs are not in git)
+( cd "$root" && npm ci --no-audit --no-fund && npm run build ) >> "$logs/runner.log" 2>&1
+if [[ ! -f "$order/progress.md" ]] && ! node "$root/bin/claude-packs.mjs" workorder check typescript --dir "$root"; then
   echo "$(date +%Y-%m-%dT%H:%M:%S%z) workorder check refused the order: fix what it names, then start again" | tee -a "$logs/runner.log"
   exit 5
 fi
@@ -50,7 +52,9 @@ while [[ "$session" -le "$max_sessions" ]]; do
   fi
   before="$(moved)"
   echo "$(date +%Y-%m-%dT%H:%M:%S%z) session $session starts" | tee -a "$logs/runner.log"
-  claude -p "Run docs/workorders/typescript/PROMPT.md" --permission-mode bypassPermissions --output-format stream-json --verbose \
+  # the second sentence is what suite-once reads to allow a full run where a step's Done when names one (W0.6 proves it)
+  claude -p "Run docs/workorders/typescript/PROMPT.md; this session runs the whole suite where a step's Done when names it" \
+    --permission-mode bypassPermissions --output-format stream-json --verbose \
     < /dev/null > "$logs/session-$session.jsonl" 2> "$logs/session-$session.err" || true
   if [[ "$(moved)" == "$before" ]] && refused "$logs/session-$session.jsonl"; then
     echo "$(date +%Y-%m-%dT%H:%M:%S%z) session $session refused for the usage limit: trying again in ${limit_wait}s" | tee -a "$logs/runner.log"

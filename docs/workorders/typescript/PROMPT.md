@@ -17,17 +17,25 @@ The user wants this done from start to finish with no involvement. Nobody is rea
 <constraints>
 Always do:
 - Read these first, every session: this file, `workorder.md`, `docs/workorders/typescript/progress.md` (create it on the first run), `CLAUDE.md` and `build.md`.
-- Before the first item of the first session (no `progress.md` yet), run `npx @thedecipherist/claude-packs workorder check typescript`. If it refuses, write what it names in `progress.md` under `BLOCKED: workorder check` and end the session there: an order that cannot finish is fixed by the person before it runs. This is the one stop this file allows.
+- Start every session with `npm ci && npm run build` (the emitted `.mjs` are not in git), and run the kit's own command as `node bin/claude-packs.mjs ...`, never `npx` (the published package is not this tree).
+- Before the first item of the first session (no `progress.md` yet), run `node bin/claude-packs.mjs workorder check typescript`. If it refuses, write what it names in `progress.md` under `BLOCKED: workorder check` and end the session there: an order that cannot finish is fixed by the person before it runs.
+- This file allows two stops, and no other: the check above, and W12. W12 publishes 2.0.0 only when this file holds the line `publish 2.0.0: yes (Tim, YYYY-MM-DD)` under the heading below; without it, finish W11, leave the branch pushed, write in `progress.md` what is ready to land and publish, and end there.
+- Run the whole suite only where a step's Done when names it (W0, W4, W5, W6, W12); `run.sh` passes the sentence that allows it ("this session runs the whole suite where a step's Done when names it"), and W0.6 proves `suite-once` accepts that sentence before the baseline runs.
 - Resume from `progress.md`: the first step not marked done, at its first unticked item.
 - After every finished item, append one line to `progress.md` before starting the next: `- YYYY-MM-DD W<n>.<item>: what was done, evidence path, commit`. The context may end at any moment, and the next session must be able to continue from that file alone.
-- Keep `docs/workorders/typescript/status.json` current, so `npx @thedecipherist/claude-packs status` shows where the run stands: written at the start of each session and after every finished item, `{ "updated": "<ISO time>", "steps": [ { "id": "W1", "title": "<short>", "items": <the step's numbered items plus one for its Done when>, "done": <finished>, "agent": "<agent name or null>" } ], "agents": [ { "name": "<name>", "worktree": ".claude/worktrees/<name>", "step": "<id>", "started": "<ISO time>" } ] }`, every step in order. Each agent's brief tells it to keep `docs/workorders/typescript/agents/<name>.json` in its own worktree, `{ "name", "step", "items", "done", "now": "<what it is doing, one line>", "updated" }`, written after each of its items; an agent leaves `agents` when its work is merged.
+- Keep `docs/workorders/typescript/status.json` current, so `node bin/claude-packs.mjs status` shows where the run stands: written at the start of each session and after every finished item, `{ "updated": "<ISO time>", "steps": [ { "id": "W1", "title": "<short>", "items": <the step's numbered items plus one for its Done when>, "done": <finished>, "agent": "<agent name or null>" } ], "agents": [ { "name": "<name>", "worktree": ".claude/worktrees/<name>", "step": "<id>", "started": "<ISO time>" } ] }`, every step in order. Each agent's brief tells it to keep `docs/workorders/typescript/agents/<name>.json` in its own worktree, `{ "name", "step", "items", "done", "now": "<what it is doing, one line>", "updated" }`, written after each of its items; an agent leaves `agents` when its work is merged.
 - Decide, and carry on. Write each choice in `docs/workorders/typescript/decisions.md` (`d-n`: the question, the options, what you chose and why). Prefer the choice that is easiest to reverse.
 - A problem is never a reason to end. Log it, take the best honest way round, and go on to whatever can still be done.
 - Prove each step's "done when" by running it, with the evidence in `build/evidence/W<n>/`. A step is finished when it is measured, never when it looks right.
-- Work on one branch for this order, `work/2.0.0-typescript` (d-1: made from `work/1.9.0-platforms`, which holds every unreleased fix, not from the trunk), pushed from its first commit. Land it once, when every step is done, the way the `land-branch` skill says, gated by the tests its changes reach against the trunk.
-- Log every bug in `bugs.md` before fixing it, and every fault in the kit in `workflow-bugs.md`.
+- Work on one branch for this order, `work/2.0.0-typescript` (d-1: made from `work/1.9.0-platforms`, which holds every unreleased fix, not from the trunk), pushed from its first commit; agents work on `work/2.0.0-ts-<slice>` branches in worktrees under `.claude/worktrees/`, started with `npm ci && npm run build`, every independent agent of a step started in the foreground in one message (the `agents-held` rule). Land it once, at W12, through `npm run release major`, which gates with the tests the branch's changes reach against the trunk, lands and publishes in one go; W9 rehearses that with `--dry-run` and a local registry and never publishes.
+- Log every fault in `workflow-bugs.md` before fixing it (the kit has no `bugs.md`), with the `KWB-` number the lead hands out.
 - Follow every rule in `.claude/rules` and every skill that applies.
-- After a refusal, once you know the answer, mark it: `npx --no-install @thedecipherist/claude-packs logs mark <id> right|wrong "<why>"`.
+- After a refusal, once you know the answer, mark it: `node bin/claude-packs.mjs logs mark <id> right|wrong "<why>"`.
+- Write into this repository only. bandwarp's hook log is read once at W0 into a fixture; no file of bandwarp or any other project is changed.
+
+## The user's yes for W12
+
+(Empty until the user writes `publish 2.0.0: yes (Tim, YYYY-MM-DD)` here.)
 
 Never do:
 - Stop to ask, wait for an answer, or end a turn while any step can still move.
