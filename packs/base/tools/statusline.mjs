@@ -21,10 +21,20 @@ import { activitySegments, gitSegment, gitState, lastActivity } from './statusli
 const SELF = fileURLToPath(import.meta.url);
 const SEPARATOR = ' | ';
 
-/** The kit version of the install this tool belongs to: .claude/claude-packs.lock.json, one folder up from .claude/tools;
- *  else the session's project's lock (a tool run from outside an install, the kit's own checkout among them). */
-export const kitVersion = (toolDir, projectDir) => [join(toolDir, '..', 'claude-packs.lock.json'), projectDir && join(projectDir, '.claude', 'claude-packs.lock.json')]
-  .filter(Boolean).map((f) => readJson(f)?.kit).find((v) => typeof v === 'string') ?? null;
+const KIT = '@thedecipherist/claude-packs';
+const packageOf = (dir) => dir && join(dir, 'node_modules', '@thedecipherist', 'claude-packs', 'package.json');
+
+/** The kit version the project runs: the installed package's own package.json (KWB-162: never the lock's note of the last
+ *  install, which a packed build installed with --no-save leaves behind), for the install this tool belongs to (.claude/tools,
+ *  two folders up) or the session's project; a tool run from the kit's own checkout (packs/base/tools) with no project reads the
+ *  checkout's package.json; the lock only where no package is found. */
+export function kitVersion(toolDir, projectDir) {
+  const packages = [packageOf(join(toolDir, '..', '..')), packageOf(projectDir), join(toolDir, '..', '..', '..', 'package.json')];
+  const running = packages.filter(Boolean).map((f) => readJson(f)).find((p) => p?.name === KIT && typeof p.version === 'string');
+  if (running) return running.version;
+  return [join(toolDir, '..', 'claude-packs.lock.json'), projectDir && join(projectDir, '.claude', 'claude-packs.lock.json')]
+    .filter(Boolean).map((f) => readJson(f)?.kit).find((v) => typeof v === 'string') ?? null;
+}
 
 /** Where the RUNS cache lives: the user's cache folder, shared by every project's bar. */
 export const runsCache = (env) => join(env.XDG_CACHE_HOME || join(env.HOME || homedir(), '.cache'), 'claude-packs', 'runs.json');

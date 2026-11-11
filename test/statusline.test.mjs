@@ -81,6 +81,24 @@ test('a run with no agent shows the lead on its current step; a stale cache says
   assert.equal(lines.length, 3);
 });
 
+// KWB-162: the version is the package the project runs (node_modules/@thedecipherist/claude-packs/package.json), not the lock's
+// note of what the last install wrote: a packed build installed with --no-save showed the lock's number
+test('the kit version is read from the project\'s installed package, the lock only where there is none', () => {
+  const { home } = scene();
+  const pkg = join(home, 'project', 'node_modules', '@thedecipherist', 'claude-packs');
+  mkdirSync(pkg, { recursive: true });
+  writeFileSync(join(pkg, 'package.json'), toJson({ name: '@thedecipherist/claude-packs', version: '9.9.0' }));
+  const env = { HOME: home, XDG_CACHE_HOME: join(home, 'cache'), CLAUDE_CONFIG_DIR: join(home, 'config'), NO_COLOR: '1' };
+  const draw = (toolDir, session = {}) => statusBar(toJson(session), { env, nowMs: NOW, toolDir, refresh: false, git: () => ({}) })[0];
+  assert.equal(draw(join(home, 'project', '.claude', 'tools')), 'claude-packs 9.9.0', 'the installed package, beside the tool');
+  // the kit's own checkout's tool (the global status line), run for a session in the project: the project's package
+  const checkout = join(home, 'kit');
+  mkdirSync(join(checkout, 'packs', 'base', 'tools'), { recursive: true });
+  writeFileSync(join(checkout, 'package.json'), toJson({ name: '@thedecipherist/claude-packs', version: '9.10.0' }));
+  assert.equal(draw(join(checkout, 'packs', 'base', 'tools'), { workspace: { project_dir: join(home, 'project') } }), 'claude-packs 9.9.0', 'the session\'s project');
+  assert.equal(draw(join(checkout, 'packs', 'base', 'tools')), 'claude-packs 9.10.0', 'no project: the checkout\'s own package.json');
+});
+
 test('a broken session, transcript or cache draws what it can and never throws', () => {
   const { home, cache } = scene();
   writeFileSync(cache, '{ half');
