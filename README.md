@@ -178,7 +178,7 @@ The kit is strict about what counts as proof:
 Every project with the kit shows, under the prompt, what is working and where it is:
 
 ```
-claude-packs 1.8.0 | opus md | CTX 41% (1.0M) | 5h 38% | 7d 81%
+claude-packs 1.9.0 | opus md | CTX 41% (1.0M) | 5h 38% | 7d 81%
 ⎇ work/panel ✱3 ↑1↓0 | Edit src/ui/Panel.cpp | $ npm run test:changed
 BANDWARP               ███████████░░░░░░░░░  55%  34 of 76 items left, 4 agents, checked 8s ago
   > dsp        > W3b The cluster             ██████░░░░  60%  ♥ 12s ⚙ 13 proc · 1.3 cpu · 322M ram        WRITE src/dsp/Comb.cpp
@@ -396,48 +396,50 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 
 `list` shows every pack and preset, with its version and author. `base`, `writing` and `hook-proof` come with every configuration.
 
+<!-- generated:packs:start -->
 | Pack | For | Rules | Checks | Hooks | Skills |
 |---|---|---|---|---|---|
-| `ai` | Code that calls a model: untrusted input, explicit keys, model ids | 2 | 4 | 0 | 0 |
-| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, a settings layer with the standard settings | 53 | 12 | 3 | 8 |
-| `base` | Universal engineering, in every configuration | 25 | 8 | 28 | 15 |
-| `ci` | CI workflows: every language run, tools pinned, permissions stated | 2 | 2 | 0 | 0 |
-| `content-site` | Sites that publish: complete page heads, one source per page, defended forms, sized media | 4 | 3 | 0 | 1 |
-| `cpp` | Any C++ project: templates, thread contracts, headers, casts, static analysis | 11 | 14 | 1 | 2 |
-| `docker` | Dockerfiles, Compose and Swarm | 5 | 24 | 0 | 1 |
-| `dynamic-data` | Definition-driven systems: a CMS, an admin generator, a low-code platform | 10 | 9 | 0 | 1 |
-| `fastify` | Fastify servers | 6 | 15 | 0 | 0 |
-| `full-stack` | The stack choice: Fastify and Next.js only | 1 | 1 | 1 | 0 |
-| `go` | Go: errors handled, wrapped and never discarded | 1 | 2 | 0 | 0 |
-| `gpu-painter` | GPU-drawn UI on Dawn, with no OpenGL | 15 | 6 | 1 | 6 |
-| `hook-proof` | A hook that should refuse does refuse | 1 | 5 | 0 | 1 |
-| `host-agent` | Software that runs as root on machines it does not own | 1 | 7 | 0 | 0 |
-| `html-ui` | Server-rendered HTML: every value escaped | 2 | 5 | 0 | 0 |
-| `http-api` | Any HTTP server, in any framework: records tied to their caller, guards that fail closed, versioned routes, three layers | 9 | 31 | 0 | 2 |
-| `instrument-shell` | Instruments on a shared shell: sessions that still load, panels that keep every route, a menu held as one route table, nothing drawn that a layer hides | 7 | 1 | 0 | 3 |
-| `js-ts` | JavaScript and TypeScript | 27 | 35 | 0 | 0 |
-| `midi` | Clock, sync and sysex, right on the wire and in the audio | 5 | 9 | 0 | 2 |
-| `mongo` | MongoDB with the native driver | 6 | 18 | 0 | 0 |
-| `multi-tenant` | One system, many customers: no role crosses a tenant | 1 | 2 | 0 | 1 |
-| `nginx` | NGINX in front of containers | 2 | 7 | 0 | 1 |
-| `postgres` | PostgreSQL: migrations that never stop traffic, values always bound, no database wiped by mistake | 5 | 10 | 1 | 1 |
-| `python` | Python: templates, errors, resources, safe subprocess calls | 2 | 11 | 0 | 1 |
-| `react` | React: failed requests, effects, accessible controls | 2 | 6 | 0 | 0 |
-| `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate, every repeat one template | 6 | 9 | 0 | 3 |
-| `reverse-engineering` | Rebuilding a machine from firmware, manuals and banks: the machine's own names first, two sources before naming, every law sourced | 10 | 4 | 1 | 9 |
-| `shell` | Shell scripts: strict mode, quoting, shared functions | 2 | 9 | 0 | 1 |
-| `shell-hooks` | Shell and Node hooks for Claude Code | 1 | 4 | 0 | 0 |
-| `sound-design` | Sound proved by measuring audio: algorithms as data, neutral is exact, the meter first, an offline VST3 renderer, and comparing with the real machine | 7 | 7 | 0 | 7 |
-| `stellix` | Laws of one synth project | 5 | 5 | 1 | 0 |
-| `stored-text` | Text from a database reaches the page through one renderer | 1 | 4 | 0 | 1 |
-| `synth-creator` | The synth-creator configuration's own laws | 8 | 3 | 10 | 2 |
-| `tui` | Terminal UIs | 1 | 5 | 0 | 1 |
-| `ui-craft` | Application and page design in any web stack | 17 | 24 | 0 | 9 |
-| `web` | Web UI: Next.js, HTML, CSS, Tailwind | 8 | 22 | 0 | 5 |
-| `websocket` | WebSocket services: identity from the connection | 1 | 3 | 0 | 0 |
-| `admiral` | Driving a session on another machine through AdmiralMCP | 0 | 0 | 0 | 1 |
-| `writing` | Text that goes public reads like a person wrote it | 9 | 11 | 0 | 10 |
-| `zod` | Zod 4 schemas written once, in one folder | 2 | 0 | 1 | 0 |
+| `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
+| `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
+| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 52 | 12 | 3 | 8 |
+| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 28 | 8 | 28 | 15 |
+| `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
+| `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
+| `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 10 | 14 | 1 | 2 |
+| `docker` | Dockerfiles, Compose and Swarm: exec form, init, non-root, pinned bases, healthchecks, secrets, swarm-safe compose. | 5 | 24 | 0 | 1 |
+| `dynamic-data` | Systems driven by definitions: a CMS, an admin generator, a low-code platform. | 10 | 9 | 0 | 1 |
+| `fastify` | Fastify servers: security always on, trust config not headers, Zod at every route, streams and hijacks handled. | 6 | 15 | 0 | 0 |
+| `full-stack` | The full-stack configuration's stack choice: Fastify and Next.js only (stack-guard). | 1 | 1 | 1 | 0 |
+| `go` | Go: errors are handled, wrapped and never discarded on a state change, and context goes first. | 1 | 2 | 0 | 0 |
+| `gpu-painter` | GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows), drawn natively: no OpenGL, no browser. | 15 | 6 | 1 | 6 |
+| `hook-proof` | A hook that should refuse does refuse: exit 2 is the only block, a crash or a swallowed exit lets the call through, and nothing is proved until it is seen red. | 1 | 5 | 0 | 1 |
+| `host-agent` | Software that runs as root on machines it does not own: updates are verified, secrets stay off the command line, system files are replaced atomically, and generated config is escaped. | 1 | 7 | 0 | 0 |
+| `html-ui` | Server-rendered HTML (template strings, views): every value escaped, no inline style or script, safe links. | 2 | 5 | 0 | 0 |
+| `http-api` | Any HTTP server, in any framework: every route ties a record to its caller, guards fail closed, input is validated, secrets are compared and stored safely, and what a route returns gives nothing away. | 9 | 31 | 0 | 2 |
+| `instrument-shell` | Instruments built on a shared shell: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit. | 7 | 1 | 0 | 3 |
+| `js-ts` | JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper. | 27 | 35 | 0 | 0 |
+| `midi` | MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. | 5 | 9 | 0 | 2 |
+| `mongo` | MongoDB with the native driver: one client, one gateway, aggregation reads, bulkWrite writes, safe deletes. | 6 | 18 | 0 | 0 |
+| `multi-tenant` | One system, many customers: no role crosses a tenant, every query carries the tenant key, and isolation is proved with a second tenant. | 1 | 2 | 0 | 1 |
+| `nginx` | NGINX in front of containers: Docker DNS resolver, keepalive, stdout logs, headers with always, CSP, ModSecurity/CRS tuning. | 2 | 7 | 0 | 1 |
+| `postgres` | PostgreSQL: migrations that never stop traffic, values always bound, types that say what they hold, and no database wiped by mistake. | 5 | 10 | 1 | 1 |
+| `python` | Python projects: what is repeated becomes a template in the forms Python has for it, errors are handled where they can be, resources are closed, subprocess and network calls are safe. | 1 | 11 | 0 | 1 |
+| `react` | React: a failed request says so, a slow response never overwrites a newer one, effects are not used for derived state, and controls have names. | 2 | 6 | 0 | 0 |
+| `reverse-engineering` | Rebuilding a machine from its firmware, manuals and sound banks: two sources before naming anything, every law carries its source, a negative names what was scanned, every term of a sum is accounted for, and firmware stays out of git. | 10 | 4 | 1 | 9 |
+| `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate. | 5 | 9 | 0 | 3 |
+| `shell` | Shell scripts: strict mode, quoted arguments, shared functions in one sourced file, tables and loops, and programs kept out of heredocs. | 1 | 9 | 0 | 1 |
+| `shell-hooks` | Shell and Node hooks for Claude Code: portable, anchored, quoted, one prelude, JSON by a tool. | 1 | 4 | 0 | 0 |
+| `sound-design` | Sound that is proved by measuring audio: algorithms are data, neutral is exact, the meter is suspected before the engine, and tests sit off the easy point. | 7 | 7 | 0 | 7 |
+| `stellix` | Stellix spec laws: the world, determinism, generated reset, no shipped images. | 5 | 5 | 1 | 0 |
+| `stored-text` | Text from a database reaches the page through one renderer: line endings normalised, markdown parsed, code highlighted, HTML sanitized. | 1 | 4 | 0 | 1 |
+| `synth-creator` | The synth-creator configuration's own laws, installed with it and never by another: the build queue (build-guard), the time watch, the spec lock, frozen fixes, read-only vendored code and copy trees, staging by name, the session watches (idle-wake, user-asks, build-sweep), and the rules and skill a synth build lives by. | 8 | 3 | 10 | 2 |
+| `tui` | Terminal UIs (Ink + React or raw-mode Node): alternate screen, resize ordering, width as state, raw mode restored on every exit. | 1 | 5 | 0 | 1 |
+| `ui-craft` | Application and page design in any web stack: forms, motion, states, navigation, touch, copy, type and space, the look of generated UI, and a rendered-page gate. | 16 | 24 | 0 | 9 |
+| `web` | Web UI (Next.js, HTML, CSS, Tailwind 4): accessibility, one primitives module, styles in stylesheets, performance, production build, client boundaries. | 8 | 22 | 0 | 5 |
+| `websocket` | WebSocket services: identity comes from the connection, each message is authorised, and a connection map survives a reconnect. | 1 | 3 | 0 | 0 |
+| `writing` | Text that goes public reads like a person wrote it: cadence, voice, stance for replies, structure for posts. | 9 | 11 | 0 | 10 |
+| `zod` | Zod 4 schemas written once, in one folder, and imported everywhere (schemas-only), with the environment shaped in one env.ts. | 2 | 0 | 1 | 0 |
+<!-- generated:packs:end -->
 
 ## APIs are versioned, in any framework
 
@@ -447,16 +449,18 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 
 A project is one configuration: a kind of project, as data in `configurations/<name>/config.json`. It holds the packs (`always`, `choose`, `default`), the folder template `init` creates, the order of its hooks, what doctor counts as source, and the house rules of its CLAUDE.md block. `.claude/layout.json` `"configuration"` names the project's. With none named, the install takes the configuration that has a chosen pack by default.
 
+<!-- generated:configurations:start -->
 | Configuration | For | `init` adds by default |
 |---|---|---|
-| `base` | Universal engineering only, for a project no other configuration fits | nothing |
-| `cpp` | Any C++ project that is not a synth | `cpp` |
-| `go` | Go projects | `go` |
-| `node` | A Node.js or TypeScript service, web app, CLI, library or MCP server | `js-ts` |
-| `python` | Python projects | `python` |
-| `rust` | Rust crates and workspaces | `rust` |
-| `full-stack` | A Fastify API and a Next.js web app, with one schemas folder and one database gateway. It fixes a folder layout, so it is offered and never assumed. It always takes `full-stack`, `http-api`, `fastify`, `zod` and `docker`; a project can choose `go`, `web`, `host-agent` and `shell-hooks` too, for a Go agent on its hosts and web pages beside the API | `js-ts`, `stored-text`, `ui-craft` |
-| `synth-creator` | JUCE synths and effects | `cpp`, `audio-core` |
+| `base` | Universal engineering only: the git laws, the line limit, the folder and placement laws, the shape law, once-only, making, secrets and the untrusted-content boundary. | nothing |
+| `cpp` | Any C++ project that is not a synth: universal engineering and the cpp pack, with what is repeated made one template. | `cpp` |
+| `full-stack` | A web service: a Fastify API and a Next.js web app in one repo, Zod 4 schemas in one shared folder, one database gateway, one error contract. | `js-ts`, `stored-text`, `ui-craft` |
+| `go` | Go projects: universal engineering and the go pack. | `go` |
+| `node` | A Node.js or TypeScript service, web app, CLI, library, MCP server or edge proxy: base, plus the packs its stack needs (js-ts, mongo, fastify, ai, docker, shell-hooks, html-ui, web, tui, nginx). | `js-ts` |
+| `python` | Python projects: universal engineering and the python pack. | `python` |
+| `rust` | Rust projects: universal engineering and the rust pack. | `rust` |
+| `synth-creator` | JUCE synths and effects units: realtime audio, the sound engines, the Dawn GPU painter, Stellix. | `cpp`, `audio-core` |
+<!-- generated:configurations:end -->
 
 ```
 npx --no-install @thedecipherist/claude-packs configs                     list them: packs, counts, folder template
@@ -468,6 +472,7 @@ npx --no-install @thedecipherist/claude-packs config <name> [--dry-run]   switch
 
 `init <preset>` installs the packs a stack needs.
 
+<!-- generated:presets:start -->
 | Preset | Packs |
 |---|---|
 | `node-api` | `js-ts`, `http-api`, `mongo`, `fastify`, `ai`, `docker` |
@@ -483,71 +488,78 @@ npx --no-install @thedecipherist/claude-packs config <name> [--dry-run]   switch
 | `shell-tools` | `shell` |
 | `go-app` | `go`, `shell`, `docker`, `ci` |
 | `rust-app` | `rust`, `shell`, `docker`, `ci` |
+<!-- generated:presets:end -->
 
 ## Commands
 
 Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thedecipherist/claude-packs <command>` with the kit as a dev dependency. `--dir <project>` runs it on another folder.
 
+<!-- generated:commands:start -->
 | Command | What it does |
 |---|---|
-| `suggest` | The configuration and packs this project needs, with the evidence |
-| `scan [--out <file>]` | On a copy: what to install and everything already wrong. `scan --prompt` prints the review brief for what checks cannot see |
-| `fix [--from <scan.json>] [--out <file>]` | The last scan as a work order, `.claude/fix-plan.md`; scans first if there is none |
-| `init [pack...] [--auto]` | Install packs or a preset. `--auto` takes what `suggest` finds; `--config`, `--profile` and `--layout` choose the start; `--from <workorder.md>` installs a work order's install block |
-| `add <pack...> [--from <git-url>]` | Add packs, a team's own included |
-| `remove <pack...>` | Remove packs; files you edited are kept |
-| `update` | Re-sync installed packs from this version |
-| `update-all <dir...>` | Update every listed project that has the kit |
-| `logs` | Which hooks earn their place: calls, refusals and verdicts per hook. `logs refusals`, `logs mark <id> right\|wrong "<why>"`, `logs crashes`, `logs clear <hook>\|all fixed\|superseded "<why>"` |
-| `doctor [--strict] [--fresh]` | Verify the install: paths, hooks, selftests, checks' own examples, hook timing, and that a test answers each rule whose Check names one |
-| `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed; `--from <workorder.md>` installs from a work order's install block; `--template <t>` writes its work order too |
-| `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template` picks the steps: `generic` (the default), `plugin` or `rebuild` |
-| `workorder check <name>` | Before a run: refuses a placeholder left, a step with no measured Done when, a skill not installed, a red doctor |
-| `status [--order <name>] [--watch <minutes>]` | Where every unattended run on this machine stands: one line per project with a bar and its percent, then one per agent with its step, its own bar and what it is doing. `--dir <project>` reports that project's orders, running or not |
-| `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
-| `list` | The packs and presets |
-| `configs` | The configurations |
-| `config <name> [--dry-run]` | Switch configuration |
-| `planner-skills [--out <dir>] [--zip <dir>]` | One project-layout skill body per configuration; `--zip` one zip per claude.ai skill (the planner's three, `design-a-preset`, `synth-cost`) |
-| `survey` | Print the prompt that makes Claude write `docs/project.md` for tailoring |
-| `shape scan` | Every instance literal in the repo, against `design/shape.json` |
-| `symmetry gen\|run` | The generated gate: every instance has the same members, and every pair swaps the same |
-| `dup scan` | Every duplicated block, by file |
-| `global add\|remove\|doctor` | The global part, below |
-| `lock status\|take\|release` | This repo's own lock, for work on the kit |
+| `new <name>` | A new project in `<dir>`/`<name>`: the house files (CLAUDE.md, build.md, bugs.md, workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed |
+| `workorder <name>` | A work order in docs/workorders/`<name>`: the steps, the prompt that runs them with nobody there, and a runner that starts session after session |
+| `workorder check <name>` | Before a run: refuses a placeholder left, a step whose Done when has no number or test path, a skill named that is not installed (with the pack to add), and a red doctor --strict |
+| `status` | Every unattended run alive on this machine: each project with a progress bar, each agent with its step and its bar, and how much is left; --dir `<project>` [--order `<name>`] for one project, running or not; --watch `<minutes>` to print it again every so many minutes |
+| `init [pack...]` | Install packs or presets (e.g. init node-api; list shows them); base is always included and create the layout folders |
+| `add <pack...>` | Add packs to an existing install |
+| `new-pack <name> [--repo <git-url>] [--hook]` | A new repository for a team's own pack, from the kit's template, ready to edit and push; --hook adds an example hook on the hook contract, with its selftest and its worktree case |
+| `add-lesson-check <id> --why <reason> --rule <rule.md> --globs <a,b> --pattern <regex> --bad <code> --good <code>` | One lesson check from the template: fills exclude and kind (--kind), proves that bad is caught and good passes, and names the check in its rule; into .claude/ of --dir, or packs/`<name>`/ with --pack `<name>` |
+| `remove <pack...>` | Remove packs (files you edited are kept) |
+| `update` | Re-sync installed packs from this package version, in the project's configuration |
+| `configs` | List the configurations: what each installs, its packs and its folder template |
+| `config <name>` | Switch this project to another configuration; prints what changes first |
+| `planner-skills [--out <dir>]` | One project-layout skill body per configuration, from its layout template (printed, or written to `<dir>`/`<configuration>`/project-layout/SKILL.md), and the claude.ai skills |
+| `update-all <dir...>` | Update every listed project that already has claude-packs (e.g. update-all ~/projects/*); folders without it are skipped |
+| `doctor [--strict] [--fresh]` | Verify the install (paths, folders, hooks, checks' own examples); a hook's selftest that passed is not run again until the hook changes (--fresh runs them all); --strict also fails when a rule matches no file or a source file is covered by no rule |
+| `shape scan` | Every instance literal in the repo (code, tests, docs, briefs), by file and concept, with a count, against design/shape.json; exit 1 when any |
+| `scan [--out <file>]` | Before installing anything: on a copy of the project, what to install and every issue the checks find; the project is never touched. scan --prompt prints the review brief for what checks cannot see |
+| `suggest` | Which configuration and packs this project needs, read from its own files, with the evidence |
+| `fix [--from <scan.json>] [--out <file>]` | The last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none |
+| `logs` | Which hooks earn their place: calls, refusals and verdicts per hook, over all the history |
+| `survey` | Print the prompt that makes Claude write docs/project.md for tailoring |
+| `list` | Show available packs |
+| `symmetry gen --cmake <out.cmake> \| --list` | The generated gate shape_symmetry: one test per many concept in design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines) |
+| `symmetry run <concept>` | That gate for one concept: every instance the same members, every pair swaps the same |
+| `dup scan` | Every duplicated block (jscpd, the once-only hook's detector), listed by file |
+| `lock status\|take [--branch <b>]\|release [--force]` | The claude-packs repo's kit lock, a lease, in each checkout: who holds it, since when, last seen, live or stale (30 min without renewal); take takes it for this session (a stale one is taken over and logged); release takes away your own lock or a stale one, never a live lease without --force |
+| `global add\|remove\|doctor` | The global part, exactly three pieces: latest-versions (skill and version-pin-guard), gnu-shell, shell-traps, in ~/.claude (never overwrites; --home `<dir>` to target another home) |
+<!-- generated:commands:end -->
 
 ## The hooks every project gets
 
+<!-- generated:base-hooks:start -->
 | Hook | When | What it does |
 |---|---|---|
-| `making` | Prompt | Asks what is being made and what it reuses |
-| `reuse-hint` | Prompt | Shows functions the repo already has when the prompt names them |
-| `lesson-checks` | Write | Runs the installed lesson checks on what a write adds |
-| `template-law` | Write | Refuses a copy, a near copy or a function made again |
-| `once-only` | Write | Refuses a duplicate of code as written |
-| `once-only-index` | After a write | Adds the written code to the copy index, only for a write that went through |
-| `code-shape` | Write | Refuses wide lines, packed lines, long functions, long parameter lists |
-| `file-size-guard` | Write | Refuses a source file past its line limit |
-| `dispatch-once` | Write | Refuses a `switch` on a kind already switched on in another file. In Rust, a second lookup table on an enum, outside the enum |
-| `folder-law` | Write | Refuses a new source file outside the layout |
-| `placement-law` | Write | Refuses a kind of thing in the wrong folder |
-| `shape-law` | Write | Refuses a literal instance of a many concept |
-| `brief-guard` | Write | Refuses a brief that names a fixed instance |
-| `brief-guard-count` | Write | Logs each brief the brief guard refused |
-| `secrets-guard` | Write | Refuses a secret in code, or a secret file in git |
-| `untrusted-boundary` | Write | Refuses a model call with outside text and no per-call boundary |
-| `git-guard` | Bash | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
+| `heartbeat` | Every call | Records what each agent did last and when, for the status line; refuses nothing |
+| `inside-the-project` | Write, Bash | Refuses work for the project done outside it: a worktree added or moved beside the project, and any write, `cd` or `git -C` into a checkout of the same repo kept outside it, where no other hook can see |
+| `lesson-checks` | Write, Bash | Runs the installed lesson checks on what a write adds |
+| `file-size-guard` | Write, Bash | Refuses a source file past its line limit |
+| `placement-law` | Write, Bash | Refuses a kind of thing in the wrong folder |
+| `folder-law` | Write, Bash | Refuses a new source file outside the layout |
+| `shape-law` | Write, Bash | Refuses a literal instance of a many concept |
+| `brief-guard` | Write, Bash, Agent | Refuses a brief that names a fixed instance |
+| `brief-guard-count` | Write, Bash, Agent | Logs each brief the brief guard refused |
+| `once-only` | Write, Bash | Refuses a duplicate of code as written |
+| `secrets-guard` | Write, Bash | Refuses a secret in code, or a secret file in git |
+| `untrusted-boundary` | Write, Bash | Refuses a model call with outside text and no per-call boundary |
+| `dispatch-once` | Write, Bash | Refuses a `switch` on a kind already switched on in another file. In Rust, a second lookup table on an enum, outside the enum |
+| `template-law` | Write, Bash | Refuses a copy, a near copy or a function made again |
+| `code-shape` | Write, Bash | Refuses wide lines, packed lines, long functions, long parameter lists |
+| `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
+| `git-guard` | Bash, Stop | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
+| `kit-fresh` | Bash, Session start | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
 | `suite-once` | Bash | Refuses the whole test suite unless the user's prompt asks for a full run |
 | `no-find` | Bash | Refuses `find`, `bfs`, `fd`, `locate` and `mdfind` unless the user's prompt asks for one: every location is named in the order and the layout |
-| `look-gate` | Bash, after a build | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
-| `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
-| `inside-the-project` | Write, Bash | Refuses work for the project done outside it: a worktree added or moved beside the project, and any write, `cd` or `git -C` into a checkout of the same repo kept outside it, where no other hook can see |
-| `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
+| `look-gate` | Bash, After Bash | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
+| `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 | `making-check-count` | Stop | Counts the times a turn was sent back, so a repeat is known |
-| `heartbeat` | Every call | Records what each agent did last and when, for the status line; refuses nothing |
-| `kit-fresh` | Session start, Bash | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
+| `making` | Prompt | Asks what is being made and what it reuses |
+| `reuse-hint` | Prompt | Shows functions the repo already has when the prompt names them |
+| `once-only-index` | After Write, Write, Write, Write, Bash | Adds the written code to the copy index, only for a write that went through |
+<!-- generated:base-hooks:end -->
 
 Packs add their own: `realtime-guard`, `param-id-lock` and `settings-layer` (`audio-core`; every plugin has a settings layer with the standard settings, and its standalone no JUCE Options button), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, `chart-first`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
@@ -660,7 +672,7 @@ Global by design: they fix this machine's shell for Claude, not any project's ru
 
 ## Credits
 
-The kit learned from [superpowers](https://github.com/obra/superpowers) (MIT), mddkit and MDD, Vercel's Web Interface Guidelines (MIT), Anthropic's frontend-design (Apache 2.0), Impeccable (Apache 2.0), taste-skill and imagegen-skills (MIT), for Rust from [BeautifulRust](https://github.com/morganlinton/BeautifulRust) (MIT) and [rust-skills](https://github.com/leonardomso/rust-skills) (MIT), and for Postgres from [squawk](https://squawkhq.com/docs/rules) (MIT and Apache 2.0), [strong_migrations](https://github.com/ankane/strong_migrations) (MIT), [pg-aiguide](https://github.com/timescale/pg-aiguide) (Apache 2.0) and the PostgreSQL wiki's [Don't Do This](https://wiki.postgresql.org/wiki/Don't_Do_This). [docs/ui-craft-sources.md](docs/ui-craft-sources.md) says what came from each UI source.
+The kit learned from [superpowers](https://github.com/obra/superpowers) (MIT), mddkit and MDD, Vercel's Web Interface Guidelines (MIT), Anthropic's frontend-design (Apache 2.0), Impeccable (Apache 2.0), taste-skill and imagegen-skills (MIT), for Rust from [BeautifulRust](https://github.com/morganlinton/BeautifulRust) (MIT) and [rust-skills](https://github.com/leonardomso/rust-skills) (MIT), and for Postgres from [squawk](https://squawkhq.com/docs/rules) (MIT and Apache 2.0), [strong_migrations](https://github.com/ankane/strong_migrations) (MIT), [pg-aiguide](https://github.com/timescale/pg-aiguide) (Apache 2.0) and the PostgreSQL wiki's [Don't Do This](https://wiki.postgresql.org/wiki/Don't_Do_This). [packs/ui-craft/SOURCES.md](packs/ui-craft/SOURCES.md) says what came from each UI source.
 
 ## Disclaimer
 

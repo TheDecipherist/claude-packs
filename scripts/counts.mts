@@ -1,8 +1,10 @@
 // The per-version manifest of what an update installs (typescript order W5.4, d-8): the files and hashes the kit's `update` makes of
 // each old project kept in test/fixtures/noop, written to packs/manifest-<version>.json. It replaces the hand lists the noop test kept
 // (what changed on purpose, what was added): a change to an installed file shows as a line of this file's diff, to be read and kept.
-//   node scripts/counts.mts            writes the manifest
-//   node scripts/counts.mts --check    exits 1 when the manifest is not what the kit installs now
+// The same script writes every document the kit keeps a number or a table in (README.md between its generated markers, the site's
+// data-counts, docs/rules-without-checks.md, docs/versions.md's used column, the status-line sample and the planner's version line).
+//   node scripts/counts.mts            writes the manifest and the documents
+//   node scripts/counts.mts --check    exits 1 when any of them is not what the kit generates now
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -12,6 +14,7 @@ import { put, readText } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
 import { isMain } from '../packs/base/hooks/lib/hook-log.mts';
 import { parseJson, readJson, toJson, writeJson } from '../packs/base/hooks/lib/json.mts';
+import { GENERATED, renderAll, type GeneratedFile } from './counts-render.mts';
 
 /** The old projects the manifest is made from, and the configuration each one's update is made in. */
 export const PROJECTS = { stellix: 'synth-creator', sub37: 'synth-creator', 'full-stack': 'full-stack' } as const;
@@ -63,14 +66,28 @@ export function manifestOf(kit: string): Manifest {
 /** The manifest the kit holds, or null where it holds none. */
 export const readManifest = (kit: string): Manifest | null => parseJson<Manifest>(readText(manifestFile(kit)));
 
+/** The generated documents of a kit folder as they stand, and as the kit makes them: the files that differ, and what only a person writes. */
+export function documentsOf(kit: string, stand: Readonly<Record<GeneratedFile, string>> = standing(kit)): { stale: GeneratedFile[]; files: Record<GeneratedFile, string>; errors: string[] } {
+  const { files, errors } = renderAll(kit, stand);
+  return { stale: GENERATED.filter((f) => files[f] !== stand[f]), files, errors };
+}
+/** The generated documents as they stand in a kit folder. */
+export const standing = (kit: string): Record<GeneratedFile, string> =>
+  Object.fromEntries(GENERATED.map((f) => [f, readText(join(kit, f)) ?? ''])) as Record<GeneratedFile, string>;
+
 if (isMain(import.meta.url)) {
   const kit = resolve(fileURLToPath(new URL('..', import.meta.url)));
+  const docs = documentsOf(kit);
   const made = manifestOf(kit);
+  for (const error of docs.errors) console.error(error);
   if (process.argv.includes('--check')) {
     const same = toJson(readManifest(kit)) === toJson(made);
     if (!same) console.error(`${manifestFile(kit)} is not what the kit installs: run node scripts/counts.mts`);
-    process.exit(same ? 0 : 1);
+    for (const file of docs.stale) console.error(`${file} is not what the kit generates: run node scripts/counts.mts`);
+    process.exit(same && docs.stale.length === 0 && docs.errors.length === 0 ? 0 : 1);
   }
+  if (docs.errors.length > 0) process.exit(1);
+  for (const file of docs.stale) put(join(kit, file), docs.files[file]);
   writeJson(manifestFile(kit), made, { pretty: true });
-  console.log(`wrote ${manifestFile(kit)}`);
+  console.log(`wrote ${manifestFile(kit)} and ${docs.stale.length} document(s)${docs.stale.map((f) => `, ${f}`).join('')}`);
 }

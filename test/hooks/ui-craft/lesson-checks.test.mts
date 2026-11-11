@@ -1,5 +1,5 @@
 // The ui-craft pack's checks (0.17.0, 0.22.0), fired through the base lesson-checks hook in a UI install: each holds to its bad and
-// good example. A check blocks only what is objective or what the sources agree on (docs/ui-craft-sources.md); taste stays a rule.
+// good example. A check blocks only what is objective or what the sources agree on (packs/ui-craft/SOURCES.md); taste stays a rule.
 // The pack's presets, gates, skills and the page-measure tool: ui-craft-pack.test.mts.
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';

@@ -1,6 +1,6 @@
 # Analyse a mock-up (for `ui-mockup`, in `workorder-writer`'s Stage 7)
 
-Drawn from the kit's `analyse-reference-look` skill and its `ui-matches-reference-look` and `straight-on-and-aligned` rules, and from a render-and-extract discipline: render, read the render as a specification, never as a mood. The mock-up is the design: the build measures it and is gated against it. So a mock-up approved loosely is built loosely, and a mock-up with no depth is built flat. Two jobs happen here, before the order is handed over: get renders that can be measured, and read them into the order.
+Drawn from the kit's `analyse-reference-look` skill and its `page-matches-reference-look` and `straight-on-and-aligned` rules, and from a render-and-extract discipline: render, read the render as a specification, never as a mood. The mock-up is the design: the build measures it and is gated against it. So a mock-up approved loosely is built loosely, and a mock-up with no depth is built flat. Two jobs happen here, before the order is handed over: get renders that can be measured, and read them into the order.
 
 ## Why depth comes first
 

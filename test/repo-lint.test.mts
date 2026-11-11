@@ -14,8 +14,8 @@ import { manifestProblems } from '../lib/pack-manifest.mts';
 import { PRESETS, availablePacks, readPack } from '../lib/packs.mts';
 import { CLI } from './kit-cli.mts';
 import {
-  BARE, addedRawJson, bareNpx, configurationFaults, frameBenchFaults, lineLimit, overLimit, pathnameForms, personalNames, readmeBaseHooks,
-  readmeMissingCommands, readmeNames, readmeOrder, readmePackRows, readmeRefusal, siteCounts, siteFiles, siteShipped, siteWords, slowChecks, synthWordsInBase,
+  BARE, addedRawJson, bareNpx, configurationFaults, frameBenchFaults, lineLimit, overLimit, pathnameForms, personalNames,
+  readmeOrder, readmeRefusal, siteFiles, siteShipped, siteWords, slowChecks, synthWordsInBase,
 } from './repo-readers.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
@@ -163,7 +163,6 @@ test('gates 11 and 12: no process global and no work at import in a converted ho
 
 // The picker reaches this file for a change under docs/ because it reads every file the repo keeps (KWB-131: no-personal-name).
 // The reader tests of W2.7 and the count and fact readers (test/repo-readers.mts, W5.4): each one asserts the real tree clean and a planted one found.
-const FACTS = (extra: Record<string, string> = {}): Record<string, string> => ({ 'packs/p/pack.json': '{}', ...extra });
 
 test('base and the base configuration name no synth word', () => {
   assert.deepEqual(synthWordsInBase(KIT), []);
@@ -240,33 +239,8 @@ test('list shows each pack\'s version, type and author', () => {
   assert.match(execFileSync('node', [CLI, 'list'], { encoding: 'utf8' }), /^mongo +1\.0\.0 +stock +claude-packs: MongoDB/m);
 });
 
-test('every pack has its row, with its true counts', () => {
-  assert.deepEqual(readmePackRows(KIT), []);
-  assert.deepEqual(readmePackRows(planted(FACTS({ 'README.md': '| `p` | x | 9 | 9 | 9 | 9 |\n' }))), ['p: the row says 9,9,9,9, the pack holds 0,0,0,0']);
-});
-test('every configuration and preset is named', () => {
-  assert.deepEqual(readmeNames(KIT, PRESETS), []);
-  assert.deepEqual(readmeNames(planted({ 'README.md': '| `a` | x |\n', 'configurations/b/config.json': '{}' }), { a: ['p'] }), ['configuration b is not named', 'preset a: p missing']);
-});
-test('every command in the help is on the page', () => {
-  const r = spawnSync('node', [CLI], { encoding: 'utf8' });
-  assert.match(r.stdout + r.stderr, /usage:/);
-  assert.deepEqual(readmeMissingCommands(KIT, r.stdout + r.stderr), []);
-  assert.deepEqual(readmeMissingCommands(planted({ 'README.md': '`init`\n' }), '  init x\n  zap y\n'), ['zap']);
-});
 test('the refusal on the page is the check\'s own words, so the first thing a reader sees is true', () => assert.deepEqual(readmeRefusal(KIT), []));
 test('a new reader meets what it is before any command, and how to install one pack', () => assert.deepEqual(readmeOrder(KIT), []));
-test('every hook base installs is in the table', () => {
-  assert.deepEqual(readmeBaseHooks(KIT), []);
-  const hook = '{"hooks":{"PreToolUse":[{"hooks":[{"command":"node .claude/hooks/zap.mjs"}]}]}}';
-  assert.deepEqual(readmeBaseHooks(planted({ 'packs/base/pack.json': hook, 'README.md': '' })), ['zap']);
-});
-
-test('the numbers on the page are the kit\'s true counts', () => {
-  assert.deepEqual(siteCounts(KIT), []);
-  const page = ['packs', 'rules', 'checks', 'hooks', 'skills', 'configurations'].map((n) => `<b data-count="${n}">0</b>`).join('');
-  assert.deepEqual(siteCounts(planted(FACTS({ 'site/index.html': page }))), ['packs: the page says 0, the kit holds 1']);
-});
 test('every file the page loads is in the site, by a relative path, so it works under any repo name', () => {
   assert.deepEqual(siteFiles(KIT), []);
   assert.deepEqual(siteFiles(planted({ 'site/index.html': '<link href="a.css"><script src="/x.js">' })), ['a.css', '/x.js', 'an absolute path']);

@@ -1,6 +1,6 @@
 ---
 name: add-lesson-check
-description: Use right after a bug is fixed, when a mistake repeats, or when the user says to make sure something never happens again.
+description: Use when a bug was just fixed, when a mistake repeats, or when the user says to make sure something never happens again.
 ---
 
 # Add a lesson check (one job: make a fixed bug impossible to reintroduce)
@@ -9,7 +9,7 @@ Run this after the fix is in, not before.
 
 <constraints>
 Always do:
-- Write one file per lesson: `.claude/checks/<id>.json` with `id`, `why`, `rule`, `globs`, `pattern`, `code`, `bad`, `good`.
+- Write one file per lesson: `.claude/checks/<id>.json` with `id`, `why`, `rule`, `globs`, `exclude`, `pattern`, `code`, `bad`, `good`. In the kit itself the file goes in the pack's `checks/` and `doctor` runs its `bad` and `good`.
 - `bad` is the smallest snippet showing the bug as it actually appeared. `good` is the fixed form.
 - Set `"code": true` for C/C++/JS/TS, so comments and strings are ignored.
 - Run `node .claude/hooks/lesson-checks.mjs --selftest` and keep refining the pattern until it reports OK. The check must catch `bad` and pass `good`.
