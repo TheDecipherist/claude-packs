@@ -1,14 +1,18 @@
 // Writes the generated layout section into the project's CLAUDE.md, between markers.
 // Everything outside the markers is the user's and is never touched.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { noPackageLine } from './kit-command.mjs';
+import { put, readText } from '../packs/base/hooks/lib/files.mts';
+import type { Layout } from '../packs/base/hooks/lib/types.d.mts';
+import { noPackageLine } from './kit-command.mts';
 
 const START = '<!-- claude-packs:start -->';
 const END = '<!-- claude-packs:end -->';
 
+/** The house rules a configuration's CLAUDE.md block ends its constraints with (configurations/<name>/config.json "preamble"). */
+export interface Preamble { always: readonly string[]; never: readonly string[] }
+
 // The house rules after the folders are the configuration's preamble (configurations/<name>/config.json, 0.10.0).
-function section(layout, packNames, preamble, notes = []) {
+function section(layout: Layout, packNames: readonly string[], preamble: Preamble, notes: readonly string[] = []): string {
   // Folders no kind points at are listed by purpose; the rest appear once, in the kinds list.
   const used = new Set(Object.values(layout.kinds ?? {}).map((k) => k.in));
   const folders = Object.entries(layout.folders)
@@ -38,23 +42,27 @@ function section(layout, packNames, preamble, notes = []) {
   ].join('\n');
 }
 
-function kindLines(layout) {
-  return Object.values(layout.kinds ?? {}).map((k) => `  - ${k.what} → \`${layout.folders?.[k.in] ? `${layout.folders[k.in].path}/` : k.in}\``);
+function kindLines(layout: Layout): string[] {
+  return Object.values(layout.kinds ?? {}).map((k) => {
+    const folder = k.in === undefined ? undefined : layout.folders?.[k.in];
+    return `  - ${k.what} → \`${folder ? `${folder.path}/` : k.in}\``;
+  });
 }
 
-function commandLines(layout) {
+function commandLines(layout: Layout): string[] {
   const entries = Object.entries(layout.commands ?? {});
   if (entries.length === 0) return [];
   return ['## Project commands', '', 'Skills and checks run these; use them, not the raw tools:', ...entries.map(([k, v]) => `- ${k}: \`${v}\``), ''];
 }
 
-export function writeClaudeMd(projectDir, layout, packNames, preamble) {
+/** Writes (or replaces) the kit's block in `<projectDir>/CLAUDE.md`; the user's text around it is kept. */
+export function writeClaudeMd(projectDir: string, layout: Layout, packNames: readonly string[], preamble: Preamble): void {
   const file = join(projectDir, 'CLAUDE.md');
   const block = section(layout, packNames, preamble, noPackageLine(projectDir));
-  let text = existsSync(file) ? readFileSync(file, 'utf8') : '';
+  let text = readText(file) ?? '';
   const s = text.indexOf(START);
   const e = text.indexOf(END);
   if (s !== -1 && e > s) text = text.slice(0, s) + block + text.slice(e + END.length);
   else text = `${text.trimEnd()}${text.trim() ? '\n\n' : ''}${block}\n`;
-  writeFileSync(file, text);
+  put(file, text);
 }
