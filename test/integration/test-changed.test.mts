@@ -79,7 +79,7 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   assert.ok(!rule.includes('kit-lock') && !rule.includes('frame-bench'));
   // 1.3.0: a new rule changed the counts on the README and the page, and a changed-only run missed the page's test
   const counted = added('packs/reverse-engineering/rules/circuits-through-the-skill.md');
-  assert.ok((counted.includes('site') && counted.includes('readme')) || counted.includes('repo-lint'), 'a rule ADDED changes the counts on the front pages');
+  assert.ok(counted.includes('counts'), `a rule ADDED changes the counts on the front pages, which counts --check holds (d-8): ${counted.join(' ')}`);
   assert.ok(!pick('packs/reverse-engineering/rules/circuits-through-the-skill.md').includes('site'), 'an edited one does not');
   assert.ok(added('packs/base/hooks/no-find.mjs').includes('worktrees'), 'a hook added needs its worktree case');
   assert.ok(!sym.includes('kit-lock') && !sym.includes('frame-bench'));
@@ -106,7 +106,7 @@ test('a pack that is not base: an edit picks what checks it, an added file the c
   const nginx = pick('packs/nginx/rules/nginx-production.md');
   assert.ok(!nginx.includes('lookup') && !nginx.includes('configurations'), nginx.join(' '));
   assert.ok(!nginx.includes('install') && !nginx.includes('noop'), nginx.join(' '));
-  assert.ok(added('packs/nginx/rules/nginx-production.md').some((t) => t === 'readme' || t === 'repo-lint'), 'added: the counts');
+  assert.ok(added('packs/nginx/rules/nginx-production.md').includes('counts'), 'added: the counts, which counts --check holds (d-8)');
   // the rule, not a count (a count moves with every test that is moved or added): an edit picks some tests, never every one
   assert.ok(nginx.length > 0 && nginx.length < all, `${nginx.length} of ${all}`);  const synth = pick('packs/synth-creator/rules/debug-by-measurement.md');
   assert.ok(synth.includes('noop') && !synth.includes('install'), 'noop installs the synth-creator pack; no install test checks the rule');

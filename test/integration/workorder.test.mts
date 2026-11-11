@@ -2,6 +2,7 @@
 // install a synth's laws on any project.
 import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readdirSync, readFileSync, spawnSync, statSync, test, writeFileSync } from '../kit-cli.mts';
 import type { Spawned } from '../kit-cli.mts';
+import { kitCommand } from '../../lib/kit-command.mts';
 
 const FOLDER = 'docs/workorders/billing';
 const TEMPLATES = 'prompts/workorder/templates';
@@ -132,7 +133,8 @@ test('workorder --template rebuild writes the rebuild steps; an unknown template
   assert.equal(cli(plain, 'workorder', 'billing').status, 0);
   const blank = readFileSync(join(plain, FOLDER, 'workorder.md'), 'utf8');
   assert.match(blank, /^# Work order: billing/, 'the plain form keeps the blank steps');
-  assert.equal(blank, readFileSync(join(KIT, `${TEMPLATES}/generic.md`), 'utf8').replaceAll('{{name}}', 'billing').replace(/\{\{date\}\}/, blank.match(/Written (\S+)\./)?.[1] ?? ''), 'no flag is generic');
+  // the template carries {{kit}} since W7 (b), filled with the project's own form of the kit's command (KWB-192)
+  assert.equal(blank, readFileSync(join(KIT, `${TEMPLATES}/generic.md`), 'utf8').replaceAll('{{name}}', 'billing').replaceAll('{{kit}}', kitCommand(plain)).replace(/\{\{date\}\}/, blank.match(/Written (\S+)\./)?.[1] ?? ''), 'no flag is generic');
   const bad = fresh('wo-bad-');
   const r = cli(bad, 'workorder', 'x', '--template', 'nope');
   assert.notEqual(r.status, 0);

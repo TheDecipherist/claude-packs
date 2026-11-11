@@ -57,7 +57,7 @@ export const TABLE: readonly TableRow[] = [
   { files: /^packs\/manifest-[\w.-]+\.json$/, why: 'the per-version manifest: the noop test compares an update against it', tests: (text) => /packs\/manifest-/.test(text) || /readManifest\(/.test(text) },
   { files: /^packs\//, why: 'an installed file changed: noop holds every installed file and every change to one listed', tests: noopOf },
   { files: /^packs\/[\w-]+\/(rules|checks|hooks|skills)\//, when: (_c, status) => SHAPE(status), why: 'a pack gained or lost a rule, check, hook or skill: the tests that hold the true counts',
-    tests: (text) => /true counts/.test(text) },
+    tests: (text) => /true counts|counts\.mts --check/.test(text) },   // since W7 (c), d-8: counts --check holds them (KWB-191)
   { files: /^packs\/[\w-]+\/(hooks\/[\w-]+\.(mjs|mts|py)|pack\.json)$/, when: (c, status) => SHAPE(status) || c.endsWith('pack.json'), why: 'a hook added, removed or registered: every installed hook has its worktree case',
     tests: (text) => /every installed hook needs a worktree case/.test(text) },
   { files: /^configurations\//, why: 'a configuration: the tests that bring it in', tests: (text, changed) => installs(text) && new RegExp(`--config['"]?,?\\s*['"]?${changed.split('/')[1]}\\b|['"]configurations['"]`).test(text) },

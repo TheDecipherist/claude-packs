@@ -18,6 +18,10 @@ paths:
 # No cargo cult: these rules are about cadence, not a word list
 
 <constraints>
+Always do:
+- Write to the cadence of the text: sentence length, rhythm and register are the unit, never a list of words.
+- Verify a claim, then state it flat.
+
 Never do:
 - Ban common English words ("that", "just", "actually"): the bans break normal English.
 - Swap one canned phrase list for another; replacements become tells too.

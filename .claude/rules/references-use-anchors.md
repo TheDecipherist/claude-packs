@@ -10,7 +10,7 @@ paths:
 
 # Point at documents by anchor, never by line number
 
-One added line in Stellix's spec moved 189 references in its seed.
+One added line in a spec moved 189 references in its seed.
 
 <constraints>
 Always do:
@@ -21,3 +21,4 @@ Always do:
 Never do:
 - Write `spec.md:412` or "line 412" into data, checks, docs or build.md.
 - Rename or drop an anchor something still cites.
+</constraints>

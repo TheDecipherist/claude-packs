@@ -1,9 +1,9 @@
 ---
 name: analyse-reference-look
-description: Use before building or rebuilding a page, a screen, an editor or a layer from a reference picture, a mock-up or an existing screenshot. Also /analyse-reference-look.
+description: Use when a page, a screen, an editor or a layer is to be built or rebuilt from a reference picture, a mock-up or an existing screenshot, before any of it is drawn. Also /analyse-reference-look.
 ---
 
-# Analyse a reference picture into numbers
+# Analyse a reference picture into numbers (one job: turn a picture into measures and a gate that holds the build to them)
 
 Where the project has the rule `straight-on-and-aligned` (an editor drawn from a photograph of hardware), read it first. Write one analysis file per reference, in the design reference folder, or in `design/analysis/` if that folder is git-ignored. Measure by script, never by eye.
 
@@ -14,6 +14,8 @@ First, separate the object from the photograph. You are learning a design, to dr
 
 For each measure, give **a control and a confidence**. The control is the same measurement on something whose answer is known. The confidence says how far to trust the number: a part that fills its search box exactly was not measured at all.
 
+<constraints>
+Always do:
 1. **Layout:** every region and every element's centre and size as fractions of the picture. Then find the grid: which elements share a row or a column, which look grouped, and the one size of each kind. Snap to it, and record what the snap moved and why. A measured offset smaller than the design's own spacing is error.
 2. **Dark on dark:** a dark part on a dark ground cannot be found by a threshold. Give each one a seed box by hand, from the grid or the neighbouring parts, and measure inside it. Say which parts were seeded.
 3. **Colour:** sample the background, surfaces, borders, text levels, accents, lit and unlit states. Read a colour against the picture's own white and black, which takes out exposure and white balance.
@@ -37,5 +39,10 @@ Then write the gate:
 - Plant a fault for each thing the gate claims, and diff each planted run against the unplanted result: depth off (no shadow, no bevel) is one of them. An exit code proves nothing: one gate's first run showed three plants "failing", and two had changed nothing, because the gate was already red.
 - A measure changed while the gate is red is suspect: say so, and show the thresholds stayed put.
 - Declare the look in `.claude/layout.json` `looks` (its name, the reference, and the code globs that draw it), and have the gate write its verdict to `build/evidence/looks/<name>.json`: `{ "reference", "code": <the output of `node .claude/hooks/look-gate.mjs --key <name>`, a hash of the files that draw the look>, "verdict": "pass" | "fail", "measures": {...} }`, the depth rows among the measures. Commit the report on the branch. `look-gate` refuses to land a branch whose look code changed without a passing report for the code as it stands (its `code` key equal to the current one; a report holds no commit, so two branches that left the page alone write the same bytes and never conflict), and names the look after every build that touched it.
+
+Never do:
+- Pass a page on a whole-picture score: it is a likeness, read beside the measures.
+- Change a measure while the gate is red without saying so, or move a threshold to make it pass.
+</constraints>
 
 Report the analysis file's path and the list of open items.
