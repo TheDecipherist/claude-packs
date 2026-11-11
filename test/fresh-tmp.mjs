@@ -27,5 +27,12 @@ delete process.env.CLAUDE_PID;
 // version, so no test reaches the network and an install of this kit reads as the newest
 process.env.CLAUDE_PACKS_CACHE_DIR ??= join(dir, 'cache');
 mkdirSync(process.env.CLAUDE_PACKS_CACHE_DIR, { recursive: true });
-const ownVersion = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
-writeFileSync(join(process.env.CLAUDE_PACKS_CACHE_DIR, 'kit-fresh.json'), JSON.stringify({ version: ownVersion, at: Date.now() }));
+const kitPackage = new URL('../package.json', import.meta.url);   // absent where the preload is copied into a scratch repo
+if (existsSync(kitPackage)) {
+  const ownVersion = JSON.parse(readFileSync(kitPackage, 'utf8')).version;
+  writeFileSync(join(process.env.CLAUDE_PACKS_CACHE_DIR, 'kit-fresh.json'), JSON.stringify({ version: ownVersion, at: Date.now() }));
+}
+
+// KWB-166: a test's install takes the hooks' selftests as proved by the gate (scripts/test-changed.mjs proves the changed ones first);
+// a test whose subject is doctor's selftests runs them with CLAUDE_PACKS_SELFTESTS=run
+process.env.CLAUDE_PACKS_SELFTESTS ??= 'gate';

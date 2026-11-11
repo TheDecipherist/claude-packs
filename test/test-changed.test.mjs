@@ -63,36 +63,42 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   const pick = (...changed) => [...choose(KIT, changed, g).chosen.keys()];
   const sym = pick('packs/base/tools/shape-symmetry.mjs');
   assert.ok(sym.includes('test/symmetry.test.mjs'));
+  // KWB-166: a pack file's content picks noop (every changed installed file listed) and what names it, never every install
   const rule = pick('packs/base/rules/instances-by-index-identities-by-id.md');
-  assert.ok(rule.includes('test/install.test.mjs') && rule.includes('test/worktrees.test.mjs'), 'a pack file: the tests that install packs (the table)');
+  assert.ok(rule.includes('test/noop.test.mjs') && !rule.includes('test/install.test.mjs') && !rule.includes('test/worktrees.test.mjs'), rule.join(' '));
   assert.ok(!rule.includes('test/kit-lock.test.mjs') && !rule.includes('test/frame-bench.test.mjs'));
   // 1.3.0: a new rule changed the counts on the README and the page, and a changed-only run missed the page's test
-  const counted = pick('packs/reverse-engineering/rules/circuits-through-the-skill.md');
-  assert.ok(counted.includes('test/site.test.mjs') && counted.includes('test/readme.test.mjs'), 'a pack\'s rules are counted on the front pages');
+  const added = (f) => [...choose(KIT, [f], g, { [f]: 'A' }).chosen.keys()];
+  const counted = added('packs/reverse-engineering/rules/circuits-through-the-skill.md');
+  assert.ok(counted.includes('test/site.test.mjs') && counted.includes('test/readme.test.mjs'), 'a rule ADDED changes the counts on the front pages');
+  assert.ok(!pick('packs/reverse-engineering/rules/circuits-through-the-skill.md').includes('test/site.test.mjs'), 'an edited one does not');
+  assert.ok(added('packs/base/hooks/no-find.mjs').includes('test/worktrees.test.mjs'), 'a hook added needs its worktree case');
   assert.ok(!sym.includes('test/kit-lock.test.mjs') && !sym.includes('test/frame-bench.test.mjs'));
   assert.deepEqual(pick('packs/gpu-painter/skills/gpu-frame-bench/SKILL.md').includes('test/frame-bench.test.mjs'), true);
   const lock = pick('.claude/hooks/kit-lock.mjs');
   assert.ok(lock.includes('test/kit-lock.test.mjs') && !lock.includes('test/install.test.mjs'), lock.join(' '));
-  assert.ok(pick('lib/sync.mjs').includes('test/new.test.mjs'), 'lib/ reaches every test that runs the CLI');
+  assert.ok(pick('lib/doctor.mjs').includes('test/doctor-cache.test.mjs') && !pick('lib/doctor.mjs').includes('test/install.test.mjs'), 'a CLI module: the tests about it, not every test that runs the CLI');
   assert.deepEqual(pick('scripts/test-changed.mjs'), ['test/test-changed.test.mjs']);
-  assert.equal(pick('test/fresh-tmp.mjs').length, choose(KIT, [], g).tests.length, 'the preload: every test');
+  assert.ok(pick('test/fresh-tmp.mjs').includes('test/fresh-tmp.test.mjs') && pick('test/fresh-tmp.mjs').length < 5, 'the preload: its own test, not every test that loads it');
   assert.deepEqual(choose(KIT, ['CHANGELOG.md'], g).uncovered, ['CHANGELOG.md']);
   // KWB-141: the planner test reads every planner file through join(KIT, 'planner'), which no import or path literal shows
   assert.ok(pick('planner/ui-mockup/SKILL.md').includes('test/planner.test.mjs'), 'a planner skill: the planner test');
 });
 
-test('a pack that is not base: only the tests that bring it in, by name, preset or configuration (KWB-41)', () => {
+test('a pack that is not base: an edit picks what checks it, an added file the counts (KWB-41, KWB-166)', () => {
   const g = graph(KIT);
   const pick = (...changed) => [...choose(KIT, changed, g).chosen.keys()];
   const all = choose(KIT, [], g).tests.length;
+  // KWB-166: an edited rule of a pack noop does not install is checked by what names it; a test that installs nginx through a
+  // preset uses the rule and does not check it. A rule added changes the counts.
   const nginx = pick('packs/nginx/rules/nginx-production.md');
-  assert.ok(nginx.includes('test/lookup.test.mjs'), 'the preset `edge` brings nginx');
-  assert.ok(nginx.includes('test/configurations.test.mjs'), 'a test that walks every configuration');
+  assert.ok(!nginx.includes('test/lookup.test.mjs') && !nginx.includes('test/configurations.test.mjs'), nginx.join(' '));
   assert.ok(!nginx.includes('test/install.test.mjs') && !nginx.includes('test/noop.test.mjs'), nginx.join(' '));
-  assert.ok(nginx.length < all / 2, `${nginx.length} of ${all}`);
+  assert.ok([...choose(KIT, ['packs/nginx/rules/nginx-production.md'], g, { 'packs/nginx/rules/nginx-production.md': 'A' }).chosen.keys()].includes('test/readme.test.mjs'), 'added: the counts');
+  assert.ok(nginx.length < all / 4, `${nginx.length} of ${all}`);
   const synth = pick('packs/synth-creator/rules/debug-by-measurement.md');
-  assert.ok(synth.includes('test/install.test.mjs') && synth.includes('test/noop.test.mjs'), 'audio-core brings the synth-creator pack');
-  assert.ok(pick('packs/base/rules/skill-writing.md').length > synth.length, 'base: every test that installs');
+  assert.ok(synth.includes('test/noop.test.mjs') && !synth.includes('test/install.test.mjs'), 'noop installs the synth-creator pack; no install test checks the rule');
+  assert.ok(pick('packs/base/rules/skill-writing.md').length < all / 4, 'base: what checks the file, not every test that installs (KWB-166)');
 });
 
 test('a version bump alone chooses no test; any other package.json change still chooses them all (KWB-41)', () => {
@@ -109,4 +115,21 @@ test('a version bump alone chooses no test; any other package.json change still 
   assert.match(dry(), /version bump only: package\.json/);
   writeFileSync(join(dir, 'package.json'), '{\n  "name": "x",\n  "version": "1.0.1",\n  "license": "ISC"\n}\n');
   assert.doesNotMatch(dry(), /version bump only/);
+});
+
+// KWB-166: a JS module picks the tests that call or import a function the diff touched, never every importer of the module
+test('a changed function picks the tests that use it; a change to imports or comments only picks none', () => {
+  const dir = scratchRepo();
+  writeFileSync(join(dir, 'lib/two.mjs'), 'export function one() { return 1; }\n\nexport function two() { return 2; }\n');
+  writeFileSync(join(dir, 'test/one.test.mjs'), "import { test } from 'node:test'; import { one } from '../lib/two.mjs'; test('one', () => { if (one() !== 1) throw new Error('one'); });\n");
+  writeFileSync(join(dir, 'test/two.test.mjs'), "import { test } from 'node:test'; import { two } from '../lib/two.mjs'; test('two', () => { if (two() !== 2) throw new Error('two'); });\n");
+  git(dir, 'add', 'lib', 'test');
+  git(dir, 'commit', '-q', '-m', 'two');
+  writeFileSync(join(dir, 'lib/two.mjs'), 'export function one() { return 1; }\n\nexport function two(scale = 1) { return 2 * scale; }\n');
+  const r = spawnSync(process.execPath, [SCRIPT, '--dry-run', '--base', 'HEAD', '--root', dir], { encoding: 'utf8' });
+  assert.match(r.stdout, /test\/two\.test\.mjs/, r.stdout);
+  assert.doesNotMatch(r.stdout, /test\/one\.test\.mjs/, 'a test of the function that did not change is not picked');
+  writeFileSync(join(dir, 'lib/two.mjs'), '// a header comment\nexport function one() { return 1; }\n\nexport function two() { return 2; }\n');
+  const c = spawnSync(process.execPath, [SCRIPT, '--dry-run', '--base', 'HEAD', '--root', dir], { encoding: 'utf8' });
+  assert.match(c.stdout, /chose 0 of/, c.stdout);
 });
