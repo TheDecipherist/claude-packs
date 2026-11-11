@@ -9,7 +9,7 @@ import { put, scratchDir } from '../packs/base/hooks/lib/files.mts';
 import { parseJson, toJson } from '../packs/base/hooks/lib/json.mts';
 import type { WorktreeCase } from '../packs/base/hooks/lib/selftest.mts';
 import { git, withLayout } from './fixtures/installs.mts';
-import { CLI } from './kit-cli.mts';
+import { CLI, profile } from './kit-cli.mts';
 
 export { CLI, put };
 export const PIN_GUARD: string = fileURLToPath(new URL('../global/hooks/version-pin-guard.mjs', import.meta.url));
@@ -51,7 +51,7 @@ export function landFromWorktree({ here, wt }: Checkouts): string {
   return trunk;
 }
 
-export const stellix = (): Checkouts => project(['audio-core', 'gpu-painter', 'stellix', '--profile', 'stellix'], (dir) => {
+export const stellix = (): Checkouts => project(['audio-core', 'gpu-painter', 'stellix', '--profile', profile('stellix')], (dir) => {
   for (const d of ['lib/app/src', 'lib/world/src', 'lib/engines/src', 'lib/painter/src']) mkdirSync(join(dir, d), { recursive: true });
   writeFileSync(join(dir, 'lib/app/src/keep.h'), '// keep\n');
 });

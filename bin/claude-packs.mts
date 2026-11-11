@@ -59,7 +59,9 @@ interface Run extends Record<Switch, boolean> {
 const pathOf = (run: Run, flag: ValueFlag): string | null => (run.value[flag] === undefined ? null : resolve(run.value[flag]));
 
 function seedOf(value: Run['value']): Partial<Layout> | null {
-  const file = value['--profile'] ? fileURLToPath(new URL(`../profiles/${value['--profile']}.layout.json`, import.meta.url)) : value['--layout'] ? resolve(value['--layout']) : null;
+  // --profile and --layout both take the path of a layout file (the two shipped profiles became test fixtures, W5.4)
+  const named = value['--profile'] ?? value['--layout'];
+  const file = named === undefined || named === '' ? null : resolve(named);
   if (file === null) return null;
   const seed = readJson<Partial<Layout>>(file);
   if (seed === null) throw new Error(`${file}: not a layout (missing or not JSON)`);

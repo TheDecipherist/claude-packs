@@ -50,7 +50,7 @@ function brings(root: string, pack: string): RegExp {
 // What a change can break, by what kind of change it is (KWB-166); a changed hook also proves its own selftest (selftestsOf).
 const SHAPE = (status: string): boolean => status === 'A' || status === 'D' || status === 'R';
 const packOf = (c: string): string => (c.startsWith('packs/') ? (c.split('/')[1] ?? 'base') : 'base');
-const noopOf = (text: string, changed: string, root: string): boolean => /noop/.test(text) && /updated\(/.test(text) && (packOf(changed) === 'base' || brings(root, packOf(changed)).test(text));
+const noopOf = (text: string, changed: string, root: string): boolean => /noop/.test(text) && /updated(?:Project)?\(/.test(text) && (packOf(changed) === 'base' || brings(root, packOf(changed)).test(text));
 
 // No change picks every test that installs (the user: "There is no way we touch every single file every time just because we touch
 // base"). A pack's file changes what an install holds, and only noop (every installed file listed), the counts (a file gained or
@@ -60,6 +60,7 @@ export const TABLE: readonly TableRow[] = [
   { files: /^package\.json$/, why: 'runs every test (its scripts, its dependencies)', tests: () => true },
   { files: /^docs\//, why: 'a document: the tests that read every file the repo keeps (KWB-131)', tests: (text) => /reads every file the repo keeps/.test(text) },
   { files: /^test\/fresh-tmp\.m[jt]s$/, why: 'the preload: its own test (every test loads it; this one checks what it gives them)', tests: (text) => /test\/fresh-tmp\.mjs itself|The preload itself/.test(text) },
+  { files: /^packs\/manifest-[\w.-]+\.json$/, why: 'the per-version manifest: the noop test compares an update against it', tests: (text) => /packs\/manifest-/.test(text) || /readManifest\(/.test(text) },
   { files: /^packs\//, why: 'an installed file changed: noop holds every installed file and every change to one listed', tests: noopOf },
   { files: /^packs\/[\w-]+\/(rules|checks|hooks|skills)\//, when: (_c, status) => SHAPE(status), why: 'a pack gained or lost a rule, check, hook or skill: the tests that hold the true counts',
     tests: (text) => /true counts/.test(text) },

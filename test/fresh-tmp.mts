@@ -2,6 +2,7 @@
 // `siblings: ["../"]` make doctor read the folder around a project, and the shared system temp
 // folder holds tens of thousands of other programs' files (and other tests' repos).
 // Self-contained on purpose: test-changed's own test copies this one file into a scratch repo.
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -24,6 +25,21 @@ process.env.CLAUDE_PACKS_FIXTURES ??= join(dir, 'fixtures');
 // sit outside the kit's node_modules (0.9.0).
 const jscpd = fileURLToPath(new URL('../node_modules/.bin/jscpd', import.meta.url));
 if (existsSync(jscpd)) process.env.CLAUDE_PACKS_JSCPD ??= jscpd;
+
+// The resident runner under test (review-2 6.2): its sockets, pid files and logs live in the run's own folder, never the user's
+// ~/.cache/claude-packs, and the teardown stops every runner whose command line names that folder (a test that wants the TypeScript
+// path sets CLAUDE_PACKS_DAEMON=off). test/repo-lint.test.mts holds that none is left after the run.
+const daemonCache = (process.env.CLAUDE_PACKS_CACHE ??= join(dir, 'daemon-cache'));
+mkdirSync(daemonCache, { recursive: true });
+process.on('exit', () => {
+  const ps = spawnSync('ps', ['-axo', 'pid=,command='], { encoding: 'utf8' });
+  for (const line of ps.stdout.split('\n')) {
+    const pid = Number(line.trim().split(/\s+/)[0]);
+    if (line.includes('resident.mjs') && line.includes(daemonCache) && pid !== process.pid) {
+      try { process.kill(pid, 'SIGTERM'); } catch { /* already gone */ }
+    }
+  }
+});
 
 // A test's simulated sessions are not this Claude process: kit-lock reads CLAUDE_PID as its holder (KWB-40).
 delete process.env.CLAUDE_PID;
