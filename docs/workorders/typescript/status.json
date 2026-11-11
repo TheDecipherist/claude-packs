@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T20:55:04Z",
+  "updated": "2026-11-11T21:11:16Z",
   "steps": [
     {
       "id": "W0",
@@ -48,7 +48,7 @@
       "id": "W6",
       "title": "End to end and the change-to-tests map",
       "items": 7,
-      "done": 0,
+      "done": 7,
       "agent": null
     },
     {
