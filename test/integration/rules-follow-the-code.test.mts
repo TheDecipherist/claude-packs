@@ -1,15 +1,19 @@
 // KWB-83: a file could be legal and have no rules. folder-law allowed any layout folder, while base's cpp and js concepts meant only src/ and tests/, and a
 // first install never read where a repo's code lives, so folder-law refused a new file in the project's own lib/.
-import { assert, cli, execFileSync, existsSync, hookRun, join, mkdirSync, projectWith, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
+// The install is the subject here: a first install reads where the source is, so each test installs on purpose.
+import { assert, cli, execFileSync, existsSync, hookRun, join, mkdirSync, projectWith, readFileSync, run, test, writeFileSync } from '../kit-cli.mts';
 
-function repo(files) {
+interface Folder { path: string; purpose?: string }
+interface Layout { folders: Record<string, Folder>; concepts: Record<string, string[]>; followFolders?: unknown }
+
+function repo(files: Readonly<Record<string, string>>): string {
   const dir = projectWith(files, 'follow-');
   execFileSync('git', ['init', '-q'], { cwd: dir });
   return dir;
 }
-const layoutOf = (dir) => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8'));
-const pathsOf = (dir) => Object.values(layoutOf(dir).folders).map((f) => f.path);
-const write = (dir, rel) => hookRun(dir, 'folder-law.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content: 'int x;\n' } }).status;
+const layoutOf = (dir: string): Layout => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) as Layout;
+const pathsOf = (dir: string): string[] => Object.values(layoutOf(dir).folders).map((f) => f.path);
+const write = (dir: string, rel: string): number | null => hookRun(dir, 'folder-law.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content: 'int x;\n' } }).status;
 
 test('a first install adds the folders a repo\'s source is in, and folder-law then takes a new file there', () => {
   const dir = repo({ 'lib/net/socket.cpp': 'int a;\n', 'plugin/main.cpp': 'int b;\n' });
@@ -42,7 +46,7 @@ test('a folder added to the layout later gets its rules on update; test/structur
   mkdirSync(join(dir, 'engine'));
   writeFileSync(join(dir, 'engine/a.cpp'), 'int a;\n');
   run(dir, 'update');
-  assert.ok(layoutOf(dir).concepts.cpp.includes('engine/**/*.cpp'));
+  assert.ok(layoutOf(dir).concepts.cpp?.includes('engine/**/*.cpp'));
 });
 
 test('an installed project keeps its own concepts and folders on update: a new law never moves under it', () => {
