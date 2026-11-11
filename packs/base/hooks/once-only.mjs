@@ -15,7 +15,7 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { changedLines, copyGlobs, excludeGlobs, FIX, findJscpd, isGenerated, isSource, realPath } from './lib/dup.mjs';
-import { judgeWrites } from './lib/dup-index.mjs';
+import { judgeCopyWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mjs';
@@ -53,10 +53,10 @@ export function judge(payload) {
   if (!list.length) return { code: 0 };
   const found = [];
   // each checkout written to: its index finds the candidates (built once, then only changed files are read again), jscpd
-  // confirms on those files alone (lib/dup-index.mjs judgeWrites)
+  // confirms on those files alone (lib/dup-index.mjs judgeCopyWrites)
   for (const root of new Set(list.map((j) => j.root))) {
     const mine = list.filter((j) => j.root === root);
-    const r = judgeWrites(root, mine.map((j) => ({ path: j.w.path, after: j.w.after, range: j.range })), { layout: mine[0].layout, shape: mine[0].shape, ignore: gone });
+    const r = judgeCopyWrites(root, mine.map((j) => ({ path: j.w.path, after: j.w.after, range: j.range })), { env: process.env, layout: mine[0].layout, shape: mine[0].shape, ignore: gone });
     if (r.error) return { code: 0, note: `once-only could not judge: ${r.error}` }; // doctor shows a missing detector
     const base = realPath(root);
     const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
