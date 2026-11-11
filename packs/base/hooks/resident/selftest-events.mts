@@ -57,8 +57,9 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
 
     const exited = await ask(rig, eventText(rig, 'Exit'));
     cases.push(['a hook calling process.exit(0): the event is answered, as a crash of that hook', exited.code === 2 && exited.stderr.includes('exits crashed'), true]);
-    await ask(rig, eventText(rig, 'Fast'));
-    await waitFor(() => readState(filesOf(rig).pid)?.workers === 4);
+    await nap(80);
+    await ask(rig, eventText(rig, 'Fast'));   // the pid file is rewritten after an event, at most every 20 ms in this run
+    await nap(80);
     cases.push(['and the pool size is kept (its worker replaced)', readState(filesOf(rig).pid)?.workers ?? null, 4]);
 
     const rejected = await ask(rig, eventText(rig, 'Reject'));

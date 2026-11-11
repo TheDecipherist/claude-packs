@@ -33,7 +33,7 @@ export interface Pool {
 }
 
 /** A worker's heap is kept small: its hooks make short-lived garbage, and a large young generation is memory the daemon holds for nothing. */
-const WORKER_HEAP = { maxYoungGenerationSizeMb: 8 };
+const WORKER_HEAP = { maxYoungGenerationSizeMb: 1 };
 
 const crash =(job: Job, why: string): Done => ({ hook: job.hook, ms: 0, code: 1, stdout: '', stderr: `run-hooks: ${job.hook} failed: ${why}\n` });
 
