@@ -116,7 +116,7 @@ test('the skill points at shape_symmetry, the rule takes its scope from shape.js
   const rule = readFileSync(join(dir, '.claude/rules/instances-by-index-identities-by-id.md'), 'utf8');
   assert.match(rule, /scope from `design\/shape\.json`, never from a folder list/);
   // doctor runs the tool's selftest: a broken copy is a problem
-  writeFileSync(join(dir, '.claude/tools/shape-symmetry.mjs'), readFileSync(join(dir, '.claude/tools/shape-symmetry.mjs'), 'utf8').replace('if (diffs) red += 1;', 'if (false) red += 1;'));
+  writeFileSync(join(dir, '.claude/tools/shape-symmetry.mjs'), readFileSync(join(dir, '.claude/tools/shape-symmetry.mjs'), 'utf8').replace(/if \(diffs\)\s+red \+= 1;/, 'if (false) red += 1;'));   // the emitted code breaks the line, so match across it
   const doc = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' });
   assert.match(doc.stdout, /shape-symmetry\.mjs fails its selftest/);
 });
