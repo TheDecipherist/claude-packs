@@ -96,6 +96,12 @@ test('an agent shows from its first minute, by its worktree on the order\'s bran
   const report = runsReport({ dir, order: 'demo' });
   assert.deepEqual(report.runs[0].agents.map((a) => a.name), ['fresh'], 'the finished agent left out');
   assert.ok(Date.now() - Date.parse(report.runs[0].agents[0].updated) < 60_000, 'its clock: git\'s last touch of its worktree');
+  // a worktree made for an agent, its branch with no commit of its own and nothing running: waiting for its agent
+  const [waiting] = runRows(report.runs[0], Date.now()).agents;
+  assert.equal(waiting.title, 'not started yet');
+  writeFileSync(join(dir, '.claude/worktrees/fresh/notes.txt'), 'x');
+  execFileSync('git', ['-C', join(dir, '.claude/worktrees/fresh'), '-c', 'user.email=t@local', '-c', 'user.name=t', 'commit', '-q', '-m', 'one', '--allow-empty']);
+  assert.equal(runRows(runsReport({ dir, order: 'demo' }).runs[0], Date.now()).agents[0].title, 'no status file yet', 'its first commit: started');
 });
 
 test('a status file that is not JSON is ignored and the progress is derived instead, never a crash', () => {

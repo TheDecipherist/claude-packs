@@ -81,6 +81,11 @@ export function worktreesOf(project) {
   }).filter(Boolean);
 }
 
+/** How many commits `branch` has that `base` lacks: 0 for a branch just made from it; null when either cannot be read. */
+export function commitsAhead(project, branch, base) {
+  try { return Number(execFileSync('git', ['-C', project, 'rev-list', '--count', `${base}..${branch}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()); } catch { return null; }
+}
+
 /** Whether `branch` is merged into `into`: every commit of it is there. False when either cannot be read. */
 export function mergedInto(project, branch, into) {
   try { execFileSync('git', ['-C', project, 'merge-base', '--is-ancestor', branch, into], { stdio: 'ignore' }); return true; } catch { return false; }

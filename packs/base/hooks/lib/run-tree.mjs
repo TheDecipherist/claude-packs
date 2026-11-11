@@ -9,7 +9,7 @@
 //   └ panel    > W8 The main panel ...
 // A lead working alone is said on its order's row, never as a row of its own.
 import { basename } from 'node:path';
-import { checkedText, percent, projectOf, runRows } from './run-status.mjs';
+import { checkedText, percent, projectOf, runRows, workLine } from './run-status.mjs';
 
 /** The runs grouped by machine and project, in the order first seen: [{ name: "PC: VSYNTHGT", percent, items, done, state, runs }]. */
 export function projectGroups(runs) {
@@ -35,7 +35,8 @@ const under = (i, n) => (i === n - 1 ? '  ' : '│ ');          // what a last c
 function orderRows(r, { prefix, childPrefix, label, nowMs, checkedAt, top }) {
   const { project, agents } = runRows(r, nowMs, checkedAt);
   const lead = agents.length === 1 && agents[0].who === 'lead' ? agents[0] : null;
-  const live = lead && /[♥⚙]/.test(lead.live) ? lead.live.trim() : '';   // the lead's heartbeat or work, when there is one
+  // the lead's own work, on its order's row, agents or not: its builds and gates are often the machine's real work
+  const live = lead ? (/[♥⚙]/.test(lead.live) ? lead.live.trim() : '') : r.leadWork?.procs ? `lead ${workLine(r.leadWork)}` : '';
   const crew = lead ? `, lead on ${lead.id} ${lead.title.slice(0, 26)}` : agents.length ? `, ${agents.length} agent${agents.length === 1 ? '' : 's'}` : '';
   const state = `${project.left}${crew}${top ? project.checked : ''}`;
   const head = { kind: 'order', prefix, name: label ?? project.name, percent: project.percent, state, live, quiet: lead?.quiet ?? 0 };
