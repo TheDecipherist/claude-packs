@@ -99,3 +99,6 @@ packs/base/hooks/lib/run-live.mjs
 packs/base/hooks/lib/run-progress.mjs
 packs/base/hooks/lib/run-rows.mjs
 packs/base/hooks/run-hooks.mjs
+packs/base/hooks/lib/verdict.mjs
+# W4: base hooks, emitted as each converts
+packs/base/hooks/no-find.mjs

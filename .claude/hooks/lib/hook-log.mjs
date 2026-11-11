@@ -12,12 +12,15 @@
 //   logHook(root, { event, hook, ms, code, tool })    readHookLog(root) -> [{ time, event, hook, ms, code, tool }]
 // This file is the hooks' process boundary (typescript order d-23): it alone reads the process (argv, env, cwd, stdin, stderr,
 // exit), so the repo lint's gates 11 and 12 leave it out by name.
-import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeSync } from 'node:fs';
 import { basename, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logCall } from './event-log.mjs';
 import { readJson } from './json.mjs';
+import { readLayout } from './layout.mjs';
 import { real } from './project.mjs';
+import { isVerdict } from './verdict.mjs';
+import { readPayload } from './writes.mjs';
 export const LOG = join('.claude', 'hooks.log');
 export const LOG_MAX_BYTES = 1024 * 1024;
 export const LOGS = join('.claude', 'logs');
@@ -126,6 +129,33 @@ const readJsonText = (text) => {
         return null;
     }
 };
+/** True for a hook declared with both parameters: it is called with the event and a context and returns a Verdict. */
+export const takesContext = (fn) => fn.length >= 2;
+/** The context of an event run on its own, from this process: the project (CLAUDE_PROJECT_DIR, else the folder), the folder, the
+ *  environment, the parent process (Claude Code), now, the project's layout and a logger to stderr. `over` replaces any of them
+ *  (a test, a caller that is not this process). The runner builds its own from its caller, once per event. */
+export function contextOf(over = {}) {
+    const projectDir = over.projectDir ?? projectRoot();
+    return {
+        projectDir,
+        cwd: process.cwd(),
+        env: process.env,
+        sessionPid: process.ppid,
+        now: Date.now(),
+        layout: readLayout(projectDir),
+        log: (line) => { process.stderr.write(`${line}\n`); },
+        ...over,
+    };
+}
+/** A Verdict's words written at once to the process's streams (a hook may leave a timer behind, and the event never waits on it). */
+export function writeVerdict(verdict) {
+    for (const [fd, text] of [[1, verdict.stdout], [2, verdict.stderr]])
+        if (text)
+            try {
+                writeSync(fd, text);
+            }
+            catch { /* a closed pipe */ }
+}
 const stdinText = () => readFileSync(0, 'utf8');
 /** A hook run on its own: the time is from the process's start (node's own start-up included, which is what a hook costs). */
 export async function asHook(name, fn, readStdin = stdinText) {
@@ -139,7 +169,17 @@ export async function asHook(name, fn, readStdin = stdinText) {
     process.stderr.write = ((chunk, ...rest) => { said.push(String(chunk)); return write(chunk, ...rest); });
     let code;
     try {
-        code = await fn(text);
+        if (takesContext(fn)) {
+            // the contract: the parsed event and a context in, a Verdict out; its words are written here, its code is the exit code
+            const verdict = await fn(readPayload(text) ?? {}, contextOf());
+            if (!isVerdict(verdict))
+                throw new Error(`${name ?? 'the hook'} returned no Verdict`);
+            writeVerdict(verdict);
+            said.push(verdict.stderr);
+            code = verdict.code;
+        }
+        else
+            code = await fn(text);
     }
     finally {
         process.stderr.write = write;

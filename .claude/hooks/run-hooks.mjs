@@ -27,19 +27,19 @@ import { logCall } from './lib/event-log.mjs';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mjs';
 import { appendRotated, isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mjs';
 import { parseJson, toJson } from './lib/json.mjs';
+import { readLayout } from './lib/layout.mjs';
 import { verdicts } from './lib/selftest.mjs';
 import { unreadWrites } from './lib/unread-writes.mjs';
+import { isVerdict } from './lib/verdict.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const RUNNER = 'run-hooks';
 /** What the merged text of one event may hold: Claude Code cuts a hook's output at 10,000 characters. */
 export const OUT_CAP = 9000;
 export const nameOf = (arg) => basename(arg).replace(/\.mjs$/, '');
 const fileOf = (arg) => (isAbsolute(arg) ? arg : join(HERE, `${nameOf(arg)}.mjs`));
+/** A hook declared with both parameters takes the event and a context and returns a Verdict (types.d.mts `Hook`). */
+const takesContext = (fn) => fn.length >= 2;
 const asRecord = (value) => (value !== null && typeof value === 'object' && !Array.isArray(value) ? value : null);
-const isVerdict = (value) => {
-    const v = asRecord(value);
-    return v !== null && typeof v.code === 'number' && typeof v.stdout === 'string' && typeof v.stderr === 'string';
-};
 function hookOf(mod) {
     const fn = asRecord(mod)?.hook;
     return typeof fn === 'function' ? fn : null;
@@ -122,19 +122,29 @@ export async function runAll(args, text, root, caller) {
     const outs = [];
     const err = [];
     const judged = [];
+    // the context of this event, built once from the caller (never from this process): every two-parameter hook gets it
+    const ctx = {
+        projectDir: root, cwd: caller.cwd, env: caller.env, sessionPid: caller.sessionPid, now: Date.now(), layout: readLayout(root),
+        log: (line) => { caller.stderr.write(`${line}\n`); },
+    };
     let code = 0;
     for (const arg of args) {
         const name = nameOf(arg);
         const out = [];
         const before = err.length;
         const t0 = performance.now();
-        const undo = [capture(caller.stdout, out), capture(caller.stderr, err)];
         let c = 0;
+        let undo = [];
         try {
             const fn = hookOf(await import(__rewriteRelativeImportExtension(pathToFileURL(fileOf(arg)).href)));
             if (!fn)
-                throw new Error(`${name} exports no hook(text)`);
-            const result = await fn(text);
+                throw new Error(`${name} exports no hook`);
+            // the streams are caught only for a one-parameter hook, which writes to them (W4's end removes this)
+            if (!takesContext(fn))
+                undo = [capture(caller.stdout, out), capture(caller.stderr, err)];
+            const result = takesContext(fn) ? await fn(ev, ctx) : await fn(text);
+            if (takesContext(fn) && !isVerdict(result))
+                throw new Error(`${name} returned no Verdict`);
             if (isVerdict(result)) {
                 c = result.code;
                 out.push(result.stdout);
@@ -170,7 +180,8 @@ export async function runAll(args, text, root, caller) {
 async function selftest(real) {
     const dir = scratchDir('run-hooks-');
     ensureDir(join(dir, '.claude'));
-    const fake = (name, body) => { const f = join(dir, `${name}.mjs`); put(f, `export function hook(text) {\n${body}\n}\n`); return f; };
+    const fake = (name, body, params = 'text') => { const f = join(dir, `${name}.mjs`); put(f, `export function hook(${params}) {\n${body}\n}\n`); return f; };
+    const fake2 = (name, body) => fake(name, body, 'event, ctx');
     const ok = fake('says-ok', "process.stdout.write('{\"systemMessage\":\"a\"}'); return 0;");
     const no = fake('refuses', "process.stderr.write('BLOCKED by refuses\\n'); return JSON.parse(text).tool_name === 'Bash' ? 2 : 0;");
     const also = fake('also-says', "console.log(JSON.stringify({ systemMessage: 'b' })); return 0;");
@@ -179,7 +190,10 @@ async function selftest(real) {
     const talk = fake('returns-words', "return { code: 0, stdout: JSON.stringify({ systemMessage: 'v' }), stderr: '' };");
     const loud = Array.from({ length: 30 }, (_, i) => fake(`loud-${i}`, `return { code: 0, stdout: JSON.stringify({ systemMessage: ${toJson(`h${i} `.repeat(250).slice(0, 500))} }), stderr: '' };`));
     const wall = Array.from({ length: 30 }, (_, i) => fake(`wall-${i}`, `return { code: 0, stdout: ${toJson(`w${i} `.repeat(250).slice(0, 499))} + '\\n', stderr: '' };`));
-    const caller = { ...real, env: {} };
+    const sees = fake2('sees-context', "return { code: ctx.env.MARK === 'x' && ctx.sessionPid === 4242 && ctx.cwd === '/there' && event.tool_name === 'Bash' ? 2 : 0, stdout: '', stderr: 'CTX seen\\n' };");
+    const silent = fake2('returns-nothing', 'return undefined;');
+    const bang = fake2('throws-too', "throw new Error('planted two');");
+    const caller = { ...real, env: { MARK: 'x' }, cwd: '/there', sessionPid: 4242 };
     const bash = toJson({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'rm x' } });
     const cases = [];
     const r1 = await runAll([ok, no, also], bash, dir, caller);
@@ -209,12 +223,18 @@ async function selftest(real) {
     const r7 = await runAll(wall, toJson({ hook_event_name: 'UserPromptSubmit' }), dir, caller);
     cases.push(['30 plain-text hooks: held to 9,000, the cut named at the end', r7.stdout.length <= OUT_CAP && r7.stdout.includes('were cut here'), true]);
     cases.push(['a short merge is untouched', mergeOut(['a\n', 'b\n']), 'a\nb\n']);
+    const r8 = await runAll([sees, talk], bash, dir, caller);
+    cases.push(['a two-parameter hook gets the event and the context built from the caller', r8.code === 2 && r8.stderr.includes('CTX seen') && r8.stdout.includes('"v"'), true]);
+    const r9 = await runAll([silent, ok], bash, dir, caller);
+    cases.push(['a two-parameter hook that returns no Verdict crashed: the call is refused once, and the next hook still runs', r9.code === 2 && r9.stderr.includes('returns-nothing crashed') && r9.stdout.includes('"a"'), true]);
+    const r10 = await runAll([bang], bash, dir, caller);
+    cases.push(['a two-parameter hook that throws crashed', r10.code === 2 && r10.stderr.includes('throws-too crashed'), true]);
     rmSync(dir, { recursive: true, force: true });
     return verdicts('run-hooks', cases);
 }
 if (isMain(import.meta.url)) {
     const args = process.argv.slice(2);
-    const caller = { env: process.env, stdout: process.stdout, stderr: process.stderr };
+    const caller = { env: process.env, stdout: process.stdout, stderr: process.stderr, cwd: process.cwd(), sessionPid: process.ppid };
     if (args.includes('--selftest'))
         process.exit(await selftest(caller));
     let text = '';

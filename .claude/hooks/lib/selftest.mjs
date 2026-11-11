@@ -4,10 +4,10 @@
 // that judges command text can refuse the probe itself (Sub37 WB-4). doctor runs every selftest.
 // A selftest module is left out of the repo lint's no-process gates (d-20): it is the one place that runs as a process.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, rmSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { put, scratchDir } from './files.mjs';
+import { put, scratchDir, walk } from './files.mjs';
 import { toJson } from './json.mjs';
 const made = [];
 export { put }; // its importers' name for writing a file; files.mts owns it
@@ -23,6 +23,25 @@ export function scratchProject(files = {}, layout = null) {
     for (const [rel, text] of Object.entries(files))
         put(join(dir, rel), text);
     return dir;
+}
+// The runner's own logs are not a judge's writes (the runner writes them for every hook, a judge or not).
+const RUNNER_LOGS = /(?:^|\/)\.claude\/(?:hooks\.log|logs\/)/;
+/** Every file under `dir` with its size and mtime, but the runner's logs: the state a judge's selftest must leave as it was. */
+export function snapshot(dir) {
+    const seen = new Map();
+    for (const file of walk(dir)) {
+        const rel = relative(dir, file).replace(/\\/g, '/');
+        if (RUNNER_LOGS.test(rel))
+            continue;
+        const s = statSync(file);
+        seen.set(rel, `${s.size}:${s.mtimeMs}`);
+    }
+    return seen;
+}
+/** The files that differ from a `snapshot` taken before (added, changed or gone): a judge's selftest row is `writtenSince(...).length`, wanted 0. */
+export function writtenSince(dir, before) {
+    const now = snapshot(dir);
+    return [...new Set([...before.keys(), ...now.keys()])].filter((k) => before.get(k) !== now.get(k)).sort();
 }
 // A hook event goes through run-hooks.mjs, the way settings.json runs every kit hook (KWB-24), so each selftest proves the
 // hook inside the runner; a by-hand mode (args, e.g. --init) runs the hook file itself.

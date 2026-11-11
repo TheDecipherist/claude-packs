@@ -13,6 +13,7 @@ import { checkoutRoot, commandLeavesProject, insideProject } from './project.mjs
 import { computeEdit } from './apply-edit.mjs';
 import { parseJson } from './json.mjs';
 import { afterText, readText, shellWrites } from './shell-writes.mjs';
+import { pass, refuse } from './verdict.mjs';
 export const WRITE_TOOLS = ['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Bash'];
 /** The text of a notebook cell once a NotebookEdit has run: the cell appended on its own line, or the file as it was on a delete. */
 function notebookAfter(before, source, mode) {
@@ -62,27 +63,40 @@ export function readPayload(text) {
 // One guard's frame (0.10.0): read the event, judge its shell command (`command(text, cwd)`, unless it leaves the project) and
 // every write inside the project (`write(w, rel)`, rel from the file's own checkout); the first finding refuses, exit 2.
 // A finding that starts with "BLOCKED" is written as it is, any other as "BLOCKED by <name>: <finding>".
-export function judgeEvent(text, { name, command = null, write = null }, run) {
+export function judgeEvent(text, spec, run) {
     const payload = readPayload(text);
     if (!payload)
         return 0;
     const here = run.cwd();
+    const finding = findingOf(payload, spec, { here, root: run.env.CLAUDE_PROJECT_DIR ?? here, env: run.env });
+    if (finding === null)
+        return 0;
+    run.stderr.write(finding);
+    return 2;
+}
+/** The same frame for a hook on the contract: the event and its context in, a Verdict out (nothing written, nothing read of the process). */
+export function judgeVerdict(event, spec, ctx) {
+    const finding = findingOf(event, spec, { here: ctx.cwd, root: ctx.projectDir, env: ctx.env });
+    return finding === null ? pass : refuse(finding);
+}
+// The first finding as the text a refusal says, or null when the event passes. A finding that starts with "BLOCKED" is kept as it
+// is, any other becomes "BLOCKED by <name>: <finding>".
+function findingOf(payload, { name, command = null, write = null }, { here, root, env }) {
     const cwd = payload.cwd ?? here;
-    const root = run.env.CLAUDE_PROJECT_DIR ?? here;
-    const refuse = (msg) => { run.stderr.write(msg.startsWith('BLOCKED') ? msg : `BLOCKED by ${name}: ${msg}\n`); return 2; };
+    const said = (msg) => (msg.startsWith('BLOCKED') ? msg : `BLOCKED by ${name}: ${msg}\n`);
     const cmd = payload.tool_input?.command ?? '';
-    if (command && payload.tool_name === 'Bash' && !commandLeavesProject(root, cmd, here, run.env.HOME)) {
+    if (command && payload.tool_name === 'Bash' && !commandLeavesProject(root, cmd, here, env.HOME)) {
         const msg = command(cmd, cwd);
         if (msg)
-            return refuse(msg);
+            return said(msg);
     }
     if (write)
-        for (const w of writesOf(payload, cwd, run.env)) {
+        for (const w of writesOf(payload, cwd, env)) {
             if (!insideProject(root, w.path, cwd))
                 continue;
             const msg = write(w, relative(checkoutRoot(root, w.path, here), w.path));
             if (msg)
-                return refuse(msg);
+                return said(msg);
         }
-    return 0;
+    return null;
 }
