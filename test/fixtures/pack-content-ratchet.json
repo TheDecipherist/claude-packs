@@ -1,0 +1,14 @@
+{
+  "//": "Files failing each soft check of the pack-content gate (test/pack-content.test.mts). A count may only fall: lower it here when a fix lands. The hard checks have no row: they fail no file.",
+  "C2": 35,
+  "C5": 29,
+  "C6": 139,
+  "C7": 3,
+  "R1": 83,
+  "R6": 75,
+  "R7": 21,
+  "S3": 15,
+  "S4": 23,
+  "S7": 11,
+  "S8": 11
+}

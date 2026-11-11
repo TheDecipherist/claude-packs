@@ -1,6 +1,6 @@
 ---
 name: tripwire-the-law
-description: Use before changing a law, a coefficient or a formula that has a source.
+description: Use when a law, a coefficient or a formula that has a source is about to change.
 ---
 
 # Tripwire the law (one job: the source and the engine cannot silently part)

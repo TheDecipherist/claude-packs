@@ -6,13 +6,16 @@ paths:
 
 # No source file over 300 lines
 
-## The law
-A file holds one module with one responsibility, and never more than 300 lines. Before a file reaches the limit, split it by responsibility (types, schema, helpers, the main logic) into a folder with an `index.ts` that re-exports. Never split it arbitrarily into part1 and part2.
+A file holds one module with one responsibility. The limit is the house limit; the edit hook that refuses an oversized file is the hard stop.
 
-(The downloaded templates allowed 800 lines; this house limit replaces that.)
+<constraints>
+Always do:
+- Keep every source file at 300 lines or fewer.
+- Split a file by responsibility (types, schema, helpers, the main logic) into a folder with an `index.ts` that re-exports, before it reaches the limit.
+
+Never do:
+- Split a file arbitrarily into part1 and part2.
+</constraints>
 
 ## Check
-```js
-'max-lines': ['error', { max: 300, skipBlankLines: false, skipComments: false }],
-```
-The existing edit hook that refuses oversized files remains the hard stop.
+The file-size hook refuses an edit past the limit (see `split-before-the-limit`). Where the project has ESLint: `max-lines` at 300, blank lines and comments counted.

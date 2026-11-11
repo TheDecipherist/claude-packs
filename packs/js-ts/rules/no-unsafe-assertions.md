@@ -6,25 +6,18 @@ paths:
 
 # No non-null `!` and no casting object literals
 
-## The law
-- Never use the non-null assertion `x!`. Handle the `null`/`undefined` case with a guard, or throw.
-- Never cast an object literal into a type (`{...} as User`). Annotate it instead (`const u: User = {...}`) so missing fields are caught.
-- `as` on anything else needs a one-line comment saying why the compiler can't see it. Prefer a Zod parse or a type guard.
+A cast tells the compiler something it cannot check, and the bug moves to run time.
 
-```ts
-// NO
-const user = await findUser(id);
-send(user!.email);
+<constraints>
+Always do:
+- Handle the `null` or `undefined` case with a guard or a throw: `if (!user) throw new Error(...)`.
+- Annotate an object literal instead of casting it (`const u: User = {...}`), so missing fields are caught.
+- Put a one-line comment on any other `as`, saying why the compiler cannot see it, and prefer a Zod parse or a type guard.
 
-// YES
-const user = await findUser(id);
-if (!user) throw new Error(`user ${id} not found`);
-send(user.email);
-```
+Never do:
+- Use the non-null assertion `x!`.
+- Cast an object literal into a type (`{...} as User`).
+</constraints>
 
 ## Check
-```js
-'@typescript-eslint/no-non-null-assertion': 'error',
-'@typescript-eslint/consistent-type-assertions': ['error',
-  { assertionStyle: 'as', objectLiteralTypeAssertions: 'never' }],
-```
+`no-cast-escape-hatches` refuses the fault at edit time. Where the project has ESLint: `@typescript-eslint/no-non-null-assertion` and `consistent-type-assertions` with `objectLiteralTypeAssertions: 'never'`.

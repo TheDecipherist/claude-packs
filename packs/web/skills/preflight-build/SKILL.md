@@ -1,9 +1,9 @@
 ---
 name: preflight-build
-description: Use before any production build, deploy, image publish or release of a web app, and when asked whether the build is production-ready. Runs the real build and audits the emitted output; findings are blockers.
+description: Use when a web app's production build, deploy, image publish or release is about to run, or when asked if the build is production-ready. Runs the real build and audits the output; findings block.
 ---
 
-# preflight-build
+# Preflight a web build (one job: prove the actual production build against the production-build rule)
 
 One thing: prove the **actual** production build against the `production-build` rule. Configs can lie; the emitted output cannot.
 

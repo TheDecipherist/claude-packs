@@ -6,8 +6,8 @@ paths:
 
 # Every control behaves the house way
 
-Taken from Solera and MegaSynth. Stellix shipped without double-click reset (B-163) because no list said what a control must do, and
-later with dropdowns that stepped instead of opening and a page where only one control worked (B-210, B-211), because the gates walked
+Taken from two reference synths. A synth shipped without double-click reset because no list said what a control must do, and
+later with dropdowns that stepped instead of opening and a page where only one control worked, because the gates walked
 INIT and never pressed a dropdown.
 
 <constraints>
@@ -30,11 +30,12 @@ Always do:
   3. DOUBLE and TRIPLE beside KB OCT, always the two together with it. DOUBLE adds a whole voice an octave up, TRIPLE a whole voice an octave down, and both can be on. Each extra voice has its own filter and envelopes and sounds as if that octave were played, equal pitches are never merged, and a note-off stops every voice its key started. They light their extra keys, a little dimmer.
 - Check a new or changed control against this list with the `new-panel-control` skill, and walk one control of each template through the real window in the behaviour gate.
 - Walk one control of each template in the real window, on a loaded patch and not only on INIT: it moves its value and the sound or
-  the picture, and a choice control opens its list. Prove the rest by a read, not a walk (`test-the-template-once`), plus one cheap pass of every control through its real input path, since a read cannot see one unhooked (twelve controls on the MPX 500 were each caught only by working them): a table check that every
+  the picture, and a choice control opens its list. Prove the rest by a read, not a walk (`test-the-template-once`), plus one cheap pass of every control through its real input path, since a read cannot see one unhooked (twelve controls on one machine were each caught only by working them): a table check that every
   control is built from its template and its binding reaches a live parameter, which is what catches a control wired to nothing. The gate is red on a planted control that does nothing and on a planted dropdown
   that steps instead of opening.
-- When a project's reference synth (Solera, MegaSynth) does a behaviour differently, copy it and write down what was copied.
+- When a project's reference synth does a behaviour differently, copy it and write down what was copied.
 
 Never do:
 - Draw a control by hand on one page instead of using the shared piece.
 - Give one page a behaviour the others lack.
+</constraints>

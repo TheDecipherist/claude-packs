@@ -6,23 +6,17 @@ paths:
 
 # Test names state the behavior; bodies are Arrange-Act-Assert
 
-## The law
-- The title says what happens under which condition: `returns 404 when the user does not exist`, not `test getUser`.
-- The body has three visible parts: arrange, act, assert. One behavior per test.
-- Fix the code, not the test, unless the test itself is wrong. Say which one it is when you change a test.
+A title that names the behavior tells the next reader what broke.
 
-```ts
-it('rejects an order when the card is expired', async () => {
-  const order = makeOrder({ card: expiredCard });   // arrange
-  const result = await checkout(order);             // act
-  expect(result).toEqual({ ok: false, error: 'card_expired' }); // assert
-});
-```
+<constraints>
+Always do:
+- Write the title as what happens under which condition: `returns 404 when the user does not exist`.
+- Give the body three visible parts, arrange, act and assert, and one behavior per test.
+- Fix the code, not the test, unless the test itself is wrong; say which one it is when a test changes.
+
+Never do:
+- Title a test after the function alone: `test getUser`.
+</constraints>
 
 ## Check
-```js
-// @vitest/eslint-plugin
-'vitest/valid-title': 'error',
-'vitest/expect-expect': 'error',
-'vitest/no-identical-title': 'error',
-```
+`test-name-says-behaviour` refuses a title that names no behavior. Where the project has ESLint: `vitest/valid-title`, `vitest/expect-expect` and `vitest/no-identical-title`.

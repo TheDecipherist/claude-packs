@@ -1,5 +1,7 @@
 ---
 # concepts: ui, painter, panel-spec
+paths:
+  - "placeholder"
 ---
 
 # Sizes and type come from one table of tokens, by kind of control, measured from the house reference plugin
@@ -14,7 +16,7 @@ Always do:
 - Use one condensed family: names in uppercase, a selector's values in mixed case, no italics.
 - Keep 8 units between any two pieces of text, and 14 between a section's name and its lamp.
 - Keep every number a token in one place, read by name: change it there and every panel follows.
-- Hold each of these as a row of the look gate (`ui-matches-reference-look`): radius by kind, the hub to satellite ratio, the type floors, the gap between texts and the needle's contrast, each with its tolerance.
+- Hold each of these as a row of the look gate (`page-matches-reference-look`): radius by kind, the hub to satellite ratio, the type floors, the gap between texts and the needle's contrast, each with its tolerance.
 
 Never do:
 - Size a control by eye, or write one of these numbers into a unit's code.

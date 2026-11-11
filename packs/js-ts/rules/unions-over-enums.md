@@ -6,24 +6,15 @@ paths:
 
 # String-literal unions over `enum`
 
-## The law
-Use a union of string literals, or an `as const` object when you also need runtime values. Do not use TypeScript `enum`.
+Enums emit runtime code, cannot be erased by type-stripping runtimes (Node's native TypeScript support), and numeric enums accept any number.
 
-```ts
-// NO
-enum Role { Admin = 'admin', Member = 'member' }
+<constraints>
+Always do:
+- Use a union of string literals, or an `as const` object where runtime values are also needed: `export const ROLES = ['admin', 'member'] as const; export type Role = (typeof ROLES)[number];` (and `z.enum(ROLES)` in Zod).
 
-// YES
-export const ROLES = ['admin', 'member'] as const;
-export type Role = (typeof ROLES)[number];
-// Zod: z.enum(ROLES)
-```
-
-Why: enums emit runtime code, can't be erased by type-stripping runtimes (Node's native TS support), and numeric enums accept any number.
+Never do:
+- Use a TypeScript `enum`.
+</constraints>
 
 ## Check
-```js
-'no-restricted-syntax': ['error',
-  { selector: 'TSEnumDeclaration', message: 'Use a string-literal union or as-const array.' }],
-```
-(Merge this selector into any existing `no-restricted-syntax` list; the rule takes one array.)
+`no-ts-enum` refuses an `enum` at edit time. Where the project has ESLint: a `no-restricted-syntax` selector on `TSEnumDeclaration`, merged into any existing list, since the rule takes one array.

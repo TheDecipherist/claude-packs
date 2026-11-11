@@ -3,7 +3,7 @@
 // Everything installs into the project's own .claude/ (and nested skill folders).
 // The one exception is `global`: latest-versions (skill and hook), gnu-shell and shell-traps.
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Layout } from '../packs/base/hooks/lib/types.d.mts';
@@ -20,6 +20,8 @@ import { readLock } from '../lib/manifest.mts';
 import { newProject } from '../lib/new.mts';
 import { dupScan } from '../lib/once-only-report.mts';
 import { PRESETS, availablePacks, readPack } from '../lib/packs.mts';
+import type { CheckSpec } from '../lib/pack-template.mts';
+import { addCheck } from '../lib/pack-template.mts';
 import { plannerSkills } from '../lib/planner.mts';
 import { scan } from '../lib/scan.mts';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mts';
@@ -35,9 +37,9 @@ const HELP = readFileSync(fileURLToPath(new URL('../prompts/help.txt', import.me
 
 // ---- The command line: switches, flags that take a value, and the words left ----
 
-const SWITCHES = { '--dry-run': 'dryRun', '--force': 'force', '--strict': 'strict', '--fresh': 'fresh' } as const;
+const SWITCHES = { '--dry-run': 'dryRun', '--force': 'force', '--strict': 'strict', '--fresh': 'fresh', '--hook': 'hook' } as const;
 type Switch = (typeof SWITCHES)[keyof typeof SWITCHES];
-const VALUE_FLAGS = ['--dir', '--packs', '--profile', '--layout', '--config', '--home', '--from', '--template', '--out', '--zip', '--repo', '--branch'] as const;
+const VALUE_FLAGS = ['--dir', '--packs', '--profile', '--layout', '--config', '--home', '--from', '--template', '--out', '--zip', '--repo', '--branch', '--pack', '--rule', '--pattern', '--bad', '--good', '--globs', '--why', '--kind'] as const;
 type ValueFlag = (typeof VALUE_FLAGS)[number];
 const isSwitch = (word: string): word is keyof typeof SWITCHES => Object.hasOwn(SWITCHES, word);
 const isValueFlag = (word: string): word is ValueFlag => (VALUE_FLAGS as readonly string[]).includes(word);
@@ -69,10 +71,10 @@ function seedOf(value: Run['value']): Partial<Layout> | null {
 }
 
 // The commands that never load a team's custom packs (they read, or they make something new).
-const NO_CUSTOM_PACKS = new Set(['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'status']);
+const NO_CUSTOM_PACKS = new Set(['new-pack', 'add-lesson-check', 'scan', 'suggest', 'fix', 'logs', 'global', 'status']);
 
 function parse(command: string | undefined, argv: readonly string[]): Run {
-  const flags: Record<Switch, boolean> = { dryRun: false, force: false, strict: false, fresh: false };
+  const flags: Record<Switch, boolean> = { dryRun: false, force: false, strict: false, fresh: false, hook: false };
   const value: Run['value'] = {};
   const rest: string[] = [];
   for (let i = 0; i < argv.length; i += 1) {
@@ -158,7 +160,33 @@ async function updateAll(run: Run): Promise<number> {
   return failed ? 1 : 0;
 }
 
-const printPrompt = (name: string): number => {
+/** One lesson check from the template: the flags are its fields; exclude and kind are filled, the examples are proved, the rule names it. */
+function addLessonCheck(run: Run): number {
+  const need = (flag: ValueFlag): string => {
+    const got = run.value[flag];
+    if (got === undefined || got === '') throw new Error(`add-lesson-check <id> needs ${flag}: --why, --rule, --globs, --pattern, --bad and --good (--kind, --pack optional)`);
+    return got;
+  };
+  const text = (flag: ValueFlag): string => need(flag).replaceAll('\\n', '\n');
+  const kind = run.value['--kind'];
+  const pack = run.value['--pack'];
+  const folder = pack === undefined ? join(run.dir, '.claude') : join(run.dir, 'packs', pack);
+  const spec: CheckSpec = {
+    id: run.rest[0] ?? '',
+    why: need('--why'),
+    rule: need('--rule'),
+    globs: need('--globs').split(',').map((g) => g.trim()),
+    pattern: need('--pattern'),
+    bad: text('--bad'),
+    good: text('--good'),
+    ...(kind === undefined ? {} : { kind }),
+  };
+  const written = addCheck(join(folder, 'checks'), join(folder, 'rules'), spec);
+  console.log(`  ${relative(run.dir, written)}: its bad example is caught and its good example passes`);
+  return 0;
+}
+
+const printPrompt =(name: string): number => {
   process.stdout.write(readFileSync(fileURLToPath(new URL(`../prompts/${name}`, import.meta.url)), 'utf8'));
   return 0;
 };
@@ -214,7 +242,8 @@ const COMMANDS: Record<string, Command> = {
   status: (run) => statusCommand(run.argv.includes('--dir') ? [...run.rest, '--dir', run.dir] : run.rest), // no --dir: every run on the machine
   suggest: (run) => { suggest(run.dir); return 0; },
   fix: async (run) => { await fixPlan(run.dir, { from: pathOf(run, '--from'), out: pathOf(run, '--out') }); return 0; },
-  'new-pack': (run) => newPack(run.dir, run.rest[0], { repo: run.value['--repo'] ?? null }),
+  'new-pack': (run) => newPack(run.dir, run.rest[0], { repo: run.value['--repo'] ?? null, hook: run.hook }),
+  'add-lesson-check': addLessonCheck,
   survey: () => printPrompt('survey.md'),
   global: (run) => {
     const command = run.rest[0] !== undefined && Object.hasOwn(GLOBAL, run.rest[0]) ? GLOBAL[run.rest[0]] : undefined;

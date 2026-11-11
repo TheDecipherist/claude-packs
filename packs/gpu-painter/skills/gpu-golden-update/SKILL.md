@@ -1,6 +1,6 @@
 ---
 name: gpu-golden-update
-description: Use only when the user confirms a visual change is intended and asks to update the golden images.
+description: Use when the user confirms a visual change is intended and asks to update the golden images.
 ---
 
 # Golden image update (one job: accept an intended visual change)

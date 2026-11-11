@@ -25,7 +25,11 @@ usage: npx --no-install @thedecipherist/claude-packs <command> [options]
                                        and packs, then its layout keys (enable, looks, guards, commands, ...), then update
   add <pack...>      add packs to an existing install
                      --from <git-url>  a custom pack from a team's repository; its hooks stay off until "enable" names them
-  new-pack <name> [--repo <git-url>]  a new repository for a team's own pack, ready to edit and push
+  new-pack <name> [--repo <git-url>] [--hook]  a new repository for a team's own pack, from the kit's template, ready to edit and
+                     push; --hook adds an example hook on the hook contract, with its selftest and its worktree case
+  add-lesson-check <id> --why <reason> --rule <rule.md> --globs <a,b> --pattern <regex> --bad <code> --good <code>
+                     one lesson check from the template: fills exclude and kind (--kind), proves that bad is caught and good
+                     passes, and names the check in its rule; into .claude/ of --dir, or packs/<name>/ with --pack <name>
   remove <pack...>   remove packs (files you edited are kept)
   update             re-sync installed packs from this package version, in the project's configuration
   configs            list the configurations: what each installs, its packs and its folder template

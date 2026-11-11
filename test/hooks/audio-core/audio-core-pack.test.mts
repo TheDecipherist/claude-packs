@@ -54,7 +54,7 @@ test('the skill stays under the limit and names the rule as required reading whe
 });
 
 test('ui-matches-reference-look: a look gate checks geometry exactly, and a whole-picture score is never a pass', () => {
-  const text = pack('audio-core/rules/ui-matches-reference-look.md');
+  const text = pack('base/rules/page-matches-reference-look.md');   // W7 (a): folded into the page rule, in base
   assert.match(text, /geometry exactly/);
   assert.match(text, /whole-picture score/);
   assert.match(text, /unplanted/);

@@ -6,29 +6,15 @@ paths:
 
 # Named constants, not magic numbers
 
-## The law
-Any number with meaning (a timeout, limit, threshold, retry count, status code) gets a named constant that says what it is and its unit.
+A bare number hides what it means and in which unit.
 
-```ts
-// NO
-setTimeout(retry, 30000);
-if (items.length > 100) paginate();
+<constraints>
+Always do:
+- Give any number with meaning (a timeout, limit, threshold, retry count, status code) a named constant that says what it is and its unit: `const RETRY_DELAY_MS = 30_000;`.
 
-// YES
-const RETRY_DELAY_MS = 30_000;
-const MAX_PAGE_SIZE = 100;
-```
+Never do:
+- Write such a number inline: `setTimeout(retry, 30000)`, `if (items.length > 100)`.
+</constraints>
 
 ## Check
-```js
-'@typescript-eslint/no-magic-numbers': ['error', {
-  ignore: [-1, 0, 1, 2],
-  ignoreArrayIndexes: true,
-  ignoreEnums: true,
-  ignoreNumericLiteralTypes: true,
-  ignoreReadonlyClassProperties: true,
-  ignoreTypeIndexes: true,
-}],
-{ files: ['**/*.test.*', '**/*.spec.*'], rules: { '@typescript-eslint/no-magic-numbers': 'off' } },
-```
-Turn off core `no-magic-numbers` when enabling the TS version.
+Where the project has ESLint: `@typescript-eslint/no-magic-numbers`, ignoring -1, 0, 1 and 2, array indexes, enums, numeric literal types, readonly class properties and type indexes, off in test files; turn the core `no-magic-numbers` off when it is on.

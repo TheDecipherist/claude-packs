@@ -6,20 +6,19 @@ paths:
 
 # Guard clauses over nesting
 
-## The law
-Handle the invalid, empty and error cases first with early returns or throws. Then the main path runs unindented at the bottom. Max nesting depth is 3.
+The main path of a function runs unindented at the bottom, after the invalid, empty and error cases are gone.
 
+<constraints>
+Always do:
+- Handle the invalid, empty and error cases first, with early returns or throws.
+- Keep nesting depth at 3 or less.
+
+Never do:
+- Wrap the main path in `if (valid) { if (paid) { ... } }`.
+</constraints>
+
+## Example
 ```ts
-// NO
-function ship(order?: Order) {
-  if (order) {
-    if (order.paid) {
-      if (order.items.length) { return dispatch(order); }
-    }
-  }
-}
-
-// YES
 function ship(order?: Order) {
   if (!order) throw new Error('no order');
   if (!order.paid) throw new Error('unpaid');
@@ -29,6 +28,4 @@ function ship(order?: Order) {
 ```
 
 ## Check
-```js
-'max-depth': ['error', 3],
-```
+Where the project has ESLint: `max-depth` at 3.

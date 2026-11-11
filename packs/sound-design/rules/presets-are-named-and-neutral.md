@@ -1,14 +1,10 @@
 ---
+# concepts: preset-files
 paths:
-  - "data/factory.csv"
-  - "data/params.csv"
-  - "presets/**"
-  - "banks/**"
-  - "**/*[Pp]reset*"
-  - "**/*[Bb]ank*"
+  - "placeholder"
 ---
 
-# Presets carry the author's own names, INIT is neutral through every stage, a bank shows the engine, and its levels are measured
+# Presets carry the author's names, INIT stays neutral, a bank shows the engine, levels are measured
 
 <constraints>
 Always do:
@@ -30,3 +26,6 @@ Never do:
 - Leave a module on in INIT, or give a stage a value close to neutral where it should be exactly neutral.
 - Call a bank done before `spread-probe` has run on it, or on its first sound alone.
 </constraints>
+
+## Check
+`preset-name-no-brand` refuses a preset named after a brand or another machine, and `preset-not-default-envelope` refuses a preset left on the default envelope.
