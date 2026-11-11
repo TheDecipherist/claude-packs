@@ -6,15 +6,16 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { toJson } from './json.mjs';
 import { atCommit, atStart, compareVersions, KIT, newestOnNpm } from './kit-fresh-look.mjs';
 import { git, put, scratchProject, verdicts } from './selftest.mjs';
 
 const HOOK = fileURLToPath(new URL('../kit-fresh.mjs', import.meta.url));
 const RUNNER = fileURLToPath(new URL('../run-hooks.mjs', import.meta.url));
 const run = (dir, payload, env = {}) => spawnSync(process.execPath, [RUNNER, HOOK], {
-  cwd: dir, input: JSON.stringify(payload), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir, ...env },
+  cwd: dir, input: toJson(payload), encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir, ...env },
 });
-const lock = (kit) => ({ '.claude/claude-packs.lock.json': JSON.stringify({ kit }) });
+const lock = (kit) => ({ '.claude/claude-packs.lock.json': toJson({ kit }) });
 const answer = (version) => () => ({ version });
 const offline = () => ({ error: 'getaddrinfo ENOTFOUND registry.npmjs.org' });
 
@@ -22,7 +23,7 @@ const offline = () => ({ error: 'getaddrinfo ENOTFOUND registry.npmjs.org' });
 function kitRepo(version, newer) {
   const hub = mkdtempSync(join(tmpdir(), 'cp-kf-hub-'));
   git(hub, 'init', '-q', '--bare');
-  const dir = scratchProject({ 'package.json': JSON.stringify({ name: KIT, version }) });
+  const dir = scratchProject({ 'package.json': toJson({ name: KIT, version }) });
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'add', 'package.json');
   git(dir, 'commit', '-qm', 'main');
@@ -51,9 +52,9 @@ export function selftest() {
   cases.push(['a lock newer than npm (a tarball before its release) says nothing', atStart(scratchProject(lock('1.9.1')), { npm: answer('1.9.0') }), null]);
 
   // the installed package is what runs, the lock only its note (KWB-162): a stale lock beside a current package is up to date
-  const packed = scratchProject({ ...lock('1.0.0'), 'node_modules/@thedecipherist/claude-packs/package.json': JSON.stringify({ name: KIT, version: '1.9.0' }) });
+  const packed = scratchProject({ ...lock('1.0.0'), 'node_modules/@thedecipherist/claude-packs/package.json': toJson({ name: KIT, version: '1.9.0' }) });
   cases.push(['the installed package wins over a stale lock', atStart(packed, { npm: answer('1.9.0'), unattended: true }), null]);
-  cases.push(['an installed package older than npm is said', /runs the kit 1\.8\.0/.test(say(atStart(scratchProject({ 'node_modules/@thedecipherist/claude-packs/package.json': JSON.stringify({ name: KIT, version: '1.8.0' }) }), { npm: answer('1.9.0') }))), true]);
+  cases.push(['an installed package older than npm is said', /runs the kit 1\.8\.0/.test(say(atStart(scratchProject({ 'node_modules/@thedecipherist/claude-packs/package.json': toJson({ name: KIT, version: '1.8.0' }) }), { npm: answer('1.9.0') }))), true]);
 
   // 2. offline: what could not be checked is said; never a block, even with nobody there
   const off = atStart(old, { npm: offline, unattended: true });

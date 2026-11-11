@@ -3,13 +3,13 @@
 // never remembered; `doctor --fresh` runs them all.
 import { CLI, appendFileSync, assert, execFileSync, fresh, join, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
 
-const doctor = (dir, cache, ...args) => spawnSync('node', [CLI, 'doctor', '--dir', dir, ...args], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache } });
+const doctor = (dir, cache, ...args) => spawnSync('node', [CLI, 'doctor', '--dir', dir, ...args], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache, CLAUDE_PACKS_SELFTESTS: 'run' } });
 const unchanged = (out) => Number(out.match(/selftests: (\d+) of \d+ unchanged/)?.[1] ?? 0);
 
 function install() {
   const dir = fresh('dcache-');
   const cache = fresh('dcache-store-');
-  execFileSync('node', [CLI, 'init', '--config', 'base', '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache } });
+  execFileSync('node', [CLI, 'init', '--config', 'base', '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_CACHE: cache, CLAUDE_PACKS_SELFTESTS: 'run' } });
   return { dir, cache };
 }
 
@@ -36,4 +36,13 @@ test('a failing selftest is never remembered, and --fresh runs them all', () => 
     assert.match(r.stdout, /folder-law\.mjs fails its selftest/);
   }
   assert.equal(unchanged(doctor(dir, cache, '--fresh').stdout), 0, '--fresh runs every selftest');
+});
+
+test('under the kit\'s default test env doctor takes every selftest as proved by the gate and runs none', () => {
+  const dir = fresh('dgate-');
+  execFileSync('node', [CLI, 'init', '--config', 'base', '--dir', dir], { encoding: 'utf8' });
+  const r = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stdout);
+  assert.equal(process.env.CLAUDE_PACKS_SELFTESTS, 'gate', 'the test run is under the gate');
+  assert.match(r.stdout, /taken as proved by the gate/);
 });

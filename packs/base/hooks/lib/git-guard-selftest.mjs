@@ -6,6 +6,7 @@
 //   the refusals name the push and never offer deleting a branch; three identical Stop refusals end the session.
 import { renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseJson, toJson } from './json.mjs';
 import { git, put } from './selftest.mjs';
 import { hubRepo } from './hub-rig.mjs';
 import { lagCases } from './trunk-lag-selftest.mjs';
@@ -40,7 +41,7 @@ export function pushedCases(hookFile) {
   git(lone, 'commit', '-q', '--allow-empty', '-m', 'b');
   cases.push(['a repo with no remote has nothing to push to: passes', bash(`git -C ${lone} commit --allow-empty -m c`).status, 0]);
   // a repo that pushes by URL only names its GitHub repo in the layout (guards.git.repo): judged against it
-  put(join(lone, '.claude/layout.json'), JSON.stringify({ folders: {}, guards: { git: { house: true, repo: hub } } }));
+  put(join(lone, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true, repo: hub } } }));
   const byUrl = runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit --allow-empty -m c' } }, lone, lone);
   cases.push(['no remote, guards.git.repo named: its unpushed commits refuse the next commit', byUrl.status, 2]);
 
@@ -79,7 +80,7 @@ export function pushedCases(hookFile) {
 
   // the house laws off: nothing judged
   git(dir, 'remote', 'set-url', 'origin', hub);
-  put(join(dir, '.claude/layout.json'), JSON.stringify({ folders: {} }));
+  put(join(dir, '.claude/layout.json'), toJson({ folders: {} }));
   cases.push(['house laws off: an unpushed commit is not judged', bash(C).status, 0]);
   cases.push(['house laws off: Stop is not judged', stop().status, 0]);
   rmSync(top, { recursive: true, force: true });
@@ -90,10 +91,10 @@ export function pushedCases(hookFile) {
 // once a session and never refused; a branch missing on GitHub by name only, every commit of it there, is not told.
 export function ownerCases(hookFile) {
   const { top, dir, hub, commit, push, run: runAt } = hubRepo('git-guard-owner-');
-  put(join(dir, '.claude/layout.json'), JSON.stringify({ folders: {}, guards: { git: { house: true, trunkNeedsYes: true, pushNeedsYes: true } } }));
+  put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true, trunkNeedsYes: true, pushNeedsYes: true } } }));
   const bash = (command) => runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } });
   const stop = () => runAt(hookFile, { hook_event_name: 'Stop', stop_hook_active: false });
-  const told = (r) => { try { return JSON.parse(r.stdout).systemMessage ?? ''; } catch { return ''; } };
+  const told = (r) => { try { return parseJson(r.stdout).systemMessage ?? ''; } catch { return ''; } };
   const cases = [];
   commit('first');
   push('main');

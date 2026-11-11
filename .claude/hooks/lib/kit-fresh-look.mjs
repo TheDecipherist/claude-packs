@@ -7,10 +7,10 @@
 //   kitVerdict(root, { git, fetch }) -> null | { say, refuseCommit }
 //   atStart(root, { unattended, npm, git }) -> null | { say, block }   atCommit(root, command, { git }) -> refusal | null
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { readJson } from './json.mjs';
+import { readJson, toJson } from './json.mjs';
 import { KIT, runningKit } from './kit-version.mjs';
 
 export { KIT };
@@ -52,13 +52,13 @@ export function askNpm() {
 export function newestOnNpm({ now = Date.now(), dir = cacheDir(), ask = askNpm } = {}) {
   const file = join(dir, 'kit-fresh.json');
   let kept = null;
-  try { kept = JSON.parse(readFileSync(file, 'utf8')); } catch { /* nothing kept yet: asked below */ }
+  try { kept = readJson(file); } catch { /* nothing kept yet: asked below */ }
   if (kept?.version && now - kept.at < DAY_MS) return { version: kept.version };
   if (kept?.error && now - kept.at < RETRY_MS) return { error: kept.error };
   const r = ask();
   try {
     mkdirSync(dir, { recursive: true });
-    writeFileSync(file, JSON.stringify({ ...r, at: now }));
+    writeFileSync(file, toJson({ ...r, at: now }));
   } catch { /* not kept: asked again next session, no harm */ }
   return r;
 }

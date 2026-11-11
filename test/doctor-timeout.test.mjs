@@ -11,9 +11,9 @@ import { fileURLToPath } from 'node:url';
 const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
 test('a selftest that hangs is reported as timed out', () => {
   const dir = mkdtempSync(join(tmpdir(), 'cp-timeout-'));
-  execFileSync('node', [CLI, 'init', 'audio-core', '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_S: '600' } });
+  execFileSync('node', [CLI, 'init', 'audio-core', '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_S: '600', CLAUDE_PACKS_SELFTESTS: 'run' } });
   writeFileSync(join(dir, '.claude/hooks/zz-hangs.mjs'), "// --selftest\nsetTimeout(() => {}, 60000);\n");
-  const r = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_S: '3' } });
+  const r = spawnSync('node', [CLI, 'doctor', '--dir', dir], { encoding: 'utf8', env: { ...process.env, CLAUDE_PACKS_SELFTEST_S: '3', CLAUDE_PACKS_SELFTESTS: 'run' } });
   const said = r.stdout + r.stderr;
   assert.match(said, /zz-hangs\.mjs's selftest timed out after 3 s/);
   assert.doesNotMatch(said, /zz-hangs\.mjs fails its selftest/);

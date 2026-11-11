@@ -1,10 +1,11 @@
 // The preload itself (KWB-166): what test/fresh-tmp.mjs gives every test process, checked here, so a change to it picks this test,
 // not every test that merely loads it (the user: "a pack that affects everything is not the same as it changed everything").
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { readJson } from '../packs/base/hooks/lib/json.mjs';
 
 test('the run has its own temp folder, by its real path (macOS /var is /private/var: KWB-158)', () => {
   const dir = process.env.TMPDIR;
@@ -17,8 +18,8 @@ test('the run has its own temp folder, by its real path (macOS /var is /private/
 test('kit-fresh reads a kept answer inside the run, holding this kit\'s own version (no test reaches npm: KWB-156)', () => {
   const cache = process.env.CLAUDE_PACKS_CACHE_DIR;
   assert.ok(cache && cache.startsWith(process.env.TMPDIR), 'inside the run\'s folder');
-  const kept = JSON.parse(readFileSync(join(cache, 'kit-fresh.json'), 'utf8'));
-  assert.equal(kept.version, JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version);
+  const kept = readJson(join(cache, 'kit-fresh.json'));
+  assert.equal(kept.version, readJson(new URL('../package.json', import.meta.url)).version);
   assert.ok(Date.now() - kept.at < 24 * 3600 * 1000, 'today\'s');
 });
 

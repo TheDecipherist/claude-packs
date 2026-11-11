@@ -19,6 +19,7 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, 
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readJson } from '../packs/base/hooks/lib/json.mjs';
 import { coreBudget, projectLayout } from '../packs/base/hooks/lib/core-budget.mjs';
 import { PRESETS } from '../lib/packs.mjs';
 import { changedNames, usesAny } from './changed-functions.mjs';
@@ -39,7 +40,7 @@ function brings(root, pack) {
   const configs = [];
   const dir = join(root, 'configurations');
   for (const name of existsSync(dir) ? readdirSync(dir) : []) {
-    const c = JSON.parse(readFileSync(join(dir, name, 'config.json'), 'utf8'));
+    const c = readJson(join(dir, name, 'config.json'));
     if (c.packs.always.includes(pack)) for (const p of c.packs.choose) words.add(p);
     if ([...c.packs.always, ...c.packs.choose].includes(pack)) configs.push(name);
   }

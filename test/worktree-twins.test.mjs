@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { toJson } from '../packs/base/hooks/lib/json.mjs';
 import { fireAs, project, put } from './worktree-rig.mjs';
 
 const git = (dir, ...a) => execFileSync('git', ['-C', dir, ...a], { encoding: 'utf8' });
@@ -16,7 +17,7 @@ const BUILD = '# x\n\n## In progress\n\n- the filter; making: the state-variable
 
 test('making-check judges each worktree\'s writes against its own checkout: the same file in two worktrees is no copy (KWB-155)', () => {
   const { here, wt } = project(['audio-core']);
-  put(join(wt, 'design/shape.json'), JSON.stringify(SHAPE));
+  put(join(wt, 'design/shape.json'), toJson(SHAPE));
   put(join(wt, 'build.md'), BUILD);
   git(wt, 'add', 'design/shape.json', 'build.md');
   git(wt, '-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'manifest');
@@ -30,7 +31,7 @@ test('making-check judges each worktree\'s writes against its own checkout: the 
     turn.push({ type: 'assistant', cwd: wt, message: { content: [bashWrite(`w${i}`, file)] } });
   }
   const t = join(wt, 'transcript.jsonl');
-  writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, ...turn].map((e) => JSON.stringify(e)).join('\n'));
+  writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, ...turn].map((e) => toJson(e)).join('\n'));
   const r = fireAs(here, 'making-check.mjs', { hook_event_name: 'Stop', transcript_path: t, cwd: wt, session_id: `twins-${process.pid}` });
   assert.doesNotMatch(r.stderr, /did not pass once-only/, r.stderr);
   assert.equal(r.status, 0, r.stderr);
@@ -38,7 +39,7 @@ test('making-check judges each worktree\'s writes against its own checkout: the 
   const copy = join(wt2, 'src/dsp/SvfAgain.cpp');
   put(copy, SVF.replace('Svf::', 'SvfAgain::'));
   writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, { type: 'assistant', cwd: wt2, message: { content: [bashWrite('w9', copy)] } }]
-    .map((e) => JSON.stringify(e)).join('\n'));
+    .map((e) => toJson(e)).join('\n'));
   const again = fireAs(here, 'making-check.mjs', { hook_event_name: 'Stop', transcript_path: t, cwd: wt2, session_id: `twins-b-${process.pid}` });
   assert.match(again.stderr, /did not pass once-only/, 'a copy inside one worktree is still refused');
 });

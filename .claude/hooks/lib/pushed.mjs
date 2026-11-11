@@ -24,6 +24,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { readJson, toJson } from './json.mjs';
 
 const CACHE = 'claude-packs-heads.json';
 
@@ -46,7 +47,7 @@ export function tokenFor(tokenVar) {
 
 export const isGitHub = (url) => /^https:\/\/([^@/]+@)?github\.com\//.test(url ?? '');
 const cacheFile = (cwd) => { const d = out(git(cwd, ['rev-parse', '--git-common-dir'])); return d ? join(resolve(cwd, d), CACHE) : null; };
-const readCache = (file) => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return {}; } };
+const readCache = (file) => readJson(file, {});
 
 // the URL a remote name stands for, else the layout's repo
 export function urlOf(cwd, remote, { repo = null } = {}) {
@@ -72,7 +73,7 @@ export function remoteHeads(cwd, remote, { tokenVar = 'PERSONAL_GITHUB_TOKEN', r
   const r = git(cwd, args, env);
   if (typeof r !== 'string') return { url, error: r.error };
   const heads = new Map(r.split('\n').filter(Boolean).map((l) => l.split('\t')).map(([sha, ref]) => [ref.replace(/^refs\/heads\//, ''), sha]));
-  if (file) { try { writeFileSync(file, JSON.stringify({ ...cache, [url]: { time: now, heads: Object.fromEntries(heads) } })); } catch { /* the check still holds */ } }
+  if (file) { try { writeFileSync(file, toJson({ ...cache, [url]: { time: now, heads: Object.fromEntries(heads) } })); } catch { /* the check still holds */ } }
   return { url, heads, cached: false };
 }
 
@@ -217,7 +218,7 @@ export const MAX_SENDS = 3;
 export function stopVerdict(root, cfg = {}, session = 'session', stateDir = process.env.TMPDIR ?? '/tmp', { lag = () => null } = {}) {
   const file = join(stateDir, `git-guard-stop-${String(session).replace(/[^\w-]/g, '')}.json`);
   let st = {};
-  try { st = JSON.parse(readFileSync(file, 'utf8')); } catch { /* first */ }
+  try { st = readJson(file, {}); } catch { /* first */ }
   const owner = !!cfg.pushNeedsYes;
   let found = localBranches(root, owner ? { ...cfg, cachedOnly: true } : cfg);
   if (owner && found?.length && hereOnly(found) !== st.told) found = localBranches(root, cfg); // looked up live before telling
@@ -237,11 +238,11 @@ export function stopVerdict(root, cfg = {}, session = 'session', stateDir = proc
       `\nPush them before the session ends (KWB-26):\n${[...byUrl].map(([url, b]) => `  ${pushCommand(url, b, cfg)}`).join('\n')}\n${NEVER_DELETE}`);
   }
   if (behind?.refuse) parts.push(behind.refuse);
-  const said = notes.length ? JSON.stringify({ systemMessage: notes.join('\n') }) : undefined;
-  if (!parts.length) { try { writeFileSync(file, JSON.stringify({ told: tell })); } catch { /* nothing to count */ } return { code: 0, stdout: said }; }
+  const said = notes.length ? toJson({ systemMessage: notes.join('\n') }) : undefined;
+  if (!parts.length) { try { writeFileSync(file, toJson({ told: tell })); } catch { /* nothing to count */ } return { code: 0, stdout: said }; }
   const text = parts.join('\n');
   const count = st.text === text ? (st.count ?? 0) + 1 : 1;
-  try { writeFileSync(file, JSON.stringify({ text, count, told: tell })); } catch { /* still refused */ }
-  if (count > MAX_SENDS) return { code: 0, stdout: JSON.stringify({ systemMessage: [`git-guard refused the end of this session ${MAX_SENDS} times; it ends here for you to decide.\n${text}`, ...notes].join('\n') }) };
+  try { writeFileSync(file, toJson({ text, count, told: tell })); } catch { /* still refused */ }
+  if (count > MAX_SENDS) return { code: 0, stdout: toJson({ systemMessage: [`git-guard refused the end of this session ${MAX_SENDS} times; it ends here for you to decide.\n${text}`, ...notes].join('\n') }) };
   return { code: 2, stderr: `git-guard: ${[text, ...notes].join('\n')}\n` };
 }
