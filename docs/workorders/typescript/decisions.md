@@ -136,3 +136,10 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
   test/integration, test/fixtures/profiles, proxy); `packs/base/hooks/bin` leaves the layout until W8 writes its first file (the
   sh picker), since anything in it installs into every project; `build/evidence` leaves it for good (ignored, never source).
 - Why: the layout says what exists; a README is the cheapest true first file, and no project receives one.
+
+## d-22 Two real-path helpers, each its own job {#d-22}
+- Question: the surveys list `real` three times; dup's walks up to the nearest existing parent for a path that does not exist yet
+  (`/var` against `/private/var` for a file about to be written), project's resolves it as written.
+- Chosen: project.mts `real` is the owner; dup.mts keeps `realPath`, built on it, for paths that may not exist (a new file's).
+- Why: the two give different results for a missing path (the order's own example of an owner's merge that would change a result);
+  merging them changes what once-only matches, which wants its own KWB and test if it is ever wanted.

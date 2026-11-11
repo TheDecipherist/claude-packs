@@ -7,7 +7,7 @@ import { assert, execFileSync, join, readFileSync, test } from './kit-cli.mjs';
 import { languageOf } from '../packs/base/hooks/lib/languages.mjs';
 
 const KIT = join(import.meta.dirname, '..');
-const RAW_CALLS_LEFT = 539;   // lowered 2026-11-11 (was 547; the typescript order's W2 and W3 layer 0 moved code onto json.mts) (code and tests); lower it with every migration, never raise it
+const RAW_CALLS_LEFT = 519;   // lowered 2026-11-11 (was 547; the typescript order's W2 and W3 layers 0 and 1 moved code onto json.mts) (code and tests); lower it with every migration, never raise it
 const RAW = /\bJSON\s*\.\s*(?:parse|stringify)\s*\(/g;
 
 function rawCalls() {
