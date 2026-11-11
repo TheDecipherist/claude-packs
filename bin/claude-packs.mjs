@@ -23,6 +23,7 @@ import { assertTemplate, newWorkorder } from '../lib/workorder.mjs';
 import { workorderCheck } from '../lib/workorder-check.mjs';
 import { blockPacks, installFrom, readInstallBlock } from '../lib/install-block.mjs';
 import { sync } from '../lib/sync.mjs';
+import { statusCommand } from '../lib/status-cli.mjs';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mjs';
 
 const INSTALLING = { installing: true }; // doctor at the end of an install: what the project has yet to do is a note
@@ -40,6 +41,9 @@ const HELP = `usage: npx --no-install @thedecipherist/claude-packs <command> [op
                                        plugin (a new synth or effect), rebuild (a hardware instrument as a plugin)
   workorder check <name>  before a run: refuses a placeholder left, a step whose Done when has no number or test path,
                      a skill named that is not installed (with the pack to add), and a red doctor --strict
+  status             every unattended run alive on this machine: each project with a progress bar, each agent with its
+                     step and its bar, and how much is left; --dir <project> [--order <name>] for one project, running or
+                     not; --watch <minutes> to print it again every so many minutes
   claude-ai-skill    workorder-writer.zip in <dir>: the work order interview alone, as planner-skills --zip writes it
   init [pack...]     install packs or presets (e.g. init node-api; list shows them); base is always included
                      and create the layout folders
@@ -118,7 +122,7 @@ async function main() {
   const seedLayout = seed ? JSON.parse(readFileSync(seed, 'utf8')) : null;
   const installed = readLock(resolve(dir, '.claude')).packs;
   const fromUrl = rest.includes('--from') ? rest.splice(rest.indexOf('--from'), 2)[1] : null;
-  const fetched = ['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'claude-ai-skill'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
+  const fetched = ['new-pack', 'scan', 'suggest', 'fix', 'logs', 'global', 'claude-ai-skill', 'status'].includes(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
 
   switch (command) {
     case 'new': {
@@ -205,6 +209,8 @@ async function main() {
       return 0;
     case 'logs':
       return logsCommand(dir, rest);
+    case 'status':
+      return statusCommand(argv.includes('--dir') ? [...rest, '--dir', dir] : rest);   // no --dir: every run on the machine
     case 'suggest':
       suggest(dir);
       break;

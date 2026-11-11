@@ -209,6 +209,16 @@ Write the steps with Claude, and the `write-a-workorder` skill keeps them honest
 
 Before it runs, `workorder check billing` reads the order the way the run will and refuses what would stop it halfway, naming each: a placeholder left in angle brackets, a step whose "Done when" holds no number and no path to a test, a skill it names that the project has not installed (with the pack that brings it), and a red `doctor --strict`. An order with no install block gets a warning. `run.sh` and `PROMPT.md` run it before the first session and start nothing on a refusal.
 
+`status` shows where each run stands, every so many minutes with `--watch 15`:
+
+```
+BANDWARP                 [█████████░░░░░░░░░░░]  47%   40 of 76 items left, 4 agents
+  > dsp        > W3b The cluster          [████░░░░░░]  40%   SPACING modes against the reference
+  > panel      > W8 The main panel        [██░░░░░░░░]  20%   the screen markers
+```
+
+The unit is the item: a step's numbered items plus one for its Done when. A run keeps `status.json` beside its order and each agent keeps `agents/<name>.json` in its own worktree, as `PROMPT.md` tells them; an order without them is counted from its `progress.md` lines.
+
 An order carries its own set-up as one fenced block with the info string `claude-packs`, in the kit's own keys: `configuration` and `packs` as `init` takes them, and the layout keys a project owns (`enable`, `looks`, `guards`, `commands`, ...). `init --from docs/workorders/billing/workorder.md` installs from it: the configuration and packs, then those keys written into `.claude/layout.json`, then an update. `new <name> --from <order>` does the same for a new project. A key the kit does not read is refused by name, and nothing is installed.
 
 ````markdown
@@ -458,6 +468,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `new <name>` | A new project: the house files, a git repo on a work branch, the kit installed; `--from <workorder.md>` installs from a work order's install block; `--template <t>` writes its work order too |
 | `workorder <name>` | A work order in `docs/workorders/<name>`: the steps, the prompt that runs them, and a runner; `--template` picks the steps: `generic` (the default), `plugin` or `rebuild` |
 | `workorder check <name>` | Before a run: refuses a placeholder left, a step with no measured Done when, a skill not installed, a red doctor |
+| `status [--order <name>] [--watch <minutes>]` | Where every unattended run on this machine stands: one line per project with a bar and its percent, then one per agent with its step, its own bar and what it is doing. `--dir <project>` reports that project's orders, running or not |
 | `claude-ai-skill` | `workorder-writer.zip`: the work order interview alone, as `planner-skills --zip` writes it |
 | `new-pack <name> [--repo <git-url>]` | A new repository for a team's own pack |
 | `list` | The packs and presets |

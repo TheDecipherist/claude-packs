@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 1.7.3, `claude-packs status` (work/1.7.3-status), started 2026-11-10, from the user: "make that part of the core kit. it reports which projects its working on, how many agents per project, where they are, and how much is left", every 15 minutes.
+  making: lib/run-status.mjs (one order's progress: its status.json, else derived from workorder.md and the progress lines of the main checkout and every agent worktree), lib/run-discovery.mjs (the runs alive on this machine, from their processes), lib/status-cli.mjs (`status`, `--all`, `--watch <minutes>`); the PROMPT template asks every run for status.json and each agent for its own file; concepts: none; reuse: lib/workorder.mjs (the order's folder), the hooks lib's git helpers.
+  done when: test/run-status.test.mjs proves the counts from a status.json, the same counts derived with no status.json, an agent's file read from its worktree, a finished step counted whole, the discovery of a run from its process, and --watch printing on each tick; each seen red; the tests the branch reaches green against main.
 - 1.7.2, smoothing always on (work/1.7.2-smoothing-always), started 2026-11-10, from the user: "smoothing should be completely automatic and never opt in".
   making: realtime-guard's smoothing check on in every project with audio-core, by convention without guards.smoothing, never off; a bypass done in one sample refused; the rule saying so, and that every switch crossfades; KWB-145; concepts: none; reuse: lib/smoothing-checks.mjs's shapes, the hooks lib's conceptGlobs and foldersOfKind.
   done when: realtime-guard --selftest passes 39 cases, the default-on and bypass cases seen red before the fix; the tests the branch reaches green against main.
