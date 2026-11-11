@@ -1,6 +1,6 @@
 # Open and unreleased work the TypeScript order must absorb, carry or leave (survey, 2026-11-11)
 
-Read-only survey of `/Users/tim.clausen/projects/claude-packs`, branch `work/2.0.0-typescript` (HEAD 9cda395, the same commit as
+Read-only survey of `~/projects/claude-packs`, branch `work/2.0.0-typescript` (HEAD 9cda395, the same commit as
 `origin/work/1.9.0-platforms`; `git log origin/main..HEAD` is 22 commits, all 1.9.0 work). Step names are the order's W0 to W9
 (`docs/workorders/typescript/workorder.md`). The order has no "not done" section yet; W9's report is where a CARRY list belongs.
 

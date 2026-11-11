@@ -1,6 +1,6 @@
 # What the installed kit costs a project at run time
 
-Survey, read-only. Project measured: /Users/tim.clausen/projects/bandwarp (kit 1.9.0, packs base, cpp, audio-core,
+Survey, read-only. Project measured: ~/projects/bandwarp (kit 1.9.0, packs base, cpp, audio-core,
 instrument-shell, midi, sound-design). Date 2026-11-11. The machine is a Mac under load (uptime load averages 5.6 to 9.7 while
 measuring; seven agents running in bandwarp). The requirement measured against: every check the kit makes has the same time
 constraint, so nothing a tool call waits on waits long. Doctor's own line today is a median of 500 ms per hook

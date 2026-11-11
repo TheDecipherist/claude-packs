@@ -11,9 +11,9 @@ const esc = (n) => n.replace(/\$/g, '\\$');
 // function in a core is rewritten completely should that trigger a full test suite"): each changed line belongs to the top-level
 // declaration it falls in; an internal helper that changed counts for every declaration in the file that calls it. null when the
 // file is new, gone or not a module: then the whole file counts, as before.
-const DECL = /^(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:function\s*\*?\s*([\w$]+)|(?:const|let|var|class)\s+([\w$]+))/;
+const DECL = /^(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:function\s*\*?\s*([\w$]+)|(?:const|let|var|class|interface|type)\s+([\w$]+))/;
 export function changedNames(root, base, file) {
-  if (!/\.(mjs|js)$/.test(file) || !existsSync(join(root, file))) return null;
+  if (!/\.(mjs|js|mts|cts|ts)$/.test(file) || !existsSync(join(root, file))) return null;   // TypeScript too (W2.6)
   const diff = git(root, 'diff', '-U0', base, '--', file);
   if (diff.status !== 0 || !diff.stdout) return null;
   const lines = readFileSync(join(root, file), 'utf8').split('\n');

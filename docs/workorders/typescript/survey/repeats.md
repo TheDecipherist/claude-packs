@@ -1,7 +1,7 @@
 # Survey: what the kit repeats (the kit's own readers, run on the kit)
 
 Branch work/2.0.0-typescript, measured 2026-11-11. Nothing in the repo was changed except this file. Raw output is in
-`/private/tmp/claude-502/-Users-tim-clausen-projects-bandwarp/e9034e6a-ff37-4f31-992c-cedfc531a016/scratchpad/repeats/`: dup-scan.txt, dup-pairs.txt, scan-report.md, claude-packs-scan.json, scan-by-check.txt, scan-stdout.txt, repeats-raw.txt, run-repeats.mjs,
+`<session scratchpad>/repeats/`: dup-scan.txt, dup-pairs.txt, scan-report.md, claude-packs-scan.json, scan-by-check.txt, scan-stdout.txt, repeats-raw.txt, run-repeats.mjs,
 selftest-handrolled.txt (and mts/, the probe for part 5). The kit has 279 .mjs files and 25,594 lines under packs, test, lib, scripts, global, bin.
 
 ## 1. Duplicate scan (`dup scan --dir .`, jscpd, 284 sources, 50 tokens / 6 lines minimum)

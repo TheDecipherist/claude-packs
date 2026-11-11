@@ -63,6 +63,12 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   const pick = (...changed) => [...choose(KIT, changed, g).chosen.keys()];
   const sym = pick('packs/base/tools/shape-symmetry.mjs');
   assert.ok(sym.includes('test/symmetry.test.mjs'));
+  // W2.6: a TypeScript source picks the test that imports it, and the tests of the .mjs that import its emitted file
+  const ts = pick('packs/base/hooks/lib/source-exts.mts');
+  assert.ok(ts.includes('test/unit/hooks-lib/source-exts.test.mts'), ts.join(' '));
+  assert.ok(pick('packs/base/hooks/lib/files.mts').includes('test/unit/lib/packs.test.mts'), 'through lib/packs.mjs importing files.mjs');
+  // KWB-131: a change under docs/ reaches the test that reads every file the repo keeps
+  assert.ok(pick('docs/versions.md').includes('test/no-personal-name.test.mjs'));
   // KWB-166: a pack file's content picks noop (every changed installed file listed) and what names it, never every install
   const rule = pick('packs/base/rules/instances-by-index-identities-by-id.md');
   assert.ok(rule.includes('test/noop.test.mjs') && !rule.includes('test/install.test.mjs') && !rule.includes('test/worktrees.test.mjs'), rule.join(' '));

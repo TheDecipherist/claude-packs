@@ -24,6 +24,12 @@ import { coreBudget, projectLayout } from '../packs/base/hooks/lib/core-budget.m
 import { PRESETS } from '../lib/packs.mjs';
 import { useJscpd } from '../lib/once-only-report.mjs';
 import { changedNames, usesAny } from './changed-functions.mjs';
+import { emittedFrom } from '../packs/base/hooks/lib/source-exts.mjs';
+
+// What the picker reads as a module, a test and a test helper: JavaScript and TypeScript alike (W2.6; review O1).
+const MODULE = /\.(?:mjs|js|mts|cts|ts)$/;
+const TEST = /^test\/.*\.test\.m[jt]s$/;
+const HOOK = /^packs\/[\w-]+\/hooks\/[\w-]+\.(?:mjs|mts|py)$/;
 export { changedNames };
 
 const SELF = fileURLToPath(import.meta.url);
@@ -59,11 +65,12 @@ const noopOf = (text, changed, root) => /noop/.test(text) && /updated\(/.test(te
 // it in; the installer's own code (lib/) reaches its tests through their imports and names.
 export const TABLE = [
   { files: /^package\.json$/, why: 'runs every test (its scripts, its dependencies)', tests: () => true },
+  { files: /^docs\//, why: 'a document: the tests that read every file the repo keeps (KWB-131)', tests: (text) => /reads every file the repo keeps/.test(text) },
   { files: /^test\/fresh-tmp\.mjs$/, why: 'the preload: its own test (every test loads it; this one checks what it gives them)', tests: (text) => /test\/fresh-tmp\.mjs itself|The preload itself/.test(text) },
   { files: /^packs\//, why: 'an installed file changed: noop holds every installed file and every change to one listed', tests: noopOf },
   { files: /^packs\/[\w-]+\/(rules|checks|hooks|skills)\//, when: (c, status) => SHAPE(status), why: 'a pack gained or lost a rule, check, hook or skill: the tests that hold the true counts',
     tests: (text) => /true counts/.test(text) },
-  { files: /^packs\/[\w-]+\/(hooks\/[\w-]+\.(mjs|py)|pack\.json)$/, when: (c, status) => SHAPE(status) || c.endsWith('pack.json'), why: 'a hook added, removed or registered: every installed hook has its worktree case',
+  { files: /^packs\/[\w-]+\/(hooks\/[\w-]+\.(mjs|mts|py)|pack\.json)$/, when: (c, status) => SHAPE(status) || c.endsWith('pack.json'), why: 'a hook added, removed or registered: every installed hook has its worktree case',
     tests: (text) => /every installed hook needs a worktree case/.test(text) },
   { files: /^configurations\//, why: 'a configuration: the tests that bring it in', tests: (text, changed, root) => installs(text) && new RegExp(`--config['"]?,?\\s*['"]?${changed.split('/')[1]}\\b|['"]configurations['"]`).test(text) },
   // a module of the CLI: the tests about it (named after it); a test that only runs its command on the way (every install runs
@@ -97,12 +104,17 @@ function references(root, rel) {
   return specs.map((s) => posix(relative(root, resolve(root, dirname(rel), s)))).filter((p) => p && !p.startsWith('..'));
 }
 
+// A module and the files it references; an import of an emitted .mjs reaches its .mts, the file that is edited (W2.6, d-2),
+// and an emitted file is no module of its own (its source is).
 export function graph(root) {
   const files = walk(root);
-  const modules = files.filter((f) => /\.(mjs|js)$/.test(f));
+  const listed = new Set(files);
+  const sourceOf = (f) => emittedFrom(f, (candidate) => listed.has(candidate));
+  const modules = files.filter((f) => MODULE.test(f) && !sourceOf(f));
   const importers = new Map(); // file → [modules that reference it]
   for (const m of modules) {
-    for (const ref of references(root, m)) {
+    for (const named of references(root, m)) {
+      const ref = sourceOf(named) ?? named;
       const targets = files.filter((f) => f === ref || (ref !== '' && f.startsWith(`${ref.replace(/\/$/, '')}/`)));
       for (const t of targets) importers.set(t, [...(importers.get(t) ?? []), m]);
     }
@@ -112,12 +124,12 @@ export function graph(root) {
 
 // changed: repo-relative paths; status: { path: 'A' | 'M' | 'D' | 'R' } from git (an untracked file is 'A'). Returns { chosen: Map(test → [reasons]), uncovered: [paths], tests: [all test files] }.
 export function choose(root, changed, g = graph(root), status = {}, fnNames = {}) {
-  const tests = g.files.filter((f) => /^test\/.*\.test\.mjs$/.test(f)).sort();
+  const tests = g.files.filter((f) => TEST.test(f)).sort();
   const text = Object.fromEntries(tests.map((t) => [t, readFileSync(join(root, t), 'utf8')]));
   const chosen = new Map();
   const add = (t, why) => { if (!chosen.has(t)) chosen.set(t, []); if (!chosen.get(t).includes(why)) chosen.get(t).push(why); };
   const uncovered = [];
-  const helpers = g.files.filter((f) => /^test\/.*\.mjs$/.test(f) && !/\.test\.mjs$/.test(f));
+  const helpers = g.files.filter((f) => /^test\/.*\.m[jt]s$/.test(f) && !TEST.test(f));
   const helperText = Object.fromEntries(helpers.map((h) => [h, readFileSync(join(root, h), 'utf8')]));
   const importsOf = (t) => new Set([...g.importers.entries()].filter(([, by]) => by.includes(t)).map(([f]) => f));
   const namesIt = (text, c) => { const b = c.split('/').pop(); return !GENERIC.has(b) && b.length > 5 && new RegExp(`['"\`]${b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"\`]`).test(text); };
@@ -168,7 +180,7 @@ const git = (root, ...a) => spawnSync('git', ['-C', root, ...a], { encoding: 'ut
 
 // The hooks a change must prove with their own selftests (KWB-166): a changed hook, and every hook that imports a changed lib.
 export function selftestsOf(root, changed, g = graph(root)) {
-  const isHook = (f) => /^packs\/[\w-]+\/hooks\/[\w-]+\.(mjs|py)$/.test(f);
+  const isHook = (f) => HOOK.test(f);
   const hooks = new Set(changed.filter(isHook));
   for (const c of changed.filter((f) => /^packs\/[\w-]+\/hooks\/lib\//.test(f))) {
     const seen = new Set([c]); const queue = [c];
@@ -186,7 +198,7 @@ export function proveHooks(root, hooks, concurrency = 4) {
   mkdirSync(dir, { recursive: true });
   for (const pack of ['base', ...new Set(hooks.map((h) => h.split('/')[1]))]) cpSync(join(root, 'packs', pack, 'hooks'), dir, { recursive: true });
   const run = (h) => new Promise((done) => {
-    const file = join(dir, basename(h));
+    const file = join(dir, basename(h).replace(/\.mts$/, '.mjs'));   // a converted hook is proved as projects run it: emitted (d-4)
     const child = spawn(h.endsWith('.py') ? 'python3' : process.execPath, [file, '--selftest'], { cwd: dirname(dir), env: process.env });
     let out = '';
     child.stdout.on('data', (d) => { out += d; }); child.stderr.on('data', (d) => { out += d; });
