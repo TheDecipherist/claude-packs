@@ -3,8 +3,7 @@
 // The install is the subject here: a first install reads where the source is, so each test installs on purpose.
 import { assert, cli, execFileSync, existsSync, hookRun, join, mkdirSync, projectWith, readFileSync, run, test, writeFileSync } from '../kit-cli.mts';
 
-interface Folder { path: string; purpose?: string }
-interface Layout { folders: Record<string, Folder>; concepts: Record<string, string[]>; followFolders?: unknown }
+import type { Layout, LayoutFolder as Folder } from '../../packs/base/hooks/lib/types.d.mts';
 
 function repo(files: Readonly<Record<string, string>>): string {
   const dir = projectWith(files, 'follow-');

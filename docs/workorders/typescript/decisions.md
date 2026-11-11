@@ -167,3 +167,11 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
   project to the hook table, where the split comes in with the table and switches on with it.
 - Chosen: keep it, `role: recorder`; the split is W8.1's, with its migration and a test that an updated audio project still records.
 - Why: a law must never stop silently in existing projects (CLAUDE.md, "What switches on").
+
+## d-26 The order's own prompt and steps keep the user's words {#d-26}
+- Question: W5 asks for the whole suite green, and no-personal-name finds the user's name in this order's PROMPT.md (the publish
+  yes, W12's authorisation, and the writing skill's name) and workorder.md (the writing skill's name).
+- Options: rewrite the two files; leave exactly these two out of the name check.
+- Chosen: leave them out (test/repo-readers.mts `USERS_OWN`); the run's own records (progress, decisions, briefs) are fixed instead.
+- Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
+  the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.

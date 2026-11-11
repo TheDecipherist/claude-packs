@@ -1,12 +1,11 @@
 // planner W3: a work order's install block (a ```claude-packs fence) is what `init --from` and `new --from` install, so the order is
 // the one source of a project's set-up. Its keys are the kit's own; an unknown one is refused by name and nothing is installed.
 import { assert, cli, existsSync, fresh, git, join, readFileSync, test, writeFileSync } from '../kit-cli.mts';
+import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
 import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+import { lockOf } from '../fixtures/installs.mts';
 
-interface Layout { configuration?: string; enable?: string[]; commands?: { test?: string }; looks?: { name: string }[] }
-interface Lock { packs: string[] }
-const layoutOf = (dir: string): Layout => parseJson<Layout>(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) ?? {};
-const lockOf = (dir: string): Lock => parseJson<Lock>(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8')) ?? { packs: [] };
+const layoutOf = readLayout;
 const group = (text: string, re: RegExp): string => text.match(re)?.[1] ?? '';
 
 // An order holding `block` as its install block, written to a scratch file.
@@ -26,7 +25,7 @@ for (const template of ['generic', 'plugin', 'rebuild']) {
     assert.equal(strict.status, 0, strict.stdout);
     const text = readFileSync(join(dir, 'docs/workorders/o/workorder.md'), 'utf8');
     assert.equal(layoutOf(dir).configuration, group(text, /^configuration: (\S+)$/m));
-    for (const pack of group(text, /^packs: (.*)$/m).split(',').map((p) => p.trim())) assert.ok(lockOf(dir).packs.includes(pack) || pack === 'base', pack);
+    for (const pack of group(text, /^packs: (.*)$/m).split(',').map((p) => p.trim())) assert.ok(lockOf(dir).packs?.includes(pack) || pack === 'base', pack);
   });
 }
 

@@ -1,18 +1,17 @@
 // 0.21.0: if a person makes something for their employer's internals, it is easy to make a repo and share it with their team.
 import { CLI, assert, existsSync, fresh, git, hookRun, join, lessonWrite, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
 import type { Spawned } from '../kit-cli.mts';
-import { fixture } from '../fixtures/installs.mts';
+import { fixture, lockOf } from '../fixtures/installs.mts';
 import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
+import type { Lock } from '../../packs/base/hooks/lib/types.d.mts';
 
-interface Lock { packs: string[]; sources?: Record<string, { url: string; commit: string }> }
 interface Manifest { author?: string; hooks?: unknown }
-interface Layout { enable?: string[] }
 
 const env = (): NodeJS.ProcessEnv => ({ ...process.env, CLAUDE_PACKS_CACHE: join(process.env.TMPDIR ?? '', 'pack-cache') });
 const kit = (dir: string, ...a: string[]): Spawned => spawnSync('node', [CLI, ...a, '--dir', dir], { encoding: 'utf8', env: env() });
-const lockOf = (dir: string): Lock => parseJson<Lock>(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8')) ?? { packs: [] };
 const manifestOf = (file: string): Manifest => parseJson<Manifest>(readFileSync(file, 'utf8')) ?? {};
-const sourceOf = (dir: string, name: string): { url: string; commit: string } => {
+const sourceOf = (dir: string, name: string): NonNullable<Lock['sources']>[string] => {
   const s = lockOf(dir).sources?.[name];
   assert.ok(s, `${name} has a source in the lock`);
   return s;
@@ -43,9 +42,9 @@ test('new-pack makes a repository that add --from installs, in any configuration
   assert.equal(refused.status, 2);
   assert.match(refused.stderr, /acme-internal-example/);
   const lock = lockOf(project);
-  assert.ok(lock.packs.includes(name));
+  assert.ok(lock.packs?.includes(name));
   assert.equal(sourceOf(project, name).url, url);
-  assert.match(sourceOf(project, name).commit, /^[0-9a-f]{40}$/);
+  assert.match(sourceOf(project, name).commit ?? '', /^[0-9a-f]{40}$/);
 });
 
 test('a custom hook stays off until the project enables it', () => {
@@ -61,7 +60,7 @@ test('a custom hook stays off until the project enables it', () => {
   assert.ok(!existsSync(join(project, '.claude/hooks/acme-guard.mjs')), 'held back');
   assert.doesNotMatch(readFileSync(join(project, '.claude/settings.json'), 'utf8'), /acme-guard/);
   const layoutFile = join(project, '.claude/layout.json');
-  const layout = parseJson<Layout>(readFileSync(layoutFile, 'utf8')) ?? {};
+  const layout = readLayout(project);
   writeFileSync(layoutFile, JSON.stringify({ ...layout, enable: [...(layout.enable ?? []), 'hooks/acme-guard.mjs'] }, null, 2));
   assert.equal(kit(project, 'update').status, 0);
   assert.ok(existsSync(join(project, '.claude/hooks/acme-guard.mjs')), 'on once named');

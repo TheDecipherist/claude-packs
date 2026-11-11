@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { put } from '../../../packs/base/hooks/lib/files.mts';
 import { readJson } from '../../../packs/base/hooks/lib/json.mts';
 import { withLayout } from '../../fixtures/installs.mts';
-import { KIT, assert, cli, existsSync, git, mkdirSync, readFileSync, test, writeFileSync } from '../../kit-cli.mts';
+import { KIT, assert, cli, existsSync, git, mkdirSync, profile, readFileSync, test, writeFileSync } from '../../kit-cli.mts';
 import { extraFixture, fixture } from '../hook-rig.mts';
 import type { FixtureName } from '../hook-rig.mts';
 
@@ -95,7 +95,7 @@ test('doctor: a node web project with UI code and no hover gate is a PROBLEM too
 });
 
 test('the Stellix profile declares its hover gate', () => {
-  const p = readJson<{ gates?: { hover?: string } }>(join(KIT, 'profiles/stellix.layout.json'), {});
+  const p = readJson<{ gates?: { hover?: string } }>(profile('stellix'), {});
   assert.equal(p?.gates?.hover, 'bash tools/gates/hover_gate.sh');
 });
 

@@ -104,3 +104,18 @@ export const installedCase = (hook: string) => async (checkouts: Checkouts): Pro
   const module: unknown = await import(pathToFileURL(join(checkouts.here, '.claude/hooks', hook)).href);
   caseFrom(hook, worktreeCaseOf(module, hook))(checkouts);
 };
+
+export const APVTS = 'void Filter::prepare (juce::AudioProcessorValueTreeState& apvts) { cutoff = apvts.getRawParameterValue ("cutoff"); }\n';
+
+/** lesson-checks' second worktree step: the worktree's branch moves the dsp concept into src/engine, and its own layout.json
+ *  decides, not main's (the hook test and the worktree table both run it). */
+export function movedConceptCase({ here, wt }: Checkouts): void {
+  withLayout(wt, (layout) => {
+    const concepts = (layout['concepts'] ?? {}) as Record<string, string[]>;
+    return { concepts: { ...concepts, dsp: [...(concepts['dsp'] ?? []), 'src/engine/**'] } };
+  });
+  assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), APVTS), 2);
+  assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/engine/Filter.cpp'), APVTS), 2);
+  assert.equal(fire(here, 'lesson-checks.mjs', join(here, 'src/engine/Filter.cpp'), APVTS), 0);
+  assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), 'void Filter::setParams (const P& p) noexcept {}\n'), 0);
+}

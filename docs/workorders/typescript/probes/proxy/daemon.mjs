@@ -1,7 +1,7 @@
 // A resident runner: the Bash-group hooks loaded once, each event answered over a unix socket.
 import { createServer } from 'node:net';
 import { unlinkSync } from 'node:fs';
-const KIT = '/Users/tim.clausen/projects/claude-packs/.claude/hooks/';
+const KIT = new URL('../../../../../.claude/hooks/', import.meta.url).href;   // the kit's own install, from this probe's folder
 const names = ['git-guard', 'kit-fresh', 'suite-once', 'no-find', 'repo-litter', 'look-gate'];
 const hooks = await Promise.all(names.map((n) => import(`${KIT}${n}.mjs`).then((m) => m.hook)));
 const sock = process.argv[2];

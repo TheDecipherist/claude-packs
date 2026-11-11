@@ -1,9 +1,9 @@
 // End-to-end tests of the CLI against throwaway projects.
-import { appendFileSync, assert, cli, existsSync, fresh, hookStatus, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from '../kit-cli.mts';
+import { appendFileSync, assert, cli, existsSync, fresh, hookStatus, join, mkdirSync, profile, readFileSync, readdirSync, run, test, writeFileSync } from '../kit-cli.mts';
 import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+import type { Layout } from '../../packs/base/hooks/lib/types.d.mts';
 
 interface Settings { model?: string; hooks: { Stop: { hooks: { command: string }[] }[] } }
-interface Layout { folders: Record<string, { path: string }> }
 const project = (): string => fresh('cp-');
 const text = (dir: string, rel: string): string => readFileSync(join(dir, rel), 'utf8');
 const writeTool = (dir: string, p: string): number | null => hookStatus(dir, 'folder-law.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, p), content: 'x' } });
@@ -114,7 +114,7 @@ test('the Stellix profile installs onto the real lib/ layout without touching ho
   const dir = project();
   for (const d of ['lib/app/src', 'lib/world/src', 'lib/engines/src/tabula', 'lib/painter/src', '.claude/rules']) mkdirSync(join(dir, d), { recursive: true });
   writeFileSync(join(dir, '.claude', 'rules', 'world.md'), '# house world rule\n');
-  run(dir, 'init', 'audio-core', 'gpu-painter', 'stellix', '--profile', 'stellix');
+  run(dir, 'init', 'audio-core', 'gpu-painter', 'stellix', '--profile', profile('stellix'));
   assert.ok(!existsSync(join(dir, 'src')), 'no default src/ folder in a complete layout');
   assert.equal(text(dir, '.claude/rules/world.md'), '# house world rule\n');
   assert.match(text(dir, '.claude/rules/world-fp-determinism.md'), /"lib\/world\/\*\*"/);

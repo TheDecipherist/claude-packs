@@ -2,11 +2,11 @@
 // planner-skills generator emits one project-layout skill body per configuration, from its layout template (KWB-35).
 import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, test } from '../kit-cli.mts';
 import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+import type { Lock } from '../../packs/base/hooks/lib/types.d.mts';
 
 interface Folder { path: string; planned?: boolean }
 interface Config { layout: { folders: Record<string, Folder> }; preamble: { never: string[] } }
 interface PackJson { hooks?: unknown }
-interface Lock { packs: string[] }
 
 const CONFIGS = readdirSync(join(KIT, 'configurations')).sort();
 const config = (name: string): Config => {

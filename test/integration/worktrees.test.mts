@@ -6,9 +6,10 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, caseFrom, fire, fireAs, installedCase, project, put } from '../worktree-rig.mts';
+import { APVTS, CLI, caseFrom, fire, fireAs, installedCase, movedConceptCase, project, put } from '../worktree-rig.mts';
 import type { Checkouts } from '../worktree-rig.mts';
 import { readJson } from '../../packs/base/hooks/lib/json.mts';
+import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
 import { COMMAND_CASES } from '../worktree-cases-commands.mts';
 import { PACK_CASES } from '../worktree-cases-packs.mts';
 import { worktreeCase as CODE_SHAPE } from '../../packs/base/hooks/code-shape.mts';
@@ -24,12 +25,8 @@ import { worktreeCase as PLACEMENT_LAW } from '../../packs/base/hooks/placement-
 import { worktreeCase as SECRETS_GUARD } from '../../packs/base/hooks/secrets-guard.mts';
 import { worktreeCase as SHAPE_LAW } from '../../packs/base/hooks/shape-law.mts';
 
-/** A layout as the tests here read it: its folders, concepts and guards by name. */
-interface Layout { folders: Record<string, Record<string, unknown>>; concepts: Record<string, string[]>; guards?: unknown; enable?: string[] }
-const readLayout = (dir: string): Layout => JSON.parse(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) as Layout;
 
 const PARAMS = (...ids: string[]): string => ids.map((id) => `auto p_${id} = juce::ParameterID { "${id}", 1 };`).join('\n') + '\n';
-const APVTS = 'void Filter::prepare (juce::AudioProcessorValueTreeState& apvts) { cutoff = apvts.getRawParameterValue ("cutoff"); }\n';
 const RT_BAD = 'void Voice::processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer& m) { auto* x = new float[64]; }\n';
 
 // making, making-check (0.9.0): a manifest with one many concept.
@@ -56,17 +53,8 @@ const CASES: Record<string, (checkouts: Checkouts) => void | Promise<void>> = {
   'placement-law.mjs': caseFrom('placement-law.mjs', PLACEMENT_LAW),
   'shape-law.mjs': caseFrom('shape-law.mjs', SHAPE_LAW),
   'lesson-checks.mjs': (checkouts) => {
-    caseFrom('lesson-checks.mjs', LESSON_CHECKS)(checkouts);   // the worktree's own check; the step below moves a concept in its layout
-    const { here, wt } = checkouts;
-    // The worktree's branch moved the dsp concept into src/engine: its own layout.json decides, not main's.
-    const layoutFile = join(wt, '.claude/layout.json');
-    const layout = readLayout(wt);
-    layout.concepts.dsp = [...(layout.concepts.dsp ?? []), 'src/engine/**'];
-    writeFileSync(layoutFile, JSON.stringify(layout, null, 2));
-    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), APVTS), 2);
-    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/engine/Filter.cpp'), APVTS), 2);
-    assert.equal(fire(here, 'lesson-checks.mjs', join(here, 'src/engine/Filter.cpp'), APVTS), 0);
-    assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), 'void Filter::setParams (const P& p) noexcept {}\n'), 0);
+    caseFrom('lesson-checks.mjs', LESSON_CHECKS)(checkouts);   // the worktree's own check, then a concept moved in its layout
+    movedConceptCase(checkouts);
   },
   'frozen-files.mjs': installedCase('frozen-files.mjs'),
   'spec-lock.mjs': installedCase('spec-lock.mjs'),

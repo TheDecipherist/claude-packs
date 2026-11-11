@@ -22,10 +22,6 @@
       "path": "global",
       "purpose": "the global part: latest-versions, gnu-shell, shell-traps (global add)"
     },
-    "profiles": {
-      "path": "profiles",
-      "purpose": "tailored seed layouts shipped in the package"
-    },
     "prompts": {
       "path": "prompts",
       "purpose": "prompts the command prints (survey.md, scan-review.md)"

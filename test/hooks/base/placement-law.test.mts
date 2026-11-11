@@ -2,7 +2,7 @@
 import { join } from 'node:path';
 import { put } from '../../../packs/base/hooks/lib/files.mts';
 import { write } from '../../fixtures/installs.mts';
-import { assert, existsSync, execFileSync, fresh, hookRun, mkdirSync, readFileSync, run, spawnSync, test, writeFileSync, cli } from '../../kit-cli.mts';
+import { assert, existsSync, execFileSync, fresh, hookRun, mkdirSync, profile, readFileSync, run, spawnSync, test, writeFileSync, cli } from '../../kit-cli.mts';
 import { fixture, holdsTheContract } from '../hook-rig.mts';
 import { routeProject, unrefused } from '../routes.mts';
 
@@ -64,7 +64,7 @@ test('the Sub37 profile fits the template tree: laws, kinds and the id lock', ()
   seed('src/generated/Sub37Params.h', '{ "osc1_wave", "Osc 1 Wave", "float", 0.0f, 1.0f, 0.333f, "", "[MAN p.25]" },\n');
   seed('panel/bindings.json', '{ "bindings": { "cursor": { "kind": "select" } } }\n');
   seed('tools/sync_probe.cpp', 'int main() {}\n');
-  run(dir, 'init', 'audio-core', '--profile', 'sub37');
+  run(dir, 'init', 'audio-core', '--profile', profile('sub37'));
   assert.match(cli(dir, 'doctor').stdout, /^1 problem\(s\)$/m, 'only the rules whose tests the project has yet to write');
   for (const d of ['src/app', 'src/audio', 'src/dsp', 'tests']) assert.equal(existsSync(join(dir, d)), false, `no default ${d}/`);
 

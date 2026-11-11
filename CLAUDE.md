@@ -46,7 +46,7 @@ Never run `node --test` without the `fresh-tmp.mts` preload: tests then share th
 - `hook-log.mjs`: each hook does `export const hook = main` and ends with `if (isMain(import.meta.url)) process.exit(--selftest ? selftest() : await asHook('<name>', main))`. `settings.json` runs all node hooks of one entry in one process via `run-hooks.mjs`, which calls each `hook(text)` and logs timing to `.claude/hooks.log`. `doctor` fails a hook whose median is over 500 ms.
 - `selftest.mjs`: `scratchProject`, `runHook`, `verdicts`: a selftest builds a throwaway project and runs the hook through the runner, as Claude Code would. Prove hooks this way, never by pasting payloads into a shell command.
 
-**`.claude/layout.json` (in the target) is the single source of truth.** `folders` name paths; `concepts` map to folder names or globs; `kinds` say what goes where (CLAUDE.md block + `placement-law`). Rules declare `# concepts:` in frontmatter and get `paths:` generated. Keys the project owns (`files`, `protected`, `writeOnce`, `disable`, `enable`, `commands`, `siblings`, `guards`, `maxFileLines`, `paramIds`, …) survive every update. `"complete": true` layouts (`profiles/*.layout.json`, via `--profile`) get no default pack folders.
+**`.claude/layout.json` (in the target) is the single source of truth.** `folders` name paths; `concepts` map to folder names or globs; `kinds` say what goes where (CLAUDE.md block + `placement-law`). Rules declare `# concepts:` in frontmatter and get `paths:` generated. Keys the project owns (`files`, `protected`, `writeOnce`, `disable`, `enable`, `commands`, `siblings`, `guards`, `maxFileLines`, `paramIds`, …) survive every update. `"complete": true` layouts (a seed file given to `--layout` or `--profile`; the tests' two are in `test/fixtures/profiles/`) get no default pack folders.
 
 **What switches on** (`lib/switches.mjs`): `init`/`add` bring a pack's hooks and checks except its `optIn` ones. `update` brings a hook or check *new* to the project only if `layout.json` `"enable"` names it. Never make a new law silently switch on in existing projects.
 
@@ -99,7 +99,6 @@ Always do:
   - `global/`: the global part: latest-versions, gnu-shell, shell-traps (global add)
   - `lib/`: the command's library: sync, settings, layout, doctor, scan, suggest, fix, the kit lock
   - `packs/`: the packs a project installs: rules, checks, hooks, skills, tools (list shows them)
-  - `profiles/`: tailored seed layouts shipped in the package
   - `prompts/`: prompts the command prints (survey.md, scan-review.md)
   - `proxy/`: the Go hook proxy's client (the one hand-written non-TypeScript source) and its tests
   - `scripts/`: the kit's own development scripts (test-changed.mjs); never shipped

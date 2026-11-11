@@ -34,5 +34,5 @@ test('gh with a token login must name the token and have it set; a cli login or 
   assert.match(ghLaw('gh pr list', 'gh pr list', token, {}, none) ?? '', /Every `gh` names the token.*NOTE/);
   assert.equal(ghLaw('GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh pr list', 'gh pr list', token, { PERSONAL_GITHUB_TOKEN: 't' }, none), null);
   assert.equal(ghLaw('source ~/.env && GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh x', 'gh x', token, {}, none), null, 'a source may set it');
-  assert.match(ghLaw('GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh x', 'gh x', token, {}, () => 'tim') ?? '', /is not set here.*gh is logged in as tim/);
+  assert.match(ghLaw('GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh x', 'gh x', token, {}, () => 'octocat') ?? '', /is not set here.*gh is logged in as octocat/);
 });

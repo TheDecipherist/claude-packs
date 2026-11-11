@@ -4,10 +4,11 @@
 // them and doctor prints the one installed (KWB-31).
 import { assert, cli, existsSync, fresh, join, readFileSync, run, test, writeFileSync } from '../kit-cli.mts';
 import { parseJson } from '../../packs/base/hooks/lib/json.mts';
+import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
+import type { Layout } from '../../packs/base/hooks/lib/types.d.mts';
 
-type Layout = Record<string, unknown> & { configuration?: string };
 const project = (): string => fresh('cfg-');
-const layoutOf = (dir: string): Layout => parseJson<Layout>(readFileSync(join(dir, '.claude/layout.json'), 'utf8')) ?? {};
+const layoutOf = (dir: string): Layout => readLayout(dir);
 const lockOf = (dir: string): { packs: string[] } => parseJson<{ packs: string[] }>(readFileSync(join(dir, '.claude/claude-packs.lock.json'), 'utf8')) ?? { packs: [] };
 const SYNTH_LINE = 'Put drawing code in audio or world folders';
 

@@ -102,9 +102,13 @@ export function addedRawJson(root: string, base = 'HEAD'): string[] {
 
 // no-personal-name: the kit is for everyone; nothing it ships or keeps in its repo names one person. It reads every file the repo keeps.
 const NAME = new RegExp(['\\b[Tt]' + 'im\\b', 'Clau' + 'sen', 'ti' + 'ms-', 'ti' + 'm-writing', 'tim_' + 'carter'].join('|'));
+// A work order's prompt and steps are the user's own instructions, with the user's own yes for a publish: a run never rewrites
+// them (d-26). Never shipped: docs/ is not in the package.
+// lib/settings keeps one old hook name, so a project that still runs it can be moved on (the check's one exception since it began).
+const USERS_OWN = new Set(['docs/workorders/typescript/PROMPT.md', 'docs/workorders/typescript/workorder.md', 'lib/settings.mts']);
 export function personalNames(root: string, files: readonly string[] = keptFiles(root)): string[] {
   const hits: string[] = [];
-  for (const f of files.filter((name) => !name.startsWith('test/fixtures/'))) {   // real projects' files, kept verbatim and never shipped
+  for (const f of files.filter((name) => !name.startsWith('test/fixtures/') && !USERS_OWN.has(name))) {   // fixtures: real projects' files, kept verbatim and never shipped
     if (NAME.test(f)) hits.push(f);
     const text = readText(join(root, f));
     if (text === null) continue;

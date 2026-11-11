@@ -1,7 +1,9 @@
 // Worker-thread cost: start time and memory, bare and with every installed hook imported.
 import { Worker } from 'node:worker_threads';
 import { readdirSync } from 'node:fs';
-const DIR = '/Users/tim.clausen/projects/bandwarp/.claude/hooks/';
+// the measured project's installed hooks, named by the run: PROBE_HOOKS_DIR=<project>/.claude/hooks/ (W1.5 measured a synth project's)
+const DIR = process.env.PROBE_HOOKS_DIR ?? '';
+if (!DIR.endsWith('/')) throw new Error('set PROBE_HOOKS_DIR to a project\'s .claude/hooks/ folder, with its trailing slash');
 const skip = new Set(['idle-wake.mjs', 'build-sweep.mjs']);
 const files = readdirSync(DIR).filter((f) => f.endsWith('.mjs') && !skip.has(f)).map((f) => DIR + f);
 const mb = () => Math.round(process.memoryUsage().rss / 1048576);

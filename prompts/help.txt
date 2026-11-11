@@ -2,7 +2,7 @@ usage: npx --no-install @thedecipherist/claude-packs <command> [options]
 
   new <name>         a new project in <dir>/<name>: the house files (CLAUDE.md, build.md, bugs.md,
                      workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed
-                     --packs <a,b>     the packs (default base alone); --profile <name>, --config <name> as for init
+                     --packs <a,b>     the packs (default base alone); --profile <file>, --config <name> as for init
                      --from <workorder.md>  install from the order's install block, as init --from does
                      --template <t>    and its work order, docs/workorders/<name>/, from that template
   workorder <name>   a work order in docs/workorders/<name>: the steps, the prompt that runs them with nobody
@@ -19,7 +19,7 @@ usage: npx --no-install @thedecipherist/claude-packs <command> [options]
                      and create the layout folders
                      --config <name>   the configuration (configs lists them; stored in layout.json
                                        "configuration"); with no packs named, the ones it takes by default
-                     --profile <name>  start from a tailored layout shipped in the package (e.g. stellix)
+                     --profile <file>  the same as --layout: start from a seed layout file
                      --layout <file>   start from your own layout.json
                      --auto            the configuration and packs suggest finds, so nobody picks them by hand
                      --from <workorder.md>  the order's install block (its claude-packs fence): its configuration

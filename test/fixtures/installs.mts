@@ -10,6 +10,7 @@ import { ensureDir, isDir, put, readText, scratchDir, walk } from '../../packs/b
 import { gitRun } from '../../packs/base/hooks/lib/git-run.mts';
 import { readJson, toJson, writeJson } from '../../packs/base/hooks/lib/json.mts';
 import { bashOf, writeOf } from '../../packs/base/hooks/lib/selftest.mts';
+import type { Lock } from '../../packs/base/hooks/lib/types.d.mts';
 import { KIT, profile, run } from '../kit-cli.mts';
 
 /** A Write and a Bash payload as Claude Code sends them (selftest's builders, under the names the tests use). */
@@ -132,8 +133,8 @@ export function withLayout(dir: string, patch: Record<string, unknown> | ((layou
   writeJson(file, { ...layout, ...(typeof patch === 'function' ? patch(layout) : patch) }, { pretty: true });
 }
 
-/** The install's lock: what it holds and at which version. */
-export interface InstallLock { kit?: string; packs?: string[]; files?: Record<string, string>; [key: string]: unknown }
+/** The install's lock: what it holds and at which version; every field may be missing, since a folder may hold none. */
+export type InstallLock = Partial<Lock>;
 export const lockOf = (dir: string): InstallLock => readJson<InstallLock>(join(dir, '.claude/claude-packs.lock.json'), {}) ?? {};
 
 /** git in a scratch repo, with the one identity tests commit as; what it printed, trimmed. A failure throws with git's own words. */
