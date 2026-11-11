@@ -35,7 +35,7 @@ export function writesOf(payload, base = process.cwd()) {
     // and the file is judged once, from what it was to what the last one leaves (KWB-13: each was read against the file on disk, and
     // the two different results were judged as two copies of the file)
     const byPath = new Map();
-    for (const w of shellWrites(input.command ?? '', payload.cwd ?? base)) {
+    for (const w of shellWrites(input.command ?? '', payload.cwd ?? base, process.env)) {
       const prev = byPath.get(w.path);
       const r = prev ? (prev.after === null ? { after: null } : afterText(w, prev.after)) : afterText(w);
       byPath.set(w.path, prev ? { ...prev, op: w.op === 'delete' ? 'delete' : prev.op, after: r.after } : { path: w.path, op: w.op, ...r });

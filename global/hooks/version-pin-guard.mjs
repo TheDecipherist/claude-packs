@@ -210,7 +210,7 @@ function main(payload) {
   if (payload.tool_name === 'Bash') {
     pins = pinsFromCommand(input.command ?? '');
     where = installDir(input.command ?? '', payload.cwd ?? process.cwd());
-    for (const w of shellWrites(input.command ?? '', where)) {
+    for (const w of shellWrites(input.command ?? '', where, process.env)) {
       const extract = extractorFor(w.path);
       if (!extract) continue;
       const { before, after } = afterText(w);
