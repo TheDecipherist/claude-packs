@@ -30,21 +30,25 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/frozen-files.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spec-lock.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/chart-first.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]
@@ -55,11 +59,13 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stage-guard.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-guard.mjs\"",
+            "role": "judge",
             "timeout": 15
           }
         ]
@@ -70,6 +76,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
+            "role": "judge",
             "timeout": 15
           }
         ]
@@ -82,6 +89,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
+            "role": "judge",
             "timeout": 15
           }
         ]
@@ -93,6 +101,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.mjs\"",
+            "role": "judge",
             "asyncRewake": true,
             "timeout": 1000
           }
@@ -106,6 +115,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/user-asks.mjs\"",
+            "role": "judge",
             "timeout": 15
           }
         ]
@@ -115,6 +125,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
+            "role": "recorder",
             "timeout": 15
           }
         ]
@@ -126,6 +137,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
+            "role": "recorder",
             "timeout": 15
           }
         ]

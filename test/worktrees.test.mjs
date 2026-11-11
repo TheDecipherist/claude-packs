@@ -6,7 +6,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { CLI, PIN_GUARD, bash, caseFrom, fire, fireAs, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
+import { CLI, PIN_GUARD, bash, caseFrom, fire, fireAs, installedCase, landFromWorktree, project, put, stellix } from './worktree-rig.mjs';
 import { readJson } from '../packs/base/hooks/lib/json.mjs';
 import { COMMAND_CASES } from './worktree-cases-commands.mjs';
 import { PACK_CASES } from './worktree-cases-packs.mjs';
@@ -71,22 +71,8 @@ const CASES = {
     assert.equal(fire(here, 'lesson-checks.mjs', join(here, 'src/synth/Filter.cpp'), APVTS), 0);
     assert.equal(fire(here, 'lesson-checks.mjs', join(wt, 'src/dsp/Filter.cpp'), 'void Filter::setParams (const P& p) noexcept {}\n'), 0);
   },
-  'frozen-files.mjs': ({ here, wt }) => {
-    const env = { ...process.env, CLAUDE_PROJECT_DIR: here };
-    execFileSync('node', [join(here, '.claude/tools/freeze.mjs'), 'on', 'bug 7', 'tests/**'], { env, stdio: 'ignore' });
-    assert.equal(fire(here, 'frozen-files.mjs', join(wt, 'tests/svf_test.cpp')), 2);
-    assert.equal(fire(here, 'frozen-files.mjs', join(wt, 'src/dsp/Svf.cpp')), 0);
-    execFileSync('node', [join(here, '.claude/tools/freeze.mjs'), 'off'], { env, stdio: 'ignore' });
-  },
-  'spec-lock.mjs': ({ here, wt }) => {
-    const lock = (...a) => execFileSync('node', [join(here, '.claude/hooks/spec-lock.mjs'), ...a], { env: { ...process.env, CLAUDE_PROJECT_DIR: here }, stdio: 'ignore' });
-    lock('lock', 'build running');
-    assert.equal(fire(here, 'spec-lock.mjs', join(wt, 'docs/stellix-spec.md')), 2);
-    assert.equal(fire(here, 'spec-lock.mjs', join(wt, 'src/dsp/Svf.cpp')), 0);
-    assert.equal(bash(here, 'spec-lock.mjs', `sed -i '' s/a/b/ ${join(wt, 'spec/plan.md')}`), 2);
-    assert.equal(bash(here, 'spec-lock.mjs', `sed -i '' s/a/b/ ${join(wt, 'src/dsp/Svf.cpp')}`), 0);
-    lock('unlock');
-  },
+  'frozen-files.mjs': installedCase('frozen-files.mjs'),
+  'spec-lock.mjs': installedCase('spec-lock.mjs'),
   'secrets-guard.mjs': caseFrom('secrets-guard.mjs', SECRETS_GUARD),
   // 1.8.0: a call in the worktree is that agent's heartbeat, written in the main checkout where the status reads it, never
   // into the worktree; a call in the main checkout is the lead's
@@ -100,10 +86,7 @@ const CASES = {
     assert.equal(fireAs(here, 'heartbeat.mjs', { hook_event_name: 'PostToolUse', cwd: here, tool_name: 'Read', tool_input: { file_path: join(here, 'CLAUDE.md') } }).status, 0);
     assert.equal(beat('lead')?.event, 'post');
   },
-  'stage-guard.mjs': ({ here, wt }) => {
-    assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add -A`), 2);
-    assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add src/dsp/Svf.cpp`), 0);
-  },
+  'stage-guard.mjs': installedCase('stage-guard.mjs'),
   'git-guard.mjs': caseFrom('git-guard.mjs', (await import('../packs/base/hooks/git-guard.mjs')).worktreeCase),
   'realtime-guard.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'realtime-guard.mjs', join(wt, 'src/audio/Voice.cpp'), RT_BAD), 2);
@@ -143,7 +126,7 @@ const CASES = {
   },
 };
 
-test('every hook judges a worktree file against the worktree, inside a real git worktree', () => {
+test('every hook judges a worktree file against the worktree, inside a real git worktree', async () => {
   const p = project(['audio-core', 'gpu-painter', 'stellix', 'reverse-engineering'], (dir) => {
     const lf = join(dir, '.claude/layout.json');
     const layout = JSON.parse(readFileSync(lf, 'utf8'));
@@ -159,7 +142,7 @@ test('every hook judges a worktree file against the worktree, inside a real git 
   assert.deepEqual(installed, Object.keys(CASES).sort(), 'every installed hook needs a worktree case here');
   const failed = [];
   for (const [hook, check] of Object.entries(CASES)) {
-    try { check(p); } catch (e) { failed.push(`${hook}: ${e.message.split('\n')[0]}`); }
+    try { await check(p); } catch (e) { failed.push(`${hook}: ${e.message.split('\n')[0]}`); }
   }
   assert.deepEqual(failed, []);
 });

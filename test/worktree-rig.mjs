@@ -5,7 +5,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const CLI = fileURLToPath(new URL('../bin/claude-packs.mjs', import.meta.url));
 export const PIN_GUARD = fileURLToPath(new URL('../global/hooks/version-pin-guard.mjs', import.meta.url));
@@ -60,3 +60,10 @@ export const caseFrom = (hook, worktreeCase) => ({ here, wt }) => {
 };
 export const fire = (here, hook, file, content = '// new\n') => fireAs(here, hook, { tool_name: 'Write', tool_input: { file_path: file, content } }).status;
 export const bash = (here, hook, command) => fireAs(here, hook, { tool_name: 'Bash', tool_input: { command } }).status;
+
+// The same, for a hook of a pack other than base: its module imports the libs beside it as an install merges them, so the
+// worktreeCase is read from the installed copy in the project under test (async: the caller awaits it).
+export const installedCase = (hook) => async (checkouts) => {
+  const { worktreeCase } = await import(pathToFileURL(join(checkouts.here, '.claude/hooks', hook)).href);
+  caseFrom(hook, worktreeCase)(checkouts);
+};
