@@ -12,20 +12,24 @@ import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readJson } from '../hooks/lib/json.mjs';
-import { checkoutVersion, lockVersion, packageVersion } from '../hooks/lib/kit-version.mjs';
-import { bold, COLOURS as C, fitWidth, paintMode, painter } from './statusline-paint.mjs';
-import { refreshRuns, runsSegments } from './statusline-runs.mjs';
-import { contextSegment, modelSegment, sessionOf, usageSegments } from './statusline-session.mjs';
-import { activitySegments, gitSegment, gitState, lastActivity } from './statusline-work.mjs';
+import { isMain } from '../hooks/lib/hook-log.mts';
+import { readJson } from '../hooks/lib/json.mts';
+import { checkoutVersion, lockVersion, packageVersion } from '../hooks/lib/kit-version.mts';
+import { bold, COLOURS as C, fitWidth, paintMode, painter } from './statusline-paint.mts';
+import { refreshRuns, runsSegments } from './statusline-runs.mts';
+import { contextSegment, modelSegment, sessionOf, usageSegments } from './statusline-session.mts';
+import { activitySegments, gitSegment, gitState, lastActivity } from './statusline-work.mts';
+import type { GitState } from './statusline-work.mts';
 
 const SELF = fileURLToPath(import.meta.url);
 const SEPARATOR = ' | ';
 
+type Env = Readonly<Record<string, string | undefined>>;
+
 /** The kit version the project runs (KWB-162, lib/kit-version.mjs): the installed package of the install this tool belongs to
  *  (.claude/tools, two folders up) or of the session's project, its lock where no package is installed; the kit's own checkout
  *  (packs/base/tools) reads its package.json only with no project of its own. */
-export function kitVersion(toolDir, projectDir) {
+export function kitVersion(toolDir: string, projectDir: string | undefined): string | null {
   const install = join(toolDir, '..', '..');
   // the project's own install first, package before lock; the kit checkout's own version last: only with no project, or in the
   // kit itself (KWB-165: before a project's lock, it showed the kit's version for another project's install)
@@ -34,19 +38,28 @@ export function kitVersion(toolDir, projectDir) {
 }
 
 /** Where the RUNS cache lives: the user's cache folder, shared by every project's bar. */
-export const runsCache = (env) => join(env.XDG_CACHE_HOME || join(env.HOME || homedir(), '.cache'), 'claude-packs', 'runs.json');
+export const runsCache = (env: Env): string => join(env.XDG_CACHE_HOME || join(env.HOME || homedir(), '.cache'), 'claude-packs', 'runs.json');
+
+export interface StatusBarOptions {
+  env?: Env;
+  nowMs?: number;
+  toolDir?: string;
+  refresh?: boolean;
+  /** The git state of a folder. */
+  git?: (cwd: string) => GitState;
+}
 
 /** The bar's lines for one render. */
-export function statusBar(raw, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git = gitState } = {}) {
+export function statusBar(raw: string, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git }: StatusBarOptions = {}): string[] {
   const s = sessionOf(raw);
   const mode = paintMode(env);
   const paint = painter(mode);
   const version = kitVersion(toolDir, s.projectDir || env.CLAUDE_PROJECT_DIR);
-  const pinned = readJson(join(env.CLAUDE_CONFIG_DIR || join(env.HOME || homedir(), '.claude'), 'settings.json'))?.model;
+  const pinned = readJson<{ model?: unknown }>(join(env.CLAUDE_CONFIG_DIR || join(env.HOME || homedir(), '.claude'), 'settings.json'))?.model;
   const top = [version ? bold(paint(`claude-packs ${version}`, C.orange), mode) : '', modelSegment(s, typeof pinned === 'string' ? pinned : null, paint, C),
     contextSegment(s, paint, C), ...usageSegments(s, env, paint, C)];
   const cwd = s.cwd || env.CLAUDE_PROJECT_DIR || process.cwd();
-  const second = [gitSegment(git(cwd), paint, C), ...activitySegments(lastActivity(s.transcript), paint, C)];
+  const second = [gitSegment((git ?? ((dir) => gitState(dir, { env })))(cwd), paint, C), ...activitySegments(lastActivity(s.transcript), paint, C)];
   const cache = runsCache(env);
   if (refresh) refreshRuns(cache, nowMs);
   const columns = Number.parseInt(env.COLUMNS ?? '', 10) || 0;
@@ -54,7 +67,7 @@ export function statusBar(raw, { env = process.env, nowMs = Date.now(), toolDir 
     .filter(Boolean).map((line) => fitWidth(line, columns));
 }
 
-if (process.argv[1] === SELF) {
+if (isMain(import.meta.url)) {
   let raw = '';
   try { raw = readFileSync(0, 'utf8'); } catch { /* no stdin: a bar with what it can find */ }
   process.stdout.write(statusBar(raw).join('\n'));

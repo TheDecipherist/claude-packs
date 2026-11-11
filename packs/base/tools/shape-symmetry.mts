@@ -12,45 +12,70 @@
 //   node .claude/tools/shape-symmetry.mjs --selftest
 // The kit's CLI runs the same: `npx --no-install @thedecipherist/claude-packs symmetry run|gen ...`.
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ensureDir, put, readText } from '../hooks/lib/files.mts';
+import { isMain } from '../hooks/lib/hook-log.mts';
+import { parseJson } from '../hooks/lib/json.mts';
 
 const SELF = fileURLToPath(import.meta.url);
 const TIMEOUT_S = 600;
 
-export function readManifest(root) {
-  const file = join(root, 'design', 'shape.json');
-  if (!existsSync(file)) throw new Error(`no design/shape.json in ${root} (every project declares its concepts there: one or many)`);
-  return JSON.parse(readFileSync(file, 'utf8'));
+/** A concept's `symmetry` block: the commands the project declares (types.d.mts types it as a list; it is this object). */
+export interface SymmetryBlock { members?: string; swap?: string; instances?: string; first?: number }
+/** One concept of design/shape.json, as this gate reads it. */
+export interface SymConcept { shape?: string; count?: number; owns?: readonly string[]; symmetry?: SymmetryBlock }
+export interface SymManifest { concepts?: Record<string, SymConcept> }
+/** What `gen` is asked for. */
+export interface GenerateOptions { cmake?: string; list?: boolean }
+type Log = (line: string) => void;
+
+const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+export function readManifest(root: string): SymManifest {
+  const text = readText(join(root, 'design', 'shape.json'));
+  if (text === null) throw new Error(`no design/shape.json in ${root} (every project declares its concepts there: one or many)`);
+  const shape = parseJson<SymManifest>(text);
+  if (shape === null) throw new Error(`design/shape.json in ${root} is not JSON`);
+  return shape;
 }
 
-export const manyConcepts = (shape) => Object.entries(shape.concepts ?? {}).filter(([, c]) => c.shape === 'many').map(([name]) => name);
-export const testName = (concept) => `shape_symmetry.${concept}`;
+export const manyConcepts = (shape: SymManifest): string[] => Object.entries(shape.concepts ?? {}).filter(([, c]) => c.shape === 'many').map(([name]) => name);
+export const testName = (concept: string): string => `shape_symmetry.${concept}`;
 
-const sh = (cmd, root, vars) => {
-  const line = cmd.replace(/\{([ij])\}/g, (_, k) => String(vars[k]));
+interface Ran { line: string; code: number; out: string; err: string }
+
+const sh = (cmd: string, root: string, vars: { i?: number; j?: number }): Ran => {
+  const line = cmd.replace(/\{([ij])\}/g, (_, k: 'i' | 'j') => String(vars[k]));
   const r = spawnSync(line, { shell: true, cwd: root, encoding: 'utf8', timeout: TIMEOUT_S * 1000, maxBuffer: 64 << 20 });
   return { line, code: r.status ?? (r.error ? 127 : 1), out: r.stdout ?? '', err: `${r.stderr ?? ''}${r.error ? r.error.message : ''}` };
 };
-const tail = (text, n = 4) => text.trim().split('\n').filter(Boolean).slice(-n).map((l) => `\n      ${l}`).join('');
+const tail = (text: string, n = 4): string => text.trim().split('\n').filter(Boolean).slice(-n).map((l) => `\n      ${l}`).join('');
 
 // The instances, in order: count from the concept (many(N)), or the symmetry block's `instances` command (many, no fixed N).
-function instancesOf(name, concept, root) {
-  const sym = concept.symmetry;
+function instancesOf(name: string, concept: SymConcept, sym: SymmetryBlock, root: string): number[] {
   let n = concept.count;
   if (n === undefined && sym.instances) {
     const r = sh(sym.instances, root, {});
     n = r.code === 0 ? Number(r.out.trim()) : NaN;
     if (!Number.isInteger(n)) throw new Error(`${name}: the instances command "${sym.instances}" printed no count (exit ${r.code})`);
   }
-  if (!Number.isInteger(n) || n < 1) throw new Error(`${name} is many with no count: give it "count": N, or "symmetry": { "instances": "<command printing N>" }`);
+  if (n === undefined || !Number.isInteger(n) || n < 1) throw new Error(`${name} is many with no count: give it "count": N, or "symmetry": { "instances": "<command printing N>" }`);
   const first = sym.first ?? 0;
   return Array.from({ length: n }, (_, k) => first + k);
 }
 
+const ALL_PAIRS_UP_TO = 8;
+const SPREAD = 8;
+function swapPairs(ids: readonly number[]): [number, number][] {
+  const head = ids[0] ?? 0;
+  if (ids.length <= ALL_PAIRS_UP_TO) return ids.flatMap((a, x) => ids.slice(x + 1).map((b): [number, number] => [a, b]));
+  const step = (ids.length - 1) / SPREAD;
+  return [...new Set(Array.from({ length: SPREAD }, (_, k) => Math.round((k + 1) * step)))].map((x): [number, number] => [head, ids[x] ?? head]);
+}
+
 // Runs the gate for one concept; prints every reading; returns 0 (same) or 1 (red).
-export function runConcept(root, name, log = console.log) {
+export function runConcept(root: string, name: string, log: Log = console.log): number {
   const shape = readManifest(root);
   const concept = shape.concepts?.[name];
   const head = `shape_symmetry ${name}`;
@@ -61,13 +86,13 @@ export function runConcept(root, name, log = console.log) {
     log(`${head}: RED: "${name}" is many but design/shape.json gives it no symmetry block. Add "symmetry": { "members": "<command printing instance {i}'s members, one per line>", "swap": "<command: exit 0 when instances {i} and {j} swap the same>" }`);
     return 1;
   }
-  let ids;
-  try { ids = instancesOf(name, concept, root); } catch (e) { log(`${head}: RED: ${e.message}`); return 1; }
+  let ids: number[];
+  try { ids = instancesOf(name, concept, sym, root); } catch (e) { log(`${head}: RED: ${messageOf(e)}`); return 1; }
   log(`${head}: ${ids.length} instances (${ids.join(', ')}); owns: ${(concept.owns ?? []).join(', ') || '(not listed)'}`);
   let red = 0;
 
   // (a) members
-  const sets = new Map();
+  const sets = new Map<number, Set<string>>();
   for (const i of ids) {
     const r = sh(sym.members, root, { i });
     const members = new Set(r.out.split('\n').map((l) => l.trim()).filter(Boolean));
@@ -77,15 +102,15 @@ export function runConcept(root, name, log = console.log) {
     log(`  members ${i}: ${members.size}`);
   }
   let diffs = 0;
-  const first = sets.keys().next().value;
+  const against = ids.length > ALL_PAIRS_UP_TO ? [...sets].slice(0, 1) : [...sets];
   // Identical to the first means identical to each other, so many instances cost one pass, not N squared (0.22.0).
-  for (const i of sets.keys()) for (const j of ids.length > ALL_PAIRS_UP_TO ? [first] : sets.keys()) {
+  for (const [i, mine] of sets) for (const [j, theirs] of against) {
     if (i === j) continue;
-    const lacks = [...sets.get(i)].filter((m) => !sets.get(j).has(m)).sort();
+    const lacks = [...mine].filter((m) => !theirs.has(m)).sort();
     if (lacks.length) { diffs += 1; log(`  members DIFFER: instance ${i} has ${lacks.join(', ')} that instance ${j} lacks`); }
   }
   if (diffs) red += 1;
-  else if (sets.size === ids.length) log(`  members: every instance has the same ${sets.values().next().value.size} members`);
+  else if (sets.size === ids.length) log(`  members: every instance has the same ${sets.values().next().value?.size ?? 0} members`);
 
   // (b) swap: every unordered pair of a few instances; of many, the first against an even spread (testing thousands of the same control
   // is a complete waste of time; `members` above already read every one)
@@ -104,23 +129,15 @@ export function runConcept(root, name, log = console.log) {
   return red ? 1 : 0;
 }
 
-const ALL_PAIRS_UP_TO = 8;
-const SPREAD = 8;
-function swapPairs(ids) {
-  if (ids.length <= ALL_PAIRS_UP_TO) return ids.flatMap((a, x) => ids.slice(x + 1).map((b) => [a, b]));
-  const step = (ids.length - 1) / SPREAD;
-  return [...new Set(Array.from({ length: SPREAD }, (_, k) => Math.round((k + 1) * step)))].map((x) => [ids[0], ids[x]]);
-}
-
 // One test per many concept. A many concept with no symmetry block still gets its test, which is red until it has one.
-export function generate(root, { cmake, list } = {}, log = console.log) {
+export function generate(root: string, { cmake, list }: GenerateOptions = {}, log: Log = console.log): number {
   const shape = readManifest(root);
   const names = manyConcepts(shape);
   const abs = resolve(root);
-  const argv = (n) => [process.execPath, SELF, 'run', n, '--dir', abs];
+  const argv = (n: string): string[] => [process.execPath, SELF, 'run', n, '--dir', abs];
   if (list) for (const n of names) log(`${testName(n)}\t${argv(n).map((a) => (/\s/.test(a) ? `"${a}"` : a)).join(' ')}`);
   if (cmake) {
-    const q = (s) => `"${s.replace(/\\/g, '/').replace(/"/g, '\\"')}"`;
+    const q = (s: string): string => `"${s.replace(/\\/g, '/').replace(/"/g, '\\"')}"`;
     const lines = [
       '# Generated by claude-packs (shape-symmetry.mjs gen) from design/shape.json at configure time. Never edit, never commit:',
       '# a change to the manifest re-runs the configure step, which writes this file again.',
@@ -131,21 +148,23 @@ export function generate(root, { cmake, list } = {}, log = console.log) {
       ]),
       '',
     ];
-    mkdirSync(dirname(resolve(cmake)), { recursive: true });
-    writeFileSync(resolve(cmake), lines.join('\n'));
-    const none = names.filter((n) => !shape.concepts[n].symmetry);
+    ensureDir(dirname(resolve(cmake)));
+    put(resolve(cmake), lines.join('\n'));
+    const none = names.filter((n) => !shape.concepts?.[n]?.symmetry);
     log(`shape_symmetry: ${names.length} test(s) in ${cmake}: ${names.map(testName).join(', ') || '(no many concept)'}${none.length ? `; red until they have a symmetry block: ${none.join(', ')}` : ''}`);
   }
   return 0;
 }
 
-function args(argv) {
-  const o = { rest: [], dir: process.env.CLAUDE_PROJECT_DIR ?? process.cwd() };
+interface Args extends GenerateOptions { rest: string[]; dir: string }
+
+function args(argv: readonly string[], defaultDir: string): Args {
+  const o: Args = { rest: [], dir: defaultDir };
   for (let k = 0; k < argv.length; k += 1) {
-    if (argv[k] === '--dir') o.dir = argv[++k];
+    if (argv[k] === '--dir') o.dir = argv[++k] ?? o.dir;
     else if (argv[k] === '--cmake') o.cmake = argv[++k];
     else if (argv[k] === '--list') o.list = true;
-    else o.rest.push(argv[k]);
+    else o.rest.push(argv[k] ?? '');
   }
   o.dir = resolve(o.dir);
   return o;
@@ -158,21 +177,23 @@ In CMakeLists.txt (configure time):
                   --cmake \${CMAKE_BINARY_DIR}/shape_symmetry.cmake COMMAND_ERROR_IS_FATAL ANY)
   include(\${CMAKE_BINARY_DIR}/shape_symmetry.cmake)`;
 
-export async function main(argv) {
-  if (argv[0] === '--selftest') return (await import('./shape-symmetry-selftest.mjs')).selftest(SELF);
-  const o = args(argv);
+export interface MainOptions { env?: Readonly<Record<string, string | undefined>>; cwd?: string }
+
+export async function main(argv: readonly string[], { env = process.env, cwd = process.cwd() }: MainOptions = {}): Promise<number> {
+  if (argv[0] === '--selftest') return (await import('./shape-symmetry-selftest.mts')).selftest(SELF);
+  const o = args(argv, env.CLAUDE_PROJECT_DIR ?? cwd);
   const [cmd, concept] = o.rest;
   try {
     if (cmd === 'run' && concept) return runConcept(o.dir, concept);
     if (cmd === 'gen' && (o.cmake || o.list)) return generate(o.dir, o);
   } catch (e) {
-    console.error(`shape_symmetry: ${e.message}`);
+    console.error(`shape_symmetry: ${messageOf(e)}`);
     return 2;
   }
   console.error(USAGE);
   return 2;
 }
 
-// realpath: the module's own URL is the real path, the command line may go through a symlink (/var is /private/var on macOS),
-// and a tool that silently does nothing reads as green.
-if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(SELF)) main(process.argv.slice(2)).then((c) => process.exit(c));
+// isMain compares real paths: the module's own URL is the real path, the command line may go through a symlink (/var is
+// /private/var on macOS), and a tool that silently does nothing reads as green.
+if (isMain(import.meta.url)) process.exit(await main(process.argv.slice(2)));
