@@ -1,22 +1,28 @@
-// Configurations (0.10.0, STEP 3; KWB-31): a kind of project, as data. configurations/<name>/config.json holds
+// Configurations (0.10.0, STEP 3; KWB-31): a kind of project, as data. A configuration is configurations/shared.json (what every
+// kind holds: the always packs, the shared folders and kinds, the house rules) with the deltas of configurations/<name>/config.json
+// laid over it (lib/config-merge.mts says how); readConfig makes the whole of it:
 //   "packs":     { "always": [...], "choose": [...], "default": [...] }  the packs it always installs (base first), the ones
-//                a project may add, and the ones `init --config <name>` takes when none are named
+//                a project may add (every pack whose pack.json `fits` names it), and the ones `init --config <name>` takes
 //   "layout":    { "folders", "concepts", "kinds" }   the layout template: the folder structure of that kind of project
-//   "hookOrder": { "<event> <matcher>": ["a.mjs", ...] }   the order its hooks run in, per settings entry (optional)
 //   "leaveOut":  ["rules/x.md", "hooks/y.mjs", ...]   pack items this configuration does not install (optional)
 //   "sourceFiles": "<regex>"   what doctor's coverage counts as source (optional; default C, C++ and shaders)
 //   "preamble":  { "always": [...], "never": [...] }  the house rules of its CLAUDE.md block
-// Its rules, hooks, checks and skills are its packs' (`configs` lists them). layout.json "configuration" names the one a
-// project has; `update` applies it; an install from before 0.10.0 gets the smallest configuration that takes its packs.
+// The order of its hooks is the packs': each hook row's `order` (lib/settings.mts). Its rules, hooks, checks and skills are its
+// packs' (`configs` lists them). layout.json "configuration" names the one a project has; `update` applies it; an install from
+// before 0.10.0 gets the smallest configuration that takes its packs.
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readLayout } from '../packs/base/hooks/lib/layout.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Configuration, Layout, Logger } from '../packs/base/hooks/lib/types.d.mts';
-import { customPacks, planFiles, readPack } from './packs.mts';
+import { mergeConfig, type ConfigDelta, type SharedConfig } from './config-merge.mts';
+import { fitsOf, type PackFields } from './pack-manifest.mts';
+import { PACKS_DIR, customPacks, planFiles, readPack } from './packs.mts';
 
 export const CONFIGS_DIR: string = join(dirname(fileURLToPath(import.meta.url)), '..', 'configurations');
+/** What every configuration holds; the folders beside it each hold one configuration's deltas. */
+export const SHARED_FILE: string = join(CONFIGS_DIR, 'shared.json');
 
 /** What a configuration reads of a project's layout. */
 export type ConfigLayout = Partial<Layout>;
@@ -29,13 +35,33 @@ export function availableConfigs(): string[] {
   return readdirSync(CONFIGS_DIR).filter((d) => existsSync(join(CONFIGS_DIR, d, 'config.json'))).sort();
 }
 
-/** A configuration by name. Throws on an unknown one, or a config.json that is not JSON. */
+/** Every configuration of a kit folder (the kit itself, or a copy a test plants a fault in), each as it reads there: its deltas over that
+ *  folder's shared.json, and the packs that fit it by that folder's pack.json files. */
+export function configsAt(kit: string): Configuration[] {
+  const shared = readJson<SharedConfig>(join(kit, 'configurations', 'shared.json'));
+  if (shared === null) return [];
+  const folders = (dir: string): string[] => (existsSync(dir) ? readdirSync(dir).filter((d) => existsSync(join(dir, d, 'pack.json')) || existsSync(join(dir, d, 'config.json'))).sort() : []);
+  const fits = Object.fromEntries(folders(join(kit, 'packs')).map((p) => [p, fitsOf(readJson<PackFields>(join(kit, 'packs', p, 'pack.json')) ?? {})]));
+  return folders(join(kit, 'configurations')).flatMap((name) => {
+    const delta = readJson<ConfigDelta>(join(kit, 'configurations', name, 'config.json'));
+    return delta === null ? [] : [mergeConfig(name, shared, delta, fits)];
+  });
+}
+
+/** What each stock pack says of the configurations it may join: pack name, then its `fits`. */
+export function packFits(): Record<string, string[]> {
+  return Object.fromEntries(readdirSync(PACKS_DIR).filter((d) => existsSync(join(PACKS_DIR, d, 'pack.json'))).sort().map((d) => [d, fitsOf(readPack(d))]));
+}
+
+/** A configuration by name: the shared base and its deltas, with the packs that fit it. Throws on an unknown one, or a file that is not JSON. */
 export function readConfig(name: string): Configuration {
   const file = join(CONFIGS_DIR, String(name), 'config.json');
   if (!existsSync(file)) throw new Error(`unknown configuration "${name}" (available: ${availableConfigs().join(', ')})`);
-  const config = readJson<Configuration>(file);
-  if (config === null) throw new Error(`configuration ${name}: ${file} is not valid JSON`);
-  return config;
+  const delta = readJson<ConfigDelta>(file);
+  if (delta === null) throw new Error(`configuration ${name}: ${file} is not valid JSON`);
+  const shared = readJson<SharedConfig>(SHARED_FILE);
+  if (shared === null) throw new Error(`${SHARED_FILE} is missing or not valid JSON`);
+  return mergeConfig(String(name), shared, delta, packFits());
 }
 
 /** Every pack a configuration takes, always-installed first. */

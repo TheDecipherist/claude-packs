@@ -1,9 +1,7 @@
 // What test-changed knows without reading a test: how it tells a module, a test and a hook by their names, and the table of what a
 // change can break when no import or name shows it (the table's row for each kind of file the kit keeps).
-import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { configsAt } from '../lib/configs.mts';
 import { PRESETS } from '../lib/packs.mts';
-import { readJson } from '../packs/base/hooks/lib/json.mts';
 
 // What the picker reads as a module, a test and a test helper: JavaScript and TypeScript alike (W2.6; review O1).
 export const MODULE = /\.(?:mjs|js|mts|cts|ts)$/;
@@ -29,19 +27,14 @@ export interface TableRow {
 const INSTALLING_HELPERS = ['bin/claude-packs.mjs', './kit-cli.mjs', './worktree-rig.mjs', './kit-cli.mts', './worktree-rig.mts', 'fixtures/installs.mts'];
 const installs = (text: string): boolean => INSTALLING_HELPERS.some((h) => text.includes(h)) && /['"](init|new|add|update|update-all)['"]/.test(text);
 
-interface ConfigPacks { packs: { always: string[]; choose: string[] } }
-
 // The text of a test that brings a pack in: its name, a preset that holds it, a configuration that takes it (by --config; a
 // configuration's own pack also comes with the packs it offers), or a walk over every configuration (KWB-41).
 function brings(root: string, pack: string): RegExp {
   const words = new Set([pack]);
   const configs: string[] = [];
-  const dir = join(root, 'configurations');
-  for (const name of existsSync(dir) ? readdirSync(dir) : []) {
-    const c = readJson<ConfigPacks>(join(dir, name, 'config.json'));
-    if (!c) continue;
+  for (const c of configsAt(root)) {
     if (c.packs.always.includes(pack)) for (const p of c.packs.choose) words.add(p);
-    if ([...c.packs.always, ...c.packs.choose].includes(pack)) configs.push(name);
+    if ([...c.packs.always, ...c.packs.choose].includes(pack)) configs.push(c.name ?? '');
   }
   for (const [preset, packs] of Object.entries(PRESETS)) if (packs.some((p) => words.has(p))) words.add(preset);
   return new RegExp(`['"](?:${[...words].join('|')})['"]|--config['"]?,?\\s*['"]?(?:${configs.join('|') || '$^'})\\b|['"]configurations['"]`);

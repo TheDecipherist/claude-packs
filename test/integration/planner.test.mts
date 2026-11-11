@@ -32,7 +32,7 @@ const COMMANDS = new Set([...HELP.matchAll(/^ {2}([a-z][\w-]*)/gm)].map((m) => m
 const FLAGS = new Set(HELP.match(/--[a-z][\w-]*/g));
 
 test('every command and flag start-a-build prints exists in the kit', () => {
-  const said = filesOf('start-a-build').map(text).join('\n');
+  const said = filesOf('start-a-build').map(text).join('\n').replaceAll('{{kit}}', 'npx @thedecipherist/claude-packs');   // the bundle fills {{kit}} in
   const calls = [...said.matchAll(/@thedecipherist\/claude-packs ([a-z][\w-]*)([^\n`]*)/g)];
   assert.ok(calls.length >= 3, `the hand-over prints its commands: ${calls.length}`);
   const missing = calls.flatMap(([, command, rest]) => [

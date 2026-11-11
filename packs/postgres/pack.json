@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "PostgreSQL: migrations that never stop traffic, values always bound, types that say what they hold, and no database wiped by mistake.",
   "type": "stock",
+  "fits": ["full-stack", "go", "node", "python", "rust"],
+  "requires": [],
+  "tests": {
+    "hooks/db-wipe-guard.mts": ["test/hooks/postgres/db-wipe-guard.test.mts"]
+  },
+  "folders": {},
+  "skillsIn": null,
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
@@ -40,6 +47,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/db-wipe-guard.mjs\"",
             "role": "judge",
+            "order": 110,
             "timeout": 10
           }
         ]

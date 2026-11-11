@@ -3,6 +3,26 @@
   "version": "1.0.0",
   "description": "The synth-creator configuration's own laws, installed with it and never by another: the build queue (build-guard), the time watch, the spec lock, frozen fixes, read-only vendored code and copy trees, staging by name, the session watches (idle-wake, user-asks, build-sweep), and the rules and skill a synth build lives by.",
   "type": "stock",
+  "fits": [],
+  "requires": [],
+  "tests": {
+    "hooks/build-guard.mts": ["test/hooks/synth-creator/build-guard.test.mts"],
+    "hooks/build-sweep.mts": ["test/hooks/synth-creator/build-sweep.test.mts"],
+    "hooks/chart-first.mts": ["test/hooks/synth-creator/chart-first.test.mts"],
+    "hooks/frozen-files.mts": ["test/hooks/synth-creator/frozen-files.test.mts"],
+    "hooks/idle-wake.mts": ["test/hooks/synth-creator/idle-wake.test.mts"],
+    "hooks/lib/build-guard-selftest.mts": ["test/hooks/synth-creator/build-guard.test.mts"],
+    "hooks/lib/time-findings.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
+    "hooks/lib/time-guard-selftest.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
+    "hooks/lib/time-state.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
+    "hooks/protect-vendor.mts": ["test/hooks/synth-creator/protect-vendor.test.mts"],
+    "hooks/spec-lock.mts": ["test/hooks/synth-creator/spec-lock.test.mts"],
+    "hooks/stage-guard.mts": ["test/hooks/synth-creator/stage-guard.test.mts"],
+    "hooks/time-guard.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
+    "hooks/user-asks.mts": ["test/hooks/synth-creator/user-asks.test.mts"],
+    "tools/buildq.mts": ["test/tools/synth-creator/buildq.test.mts"],
+    "tools/freeze.mts": ["test/tools/synth-creator/freeze.test.mts"]
+  },
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
@@ -31,24 +51,28 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/frozen-files.mjs\"",
             "role": "judge",
+            "order": 40,
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-vendor.mjs\"",
             "role": "judge",
+            "order": 60,
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spec-lock.mjs\"",
             "role": "judge",
+            "order": 70,
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/chart-first.mjs\"",
             "role": "judge",
+            "order": 80,
             "timeout": 10
           }
         ]
@@ -60,12 +84,14 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stage-guard.mjs\"",
             "role": "judge",
+            "order": 10,
             "timeout": 10
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-guard.mjs\"",
             "role": "judge",
+            "order": 40,
             "timeout": 15
           }
         ]
@@ -77,6 +103,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
             "role": "judge",
+            "order": 10,
             "timeout": 15
           }
         ]
@@ -90,6 +117,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/time-guard.mjs\"",
             "role": "judge",
+            "order": 10,
             "timeout": 15
           }
         ]
@@ -102,6 +130,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/idle-wake.mjs\"",
             "role": "judge",
+            "order": 10,
             "asyncRewake": true,
             "timeout": 1000
           }
@@ -116,6 +145,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/user-asks.mjs\"",
             "role": "judge",
+            "order": 10,
             "timeout": 15
           }
         ]
@@ -126,6 +156,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
             "role": "recorder",
+            "order": 20,
             "timeout": 15
           }
         ]
@@ -138,6 +169,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/build-sweep.mjs\"",
             "role": "recorder",
+            "order": 10,
             "timeout": 15
           }
         ]

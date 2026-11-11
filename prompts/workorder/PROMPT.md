@@ -27,7 +27,7 @@ Always do:
 - Work on one branch for this order, `work/{{name}}`, made from the fetched trunk and pushed from its first commit. Land it once, when every step is done, the way the `land-branch` skill says, gated by the tests its changes reach against the trunk.
 - Log every bug in `bugs.md` before fixing it, and every fault in the kit in `workflow-bugs.md`.
 - Follow every rule in `.claude/rules` and every skill that applies.
-- After a refusal, once you know the answer, mark it: `npx --no-install @thedecipherist/claude-packs logs mark <id> right|wrong "<why>"`.
+- After a refusal, once you know the answer, mark it: `{{kit}} logs mark <id> right|wrong "<why>"`.
 
 Never do:
 - Stop to ask, wait for an answer, or end a turn while any step can still move.

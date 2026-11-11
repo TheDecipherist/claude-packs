@@ -72,7 +72,7 @@ commands:
   test: node .claude/tools/buildq.mjs ctest --preset dev
 ```
 
-1. Install from the block: `npx --no-install @thedecipherist/claude-packs init --from docs/workorders/{{name}}/workorder.md`, then `doctor --strict`. Check that every skill **The foundation** names is installed.
+1. Install from the block: `{{kit}} init --from docs/workorders/{{name}}/workorder.md`, then `doctor --strict`. Check that every skill **The foundation** names is installed.
 2. The skeleton: the house tool where the project has one, else `CMakeLists.txt` and `CMakePresets.json` with the four presets of **The stack**; `synthcore` linked as its README says.
 3. `gates-from-commit-one`: the house gates and pluginval at strictness 10 on every format the build makes, each seen red on a planted fault.
 4. `node .claude/hooks/param-id-lock.mjs --init`, so the lock exists before the first id.

@@ -9,7 +9,8 @@ import { KIT } from '../../kit-cli.mts';
 import { INSTALLS, holdsThePack } from './writing-configurations-rig.mts';
 
 test('every configuration has an install here, so each is proved by one of the writing-configurations files', () => {
-  assert.deepEqual(readdirSync(join(KIT, 'configurations')).sort(), Object.keys(INSTALLS).sort(), 'a configuration with no install here');
+  const configurations = readdirSync(join(KIT, 'configurations'), { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);   // not shared.json
+  assert.deepEqual(configurations.sort(), Object.keys(INSTALLS).sort(), 'a configuration with no install here');
 });
 
 holdsThePack(['base', 'cpp']);

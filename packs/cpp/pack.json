@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "description": "Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding.",
   "type": "stock",
+  "fits": ["cpp", "node", "python", "synth-creator"],
+  "requires": [],
+  "tests": {
+    "hooks/compile-cache.mts": ["test/hooks/cpp/compile-cache.test.mts"]
+  },
+  "concepts": {},
+  "folders": {},
+  "skillsIn": null,
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
@@ -24,7 +32,7 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/compile-cache.mjs\"", "role": "judge", "timeout": 10 }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/compile-cache.mjs\"", "role": "judge", "order": 90, "timeout": 10 }
         ]
       }
     ]

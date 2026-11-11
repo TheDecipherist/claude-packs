@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "GPU-drawn UI on Dawn (Metal on Mac, Direct3D 12 on Windows), drawn natively: no OpenGL, no browser.",
   "type": "stock",
+  "fits": ["synth-creator"],
+  "requires": [],
+  "tests": {
+    "hooks/browser-guard.mts": ["test/hooks/gpu-painter/browser-guard.test.mts"]
+  },
   "author": "claude-packs",
   "license": "MIT",
   "homepage": "https://github.com/TheDecipherist/claude-packs",
@@ -55,6 +60,7 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/browser-guard.mjs\"",
             "role": "judge",
+            "order": 170,
             "timeout": 15
           }
         ]

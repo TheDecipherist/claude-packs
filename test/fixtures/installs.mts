@@ -11,6 +11,7 @@ import { gitRun } from '../../packs/base/hooks/lib/git-run.mts';
 import { readJson, toJson, writeJson } from '../../packs/base/hooks/lib/json.mts';
 import { bashOf, writeOf } from '../../packs/base/hooks/lib/selftest.mts';
 import type { Lock } from '../../packs/base/hooks/lib/types.d.mts';
+import { readConfig } from '../../lib/configs.mts';
 import { KIT, profile, run } from '../kit-cli.mts';
 
 /** A Write and a Bash payload as Claude Code sends them (selftest's builders, under the names the tests use). */
@@ -96,8 +97,8 @@ export function buildOnce(root: string, name: string, build: (into: string) => v
 const fixturesRoot = (): string => process.env.CLAUDE_PACKS_FIXTURES ?? join(tmpdir(), `claude-packs-fixtures-${process.pid}`);
 
 const OTHER_PACKS_CHECKS: readonly string[] = ['fetch-needs-timeout.json', 'cpp-no-mutable-global.json', 'one-seeded-random.json'];
-const synthPacks =(): string[] => readJson<{ packs: { always: string[]; choose: string[] } }>(join(KIT, 'configurations/synth-creator/config.json'))?.packs.choose ?? [];
-const nodePacks = (): string[] => readJson<{ packs: { choose: string[] } }>(join(KIT, 'configurations/node/config.json'))?.packs.choose ?? [];
+const synthPacks = (): string[] => [...readConfig('synth-creator').packs.choose];
+const nodePacks = (): string[] => [...readConfig('node').packs.choose];
 
 /** Build one fixture into a folder: its `init` arguments, or for `all-packs` two installs whose checks are put in one. */
 function buildFixture(name: FixtureName, into: string): void {
