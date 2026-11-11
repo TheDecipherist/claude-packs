@@ -18,7 +18,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
-import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, real } from './lib/dup.mjs';
+import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './lib/dup.mjs';
 import { judgeWrites } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -201,7 +201,7 @@ export function check(event, cwd = event.cwd ?? process.cwd()) {
     const writes = mine.map((p) => ({ path: p, after: readFileSync(p, 'utf8'), ranges: added.get(p) })).filter((w) => w.ranges.length);
     const r = writes.length ? judgeWrites(root, writes, { layout, shape }) : { clones: [] };
     if (r.error) problems.push(`once-only could not judge this turn's writes: ${r.error}`);
-    const base = real(root);
+    const base = realPath(root);
     const show = (s) => `${relative(base, s.file)}:${s.start}-${s.end}`;
     for (const c of r.clones) found.add(`${show(c.at)} repeats ${show(c.other)} (${c.lines} lines)`);
   }

@@ -13,12 +13,12 @@ test('two modules that share only their imports are no copy (KWB-176)', () => {
   const dir = scratchDir('dup-');
   put(join(dir, 'a.mjs'), `${IMPORTS}export function one(x) {\n  return x + 1;\n}\n`);
   put(join(dir, 'b.mjs'), `${IMPORTS}export function two(y) {\n  const z = y * 2;\n  return z - 3;\n}\n`);
-  assert.deepEqual(repoClones(dir).clones, []);
+  assert.deepEqual(repoClones(dir, { env: process.env }).clones, []);
 });
 
 test('two modules that share a function body are still a copy', () => {
   const dir = scratchDir('dup-');
   put(join(dir, 'a.mjs'), `export function one(values, weights, offsets) {\n  let total = 0;\n${BODY}  return total;\n}\n`);
   put(join(dir, 'b.mjs'), `export function two(values, weights, offsets) {\n  let total = 0;\n${BODY}  return total;\n}\n`);
-  assert.equal(repoClones(dir).clones.length, 1);
+  assert.equal(repoClones(dir, { env: process.env }).clones.length, 1);
 });
