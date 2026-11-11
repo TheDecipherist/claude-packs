@@ -30,6 +30,11 @@ export const FILES: readonly (readonly [from: string, to: string])[] = [
   ['../packs/base/hooks/lib/files.mjs', 'hooks/claude-packs/lib/files.mjs'],   // the file helpers shell-writes and program-writes read through (W2.5)
   ['../packs/base/hooks/lib/json.mjs', 'hooks/claude-packs/lib/json.mjs'],   // shell-writes reads its JSON through it (W3 layer 2)
   ['../packs/base/hooks/lib/shell-sed.mjs', 'hooks/claude-packs/lib/shell-sed.mjs'],   // shell-writes' sed -i, perl -i and ruby -i readers, split out (W3 layer 2)
+  // what the three global hooks share (global/hooks/lib/global-hook.mts): version-pin-guard reads it beside itself, the other two from hooks/lib
+  ['hooks/lib/global-hook.mjs', 'hooks/claude-packs/lib/global-hook.mjs'],
+  ['hooks/lib/global-hook.mjs', 'hooks/lib/global-hook.mjs'],
+  ['hooks/lib/manifest-pins.mjs', 'hooks/claude-packs/lib/manifest-pins.mjs'],   // version-pin-guard's readers of a dependency file and of an install command, split out (W4)
+  ['hooks/lib/command-pins.mjs', 'hooks/claude-packs/lib/command-pins.mjs'],
   ['hooks/shell-traps.mjs', 'hooks/shell-traps.mjs'],
   ['hooks/gnu-shell.mjs', 'hooks/gnu-shell.mjs'],
 ];
