@@ -20,7 +20,10 @@ export function coreBudget(env = process.env, layout = {}, cores = cpus().length
 }
 
 /** One job's share of the budget, when `slots` jobs may run at once. */
-export const shareOf = (budget, slots) => Math.max(1, Math.floor(budget / Math.max(1, slots)));
+// KWB-150: by the jobs running as it starts, its own counted, so a build alone takes the whole budget; never less than the
+// slot's share (budget ÷ slots), so more jobs than slots (a dead one's slot being taken back) cannot starve it. No count:
+// the slot's share.
+export const shareOf = (budget, slots, running = slots) => Math.max(1, Math.floor(budget / Math.max(1, Math.min(slots, running))));
 
 const COUNT = /^\d+$/;
 
@@ -53,12 +56,12 @@ export function budgetEnv(env, most) {
   return { ...env, CMAKE_BUILD_PARALLEL_LEVEL: String(most), CTEST_PARALLEL_LEVEL: String(most), MAKEFLAGS: `-j${most}` };
 }
 
-/** The command run at a low priority. A build on macOS takes background QoS (spare cores only); a run with timing checks
-    (`timing`) keeps every core and only yields (`nice`), so a frame-time check is not measured on throttled cores.
-    BUILDQ_PRIORITY=normal runs it as asked. */
-export function gentle(command, { platform = process.platform, env = process.env, timing = false } = {}) {
+/** The command run at a low priority: it yields to the user's own apps (`nice`) and keeps every core. Background QoS
+    (`taskpolicy -b`) is never used: macOS runs it on the efficiency cores only, and a Mac's build took 2.5 cores of 18 with
+    its fan never on (KWB-149). `timing` is kept for callers that ask; it is the same now. BUILDQ_PRIORITY=normal runs it as
+    asked. */
+export function gentle(command, { platform = process.platform, env = process.env } = {}) {
   if (env.BUILDQ_PRIORITY === 'normal') return command;
-  if (platform === 'darwin' && !timing) return ['taskpolicy', '-b', ...command];
   if (platform === 'win32') return command;
   return ['nice', '-n', '10', ...command];
 }

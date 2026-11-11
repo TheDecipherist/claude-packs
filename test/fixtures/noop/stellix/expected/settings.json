@@ -11,6 +11,16 @@
         ]
       },
       {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
+            "async": true,
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
         "hooks": [
           {
@@ -57,6 +67,16 @@
       }
     ],
     "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
+            "async": true,
+            "timeout": 5
+          }
+        ]
+      },
       {
         "matcher": "*",
         "hooks": [
@@ -142,5 +162,11 @@
   "env": {
     "CLAUDE_CODE_SHELL": "/opt/homebrew/bin/bash",
     "SHELL": "/opt/homebrew/bin/bash"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs\"",
+    "padding": 0,
+    "refreshInterval": 1
   }
 }
