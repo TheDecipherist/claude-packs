@@ -23,12 +23,14 @@ const SELF = fileURLToPath(import.meta.url);
 const SEPARATOR = ' | ';
 
 /** The kit version the project runs (KWB-162, lib/kit-version.mjs): the installed package of the install this tool belongs to
- *  (.claude/tools, two folders up) or of the session's project; a tool run from the kit's own checkout (packs/base/tools) with no
- *  project reads the checkout's package.json; a lock only where no package is found. */
+ *  (.claude/tools, two folders up) or of the session's project, its lock where no package is installed; the kit's own checkout
+ *  (packs/base/tools) reads its package.json only with no project of its own. */
 export function kitVersion(toolDir, projectDir) {
   const install = join(toolDir, '..', '..');
-  return packageVersion(install) ?? packageVersion(projectDir) ?? checkoutVersion(join(toolDir, '..', '..', '..')) ??
-    lockVersion(install) ?? lockVersion(projectDir);
+  // the project's own install first, package before lock; the kit checkout's own version last: only with no project, or in the
+  // kit itself (KWB-165: before a project's lock, it showed the kit's version for another project's install)
+  return packageVersion(install) ?? packageVersion(projectDir) ?? checkoutVersion(projectDir) ?? lockVersion(install) ?? lockVersion(projectDir) ??
+    checkoutVersion(join(toolDir, '..', '..', '..'));
 }
 
 /** Where the RUNS cache lives: the user's cache folder, shared by every project's bar. */

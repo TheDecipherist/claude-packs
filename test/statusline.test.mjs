@@ -97,6 +97,16 @@ test('the kit version is read from the project\'s installed package, the lock on
   writeFileSync(join(checkout, 'package.json'), toJson({ name: '@thedecipherist/claude-packs', version: '9.10.0' }));
   assert.equal(draw(join(checkout, 'packs', 'base', 'tools'), { workspace: { project_dir: join(home, 'project') } }), 'claude-packs 9.9.0', 'the session\'s project');
   assert.equal(draw(join(checkout, 'packs', 'base', 'tools')), 'claude-packs 9.10.0', 'no project: the checkout\'s own package.json');
+  // KWB-165: a project with only its lock (no package in node_modules), drawn by the checkout's tool: the project's lock, never
+  // the checkout's own version (another project showed the kit's 1.9.0 for its own install)
+  const locked = join(home, 'locked');
+  mkdirSync(join(locked, '.claude'), { recursive: true });
+  writeFileSync(join(locked, '.claude', 'claude-packs.lock.json'), toJson({ kit: '1.4.0', files: {} }));
+  assert.equal(draw(join(checkout, 'packs', 'base', 'tools'), { workspace: { project_dir: locked } }), 'claude-packs 1.4.0', 'the project\'s own lock');
+  // in the kit's own repo, which has a lock of its own install too, the running version is its package.json
+  mkdirSync(join(checkout, '.claude'), { recursive: true });
+  writeFileSync(join(checkout, '.claude', 'claude-packs.lock.json'), toJson({ kit: '1.0.0', files: {} }));
+  assert.equal(draw(join(checkout, 'packs', 'base', 'tools'), { workspace: { project_dir: checkout } }), 'claude-packs 9.10.0', 'the kit itself');
 });
 
 test('a broken session, transcript or cache draws what it can and never throws', () => {
