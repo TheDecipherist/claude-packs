@@ -21,12 +21,12 @@ import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync }
 import { tmpdir } from 'node:os';
 import { basename, join, relative } from 'node:path';
 import { clonesOf, excludeGlobs, LIMITS, realPath, scan, SOURCE } from './dup.mts';
-import type { BlockClone, Env } from './dup.mts';
+import type { BlockClone, Env, ShapeExclude } from './dup.mts';
 import { scratchDir } from './files.mts';
 import { matchesAny } from './glob.mts';
 import { shortHash } from './hash.mts';
 import { parseJson, writeJson } from './json.mts';
-import type { Layout, ShapeManifest } from './types.d.mts';
+import type { Layout } from './types.d.mts';
 
 export const WINDOW = 20;
 const COMMON = 40;
@@ -57,7 +57,8 @@ export interface DupWrite {
   range?: readonly [number, number] | null;
   ranges?: readonly (readonly [number, number])[];
 }
-export interface JudgeOptions { env: Env; layout?: Partial<Layout>; shape?: ShapeManifest | null; ignore?: readonly string[] }
+/** `persist: false` judges from the index as it stands, brought up to date in memory only: a judge writes nothing (once-only-index records it). */
+export interface JudgeOptions { env: Env; layout?: Partial<Layout>; shape?: ShapeExclude | null; ignore?: readonly string[]; persist?: boolean }
 export interface JudgeResult { clones: BlockClone[]; error?: string; index: DupIndex }
 export interface Tokens { t: string[]; l: number[] }
 
@@ -121,7 +122,7 @@ function sourceStats(root: string, ex: readonly string[]): Record<string, Stat> 
 interface StoredIndex { v?: number; root?: string; files: Record<string, IndexedFile> }
 
 /** The checkout's index, read from the temp folder and brought up to date for the files that changed. */
-export function loadIndex(root: string, { layout = {}, shape = null }: { layout?: Partial<Layout>; shape?: ShapeManifest | null } = {}): DupIndex {
+export function loadIndex(root: string, { layout = {}, shape = null, persist = true }: { layout?: Partial<Layout>; shape?: ShapeExclude | null; persist?: boolean } = {}): DupIndex {
   const file = fileOf(root);
   const real = realPath(root);
   // read whole, not through readText: a big checkout's index is past its 8 MB cap
@@ -143,7 +144,7 @@ export function loadIndex(root: string, { layout = {}, shape = null }: { layout?
     read += 1;
   }
   const changed = read > 0 || !old || Object.keys(old.files).length !== Object.keys(files).length;
-  if (changed) {
+  if (changed && persist) {
     try { mkdirSync(join(file, '..'), { recursive: true }); } catch { /* judged all the same */ }
     writeJson(file, { v: VERSION, root: real, files });   // false when refused: judged all the same
   }
@@ -232,8 +233,8 @@ const holdsLogic = (text: string, { start, end }: { start: number; end: number }
   text.split('\n').slice(start - 1, end).filter((l) => !DECLARATION.test(l)).length >= MIN_LOGIC_LINES;
 
 /** The clones the writes would add, as jscpd over the repo would find them: the index picks the candidates, jscpd confirms. */
-export function judgeCopyWrites(root: string, writes: readonly DupWrite[], { env, layout = {}, shape = null, ignore = [] }: JudgeOptions): JudgeResult {
-  const index = loadIndex(root, { layout, shape });
+export function judgeCopyWrites(root: string, writes: readonly DupWrite[], { env, layout = {}, shape = null, ignore = [], persist = true }: JudgeOptions): JudgeResult {
+  const index = loadIndex(root, { layout, shape, persist });
   const maybe = clonesIn(index, writes, { ignore });
   if (!maybe.length) return { clones: [], index };
   const tmp = scratchDir('once-only-new-');

@@ -132,6 +132,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/once-only.mjs\"",
+            "role": "judge",
             "timeout": 20
           },
           {
@@ -184,6 +185,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs\"",
+            "role": "judge",
             "timeout": 15
           },
           {
@@ -236,6 +238,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs\"",
+            "role": "judge",
             "timeout": 30
           }
         ]
@@ -247,6 +250,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making.mjs\"",
+            "role": "judge",
             "timeout": 10
           },
           {
@@ -277,6 +281,17 @@
             "timeout": 20
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/once-only-index.mjs\"",
+            "role": "recorder",
+            "timeout": 20
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -295,6 +310,7 @@
     "hooks/shape-law.mjs",
     "hooks/brief-guard.mjs",
     "hooks/once-only.mjs",
+    "hooks/once-only-index.mjs",
     "hooks/making.mjs",
     "hooks/making-check.mjs",
     "hooks/run-hooks.mjs",
