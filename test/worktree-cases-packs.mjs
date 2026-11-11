@@ -46,6 +46,8 @@ export const PACK_CASES = {
     put(join(wt, '.claude/layout.json'), JSON.stringify({ ...JSON.parse(readFileSync(join(wt, '.claude/layout.json'), 'utf8')), chart: 'CLAUDE.md' }));
     assert.equal(fire(here, 'chart-first.mjs', join(wt, 'src/dsp/Svf.cpp')), 0, 'judged by the worktree');
   },
+  // A non-base pack's hook cannot be imported from packs/ (its ./lib/ is base's, merged only by an install), so the worktree
+  // cases of these hooks stay functions here, beside the `worktreeCase` data each hook exports, until slice 6 reads it from an install.
   'no-shipped-images.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'src/painter/logo.png')), 2);
     assert.equal(fire(here, 'no-shipped-images.mjs', join(wt, 'tests/goldens/panel.png')), 0);

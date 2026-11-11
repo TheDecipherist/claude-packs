@@ -24,7 +24,7 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/compile-cache.mjs\"", "timeout": 10 }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/compile-cache.mjs\"", "role": "judge", "timeout": 10 }
         ]
       }
     ]

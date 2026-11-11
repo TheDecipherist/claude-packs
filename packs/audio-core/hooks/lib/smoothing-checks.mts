@@ -1,15 +1,22 @@
-import { blankCode, lineAt } from './cpp-scan.mjs';
-import { matchesAny } from './glob.mjs';
-import { conceptGlobs, foldersOfKind } from './layout.mjs';
+import { blankCode, lineAt } from './cpp-scan.mts';
+import { matchesAny } from './glob.mts';
+import { conceptGlobs, foldersOfKind } from './layout.mts';
+import type { FileWrite, Layout } from './types.d.mts';
 
 // KWB-126: every continuous control runs through the project's one smoothing module, so a search for its namespace shows
 // what is smoothed and what is not. This judges the code outside that module for smoothing written by hand, or a gain
 // stepped once per block. Off until `.claude/layout.json` has `guards.smoothing`.
 //   { "module": "src/dsp/smooth/**", "namespace": "smooth", "scope": ["src/audio/**", "src/dsp/**"] }
 
+/** Where the smoothing module is, what its namespace is called, and which files are judged. */
+export interface SmoothingConfig { module: string[]; namespace: string; scope: string[] }
+
+/** One hand-written smoothing found: its line, what it is, and its text. */
+export interface SmoothingHit { line: number; why: string; text: string }
+
 export const MARKER = /\/\/\s*smooth-ok:\s*\S/; // a marker carries its reason: a bare `// smooth-ok:` does not pass
 
-const list = (v) => (Array.isArray(v) ? v : typeof v === 'string' ? [v] : []);
+const list = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : typeof v === 'string' ? [v] : []);
 
 // Smoothing is never optional (the user, 2026-11-10: "smoothing should be completely automatic and never opt in. there is no
 // reason to not do smoothing"). Without `guards.smoothing` the module is any folder named smooth, plus a project's copy trees
@@ -19,22 +26,25 @@ const DEFAULT_MODULE = ['**/smooth/**'];
 const DEFAULT_SCOPE = ['src/audio/**', 'src/dsp/**', 'src/engines/**', 'src/app/**'];
 const AUDIO_CONCEPTS = ['audio', 'dsp'];
 
-export function smoothingConfig(layout = {}) {
-  const g = layout?.guards?.smoothing && typeof layout.guards.smoothing === 'object' ? layout.guards.smoothing : {};
+export function smoothingConfig(layout: Layout): SmoothingConfig {
+  const declared = layout.guards?.['smoothing'];
+  const g: Record<string, unknown> = declared && typeof declared === 'object' ? declared as Record<string, unknown> : {};
   const concepts = AUDIO_CONCEPTS.flatMap((c) => conceptGlobs(layout, c) ?? []);
-  const module = [...new Set([...list(g.module), ...DEFAULT_MODULE, ...foldersOfKind(layout, 'copy').map((p) => `${p}/**`)])];
-  const scope = list(g.scope).length ? list(g.scope) : concepts.length ? [...new Set(concepts)] : DEFAULT_SCOPE;
-  return { module, namespace: typeof g.namespace === 'string' && g.namespace ? g.namespace : 'smooth', scope };
+  const module = [...new Set([...list(g['module']), ...DEFAULT_MODULE, ...foldersOfKind(layout, 'copy').map((p) => `${p}/**`)])];
+  const named = list(g['scope']);
+  const scope = named.length ? named : concepts.length ? [...new Set(concepts)] : DEFAULT_SCOPE;
+  const namespace = g['namespace'];
+  return { module, namespace: typeof namespace === 'string' && namespace ? namespace : 'smooth', scope };
 }
 
 // A file is judged when it is in scope and is not the module itself.
-export const judged = (rel, cfg) => matchesAny(rel, cfg.scope) && !matchesAny(rel, cfg.module);
+export const judged = (rel: string, cfg: SmoothingConfig): boolean => matchesAny(rel, cfg.scope) && !matchesAny(rel, cfg.module);
 
 const IDENT = String.raw`[\w.\->\[\]]+`;
 const DIFF = String.raw`\(\s*[^()]*-\s*[^()]*\)`;
 
 // One row per shape of hand-written smoothing: a line pattern and what it is.
-const SHAPES = [
+const SHAPES: readonly { re: RegExp; why: string }[] = [
   { re: /\b(?:Linear|Multiplicative)?SmoothedValue\b|\bLinearSmoothedValue\b/g, why: 'a hand-made `SmoothedValue`' },
   { re: new RegExp(String.raw`[-+]=\s*${IDENT}\s*\*\s*${DIFF}|[-+]=\s*${DIFF}\s*\*\s*${IDENT}`, 'g'), why: 'a one-pole slew written out (`x += k * (target - x)`)' },
   { re: new RegExp(String.raw`(${IDENT})\s*=\s*\1\s*[-+]\s*${IDENT}\s*\*\s*${DIFF}`, 'g'), why: 'a one-pole slew written out (`x = x + k * (target - x)`)' },
@@ -47,18 +57,21 @@ const SHAPES = [
 
 const LITERAL = /^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?[fFdD]?$/;
 const POINTERISH = /Pointer|\.data\s*\(|\[|&/;
+
+interface GainCall { re: RegExp; name: string; gain: (args: readonly string[]) => string | null | undefined }
+
 // A gain applied to a whole block as one scalar. `gain(args)` is the argument that is the gain, or null when the call has none.
-const GAIN_CALLS = [
+const GAIN_CALLS: readonly GainCall[] = [
   { re: /\.\s*applyGain\s*\(/g, name: 'applyGain', gain: (a) => a[a.length - 1] },
   { re: /\.\s*multiplyBy\s*\(/g, name: 'multiplyBy', gain: (a) => a[a.length - 1] },
   { re: /\b(?:add|copy)From\s*\(/g, name: 'addFrom/copyFrom', gain: (a) => (a.length === 5 || a.length === 7 ? a[a.length - 1] : null) },
-  { re: /\bFloatVectorOperations\s*::\s*multiply\s*\(/g, name: 'FloatVectorOperations::multiply', gain: (a) => (a.length === 4 ? a[2] : a.length === 3 && !POINTERISH.test(a[1]) ? a[1] : null) },
+  { re: /\bFloatVectorOperations\s*::\s*multiply\s*\(/g, name: 'FloatVectorOperations::multiply', gain: (a) => (a.length === 4 ? a[2] : a.length === 3 && !POINTERISH.test(a[1] ?? '') ? a[1] : null) },
   { re: /\bFloatVectorOperations\s*::\s*(?:copyWithMultiply|addWithMultiply)\s*\(/g, name: 'FloatVectorOperations::copy/addWithMultiply', gain: (a) => (a.length === 4 ? a[2] : null) },
 ];
 
 // The top-level arguments of the call whose "(" is at open, or null when it never closes.
-function argsAt(code, open) {
-  const args = [];
+function argsAt(code: string, open: number): string[] | null {
+  const args: string[] = [];
   let depth = 0;
   let from = open + 1;
   for (let i = open; i < code.length; i += 1) {
@@ -79,11 +92,13 @@ function argsAt(code, open) {
   return null;
 }
 
-function gainSteps(code) {
-  const found = [];
+interface RawHit { index: number; why: string }
+
+function gainSteps(code: string): RawHit[] {
+  const found: RawHit[] = [];
   for (const { re, name, gain } of GAIN_CALLS) {
     re.lastIndex = 0;
-    let m;
+    let m: RegExpExecArray | null;
     while ((m = re.exec(code)) !== null) {
       const args = argsAt(code, m.index + m[0].length - 1);
       const g = args && gain(args);
@@ -94,16 +109,16 @@ function gainSteps(code) {
 }
 
 // Every smoothing outside the module in one file's source: [{ line, why, text }], marked lines left out.
-export function findHandSmoothing(src) {
+export function findHandSmoothing(src: string): SmoothingHit[] {
   const code = blankCode(src);
   const lines = src.split('\n');
-  const hits = [...gainSteps(code)];
+  const hits: RawHit[] = [...gainSteps(code)];
   for (const { re, why } of SHAPES) {
     re.lastIndex = 0;
-    let m;
+    let m: RegExpExecArray | null;
     while ((m = re.exec(code)) !== null) hits.push({ index: m.index, why });
   }
-  const found = [];
+  const found: SmoothingHit[] = [];
   for (const { index, why } of hits) {
     const line = lineAt(src, index);
     const text = (lines[line - 1] ?? '').trim();
@@ -112,11 +127,11 @@ export function findHandSmoothing(src) {
   return found.sort((a, b) => a.line - b.line);
 }
 
-export const smoothingKey = (v) => `${v.why}|${v.text}`;
+export const smoothingKey = (v: SmoothingHit): string => `${v.why}|${v.text}`;
 
 // The message for a write that adds some, or null.
-export function judgeSmoothing(w, rel, cfg) {
-  if (!/\.(cpp|cc|cxx|h|hh|hpp|mm)$/.test(w.path) || w.after === null || w.after === undefined || !judged(rel, cfg)) return null;
+export function judgeSmoothing(w: FileWrite, rel: string, cfg: SmoothingConfig): string | null {
+  if (!/\.(cpp|cc|cxx|h|hh|hpp|mm)$/.test(w.path) || w.after === null || !judged(rel, cfg)) return null;
   const was = new Set(findHandSmoothing(w.before ?? '').map(smoothingKey));
   const added = findHandSmoothing(w.after).filter((v) => !was.has(smoothingKey(v)));
   if (added.length === 0) return null;

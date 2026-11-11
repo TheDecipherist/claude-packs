@@ -1,7 +1,13 @@
-import { blankCode, findAudioBodies, lineAt } from './cpp-scan.mjs';
+import { blankCode, findAudioBodies, lineAt } from './cpp-scan.mts';
+
+/** One check: a pattern searched inside audio-thread bodies, and the reason shown to Claude. */
+export interface RealtimeCheck { re: RegExp; why: string }
+
+/** One realtime-unsafe line: where, in which function, why, and its text. */
+export interface RealtimeViolation { line: number; func: string; why: string; text: string }
 
 // Each check: a pattern searched inside audio-thread bodies, and the reason shown to Claude.
-export const CHECKS = [
+export const CHECKS: readonly RealtimeCheck[] = [
   { re: /\bnew\b(?!\s*\()/g, why: 'heap allocation (`new`)' },
   { re: /\bdelete\b/g, why: 'heap deallocation (`delete`)' },
   { re: /\b(malloc|calloc|realloc|free)\s*\(/g, why: 'C heap call' },
@@ -28,15 +34,15 @@ export const CHECKS = [
 const ESCAPE = /\/\/\s*rt-ok:/;
 
 // Returns [{ line, func, why, text }] for one file's source.
-export function findViolations(src) {
+export function findViolations(src: string): RealtimeViolation[] {
   const code = blankCode(src);
   const lines = src.split('\n');
-  const found = [];
+  const found: RealtimeViolation[] = [];
   for (const body of findAudioBodies(code)) {
     const slice = code.slice(body.start, body.end + 1);
     for (const { re, why } of CHECKS) {
       re.lastIndex = 0;
-      let m;
+      let m: RegExpExecArray | null;
       while ((m = re.exec(slice)) !== null) {
         const line = lineAt(src, body.start + m.index);
         const text = (lines[line - 1] ?? '').trim();
@@ -53,4 +59,4 @@ export function findViolations(src) {
 }
 
 // Key that survives line shifts, so only violations an edit adds are reported.
-export const violationKey = (v) => `${v.func}|${v.why}|${v.text}`;
+export const violationKey = (v: RealtimeViolation): string => `${v.func}|${v.why}|${v.text}`;

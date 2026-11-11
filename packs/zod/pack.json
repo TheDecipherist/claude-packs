@@ -35,6 +35,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/schemas-only.mjs\"",
+            "role": "judge",
             "timeout": 10
           }
         ]
