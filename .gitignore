@@ -20,3 +20,25 @@ packs/base/hooks/lib/source-exts.mjs
 scripts/clean-emitted.mjs
 packs/base/hooks/lib/json.mjs
 lib/kit-lock.mjs
+# W3 layer 0 (base hooks lib), emitted
+packs/base/hooks/lib/apply-edit.mjs
+packs/base/hooks/lib/audience.mjs
+packs/base/hooks/lib/build-slots.mjs
+packs/base/hooks/lib/command-prefix.mjs
+packs/base/hooks/lib/compile-cache.mjs
+packs/base/hooks/lib/core-budget.mjs
+packs/base/hooks/lib/cpp-scan.mjs
+packs/base/hooks/lib/crash-policy.mjs
+packs/base/hooks/lib/git-adds.mjs
+packs/base/hooks/lib/glob.mjs
+packs/base/hooks/lib/identifier-runs.mjs
+packs/base/hooks/lib/layout.mjs
+packs/base/hooks/lib/own-processes.mjs
+packs/base/hooks/lib/program-read.mjs
+packs/base/hooks/lib/project.mjs
+packs/base/hooks/lib/prose.mjs
+packs/base/hooks/lib/run-claudes.mjs
+packs/base/hooks/lib/rust-scan.mjs
+packs/base/hooks/lib/secret-patterns.mjs
+packs/base/hooks/lib/selftest.mjs
+packs/base/hooks/lib/shell-lex.mjs

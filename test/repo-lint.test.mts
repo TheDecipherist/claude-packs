@@ -70,8 +70,10 @@ export function staleEmit(root: string, project: string): string[] {
 const TAIL = /^if \(isMain\(import\.meta\.url\)\)/m;
 const PROCESS = /\bprocess\.(?:env\b|cwd\(|ppid\b|exit\b|chdir\b|stdout\b|stderr\b)|\bconsole\./;
 const DECLARES = /^(?:import\b|export\b|const\b|let\b|var\b|function\b|async function\b|class\b|interface\b|type\b|declare\b|[}\])]|$)/;
+// A selftest module runs only under --selftest, never inside the resident runner, and is left out (d-20).
+const SELFTEST_ONLY = /\/(?:selftest|[\w-]+-selftest|hub-rig)\.mts$/;
 const hookModules = (root: string): string[] => walk(join(root, 'packs'), skipped)
-  .filter((f) => /\/hooks\/(?:lib\/)?[\w-]+\.(?:mts|cts)$/.test(f) && !f.endsWith('.d.mts'));
+  .filter((f) => /\/hooks\/(?:lib\/)?[\w-]+\.(?:mts|cts)$/.test(f) && !f.endsWith('.d.mts') && !SELFTEST_ONLY.test(f));
 export function processGlobals(root: string, files = hookModules(root)): string[] {
   return files.flatMap((f) => {
     const code = blank(readText(f) ?? '');

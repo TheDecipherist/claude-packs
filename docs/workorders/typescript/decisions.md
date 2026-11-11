@@ -122,3 +122,10 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
   when `writes` is converted (W3 L3), since a `.mts` may import only typed modules; project converts at W3 L0 with its `ctx` form.
 - Why: project reads `process.env` and `process.cwd()` at import (gate 11) and its `ctx` form changes what 23 importers call,
   which is W3.3's work; converting it now would make the pilot either fail gate 11 or change 23 files outside its layer.
+
+## d-20 Selftest modules and gates 11 and 12 {#d-20}
+- Question: gates 11 and 12 forbid process globals and work at import in a hook or hook-lib module; `selftest.mts` and the
+  `*-selftest` and `hub-rig` modules spawn processes with the process's env by design.
+- Chosen: those modules are left out of gates 11 and 12 (repo-lint `SELFTEST_ONLY`); every other hook and hook-lib module is held.
+- Why: a selftest module runs only under `--selftest` (W3.2 moves look-gate's and skill-first's to a dynamic import there), never
+  inside the resident runner, which is what the two gates protect.
