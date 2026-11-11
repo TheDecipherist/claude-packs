@@ -19,10 +19,10 @@ const NEW_LAWS = [['hooks/secrets-guard.mjs', 'rules/secrets-never-committed.md'
 test('a new project of every configuration gets both laws, and both selftests pass', () => {
   for (const config of ['base', 'synth-creator'] as const) {
     const dir = fixture(config);
-    const settings = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
+    const settings = readFileSync(join(dir, '.claude/hooks/hooks.json'), 'utf8');   // the runner's table (W8.1)
     for (const [hook, rule] of NEW_LAWS) {
       assert.ok(existsSync(join(dir, '.claude', rule)), `${config}: ${rule}`);
-      assert.match(settings, new RegExp(hook.replace('hooks/', '').replace('.', '\\.')), `${config}: ${hook} wired`);
+      assert.match(settings, new RegExp(`"hook": "${hook.replace('hooks/', '').replace('.mjs', '')}"`), `${config}: ${hook} is a row of the runner's table`);
       const r = selftest(dir, hook.replace('hooks/', ''));
       assert.equal(r.status, 0, r.stdout + r.stderr);
     }
