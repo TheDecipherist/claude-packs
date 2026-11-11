@@ -1,5 +1,5 @@
 ---
-# concepts: cpp, shaders
+# concepts: cpp, shaders, python, go, rust, js
 paths:
   - "placeholder"
 ---
