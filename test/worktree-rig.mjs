@@ -1,5 +1,6 @@
 // The worktree tests' rig: a real repo with the packs installed and committed, one agent worktree under .claude/worktrees/,
 // and hooks fired the way Claude Code fires them (the main checkout's copy, CLAUDE_PROJECT_DIR = main).
+import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -45,5 +46,17 @@ export const stellix = () => project(['audio-core', 'gpu-painter', 'stellix', '-
 // node runs a .mjs hook, python3 a .py one, as the settings entries do.
 export const fireAs = (here, hook, payload, env = {}) =>
   spawnSync(hook.endsWith('.py') ? 'python3' : 'node', [join(here, '.claude/hooks', hook)], { input: JSON.stringify(payload), env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', CLAUDE_PROJECT_DIR: here, ...env }, encoding: 'utf8' });
+// A hook's own `worktreeCase` (data beside its selftest, lib/selftest.mts WorktreeCase) as the check worktrees.test.mjs runs:
+// `{here}` and `{wt}` in the files and in the events become the two checkouts, each step's exit code is the one it wants.
+const swapPaths = (value, here, wt) => {
+  if (typeof value === 'string') return value.replaceAll('{here}', here).replaceAll('{wt}', wt);
+  if (Array.isArray(value)) return value.map((v) => swapPaths(v, here, wt));
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, swapPaths(v, here, wt)]));
+  return value;
+};
+export const caseFrom = (hook, worktreeCase) => ({ here, wt }) => {
+  for (const [file, text] of Object.entries(worktreeCase.files ?? {})) put(swapPaths(file, here, wt), swapPaths(text, here, wt));
+  for (const step of worktreeCase.steps) assert.equal(fireAs(here, hook, swapPaths(step.event, here, wt)).status, step.want, `${hook}: ${step.label}`);
+};
 export const fire = (here, hook, file, content = '// new\n') => fireAs(here, hook, { tool_name: 'Write', tool_input: { file_path: file, content } }).status;
 export const bash = (here, hook, command) => fireAs(here, hook, { tool_name: 'Bash', tool_input: { command } }).status;

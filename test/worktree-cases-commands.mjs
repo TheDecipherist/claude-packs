@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { bash, fireAs, put } from './worktree-rig.mjs';
+import { bash, caseFrom, fireAs, put } from './worktree-rig.mjs';
 
 // The worktree's layout with these keys merged in; main's stays as it was.
 const withLayout = (wt, keys) => {
@@ -44,12 +44,8 @@ export const COMMAND_CASES = {
     assert.match(start(wt).stdout, /runs the kit 0\.0\.1/);
     assert.equal(start(here).stdout, '');
   },
-  'no-find.mjs': ({ here, wt }) => {
-    // A search is refused in a worktree as in the main checkout (1.8.2, KWB-154): nobody asked for one.
-    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && find . -name x`), 2);
-    assert.equal(bash(here, 'no-find.mjs', `cd ${here} && find . -name x`), 2);
-    assert.equal(bash(here, 'no-find.mjs', `cd ${wt} && git grep -n x`), 0);
-  },
+  // a hook moved onto the contract (W4) exports its own worktree case as data, beside its selftest
+  'no-find.mjs': caseFrom('no-find.mjs', (await import('../packs/base/hooks/no-find.mjs')).worktreeCase),
   'repo-litter.mjs': ({ here, wt }) => {
     // The worktree's layout allows this asset; main's does not.
     put(join(wt, 'hero.png'), 'x');

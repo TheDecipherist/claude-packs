@@ -4,10 +4,10 @@
 // that judges command text can refuse the probe itself (Sub37 WB-4). doctor runs every selftest.
 // A selftest module is left out of the repo lint's no-process gates (d-20): it is the one place that runs as a process.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, rmSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { put, scratchDir } from './files.mts';
+import { put, scratchDir, walk } from './files.mts';
 import { toJson } from './json.mts';
 import type { Layout, VerdictRow } from './types.d.mts';
 
@@ -25,6 +25,32 @@ export function scratchProject(files: Record<string, string> = {}, layout: Parti
   if (layout) put(join(dir, '.claude/layout.json'), toJson(layout));
   for (const [rel, text] of Object.entries(files)) put(join(dir, rel), text);
   return dir;
+}
+
+/** The worktree case a hook exports beside `selftest` (`export const worktreeCase: WorktreeCase`), as data the test reads: each
+ *  step fires the installed hook in a real project with an agent worktree and wants its exit code. Strings in `event` and in
+ *  `files` may hold `{here}` (the main checkout) and `{wt}` (the worktree), swapped in by the test; `files` are written first,
+ *  by path with those swapped in. The step's event is the payload as Claude Code sends it. */
+export interface WorktreeStep { label: string; event: Record<string, unknown>; want: number }
+export interface WorktreeCase { files?: Readonly<Record<string, string>>; steps: readonly WorktreeStep[] }
+
+// The runner's own logs are not a judge's writes (the runner writes them for every hook, a judge or not).
+const RUNNER_LOGS = /(?:^|\/)\.claude\/(?:hooks\.log|logs\/)/;
+/** Every file under `dir` with its size and mtime, but the runner's logs: the state a judge's selftest must leave as it was. */
+export function snapshot(dir: string): Map<string, string> {
+  const seen = new Map<string, string>();
+  for (const file of walk(dir)) {
+    const rel = relative(dir, file).replace(/\\/g, '/');
+    if (RUNNER_LOGS.test(rel)) continue;
+    const s = statSync(file);
+    seen.set(rel, `${s.size}:${s.mtimeMs}`);
+  }
+  return seen;
+}
+/** The files that differ from a `snapshot` taken before (added, changed or gone): a judge's selftest row is `writtenSince(...).length`, wanted 0. */
+export function writtenSince(dir: string, before: ReadonlyMap<string, string>): string[] {
+  const now = snapshot(dir);
+  return [...new Set([...before.keys(), ...now.keys()])].filter((k) => before.get(k) !== now.get(k)).sort();
 }
 
 /** What a hook run left: its exit code (null when it was stopped), stdout and stderr. */

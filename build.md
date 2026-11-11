@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 W4 w4-contract (work/2.0.0-ts-w4-contract), started 2026-11-11: the hook contract the six W4 slices move every hook onto.
+  making: lib/verdict.mts (pass, refuse, say), contextOf and the two-kind runAsHook/dispatchHook in hook-log.mts, the two-kind runner in run-hooks.mts, no-find.mts as the worked example with its worktreeCase, briefs/W4-hook.md; concepts: none (design/shape.json declares none); reuse: readPayload (writes.mts), readLayout (layout.mts), judgeEvent's frame (writes.mts), runAsHook/dispatchHook (hook-log.mts).
+
 - 2.0.0, the kit in TypeScript (work/2.0.0-typescript, from work/1.9.0-platforms), started 2026-11-11, the order docs/workorders/typescript/ (W0-W12), run unattended from its PROMPT.
   making: W0 set up (decisions d-1..d-13, the order's folders in layout.json, the admiral merge, the four stale KWB rows closed, the version pins, the baseline (a)-(l), suite-once's two planted prompts); then each step as workorder.md says; concepts: none (design/shape.json declares none); reuse: the foundation workorder.md lists (lib/sync.mjs, run-hooks.mjs, selftest.mjs, json.mjs, shell-lex.mjs, scripts/test-changed.mjs, scripts/release.mjs).
   done when: as each step of docs/workorders/typescript/workorder.md says; progress in docs/workorders/typescript/progress.md.

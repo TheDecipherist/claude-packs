@@ -19,10 +19,12 @@ import { logCall } from './lib/event-log.mts';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mts';
 import { appendRotated, isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mts';
 import { parseJson, toJson } from './lib/json.mts';
+import { readLayout } from './lib/layout.mts';
 import { verdicts } from './lib/selftest.mts';
 import { unreadWrites } from './lib/unread-writes.mts';
+import { isVerdict } from './lib/verdict.mts';
 import type { Env } from './lib/shell-writes.mts';
-import type { HookEvent, Verdict } from './lib/types.d.mts';
+import type { Hook, HookContext, HookEvent, Verdict } from './lib/types.d.mts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const RUNNER = 'run-hooks';
@@ -31,16 +33,14 @@ export const OUT_CAP = 9000;
 export const nameOf = (arg: string): string => basename(arg).replace(/\.mjs$/, '');
 const fileOf = (arg: string): string => (isAbsolute(arg) ? arg : join(HERE, `${nameOf(arg)}.mjs`));
 
-/** What a hook module's `hook` gives back: a Verdict, or (until W4 moves every hook) an exit code, its output in the streams. */
+/** What a one-parameter hook gives back (until W4 moves every hook): an exit code, its output in the streams. */
 export type HookResult = Verdict | number | void | undefined;
-type ModuleHook = (text: string) => HookResult | Promise<HookResult>;
+type ModuleHook = ((text: string) => HookResult | Promise<HookResult>) | Hook;
+/** A hook declared with both parameters takes the event and a context and returns a Verdict (types.d.mts `Hook`). */
+const takesContext = (fn: ModuleHook): fn is Hook => fn.length >= 2;
 
 type Json = Record<string, unknown>;
 const asRecord = (value: unknown): Json | null => (value !== null && typeof value === 'object' && !Array.isArray(value) ? (value as Json) : null);
-const isVerdict = (value: unknown): value is Verdict => {
-  const v = asRecord(value);
-  return v !== null && typeof v.code === 'number' && typeof v.stdout === 'string' && typeof v.stderr === 'string';
-};
 
 function hookOf(mod: unknown): ModuleHook | null {
   const fn = asRecord(mod)?.hook;
@@ -117,7 +117,7 @@ const capture = (stream: NodeJS.WriteStream, sink: string[]): (() => void) => {
 export interface RunResult { code: number; stdout: string; stderr: string }
 /** What of the process the runner reaches for, given by whoever calls it (the tail below, or a test): the environment, and the
  *  streams a number-returning hook writes to. */
-export interface Caller { env: Env; stdout: NodeJS.WriteStream; stderr: NodeJS.WriteStream }
+export interface Caller { env: Env; stdout: NodeJS.WriteStream; stderr: NodeJS.WriteStream; cwd: string; sessionPid: number }
 interface Judged { hook: string; ms: number; code: number; reason: string; out: string }
 
 // -> { code, stdout, stderr }. Each hook's own time is logged (its module's first import included).
@@ -126,18 +126,26 @@ export async function runAll(args: readonly string[], text: string, root: string
   const outs: string[] = [];
   const err: string[] = [];
   const judged: Judged[] = [];
+  // the context of this event, built once from the caller (never from this process): every two-parameter hook gets it
+  const ctx: HookContext = {
+    projectDir: root, cwd: caller.cwd, env: caller.env, sessionPid: caller.sessionPid, now: Date.now(), layout: readLayout(root),
+    log: (line: string): void => { caller.stderr.write(`${line}\n`); },
+  };
   let code = 0;
   for (const arg of args) {
     const name = nameOf(arg);
     const out: string[] = [];
     const before = err.length;
     const t0 = performance.now();
-    const undo = [capture(caller.stdout, out), capture(caller.stderr, err)];
     let c = 0;
+    let undo: (() => void)[] = [];
     try {
       const fn = hookOf(await import(pathToFileURL(fileOf(arg)).href));
-      if (!fn) throw new Error(`${name} exports no hook(text)`);
-      const result = await fn(text);
+      if (!fn) throw new Error(`${name} exports no hook`);
+      // the streams are caught only for a one-parameter hook, which writes to them (W4's end removes this)
+      if (!takesContext(fn)) undo = [capture(caller.stdout, out), capture(caller.stderr, err)];
+      const result: unknown = takesContext(fn) ? await fn(ev, ctx) : await fn(text);
+      if (takesContext(fn) && !isVerdict(result)) throw new Error(`${name} returned no Verdict`);
       if (isVerdict(result)) {
         c = result.code;
         out.push(result.stdout);
@@ -166,7 +174,8 @@ export async function runAll(args: readonly string[], text: string, root: string
 async function selftest(real: Caller): Promise<number> {
   const dir = scratchDir('run-hooks-');
   ensureDir(join(dir, '.claude'));
-  const fake = (name: string, body: string): string => { const f = join(dir, `${name}.mjs`); put(f, `export function hook(text) {\n${body}\n}\n`); return f; };
+  const fake = (name: string, body: string, params = 'text'): string => { const f = join(dir, `${name}.mjs`); put(f, `export function hook(${params}) {\n${body}\n}\n`); return f; };
+  const fake2 = (name: string, body: string): string => fake(name, body, 'event, ctx');
   const ok = fake('says-ok', "process.stdout.write('{\"systemMessage\":\"a\"}'); return 0;");
   const no = fake('refuses', "process.stderr.write('BLOCKED by refuses\\n'); return JSON.parse(text).tool_name === 'Bash' ? 2 : 0;");
   const also = fake('also-says', "console.log(JSON.stringify({ systemMessage: 'b' })); return 0;");
@@ -175,7 +184,10 @@ async function selftest(real: Caller): Promise<number> {
   const talk = fake('returns-words', "return { code: 0, stdout: JSON.stringify({ systemMessage: 'v' }), stderr: '' };");
   const loud = Array.from({ length: 30 }, (_, i) => fake(`loud-${i}`, `return { code: 0, stdout: JSON.stringify({ systemMessage: ${toJson(`h${i} `.repeat(250).slice(0, 500))} }), stderr: '' };`));
   const wall = Array.from({ length: 30 }, (_, i) => fake(`wall-${i}`, `return { code: 0, stdout: ${toJson(`w${i} `.repeat(250).slice(0, 499))} + '\\n', stderr: '' };`));
-  const caller: Caller = { ...real, env: {} };
+  const sees = fake2('sees-context', "return { code: ctx.env.MARK === 'x' && ctx.sessionPid === 4242 && ctx.cwd === '/there' && event.tool_name === 'Bash' ? 2 : 0, stdout: '', stderr: 'CTX seen\\n' };");
+  const silent = fake2('returns-nothing', 'return undefined;');
+  const bang = fake2('throws-too', "throw new Error('planted two');");
+  const caller: Caller = { ...real, env: { MARK: 'x' }, cwd: '/there', sessionPid: 4242 };
   const bash = toJson({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'rm x' } });
   const cases: [string, number | boolean | string | null, number | boolean | string | null][] = [];
   const r1 = await runAll([ok, no, also], bash, dir, caller);
@@ -205,13 +217,19 @@ async function selftest(real: Caller): Promise<number> {
   const r7 = await runAll(wall, toJson({ hook_event_name: 'UserPromptSubmit' }), dir, caller);
   cases.push(['30 plain-text hooks: held to 9,000, the cut named at the end', r7.stdout.length <= OUT_CAP && r7.stdout.includes('were cut here'), true]);
   cases.push(['a short merge is untouched', mergeOut(['a\n', 'b\n']), 'a\nb\n']);
+  const r8 = await runAll([sees, talk], bash, dir, caller);
+  cases.push(['a two-parameter hook gets the event and the context built from the caller', r8.code === 2 && r8.stderr.includes('CTX seen') && r8.stdout.includes('"v"'), true]);
+  const r9 = await runAll([silent, ok], bash, dir, caller);
+  cases.push(['a two-parameter hook that returns no Verdict crashed: the call is refused once, and the next hook still runs', r9.code === 2 && r9.stderr.includes('returns-nothing crashed') && r9.stdout.includes('"a"'), true]);
+  const r10 = await runAll([bang], bash, dir, caller);
+  cases.push(['a two-parameter hook that throws crashed', r10.code === 2 && r10.stderr.includes('throws-too crashed'), true]);
   rmSync(dir, { recursive: true, force: true });
   return verdicts('run-hooks', cases);
 }
 
 if (isMain(import.meta.url)) {
   const args = process.argv.slice(2);
-  const caller: Caller = { env: process.env, stdout: process.stdout, stderr: process.stderr };
+  const caller: Caller = { env: process.env, stdout: process.stdout, stderr: process.stderr, cwd: process.cwd(), sessionPid: process.ppid };
   if (args.includes('--selftest')) process.exit(await selftest(caller));
   let text = '';
   try { text = readFileSync(0, 'utf8'); } catch { /* no stdin */ }

@@ -12,12 +12,16 @@
 //   logHook(root, { event, hook, ms, code, tool })    readHookLog(root) -> [{ time, event, hook, ms, code, tool }]
 // This file is the hooks' process boundary (typescript order d-23): it alone reads the process (argv, env, cwd, stdin, stderr,
 // exit), so the repo lint's gates 11 and 12 leave it out by name.
-import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeSync } from 'node:fs';
 import { basename, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logCall } from './event-log.mts';
 import { readJson } from './json.mts';
+import { readLayout } from './layout.mts';
 import { real } from './project.mts';
+import { isVerdict } from './verdict.mts';
+import { readPayload } from './writes.mts';
+import type { Hook, HookContext, Verdict } from './types.d.mts';
 
 export const LOG: string = join('.claude', 'hooks.log');
 export const LOG_MAX_BYTES = 1024 * 1024;
@@ -119,13 +123,39 @@ const readJsonText = (text: string): Record<string, unknown> | null => {
   try { const p: unknown = JSON.parse(text); return p !== null && typeof p === 'object' ? p as Record<string, unknown> : null; } catch { return null; }
 };
 
-/** What a hook's main is: the event text in, the exit code out. */
+/** What a hook's main is until W4 moves it: the event text in, the exit code out, its words written to the process's streams. */
 export type HookMain = (text: string) => number | void | Promise<number | void>;
+/** Either kind of hook function: `hook(event, ctx)` returning a Verdict (declared with both parameters, `length` 2), or a HookMain. */
+export type HookFn = HookMain | Hook;
+/** True for a hook declared with both parameters: it is called with the event and a context and returns a Verdict. */
+export const takesContext = (fn: HookFn): fn is Hook => fn.length >= 2;
+
+/** The context of an event run on its own, from this process: the project (CLAUDE_PROJECT_DIR, else the folder), the folder, the
+ *  environment, the parent process (Claude Code), now, the project's layout and a logger to stderr. `over` replaces any of them
+ *  (a test, a caller that is not this process). The runner builds its own from its caller, once per event. */
+export function contextOf(over: Partial<HookContext> = {}): HookContext {
+  const projectDir = over.projectDir ?? projectRoot();
+  return {
+    projectDir,
+    cwd: process.cwd(),
+    env: process.env,
+    sessionPid: process.ppid,
+    now: Date.now(),
+    layout: readLayout(projectDir),
+    log: (line: string): void => { process.stderr.write(`${line}\n`); },
+    ...over,
+  };
+}
+
+/** A Verdict's words written at once to the process's streams (a hook may leave a timer behind, and the event never waits on it). */
+export function writeVerdict(verdict: Verdict): void {
+  for (const [fd, text] of [[1, verdict.stdout], [2, verdict.stderr]] as const) if (text) try { writeSync(fd, text); } catch { /* a closed pipe */ }
+}
 
 const stdinText = (): string => readFileSync(0, 'utf8');
 
 /** A hook run on its own: the time is from the process's start (node's own start-up included, which is what a hook costs). */
-export async function asHook(name: string | null | undefined, fn: HookMain, readStdin: () => string = stdinText): Promise<number> {
+export async function asHook(name: string | null | undefined, fn: HookFn, readStdin: () => string = stdinText): Promise<number> {
   let text = '';
   try { text = readStdin(); } catch { /* no stdin */ }
   const said: string[] = [];
@@ -133,7 +163,14 @@ export async function asHook(name: string | null | undefined, fn: HookMain, read
   process.stderr.write = ((chunk: string | Uint8Array, ...rest: unknown[]): boolean => { said.push(String(chunk)); return (write as (...a: unknown[]) => boolean)(chunk, ...rest); }) as typeof process.stderr.write;
   let code: number | void | undefined;
   try {
-    code = await fn(text);
+    if (takesContext(fn)) {
+      // the contract: the parsed event and a context in, a Verdict out; its words are written here, its code is the exit code
+      const verdict: unknown = await fn(readPayload(text) ?? {}, contextOf());
+      if (!isVerdict(verdict)) throw new Error(`${name ?? 'the hook'} returned no Verdict`);
+      writeVerdict(verdict);
+      said.push(verdict.stderr);
+      code = verdict.code;
+    } else code = await fn(text);
   } finally {
     process.stderr.write = write;
     const hook = name ?? basename(process.argv[1] ?? '-').replace(/\.\w+$/, '');
@@ -157,7 +194,7 @@ export interface RunAsHookOptions {
  *  the hook on stdin. An argument no one declared is ignored, as the hooks ignored it before: Claude Code passes none. A
  *  selftest's code, a flag's code and the hook's code are returned; a hook that throws still has its call logged (asHook) and
  *  the error comes out to the caller. */
-export async function dispatchHook(argv: readonly string[], name: string, main: HookMain, selftest: () => number | Promise<number>, options: RunAsHookOptions = {}): Promise<number> {
+export async function dispatchHook(argv: readonly string[], name: string, main: HookFn, selftest: () => number | Promise<number>, options: RunAsHookOptions = {}): Promise<number> {
   if (argv.includes('--selftest')) return selftest();
   for (const [flag, handler] of Object.entries(options.flags ?? {})) if (argv.includes(flag)) return handler(argv);
   return asHook(name, main, options.stdin);
@@ -166,7 +203,7 @@ export async function dispatchHook(argv: readonly string[], name: string, main: 
 /** The tail of every hook: `runAsHook(import.meta.url, '<name>', main, selftest, { flags })`. Nothing happens when the hook is
  *  imported (the runner). Run directly, it dispatches (see dispatchHook) and exits with the code; a throw is printed as node
  *  would print it, and exits 1. */
-export async function runAsHook(url: string, name: string, main: HookMain, selftest: () => number | Promise<number>, options: RunAsHookOptions = {}): Promise<void> {
+export async function runAsHook(url: string, name: string, main: HookFn, selftest: () => number | Promise<number>, options: RunAsHookOptions = {}): Promise<void> {
   if (!isMain(url)) return;
   let code: number;
   try {

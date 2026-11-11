@@ -14,7 +14,8 @@ import { computeEdit } from './apply-edit.mts';
 import { parseJson } from './json.mts';
 import { afterText, readText, shellWrites } from './shell-writes.mts';
 import type { Env, ShellWrite } from './shell-writes.mts';
-import type { FileWrite, HookEvent } from './types.d.mts';
+import { pass, refuse } from './verdict.mts';
+import type { FileWrite, HookContext, HookEvent, Verdict } from './types.d.mts';
 
 export const WRITE_TOOLS: readonly string[] = ['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Bash'];
 
@@ -81,22 +82,39 @@ export interface JudgeSpec {
 // One guard's frame (0.10.0): read the event, judge its shell command (`command(text, cwd)`, unless it leaves the project) and
 // every write inside the project (`write(w, rel)`, rel from the file's own checkout); the first finding refuses, exit 2.
 // A finding that starts with "BLOCKED" is written as it is, any other as "BLOCKED by <name>: <finding>".
-export function judgeEvent(text: string, { name, command = null, write = null }: JudgeSpec, run: JudgeRun): number {
+export function judgeEvent(text: string, spec: JudgeSpec, run: JudgeRun): number {
   const payload = readPayload(text);
   if (!payload) return 0;
   const here = run.cwd();
+  const finding = findingOf(payload, spec, { here, root: run.env.CLAUDE_PROJECT_DIR ?? here, env: run.env });
+  if (finding === null) return 0;
+  run.stderr.write(finding);
+  return 2;
+}
+
+/** The same frame for a hook on the contract: the event and its context in, a Verdict out (nothing written, nothing read of the process). */
+export function judgeVerdict(event: HookEvent, spec: JudgeSpec, ctx: HookContext): Verdict {
+  const finding = findingOf(event, spec, { here: ctx.cwd, root: ctx.projectDir, env: ctx.env });
+  return finding === null ? pass : refuse(finding);
+}
+
+/** The folder the judgement runs in (`here`), the project (`root`) and the environment a shell path expands from. */
+interface JudgeWhere { here: string; root: string; env: Env }
+
+// The first finding as the text a refusal says, or null when the event passes. A finding that starts with "BLOCKED" is kept as it
+// is, any other becomes "BLOCKED by <name>: <finding>".
+function findingOf(payload: HookEvent, { name, command = null, write = null }: JudgeSpec, { here, root, env }: JudgeWhere): string | null {
   const cwd = payload.cwd ?? here;
-  const root = run.env.CLAUDE_PROJECT_DIR ?? here;
-  const refuse = (msg: string): number => { run.stderr.write(msg.startsWith('BLOCKED') ? msg : `BLOCKED by ${name}: ${msg}\n`); return 2; };
+  const said = (msg: string): string => (msg.startsWith('BLOCKED') ? msg : `BLOCKED by ${name}: ${msg}\n`);
   const cmd = payload.tool_input?.command ?? '';
-  if (command && payload.tool_name === 'Bash' && !commandLeavesProject(root, cmd, here, run.env.HOME)) {
+  if (command && payload.tool_name === 'Bash' && !commandLeavesProject(root, cmd, here, env.HOME)) {
     const msg = command(cmd, cwd);
-    if (msg) return refuse(msg);
+    if (msg) return said(msg);
   }
-  if (write) for (const w of writesOf(payload, cwd, run.env)) {
+  if (write) for (const w of writesOf(payload, cwd, env)) {
     if (!insideProject(root, w.path, cwd)) continue;
     const msg = write(w, relative(checkoutRoot(root, w.path, here), w.path));
-    if (msg) return refuse(msg);
+    if (msg) return said(msg);
   }
-  return 0;
+  return null;
 }
