@@ -1,5 +1,5 @@
 // 1.1.0: the rust pack, and what a project that is not C++ or JS needed from the kit (KWB-75 to KWB-80). Each case was met on a real crate.
-import { assert, cli, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
 import { languageOf } from '../packs/base/hooks/lib/languages.mjs';
 
 const rust = languageOf('.rs');

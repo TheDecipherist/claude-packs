@@ -105,10 +105,10 @@ const writeAt = (file: string, content: string): Record<string, unknown> => ({ t
 
 /** The worktree's branch already switches on blendStyle; main does not. Each checkout is scanned on its own. */
 export const worktreeCase: WorktreeCase = {
-  files: { '{wt}/src/dsp/Blend.cpp': 'float blend (Layer& l) { switch (l.blendStyle) { default: return 0.0f; } }\n' },
+  files: { '{wt}/src/core/Blend.cpp': 'float blend (Layer& l) { switch (l.blendStyle) { default: return 0.0f; } }\n' },
   steps: [
-    { label: 'a second switch in the worktree', event: writeAt('{wt}/src/dsp/Label.cpp', LABEL), want: 2 },
-    { label: 'the same switch in the main checkout, which has no other', event: writeAt('{here}/src/dsp/Label.cpp', LABEL), want: 0 },
+    { label: 'a second switch in the worktree', event: writeAt('{wt}/src/core/Label.cpp', LABEL), want: 2 },
+    { label: 'the same switch in the main checkout, which has no other', event: writeAt('{here}/src/core/Label.cpp', LABEL), want: 0 },
   ],
 };
 

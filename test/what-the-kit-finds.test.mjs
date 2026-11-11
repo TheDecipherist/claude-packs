@@ -1,6 +1,6 @@
 // 0.32.0: six real repos read wrongly. A kit rule file taken for reverse-engineering notes, firmware findings not seen at all, a named configuration overruled, control names
 // reported as 11,410 secrets, and 1,663 tracked build files read as source.
-import { assert, cli, execFileSync, existsSync, hookRun, join, projectWith, readFileSync, rmSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, hookRun, join, projectWith, readFileSync, rmSync, test, writeFileSync } from './kit-cli.mts';
 import { buildFolders } from '../lib/repo-weight.mjs';
 import { SECRETS, maskSecrets } from '../packs/base/hooks/lib/secret-patterns.mjs';
 

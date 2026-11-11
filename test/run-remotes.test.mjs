@@ -1,6 +1,6 @@
 // 1.8.1: the runs of other machines (packs/base/hooks/lib/run-remotes.mjs). The user, as a run moved to the Mac: "but we
 // still need to get some kind of report here for whats happening". No test reaches a real machine: the ssh call is a stand-in.
-import { assert, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mts';
 import { toJson } from '../packs/base/hooks/lib/json.mjs';
 import { askCommand, machineName, remoteRuns, remotesOf, remotesReport } from '../packs/base/hooks/lib/run-remotes.mjs';
 import { projectGroups, runRows, runsReport } from '../lib/run-status.mjs';

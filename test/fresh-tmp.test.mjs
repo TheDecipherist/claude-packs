@@ -1,4 +1,4 @@
-// The preload itself (KWB-166): what test/fresh-tmp.mjs gives every test process, checked here, so a change to it picks this test,
+// The preload itself (KWB-166): what test/fresh-tmp.mts gives every test process, checked here, so a change to it picks this test,
 // not every test that merely loads it (the user: "a pack that affects everything is not the same as it changed everything").
 import assert from 'node:assert/strict';
 import { existsSync, realpathSync } from 'node:fs';
@@ -27,4 +27,5 @@ test('selftests are the gate\'s, the memory of proved hooks is the run\'s, and n
   assert.equal(process.env.CLAUDE_PACKS_SELFTESTS, 'gate', 'a test\'s install takes the hooks as proved by the gate (KWB-166)');
   assert.ok(process.env.CLAUDE_PACKS_SELFTEST_CACHE?.startsWith(process.env.TMPDIR), 'one memory a run, never an earlier run\'s (KWB-41)');
   assert.equal(process.env.CLAUDE_PID, undefined, 'kit-lock never reads this process as a session (KWB-40)');
+  assert.ok(process.env.CLAUDE_PACKS_FIXTURES,'the installs the tests copy are built under one folder of the run (test/fixtures/installs.mts)');
 });

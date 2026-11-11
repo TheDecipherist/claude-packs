@@ -3,7 +3,7 @@
 // tool gets it too: it goes to the synth-creator pack, or the example is made neutral. The same holds for the base
 // configuration's own config.json. The synth-creator pack carries what moved, and the synth-creator configuration installs it.
 import { relative } from 'node:path';
-import { KIT, assert, join, readdirSync, readFileSync, statSync, test } from './kit-cli.mjs';
+import { KIT, assert, join, readdirSync, readFileSync, statSync, test } from './kit-cli.mts';
 
 const SYNTH_WORD = /\b(sounds?|panels?|patch(?:es)?|voices?|dsp|synths?)\b/i;
 

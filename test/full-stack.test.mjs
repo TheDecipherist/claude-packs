@@ -2,7 +2,7 @@
 // schemas folder (schemas-only), rules per folder (thin routes, handlers, one database gateway with chain keys first, one error
 // contract, env.ts shapes, health and logs, multistage Docker, inject() tests), its folder template, and doctor's coverage
 // counting TypeScript as source (KWB-32).
-import { assert, cli, execFileSync, existsSync, fresh, hookStatus as hook, join, mkdirSync, readFileSync, renameSync, selftest, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, fresh, hookStatus as hook, join, mkdirSync, readFileSync, renameSync, selftest, test, writeFileSync } from './kit-cli.mts';
 
 
 function fullStack() {

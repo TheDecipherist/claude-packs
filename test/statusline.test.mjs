@@ -3,7 +3,7 @@
 // line should be the claude-packs version number". Every feed is a scratch file here: no test reads the user's own settings,
 // transcript or cache.
 import { utimesSync } from 'node:fs';
-import { assert, execFileSync, existsSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, execFileSync, existsSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mts';
 import { readJson, toJson } from '../packs/base/hooks/lib/json.mjs';
 import { statusBar } from '../packs/base/tools/statusline.mjs';
 import { gitState, parseStatusV2 } from '../packs/base/tools/statusline-work.mjs';

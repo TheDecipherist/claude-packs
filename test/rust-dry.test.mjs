@@ -1,6 +1,6 @@
 // 1.1.0: the repetition laws, true on Rust (KWB-81, KWB-82). The DRY laws were written on C++ and JS, and a language row alone did not make them hold:
 // each case here was met on a real crate. A trait method must repeat, and a `match` that does work is good Rust, so a port of the C++ law refused both.
-import { assert, fresh, hookRun, join, lessonWrite, mkdirSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { assert, fresh, hookRun, join, lessonWrite, mkdirSync, run, test, writeFileSync } from './kit-cli.mts';
 import { definesOf } from '../packs/base/hooks/lib/near-copies.mjs';
 import { lookupMatches } from '../packs/base/hooks/lib/rust-scan.mjs';
 

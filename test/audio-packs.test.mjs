@@ -1,6 +1,6 @@
 // 0.28.0: packs from the playbook of rebuilding classic machines from firmware. Their laws come from failures that passed every test: nine units deaf to the
 // transport, 272 of 625 presets on defaults, one DSP path behind 15 algorithms. The checks here are mostly guards against those coming back.
-import { KIT, assert, cli, execFileSync, existsSync, fresh, holdsEachCase, hookRun, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, execFileSync, existsSync, fresh, holdsEachCase, hookRun, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 
 holdsEachCase([
   ['midi', 'src/in.cpp', 'int k = b & 0xF0;\n', 'if (b >= 0xF8) { rt (b); return; }\nint k = b & 0xF0;\n'],

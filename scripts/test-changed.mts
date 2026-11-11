@@ -115,7 +115,7 @@ export async function main(argv: readonly string[], env: Env, log: (line: string
   const red = proved.filter((r) => r.code !== 0);
   if (red.length) { for (const r of red) log(`\n${r.hook}:\n${r.out}`); log(GATE); return 1; }
   if (!chosen.size) { log(GATE); return 0; }
-  const args = ['--import', './test/fresh-tmp.mjs', '--test', `--test-concurrency=${concurrency}`, ...chosen.keys()];
+  const args = ['--import', './test/fresh-tmp.mts', '--test', `--test-concurrency=${concurrency}`, ...chosen.keys()];
   log(`running: node ${args.join(' ')}`);
   // NODE_TEST_CONTEXT is set when this runs under a test runner; passed on, the nested run reports to it and exits 0 on a failure.
   const { NODE_TEST_CONTEXT: _context, ...nested } = env;

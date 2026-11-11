@@ -41,7 +41,7 @@ export const hook: Hook = (event, ctx) => {
 /** A written source file reaches the worktree's own index, the one once-only judges it against. */
 export const worktreeCase: WorktreeCase = {
   steps: [
-    { label: 'a source file written in the worktree is recorded and refused nothing', event: { hook_event_name: 'PostToolUse', tool_name: 'Write', tool_input: { file_path: '{wt}/src/dsp/Rec.cpp', content: '// new\n' } }, want: 0 },
+    { label: 'a source file written in the worktree is recorded and refused nothing', event: { hook_event_name: 'PostToolUse', tool_name: 'Write', tool_input: { file_path: '{wt}/src/core/Rec.cpp', content: '// new\n' } }, want: 0 },
   ],
 };
 

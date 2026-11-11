@@ -1,6 +1,6 @@
 // 0.10.0 (STEP 3 item 5): every configuration installs into a fresh repo and `doctor --strict` passes there; the
 // planner-skills generator emits one project-layout skill body per configuration, from its layout template (KWB-35).
-import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, test } from './kit-cli.mjs';
+import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, test } from './kit-cli.mts';
 
 const CONFIGS = readdirSync(join(KIT, 'configurations')).sort();
 const config = (name) => JSON.parse(readFileSync(join(KIT, 'configurations', name, 'config.json'), 'utf8'));

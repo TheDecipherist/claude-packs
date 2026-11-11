@@ -1,5 +1,5 @@
 // 0.22.0: everything in taste-skill, hover that says so, and one template tested once. The page-measure tool runs in real Chrome.
-import { KIT, assert, cli, existsSync, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, existsSync, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, spawnSync, test, writeFileSync } from './kit-cli.mts';
 import { judge, measure } from '../packs/ui-craft/tools/page-measure.mjs';
 
 const CHROME = ['/usr/bin/google-chrome', '/usr/bin/chromium', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => existsSync(p));

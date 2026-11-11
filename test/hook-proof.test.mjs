@@ -1,6 +1,6 @@
 // 0.18.0: whenever a hook is supposed to exit 2 and it exits 0, it is caught. Only exit 2 blocks, so a crash, a hook no
 // settings entry runs, and an `exit 1` all let the call through in silence.
-import { KIT, appendFileSync, assert, cli, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, appendFileSync, assert, cli, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mts';
 
 const installed = () => { const dir = fresh('hp-'); run(dir, 'init', '--config', 'base'); return dir; };
 

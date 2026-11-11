@@ -1,5 +1,5 @@
 // 0.25.0: after a scan, one command makes the work order Claude follows, so everything found is fixed by the kit's own laws.
-import { assert, cli, existsSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, join, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 import { planText } from '../lib/fix-plan.mjs';
 
 const helper = (f, a) => `export function ${f}(${a}) {\n${[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `  const v${i} = compute(${a}.rows[${i}], ${i}, 'k${i}', other(${a}, ${i}));`).join('\n')}\n  return ${a};\n}\n`;

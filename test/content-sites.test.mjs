@@ -1,6 +1,6 @@
 // 0.27.0: the first content-heavy repo scanned showed the kit judging published text as code. Every "secret" and compose fault was a tutorial sample, and a
 // thousand dates were the subject of the articles they sat in. Published text is read by the writing laws, and left alone by the code laws, at the write and in a scan.
-import { assert, cli, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 import { isContent } from '../packs/base/hooks/lib/content.mjs';
 import { addedSecret } from '../packs/base/hooks/secrets-guard.mjs';
 

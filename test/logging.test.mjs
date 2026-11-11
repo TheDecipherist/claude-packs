@@ -1,5 +1,5 @@
 // 0.29.0: until a project knows which hooks work, it needs all of its history, with as much detail as it can keep. Nothing is cleared, and every refusal can be judged.
-import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, readdirSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, readdirSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 import { maskSecrets } from '../packs/base/hooks/lib/secret-patterns.mjs';
 import { checkoutHead } from '../packs/base/hooks/lib/event-log.mjs';
 

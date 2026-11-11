@@ -1,6 +1,6 @@
 // 1.1.0: a project can build itself, and a reader can find out how. The templates come from two whole builds run with nobody there. KWB-84: `new` used to
 // install a synth's laws on any project.
-import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, statSync, test, writeFileSync } from './kit-cli.mjs';
+import { CLI, KIT, assert, cli, execFileSync, existsSync, fresh, join, readdirSync, readFileSync, spawnSync, statSync, test, writeFileSync } from './kit-cli.mts';
 
 const FOLDER = 'docs/workorders/billing';
 const TEMPLATES = 'prompts/workorder/templates';

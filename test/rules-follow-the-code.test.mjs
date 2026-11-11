@@ -1,6 +1,6 @@
 // KWB-83: a file could be legal and have no rules. folder-law allowed any layout folder, while base's cpp and js concepts meant only src/ and tests/, and a
 // first install never read where a repo's code lives, so folder-law refused a new file in the project's own lib/.
-import { assert, cli, execFileSync, existsSync, hookRun, join, mkdirSync, projectWith, readFileSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, existsSync, hookRun, join, mkdirSync, projectWith, readFileSync, run, test, writeFileSync } from './kit-cli.mts';
 
 function repo(files) {
   const dir = projectWith(files, 'follow-');

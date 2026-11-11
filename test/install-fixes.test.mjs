@@ -1,7 +1,7 @@
 // 0.20.0: what a real install found (AdmiralMCP, kit 0.14.0, build/kit-review-plan.md Phase 5). Each case failed before; the checks' own
 // examples carry the rest, proved by doctor's selftest of lesson-checks.
 import { house } from '../packs/base/hooks/git-guard.mjs';
-import { CLI, assert, execFileSync, fresh, join, lessonWrite, mkdirSync, readFileSync, run, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { CLI, assert, execFileSync, fresh, join, lessonWrite, mkdirSync, readFileSync, run, spawnSync, test, writeFileSync } from './kit-cli.mts';
 
 const clean = { dirty: () => [], branch: () => 'main', hasHead: () => true };
 

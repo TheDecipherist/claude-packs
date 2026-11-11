@@ -1,6 +1,6 @@
 // KWB-43: a lesson check runs on every edit and over every file of a scan. A pattern that backtracks across a file stops both, so every check
 // must get through a large, realistic file within a budget.
-import { KIT, assert, join, readdirSync, readFileSync, test } from './kit-cli.mjs';
+import { KIT, assert, join, readdirSync, readFileSync, test } from './kit-cli.mts';
 
 const BUDGET_MS = 1500;
 const LINE = "  const value = await thing.call(other, 'text', { key: 1 }); // a note\n  if (value === other) { import('x'); }\n  for (const a of list) total += a.size;\n";

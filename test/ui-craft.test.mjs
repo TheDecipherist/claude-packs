@@ -1,6 +1,6 @@
 // 0.17.0: application and page design, from Vercel's guidelines, Anthropic's frontend-design, Impeccable and taste-skill
 // (docs/ui-craft-sources.md says what came from each). A check blocks only what is objective or what the sources agree on; taste stays a rule.
-import { KIT, assert, cli, existsSync, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, existsSync, fresh, holdToExamples, join, mkdirSync, readFileSync, readdirSync, run, test, writeFileSync } from './kit-cli.mts';
 
 const checks = readdirSync(join(KIT, 'packs/ui-craft/checks')).map((f) => JSON.parse(readFileSync(join(KIT, 'packs/ui-craft/checks', f), 'utf8')));
 

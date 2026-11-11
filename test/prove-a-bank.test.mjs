@@ -1,7 +1,7 @@
 // planner W5.6: prove-a-bank measures design-a-preset's gate on renders, never on typed values. A synthetic bank passes every line;
 // one planted fault per measurement fails exactly that line. Run from an install, as a project runs it (its WAV reader and FFT are
 // audio-core's, installed beside it).
-import { assert, cli, fresh, join, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, fresh, join, spawnSync, test, writeFileSync } from './kit-cli.mts';
 import { writeWav } from '../packs/audio-core/tools/lib/wav.mjs';
 import { symlinkSync } from 'node:fs';
 

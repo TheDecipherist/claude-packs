@@ -75,11 +75,11 @@ export const hook: Hook = (event, ctx) => {
   return pass;
 };
 
-/** A shader belongs in the painter folder: judged from the worktree's checkout, a new .wgsl in painter passes and one in dsp is refused. */
+/** A shader belongs in the painter folder: judged from the worktree's checkout, a new .wgsl in painter passes and one in the core folder is refused. */
 export const worktreeCase: WorktreeCase = {
   steps: [
     { label: 'a shader in the painter folder of the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/painter/shaders/glow.wgsl', content: '@fragment fn fs() {}' } }, want: 0 },
-    { label: 'a shader in the dsp folder of the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/dsp/glow.wgsl', content: '@fragment fn fs() {}' } }, want: 2 },
+    { label: 'a shader in the core folder of the worktree', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/core/glow.wgsl', content: '@fragment fn fs() {}' } }, want: 2 },
   ],
 };
 

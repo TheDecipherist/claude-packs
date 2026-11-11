@@ -2,7 +2,7 @@
 // each with a rule that states it. A new project gets both; a project that had base before gets neither until it names them in
 // "enable" (a new law never switches on by itself), and a rule that states a hook's law ("# hook:" in its frontmatter) is held
 // back with its hook.
-import { assert, existsSync, fresh, join, readFileSync, rmSync, run, selftest, test, writeFileSync } from './kit-cli.mjs';
+import { assert, existsSync, fresh, join, readFileSync, rmSync, run, selftest, test, writeFileSync } from './kit-cli.mts';
 
 const NEW = [['hooks/secrets-guard.mjs', 'rules/secrets-never-committed.md'], ['hooks/untrusted-boundary.mjs', 'rules/untrusted-content-boundary.md']];
 

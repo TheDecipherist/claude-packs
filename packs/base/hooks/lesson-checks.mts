@@ -206,12 +206,12 @@ export const hook: Hook = (event, ctx) => {
 /** A check judges a file in a worktree by the worktree's own checks, not main's: the worktree's branch added one. */
 export const worktreeCase: WorktreeCase = {
   files: {
-    '{wt}/.claude/checks/no-forbidden.json': '{"id":"no-forbidden","why":"a planted lesson","globs":["src/synth/**"],"pattern":"forbidden\\\\(","bad":"forbidden(x);","good":"allowed(x);"}',
+    '{wt}/.claude/checks/no-forbidden.json': '{"id":"no-forbidden","why":"a planted lesson","globs":["src/engine/**"],"pattern":"forbidden\\\\(","bad":"forbidden(x);","good":"allowed(x);"}',
   },
   steps: [
-    { label: 'the worktree\'s own check refuses what it forbids', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/synth/Filter.cpp', content: 'void f() { forbidden(x); }\n' } }, want: 2 },
-    { label: 'main has no such check', event: { tool_name: 'Write', tool_input: { file_path: '{here}/src/synth/Filter.cpp', content: 'void f() { forbidden(x); }\n' } }, want: 0 },
-    { label: 'a clean write in the worktree passes', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/synth/Filter.cpp', content: 'void f() { allowed(x); }\n' } }, want: 0 },
+    { label: 'the worktree\'s own check refuses what it forbids', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/engine/Filter.cpp', content: 'void f() { forbidden(x); }\n' } }, want: 2 },
+    { label: 'main has no such check', event: { tool_name: 'Write', tool_input: { file_path: '{here}/src/engine/Filter.cpp', content: 'void f() { forbidden(x); }\n' } }, want: 0 },
+    { label: 'a clean write in the worktree passes', event: { tool_name: 'Write', tool_input: { file_path: '{wt}/src/engine/Filter.cpp', content: 'void f() { allowed(x); }\n' } }, want: 0 },
   ],
 };
 

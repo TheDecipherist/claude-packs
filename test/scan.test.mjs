@@ -1,6 +1,6 @@
 // 0.16.0: `scan` reports on a project before anything is installed. Its first promise is that it touches nothing: a real project, with
 // real secrets, is the input.
-import { CLI, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, readdirSync, statSync, test, writeFileSync } from './kit-cli.mjs';
+import { CLI, assert, cli, execFileSync, existsSync, fresh, join, mkdirSync, readFileSync, readdirSync, statSync, test, writeFileSync } from './kit-cli.mts';
 import { createHash } from 'node:crypto';
 
 const TOKEN = `ghp_${'a1B2'.repeat(10)}`;

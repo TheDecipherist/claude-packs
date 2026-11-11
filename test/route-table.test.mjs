@@ -1,6 +1,6 @@
 // 1.7.0: a menu system is one route table, judged by instrument-shell's route-table tool and drawn from it as Mermaid. The
 // user: a menu like the V-Synth's must be ironclad, and a Mermaid diagram fits its shape, so the picture is made from the table.
-import { KIT, assert, existsSync, fresh, join, readdirSync, readFileSync, run, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, existsSync, fresh, join, readdirSync, readFileSync, run, spawnSync, test, writeFileSync } from './kit-cli.mts';
 import { judge, LAW_NAMES } from '../packs/instrument-shell/tools/lib/route-judge.mjs';
 import { diagrams } from '../packs/instrument-shell/tools/lib/route-mermaid.mjs';
 import { CLEAN, PLANTS, planted } from '../packs/instrument-shell/tools/lib/route-plants.mjs';

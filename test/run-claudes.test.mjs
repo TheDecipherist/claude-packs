@@ -6,7 +6,7 @@ import { mkdirSync, utimesSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { claudesIn, orderProjectOf, sessionOrders } from '../packs/base/hooks/lib/run-claudes.mjs';
-import { fresh } from './kit-cli.mjs';
+import { fresh } from './kit-cli.mts';
 
 const HOUR = 60 * 60 * 1000;
 const put = (file, text = 'x\n') => { mkdirSync(join(file, '..'), { recursive: true }); writeFileSync(file, text); };

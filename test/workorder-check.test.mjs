@@ -1,6 +1,6 @@
 // planner W2: `workorder check <name>`, the pre-flight before a run. One planted fault per refusal, each refused with the line that
 // names it; a clean order passes; an order with no install block is warned and still passes.
-import { assert, cli, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, execFileSync, fresh, join, mkdirSync, test, writeFileSync } from './kit-cli.mts';
 
 const CLEAN = `# Work order: billing
 

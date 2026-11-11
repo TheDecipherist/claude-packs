@@ -1,6 +1,7 @@
 // Preloaded by `npm test`: every test process gets its own empty temp folder. Profiles with
 // `siblings: ["../"]` make doctor read the folder around a project, and the shared system temp
 // folder holds tens of thousands of other programs' files (and other tests' repos).
+// Self-contained on purpose: test-changed's own test copies this one file into a scratch repo.
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,8 +13,12 @@ process.env.TMPDIR = dir;
 process.on('exit', () => rmSync(dir, { recursive: true, force: true }));
 
 // One memory of proved hooks for the whole run (the runner's preload makes it, its test processes inherit it), so a hook is proved once
-// per run, never carried over from an earlier run (lib/selftest-cache.mjs, KWB-41).
+// per run, never carried over from an earlier run (lib/selftest-cache.mts, KWB-41).
 process.env.CLAUDE_PACKS_SELFTEST_CACHE ??= join(dir, 'selftests');
+
+// The same hand-off for the installs the tests copy (test/fixtures/installs.mts): the first process to ask for a configuration
+// builds it under this folder, the others wait for it, and every test works on a copy.
+process.env.CLAUDE_PACKS_FIXTURES ??= join(dir, 'fixtures');
 
 // once-only's detector (jscpd, the kit's optional dependency) for hooks installed into a test's throwaway project, which
 // sit outside the kit's node_modules (0.9.0).
@@ -25,14 +30,14 @@ delete process.env.CLAUDE_PID;
 
 // kit-fresh asks npm for the newest kit at most once a day (KWB-156): the run's own cache, holding today's answer as this kit's own
 // version, so no test reaches the network and an install of this kit reads as the newest
-process.env.CLAUDE_PACKS_CACHE_DIR ??= join(dir, 'cache');
-mkdirSync(process.env.CLAUDE_PACKS_CACHE_DIR, { recursive: true });
+const cacheDir = (process.env.CLAUDE_PACKS_CACHE_DIR ??= join(dir, 'cache'));
+mkdirSync(cacheDir, { recursive: true });
 const kitPackage = new URL('../package.json', import.meta.url);   // absent where the preload is copied into a scratch repo
 if (existsSync(kitPackage)) {
-  const ownVersion = JSON.parse(readFileSync(kitPackage, 'utf8')).version;
-  writeFileSync(join(process.env.CLAUDE_PACKS_CACHE_DIR, 'kit-fresh.json'), JSON.stringify({ version: ownVersion, at: Date.now() }));
+  const ownVersion = (JSON.parse(readFileSync(kitPackage, 'utf8')) as { version: string }).version;
+  writeFileSync(join(cacheDir, 'kit-fresh.json'), JSON.stringify({ version: ownVersion, at: Date.now() }));
 }
 
-// KWB-166: a test's install takes the hooks' selftests as proved by the gate (scripts/test-changed.mjs proves the changed ones first);
+// KWB-166: a test's install takes the hooks' selftests as proved by the gate (scripts/test-changed.mts proves the changed ones first);
 // a test whose subject is doctor's selftests runs them with CLAUDE_PACKS_SELFTESTS=run
 process.env.CLAUDE_PACKS_SELFTESTS ??= 'gate';

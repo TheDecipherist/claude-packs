@@ -1,6 +1,6 @@
 // 1.6.1: `npm run release` makes the npm package, the tag and the GitHub release from one version and its CHANGELOG section, and
 // refuses a repo that is not ready. Its parts are judged here without touching npm or GitHub.
-import { assert, test } from './kit-cli.mjs';
+import { assert, test } from './kit-cli.mts';
 import { gitWithToken, githubRemote, notesFor, plan, refusals } from '../scripts/release.mjs';
 
 const CHANGELOG = '# Changelog\n\n## Unreleased\n\n- next\n\n## 1.6.1 (2026-11-10)\n\n- the release script\n- the disclaimer\n\n## 1.6.0 (2026-11-09)\n\n- the planner\n';

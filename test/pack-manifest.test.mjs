@@ -1,7 +1,7 @@
 // 0.19.0: a pack.json says if it is stock or custom, has a git url, fields like a package.json, and who made it.
 import { manifestProblems } from '../lib/pack-manifest.mjs';
 import { availablePacks, readPack } from '../lib/packs.mjs';
-import { CLI, assert, execFileSync, test } from './kit-cli.mjs';
+import { CLI, assert, execFileSync, test } from './kit-cli.mts';
 
 const custom = { name: 'acme', version: '1.2.0', description: 'Acme laws', type: 'custom', author: 'Acme Platform', license: 'UNLICENSED', repository: { type: 'git', url: 'git@git.acme.example:p/acme.git' } };
 

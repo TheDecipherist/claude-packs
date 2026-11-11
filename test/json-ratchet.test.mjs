@@ -3,7 +3,7 @@
 // nothing judged the kit at write time, and new raw calls kept coming (the user: "how come you are still writing
 // JSON.stringify function calls"). Until the migration takes the count to zero, this holds the line: the raw calls left in
 // the kit's code may only go down, and the number below is lowered with them.
-import { assert, execFileSync, join, readFileSync, test } from './kit-cli.mjs';
+import { assert, execFileSync, join, readFileSync, test } from './kit-cli.mts';
 import { languageOf } from '../packs/base/hooks/lib/languages.mjs';
 
 const KIT = join(import.meta.dirname, '..');

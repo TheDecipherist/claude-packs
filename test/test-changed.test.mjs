@@ -18,7 +18,7 @@ function scratchRepo() {
   const dir = mkdtempSync(join(tmpdir(), 'cps-changed-'));
   mkdirSync(join(dir, 'lib'));
   mkdirSync(join(dir, 'test'));
-  copyFileSync(join(KIT, 'test/fresh-tmp.mjs'), join(dir, 'test/fresh-tmp.mjs'));
+  copyFileSync(join(KIT, 'test/fresh-tmp.mts'), join(dir, 'test/fresh-tmp.mts'));
   writeFileSync(join(dir, 'lib/a.mjs'), 'export const a = 1;\n');
   writeFileSync(join(dir, 'lib/b.mjs'), 'export const b = 2;\n');
   writeFileSync(join(dir, 'lib/via.mjs'), "export { a } from './a.mjs';\n");
@@ -41,7 +41,7 @@ test('a planted change runs only the tests that reach it, an untracked test runs
   assert.match(r.stdout, /test\/a\.test\.mjs\n {4}reaches lib\/a\.mjs through lib\/via\.mjs/);
   assert.match(r.stdout, /test\/c\.test\.mjs\n {4}changed/);
   assert.doesNotMatch(r.stdout, /b\.test\.mjs/);
-  assert.match(r.stdout, /running: node --import \.\/test\/fresh-tmp\.mjs --test /);
+  assert.match(r.stdout, /running: node --import \.\/test\/fresh-tmp\.mts --test /);
   assert.match(r.stdout, /With --base origin\/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks/);
 });
 
@@ -85,7 +85,7 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   assert.ok(lock.includes('test/kit-lock.test.mjs') && !lock.includes('test/install.test.mjs'), lock.join(' '));
   assert.ok(pick('lib/doctor.mjs').includes('test/doctor-cache.test.mjs') && !pick('lib/doctor.mjs').includes('test/install.test.mjs'), 'a CLI module: the tests about it, not every test that runs the CLI');
   assert.deepEqual(pick('scripts/test-changed.mjs'), ['test/test-changed.test.mjs']);
-  assert.ok(pick('test/fresh-tmp.mjs').includes('test/fresh-tmp.test.mjs') && pick('test/fresh-tmp.mjs').length < 5, 'the preload: its own test, not every test that loads it');
+  assert.ok(pick('test/fresh-tmp.mts').includes('test/fresh-tmp.test.mjs') && pick('test/fresh-tmp.mts').length < 5, 'the preload: its own test, not every test that loads it');
   assert.deepEqual(choose(KIT, ['CHANGELOG.md'], g).uncovered, ['CHANGELOG.md']);
   // KWB-141: the planner test reads every planner file through join(KIT, 'planner'), which no import or path literal shows
   assert.ok(pick('planner/ui-mockup/SKILL.md').includes('test/planner.test.mjs'), 'a planner skill: the planner test');

@@ -1,7 +1,7 @@
 // The first rule this package came from: three branches on one value are a lookup. It lives in base,
 // so every project gets it, and its check blocks the edit in C++ and in JS/TS. (v7 additions, 0.11.0: the js-ts, mongo,
 // fastify, ai, docker, shell-hooks and html-ui packs, the node configuration and the presets that pick its packs.)
-import { assert, fresh, hookRun, join, readFileSync, readdirSync, existsSync, run, test, writeFileSync } from './kit-cli.mjs';
+import { assert, fresh, hookRun, join, readFileSync, readdirSync, existsSync, run, test, writeFileSync } from './kit-cli.mts';
 
 // A write fired at the project's lesson checks, as Claude Code fires it.
 const write = (dir, rel, content) => hookRun(dir, 'lesson-checks.mjs', { tool_name: 'Write', tool_input: { file_path: join(dir, rel), content } });

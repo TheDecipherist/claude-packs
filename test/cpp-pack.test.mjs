@@ -1,7 +1,7 @@
 // 0.24.0: "we need to thoroughly do c++", "anything you find that is repeated should have something that makes it reuseable and
 // template like", "maybe make a specific c++ pack". The fixtures are the shapes measured on Stellix: many statements on a line, helpers copied
 // from gate to gate with other names, descriptors filled field by field, tables written as calls, and a gate that presses every control.
-import { assert, cli, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mjs';
+import { assert, cli, existsSync, fresh, hookRun, join, lessonWrite, mkdirSync, readFileSync, test, writeFileSync } from './kit-cli.mts';
 
 const reader = (f, id) => `auto ${f} = [this](const std::string& ${id}) {\n  const auto& L = shown(); float best = 0.0f;\n  for (size_t i = 0; i < L.controls.size(); i++) best += L.controls[i].box.getCentreX() * float(getWidth());\n  if (best > 10.0f) log(best, "${id}");\n  const auto p = at(best, 2.5f); pressAt(p); releaseAt(p); return best;\n};\n`;
 const descriptor = (n, label) => `  wgpu::BufferDescriptor ${n}; ${n}.label = "${label}"; ${n}.size = 64; ${n}.usage = kUsage;\n`;

@@ -1,5 +1,5 @@
 // The kit's web page. Like the README, it must not fall behind what the kit holds, and it names no person and carries nobody's tracking.
-import { KIT, assert, existsSync, join, readdirSync, readFileSync, test } from './kit-cli.mjs';
+import { KIT, assert, existsSync, join, readdirSync, readFileSync, test } from './kit-cli.mts';
 
 const PAGE = readFileSync(join(KIT, 'site/index.html'), 'utf8');
 const packs = readdirSync(join(KIT, 'packs'));

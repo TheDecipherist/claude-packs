@@ -1,6 +1,6 @@
 // 1.3.0: a ledger of every source, ticked only when read. On the Matrix-12 the owner's manual lost every graph to a
 // placeholder, and the service manual, which is scanned sheets, came out nearly empty, and nothing listed either as unread.
-import { KIT, assert, cli, fresh, join, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mjs';
+import { KIT, assert, cli, fresh, join, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from './kit-cli.mts';
 
 // The command runs from an install, as a project runs it: it finds base's hook lib beside the tools (W4: isMain from hook-log).
 const INSTALL = fresh('ledger-install-');

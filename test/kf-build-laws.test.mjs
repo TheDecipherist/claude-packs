@@ -1,6 +1,6 @@
 // 1.1.0, group 4: what the MPX 500 build taught, as laws. A control is proved through its own input path, and a look gate checks geometry exactly. Each test was seen
 // red first (docs/1.1-progress.md).
-import { KIT, assert, cli, fresh, join, readFileSync, test } from './kit-cli.mjs';
+import { KIT, assert, cli, fresh, join, readFileSync, test } from './kit-cli.mts';
 import { namesATest } from '../lib/rule-tests.mjs';
 
 const pack = (rel) => readFileSync(join(KIT, 'packs', rel), 'utf8');

@@ -7,7 +7,7 @@ import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'n
 import { dirname, join, relative } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { fresh } from './kit-cli.mjs';
+import { fresh } from './kit-cli.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
 // npx (any flags) then the bare name: never the scoped one
