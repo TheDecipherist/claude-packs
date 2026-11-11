@@ -24,7 +24,9 @@ export const LOG_MAX_BYTES = 1024 * 1024;
 export const LOGS: string = join('.claude', 'logs');
 
 /** One line of hooks.log. `code` is the text of the exit code (`-` when none was written). */
-export interface HookLogEntry { time: string; event: string; hook: string; ms: number; code: string; tool: string }
+import type { HookLogLine } from './types.d.mts';
+/** One line of the hook log (types.d.mts owns the shape; the CLI reads an install's log through it). */
+export type HookLogEntry = HookLogLine;
 
 /** What logHook is given: `ms` and `hook` are the call's; the rest are written as `-` when missing. */
 export interface HookLogCall { event?: string; hook?: string | null; ms: number; code?: number | null; tool?: string }

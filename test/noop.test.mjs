@@ -92,9 +92,9 @@ const STATUS = ['.claude/hooks/heartbeat.mjs', '.claude/hooks/no-find.mjs', ...[
 // 2.0.0 (the typescript order, W3): installed files the conversion rewrote, the same law emitted from TypeScript, or an importer
 // that now passes the project root, env or pid a converted lib used to read itself (W3.3); each layer's merge adds its own
 const CONVERTED_CHANGED = [...['file-size-guard', 'folder-law', 'frozen-files', 'lesson-checks', 'making', 'once-only', 'placement-law', 'reuse-hint', 'run-hooks', 'spec-lock'].map((f) => `.claude/hooks/${f}.mjs`),
-  ...['content', 'dup-index', 'event-log', 'hub-rig', 'languages', 'apply-edit', 'cpp-scan', 'crash-policy', 'dup', 'elements', 'git-adds', 'glob', 'identifier-runs', 'layout', 'own-processes', 'program-read', 'program-writes', 'prose', 'repo-index', 'rust-scan', 'secret-patterns', 'shape-code', 'skill-first-selftest', 'unread-writes', 'writes'].map((f) => `.claude/hooks/lib/${f}.mjs`)];
+  ...['hook-log', 'code-shapes', 'shape-prose', 'shell-writes', 'trunk-lag-selftest', 'making-check-selftest', 'turn', 'content', 'dup-index', 'event-log', 'hub-rig', 'languages', 'apply-edit', 'cpp-scan', 'crash-policy', 'dup', 'elements', 'git-adds', 'glob', 'identifier-runs', 'layout', 'own-processes', 'program-read', 'program-writes', 'prose', 'repo-index', 'rust-scan', 'secret-patterns', 'shape-code', 'skill-first-selftest', 'unread-writes', 'writes'].map((f) => `.claude/hooks/lib/${f}.mjs`)];
 // 2.0.0 (the typescript order, W2.5): the shared owners every base lib reads through, new to every project
-const TYPESCRIPT = ['files', 'git-run', 'hash', 'source-exts'].map((f) => `.claude/hooks/lib/${f}.mjs`);
+const TYPESCRIPT = ['files', 'git-run', 'hash', 'source-exts', 'shell-sed'].map((f) => `.claude/hooks/lib/${f}.mjs`);
 const BUDGET = ['core-budget', 'compile-cache'].map((f) => `.claude/hooks/lib/${f}.mjs`);   // 1.5.4 (KWB-111, KWB-112): the machine's core share for the queue and the tests; whether a build folder compiles through the shared cache
 // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place, so a synth project keeps it (its new text is in REPAIRED)
 const MOVED = { '.claude/skills/analyse-reference-look/SKILL.md': 'packs/base/skills/analyse-reference-look/SKILL.md' };

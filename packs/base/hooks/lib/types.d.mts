@@ -214,9 +214,10 @@ export interface InstalledGlobModule {
   matchesAny(relPath: string, globs: readonly string[]): boolean;
 }
 
-export interface HookLogLine { at: string; event: string; hook: string; ms: number; code: number | null; tool: string }
+/** One line of `.claude/hooks.log` as `readHookLog` reads it: the code is the text the line holds (`-` when the hook said none). */
+export interface HookLogLine { time: string; event: string; hook: string; ms: number; code: string; tool: string }
 export interface InstalledHookLogModule {
-  readHookLog(root: string): HookLogLine[];
+  readHookLog(root: string, options?: { rotated?: boolean }): HookLogLine[];
 }
 
 export interface LessonCheck {

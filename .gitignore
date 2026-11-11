@@ -61,3 +61,4 @@ packs/base/hooks/lib/shape-prose.mjs
 packs/base/hooks/lib/shell-writes.mjs
 packs/base/hooks/lib/shell-writes-selftest.mjs
 packs/base/hooks/lib/trunk-lag-selftest.mjs
+packs/base/hooks/lib/shell-sed.mjs
