@@ -50,8 +50,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/build-guard.mjs",
-            "timeout": 30
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\" .claude/hooks/git-guard.mjs .claude/hooks/build-guard.mjs .claude/hooks/no-find.mjs",
+            "timeout": 40
           }
         ]
       },

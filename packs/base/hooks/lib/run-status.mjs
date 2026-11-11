@@ -217,7 +217,8 @@ function ordersIn(project, only) {
 /** Every run's progress: { updated, dir, runs: [orderStatus], unreachable: [{ host, why }] }: the runs alive on this machine
  *  and on every machine remotes.json lists (1.8.1), or one project's orders here (`dir`). */
 export function runsReport({ dir = null, order = null, remotes = undefined, ask = undefined, here = undefined } = {}) {
-  const runs = (dir ? ordersIn(dir, order).map((o) => ({ project: dir, order: o })) : runningOrders()).map((r) => orderStatus(r.project, r.order));
+  const notes = [];   // what could not be looked at (KWB-161: Windows' sessions), said, never silence
+  const runs = (dir ? ordersIn(dir, order).map((o) => ({ project: dir, order: o })) : runningOrders({ notes })).map((r) => orderStatus(r.project, r.order));
   // the check: what really runs in each agent's worktree now, and in the checkout the lead works in (the user: "and what
   // happened to the heartbeat and cores and all that?"); a process counts for the deepest folder, so an agent's build is its own
   const work = workIn([...runs.map((r) => r.project), ...runs.flatMap((r) => r.agents.map((a) => a.path))]);
@@ -229,5 +230,5 @@ export function runsReport({ dir = null, order = null, remotes = undefined, ask 
   // with other machines listed, every run says where it runs, this machine's own too; alone, no names
   const name = listed.length ? (here ?? machineName()) : null;
   const mine = name ? runs.map((r) => ({ ...r, host: name })) : runs;
-  return { updated: new Date().toISOString(), dir, runs: [...mine, ...far.runs], unreachable: far.unreachable };
+  return { updated: new Date().toISOString(), dir, runs: [...mine, ...far.runs], unreachable: far.unreachable, notes };
 }
