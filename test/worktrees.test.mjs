@@ -105,6 +105,8 @@ const CASES = {
     assert.equal(bash(here, 'stage-guard.mjs', `git -C ${wt} add src/dsp/Svf.cpp`), 0);
   },
   'git-guard.mjs': caseFrom('git-guard.mjs', (await import('../packs/base/hooks/git-guard.mjs')).worktreeCase),
+  // A non-base pack's hook cannot be imported from packs/ (its ./lib/ is base's, merged only by an install), so these cases stay
+  // functions, beside the `worktreeCase` data each hook exports, until slice 6 reads it from an install.
   'realtime-guard.mjs': ({ here, wt }) => {
     assert.equal(fire(here, 'realtime-guard.mjs', join(wt, 'src/audio/Voice.cpp'), RT_BAD), 2);
     assert.equal(fire(here, 'realtime-guard.mjs', join(wt, 'src/audio/Voice.cpp'), 'void Voice::processBlock (B& b, M& m) { juce::ScopedNoDenormals noDenormals; b.clear(); }\n'), 0);
