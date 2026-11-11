@@ -62,6 +62,8 @@
     "hooks/lib/program-read.mts": ["test/unit/hooks-lib/program-read.test.mts"],
     "hooks/lib/program-writes.mts": ["test/unit/hooks-lib/program-writes.test.mts"],
     "hooks/lib/project.mts": ["test/unit/hooks-lib/project.test.mts"],
+    "hooks/lib/proxy-client.mts": ["test/unit/hooks-lib/proxy-wire.test.mts"],
+    "hooks/lib/proxy-wire.mts": ["test/unit/hooks-lib/proxy-wire.test.mts"],
     "hooks/lib/prose.mts": ["test/unit/hooks-lib/prose.test.mts"],
     "hooks/lib/push-form.mts": ["test/unit/hooks-lib/push-form.test.mts"],
     "hooks/lib/pushed-selftest.mts": ["test/hooks/base/git-guard.test.mts", "test/unit/hooks-lib/git-guard-libs.test.mts", "test/unit/hooks-lib/hub-rig.test.mts", "test/unit/hooks-lib/push-form.test.mts", "test/unit/hooks-lib/remote-heads.test.mts"],
