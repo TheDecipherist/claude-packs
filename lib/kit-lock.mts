@@ -107,7 +107,7 @@ export const describe = (lock: Lease, l: Liveness): string => `held by session $
   (l.live ? 'live' : `stale (no renewal for ${LEASE_MIN} min)`);
 
 /** A stale lease out, the taker's in, the take-over logged in the main checkout's .claude/kit-lock.log. */
-export function takeOver(root: string, where: string, lock: Lease, l: Liveness, session: string, now: number = Date.now()): void {
+function takeOver(root: string, where: string, lock: Lease, l: Liveness, session: string, now: number = Date.now()): void {
   const main = checkouts(root)[0] ?? root;
   mkdirSync(join(main, '.claude'), { recursive: true });
   appendFileSync(join(main, LOG), `${new Date(now).toISOString()} took over ${join(where, LOCK)}: ${describe(lock, l)}; by session ${session}\n`);

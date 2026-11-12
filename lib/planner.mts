@@ -120,7 +120,7 @@ const MIN_SHARED = 2;
 const FOLD: Readonly<Record<string, string>> = { built: 'build' };
 const folded = (w: string): string => FOLD[w] ?? (w.length > 3 && w.endsWith('s') && !w.endsWith('ss') ? w.slice(0, -1) : w);
 export const contentWords = (text: string): Set<string> => new Set((text.toLowerCase().match(/[a-z0-9]+/g) ?? []).map(folded).filter((w) => !STOP.has(w)));
-export const sharedWords = (sentence: string, description: string): string[] => [...contentWords(sentence)].filter((w) => contentWords(description).has(w));
+const sharedWords = (sentence: string, description: string): string[] => [...contentWords(sentence)].filter((w) => contentWords(description).has(w));
 
 /** The skill whose description shares the most content words with the sentence, or null for a tie, or fewer than two shared. */
 export function skillFor(sentence: string, descriptions: Readonly<Record<string, string>>): string | null {

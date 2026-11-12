@@ -52,8 +52,12 @@ func (j *job) startDaemon() <-chan string {
 	cmd.Process.Release()
 	word := make(chan string, 1)
 	go func() {
-		line, _ := bufio.NewReader(read).ReadString('\n')
+		line, err := bufio.NewReader(read).ReadString('\n')
 		read.Close()
+		if err != nil && strings.TrimSpace(line) == "" {
+			// a daemon that closed the pipe without a word is not a ready one: say so instead of sending an empty line
+			line = "no word from the daemon: " + err.Error()
+		}
 		word <- strings.TrimSpace(line)
 	}()
 	return word
