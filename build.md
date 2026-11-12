@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 W8.5 (work/2.0.0-ts-w8-ts), started 2026-11-11: TypeScript enforced in projects (d-5).
+  making: lib/ts-project.mts (devDependency, strict tsconfig, LSP declaration, doctor's problems), packs/js-ts/checks/typescript-only.json and its rule, the sync and doctor calls, tests; concepts: none (design/shape.json declares none); reuse: readJson/writeJson/toJson (packs/base/hooks/lib/json.mts), readSettings (lib/settings.mts), switches (lib/switches.mts), the pack-template check gate.
+
 - 2.0.0 W5 (work/2.0.0-typescript; agents work/2.0.0-ts-w5-{d,a,b,c}), started 2026-11-11: the tests in three tiers on one install per configuration.
   making: test/unit, test/hooks/PACK, test/tools/PACK and test/integration files from the 87 root tests, the fixture builder, the per-version manifest and its noop, repo-lint's readers, briefs/W5-tier.md; concepts: none (design/shape.json declares none); reuse: fixture (test/fixtures/installs.mts), git, hookRun, projectWith, fresh (test/kit-cli.mts), runHook and verdicts (packs/base/hooks/lib/selftest.mts).
 

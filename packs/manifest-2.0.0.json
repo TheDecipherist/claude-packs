@@ -1056,6 +1056,7 @@
         ".claude/rules/type-space-colour.md": "f22133f6e64eb62fd63390e49b1fe38b38d0a0adb306a14faf3bb65069d108a6",
         ".claude/rules/typed-exports.md": "288fe7fcc2decef3cdbc7e69f298126a624e8d3e14477c0c407f3e178b0841d2",
         ".claude/rules/types-once-at-the-edge.md": "99244b2fbb905af1a7fa98faa2cb7fdbaf86dbe633560994eab918ee0b4b263b",
+        ".claude/rules/typescript-only.md": "a780bd5c22dc26b1b8f3b88319f5ed36f49726e9327d2ffdec54bd8998eac69c",
         ".claude/rules/unattended-runs.md": "598a2977c2596f4480a7d433b176d375d51344c2f9520adf8fa1ef3fde770da5",
         ".claude/rules/unions-over-enums.md": "e706cdb914800dbc298b220522aaf2f5bd45c4cb6516b797a0a9f555cd8b1fe6",
         ".claude/rules/untrusted-content-boundary.md": "810a7efafbe193847bc1cf54ebdcf7f37583e864a8cb6145937a1d30f598e2d8",

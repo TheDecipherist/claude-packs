@@ -417,7 +417,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `html-ui` | Server-rendered HTML (template strings, views): every value escaped, no inline style or script, safe links. | 2 | 5 | 0 | 0 |
 | `http-api` | Any HTTP server, in any framework: every route ties a record to its caller, guards fail closed, input is validated, secrets are compared and stored safely, and what a route returns gives nothing away. | 9 | 31 | 0 | 2 |
 | `instrument-shell` | Instruments built on a shared shell: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit. | 7 | 1 | 0 | 3 |
-| `js-ts` | JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper. | 27 | 35 | 0 | 0 |
+| `js-ts` | JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper. | 28 | 36 | 0 | 0 |
 | `midi` | MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. | 5 | 9 | 0 | 2 |
 | `mongo` | MongoDB with the native driver: one client, one gateway, aggregation reads, bulkWrite writes, safe deletes. | 6 | 18 | 0 | 0 |
 | `multi-tenant` | One system, many customers: no role crosses a tenant, every query carries the tenant key, and isolation is proved with a second tenant. | 1 | 2 | 0 | 1 |
