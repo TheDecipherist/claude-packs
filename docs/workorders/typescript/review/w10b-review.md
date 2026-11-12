@@ -5,7 +5,7 @@ Read on branch `work/2.0.0-ts-w10b-review` (from `origin/work/2.0.0-typescript`)
 owns the other half of the wire), `proxy/*.go`, `scripts/build-proxy.mts`. Read-only; `go vet .` and `go test .` in `proxy/` are
 green. The wave's other agents are changing the daemon's index start and git-guard; none of that is judged here.
 
-**Findings: 22** (high 3, medium 10, low 9). Sizes: S a few lines, M one file or one table, L several files or a design change.
+**Findings: 22** (high 3, medium 11, low 8). Sizes: S a few lines, M one file or one table, L several files or a design change.
 
 Answer to the brief's first question, in one line: there is **no** single owner across the two languages. `proxy-wire.mts` is the
 TypeScript owner and `proxy/wire.go` copies it by hand; only the daemon key has a shared vector test (`proxy/main_test.go` carries
