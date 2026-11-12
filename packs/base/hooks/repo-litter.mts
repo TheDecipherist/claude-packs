@@ -50,15 +50,21 @@ function faultOf(rel: string, abs: string, cfg: LitterConfig): string | null {
   return mb > limit ? `${rel} is ${Math.round(mb)} MB (limit ${limit}). Git keeps it for ever: use object storage or a release.` : null;
 }
 
-// A named file, or what a folder would stage.
-const staged = (dir: string, arg: string, env: HookContext['env']): string[] =>
-  gitLines(['ls-files', '--others', '--modified', '--exclude-standard', '--', arg], { cwd: dir, env }).map((f) => resolve(dir, f));
+const isFile = (abs: string): boolean => { try { return statSync(abs).isFile(); } catch { return false; } };
+
+/** A named file, or what a folder would stage. A plain file that nothing here faults is cleared without asking git (a `git ls-files`
+ *  over a big tree cost up to 187 ms on every `git add`); only one with a fault is confirmed as staged. */
+function staged(dir: string, arg: string, root: string, cfg: LitterConfig, env: HookContext['env']): string[] {
+  const named = resolve(dir, arg);
+  if (isFile(named) && !faultOf(slash(relative(root, named)), named, cfg)) return [];
+  return gitLines(['ls-files', '--others', '--modified', '--exclude-standard', '--', arg], { cwd: dir, env }).map((f) => resolve(dir, f));
+}
 
 function litterFault(command: string, cwd: string, ctx: HookContext): string | null {
   for (const { dir, args } of gitAdds(command, cwd)) {
     const root = checkoutRoot(ctx.projectDir, join(dir, 'x'), ctx.cwd);
     const cfg = litterConfig(readLayout(claudeRoot(ctx.projectDir, join(dir, 'x'), ctx.cwd)));
-    for (const abs of args.filter((a) => !a.startsWith('-')).flatMap((a) => staged(dir, a, ctx.env))) {
+    for (const abs of args.filter((a) => !a.startsWith('-')).flatMap((a) => staged(dir, a, root, cfg, ctx.env))) {
       const fault = faultOf(slash(relative(root, abs)), abs, cfg);
       if (fault) return `${fault}\nA real asset can be named in guards.repoLitter.allow.\n`;
     }
