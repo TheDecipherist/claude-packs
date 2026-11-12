@@ -4,7 +4,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readlinkSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { buildSlots, slotOwners } from './build-slots.mts';
+import { inFlight, machineHost } from './governor.mts';
 import { gitOut, gitRun } from './git-run.mts';
 import { sessionOrders } from './run-claudes.mts';
 
@@ -57,12 +57,12 @@ export function runnersIn(psText: string): Runner[] {
 /** Whether a process's command line is a resident runner serving a project (`node .../resident.mjs --serve <project> ...`). */
 export const isDaemon = (args: string): boolean => /\bresident\.m?[jt]s\s+--serve\b/.test(args);
 
-/** Every process's working folder, CPU, resident memory and whether it is a build waiting for a slot of the build queue:
+/** Every process's working folder, CPU, resident memory and whether it is a build waiting for the governor's grant:
  *  /proc on Linux, one lsof call elsewhere; [] when neither works. */
 export function processesOf(env: Env): Proc[] {
   let ps = '';
   try { ps = execFileSync('ps', ['-eo', 'pid=,pcpu=,rss=,args='], { encoding: 'utf8', maxBuffer: BIG, env: { ...env } }); } catch { return []; }
-  const owners = slotOwners(buildSlots(env).dir);
+  const owners = new Set(inFlight(machineHost(env)).jobs.map((j) => j.pid));   // W8.8: a buildq job holds a governor grant once it runs
   const rows = ps.split('\n').flatMap((l) => {
     const m = l.trim().match(/^(\d+)\s+([\d.]+)\s+(\d+)\s+(.*)$/);
     if (!m) return [];
