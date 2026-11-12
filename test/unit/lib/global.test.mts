@@ -10,7 +10,7 @@ import { FILES, globalAdd, globalDoctor, globalRemove } from '../../../lib/globa
 const quiet = (): { log: (l: string) => void; said: string[] } => { const said: string[] = []; return { said, log: (l) => said.push(l) }; };
 
 test('FILES installs the shell readers the global hooks read through, and every source exists', () => {
-  for (const f of ['shell-writes', 'program-writes', 'program-read', 'command-prefix', 'shell-lex', 'files', 'json', 'shell-sed']) {
+  for (const f of ['shell-writes', 'program-writes', 'program-read', 'command-prefix', 'shell-lex', 'files', 'json', 'shell-sed', 'program-named', 'project']) {
     assert.ok(FILES.some(([from, to]) => from === `../packs/base/hooks/lib/${f}.mjs` && to === `hooks/claude-packs/lib/${f}.mjs`), f);
   }
   // the global hooks' own helpers (W4): what they share, installed beside each hook that reads it
@@ -18,7 +18,7 @@ test('FILES installs the shell readers the global hooks read through, and every 
     ['hooks/lib/manifest-pins.mjs', 'hooks/claude-packs/lib/manifest-pins.mjs'], ['hooks/lib/command-pins.mjs', 'hooks/claude-packs/lib/command-pins.mjs']]) {
     assert.ok(FILES.some(([f, t]) => f === from && t === to), `${from} to ${to}`);
   }
-  assert.equal(FILES.length, 16);
+  assert.equal(FILES.length, 18);
 });
 
 test('add wires each hook once, keeps the user\'s settings and edited file, and remove undoes only ours', () => {
