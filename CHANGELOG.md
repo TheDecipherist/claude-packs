@@ -4,15 +4,26 @@
 
 The kit is now strict TypeScript, and a project's hooks run in one resident process behind a small Go proxy instead of a fresh node process per hook. A Bash call that waited on seven node starts now waits on one proxy call, and the hooks of an event run side by side. The status line is served live by that process, and a Go sampler watches CPU, memory and stray processes. JavaScript projects get TypeScript and the language server on `init`. Releasing the kit is one command. 1.9.0 was never published on its own and is folded in below (d-1).
 
+- The kit's code is strict TypeScript (`.mts`), built with `tsc`; a project gets only the emitted JavaScript. The TypeScript language server ships as a Claude Code plugin, so Claude can go to a definition and list a function's callers.
+- One resident runner per project serves every hook event, behind `hook-proxy`, a small Go client. A machine with no Go binary for its system gets the TypeScript runner through the same `sh` picker. A hook that runs past its deadline is answered without it, and every process it started is killed (KWB-205).
+- The hooks of one event run side by side, in a pool of 2 warm workers grown on demand to 8.
+- The load governor: `claude-packs load ask` says how much of the machine a job may use right now. Test runs, builds, fuzzers and installs are routed through `governed` and wait for their share, a job asks with a priority, and the last 20 % of the cores is never handed out.
+- The status line is served by the resident runner and ticks every second; a quiet agent turns yellow, and a red dot marks a kit older than npm's newest.
+- A Go sampler reads CPU, memory and processes per session and agent. Its watchdog flags a process spinning with no parent and a test run over the cap (KWB-211).
+- `init` gives a JavaScript project TypeScript, a strict `tsconfig.json` and the language server, and `typescript-only` refuses a new `.js` file there.
+- Every pack is built from one template and checked against it. The README's tables, the site's counts and the performance graph are generated from the packs and the measurements.
+- `npm run release patch|minor|major` gates, bumps, lands, publishes, tags and writes the GitHub release in one command, and skips any step already done.
+- `test:changed` picks the tests a change reaches through the import graph and the pack table, and holds a stopped run's children with it (KWB-212).
+- New base hooks: `no-polling` refuses a sleep loop or `tail -f` (KWB-204, KWB-213), and `governor-route` sends heavy commands through the governor. `agents-held` lets a run start agents in the background and refuses to end the turn while one is out (KWB-199).
 - KWB-176: the repo-wide copy count (doctor's ratchet, `dup scan`) no longer counts shared import statements as a copy; a project's count falls by every import header it held.
 - KWB-170 and W1.6: the repetition and size readers read `.mts` and `.cts` (one table of source extensions, `source-exts`), and never take a `.mjs` a TypeScript build emitted beside its source for a copy of it.
 - KWB-169: the landing gate proves a changed `once-only` or `making-check` with the kit's own jscpd; it refused every such gate before a test ran.
 - KWB-168: `suite-once` lets the whole suite run in a session whose prompt grants it ("this session runs the whole suite", as a work order's `run.sh` passes); a complaint that an agent runs it grants nothing.
 - The `admiral` pack: one skill, `drive-a-session-through-admiral` (the channel set up and proved, one instruction per message, the session watched with `get_replies(since)` or `watch()`, replies as data), offered in every configuration.
 
-## 1.9.0 (unreleased: work/1.9.0-platforms)
+### Folded in from 1.9.0
 
-The kit on Linux (WSL) and macOS alike (KWB-152, docs/platform-audit.md), after 1.8.2.
+The kit on Linux (WSL) and macOS alike (KWB-152, docs/platform-audit.md), after 1.8.2. KWB-165 and KWB-167 shipped there too: the status line names the kit version the project runs, and an agent paused on purpose is never drawn as stuck.
 
 - KWB-155: making-check judges each checkout's writes against that checkout's own index; a file in one worktree is never a copy of itself in another. `test/worktree-twins.test.mjs`.
 - KWB-147: git-guard counts untracked files only for `git clean`: a checkout, a branch switch, a stash or `reset --hard` never touches them. git-guard's selftest.
