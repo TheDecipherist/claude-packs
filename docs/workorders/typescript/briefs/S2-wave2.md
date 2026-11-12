@@ -44,3 +44,28 @@ why, or `[gap]`). Write the result to `docs/workorders/typescript/review/w10-led
 <test> | no test: <why>`. Count the findings in each review file and write the totals at the top; 0 may be blank. This is
 read-and-write-one-file work: write nothing but `w10-ledger.md` and your status file. Gate: none beyond `git diff --stat` showing
 only those files.
+
+## budgets: doctor --strict green on the kit's own live install
+
+`node bin/claude-packs.mjs doctor --strict` in the main checkout is red on the budgets (its output:
+/Users/tim.clausen/projects/claude-packs/build/session2/doctor1.txt; the live log is the main checkout's `.claude/hooks.log`, read
+only). Every slow call is a `git commit`, `git push`, `git merge` or `git add` Bash call, or the first event after the daemon
+starts:
+- git-guard at Pre Bash 1,201 to 2,082 ms on commit and push: law 9 asks GitHub (`git ls-remote --heads`, lib/remote-heads.mts
+  `remoteHeads`) when its kept look is older than a minute (agents/kwb201-report.md, section 3). Make the event never wait on the
+  network: the local remote-tracking refs (which every push and fetch updates) answer the law, and the GitHub look is refreshed
+  detached (as the Stop path's `refreshLater` already does) after a push or a commit; say in your report what the law can then
+  miss and why that is acceptable, or keep a network look only where the law cannot be judged without it.
+- kit-fresh at Pre Bash 126 to 835 ms on the same calls: find what it does there (a child process, a registry look) and make the
+  event read a kept answer, refreshed detached.
+- repo-litter at Pre Bash up to 187 ms on `git add`: find the cost (a `git` child, file sizes) and keep it within 10/50 ms p50/p95,
+  worst 200.
+- template-law 1,516 ms on the first Pre Write or heredoc after a daemon start (its index built on that call; agents/rss-report.md
+  item 3): build the daemon's indexes when the daemon starts, in the background, so no event waits on the build (an event that
+  comes before it is ready is judged by the one-shot path, as today with no daemon).
+- once-only-index at PostToolUse 120 to 148 ms on Edits in a worktree under `.claude/worktrees/` (the daemon holds only the main
+  checkout's index): find the cost and bring Post under its 60/150 ms budget, for instance by answering a Post event before its
+  recorders finish, if the protocol allows it (read the daemon's event code and say what changes).
+Measure each before and after by driving the scratch rig (`test/integration/proxy-fire-rig.mts`, `live-event-speed.test.mts`) with
+the same commands; each fix gets a test or selftest case seen red first. Never run the main checkout's daemon or change its install;
+the lead updates it after the merge.
