@@ -645,6 +645,44 @@ snapshot under 5 ms of CPU on this Mac (or the `ps` fallback's cost stated); a p
 event stays listed past 5 minutes and is removed 5 minutes after its processes end; a planted orphan spinning for 60 s is flagged
 (and stopped with the guard set), seen red first; the daemon and the sampler together under 300 MB.
 
+## W8.8. The load governor: everything heavy runs through it, so a machine is never maxed out
+
+The user, 2026-11-12: "we need something that controls load in the kit that everything 'runs through' so you can never max out a
+machine" (the same day this run's own agents, tests, fuzzers and soak reached load 43 and 47 on 18 cores). Before W10b's soak runs.
+
+1. One owner, `packs/base/hooks/lib/governor.mts`, with the machine's budget in the user's cache folder (shared by every session,
+   agent and project on the machine): slots = 60 % of the cores by default (`~/.config/claude-packs/governor.json` `budget`, a share
+   or a count; a project's layout may lower it, never raise it), a load ceiling (default 70 % of the cores), the jobs in flight in a
+   lock-guarded file (each with its pid, process group, slots, project and start), a stale job (pid gone) freed on read.
+2. The build queue folds into it: `buildq`'s slot and core budget become the governor's (its callers and its tests kept, its own
+   state file retired), one owner for "how many cores may this job use".
+3. `governed` (`.claude/tools/governed`, through the resident runner when it is up): asks for slots by the job's weight, waits in a
+   queue while slots or live load (W8.7's sampler; `vm.loadavg` when the sampler is down) say no, quietly inside its own tool call
+   with one line of its state on stderr every 30 s (never a turn spent polling); then starts the command in its own process group
+   under `taskpolicy -b` on macOS (`nice -n 15` elsewhere) with the concurrency it was granted set for it (`-j`, `CMAKE_BUILD_PARALLEL_LEVEL`,
+   `CLAUDE_PACKS_TEST_CORES`, `GOMAXPROCS`, `-parallel` on `go test -fuzz`, `--test-concurrency`), frees its slots on exit (and on a
+   kill, by the stale rule), and exits with the command's own code.
+4. The `PreToolUse` Bash hook routes heavy commands through `governed` by `updatedInput` (one table of heavy forms with their
+   weights: builds by `cmake --build`, `make`, `ninja`, `go build`, `cargo build`; tests by `npm test`, `npm run test:changed`,
+   `node --test`, `ctest`, `go test`, `pytest`; fuzzers; `npm ci` and installs; the soak and replay scripts); a command already
+   governed, a pipe whose heavy part is not first, or a light command is left alone. The `Agent` tool's start asks the governor for
+   an agent slot (1 slot each), so a wave cannot start more agents than the budget fits; a run with nobody there still holds its
+   agents in the foreground (agents-held).
+5. The ceiling's guarantee, in the watchdog (W8.7): when the 1-minute load stays above the ceiling for 30 s, the newest governed
+   job's process group is paused (SIGSTOP), and resumed (SIGCONT) when load falls under the ceiling less 10 %; the oldest job is
+   never paused; a job paused over 10 minutes is named in the status line and the log; pausing, never killing.
+6. The status line shows the governor: slots in use of the budget, jobs queued, jobs paused.
+
+**Done when (W8.8):** `test/unit/hooks-lib/governor.test.mts`, `test/tools/base/governed.test.mts` and
+`test/hooks/base/governor-route.test.mts` are green with 0 failures, each case seen red on its plant: two planted heavy jobs whose
+weights exceed the budget run one after the other, never together; a job granted 3 slots runs with `CLAUDE_PACKS_TEST_CORES=3` and
+`-j3`; a killed job's slots are freed on the next read; a planted `npm test`, `cmake --build` and `go test -fuzz` are each rewritten
+through `governed`, and `ls`, a governed command and a pipe whose heavy part is not first are not; an agent start past the budget
+waits; a planted spinner job that holds load over the ceiling for 30 s is paused and resumed when it falls, the oldest job never
+paused; the build queue's own tests green on the governor. Measured on this Mac with the budget at its default: this order's own
+heaviest wave replayed (three test runs and a fuzzer started together) keeps the 1-minute load under the ceiling (13 on 18 cores)
+for its whole run, sampled every 5 s into `build/evidence/W8.8/`, with its wall time stated against the ungoverned one.
+
 ## W9. The release in five minutes (measured without publishing)
 
 1. `npm run release` with `patch`, `minor` or `major` does the whole of it: the gate (`test:changed --base origin/main` on committed
