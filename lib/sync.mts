@@ -7,6 +7,7 @@
 import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeCompiledChecks } from '../packs/base/hooks/lib/checks-compiled.mts';
 import { readText } from '../packs/base/hooks/lib/files.mts';
 import { TABLE_FILE } from '../packs/base/hooks/lib/hook-table.mts';
 import { parseJson, readJson } from '../packs/base/hooks/lib/json.mts';
@@ -177,6 +178,8 @@ export async function sync(projectDir: string, requested: readonly string[] | nu
   const fetched = Object.fromEntries(Object.entries({ ...lock.sources, ...sources }).filter(([name]) => listed.includes(name)));
   // packs: what was asked for, which an update reads back; installed: every pack whose files are here, the configuration's own too (KF-4)
   writeLock(claudeDir, { kit: KIT_VERSION, packs: listed, installed: [...new Set([...listed, ...config.packs.always])], ...(Object.keys(fetched).length ? { sources: fetched } : {}), updated: new Date().toISOString(), files });
+  // the checks read once for the hook, keyed by this lock (W8.3); not in the lock, which holds the key's hash
+  if (!writeCompiledChecks(projectDir)) log('  lesson checks: not compiled (a check file is not JSON, or there are none): the hook reads the files');
   log(`Packs: ${listed.join(', ')}. ${Object.keys(files).length} files managed, ${stale} rule paths refreshed.`);
   return { packNames: listed, layout, config };
 }

@@ -1,12 +1,13 @@
 // W8.3 and W11: W0's replay fixture played through an install with bandwarp's pack set, in a scratch folder (never bandwarp).
-//   node docs/workorders/typescript/probes/replay-play.mts <out.md> [--stride N] [--lag MS] [--proxy] [--stops N]
+//   node docs/workorders/typescript/probes/replay-play.mts <out.md> [--stride N] [--lag MS] [--gap MS] [--proxy] [--stops N]
 // The fixture (test/fixtures/replay/bandwarp-hooks.jsonl) keeps timings, not payloads, so each event becomes a payload of its kind
 // (the tool, the event) and is run through the install's own settings entry: the real command (the `sh` picker), a real process,
 // the wall from spawn to exit. Without --proxy HOME is the scratch, so the picker finds no binary and the TypeScript runner answers;
 // with it the Go client and the daemon answer (the daemon is stopped at the end). Scratch: init of bandwarp's pack set; a repo with
 // a bare remote, 12 heads, 7 agent worktrees, 3 local branches with commits GitHub lacks; the remote answers after --lag ms (a
-// `git-upload-pack` shim in a GIT_EXEC_PATH folder: the look at GitHub took 4 to 7 s at load 27, W0). Every 5th Stop a commit lands (a ref
-// change) and every 10th all is pushed, so the run holds hits and misses. Every Stop of the fixture is played (51, --stops); other
+// `git-upload-pack` shim in a GIT_EXEC_PATH folder: the look at GitHub took 4 to 7 s at load 27, W0). Before every 5th Stop a commit and
+// its push land, each shown to the hooks first as Claude Code does (a ref changes under the kept look), and every Stop waits --gap ms
+// (default 6 s; in a session they are minutes apart) for the detached refresh. Every Stop of the fixture is played (51, --stops); other
 // events every --stride th (default 12).
 // Out: per event kind the wall p50/p95/worst and, from the scratch's hooks.log, each hook's own `ms` p50/p95/worst.
 import { spawnSync } from 'node:child_process';
@@ -21,6 +22,7 @@ const flag = (name: string, fallback: string): string => { const i = args.indexO
 const stride = Number(flag('--stride', '12'));
 const lag = Number(flag('--lag', '1500'));
 const stops = Number(flag('--stops', '51'));
+const gap = Number(flag('--gap', '6000'));
 const proxy = args.includes('--proxy');
 const out = args.find((a) => !a.startsWith('--')) ?? 'replay-play.md';
 const cli = join(kit, 'bin/claude-packs.mjs');
@@ -39,7 +41,7 @@ const root = mkdtempSync(join(tmpdir(), 'replay-'));
 const dir = join(root, 'proj');
 const remote = join(root, 'remote.git');
 mkdirSync(dir);
-const init = sh(`node ${cli} init --config synth-creator cpp audio-core instrument-shell midi sound-design --dir ${dir}`, kit, proxy ? process.env : { ...process.env, HOME: root });
+const init = sh(`node ${cli} init --config synth-creator cpp audio-core instrument-shell midi sound-design --dir ${dir}`, kit, proxy ? { ...process.env, CLAUDE_PACKS_CACHE: join(root, 'cache') } : { ...process.env, HOME: root });
 if (init.status !== 0) throw new Error(`init failed: ${init.out}`);
 git(dir, 'init', '-q', '-b', 'main');
 git(root, 'init', '-q', '--bare', remote);
@@ -77,7 +79,8 @@ for (const f of readdirSync(exec)) if (f !== 'git-upload-pack') symlinkSync(join
 writeFileSync(join(shim, 'git-upload-pack'), `#!/bin/sh\nsleep ${(lag / 1000).toFixed(2)}\nexec "${exec}/git-upload-pack" "$@"\n`);
 chmodSync(join(shim, 'git-upload-pack'), 0o755);
 const base: NodeJS.ProcessEnv = { ...process.env, CLAUDE_PROJECT_DIR: dir, GIT_EXEC_PATH: shim, TMPDIR: root };
-const env: NodeJS.ProcessEnv = proxy ? base : { ...base, HOME: root };
+// the daemon's socket, pid file and binary live in a folder of the scratch (CLAUDE_PACKS_CACHE), never the user's cache
+const env: NodeJS.ProcessEnv = proxy ? { ...base, CLAUDE_PACKS_CACHE: join(root, 'cache') } : { ...base, HOME: root };
 
 interface Entry { matcher?: string; hooks: { command: string; async?: boolean }[] }
 const settings = readJson<{ hooks: Record<string, Entry[]> }>(join(dir, '.claude/settings.json'), { hooks: {} }) ?? { hooks: {} };
@@ -102,6 +105,10 @@ const payload = (e: Fixture, k: number): string => {
   return toJson({ ...head, tool_name: e.tool, tool_input: input, ...(e.event === 'PostToolUse' ? { tool_response: { success: true } } : {}) });
 };
 
+const fire = (event: string, tool: string, input: string): void => {
+  const cmd = commandFor(event, tool);
+  if (cmd !== null) spawnSync('sh', ['-c', cmd], { cwd: dir, env, input, encoding: 'utf8' });
+};
 const walls = new Map<string, number[]>();
 let stopsSeen = 0;
 let seen = 0;
@@ -110,8 +117,14 @@ for (const e of events) {
   if (e.event === 'Stop' ? stopsSeen >= stops : seen++ % stride !== 0) continue;
   if (e.event === 'Stop') {
     stopsSeen += 1;
-    if (stopsSeen % 5 === 0) commit(dir, 100 + stopsSeen); // a ref change: a commit GitHub lacks on the branch main's folder holds
-    if (stopsSeen % 10 === 0) { git(dir, 'push', '-q', 'origin', 'HEAD'); pushes += 1; }
+    if (stopsSeen % 5 === 0) { // a commit and its push, each shown to the hooks first, as Claude Code does (a ref changes under the kept look)
+      fire('PreToolUse', 'Bash', toJson({ session_id: 'replay', cwd: dir, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git commit -m x -- n1.txt' } }));
+      commit(dir, 100 + stopsSeen);
+      fire('PreToolUse', 'Bash', toJson({ session_id: 'replay', cwd: dir, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git push origin HEAD' } }));
+      git(dir, 'push', '-q', 'origin', 'HEAD');
+      pushes += 1;
+    }
+    spawnSync('sleep', [String(gap / 1000)]); // Stops in a session are minutes apart; the replay gives the detached refresh this long
   }
   const cmd = commandFor(e.event, e.tool);
   if (cmd === null) continue;
@@ -135,5 +148,12 @@ const text = `replay: ${stopsSeen} Stops, other events every ${stride}th, remote
   + `${table('event wall', [...walls].sort()).join('\n')}\n\n${table('hook, own ms (worst 24 by p95)', worstFirst).join('\n')}\n`;
 writeFileSync(out, text);
 process.stdout.write(text);
-if (proxy) sh(`node ${cli} daemon stop --dir ${dir}`, kit);
+if (proxy) {
+  sh(`node ${cli} daemon stop --dir ${dir}`, kit, env);
+  // nothing of the replay outlives it: a daemon `daemon stop` did not find (its socket in /tmp/claude-packs-UID) is ended by its command line, which names the scratch
+  for (const row of sh('ps -axo pid=,command=', kit).out.split('\n')) {
+    const pid = Number(row.trim().split(/\s+/)[0]);
+    if (row.includes(root) && /--serve|resident/.test(row) && Number.isInteger(pid)) process.kill(pid);
+  }
+}
 rmSync(root, { recursive: true, force: true });

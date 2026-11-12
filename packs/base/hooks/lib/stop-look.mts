@@ -13,7 +13,7 @@ import { gitDirsOf, refsFingerprint } from './git-files.mts';
 import { failed } from './remote-heads.mts';
 import type { GitEnv, GitGuards } from './remote-heads.mts';
 import { blankQuotes, dropHeredocs } from './shell-lex.mts';
-import { forget, hitFor, keep } from './stop-cache.mts';
+import { forget, hitFor, keep, slotOf } from './stop-cache.mts';
 import type { StopLook } from './stop-cache.mts';
 import type { LagVerdict } from './trunk-lag.mts';
 
@@ -44,10 +44,11 @@ export interface StopLookOptions {
 }
 
 export function stopLook(root: string, env: GitEnv, cfg: GitGuards, { lag, told, now, refresh }: StopLookOptions): StopLook {
-  const kept = hitFor(root, cfg, now);
+  const slot = slotOf(root, cfg);
+  const kept = hitFor(slot, cfg, now);
   if (kept) return kept;
   const look = lookNow(root, env, { ...cfg, until: now + STOP_LIVE_MS }, lag, told);
-  keep(root, cfg, look, now);
+  keep(slot, cfg, look, now);
   if (failed(look.found) || look.behind?.error) refresh?.();
   return look;
 }
@@ -94,7 +95,8 @@ export function landedLater(self: string, command: string, root: string, env: Gi
 
 export async function refreshStop(root: string, env: GitEnv, cfg: GitGuards, lag: LagLook, waitMs: number): Promise<StopLook> {
   await untilChanged(root, waitMs);
+  const slot = slotOf(root, cfg); // the key before the look: a ref that moves during it makes the next Stop look again
   const look = lookNow(root, env, cfg, lag, undefined);
-  keep(root, cfg, look, Date.now());
+  keep(slot, cfg, look, Date.now());
   return look;
 }

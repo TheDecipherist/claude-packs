@@ -29,25 +29,27 @@ interface Kept { key: string; at: number; look: StopLook }
 /** The settings that change what a look finds; the look's own plumbing (a deadline, the clock) does not. */
 const settingsOf = (cfg: GitGuards): string => toJson({ ...cfg, until: undefined, now: undefined, live: undefined, cachedOnly: undefined, stopCacheMs: undefined });
 
-function keyOf(root: string, cfg: GitGuards): { file: string; key: string } | null {
+/** Where a look is kept and the key it is kept under, as the repo is at the moment this is asked: taken BEFORE a look, so a look
+ *  that a ref moved during is kept under the key it began at, and is not served for the state after. */
+export interface Slot { file: string; key: string }
+
+export function slotOf(root: string, cfg: GitGuards): Slot | null {
   const dirs = gitDirsOf(root);
   return dirs ? { file: join(dirs.common, FILE), key: `${refsFingerprint(dirs)}:${shortHash(settingsOf(cfg), 12)}` } : null;
 }
 
-export function hitFor(root: string, cfg: GitGuards, now: number): StopLook | null {
+export function hitFor(slot: Slot | null, cfg: GitGuards, now: number): StopLook | null {
   const ttl = cfg.stopCacheMs ?? STOP_CACHE_MS;
-  const at = keyOf(root, cfg);
-  if (ttl <= 0 || !at) return null;
-  const kept = readJson<Kept>(at.file);
-  return kept && kept.key === at.key && now - kept.at < ttl && now >= kept.at ? kept.look : null;
+  if (ttl <= 0 || !slot) return null;
+  const kept = readJson<Kept>(slot.file);
+  return kept && kept.key === slot.key && now - kept.at < ttl && now >= kept.at ? kept.look : null;
 }
 
 /** Keeps a look that reached GitHub and found the trunk in step. A failure is not kept, and neither is a lag: whether the main
  *  checkout may be touched depends on uncommitted work, which no ref shows, so a Stop that finds one looks again. */
-export function keep(root: string, cfg: GitGuards, look: StopLook, now: number): void {
-  const at = keyOf(root, cfg);
-  if (!at || (cfg.stopCacheMs ?? STOP_CACHE_MS) <= 0 || failed(look.found) || look.behind) return;
-  writeJson(at.file, { key: at.key, at: now, look } satisfies Kept);
+export function keep(slot: Slot | null, cfg: GitGuards, look: StopLook, now: number): void {
+  if (!slot || (cfg.stopCacheMs ?? STOP_CACHE_MS) <= 0 || failed(look.found) || look.behind) return;
+  writeJson(slot.file, { key: slot.key, at: now, look } satisfies Kept);
 }
 
 export function forget(root: string): void {
