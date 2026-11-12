@@ -2,6 +2,7 @@
   "id": "ui-no-uppercase-table-header",
   "why": "An uppercase tracked table header is louder than the data. Use small grey sentence case.",
   "rule": ".claude/rules/apps-are-not-pages.md",
+  "code": false,
   "concepts": [
     "ui-markup"
   ],

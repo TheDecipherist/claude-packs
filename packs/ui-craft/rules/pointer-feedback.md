@@ -26,3 +26,6 @@ Never do:
 - Let the effect shift the layout or the neighbours: transform, shadow or colour, never size or margin.
 - Lift or zoom every card: the effect means "this acts", so an element that does nothing gets none.
 </constraints>
+
+## Check
+Lesson check for this rule: `ui-no-custom-cursor`.

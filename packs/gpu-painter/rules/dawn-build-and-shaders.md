@@ -25,3 +25,4 @@ Never do:
 ## Check
 - `.claude/checks/dawn-backends-and-validation.json` blocks extra backends and `skip_validation`.
 - CI: `tint` validates every `.wgsl`; the bench shows second-launch pipeline creation under 10% of the first.
+Lesson check for this rule: `dawn-backends-and-validation`.

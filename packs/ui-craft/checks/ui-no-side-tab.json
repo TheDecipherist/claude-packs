@@ -2,6 +2,7 @@
   "id": "ui-no-side-tab",
   "why": "A thick coloured border down one side of a card is the most recognizable generated-UI tell. Use a tone step, or nothing.",
   "rule": ".claude/rules/no-generated-look.md",
+  "code": false,
   "concepts": [
     "ui-markup"
   ],

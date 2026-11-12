@@ -16,3 +16,6 @@ Always do:
 Never do:
 - Build a date by hand from its parts (`ui-intl-for-dates`).
 </constraints>
+
+## Check
+Lesson check for this rule: `ui-intl-for-dates`.

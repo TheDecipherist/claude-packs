@@ -2,6 +2,7 @@
   "id": "denormals-not-in-prepare",
   "why": "disableDenormalisedNumberSupport() only affects the calling thread; prepareToPlay may run on another thread. Use juce::ScopedNoDenormals at the top of processBlock.",
   "rule": ".claude/rules/scoped-no-denormals.md",
+  "exclude": [],
   "concepts": [
     "cpp"
   ],

@@ -18,3 +18,6 @@ Never do:
 - A database call, `fetch` to an external API, or business logic inline in a route file (`no-db-in-route-file`).
 - A handler that imports the driver or an HTTP client directly.
 </constraints>
+
+## Check
+Lesson checks for this rule: `api-routes-versioned`, `no-db-in-route-file`.

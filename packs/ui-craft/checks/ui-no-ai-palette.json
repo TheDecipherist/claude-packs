@@ -2,6 +2,7 @@
   "id": "ui-no-ai-palette",
   "why": "Purple and violet gradients are the most recognizable tell of generated UI. Use the project's palette.",
   "rule": ".claude/rules/no-generated-look.md",
+  "code": false,
   "concepts": [
     "ui-markup",
     "ui-styles"

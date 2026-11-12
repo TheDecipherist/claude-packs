@@ -2,6 +2,7 @@
   "id": "no-latest-base",
   "why": "An unpinned or :latest base image changes under you between builds. Pin the exact tag (latest-versions tells you which).",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "concepts": [
     "dockerfile"
   ],

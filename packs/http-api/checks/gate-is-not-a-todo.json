@@ -2,6 +2,7 @@
   "id": "gate-is-not-a-todo",
   "why": "Temporary access paths are never removed, and an AI writes the comment instead of the check because the comment passes every test.",
   "rule": ".claude/rules/routes-scope-to-the-caller.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.tsx",

@@ -20,3 +20,6 @@ Never do:
 - Paranoia 3 or 4 as a default.
 - Let the WAF stand in for input validation, safe query construction and CSP in the app; it is the layer on top.
 </constraints>
+
+## Check
+Lesson check for this rule: `modsec-no-blanket-off`.

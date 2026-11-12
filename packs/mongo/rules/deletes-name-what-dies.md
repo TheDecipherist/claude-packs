@@ -19,3 +19,6 @@ Never do:
 - A delete filter built on a negation (`$ne`, `$nin`, `$not`) against a status or version field: it deletes everything except one value, and one wrong constant empties the store while reading as a cleanup (`no-negation-delete` check).
 - `dropDatabase()` / `drop()` in application code: that is an ops runbook action with a human gate (`no-drop-in-code` check).
 </constraints>
+
+## Check
+Lesson checks for this rule: `no-drop-in-code`, `no-empty-deletemany`, `no-negation-delete`.

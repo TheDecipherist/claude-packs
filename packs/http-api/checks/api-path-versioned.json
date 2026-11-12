@@ -2,6 +2,7 @@
   "id": "api-path-versioned",
   "why": "An unversioned API route cannot change without breaking every client.",
   "rule": ".claude/rules/apis-are-versioned.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.tsx",

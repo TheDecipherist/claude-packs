@@ -17,3 +17,4 @@ Never do:
 
 ## Check
 `.claude/checks/cpp-find-with-the-library.json` refuses a new hand-written search loop.
+Lesson check for this rule: `cpp-find-with-the-library`.

@@ -2,6 +2,7 @@
   "id": "no-crlf-in-scripts",
   "why": "A shell script with CRLF endings fails inside Linux containers with 'no such file or directory' on the shebang. LF only; .gitattributes enforces it for everyone.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "concepts": [
     "docker-scripts",
     "dockerfile",

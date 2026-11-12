@@ -2,6 +2,7 @@
   "id": "ear-constant-tagged",
   "why": "A value tuned by ear with no tag leaves the ledger unaware of a debt.",
   "rule": ".claude/rules/every-law-has-a-source.md",
+  "code": false,
   "globs": [
     "**/*.cpp",
     "**/*.cc",

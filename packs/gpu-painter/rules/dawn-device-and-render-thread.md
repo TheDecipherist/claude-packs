@@ -24,3 +24,4 @@ Never do:
 - `.claude/checks/dawn-no-spontaneous.json` and `dawn-present-on-render-thread.json` block the forbidden patterns.
 - Test: force `device.Destroy()` mid-session. Pass: the frame comes back and no errors are left unhandled.
 - `gpu-lifecycle-stress`: zero Dawn threads remain after the last release.
+Lesson checks for this rule: `dawn-no-spontaneous`, `dawn-present-on-render-thread`.

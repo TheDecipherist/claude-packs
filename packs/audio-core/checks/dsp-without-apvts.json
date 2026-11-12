@@ -2,6 +2,7 @@
   "id": "dsp-without-apvts",
   "why": "DSP blocks take a plain parameter struct so the same sources build into the plugin, the tests and the benchmark; they never reach into the parameter tree.",
   "rule": ".claude/rules/optimisations-are-null-tested.md",
+  "exclude": [],
   "concepts": [
     "dsp"
   ],

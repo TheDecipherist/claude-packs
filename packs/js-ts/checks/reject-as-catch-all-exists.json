@@ -2,6 +2,7 @@
   "id": "reject-as-catch-all-exists",
   "why": "\"Already exists\" as a catch-all also hides auth failures and a dead service. Check the status, then swallow only that one.",
   "rule": ".claude/rules/errors-never-swallowed.md",
+  "code": false,
   "globs": [],
   "exclude": [
     "**/tests/**",

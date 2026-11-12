@@ -26,3 +26,6 @@ Never do:
 - Compare a function with itself.
 - Invent a term. It is worse than a missing one.
 </constraints>
+
+## Check
+Lesson checks for this rule: `no-literal-key-anchor`, `test-compares-a-function-with-itself`.

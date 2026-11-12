@@ -2,6 +2,7 @@
   "id": "compose-service-needs-init",
   "why": "This service has no `init: true`: the app is PID 1 with no signal forwarding or zombie reaping, so docker stop waits 10 s then SIGKILLs it mid-request. Every service gets init: true.",
   "rule": ".claude/rules/compose-swarm-safe.md",
+  "exclude": [],
   "concepts": ["compose"],
   "code": false,
   "flags": "m",

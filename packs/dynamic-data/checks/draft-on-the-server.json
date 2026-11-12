@@ -2,6 +2,7 @@
   "id": "draft-on-the-server",
   "why": "A draft in localStorage is a second truth on one device. Keep it on the server, per user, so it follows them.",
   "rule": ".claude/rules/saves-are-patches.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.tsx",

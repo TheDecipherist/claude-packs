@@ -2,6 +2,7 @@
   "id": "compose-no-hardcoded-ip",
   "why": "Container IPs change on every restart, scale and update. The service name is the identity.",
   "rule": ".claude/rules/compose-swarm-safe.md",
+  "exclude": [],
   "concepts": [
     "compose"
   ],

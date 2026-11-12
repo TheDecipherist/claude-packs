@@ -16,3 +16,6 @@ Never do:
 - Paste table bytes into source, not even a 128-byte curve.
 - Commit a sound bank to make a test pass, unless it is a named fixture.
 </constraints>
+
+## Check
+Lesson check for this rule: `no-rom-table-literal`.

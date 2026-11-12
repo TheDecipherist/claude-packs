@@ -2,6 +2,7 @@
   "id": "dockerfile-needs-healthcheck",
   "why": "Without a HEALTHCHECK, rolling updates and rollback have nothing to decide on and a dead service stays in rotation.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "concepts": [
     "dockerfile"
   ],

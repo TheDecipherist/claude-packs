@@ -24,3 +24,6 @@ Never do:
 - A hardcoded IP or `ipv4_address`.
 - `exit(0)` on a crash in the app: `restart_policy: on-failure` only restarts non-zero.
 </constraints>
+
+## Check
+Lesson checks for this rule: `compose-no-hardcoded-ip`, `compose-no-host-bind-for-data`, `compose-no-plaintext-secret`, `compose-no-swarm-ignored-keys`, `compose-overlay-not-bridge`, `compose-service-needs-healthcheck`, `compose-service-needs-init`.

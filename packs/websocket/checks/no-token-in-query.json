@@ -2,6 +2,7 @@
   "id": "no-token-in-query",
   "why": "A token in a URL lands in logs, history and proxies.",
   "rule": ".claude/rules/identity-comes-from-the-connection.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.js",

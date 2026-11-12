@@ -20,3 +20,4 @@ Never do:
 
 ## Check
 `pg-no-money`, `pg-no-float-money`. `checks/pg-timestamptz.json` is opt-in, through `"enable"`.
+Lesson check for this rule: `pg-timestamptz`.

@@ -2,6 +2,7 @@
   "id": "gitattributes-forces-lf",
   "why": "Without `* text=auto eol=lf` a Windows checkout converts scripts and Dockerfiles to CRLF and the container cannot run them.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "globs": [
     "**/.gitattributes"
   ],

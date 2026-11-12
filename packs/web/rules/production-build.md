@@ -20,3 +20,6 @@ Never do:
 - `unpkg`, `jsdelivr`, `cdnjs` in a shipped page (`prodbuild-no-cdn-runtime-deps`).
 - `minify: false`, `mode: 'development'`, `productionBrowserSourceMaps: true` in the shipped config (`prodbuild-no-dev-flags`).
 </constraints>
+
+## Check
+Lesson checks for this rule: `prodbuild-no-cdn-runtime-deps`, `prodbuild-no-dev-flags`, `prodbuild-no-remote-fonts`.

@@ -27,3 +27,4 @@ Gates, each proven red by a planted fault:
 - **View:** with FROM VIEW off, a camera move or a hover leaves the render bit-identical.
 - **Four tempos:** HITS and BEATS notes land on their exact samples.
 - **Settle:** after a hard passage the world comes to rest once playing stops.
+Lesson checks for this rule: `no-keyboard-focus`, `one-seeded-random`.

@@ -2,6 +2,7 @@
   "id": "system-file-written-in-place",
   "why": "A crash between two steps must not leave things worse than before: write a temp file, validate, rename.",
   "rule": ".claude/rules/root-on-other-machines.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.js",

@@ -29,6 +29,11 @@ export function synthWordsInBase(root: string): string[] {
     return m ? [`${rel(root, f)}:${i + 1}: "${m[0]}" in ${line.trim().slice(0, 90)}`] : [];
   }));
 }
+/** The files of packs/synth-creator that packs/base also holds: what left base is gone from it (W10 review 7; d-12 had dropped the list). */
+export function leftBaseStillThere(root: string): string[] {
+  const own = join(root, 'packs/synth-creator');
+  return walk(own).map((f) => rel(own, f)).filter((f) => /^(?:rules|hooks|tools|skills|checks)\//.test(f) && readText(join(root, 'packs/base', f)) !== null);
+}
 /** Configurations that take the synth-creator pack, and those whose first pack is not base: each one as the root makes it (its deltas over
  *  configurations/shared.json, the packs that fit it from each pack.json `fits`). */
 export function configurationFaults(root: string): { takers: string[]; notBaseFirst: string[] } {

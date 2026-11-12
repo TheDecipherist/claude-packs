@@ -24,3 +24,4 @@ Decaying feedback (reverb tails, filter states, delay feedback after the note st
 ## Check
 - The realtime-guard hook blocks any edit that leaves a `processBlock` body without `ScopedNoDenormals`.
 - `.claude/checks/juce-snap-to-zero-off.json` blocks removing the define once it's in `CMakeLists.txt`.
+Lesson checks for this rule: `denormals-not-in-prepare`, `juce-snap-to-zero-off`.

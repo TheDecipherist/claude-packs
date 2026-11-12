@@ -24,3 +24,6 @@ Never do:
 - `outline: none` or `outline: 0` (`a11y-no-bare-outline-none`) without a `:focus-visible` replacement in the same rule.
 - `<img>` without `alt` (`a11y-img-needs-alt`).
 </constraints>
+
+## Check
+Lesson checks for this rule: `a11y-img-needs-alt`, `a11y-no-bare-outline-none`, `a11y-no-clickable-div`, `a11y-no-positive-tabindex`, `key-from-index`.

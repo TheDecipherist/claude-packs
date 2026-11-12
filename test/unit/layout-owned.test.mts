@@ -41,9 +41,10 @@ test('every layout key the kit reads survives an update', () => {
   for (const f of files) {
     // KWB-193: config-merge reads `layout.own` of a configuration's delta (configurations/<name>/config.json), which is no project's
     // layout.json: a project never holds it, so update has nothing to keep.
-    if (f.endsWith('/lib/config-merge.mts')) continue;
+    // Only that one key is left out of config-merge (W10 review 7): any other key it reads is still checked.
     const t = readFileSync(f, 'utf8');
-    for (const m of t.matchAll(/\blayout\??\.([a-zA-Z_]+)\b/g)) read.add(m[1] ?? '');
+    const merging = f.endsWith('/lib/config-merge.mts');
+    for (const m of t.matchAll(/\blayout\??\.([a-zA-Z_]+)\b/g)) if (!(merging && m[1] === 'own')) read.add(m[1] ?? '');
     for (const m of t.matchAll(/layout\.json'\), 'utf8'\)\)\.([a-zA-Z_]+)/g)) read.add(m[1] ?? '');
     // KWB-92: a key read straight off the hooks' reader, readLayout(claudeRoot(join(root, 'x'))).looks, two calls deep
     for (const m of t.matchAll(/\breadLayout\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)\??\.([a-zA-Z_]+)/g)) read.add(m[1] ?? '');

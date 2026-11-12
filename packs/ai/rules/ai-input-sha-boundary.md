@@ -29,3 +29,6 @@ Never do:
 - Mix two origins in one message with no marker (an executor's question text prefixed onto an owner's answer).
 - `new Anthropic()` with no explicit key (`process-env-only-in-config`).
 </constraints>
+
+## Check
+Lesson checks for this rule: `boundary-computes-its-own-hash`, `model-call-needs-boundary`, `model-id-from-config`.

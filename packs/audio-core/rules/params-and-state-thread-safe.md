@@ -17,3 +17,4 @@ Never do:
 
 ## Check
 ThreadSanitizer test: N threads set parameters and save state in a loop while the audio thread renders. Pass: no TSan reports, and `setlocale(LC_ALL, nullptr)` is unchanged after plugin init.
+Lesson check for this rule: `no-locale-change`.

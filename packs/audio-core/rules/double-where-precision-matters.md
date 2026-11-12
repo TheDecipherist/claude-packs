@@ -18,3 +18,4 @@ Never do:
 
 ## Check
 `.claude/checks/float-phase-or-rate.json` (lesson-checks hook) blocks new `float` declarations of sample rate, phase or phase increment.
+Lesson check for this rule: `float-phase-or-rate`.

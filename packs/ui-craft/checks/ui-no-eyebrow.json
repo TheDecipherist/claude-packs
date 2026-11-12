@@ -2,6 +2,7 @@
   "id": "ui-no-eyebrow",
   "why": "A tiny tracked uppercase label above a heading is the template's signature. Put it in the heading, or drop it.",
   "rule": ".claude/rules/no-generated-look.md",
+  "code": false,
   "concepts": [
     "ui-markup"
   ],

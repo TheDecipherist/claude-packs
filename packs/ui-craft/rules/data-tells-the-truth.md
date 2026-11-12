@@ -24,3 +24,6 @@ Never do:
 - Use vanity figures, or placeholder people and companies (`ui-no-placeholder-names`).
 - Show a green "up 100%" grown from zero.
 </constraints>
+
+## Check
+Lesson check for this rule: `ui-no-placeholder-names`.

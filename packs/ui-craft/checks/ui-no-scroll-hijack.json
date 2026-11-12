@@ -2,6 +2,7 @@
   "id": "ui-no-scroll-hijack",
   "why": "Capturing the wheel takes scrolling away from the person. Native scroll only.",
   "rule": ".claude/rules/motion-is-rare.md",
+  "code": false,
   "concepts": [
     "ui-markup"
   ],

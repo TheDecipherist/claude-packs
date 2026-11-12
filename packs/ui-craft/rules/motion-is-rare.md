@@ -29,3 +29,6 @@ Never do:
 - Capture the wheel or lock scrolling (`ui-no-scroll-hijack`). No preloader, no counter, no gate.
 - Move anything across text being read.
 </constraints>
+
+## Check
+Lesson checks for this rule: `ui-no-animate-layout`, `ui-no-bounce-easing`, `ui-no-scroll-hijack`, `ui-no-transition-all`.

@@ -18,3 +18,6 @@ Never do:
 - A `.ts` source line over 200 characters (`line-under-200-chars`): a 1,100-character tool description belongs in a `descriptions.ts` table.
 - Base64 blobs in source (`no-inline-binary`): assets are files served as files.
 </constraints>
+
+## Check
+Lesson check for this rule: `no-express-no-vite`.

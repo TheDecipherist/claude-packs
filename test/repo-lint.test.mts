@@ -15,7 +15,7 @@ import { PRESETS, availablePacks, readPack } from '../lib/packs.mts';
 import { CLI } from './kit-cli.mts';
 import {
   BARE, addedRawJson, bareNpx, configurationFaults, frameBenchFaults, lineLimit, overLimit, pathnameForms, personalNames,
-  readmeOrder, readmeRefusal, siteFiles, siteShipped, siteWords, slowChecks, synthWordsInBase,
+  readmeOrder, readmeRefusal, leftBaseStillThere, siteFiles, siteShipped, siteWords, slowChecks, synthWordsInBase,
 } from './repo-readers.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
@@ -167,6 +167,11 @@ test('gates 11 and 12: no process global and no work at import in a converted ho
 test('base and the base configuration name no synth word', () => {
   assert.deepEqual(synthWordsInBase(KIT), []);
   assert.equal(synthWordsInBase(planted({ 'packs/base/rules/a.md': 'tune the Voice\n', 'configurations/base/config.json': '{}' })).length, 1);
+});
+test('what left base is in the synth-creator pack and not in base; a synth hook put back into base is found', () => {
+  assert.deepEqual(leftBaseStillThere(KIT), []);
+  const back = planted({ 'packs/synth-creator/hooks/build-guard.mts': 'x\n', 'packs/synth-creator/pack.json': '{}', 'packs/base/hooks/build-guard.mts': 'x\n', 'packs/base/pack.json': '{}' });
+  assert.deepEqual(leftBaseStillThere(back), ['hooks/build-guard.mts']);
 });
 test('only the synth-creator configuration installs the synth-creator pack, and every configuration installs base first', () => {
   assert.deepEqual(configurationFaults(KIT), { takers: ['synth-creator'], notBaseFirst: [] });

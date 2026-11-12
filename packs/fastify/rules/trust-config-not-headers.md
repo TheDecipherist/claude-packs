@@ -22,3 +22,6 @@ Never do:
 - `setCookie('session', …)` without the `__Host-` prefix (`cookie-host-prefix`).
 - `req.body as { … }`, `req.query as …`, `Number(query.page)`.
 </constraints>
+
+## Check
+Lesson checks for this rule: `cookie-host-prefix`, `no-cast-at-route-boundary`, `origin-from-config-not-host`, `user-bytes-need-disposition`.

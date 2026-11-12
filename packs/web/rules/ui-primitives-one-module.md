@@ -28,3 +28,6 @@ Never do:
 - A raw hex colour in a page or component (`tw-no-raw-hex-in-markup`).
 - Ship a surface with zero styling classes: it is an automatic blocker in `design-review`.
 </constraints>
+
+## Check
+Lesson checks for this rule: `ds-pages-compose-primitives`, `tw-no-raw-hex-in-markup`.

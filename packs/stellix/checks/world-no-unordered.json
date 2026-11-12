@@ -2,6 +2,7 @@
   "id": "world-no-unordered",
   "why": "Hash-container iteration order differs between libc++ and the MSVC STL; the world must be ordered by stable ID to replay identically on every platform.",
   "rule": ".claude/rules/world-fp-determinism.md",
+  "exclude": [],
   "concepts": ["world"],
   "pattern": "\\bstd::unordered_(map|set|multimap|multiset)\\b",
   "code": true,

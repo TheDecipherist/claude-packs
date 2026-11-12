@@ -2,6 +2,7 @@
   "id": "hook-command-anchored",
   "why": "A relative hook command resolves only when Claude Code starts in one directory; from a subfolder or /cd it silently never runs. Anchor on $CLAUDE_PROJECT_DIR or an absolute path.",
   "rule": ".claude/rules/hooks-portable-anchored-quoted.md",
+  "exclude": [],
   "concepts": [
     "hook-settings"
   ],

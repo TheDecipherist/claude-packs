@@ -2,6 +2,7 @@
   "id": "stale-socket-deletes-new-entry",
   "why": "A dead socket's late close must not delete its reconnected successor's entry.",
   "rule": ".claude/rules/identity-comes-from-the-connection.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.js",

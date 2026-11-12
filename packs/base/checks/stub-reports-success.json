@@ -2,6 +2,7 @@
   "id": "stub-reports-success",
   "why": "A control that reports success and does nothing is worse than none, because the team stops looking.",
   "rule": ".claude/rules/a-control-is-seen-to-fire.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.tsx",

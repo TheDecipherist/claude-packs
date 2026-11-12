@@ -2,6 +2,7 @@
   "id": "rust-unsafe-needs-safety",
   "why": "An unsafe block with no stated reason cannot be reviewed.",
   "rule": ".claude/rules/rust-unsafe-is-proved.md",
+  "code": false,
   "globs": [
     "**/*.rs"
   ],

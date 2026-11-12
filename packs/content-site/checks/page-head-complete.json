@@ -2,6 +2,7 @@
   "id": "page-head-complete",
   "why": "A page with no canonical, description or social image is found less, and shared badly.",
   "rule": ".claude/rules/page-head-is-complete.md",
+  "code": false,
   "globs": [
     "**/*.html"
   ],

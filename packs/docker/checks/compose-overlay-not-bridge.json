@@ -2,6 +2,7 @@
   "id": "compose-overlay-not-bridge",
   "why": "bridge networks are single-host; Swarm needs overlay. Write the compose file for the multi-node world from day one.",
   "rule": ".claude/rules/compose-swarm-safe.md",
+  "exclude": [],
   "concepts": [
     "compose"
   ],

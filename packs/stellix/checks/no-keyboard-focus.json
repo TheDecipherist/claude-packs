@@ -2,6 +2,7 @@
   "id": "no-keyboard-focus",
   "why": "Stellix 3a: no dropdown, button or readout ever takes keyboard focus; QWERTY always plays.",
   "rule": ".claude/rules/stellix-deterministic-world.md",
+  "exclude": [],
   "concepts": [
     "ui"
   ],

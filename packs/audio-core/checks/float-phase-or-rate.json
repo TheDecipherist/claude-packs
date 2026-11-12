@@ -2,6 +2,7 @@
   "id": "float-phase-or-rate",
   "why": "Sample rate, phase and phase increment must be double (drift over long notes, tempo-synced clocks).",
   "rule": ".claude/rules/double-where-precision-matters.md",
+  "exclude": [],
   "concepts": [
     "cpp"
   ],

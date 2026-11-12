@@ -34,6 +34,7 @@ function changedSince(base: string): Set<string> | null {
 export function ratchetBreaks(stored: Readonly<Record<string, number>>, current: Readonly<Record<string, number>>): string[] {
   return [
     ...Object.entries(current).filter(([id, n]) => n > (stored[id] ?? 0)).map(([id, n]) => `${id}: ${n} files fail, the ratchet holds ${stored[id] ?? 0}`),
+    ...Object.entries(stored).filter(([id, n]) => id !== '//' && !HARD.has(id) && n > (current[id] ?? 0)).map(([id, n]) => `${id}: the ratchet holds ${n} but ${current[id] ?? 0} files fail: lower it to ${current[id] ?? 0}`),
     ...Object.keys(stored).filter((id) => HARD.has(id)).map((id) => `${id} is a hard check: it has no ratchet`),
   ];
 }
@@ -56,7 +57,8 @@ test('the ratchet: no check fails in more files than it did, and the counts are 
 
 test('the ratchet refuses a rise, a missing count and a hard check stored above 0 (the plant)', () => {
   assert.deepEqual(ratchetBreaks({ R1: 5 }, { R1: 5 }), []);
-  assert.deepEqual(ratchetBreaks({ R1: 5 }, { R1: 4 }), []);
+  assert.deepEqual(ratchetBreaks({ R1: 5 }, { R1: 4 }), ['R1: the ratchet holds 5 but 4 files fail: lower it to 4'], 'a count that fell must be lowered in the file (W10 review 4)');
+  assert.deepEqual(ratchetBreaks({ R1: 5 }, {}), ['R1: the ratchet holds 5 but 0 files fail: lower it to 0'], 'a check no file fails any more');
   assert.deepEqual(ratchetBreaks({ R1: 5 }, { R1: 6 }), ['R1: 6 files fail, the ratchet holds 5']);
   assert.deepEqual(ratchetBreaks({}, { C2: 1 }), ['C2: 1 files fail, the ratchet holds 0']);
   assert.deepEqual(ratchetBreaks({ R2: 1 }, {}), ['R2 is a hard check: it has no ratchet']);
