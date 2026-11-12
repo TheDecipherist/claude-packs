@@ -51,6 +51,8 @@ function judge(root: string, file: string, base: string, op: WriteOp = 'write'):
   const layout = readLayout(claudeRoot(root, abs, base));
   const tree = foldersOfKind(layout, 'copy').find((t) => rel === t || rel.startsWith(`${t}/`));
   if (tree) return { rel, tree, layout };
+  // KWB-115: clearing a build folder the layout itself declares as build output is the project's to do; writing into it is not.
+  if (op === 'delete' && layout['buildOutput'] !== undefined && matchesAny(rel, stringsOf(layout['buildOutput'])) && !matchesAny(rel, stringsOf(layout.protected))) return null;
   if (matchesAny(rel, [...DEFAULT_GLOBS, ...buildGlobs(layout), ...stringsOf(layout.protected)])) return { rel, layout };
   if (matchesAny(rel, stringsOf(layout.writeOnce)) && (op === 'delete' || existsSync(abs))) return { rel, layout, once: true };
   return null;
@@ -179,6 +181,11 @@ function buildOutputRows(hookFile: string): VerdictRow[] {
     ['an existing evidence file appended', b('echo x >> build/evidence/s1/run.txt'), 2],
     ['an evidence file deleted', b('rm build/evidence/s1/run.txt'), 2],
     ['an evidence file moved away', b('mv build/evidence/s1/run.txt /tmp/'), 2],
+    // KWB-115: a declared build output is the project's to clear; writing into it stays refused
+    ['rm -rf of a declared build folder (KWB-115)', b('rm -rf out/dev'), 0],
+    ['rm -rf of its fetched sources (KWB-115)', b('rm -rf out/dev/_deps'), 0],
+    ['a write into the declared build output', b('echo x > out/dev/x.h'), 2],
+    ['rm of build/_deps, not declared build output', b('rm -rf build/_deps/juce-src'), 2],
   ];
 }
 
