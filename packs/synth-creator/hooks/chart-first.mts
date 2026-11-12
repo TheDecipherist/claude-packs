@@ -7,7 +7,7 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mts';
-import { gitLines } from './lib/git-run.mts';
+import { headFiles } from './lib/git-state.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { codeFolders, readLayout } from './lib/layout.mts';
 import { checkoutRoot, claudeRoot, insideProject, relInCheckout } from './lib/project.mts';
@@ -27,10 +27,7 @@ const sourceFolders = (layout: Layout): string[] => codeFolders(layout).filter((
 // Whether a checkout's HEAD holds a chart: a file matching the globs that is not empty. A checkout with no commit has none (not a
 // refusal by itself: the source write is judged on that).
 function hasChart(checkout: string, globs: readonly string[], env: Env): boolean {
-  return gitLines(['ls-tree', '-r', '-l', 'HEAD'], { cwd: checkout, env }).some((line) => {
-    const [meta = '', path = ''] = line.split('\t');
-    return (Number(meta.trim().split(/\s+/)[3]) || 0) > 0 && matchesAny(path, globs);
-  });
+  return headFiles(checkout, env).some(([path]) => matchesAny(path, globs)); // the runner's kept list while HEAD is the commit it was taken at (git-state.mts)
 }
 
 interface Uncharted { rel: string; globs: string[] }
@@ -72,7 +69,8 @@ export const worktreeCase: WorktreeCase = {
   ],
 };
 
-export function selftest(): number {
+export async function selftest(): Promise<number> {
+  const { headOf, plantFacts } = await import('./lib/git-state-selftest.mts'); // loads only under --selftest
   const me = fileURLToPath(import.meta.url);
   const layout = { folders: { docs: { path: 'docs' }, src: { path: 'src' }, tests: { path: 'tests' } }, concepts: {} };
   const dir = scratchProject({ 'README.md': 'x\n' }, layout);
@@ -99,6 +97,11 @@ export function selftest(): number {
   cases.push(['chart committed: a source write passes', w('src/ui/Panel.cpp'), 0]);
   put(join(dir, '.claude/layout.json'), JSON.stringify({ ...layout, chart: 'design/*.mmd' }));
   cases.push(['layout.json "chart" names another place', w('src/ui/Panel.cpp'), 2]);
+  // W8.3: the runner's kept list of HEAD's files is read while HEAD is the commit it was taken at, and git answers after
+  plantFacts(dir, headOf(dir), [['design/planted.mmd', 9]]);
+  cases.push(['the kept list names a chart git does not hold: it is the one read (the plant)', w('src/ui/Panel.cpp'), 0]);
+  plantFacts(dir, 'not-this-commit', [['design/planted.mmd', 9]]);
+  cases.push(['the kept list was taken at another commit: git answers, no chart', w('src/ui/Panel.cpp'), 2]);
   return verdicts('chart-first', [...cases, ['a judge writes no file (the write trap)', trap, '']]);
 }
 

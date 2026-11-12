@@ -8,6 +8,7 @@ import { crashVerdict } from '../lib/crash-policy.mts';
 import { CRASHES, REFUSALS, logCall, type HookRun } from '../lib/event-log.mts';
 import { shortHash } from '../lib/hash.mts';
 import { LOG, appendRotated, hookLogLine } from '../lib/hook-log.mts';
+import { noteEventGitState } from '../lib/git-state.mts';
 import { hookRowsFor } from '../lib/hook-table.mts';
 import { parseJson, toJson } from '../lib/json.mts';
 import { readLayout } from '../lib/layout.mts';
@@ -33,6 +34,8 @@ export interface Served {
   /** Hook events served, and when the last one arrived (the idle clock). */
   counts: { events: number; last: number; inflight: number };
   log: (line: string) => void;
+  /** The TypeScript runner's file: started as `runner --git-state <checkout>` to keep the git facts (lib/git-state.mts). */
+  runner: string;
 }
 
 const fallback: Reply = { code: 0, stdout: '', stderr: '', fallback: 'ts' };
@@ -122,5 +125,6 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
     + hookLogLine({ event: ev.hook_event_name, hook: 'event', ms: wall, code, tool, queue, source: 'daemon' }));
   logCall(root, text, [...arrived, ...slow.map((hook): HookRun => ({ hook, ms: 0, code: 1, reason: `${overTime([hook])}\n` }))], appendRotated, wall);
   if (ev.hook_event_name === 'PostToolUse' && mayHaveWritten(ev.tool_name)) d.index.stale();
+  noteEventGitState(d.table, root, ev.cwd ?? request.cwd, request.env, d.runner); // the git facts of the next event: kept again, detached, when stale
   return reply;
 }

@@ -19,6 +19,7 @@
 // loadChecks, hitsOf and selftest(checks) from a project's install (scan, InstalledLessonChecksModule in types.d.mts).
 import { readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { readCompiled } from './lib/checks-compiled.mts';
 import { blankCode } from './lib/cpp-scan.mts';
 import { isContent } from './lib/content.mts';
 import { matchesAny } from './lib/glob.mts';
@@ -84,7 +85,9 @@ export function loadChecks(root: string): Check[] {
     return [];
   }
   const layout = readLayout(root);
-  return withoutReplaced(files.map((f) => readCheck(dir, f)).filter((c) => appliesTo(root, c)).map((c) => {
+  // the checks compiled at update, while their key is the folder's now (checks-compiled.mts); else the files, as always
+  const read = readCompiled<Check>(root) ?? files.map((f) => readCheck(dir, f));
+  return withoutReplaced(read.filter((c) => appliesTo(root, c)).map((c) => {
     const fromConcepts = (c.concepts ?? []).flatMap((k) => conceptGlobs(layout, k) ?? []);
     return { ...c, globs: [...resolveAliases(layout, c.globs ?? []), ...fromConcepts], exclude: resolveAliases(layout, c.exclude ?? []) };
   }));

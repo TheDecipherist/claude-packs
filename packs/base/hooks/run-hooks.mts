@@ -17,6 +17,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { crashVerdict } from './lib/crash-policy.mts';
 import { logCall } from './lib/event-log.mts';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mts';
+import { keepGitState, noteEventGitState } from './lib/git-state.mts';
 import { appendRotated, isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mts';
 import { hookRowsFor, readHookTable } from './lib/hook-table.mts';
 import { parseJson, toJson } from './lib/json.mts';
@@ -225,6 +226,7 @@ if (isMain(import.meta.url)) {
   const args = process.argv.slice(2);
   const caller: Caller = { env: process.env, stdout: process.stdout, stderr: process.stderr, cwd: process.cwd(), sessionPid: process.ppid };
   if (args.includes('--selftest')) process.exit(await selftest(caller));
+  if (args[0] === '--git-state') { keepGitState(args[1] ?? process.cwd(), process.env); process.exit(0); }
   let text = '';
   try { text = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
   const root = projectRoot();
@@ -237,5 +239,8 @@ if (isMain(import.meta.url)) {
       : { code: 1, stdout: '', stderr: `${RUNNER}: ${join(HERE, 'hooks.json')} is missing or is not the hook table, so no hook judged this call: run claude-packs update\n` };
   // written at once, then out: a hook may leave a timer or a child behind, and the event never waits on it
   for (const [fd, s] of [[1, r.stdout], [2, r.stderr]] as const) if (s) try { writeSync(fd, s); } catch { /* a closed pipe */ }
+  // the git facts the hooks of the next event read are kept again, detached, when they went stale (lib/git-state.mts)
+  const eventCwd = asRecord(parseJson(text))?.['cwd'];
+  if (table !== null) noteEventGitState(table, root, typeof eventCwd === 'string' ? eventCwd : caller.cwd, caller.env, fileURLToPath(import.meta.url));
   process.exit(r.code);
 }

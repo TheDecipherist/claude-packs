@@ -1,7 +1,11 @@
 // time-guard's selftest: each finding planted and its quiet twin, run through the hook's own `run` with a made-up process table,
 // then the hook itself through the runner. The hook hands in its own `run` (importing it here would be a cycle: it imports this
 // file to run its selftest).
-import { rmSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { writeJson } from './json.mts';
+import { readLook } from './time-look.mts';
 import type { RunOptions } from '../time-guard.mts';
 import { descendants, etimeS, ownProcesses, sessionPid } from './own-processes.mts';
 import type { ProcessRow } from './own-processes.mts';
@@ -51,7 +55,7 @@ const LOOKS: readonly MachineLook[] = [
 export function selftest(hookFile: string, run: Run): number {
   const rows: VerdictRow[] = [];
   const dir = scratchProject();
-  const place = placeOf('/x/proj', { TMPDIR: dir });
+  const place = placeOf(dir, { TMPDIR: dir });   // a real folder: the detached look (and the scan) start in it
   const call = (event: HookEvent, { inWorktree = false, ...extra }: Extra = {}): string[] =>
     run(event, { place: { ...place, inWorktree }, cfg: DEFAULTS, self: hookFile, sessionPid: 0, now: 5000, ...extra });
   const expect = (name: string, said: readonly string[], want: boolean): void => { rows.push([name, said.length > 0 ? 1 : 0, want ? 1 : 0]); };
@@ -97,6 +101,28 @@ export function selftest(hookFile: string, run: Run): number {
   expect("the background scan's finding is told", call(post(), at([], { state: told, late: found })), true);
   expect('and told once', call(post(), at([], { state: told, late: found, now: 5100 })), false);
   expect('nor told to a session inside a worktree (KWB-87)', call(post(), at([], { state: {}, late: found, inWorktree: true })), false);
+  // W8.3: the machine's look is taken in a process of its own: the call answers at once, the finding lands for the next event
+  const real = (now: number, state: GuardState): string[] => call(post(), { now, state, sessionPid: process.pid });
+  const slowPs = join(dir, 'slow-ps');   // a `ps` that takes 0.6 s: a look taken inside the call would show it
+  mkdirSync(slowPs);
+  writeFileSync(join(slowPs, 'ps'), '#!/bin/sh\nsleep 0.6\nexec /bin/ps "$@"\n', { mode: 0o755 });
+  const path = process.env['PATH'];
+  process.env['PATH'] = `${slowPs}:${path ?? ''}`;
+  const t0 = Date.now();
+  const first = real(t0 / 1000, {});
+  const wall = Date.now() - t0;
+  process.env['PATH'] = path;
+  expect('a call whose minute is stale says nothing yet (the look is not taken in the call)', first, false);
+  rows.push(['and does not wait for the ps and the git calls of the look (the plant: the look run inside the call)', wall < 300 ? 'quick' : `${wall} ms`, 'quick']);
+  for (let i = 0; i < 60 && readLook(place) === null; i++) spawnSync('sleep', ['0.25']);
+  const landed = readLook(place);
+  rows.push(['the detached look lands in look.json', landed !== null && Array.isArray(landed.findings), true]);
+  const planted = { at: 6000, findings: [['waitloop-7', 'a wait loop (pid 7) has run 25 h: planted']], unsaved: {}, commit: {} };
+  mkdirSync(place.stateDir, { recursive: true });
+  writeJson(join(place.stateDir, 'look.json'), planted);
+  const told2: GuardState = { looked: 6001 };
+  expect("the finding of the look before is said by the next event", real(6002, told2), true);
+  expect('and said once', real(6003, told2), false);
   const pre = (command: string): string[] => call({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }, { now: 5000, state: {} });
   const loop = ['until', '!', 'pgrep', '-f', '"cmake --build"', '>/dev/null;', 'do', 'sleep', '5;', 'done'].join(' ');
   expect('the endless wait loop inside a heredoc (text for a program) passes', pre(`python3 - <<'EOF'\nprint('${loop}')\nEOF\necho ok`), false);

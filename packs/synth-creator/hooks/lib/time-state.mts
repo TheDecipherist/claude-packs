@@ -35,6 +35,7 @@ export interface GuardState {
   told?: Record<string, number>;                   // finding key -> when it was last said
   scanned?: number;
   lateTold?: number;
+  lookTold?: number;                               // the last look (time-look.mts) whose findings were said
   [key: string]: unknown;
 }
 

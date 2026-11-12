@@ -92,7 +92,7 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
   const snapshot = (): Parameters<typeof state.save>[0] => ({
     pid: process.pid, key, project, hooks: o.hooks, node: host.node, lockHash: lockHash(lock), started, lastEvent: counts.last, events: counts.events, workers: pool.size(), rss: process.memoryUsage.rss(), heap: process.memoryUsage().heapUsed,
   });
-  const served: Served = { project, table, pool, index, counts, log };
+  const served: Served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`) };
   const listening = await listen(files.socket, (incoming) => {
     counts.inflight += 1;
     serveEvent(served, incoming.request, incoming.stdin, incoming.arrival).then(incoming.reply, (e: unknown) => {

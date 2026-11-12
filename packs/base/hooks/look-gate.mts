@@ -19,6 +19,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mts';
+import { checkoutBranch, refExistsIn } from './lib/git-state.mts';
 import { gitOut } from './lib/git-run.mts';
 import { contextOf, isMain, runAsHook, writeVerdict } from './lib/hook-log.mts';
 import { parseJson } from './lib/json.mts';
@@ -79,7 +80,7 @@ function landing(event: HookEvent, ctx: HookContext): ReturnType<Hook> {
   for (const m of (event.tool_input?.command ?? '').matchAll(MERGE)) {
     const root = checkoutRoot(ctx.projectDir, join(m[1] ? join(cwd, m[1]) : cwd, 'x'), ctx.cwd);
     const ref = m[3] ?? '';
-    if (!TRUNKS.includes(git(root, ctx.env, 'branch', '--show-current') ?? '') || TRUNKS.some((t) => ref === t || ref.endsWith(`/${t}`))) continue;
+    if (!TRUNKS.includes(checkoutBranch(root, ctx.env)) || TRUNKS.some((t) => ref === t || ref.endsWith(`/${t}`))) continue;
     for (const look of touched(root, ctx.env, looksOf(root, ctx), 'HEAD', ref)) {
       const no = verdictOf(root, ctx.env, look, ref);
       if (no) why.push(`  ${look.name} (${look.reference}): ${no}`);
@@ -93,7 +94,7 @@ function landing(event: HookEvent, ctx: HookContext): ReturnType<Hook> {
 function afterBuild(event: HookEvent, ctx: HookContext): ReturnType<Hook> {
   if (!BUILD.test(event.tool_input?.command ?? '')) return pass;
   const root = checkoutRoot(ctx.projectDir, join(event.cwd ?? ctx.cwd, 'x'), ctx.cwd);
-  const trunk = TRUNKS.map((t) => `origin/${t}`).find((t) => git(root, ctx.env, 'rev-parse', '--verify', '-q', t) !== null);
+  const trunk = TRUNKS.map((t) => `origin/${t}`).find((t) => refExistsIn(root, ctx.env, t));
   if (!trunk) return pass;
   const due = touched(root, ctx.env, looksOf(root, ctx), trunk, 'HEAD').filter((l) => verdictOf(root, ctx.env, l, 'HEAD') !== null);
   if (!due.length) return pass;
