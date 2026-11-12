@@ -12,7 +12,7 @@ export function hubRepo(prefix) {
     const dir = join(top, 'repo');
     const hub = join(top, 'hub.git');
     const session = `selftest-${prefix}${process.pid}-${Date.now()}`;
-    put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true } } }));
+    put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true, stopLiveMs: 20_000 } } })); // a selftest under load waits for GitHub as the old Stop did
     git(top, 'init', '-q', '--bare', '-b', 'main', hub);
     git(top, 'init', '-q', '-b', 'main', dir);
     git(dir, 'remote', 'add', 'origin', hub);

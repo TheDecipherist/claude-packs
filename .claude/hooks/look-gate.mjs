@@ -19,6 +19,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mjs';
+import { checkoutBranch, refExistsIn } from './lib/git-state.mjs';
 import { gitOut } from './lib/git-run.mjs';
 import { contextOf, isMain, runAsHook, writeVerdict } from './lib/hook-log.mjs';
 import { parseJson } from './lib/json.mjs';
@@ -64,7 +65,7 @@ function landing(event, ctx) {
     for (const m of (event.tool_input?.command ?? '').matchAll(MERGE)) {
         const root = checkoutRoot(ctx.projectDir, join(m[1] ? join(cwd, m[1]) : cwd, 'x'), ctx.cwd);
         const ref = m[3] ?? '';
-        if (!TRUNKS.includes(git(root, ctx.env, 'branch', '--show-current') ?? '') || TRUNKS.some((t) => ref === t || ref.endsWith(`/${t}`)))
+        if (!TRUNKS.includes(checkoutBranch(root, ctx.env)) || TRUNKS.some((t) => ref === t || ref.endsWith(`/${t}`)))
             continue;
         for (const look of touched(root, ctx.env, looksOf(root, ctx), 'HEAD', ref)) {
             const no = verdictOf(root, ctx.env, look, ref);
@@ -81,7 +82,7 @@ function afterBuild(event, ctx) {
     if (!BUILD.test(event.tool_input?.command ?? ''))
         return pass;
     const root = checkoutRoot(ctx.projectDir, join(event.cwd ?? ctx.cwd, 'x'), ctx.cwd);
-    const trunk = TRUNKS.map((t) => `origin/${t}`).find((t) => git(root, ctx.env, 'rev-parse', '--verify', '-q', t) !== null);
+    const trunk = TRUNKS.map((t) => `origin/${t}`).find((t) => refExistsIn(root, ctx.env, t));
     if (!trunk)
         return pass;
     const due = touched(root, ctx.env, looksOf(root, ctx), trunk, 'HEAD').filter((l) => verdictOf(root, ctx.env, l, 'HEAD') !== null);

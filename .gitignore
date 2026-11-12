@@ -5,6 +5,7 @@ node_modules/
 .claude/worktrees/
 .claude/.claude-packs-backup/
 .claude/state/
+.claude/checks.compiled.json
 .claude/usage.log
 .claude/hooks.log
 .claude-packs-lock

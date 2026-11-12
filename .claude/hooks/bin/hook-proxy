@@ -1,0 +1,31 @@
+#!/bin/sh
+# The hook proxy picker (typescript order W8.2, d-13, review-2-go 3.6, 5.4). settings.json runs this for every hook event:
+#   sh "$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy" <timeout seconds>
+# It picks this machine's binary by `uname` from the user's cache (the install puts it there; a project's git holds no binary, so a
+# clone on another platform picks its own) and execs it. When there is none for this machine, or the OS is older than Go's minimum
+# (macOS 12 = Darwin 21, Linux kernel 3.2), it execs the TypeScript runner, which judges the same event the same way, only slower.
+# One `uname` and no other process before the exec: a call to `sw_vers` alone costs about 15 ms on a Mac.
+root=${CLAUDE_PROJECT_DIR:-.}
+timeout=$1
+node_runner() { exec node "$root/.claude/hooks/run-hooks.mjs"; }
+
+# shellcheck disable=SC2046
+set -- $(uname -srm 2>/dev/null)
+system=$1 release=$2 machine=$3
+major=${release%%.*}
+rest=${release#*.}
+minor=${rest%%[!0-9]*}
+
+target=
+case "$system $machine" in
+  "Darwin arm64") [ "${major:-0}" -ge 21 ] 2>/dev/null && target=darwin-arm64 ;;
+  "Darwin x86_64") [ "${major:-0}" -ge 21 ] 2>/dev/null && target=darwin-amd64 ;;
+  "Linux x86_64") target=linux-amd64 ;;
+  "Linux aarch64" | "Linux arm64") target=linux-arm64 ;;
+esac
+if [ "$system" = Linux ] && { [ "${major:-0}" -lt 3 ] 2>/dev/null || { [ "${major:-0}" -eq 3 ] && [ "${minor:-0}" -lt 2 ]; } 2>/dev/null; }; then target=; fi
+[ -n "$target" ] || node_runner
+
+binary="${CLAUDE_PACKS_CACHE:-$HOME/.cache/claude-packs}/bin/$target/hook-proxy"
+[ -x "$binary" ] || node_runner
+exec "$binary" $timeout

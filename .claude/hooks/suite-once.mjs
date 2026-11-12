@@ -8,7 +8,7 @@
 // changed-only run are always allowed. `--selftest` proves it.
 // A judge on the hook contract (typescript order W4): the event and its context in, a Verdict out, nothing written.
 import { resolve } from 'node:path';
-import { gitLines } from './lib/git-run.mjs';
+import { dirtyFiles } from './lib/git-state.mjs';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
 import { blankQuotes, dropHeredocs } from './lib/shell-lex.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -31,7 +31,7 @@ function ownSuite(words, test) {
     return w === t || (w.startsWith(`${t} `) && w.slice(t.length).trim().split(/\s+/).every((a) => a.startsWith('-')));
 }
 // A repository that is not one has nothing uncommitted: nothing says the work is unfinished.
-const uncommitted = (dir, env) => gitLines(['-C', dir, '--no-optional-locks', 'status', '--porcelain', '--untracked-files=no'], { cwd: dir, env }).filter((l) => l.trim());
+const uncommitted = (dir, env) => dirtyFiles(dir, env); // the kept list while fresh (git-state.mts)
 // The user asks for a full run, as a request in their own words: "run the full suite", "do a complete run", "start all the
 // tests". A question about a full run, or a sentence that only mentions one ("why is the entire suite running", "full runs
 // only when I ask"), is no request.

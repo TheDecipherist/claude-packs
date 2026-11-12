@@ -8,6 +8,7 @@ import { crashVerdict } from '../lib/crash-policy.mjs';
 import { CRASHES, REFUSALS, logCall } from '../lib/event-log.mjs';
 import { shortHash } from '../lib/hash.mjs';
 import { LOG, appendRotated, hookLogLine } from '../lib/hook-log.mjs';
+import { noteEventGitState } from '../lib/git-state.mjs';
 import { hookRowsFor } from '../lib/hook-table.mjs';
 import { parseJson, toJson } from '../lib/json.mjs';
 import { readLayout } from '../lib/layout.mjs';
@@ -109,5 +110,6 @@ export async function serveEvent(d, request, stdin, arrival) {
     logCall(root, text, [...arrived, ...slow.map((hook) => ({ hook, ms: 0, code: 1, reason: `${overTime([hook])}\n` }))], appendRotated, wall);
     if (ev.hook_event_name === 'PostToolUse' && mayHaveWritten(ev.tool_name))
         d.index.stale();
+    noteEventGitState(d.table, root, ev.cwd ?? request.cwd, request.env, d.runner); // the git facts of the next event: kept again, detached, when stale
     return reply;
 }

@@ -5,22 +5,16 @@
 // (KWB-157). The state of a session (the last list, how often it was sent) is kept in `stateDir`, the caller's TMPDIR.
 //   stopVerdict(root, env, cfg, session, { lag, stateDir }) -> { code, stdout?, stderr? }
 import { join } from 'node:path';
-import { localBranches } from './branches-ahead.mjs';
 import { readJson, toJson, writeJson } from './json.mjs';
 import { NEVER_DELETE, pushCommand } from './push-form.mjs';
 import { failed } from './remote-heads.mjs';
+import { hereOnly, stopLook } from './stop-look.mjs';
 export const MAX_SENDS = 3;
-/** What lives on this machine only, left for the owner to push (guards.git.pushNeedsYes, KWB-157). */
-const hereOnly = (found) => `git-guard: ${found.length} local branch(es) hold commits that no GitHub branch has, left for you to push (guards.git.pushNeedsYes):\n` +
-    found.map((f) => `    ${f.branch}: ${f.ahead} commit(s)${f.missing ? ', the branch not on GitHub' : ''}`).join('\n');
-export function stopVerdict(root, env, cfg = {}, session = 'session', { lag = () => null, stateDir = env['TMPDIR'] ?? '/tmp' } = {}) {
+export function stopVerdict(root, env, cfg = {}, session = 'session', { lag = () => null, stateDir = env['TMPDIR'] ?? '/tmp', now = Date.now(), refresh } = {}) {
     const file = join(stateDir, `git-guard-stop-${String(session).replace(/[^\w-]/g, '')}.json`);
     const st = readJson(file, {}) ?? {};
     const owner = !!cfg.pushNeedsYes;
-    let found = localBranches(root, env, owner ? { ...cfg, cachedOnly: true } : cfg);
-    if (owner && Array.isArray(found) && found.length && hereOnly(found) !== st.told)
-        found = localBranches(root, env, cfg); // looked up live before telling
-    const behind = lag(root, env, cfg);
+    const { found, behind } = stopLook(root, env, cfg, { lag, told: st.told, now, ...(refresh ? { refresh } : {}) });
     const list = Array.isArray(found) ? found : [];
     const notes = [];
     if (failed(found))
