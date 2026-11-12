@@ -7,18 +7,20 @@ import { createInterface } from 'node:readline';
 import { coreBudget, projectLayout } from '../lib/core-budget.mjs';
 import { readLayout } from '../lib/layout.mjs';
 import { asRecord } from '../lib/merge-out.mjs';
-import { parseSnapshot, usage } from './usage.mjs';
+import { keepEnv } from '../lib/proxy-wire.mjs';
+import { WIRE } from '../lib/proxy-wire-table.mjs';
+import { parseSnapshot } from './usage.mjs';
 import { Watchdog } from './watchdog.mjs';
 export const SAMPLE_MS = 2000;
 const MAX_RESTARTS = 3;
-const RESTART_DELAY_MS = 5000;
+const RESTART_DELAY_MS = 5000; // the default of SamplingOptions.restartMs
 /** Whether the project's layout.json sets `guards.watchdog.stop` to true, read now. */
 export function stopGuard(project) {
     const guards = asRecord(readLayout(project).guards);
     return asRecord(guards?.watchdog)?.stop === true;
 }
 export function startSampling(o) {
-    const store = o.store ?? usage;
+    const store = o.store;
     const watchdog = new Watchdog({
         orphanMs: o.orphanMs, testMs: o.testMs, project: o.project, log: o.log,
         cap: o.capOf ?? (() => coreBudget({}, projectLayout(o.project))),
@@ -33,25 +35,27 @@ export function startSampling(o) {
     let ending = false;
     let restarts = 0;
     const launch = () => {
-        const env = Object.fromEntries(['HOME', 'PATH'].flatMap((k) => (o.env[k] === undefined ? [] : [[k, o.env[k]]])));
+        const env = keepEnv(o.env, WIRE.samplerKeeps);
         const c = spawn(o.proxy, ['sample', '--project', o.project, '--interval', `${o.intervalMs}ms`, '--exit-with', String(process.pid)], { stdio: ['ignore', 'pipe', 'pipe'], env });
         child = c;
         createInterface({ input: c.stdout }).on('line', (line) => { const snap = parseSnapshot(line); if (snap !== null)
             onSnapshot(snap); });
         c.stderr.on('data', (d) => o.log(`sampler: ${d.toString('utf8').trim().slice(0, 300)}`));
-        c.on('error', (e) => { o.log(`sampler could not start: ${e.message}`); child = null; });
-        c.on('exit', (code, signal) => {
+        // a sampler that ended and one that could not start are the same to the daemon: its totals are gone, and it is tried again a few times
+        const ended = (what) => {
             store.clear();
             if (ending || child !== c)
                 return;
             child = null;
-            o.log(`sampler exited (${code ?? signal ?? '?'})${restarts < MAX_RESTARTS ? ', starting it again' : ', not started again'}`);
+            o.log(`${what}${restarts < MAX_RESTARTS ? ', starting it again' : ', not started again'}`);
             if (restarts >= MAX_RESTARTS)
                 return;
             restarts += 1;
             setTimeout(() => { if (!ending)
-                launch(); }, RESTART_DELAY_MS).unref();
-        });
+                launch(); }, o.restartMs ?? RESTART_DELAY_MS).unref();
+        };
+        c.on('error', (e) => ended(`sampler could not start: ${e.message}`));
+        c.on('exit', (code, signal) => ended(`sampler exited (${code ?? signal ?? '?'})`));
     };
     launch();
     return {

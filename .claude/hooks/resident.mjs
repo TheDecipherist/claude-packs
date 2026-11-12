@@ -27,20 +27,27 @@ import { toJson } from './lib/json.mjs';
 import { readLayout } from './lib/layout.mjs';
 import { real } from './lib/project.mjs';
 import { cacheFolder, crashReply, daemonFiles, daemonKey, lockHash } from './lib/proxy-wire.mjs';
+import { WIRE } from './lib/proxy-wire-table.mjs';
 import { serveEvent } from './resident/event.mjs';
 import { residentIndex } from './resident/index.mjs';
+import { againOf, givenOf, numberOf, textOf } from './resident/options.mjs';
 import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mjs';
 import { startPool } from './resident/pool.mjs';
 import { answers, listen, prepareFolder } from './resident/socket.mjs';
 import { SAMPLE_MS, startSampling } from './resident/sampling.mjs';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mjs';
 import { StatusKeeper } from './resident/status.mjs';
-import { usage } from './resident/usage.mjs';
+import { closeInOrder } from './resident/shutdown.mjs';
+import { UsageStore } from './resident/usage.mjs';
 import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mjs';
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const EXT = extname(fileURLToPath(import.meta.url));
-const LOCK_FILE = join('.claude', 'claude-packs.lock.json');
+const LOCK_FILE = WIRE.lockFile;
 /** The warm workers that import every hook at start; the others import a hook when a job first brings it (W8.4: 16 workers holding every hook were 270 MB). */
+/** A stop that has not ended the process in this long ends it (each closing step is bounded too, resident/shutdown). */
+const FORCE_EXIT_MS = 15_000;
+/** Uncaught exceptions and rejections the daemon logs and carries on after, before it restarts itself. */
+const MAX_FAULTS = 5;
 const PRELOAD = 1;
 /** At most this many workers import any one hook while the pool is not full (W8.4). */
 const SPREAD = 4;
@@ -48,28 +55,27 @@ const SPREAD = 4;
  *  with V8's defaults and 264 MB with these, build/evidence/rss): no optimizing or baseline compiler, and V8's size-over-speed choices.
  *  A hook runs a few milliseconds of code per event, its time in I/O and regular expressions, which these leave alone. */
 export const SMALL_V8 = ['--optimize-for-size', '--no-turbofan', '--no-maglev', '--no-sparkplug'];
-const valueOf = (argv, flag) => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : undefined; };
-/** The options a command line gives: `--serve <project>` and its flags; null when it is not one. */
+/** The options a command line gives: `--serve <project>` and its flags (resident/options.mts is their one table); null when it is not one. */
 export function serveOptions(argv, host) {
-    const project = valueOf(argv, '--serve');
+    const at = argv.indexOf(WIRE.flag.serve);
+    const project = at >= 0 ? argv[at + 1] : undefined;
     if (project === undefined)
         return null;
-    const n = (flag, otherwise) => { const v = Number(valueOf(argv, flag)); return Number.isFinite(v) && v > 0 ? v : otherwise; };
-    const fd = valueOf(argv, '--ready-fd');
-    const hooks = valueOf(argv, '--hooks') ?? HERE;
-    const pool = Math.floor(n('--pool', Math.min(16, availableParallelism())));
-    const minutes = n('--idle-minutes', IDLE_MS / 60_000);
+    const given = givenOf(argv);
+    const n = (flag, otherwise) => numberOf(given, flag, otherwise);
+    const fd = textOf(given, WIRE.flag.readyFd);
     const exitWith = n('--exit-with', 0);
-    const proxy = valueOf(argv, '--proxy');
     return {
-        project, hooks, pool, idleMs: minutes * 60_000, readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
+        project, hooks: textOf(given, WIRE.flag.hooks) ?? HERE, pool: Math.floor(n('--pool', Math.min(16, availableParallelism()))), idleMs: n('--idle-minutes', IDLE_MS / 60_000) * 60_000,
+        readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
         recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: 10 * 60_000, stateMs: n('--state-ms', STATE_EVERY_MS),
-        proxy: valueOf(argv, '--proxy') ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS), npm: !argv.includes('--no-npm'),
-        again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : []), ...(proxy === undefined ? [] : ['--proxy', proxy]), ...(argv.includes('--no-npm') ? ['--no-npm'] : [])],
+        proxy: textOf(given, WIRE.flag.proxy) ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS), npm: !given.has('--no-npm'),
+        again: againOf(host.script, project, given),
     };
 }
 /** Runs the daemon until it stops: 0 when it was stopped, idle or replaced; 1 when it could not start. */
-export async function serve(o, host) {
+/** `usage` is this daemon's one store of the sampler's totals: the sampler writes it, the state file and the status line read it (W10b finding 18). */
+export async function serve(o, host, usage = new UsageStore()) {
     const project = real(o.project);
     const lock = readText(join(project, LOCK_FILE)) ?? '';
     const key = daemonKey(host.uid, project, lock, host.node);
@@ -116,9 +122,9 @@ export async function serve(o, host) {
         usage: usage.all(), flags: sampling?.flags() ?? [], ...(sampling?.pid() ? { sampler: sampling.pid() ?? 0 } : {}),
     });
     // the status line's facts, kept as events arrive and as the sampler reports (W8.6)
-    const status = new StatusKeeper({ project, env: host.env, log, ...(o.npm ? {} : { askNpm: () => Promise.resolve(null) }), load: () => import(__rewriteRelativeImportExtension(new URL(`../tools/statusline-live${EXT}`, import.meta.url).href)) });
+    const status = new StatusKeeper({ project, env: host.env, log, usageOf: (owner) => usage.usageOf(owner), ...(o.npm ? {} : { askNpm: () => Promise.resolve(null) }), load: () => import(__rewriteRelativeImportExtension(new URL(`../tools/statusline-live${EXT}`, import.meta.url).href)) });
     const served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`), status };
-    const listening = await listen(files.socket, (incoming) => {
+    const onRequest = (incoming) => {
         // the status line's ask: the daemon's state, no event (counts.last is the idle clock and is left alone, review-2-go 7.1)
         if (incoming.request.status === true && incoming.request.render === true) { // `hook-proxy status`: the line, drawn from what the daemon holds
             status.render(incoming.stdin.toString('utf8'), incoming.request.env).then((text) => incoming.reply({ code: 0, stdout: text, stderr: '' }), () => incoming.reply({ code: 0, stdout: '', stderr: '', fallback: 'ts' }));
@@ -133,38 +139,61 @@ export async function serve(o, host) {
             log(`event failed: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);
             incoming.reply(crashReply('the daemon failed on this event'));
         }).finally(() => { counts.inflight -= 1; state.save(snapshot()); });
-    }, log);
+    };
+    let listening;
+    try {
+        listening = await listen(files.socket, onRequest, log);
+    }
+    catch (e) {
+        // the socket could not be made (taken, no right to it, a path too long): nothing is left running, and the client is told
+        const why = e instanceof Error ? e.message : String(e);
+        log(`start failed: listen: ${why}`);
+        await closeInOrder([['pool', () => pool.close()], ['index', () => index.close()]], log);
+        releaseStartLock(files.lock);
+        sayReady(o.readyFd, `failed listen ${why.replace(/\s+/g, ' ')}\n`);
+        return 1;
+    }
     return new Promise((done) => {
         let ending = false;
+        // process-wide handlers belong to this serve and go with its stop; faults swallowed past a few mean the daemon is in an unknown state
+        let faults = 0;
+        const fault = (what) => { log(what); faults += 1; if (faults > MAX_FAULTS)
+            stop(`${faults} uncaught faults`, true); };
+        const onException = (e) => fault(`uncaught exception: ${e.stack ?? e.message}`);
+        const onRejection = (e) => fault(`unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);
+        const signals = ['SIGTERM', 'SIGINT', 'SIGHUP'].map((sig) => [sig, () => stop(sig, false)]);
         const stop = (reason, again) => {
             if (ending)
                 return;
             ending = true;
             log(`stopping: ${reason}`);
+            // however a closing step ends, the process ends: a worker that will not terminate must not leave a daemon that serves nothing
+            const force = setTimeout(() => host.exit?.(0), FORCE_EXIT_MS);
+            force.unref();
             sampling?.stop();
             clearInterval(ticker);
-            void listening.close().then(() => pool.close()).then(() => {
-                index.close();
-                state.remove();
-                releaseStartLock(files.lock);
-                if (again)
-                    reexec(host.node, o.again, host.env);
-                done(0);
-            });
+            clearInterval(watcher);
+            process.off('uncaughtException', onException);
+            process.off('unhandledRejection', onRejection);
+            for (const [sig, handler] of signals)
+                process.off(sig, handler);
+            void closeInOrder([['socket', () => listening.close()], ['pool', () => pool.close()], ['index', () => index.close()], ['state', () => state.remove()], ['start lock', () => releaseStartLock(files.lock)]], log)
+                .then(() => (again ? reexec(host.node, o.again, host.env, log) : undefined))
+                .finally(() => { clearTimeout(force); done(0); });
         };
         const ticker = setInterval(() => status.tick(Date.now()), o.sampleMs);
         ticker.unref();
         void status.refreshNewest(Date.now());
-        process.on('uncaughtException', (e) => log(`uncaught exception: ${e.stack ?? e.message}`));
-        process.on('unhandledRejection', (e) => log(`unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`));
-        for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP'])
-            process.on(sig, () => stop(sig, false));
-        watch({
+        process.on('uncaughtException', onException);
+        process.on('unhandledRejection', onRejection);
+        for (const [sig, handler] of signals)
+            process.on(sig, handler);
+        const watcher = watch({
             idleMs: o.idleMs, maxAgeMs: o.maxAgeMs, maxRss: o.maxRss, tickMs: o.tickMs, started, last: () => counts.last, busy: () => pool.busy() > 0 || counts.inflight > 0,
             rss: () => process.memoryUsage.rss(), workers: pool.size, parentGone: () => o.exitWith !== null && !alive(o.exitWith), replaced: () => (readText(join(project, LOCK_FILE)) ?? '') !== lock, stop,
         });
         if (o.proxy !== null)
-            sampling = startSampling({ proxy: o.proxy, project, intervalMs: o.sampleMs, orphanMs: o.orphanMs, testMs: o.testMs, log, env: host.env });
+            sampling = startSampling({ proxy: o.proxy, project, intervalMs: o.sampleMs, orphanMs: o.orphanMs, testMs: o.testMs, log, env: host.env, store: usage });
         state.save(snapshot(), true);
         releaseStartLock(files.lock);
         log(`started pid ${process.pid}, ${o.pool} workers, ${hooks.length} hooks${failed.length > 0 ? `, failed to load: ${failed.join(', ')}` : ''}, key ${key}`);
@@ -173,14 +202,14 @@ export async function serve(o, host) {
 }
 if (isMain(import.meta.url)) {
     const argv = process.argv.slice(2);
-    const host = { env: process.env, uid: process.getuid?.() ?? 0, home: homedir(), platform: process.platform, node: process.execPath, script: process.argv[1] ?? '' };
+    const host = { env: process.env, uid: process.getuid?.() ?? 0, home: homedir(), platform: process.platform, node: process.execPath, script: process.argv[1] ?? '', exit: (code) => process.exit(code) };
     const options = serveOptions(argv, host);
     if (argv.includes('--selftest'))
         process.exit(await (await import('./resident/selftest.mjs')).selftest()); // loaded only here: the daemon never carries it
     else if (options !== null)
         process.exit(await serve(options, host));
     else {
-        process.stderr.write('usage: node resident.mjs --serve <project> [--hooks <dir>] [--pool <n>] [--ready-fd <n>] | --selftest\n');
+        process.stderr.write(`usage: node resident.mjs ${WIRE.flag.serve} <project> [${WIRE.flag.hooks} <dir>] [--pool <n>] [${WIRE.flag.readyFd} <n>] | --selftest\n`);
         process.exit(2);
     }
 }

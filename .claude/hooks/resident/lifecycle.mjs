@@ -5,6 +5,9 @@
 // 400 MB resident, since a hook may leave a timer or a child behind that a one-shot runner dropped by exiting.
 import { spawn } from 'node:child_process';
 import { appendFileSync, closeSync, openSync, readFileSync, renameSync, rmSync, statSync, writeSync } from 'node:fs';
+import { alive } from '../lib/daemon-find.mjs';
+import { keepEnv } from '../lib/proxy-wire.mjs';
+import { WIRE } from '../lib/proxy-wire-table.mjs';
 import { basename, dirname, extname, join } from 'node:path';
 export const IDLE_MS = 15 * 60_000;
 export const MAX_AGE_MS = 24 * 3_600_000;
@@ -13,38 +16,55 @@ export const MAX_RSS = 400 * 1024 * 1024;
  *  daemon that ended there ended after every burst of events (KWB-197). Workers are recycled by job count and idle time, so the pool bounds them. */
 export const WORKER_RSS = 48 * 1024 * 1024;
 const LOG_MAX = 1024 * 1024;
-export const alive = (pid) => { try {
-    process.kill(pid, 0);
-    return true;
-}
-catch (e) {
-    return e.code === 'EPERM';
-} };
+export { alive };
 const heldBy = (file) => { try {
     return Number.parseInt(readFileSync(file, 'utf8'), 10);
 }
 catch {
     return Number.NaN;
 } };
-/** The start lock: true when this process holds it now, false when a live daemon is starting (or started). */
+/** The start lock: true when this process holds it now, false when a live daemon is starting (or started). A dead holder's lock is
+ *  taken over under a second file, `<lock>.takeover`, made with `wx` by one taker at a time: a starter that read the dead holder
+ *  before another finished taking over finds the new holder when it has the guard, and backs off (W10b finding 13). */
 export function takeStartLock(file, pid) {
-    for (let tries = 0; tries < 2; tries += 1) {
-        try {
-            const fd = openSync(file, 'wx');
-            writeSync(fd, `${pid}\n`);
-            closeSync(fd);
+    const guard = `${file}.takeover`;
+    for (let tries = 0; tries < 3; tries += 1) {
+        if (create(file, pid))
             return true;
+        const holder = heldBy(file);
+        if (Number.isInteger(holder) && holder !== pid && alive(holder))
+            return false;
+        if (!create(guard, pid)) {
+            const taker = heldBy(guard);
+            if (Number.isInteger(taker) && taker !== pid && alive(taker))
+                return false; // someone is taking it over now
+            rmSync(guard, { force: true }); // a taker that died with the guard
+            continue;
         }
-        catch (e) {
-            if (e.code !== 'EEXIST')
-                return false;
-            const holder = heldBy(file);
-            if (Number.isInteger(holder) && holder !== pid && alive(holder))
-                return false;
+        try {
+            const again = heldBy(file);
+            if (Number.isInteger(again) && again !== pid && alive(again) && again !== holder)
+                return false; // it was taken over while the guard was waited for
             rmSync(file, { force: true }); // its holder is gone: a lock left by a crash
+            return create(file, pid);
+        }
+        finally {
+            rmSync(guard, { force: true });
         }
     }
     return false;
+}
+/** A file made with `wx` that holds `pid`: false when it exists (or cannot be made). */
+function create(file, pid) {
+    try {
+        const fd = openSync(file, 'wx');
+        writeSync(fd, `${pid}\n`);
+        closeSync(fd);
+        return true;
+    }
+    catch {
+        return false;
+    }
 }
 export const releaseStartLock = (file) => rmSync(file, { force: true });
 /** One word down the ready pipe (a file descriptor the client gave), if there is one. */
@@ -91,8 +111,12 @@ export function watch(w) {
     timer.unref();
     return timer;
 }
-/** Starts this same daemon again, detached, in `/`, with HOME, PATH and the cache folder only: the old one has let go of its socket. */
-export function reexec(node, argv, env) {
-    const keep = Object.fromEntries(['HOME', 'PATH', 'CLAUDE_PACKS_CACHE', 'XDG_RUNTIME_DIR'].flatMap((k) => (env[k] === undefined ? [] : [[k, env[k]]])));
-    spawn(node, [...argv], { detached: true, cwd: '/', env: keep, stdio: 'ignore' }).unref();
+/** Starts this same daemon again, detached, in `/`, with HOME, PATH and the cache folder only: the old one has let go of its socket.
+ *  True when the new process started; false (and a line in the log) when it could not (W10b finding 16). */
+export function reexec(node, argv, env, log) {
+    return new Promise((done) => {
+        const child = spawn(node, [...argv], { detached: true, cwd: '/', env: keepEnv(env, WIRE.daemonKeeps), stdio: 'ignore' });
+        child.once('error', (e) => { log(`re-exec could not start: ${e.message}; no daemon follows this one`); done(false); });
+        child.once('spawn', () => { child.unref(); done(true); });
+    });
 }

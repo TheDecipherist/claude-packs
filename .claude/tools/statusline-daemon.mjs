@@ -9,15 +9,16 @@ import { alive, daemonsOf } from '../hooks/lib/daemon-find.mjs';
 import { readText } from '../hooks/lib/files.mjs';
 import { askDaemon } from '../hooks/lib/proxy-client.mjs';
 import { PROTOCOL, lockHash } from '../hooks/lib/proxy-wire.mjs';
+import { WIRE } from '../hooks/lib/proxy-wire-table.mjs';
 /** What the bar says when no daemon serves the project's hooks. */
 export const SLOW_PATH = 'hooks: slow path';
 /** The longest the bar waits for the daemon's answer. */
 export const ASK_MS = 50;
 /** Whether the project's hooks are served by a live daemon of the lock's kit; `ms` bounds the socket ask. */
 export async function residentState(project, env, ms = ASK_MS) {
-    if (project === undefined || project === '' || env.CLAUDE_PACKS_DAEMON === 'off' || !existsSync(join(project, '.claude', 'hooks', 'bin', 'hook-proxy')))
+    if (project === undefined || project === '' || env[WIRE.env.daemon] === 'off' || !existsSync(join(project, '.claude', 'hooks', 'bin', 'hook-proxy')))
         return 'unused';
-    const lock = lockHash(readText(join(project, '.claude', 'claude-packs.lock.json')) ?? '');
+    const lock = lockHash(readText(join(project, WIRE.lockFile)) ?? '');
     const host = { env, home: env.HOME || homedir(), platform: process.platform, uid: process.getuid?.() ?? 0 };
     const mine = daemonsOf(project, host).find((d) => d.state.lockHash === lock && alive(d.state.pid));
     if (mine === undefined)

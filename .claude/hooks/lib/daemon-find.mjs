@@ -4,7 +4,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { real } from './project.mjs';
-import { cacheFolder } from './proxy-wire.mjs';
+import { socketFolders, socketOf } from './proxy-wire.mjs';
 import { readState } from '../resident/state.mjs';
 /** Whether a process is alive: signal 0 reaches it, or it exists but another user owns it (EPERM). The one `alive` of the kit. */
 export const alive = (pid) => {
@@ -19,10 +19,9 @@ export const alive = (pid) => {
 /** The pid files of the project's daemons, in the folders a daemon may have used (its own, and the /tmp one for a long path). */
 export function daemonsOf(dir, host) {
     const project = real(dir);
-    const folders = [cacheFolder(host.env, host.home, host.platform), join('/tmp', `claude-packs-${host.uid}`)];
-    return folders.filter((f) => existsSync(f)).flatMap((f) => readdirSync(f).filter((n) => n.endsWith('.pid')).map((n) => join(f, n)))
+    return socketFolders(host).filter((f) => existsSync(f)).flatMap((f) => readdirSync(f).filter((n) => n.endsWith('.pid')).map((n) => join(f, n)))
         .flatMap((file) => {
         const state = readState(file);
-        return state !== null && state.project === project ? [{ file, socket: join(dirname(file), `${state.key}.sock`), state }] : [];
+        return state !== null && state.project === project ? [{ file, socket: socketOf(dirname(file), state.key), state }] : [];
     });
 }

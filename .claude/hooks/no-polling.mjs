@@ -42,6 +42,11 @@ export function selftest() {
         ['a loop with no sleep', sh('for f in a b; do echo "$f"; done'), 0],
         ['the words in a string', sh('echo "until x; do sleep 60; done"'), 0],
         ['a heredoc body that merely contains them', sh("cat > f.sh <<'EOF'\nwhile true; do sleep 9; done\nEOF"), 0],
+        ['a blocking wait on a process (tail --pid) passes (KWB-210)', sh('tail --pid=12345 -f /dev/null'), 0],
+        ['caffeinate -w on a process passes', sh('caffeinate -w 12345'), 0],
+        ['wait on a process passes', sh('wait 12345'), 0],
+        ['tail --pid on a file is still tail -f', sh('tail --pid=12345 -f build/x.log'), 2],
+        ['a loop that sleeps while a process lives still refuses', sh('while kill -0 12345; do sleep 1; done'), 2],
         ['tail of a number of lines', sh('tail -n 20 build/x.log'), 0],
         ['a judge writes no file (the write trap)', writtenSince(dir, before).join(','), ''],
     ]);

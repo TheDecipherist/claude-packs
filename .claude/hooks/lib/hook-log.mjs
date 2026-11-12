@@ -18,9 +18,10 @@ import { logCall } from './event-log.mjs';
 import { readJson } from './json.mjs';
 import { readLayout } from './layout.mjs';
 import { isMain } from './project.mjs';
+import { WIRE } from './proxy-wire-table.mjs';
 import { isVerdict } from './verdict.mjs';
 import { readPayload } from './writes.mjs';
-export const LOG = join('.claude', 'hooks.log');
+export const LOG = join('.claude', WIRE.hooksLog.file);
 export const LOG_MAX_BYTES = 1024 * 1024;
 export const LOGS = join('.claude', 'logs');
 // The size limit, read from the layout file alone (hook-log needs no layout module for one number). The memo's key holds
@@ -74,9 +75,10 @@ export { isMain };
 /** The project the hook runs for: CLAUDE_PROJECT_DIR, else the folder the process runs in. */
 export const projectRoot = () => resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 export function hookLogLine({ event = '-', hook, ms, code, tool = '-', queue, source }) {
-    const clean = (v) => String(v ?? '-').replace(/[\t\n]/g, ' ') || '-';
-    const more = source === undefined ? '' : `\t${Math.round(queue ?? 0)}\t${clean(source)}`;
-    return `${new Date().toISOString()}\t${clean(event)}\t${clean(hook)}\t${Math.round(ms)}\t${code ?? '-'}\t${clean(tool)}${more}\n`;
+    const clean = (v) => String(v ?? WIRE.hooksLog.empty).replace(/[\t\n]/g, ' ') || WIRE.hooksLog.empty;
+    const values = { time: new Date().toISOString(), event: clean(event), hook: clean(hook), ms: String(Math.round(ms)), code: String(code ?? '-'), tool: clean(tool), queue: String(Math.round(queue ?? 0)), source: clean(source) };
+    // the column order is the wire table's, which the Go client reads too; `queue` and `source` follow only when a source was given
+    return `${WIRE.hooksLog.columns.filter((c) => source !== undefined || !WIRE.hooksLog.optional.includes(c)).map((c) => values[c] ?? WIRE.hooksLog.empty).join('\t')}\n`;
 }
 export const logHook = (root, call) => appendRotated(root, LOG, hookLogLine(call));
 /** One line per refused concept in .claude/usage.log: time, hook, concept (the shape hooks count what they refuse). */

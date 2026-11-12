@@ -10,7 +10,6 @@ import { put } from '../lib/files.mjs';
 import { toJson } from '../lib/json.mjs';
 import { KIT, cacheDir, parseVersion } from '../lib/kit-fresh-look.mjs';
 import { AgentBoard } from './agent-board.mjs';
-import { usageOf as sampled } from './usage.mjs';
 /** How old git's state or the RUNS rows get before they are drawn again; the version is read again this often too. */
 export const GIT_MS = 4000;
 export const RUNS_MS = 2000;
@@ -41,7 +40,7 @@ export class StatusKeeper {
     }
     note(ev, ppid, now) { this.board.note(ev, ppid, now); }
     /** The sampler's tick: agents with no process and no event for five minutes are dropped even when no one renders. */
-    tick(now) { this.board.observe(now, this.o.usageOf ?? sampled); void this.refreshNewest(now); }
+    tick(now) { this.board.observe(now, this.o.usageOf); void this.refreshNewest(now); }
     /** Asks npm in the background when the last ask is an hour old; never waits, never throws. A failed or hung ask leaves the last answer. */
     async refreshNewest(now) {
         if (this.npmBusy || now - this.npmAt < NPM_MS)
@@ -84,7 +83,7 @@ export class StatusKeeper {
         const project = this.o.project;
         if (this.version === null || now - this.version.at >= VERSION_MS)
             this.version = { at: now, value: bar.kitVersion(join(project, '.claude', 'tools'), project) };
-        const usageOf = this.o.usageOf ?? sampled;
+        const usageOf = this.o.usageOf;
         const refreshRuns = this.o.refreshRuns !== false;
         const lines = bar.statusBar(raw, {
             env, nowMs: now, refresh: false, resident: 'up', toolDir: join(project, '.claude', 'tools'),

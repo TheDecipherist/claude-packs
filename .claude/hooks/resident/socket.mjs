@@ -3,7 +3,12 @@
 // is unlinked only after a connect to it failed; a connection is one request and one reply.
 import { lstatSync, mkdirSync, rmSync } from 'node:fs';
 import { connect, createServer } from 'node:net';
-import { crashReply, decodeRequest, encodeReply } from '../lib/proxy-wire.mjs';
+import { FrameGather } from '../lib/frame-gather.mjs';
+import { MAX_STDIN, crashReply, decodeRequest, encodeReply } from '../lib/proxy-wire.mjs';
+/** A client sends its whole request at once; one that has not finished it in this long is gone or stuck, and its connection is closed (W10b finding 10). */
+export const REQUEST_MS = 15_000;
+/** A probe that gets no answer in this long: the daemon behind the socket is wedged, and does not count as answering (W10b finding 22). */
+const PROBE_MS = 250;
 /** Makes the folder (mode 700) when it is not there; the reason the daemon must not use it when it is not the user's at mode 700. */
 export function prepareFolder(folder, uid) {
     try {
@@ -23,32 +28,37 @@ export function prepareFolder(folder, uid) {
 /** Whether something answers on the socket: a connect that is not refused. */
 export const answers = (socket) => new Promise((done) => {
     const c = connect(socket);
+    c.setTimeout(PROBE_MS, () => { c.destroy(); done(false); });
     c.on('connect', () => { c.destroy(); done(true); });
     c.on('error', () => done(false));
 });
 /** Listens on `socket` (the caller has made sure nothing answers there; a dead file left by a crash is removed first). */
-export function listen(socket, onRequest, log) {
-    rmSync(socket, { force: true });
+export function listen(socket, onRequest, log, requestMs = REQUEST_MS) {
     const open = new Set();
     const server = createServer((c) => {
         open.add(c);
         c.on('close', () => open.delete(c));
-        const parts = [];
+        const gather = new FrameGather(2, MAX_STDIN);
         let arrival = 0;
         let taken = false;
         const answer = (reply) => { if (!c.destroyed)
             c.end(encodeReply(reply)); };
         c.on('error', () => undefined);
+        c.setTimeout(requestMs, () => { if (!taken)
+            c.destroy(); });
         c.on('data', (d) => {
             if (taken)
                 return;
-            if (parts.length === 0)
+            if (gather.length === 0)
                 arrival = Date.now();
-            parts.push(d);
-            const got = decodeRequest(Buffer.concat(parts));
+            const bytes = gather.push(d);
+            if (bytes === null)
+                return;
+            const got = decodeRequest(bytes);
             if (got.kind === 'need')
                 return;
             taken = true;
+            c.setTimeout(0); // the reply may take as long as the hooks do
             if (got.kind === 'whole')
                 onRequest({ request: got.value.request, stdin: got.value.stdin, arrival, reply: answer });
             else {
@@ -58,6 +68,13 @@ export function listen(socket, onRequest, log) {
         });
     });
     return new Promise((ok, fail) => {
+        try {
+            rmSync(socket, { force: true });
+        }
+        catch (e) {
+            fail(e);
+            return;
+        }
         server.once('error', fail);
         server.listen(socket, () => ok({ server, close: () => new Promise((done) => { server.close(() => done()); for (const c of open)
                 c.destroy(); }) }));
