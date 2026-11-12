@@ -6,8 +6,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 )
 
 func needNode(t *testing.T) {
@@ -121,4 +124,48 @@ func TestTheProxyLine(t *testing.T) {
 	if !line.Match(log) {
 		t.Errorf("hooks.log: %q", log)
 	}
+}
+
+// W10b review finding 15: when Claude kills the client, the TypeScript runner it started and that runner's children go with it.
+func TestTheClientsDeathReachesItsChild(t *testing.T) {
+	r, err := newRig("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(r.dir)
+	pidFile := filepath.Join(r.dir, "grandchild.pid")
+	script := "sleep 60 &\necho $! > " + pidFile + "\nwait\n"
+	if err := os.WriteFile(filepath.Join(r.project, ".claude", "hooks", "run-hooks.mjs"), []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	j := &job{proc: r.p, project: r.project, node: "/bin/sh"}
+	done := make(chan int, 1)
+	go func() { done <- j.runTypeScript() }()
+	var pid int
+	for i := 0; i < 200 && pid == 0; i++ {
+		time.Sleep(25 * time.Millisecond)
+		if b, err := os.ReadFile(pidFile); err == nil {
+			pid, _ = strconv.Atoi(strings.TrimSpace(string(b)))
+		}
+	}
+	if pid == 0 {
+		t.Fatal("the runner stub never started its child")
+	}
+	defer syscall.Kill(pid, syscall.SIGKILL)
+	syscall.Kill(os.Getpid(), syscall.SIGTERM) // Claude's timeout: the client is told to end
+	select {
+	case code := <-done:
+		if code == 0 {
+			t.Errorf("a client that was killed exited %d: never 0 unjudged", code)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("runTypeScript did not return after the signal")
+	}
+	for i := 0; i < 40; i++ {
+		if syscall.Kill(pid, 0) != nil {
+			return
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	t.Errorf("the runner's child %d is still alive after the client was told to end", pid)
 }

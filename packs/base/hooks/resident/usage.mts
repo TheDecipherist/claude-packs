@@ -75,7 +75,7 @@ export function usageByOwner(snap: Snapshot, project: string): Record<string, Us
 /** A snapshot older than this is not what the machine is doing now: the sampler is down or stuck. */
 export const STALE_MS = 10_000;
 
-/** The latest snapshot's totals. One per daemon; `usageOf` below reads the daemon's. */
+/** The latest snapshot's totals. One per daemon: `serve` makes it and gives it to the sampler, the status keeper and the state file. */
 export class UsageStore {
   private by: Record<string, Usage> = {};
   private at = 0;
@@ -88,8 +88,3 @@ export class UsageStore {
   /** Every owner's totals (what the pid file and the status reply carry); empty when the snapshot is stale. */
   all(): Record<string, Usage> { return this.now() - this.at > STALE_MS ? {} : this.by; }
 }
-
-/** The running daemon's store (resident.mts makes it; the status line builder in the daemon reads `usageOf`). */
-export const usage = new UsageStore();
-/** What the status line reads: the owner's CPU, memory and process count now, or null when it has none. */
-export const usageOf = (owner: string): Usage | null => usage.usageOf(owner);
