@@ -6,9 +6,13 @@
 //   othersBranches(cwd, env) -> Set of branches checked out in another checkout of this repo (not judged here)
 //   ownerPushes(cfg, branch) -> whether only the owner pushes this branch
 import { resolve } from 'node:path';
+import { findGitDirs, refSha } from './git-files.mjs';
 import { gitOut } from './git-run.mjs';
 import { gitAt, knownShas, ownCommits, target, urlOf, withHeads } from './remote-heads.mjs';
 const commonDir = (dir, env) => {
+    const dirs = findGitDirs(dir, env);
+    if (dirs)
+        return dirs.common;
     const d = gitOut(['rev-parse', '--git-common-dir'], gitAt(dir, env));
     return d ? resolve(dir, d) : null;
 };
@@ -18,12 +22,18 @@ export function forRepo(cwd, env, projectDir, cfg = {}) {
     return cfg.repo && commonDir(cwd, env) !== commonDir(projectDir, env) ? { ...cfg, repo: null } : cfg;
 }
 export function unpushed(cwd, env, branch, cfg = {}) {
-    if (!branch || branch === 'HEAD' || gitOut(['rev-parse', '-q', '--verify', 'HEAD'], gitAt(cwd, env)) === null)
+    if (!branch || branch === 'HEAD')
+        return null;
+    const dirs = findGitDirs(cwd, env);
+    const head = dirs ? refSha(dirs, 'HEAD') : gitOut(['rev-parse', '-q', '--verify', 'HEAD'], gitAt(cwd, env));
+    if (head === null)
         return null;
     const { remote } = target(cwd, env, branch);
     if (!urlOf(cwd, env, remote, cfg))
         return null; // no remote and no guards.git.repo: nothing to compare with
     return withHeads(cwd, env, remote, { ...cfg, offline: true }, (h) => {
+        if ([...h.heads.values()].includes(head))
+            return null; // HEAD is a commit GitHub holds: nothing to subtract, no process
         const commits = ownCommits(cwd, env, 'HEAD', h.heads);
         return commits?.length ? { branch, remote, url: h.url, commits } : null;
     });

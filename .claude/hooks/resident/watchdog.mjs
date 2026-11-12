@@ -2,7 +2,7 @@
 // state the status line reads, and stopped only where `guards.watchdog.stop` is set in layout.json:
 //   orphan-spinner  a process whose parent is gone (parent pid 1, or not running) that holds a core for `orphanMs` (60 s): the 49
 //                   orphaned spinners of 2026-11-11. With the guard set it is sent SIGTERM, and SIGKILL if it is still there 5 s on.
-//   test-over-cap   a test run (a node process started with `--test`, with every process under it) holding more cores than the kit's
+//   test-over-cap   a test run (a node process started with `--test`, or a Go `<pkg>.test` binary, with every process under it) holding more cores than the kit's
 //                   test cap (coreBudget) plus one core for the runner itself, for `testMs`. Flagged, never stopped.
 // Time is the snapshot's own `at`, so a test drives it with planted snapshots.
 import { ownersOf } from './usage.mjs';
@@ -13,6 +13,8 @@ export const TEST_MS = 15_000;
 export const TEST_RUNNER_CORES = 1;
 export const KILL_AFTER_MS = 5000;
 const TEST_ARG = /(^|\s)--test(\s|=|$)/;
+// Go builds a package's tests as `<package>.test`; a fuzz run is that binary and one worker per core under it (KWB-211)
+const GO_TEST_BINARY = /\.test$/;
 const secs = (ms) => `${Math.round(ms / 1000)} s`;
 export class Watchdog {
     hot = new Map();
@@ -65,7 +67,7 @@ export class Watchdog {
         const kids = new Map();
         for (const p of snap.procs)
             kids.set(p.ppid, [...(kids.get(p.ppid) ?? []), p]);
-        const isRun = (p) => p.comm === 'node' && TEST_ARG.test(p.args);
+        const isRun = (p) => (p.comm === 'node' && TEST_ARG.test(p.args)) || GO_TEST_BINARY.test(p.comm);
         const byPid = new Map(snap.procs.map((p) => [p.pid, p]));
         const roots = snap.procs.filter((p) => isRun(p) && !(byPid.get(p.ppid) !== undefined && isRun(byPid.get(p.ppid) ?? p)));
         const seen = new Set();

@@ -28,6 +28,19 @@ export function gitDirsOf(checkout) {
     const common = readText(join(gitDir, 'commondir'))?.trim();
     return { gitDir, common: common ? resolve(gitDir, common) : gitDir };
 }
+/** The git dirs of the checkout `dir` is in or under (the nearest folder with a `.git`); null outside a repo, and when the environment
+ *  names a git dir itself (GIT_DIR, GIT_WORK_TREE: the caller asks git). */
+export function findGitDirs(dir, env) {
+    if (env['GIT_DIR'] || env['GIT_WORK_TREE'])
+        return null;
+    for (let at = resolve(dir);; at = resolve(at, '..')) {
+        const dirs = gitDirsOf(at);
+        if (dirs)
+            return dirs;
+        if (resolve(at, '..') === at)
+            return null;
+    }
+}
 const SHA = /^[0-9a-f]{40,64}$/;
 function packedRefs(common) {
     const refs = new Map();

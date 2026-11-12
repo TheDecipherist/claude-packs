@@ -2,6 +2,8 @@
 // re-exec (24 hours old, 400 MB) starts the daemon with every flag it was given, so a tuned daemon stays tuned and a flag added here is
 // parsed and carried by this row alone. `--ready-fd` is the one row a re-exec leaves out: the pipe it names is the first start's.
 import { WIRE } from '../lib/proxy-wire-table.mjs';
+/** At most this many workers import any one hook while the pool is not full (W8.4); doctor lets each hook this many cold calls after a start (one per worker). */
+export const SPREAD = 4;
 export const FLAGS = [
     { flag: WIRE.flag.hooks, value: true, again: true },
     { flag: '--pool', value: true, again: true },

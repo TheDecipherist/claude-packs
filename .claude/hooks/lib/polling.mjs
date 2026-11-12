@@ -12,7 +12,8 @@ export function pollingIn(cmd) {
             return `sleep ${m[1]}`;
     if (/for\s+\w+\s+in\s+\$\(seq[^)]*\)[\s\S]*\bsleep\b/.test(body))
         return 'a loop that sleeps';
-    if (/\btail\s+(-\S*\s+)*-[a-zA-Z]*[fF]\b/.test(body))
+    // any words of the same command before the -f (`tail -n +1 -f`, KWB-213), never past a pipe or a separator (grep -f is grep's)
+    if (/\btail\s+(?:[^\s|;&]+\s+)*?-[a-zA-Z]*[fF]\b/.test(body))
         return 'tail -f on a log (watching, not working)';
     return null;
 }

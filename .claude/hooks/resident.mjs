@@ -21,7 +21,7 @@ import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setFlagsFromString } from 'node:v8';
 import { readText } from './lib/files.mjs';
-import { isMain } from './lib/hook-log.mjs';
+import { DAEMON_START, LOG, appendRotated, hookLogLine, isMain } from './lib/hook-log.mjs';
 import { readHookTable } from './lib/hook-table.mjs';
 import { toJson } from './lib/json.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -30,7 +30,7 @@ import { cacheFolder, crashReply, daemonFiles, daemonKey, lockHash } from './lib
 import { WIRE } from './lib/proxy-wire-table.mjs';
 import { serveEvent } from './resident/event.mjs';
 import { residentIndex } from './resident/index.mjs';
-import { againOf, givenOf, numberOf, textOf } from './resident/options.mjs';
+import { SPREAD, againOf, givenOf, numberOf, textOf } from './resident/options.mjs';
 import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mjs';
 import { startPool } from './resident/pool.mjs';
 import { answers, listen, prepareFolder } from './resident/socket.mjs';
@@ -49,8 +49,6 @@ const FORCE_EXIT_MS = 15_000;
 /** Uncaught exceptions and rejections the daemon logs and carries on after, before it restarts itself. */
 const MAX_FAULTS = 5;
 const PRELOAD = 1;
-/** At most this many workers import any one hook while the pool is not full (W8.4). */
-const SPREAD = 4;
 /** V8 flags the daemon sets before its workers start, for every isolate after (rss: 16 workers that each ran every hook held 389 MB
  *  with V8's defaults and 264 MB with these, build/evidence/rss): no optimizing or baseline compiler, and V8's size-over-speed choices.
  *  A hook runs a few milliseconds of code per event, its time in I/O and regular expressions, which these leave alone. */
@@ -153,6 +151,7 @@ export async function serve(o, host, usage = new UsageStore()) {
         sayReady(o.readyFd, `failed listen ${why.replace(/\s+/g, ' ')}\n`);
         return 1;
     }
+    appendRotated(project, LOG, hookLogLine({ event: 'DaemonStart', hook: DAEMON_START, ms: 0, code: 0, source: 'daemon' })); // doctor judges the calls after it as a cold start
     return new Promise((done) => {
         let ending = false;
         // process-wide handlers belong to this serve and go with its stop; faults swallowed past a few mean the daemon is in an unknown state

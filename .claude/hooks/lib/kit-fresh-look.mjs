@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { put } from './files.mjs';
 import { gitRun } from './git-run.mjs';
 import { readJson, toJson } from './json.mjs';
+import { refsOf } from './kit-fresh-refs.mjs';
 import { KIT, runningKit } from './kit-version.mjs';
 export { KIT };
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -85,20 +86,21 @@ export const kitGit = (root, env) => (...args) => {
 };
 const workVersion = (ref) => WORK_BRANCH.exec(ref)?.[1] ?? null;
 /** the kit's own checkout against origin/main and every origin/work/<version>-* newer than the checkout's own version */
-export function kitVerdict(root, { git, fetch }) {
+export function kitVerdict(root, { git, fetch, refs = null }) {
     const notes = [];
     if (fetch) {
         const f = git('fetch', '-q', 'origin');
         if (!f.ok)
             notes.push(`could not fetch origin (${f.err || 'no answer'}): compared with what was fetched before`);
     }
-    const branch = git('rev-parse', '--abbrev-ref', 'HEAD').out;
+    const branch = refs?.branch ?? git('rev-parse', '--abbrev-ref', 'HEAD').out;
     const own = [readJson(join(root, 'package.json'))?.version, /^work\/(\d+\.\d+\.\d+)-/.exec(branch)?.[1]]
         .filter((v) => parseVersion(v) !== null).sort(compareVersions).at(-1);
     // the refs HEAD does not contain, in one call (a merge-base each took 100 to 800 ms on a commit in a worktree-heavy kit repo)
-    const missing = git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
+    const askMissing = () => git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
+    const missing = refs ? refs.missing(askMissing) : askMissing();
     // a later version made from this checkout's branch (its fork point is a commit main lacks) is the next work, landed after this (KWB-208)
-    const mainKnown = git('rev-parse', '--verify', '-q', 'origin/main').ok;
+    const mainKnown = refs?.mainKnown ?? git('rev-parse', '--verify', '-q', 'origin/main').ok;
     const stackedOnHere = (ref) => {
         const base = git('merge-base', 'HEAD', ref);
         return mainKnown && base.ok && base.out !== '' && !git('merge-base', '--is-ancestor', base.out, 'origin/main').ok;
@@ -115,17 +117,19 @@ export function kitVerdict(root, { git, fetch }) {
 }
 const COMMIT = /(?:^|[;&|(\s])git\b(?:\s+-C\s+\S+|\s+-c\s+\S+)*\s+commit\b/;
 /** what to say at a session's start, and whether it must not start: { say, block } | null */
-export function atStart(root, { env, now, unattended = env['CLAUDE_PACKS_UNATTENDED'] === '1', npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git = kitGit(root, env) }) {
+export function atStart(root, { env, now, unattended = env['CLAUDE_PACKS_UNATTENDED'] === '1', npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git: plantedGit }) {
+    const planted = plantedGit !== undefined;
+    const git = plantedGit ?? kitGit(root, env);
     if (isKitRepo(root)) {
-        const v = kitVerdict(root, { git, fetch: true });
+        const v = kitVerdict(root, { git, fetch: true, refs: planted ? null : refsOf(root) });
         return v && { say: v.say, block: false };
     }
     return projectVerdict(root, { unattended, npm });
 }
 /** a commit in the kit's own repo while it lacks newer work: the refusal, or null (no fetch: what the session start fetched) */
-export function atCommit(root, command, { env, git = kitGit(root, env) }) {
+export function atCommit(root, command, { env, git: plantedGit }) {
     if (!COMMIT.test(command ?? '') || !isKitRepo(root))
         return null;
-    const v = kitVerdict(root, { git, fetch: false });
+    const v = kitVerdict(root, { git: plantedGit ?? kitGit(root, env), fetch: false, refs: plantedGit ? null : refsOf(root) });
     return v?.refuseCommit ? v.say : null;
 }
