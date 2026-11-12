@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { killGroup } from './child-group.mts';
 import { put, scratchDir, slash, walk } from './files.mts';
 import { gitRun } from './git-run.mts';
 import { toJson } from './json.mts';
@@ -64,10 +65,10 @@ export interface HookRun { status: number | null; stdout: string; stderr: string
 // hook inside the runner; a by-hand mode (args, e.g. --init) runs the hook file itself.
 const RUNNER = fileURLToPath(new URL('../run-hooks.mjs', import.meta.url));
 export const runHook = (hook: string, dir: string, payload: unknown, args: readonly string[] = []): HookRun => {
-  const r = spawnSync(process.execPath, args.length || !existsSync(RUNNER) ? [hook, ...args] : [RUNNER, hook], {
-    cwd: dir, input: payload ? toJson(payload) : '', encoding: 'utf8',
-    env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
-  });
+  // detached: its own process group, so what the hook left running is ended with it (KWB-205); spawnSync takes it, its typings do not list it
+  const options = { cwd: dir, input: payload ? toJson(payload) : '', encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, detached: true } as const;
+  const r = spawnSync(process.execPath, args.length || !existsSync(RUNNER) ? [hook, ...args] : [RUNNER, hook], options);
+  if (r.pid) killGroup(r.pid);
   return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
 };
 

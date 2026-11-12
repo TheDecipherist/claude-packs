@@ -6,6 +6,7 @@ import { parentPort, workerData } from 'node:worker_threads';
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { childError } from '../lib/files.mts';
+import { watchGroups } from '../lib/child-group.mts';
 import { isVerdict } from '../lib/verdict.mts';
 import type { FileStatements } from '../lib/near-copies.mts';
 import type { Hook, HookContext } from '../lib/types.d.mts';
@@ -14,6 +15,7 @@ import type { FromWorker, Job, ToWorker, WorkerData } from './messages.mts';
 const port = parentPort;
 const data = workerData as WorkerData;
 const say = (m: FromWorker): void => port?.postMessage(m);
+watchGroups((e) => say({ type: 'group', ...e }));   // the children a hook starts are the main thread's to end (KWB-205)
 const loaded = new Map<string, Hook | string>();
 const waiting = new Map<number, (files: FileStatements[]) => void>();
 let asked = 0;

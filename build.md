@@ -13,6 +13,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 - 2.0.0 session 2 (work/2.0.0-typescript; agents work/2.0.0-ts-{w86-status,rss,kwb205,kwb204}), started 2026-11-12: W8 reopened closed on live numbers, W8.6, KWB-199/204/205/206, W10's findings, W11, W12.
   making: briefs/S2-wave1.md, the merges, progress.md lines, the KWB-199 probe (build/evidence/KWB-199), W11's report and showcase; concepts: none (design/shape.json declares none); reuse: the order's existing scripts (scripts/release.mts, scripts/counts.mts, scripts/test-changed.mts).
+- 2.0.0 KWB-205 (work/2.0.0-ts-kwb205), started 2026-11-12: a hook past its deadline takes its children with it.
+  making: lib/child-group.mts (children spawned detached, killed as a group), the pool's abandon/drop/close kills, the runner's and the selftest rig's group kill, test/hooks/base/hook-children.test.mts; concepts: none (design/shape.json declares none); reuse: startPool and the worker message types (resident/), runHook (lib/selftest.mts), scratchDir/put (lib/files.mts).
 
 - 2.0.0 W9 (work/2.0.0-ts-w9-release), started 2026-11-11: the release in one command, measured on a local registry.
   making: scripts/release.mts and its parts (release-version, release-state, release-steps), their tests, the measuring script scripts/measure-release.mts; concepts: none (design/shape.json declares none); reuse: gitRun/gitOut/gitLines (packs/base/hooks/lib/git-run.mts), readText/put/scratchDir (files.mts), parseJson/readJson/writeJson (json.mts), buildProxy/releaseCheck (scripts/build-proxy.mts), the test picker (scripts/test-changed.mts).
