@@ -1,4 +1,4 @@
-# Session 2, wave 4: two agents (W10b's soak and leak checks, the commit-time hook cost)
+# Session 2, wave 4: three agents (W10b's soak and leak checks, the commit-time hook cost, W11's generated graph)
 
 The order is `docs/workorders/typescript/workorder.md` (read W10b and W8's Done when) and its `PROMPT.md`. The rules for every
 agent are those of `briefs/S2-wave1.md`, section "Rules for every agent", with your own name and branch, plus wave 3's line: wait
@@ -28,3 +28,19 @@ and reads cost the time, and remove them from the event: state kept per checkout
 the kept GitHub look already are), or read from the git directory's files without a process. Each change with a test that holds
 the time on a planted repo (seen red first) and the laws' own selftests green. If a law truly needs a process on the event, say
 which and why, and measure what it costs at load 1 and at load 10.
+
+## w11-graph: W11 item 4, the README's performance graph, generated
+
+Build W11 item 4 as the order writes it, before W11's after-numbers exist, so that W11.1 only refreshes data. The numbers live in
+one tracked file, `docs/workorders/typescript/numbers.json` (the evidence under `build/` is ignored by git, so a generator and
+its `--check` must read a tracked copy): one row per measure, `{ "id", "label", "unit", "before", "after", "evidence": "<path of
+the evidence file each number came from>" }`; fill it now with the "before" from `build/evidence/W0/baseline.md` and the latest
+"after" measured so far (each with its evidence path in the main checkout: W8's summary, W9's report, session 2's progress lines),
+and mark each provisional after with `"provisional": true`, which W11.1 removes. `scripts/counts.mts` (with its parts) draws a
+light and a dark SVG from it (one horizontal bar pair per measure a user feels: the wait per turn, Stop at p95, a release from
+commit to npm, the gate for a one-hook change, a Bash call's hooks live, doctor cached, update warm; before and after on one row,
+the factor written at the end), shown in the README through an HTML picture element with both themes, and a plain table of the
+same numbers under it; `counts --check` red when the graph or the table disagrees with numbers.json (a test plants a changed
+number). Load the `dataviz` skill before choosing colours and marks. The README text around the graph is the lead's: write only
+the generated block between markers named like the other generated tables, and its marker pair, at the end of the README's
+opening section.
