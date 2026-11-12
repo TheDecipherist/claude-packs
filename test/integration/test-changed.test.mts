@@ -147,6 +147,16 @@ test('a changed function picks the tests that use it; a change to imports or com
   assert.match(c.stdout, /chose 0 of/, c.stdout);
 });
 
+// W9, KWB-166: a folder a helper builds a path from (hook-rig's `new URL('../../packs', ...)`) reaches the modules under it and no data, so
+// the regenerated manifest and README of a one-hook change pick the tests that hold them, not the ninety that run a hook.
+test('a regenerated manifest picks the tests that read it, never every hook test through a folder a helper names (W9)', () => {
+  const manifest = pick('packs/manifest-2.0.0.json');
+  assert.ok(manifest.includes('noop'), manifest.join(' '));
+  assert.ok(!manifest.includes('no-find') && !manifest.includes('git-guard') && manifest.length < 15, `${manifest.length} tests: ${manifest.join(' ')}`);
+  const rule = pick('packs/base/rules/agents-held.md');
+  assert.ok(rule.includes('noop') && !rule.includes('git-guard') && rule.length < 15, `${rule.length} tests: ${rule.join(' ')}`);
+});
+
 // KWB-169: the gate proves a changed hook's selftest in a temp folder, where no node_modules lies above it; jscpd (once-only's
 // detector) must be the kit's own, or every gate that touches once-only or making-check is refused before a test runs.
 test('the gate proves once-only in its temp folder with the kit\'s jscpd, with no CLAUDE_PACKS_JSCPD set (KWB-169)', () => {

@@ -36,7 +36,11 @@ export function graph(root: string): Graph {
   for (const m of modules) {
     for (const named of references(root, m)) {
       const ref = sourceOf(named) ?? named;
-      const targets = files.filter((f) => f === ref || (ref !== '' && f.startsWith(`${ref.replace(/\/$/, '')}/`)));
+      // a FOLDER a module builds a path from (`new URL('../../packs', import.meta.url)`) reaches the modules under it, never its data:
+      // a generated manifest or a rule is no code the module runs, and the table says which tests hold them (W9, KWB-166: the
+      // regenerated manifest of a one-hook change picked 91 test files through hook-rig's `packs` folder)
+      const inside = (f: string): boolean => ref !== '' && f.startsWith(`${ref.replace(/\/$/, '')}/`) && MODULE.test(f);
+      const targets = files.filter((f) => f === ref || inside(f));
       for (const t of targets) importers.set(t, [...(importers.get(t) ?? []), m]);
     }
   }
