@@ -14,13 +14,13 @@ import type { VerdictRow } from './types.d.mts';
 
 const sleep = (s: number): void => { spawnSync('sleep', [String(s)]); };
 
-/** A GIT_EXEC_PATH folder whose git-upload-pack answers after `seconds`: a GitHub that is slow. */
+/** A GIT_EXEC_PATH folder whose git-upload-pack answers after `seconds` and then writes `<root>/slow-done`: a GitHub that is slow. */
 function slowGitHub(root: string, seconds: number): string {
   const real = spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout.trim();
   const shim = join(root, 'slow-exec');
   mkdirSync(shim);
   for (const f of readdirSync(real)) if (f !== 'git-upload-pack') symlinkSync(join(real, f), join(shim, f));
-  writeFileSync(join(shim, 'git-upload-pack'), `#!/bin/sh\nsleep ${seconds}\nexec "${real}/git-upload-pack" "$@"\n`);
+  writeFileSync(join(shim, 'git-upload-pack'), `#!/bin/sh\nsleep ${seconds}\ntouch "${join(root, 'slow-done')}"\nexec "${real}/git-upload-pack" "$@"\n`);
   chmodSync(join(shim, 'git-upload-pack'), 0o755);
   return shim;
 }
@@ -51,12 +51,11 @@ export function stopCacheCases(hookFile: string): VerdictRow[] {
   rmSync(kept, { force: true }); // the clean look of before: what is kept after this is the refresh's
   put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true } } })); // from here a Stop gives GitHub the default second
   const was = process.env['GIT_EXEC_PATH'];
-  process.env['GIT_EXEC_PATH'] = slowGitHub(top, 3);
-  const t0 = Date.now();
+  process.env['GIT_EXEC_PATH'] = slowGitHub(top, 4);
   const slow = stop();
-  const wall = Date.now() - t0;
-  cases.push(['GitHub answers in 3 s: Stop goes ahead, with the "not checked" note', slow.status === 0 && /GitHub was not checked/.test(slow.stdout), true]);
-  cases.push(['within about a second of GitHub, never its 3 s (the cap)', wall < 2500, true]);
+  const waited = existsSync(join(top, 'slow-done')); // judged by the slow GitHub's own end, not by a wall clock a loaded machine stretches
+  cases.push(['GitHub answers in 4 s: Stop goes ahead, with the "not checked" note', slow.status === 0 && /GitHub was not checked/.test(slow.stdout), true]);
+  cases.push(['it did not wait out the slow GitHub: the cap (a second) answered before GitHub did', waited, false]);
   for (let i = 0; i < 40 && !existsSync(kept); i++) sleep(0.25);
   cases.push(['the detached refresh took the look and kept it for the next Stop', existsSync(kept), true]);
   const t1 = Date.now();

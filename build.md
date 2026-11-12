@@ -11,6 +11,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 session 2 reds (work/2.0.0-ts-reds), started 2026-11-12: the four reds of the gate, made to measure what they mean.
+  making: tests and one selftest judged by counts and by the slow GitHub's own end instead of wall time; concepts: none (design/shape.json declares none); reuse: slowGitHub (lib/stop-cache-selftest.mts), proxyRig (test/integration/proxy-fire-rig.mts).
 - 2.0.0 session 2 kwb208-210 (work/2.0.0-ts-kwb208-210), started 2026-11-12: KWB-208 and KWB-210 fixed, selftest cases red first.
   making: kit-fresh's newer-work list leaves out a later-version branch stacked on this checkout's branch; no-polling passes a wait on a process (`tail --pid=N -f /dev/null`); concepts: none (design/shape.json declares none); reuse: kitVerdict (lib/kit-fresh-look.mts), pollingIn (lib/polling.mts), kitRepo in the selftest.
 

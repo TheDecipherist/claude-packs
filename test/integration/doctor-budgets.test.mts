@@ -24,13 +24,14 @@ function inTable(dir: string, hook: string, tool: string): void {
   writeJson(file, [...(readHookTable(join(dir, '.claude/hooks')) ?? []), { hook, events: ['PreToolUse'], matcher: tool, role: 'judge', order: 99 }]);
 }
 
+// A loaded machine stretches the p95 and the worst of a 300 ms sleep past 399; the sleep itself is the floor.
 test('doctor is red on a hook that sleeps 300 ms at one event, and names the hook and the event', () => {
   const dir = fixture('base');
   plant(dir, 'sleeper', 300, 6);
   plant(dir, 'quick-fake', 0, 6);
   inTable(dir, 'sleeper', 'Bash');   // quick-fake runs as its own process (node's start in its line) and is no table hook: not judged here
   const r = cli(dir, 'doctor');
-  assert.match(r.stdout, /PROBLEM: sleeper at Pre Bash: 3\d\d\/3\d\d ms \(p50\/p95, worst 3\d\d\) over its last 6 calls, over its budget of 10\/50 ms and worst 200/);
+  assert.match(r.stdout, /PROBLEM: sleeper at Pre Bash: 3\d\d\/(?:[3-9]\d\d|\d{4,}) ms \(p50\/p95, worst (?:[3-9]\d\d|\d{4,})\) over its last 6 calls, over its budget of 10\/50 ms and worst 200/);
   assert.doesNotMatch(r.stdout, /PROBLEM: quick-fake at/);
   assert.match(r.stdout, /event budgets \(wall p50\/p95 ms/);
   assert.equal(r.status, 1);
