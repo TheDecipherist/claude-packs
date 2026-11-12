@@ -41,7 +41,7 @@ export interface Pool {
 
 /** A worker's heap is kept small: its hooks make short-lived garbage, and a large young generation is memory the daemon holds for nothing. */
 /** How long a job waits for a worker that already holds its hook before a worker that does not may import it. */
-const SPREAD_WAIT_MS = 2000;
+const SPREAD_WAIT_MS = 50;
 /** The pool grows one worker at a time, at most this often: a flood of events is a queue to drain, not a reason for 32 workers at once. */
 const GROW_EVERY_MS = 500;
 
