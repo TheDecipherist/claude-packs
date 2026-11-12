@@ -54,8 +54,9 @@ function fireEvent(dir: string, payload: EventPayload): void {
   }
 }
 
+// the hook lines only: the daemon's own start line (commit-cost, doctor's cold-start marker) records no hook call
 const logged = (dir: string): string[][] => (existsSync(join(dir, '.claude/hooks.log')) ? readFileSync(join(dir, '.claude/hooks.log'), 'utf8') : '')
-  .split('\n').filter(Boolean).map((l) => l.split('\t'));
+  .split('\n').filter(Boolean).map((l) => l.split('\t')).filter((r) => r[1] !== 'DaemonStart');
 
 test('every installed hook writes one timing line per call: time, event, hook, ms, exit code', () => {
   const dir = stellix();
