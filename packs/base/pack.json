@@ -30,6 +30,7 @@
     "hooks/lib/core-budget.mts": ["test/unit/hooks-lib/core-budget.test.mts"],
     "hooks/lib/cpp-scan.mts": ["test/unit/hooks-lib/cpp-scan.test.mts"],
     "hooks/lib/crash-policy.mts": ["test/unit/hooks-lib/crash-policy.test.mts"],
+    "hooks/lib/daemon-find.mts": ["test/unit/lib/daemon-cli.test.mts", "test/tools/base/statusline-daemon.test.mts"],
     "hooks/lib/dup-index.mts": ["test/unit/hooks-lib/dup-index.test.mts"],
     "hooks/lib/dup.mts": ["test/unit/hooks-lib/dup-index.test.mts", "test/unit/hooks-lib/dup.test.mts"],
     "hooks/lib/elements.mts": ["test/unit/hooks-lib/elements.test.mts"],
@@ -124,6 +125,7 @@
     "hooks/resident/selftest-lifecycle.mts": ["test/hooks/base/resident.test.mts"],
     "hooks/resident/selftest-plants.mts": ["test/hooks/base/resident.test.mts"],
     "hooks/resident/selftest-rig.mts": ["test/hooks/base/resident.test.mts", "test/integration/resident-load.test.mts"],
+    "hooks/resident/selftest-status.mts": ["test/hooks/base/resident.test.mts"],
     "hooks/resident/selftest.mts": ["test/hooks/base/resident.test.mts"],
     "hooks/resident/socket.mts": ["test/hooks/base/resident-parts.test.mts"],
     "hooks/resident/state.mts": ["test/hooks/base/resident-parts.test.mts", "test/unit/lib/daemon-cli.test.mts"],
@@ -139,6 +141,7 @@
     "tools/quiet-test.mts": ["test/tools/base/quiet-test.test.mts"],
     "tools/shape-symmetry-selftest.mts": ["test/tools/base/shape-symmetry.test.mts"],
     "tools/shape-symmetry.mts": ["test/tools/base/shape-symmetry.test.mts"],
+    "tools/statusline-daemon.mts": ["test/tools/base/statusline-daemon.test.mts"],
     "tools/statusline-paint.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline-runs.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline-session.mts": ["test/tools/base/statusline.test.mts"],
@@ -219,7 +222,7 @@
     "type": "command",
     "command": "node \"$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs\"",
     "padding": 0,
-    "refreshInterval": 1
+    "refreshInterval": 5
   },
   "hooks": {
     "PreToolUse": [

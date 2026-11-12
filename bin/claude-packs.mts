@@ -25,6 +25,7 @@ import type { CheckSpec } from '../lib/pack-template.mts';
 import { addCheck } from '../lib/pack-template.mts';
 import { plannerSkills } from '../lib/planner.mts';
 import { scan } from '../lib/scan.mts';
+import { wallProblem } from '../lib/wall-budget.mts';
 import { ensureShape, isSynth, shapeCommand } from '../lib/shape-cli.mts';
 import { statusCommand } from '../lib/status-cli.mts';
 import { detectedConfig, suggest, suggestionOf } from '../lib/suggest.mts';
@@ -71,8 +72,9 @@ function seedOf(value: Run['value']): Partial<Layout> | null {
   return seed;
 }
 
-// The commands that never load a team's custom packs (they read, or they make something new).
-const NO_CUSTOM_PACKS = new Set(['new-pack', 'add-lesson-check', 'scan', 'suggest', 'fix', 'logs', 'global', 'status']);
+// The only commands that load a team's custom packs (a git fetch each): the ones that install (init, add, update; remove and config sync the lock's custom packs too). Every other command reads, or makes
+// something new, and pays nothing for packs it does not use (W8.4, d-9).
+const CUSTOM_PACK_COMMANDS = new Set(['init', 'add', 'update', 'remove', 'config']);
 
 function parse(command: string | undefined, argv: readonly string[]): Run {
   const flags: Record<Switch, boolean> = { dryRun: false, force: false, strict: false, fresh: false, hook: false };
@@ -86,7 +88,7 @@ function parse(command: string | undefined, argv: readonly string[]): Run {
   }
   const dir = resolve(value['--dir'] ?? process.cwd());
   const packs = value['--packs']?.split(',').map((p) => p.trim()).filter(Boolean) ?? null;
-  const fetched = command === undefined || NO_CUSTOM_PACKS.has(command) ? {} : loadCustomPacks(dir, { latest: command === 'update' });
+  const fetched = command !== undefined && CUSTOM_PACK_COMMANDS.has(command) ? loadCustomPacks(dir, { latest: command === 'update' }) : {};
   return { ...flags, argv, rest, dir, value, packs, seedLayout: seedOf(value), installed: readLock(resolve(dir, '.claude')).packs, fetched };
 }
 
@@ -236,8 +238,11 @@ const COMMANDS: Record<string, Command> = {
   shape: (run) => shapeCommand(run.rest[0], run.dir),
   scan: async (run) => {
     if (run.rest.includes('--prompt')) return printPrompt('scan-review.md');
+    const began = Date.now();
     await scan(run.dir, { out: pathOf(run, '--out') });
-    return 0;
+    const slow = wallProblem('scan', began, Date.now());
+    if (slow !== null) console.log(`  PROBLEM: ${slow}`);
+    return slow === null ? 0 : 1;
   },
   logs: (run) => logsCommand(run.dir, run.rest),
   daemon: (run) => daemonCommand(run.dir, run.rest, console.log),

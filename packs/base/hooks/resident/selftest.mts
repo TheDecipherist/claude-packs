@@ -5,10 +5,12 @@ import { verdicts } from '../lib/selftest.mts';
 import type { VerdictRow } from '../lib/types.d.mts';
 import { eventCases } from './selftest-events.mts';
 import { lifecycleCases } from './selftest-lifecycle.mts';
+import { statusCases } from './selftest-status.mts';
 
 export async function selftest(): Promise<number> {
   const cases: VerdictRow[] = [];
   await eventCases(cases);
   await lifecycleCases(cases);
+  await statusCases(cases);
   return verdicts('resident', cases);
 }

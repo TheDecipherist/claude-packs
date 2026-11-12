@@ -151,7 +151,7 @@ function hooksDir(): string {
   return dir;
 }
 const poolOf = (dir: string, over: Partial<Parameters<typeof startPool>[0]> = {}, log: string[] = []): ReturnType<typeof startPool> =>
-  startPool({ workerUrl: WORKER, data: { dir, hooks: ['ok', 'slow', 'leaves', 'writes-stream', 'no-verdict', 'logs', 'absent'], ext: '.mjs' }, warm: 2, max: 4, idleMs: 60_000, recycleAfter: 500, growAfterMs: 10, candidates: () => [], log: (l) => log.push(l), ...over });
+  startPool({ workerUrl: WORKER, data: { dir, hooks: ['ok', 'slow', 'leaves', 'writes-stream', 'no-verdict', 'logs', 'absent'], ext: '.mjs' }, warm: 2, preload: 1, max: 4, idleMs: 60_000, recycleAfter: 500, growAfterMs: 10, candidates: () => [], log: (l) => log.push(l), ...over });
 const ctx = { projectDir: '/p', cwd: '/p', env: {}, sessionPid: 1, now: 0, layout: { folders: {}, concepts: {} } };
 const job = (hook: string) => ({ hook, event: { hook_event_name: 'PreToolUse' }, ctx });
 
@@ -191,5 +191,37 @@ test('the pool grows under load to its limit and retires the grown ones after th
     assert.ok(pool.size() > 1 && pool.size() <= 4, `grew to ${pool.size()}`);
     for (let i = 0; i < 100 && pool.size() > 1; i += 1) await nap(50);
     assert.equal(pool.size(), 1, 'back to the warm one');
+  } finally { await pool.close(); }
+});
+
+// W8.4, memory: a worker holds the hooks it has run; the first `preload` workers import them all at start.
+test('the pool: only a preloaded worker imports every hook at start; the others import a hook when a job first brings it', async () => {
+  const pool = poolOf(hooksDir(), { warm: 3, preload: 1 });
+  try {
+    assert.deepEqual(await pool.ready(), ['absent'], 'the preloaded worker names the hook that cannot be loaded');
+    assert.deepEqual(['ok', 'slow', 'logs'].map((h) => pool.holders(h)), [1, 1, 1], 'one worker holds each hook at start, of three');
+  } finally { await pool.close(); }
+  const lazy = poolOf(hooksDir(), { warm: 2, preload: 0 });
+  try {
+    assert.deepEqual(await lazy.ready(), [], 'nothing imported yet, so nothing failed to');
+    assert.equal(lazy.holders('ok'), 0);
+    assert.equal((await lazy.run(job('ok'))).code, 0);
+    assert.deepEqual([lazy.holders('ok'), lazy.holders('slow')], [1, 0], 'the one hook a job brought, in one worker');
+    assert.match((await lazy.run(job('absent'))).stderr, /absent could not be loaded/);
+  } finally { await lazy.close(); }
+});
+
+test('the pool: a hook stays on the workers that hold it while fewer than `spread` do; a job held back is never starved', async () => {
+  const pool = poolOf(hooksDir(), { warm: 4, preload: 0, spread: 1 });
+  try {
+    await pool.ready();
+    for (let i = 0; i < 6; i += 1) assert.equal((await pool.run(job('ok'))).code, 0);
+    assert.equal(pool.holders('ok'), 1, 'six jobs in turn, one holder');
+    // three at once for a 150 ms hook: the two behind the holder wait 50 ms, then idle workers import it
+    const began = Date.now();
+    const done = await Promise.all(Array.from({ length: 3 }, () => pool.run(job('slow'))));
+    assert.deepEqual(done.map((d) => d.code), [0, 0, 0]);
+    assert.ok(Date.now() - began < 450, `the jobs ran ${Date.now() - began} ms: they waited past the spread wait and were not starved`);
+    assert.ok(pool.holders('slow') > 1, `held back for the holder, then spread: ${pool.holders('slow')} holders`);
   } finally { await pool.close(); }
 });

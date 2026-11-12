@@ -1,28 +1,19 @@
 // `claude-packs daemon status|stop`: the resident runner of a project, found by its pid file (typescript order W8.2, review-2-go 3.10).
 // A project can have more than one (an old kit version's, until it is idle); status lists each with its age, kit hash, events and
 // memory, and says when its kit is not the one the project's lock names now; stop ends each of them.
-import { existsSync, readdirSync, rmSync } from 'node:fs';
+import { rmSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { alive, daemonsOf, type DaemonHost } from '../packs/base/hooks/lib/daemon-find.mts';
 import { readText } from '../packs/base/hooks/lib/files.mts';
 import { real } from '../packs/base/hooks/lib/project.mts';
-import { cacheFolder, lockHash } from '../packs/base/hooks/lib/proxy-wire.mts';
-import { readState, type DaemonState } from '../packs/base/hooks/resident/state.mts';
+import { lockHash } from '../packs/base/hooks/lib/proxy-wire.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
-export interface DaemonHost { env: Readonly<Record<string, string | undefined>>; home: string; platform: string; uid: number }
+export type { DaemonHost };
 const here = (): DaemonHost => ({ env: process.env, home: homedir(), platform: process.platform, uid: process.getuid?.() ?? 0 });
 
-const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } };
 const wait = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
-
-/** The pid files of the project's daemons, in the folders a daemon may have used (its own, and the /tmp one for a long path). */
-function daemonsOf(dir: string, host: DaemonHost): { file: string; state: DaemonState }[] {
-  const project = real(dir);
-  const folders = [cacheFolder(host.env, host.home, host.platform), join('/tmp', `claude-packs-${host.uid}`)];
-  return folders.filter((f) => existsSync(f)).flatMap((f) => readdirSync(f).filter((n) => n.endsWith('.pid')).map((n) => join(f, n)))
-    .flatMap((file) => { const state = readState(file); return state !== null && state.project === project ? [{ file, state }] : []; });
-}
 
 const age = (ms: number): string => (ms < 90_000 ? `${Math.round(ms / 1000)} s` : ms < 5_400_000 ? `${Math.round(ms / 60_000)} min` : `${(ms / 3_600_000).toFixed(1)} h`);
 

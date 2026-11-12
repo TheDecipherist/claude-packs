@@ -23,14 +23,20 @@ const hookOf = (mod: unknown): Hook | null => {
   return typeof fn === 'function' && fn.length >= 2 ? (fn as Hook) : null;
 };
 
+/** Imports one hook the first time this worker is asked for it (W8.4: a worker holds only the hooks it has run, so 16 warm workers do not
+ *  each carry all of them). The import's time is no part of the hook's `ms`. */
+async function ensure(name: string): Promise<void> {
+  if (loaded.has(name)) return;
+  try {
+    const fn = hookOf(await import(pathToFileURL(join(data.dir, `${name}${data.ext}`)).href));
+    loaded.set(name, fn ?? `${name} exports no hook(event, ctx)`);
+  } catch (e) { loaded.set(name, `${name} could not be loaded: ${e instanceof Error ? e.message : childError(e)}`); }
+}
+
+/** A preloaded worker (the first few of the pool) imports every hook at start, so the first events of a session find them loaded. */
 async function load(): Promise<void> {
-  for (const name of data.hooks) {
-    try {
-      const fn = hookOf(await import(pathToFileURL(join(data.dir, `${name}${data.ext}`)).href));
-      loaded.set(name, fn ?? `${name} exports no hook(event, ctx)`);
-    } catch (e) { loaded.set(name, `${name} could not be loaded: ${e instanceof Error ? e.message : childError(e)}`); }
-  }
-  say({ type: 'ready', failed: [...loaded].filter(([, v]) => typeof v === 'string').map(([k]) => k) });
+  if (data.preload === true) for (const name of data.hooks) await ensure(name);
+  say({ type: 'ready', failed: [...loaded].filter(([, v]) => typeof v === 'string').map(([k]) => k), loaded: [...loaded.keys()] });
 }
 
 /** The index lives on the main thread: a hook asks it which files hold these statements and gets those files' statements back. */
@@ -41,6 +47,7 @@ const candidates = (hashes: readonly string[]): Promise<FileStatements[]> => new
 });
 
 async function run(id: number, { hook, event, ctx }: Job): Promise<void> {
+  await ensure(hook);
   const t0 = performance.now();
   const lines: string[] = [];
   const full: HookContext & { candidates: typeof candidates } = { ...ctx, log: (line: string): void => { lines.push(`${line}\n`); }, candidates };

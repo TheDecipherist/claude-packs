@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mts';
 import { isMain } from './lib/hook-log.mts';
 import { readHookTable } from './lib/hook-table.mts';
+import { toJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
 import { real } from './lib/project.mts';
 import { cacheFolder, crashReply, daemonFiles, daemonKey, lockHash } from './lib/proxy-wire.mts';
@@ -27,6 +28,10 @@ import { STATE_EVERY_MS, stateFile } from './resident/state.mts';
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const EXT = extname(fileURLToPath(import.meta.url));
 const LOCK_FILE = join('.claude', 'claude-packs.lock.json');
+/** The warm workers that import every hook at start; the others import a hook when a job first brings it (W8.4: 16 workers holding every hook were 270 MB). */
+const PRELOAD = 1;
+/** At most this many workers import any one hook while the pool is not full (W8.4). */
+const SPREAD = 4;
 
 /** What the daemon takes of its process, given by whoever starts it (the tail below, or a test). */
 export interface Host { env: Readonly<Record<string, string | undefined>>; uid: number; home: string; platform: string; node: string; script: string }
@@ -82,8 +87,8 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
   const index = residentIndex(project, () => readLayout(project));
   const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
   const pool = startPool({
-    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, max: Math.max(32, o.pool),
-    idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 15, candidates: index.candidates, log,
+    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, preload: Math.min(PRELOAD, o.pool), spread: SPREAD, max: Math.max(32, o.pool),
+    idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, log,
   });
   const failed = await pool.ready();
   const counts = { events: 0, last: 0, inflight: 0 };
@@ -94,6 +99,8 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
   });
   const served: Served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`) };
   const listening = await listen(files.socket, (incoming) => {
+    // the status line's ask: the daemon's state, no event (counts.last is the idle clock and is left alone, review-2-go 7.1)
+    if (incoming.request.status === true) { incoming.reply({ code: 0, stdout: toJson(snapshot()), stderr: '' }); return; }
     counts.inflight += 1;
     serveEvent(served, incoming.request, incoming.stdin, incoming.arrival).then(incoming.reply, (e: unknown) => {
       log(`event failed: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);

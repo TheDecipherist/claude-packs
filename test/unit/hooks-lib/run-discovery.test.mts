@@ -1,7 +1,9 @@
 // run-discovery.mts: runners in ps output, the work in each folder, and git through the caller's env.
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { readdirSync } from 'node:fs';
 import { test } from 'node:test';
-import { commitsAhead, mergedInto, runnersIn, workIn, worktreesOf } from '../../../packs/base/hooks/lib/run-discovery.mts';
+import { commitsAhead, isDaemon, mergedInto, processesOf, runnersIn, workIn, worktreesOf } from '../../../packs/base/hooks/lib/run-discovery.mts';
 import { scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 
 test('runnersIn finds bash run.sh processes and leaves a claude one out', () => {
@@ -17,6 +19,26 @@ test('workIn counts a process for the deepest folder, and is null when no proces
     '/p/.claude/worktrees/a': { procs: 1, cores: 0.5, memMb: 2, queued: true },
   });
   assert.equal(workIn(['/p'], []), null);
+});
+
+// W8.4: the resident runner's own process works in no agent's folder: a daemon started with a project as its working folder
+// (the client starts it in `/`, a hand start may not) counts for 0 processes there.
+test('workIn counts 0 processes for a running daemon', async () => {
+  const { PLANTS } = await import('../../../packs/base/hooks/resident/selftest-plants.mts');
+  const { RESIDENT, makeRig, stopAll, waitFor } = await import('../../../packs/base/hooks/resident/selftest-rig.mts');
+  const rig = makeRig(PLANTS.filter((p) => p.name === 'quick'));
+  try {
+    const child = spawn(process.execPath, [RESIDENT, '--serve', rig.dir, '--hooks', rig.hooks, '--pool', '1'], { cwd: rig.dir, stdio: 'ignore', detached: true, env: { HOME: rig.dir, PATH: process.env.PATH, CLAUDE_PACKS_CACHE: rig.cache } });
+    child.unref();
+    rig.pids.add(child.pid ?? 0);
+    assert.ok(await waitFor(() => readdirSync(rig.cache).some((f) => f.endsWith('.pid'))), 'the daemon is up');
+    const all = processesOf(process.env);
+    assert.ok(all.length > 0, 'processes can be read on this machine');
+    assert.ok(all.some((p) => p.pid === process.pid), 'the test\'s own process is read');
+    assert.equal(workIn([rig.dir], all)?.[rig.dir]?.procs, 0, 'the daemon is no agent\'s work');
+    assert.equal(isDaemon(`node /p/.claude/hooks/resident.mjs --serve /p --pool 16`), true);
+    assert.equal(isDaemon('node build.mjs resident'), false);
+  } finally { await stopAll(rig); }
 });
 
 test('git questions about a folder that is no repo answer nothing, never throw', () => {
