@@ -25,3 +25,6 @@ packs/base/hooks/resident.mts, resident/{pool,options,selftest-events,selftest-r
 ## Open
 - 150 MB with the pool at 8 (above). Growth is one worker per 500 ms under queueing, so 8 is reached only under sustained load.
 - No refusals met.
+
+## Gate
+`npm run check` exits 0; `node scripts/counts.mts --check` green; the resident selftest passes (44 cases). `npm run test:changed -- --base origin/work/2.0.0-typescript` (`build/pool-gate.txt`): 174 pass, 6 fail, run at a machine load of 25. Four failures (first Pre Write 247 ms, orphan spinner, test-cap flag, the sampler and status-served tests) are load timing: resident-sampler and status-served rerun alone green (`build/pool-rerun.txt`); the first-Pre-Write test passed earlier at 182 ms (`build/evidence/pool/live.txt`) and was not rerun. Two fail on the base and are not touched by this branch: the soak-summary `Verdict` shape (gate 4, a second interface defined outside the shared types) and its companion line.
