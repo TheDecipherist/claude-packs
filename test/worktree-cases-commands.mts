@@ -41,10 +41,17 @@ export const COMMAND_CASES: Record<string, CheckoutCase> = {
   'agents-held.mjs': (checkouts) => {
     caseFrom('agents-held.mjs', AGENTS_HELD)(checkouts);
     const { here, wt } = checkouts;
-    // A session with nobody there, working in a worktree, is refused a background agent as on main; a foreground one passes (KWB-124).
-    const agent = (cwd: string, background: boolean) => fireAs(here, 'agents-held.mjs', { tool_name: 'Agent', tool_input: { prompt: 'x', run_in_background: background }, cwd }, { CLAUDE_PACKS_UNATTENDED: '1' }).status;
-    assert.equal(agent(wt, true), 2);
-    assert.equal(agent(wt, false), 0);
+    // A session with nobody there, working in a worktree, is refused the end of its turn while a background agent is pending
+    // (KWB-124, KWB-199); a returned one passes, and a background start passes.
+    const line = (block: unknown): string => JSON.stringify({ type: 'assistant', message: { content: [block] } });
+    const launch = line({ type: 'tool_use', id: 'w1', name: 'Agent', input: { description: 'part', run_in_background: true } });
+    const note = JSON.stringify({ type: 'queue-operation', content: '<task-notification><tool-use-id>w1</tool-use-id></task-notification>' });
+    put(join(wt, 'pending.jsonl'), `${launch}\n`);
+    put(join(wt, 'returned.jsonl'), `${launch}\n${note}\n`);
+    const stopAt = (cwd: string, transcript: string) => fireAs(here, 'agents-held.mjs', { hook_event_name: 'Stop', transcript_path: join(wt, transcript), cwd }, { CLAUDE_PACKS_UNATTENDED: '1' }).status;
+    assert.equal(stopAt(wt, 'pending.jsonl'), 2);
+    assert.equal(stopAt(wt, 'returned.jsonl'), 0);
+    assert.equal(fireAs(here, 'agents-held.mjs', { tool_name: 'Agent', tool_input: { prompt: 'x', run_in_background: true }, cwd: wt }, { CLAUDE_PACKS_UNATTENDED: '1' }).status, 0);
   },
   'suite-once.mjs': (checkouts) => {
     caseFrom('suite-once.mjs', SUITE_ONCE)(checkouts);

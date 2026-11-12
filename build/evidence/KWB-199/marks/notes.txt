@@ -1,0 +1,2 @@
+c-notification-during-e: no. No notification reached me while agent e was running; the tool call returned only e's DONE result.
+c-notification-wording: after e returned, a task-notification arrived saying Agent "Probe agent c, phase 2 background" finished (status completed, result: DONE, Bash ran, sleep 90 completed; marks not checked).

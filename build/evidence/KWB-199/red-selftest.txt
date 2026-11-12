@@ -1,0 +1,5 @@
+agents-held selftest FAILED: a pending background agent at Stop under a claude -p parent (got 0, wanted 2)
+agents-held selftest FAILED: a pending background agent at Stop in an unattended run (got 0, wanted 2)
+agents-held selftest FAILED: a pending background Task at Stop in an unattended run (got 0, wanted 2)
+agents-held selftest FAILED: the same with the Stop hook already active: never ends on a pending agent (got 0, wanted 2)
+agents-held selftest FAILED: one returned, one still pending (got 0, wanted 2)
