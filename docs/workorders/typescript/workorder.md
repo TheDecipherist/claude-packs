@@ -673,7 +673,7 @@ machine" (the same day this run's own agents, tests, fuzzers and soak reached lo
    never paused; a job paused over 10 minutes is named in the status line and the log; pausing, never killing.
 6. The status line shows the governor: slots in use of the budget, jobs queued, jobs paused.
 
-**Done when (W8.8):** `test/unit/hooks-lib/governor.test.mts`, `test/tools/base/governed.test.mts` and
+**Done when:** `test/unit/hooks-lib/governor.test.mts`, `test/tools/base/governed.test.mts` and
 `test/hooks/base/governor-route.test.mts` are green with 0 failures, each case seen red on its plant: two planted heavy jobs whose
 weights exceed the budget run one after the other, never together; a job granted 3 slots runs with `CLAUDE_PACKS_TEST_CORES=3` and
 `-j3`; a killed job's slots are freed on the next read; a planted `npm test`, `cmake --build` and `go test -fuzz` are each rewritten
