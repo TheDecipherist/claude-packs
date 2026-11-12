@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T20:01:23Z",
+  "updated": "2026-11-12T20:43:58Z",
   "steps": [
     {
       "id": "W0",
@@ -63,7 +63,7 @@
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 8,
       "done": 6,
-      "agent": null,
+      "agent": "reds, commit-cost",
       "note": "the daemon RSS line carried to W10 and W11 (d-29)"
     },
     {
@@ -84,14 +84,14 @@
       "id": "W10b",
       "title": "Resident runner and Go proxy under stress",
       "items": 5,
-      "done": 0,
-      "agent": "w10b-owners, w10b-paths, w10b-fuzz, kwb208-210"
+      "done": 2,
+      "agent": "w10b-fuzz, w10b-soak"
     },
     {
       "id": "W11",
       "title": "The report, with the comparison",
       "items": 5,
-      "done": 0,
+      "done": 1,
       "agent": null
     },
     {
@@ -104,28 +104,28 @@
   ],
   "agents": [
     {
-      "name": "w10b-owners",
-      "worktree": ".claude/worktrees/w10b-owners",
-      "step": "W10b",
-      "started": "2026-11-12T20:01:23Z"
-    },
-    {
-      "name": "w10b-paths",
-      "worktree": ".claude/worktrees/w10b-paths",
-      "step": "W10b",
-      "started": "2026-11-12T20:01:23Z"
-    },
-    {
       "name": "w10b-fuzz",
       "worktree": ".claude/worktrees/w10b-fuzz",
       "step": "W10b",
-      "started": "2026-11-12T20:01:23Z"
+      "started": "2026-11-12T20:43:58Z"
     },
     {
-      "name": "kwb208-210",
-      "worktree": ".claude/worktrees/kwb208-210",
+      "name": "reds",
+      "worktree": ".claude/worktrees/reds",
+      "step": "W8",
+      "started": "2026-11-12T20:43:58Z"
+    },
+    {
+      "name": "w10b-soak",
+      "worktree": ".claude/worktrees/w10b-soak",
       "step": "W10b",
-      "started": "2026-11-12T20:01:23Z"
+      "started": "2026-11-12T20:43:58Z"
+    },
+    {
+      "name": "commit-cost",
+      "worktree": ".claude/worktrees/commit-cost",
+      "step": "W8",
+      "started": "2026-11-12T20:43:58Z"
     }
   ]
 }
