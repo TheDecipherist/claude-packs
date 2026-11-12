@@ -11,6 +11,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 ab-prep (work/2.0.0-ts-ab-prep), started 2026-11-12: W11.0's preparation, the five bandwarp tasks picked and set up.
+  making: scripts/ab-pick.mts (list, seed, draw) and scripts/ab-compare.mts (one task's row) with lib/ab-*.mts parts and test/unit/lib/ab-compare.test.mts; concepts: none (design/shape.json declares none); reuse: readJson/isRecord (hooks lib json.mts).
 - 2.0.0 gov-core (work/2.0.0-ts-gov-core), started 2026-11-12: W8.8 items 0, 1, 2 and 6, the load governor's owner, `load ask|take|free`, the build queue folded in, the status line's field.
   making: packs/base/hooks/lib/governor.mts (budget, ask, take, free, jobs, settingsFor) and its CLI (lib/load-cli.mts), buildq on it, the status line's governor segment, the `load` skill; concepts: none (design/shape.json declares none); reuse: alive (hooks lib daemon-find.mts), capJobs/budgetEnv (hooks lib core-budget.mts), readJson/isRecord (hooks lib json.mts).
 - 2.0.0 pool (work/2.0.0-ts-pool), started 2026-11-12: the daemon's pool at 2 warm, grown to 8, idle 2 minutes.
