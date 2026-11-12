@@ -102,7 +102,7 @@ const skip = go === null || process.platform !== 'darwin' || hostTarget() === nu
 
 test('a proxy binary changed after it was built refuses the release before the package is made', { skip, timeout: 280_000 }, () => {
   const { work } = scratchClone('## Unreleased\n\n- the change\n');
-  for (const rel of ['scripts/build-proxy.mts', 'lib/proxy-binary.mts', 'lib/manifest.mts', 'packs/base/hooks/lib', 'proxy']) cpSync(join(KIT, rel), join(work, rel), { recursive: true });
+  for (const rel of ['scripts/build-proxy.mts', 'scripts/wire-gen.mts', 'lib/proxy-binary.mts', 'lib/manifest.mts', 'packs/base/hooks/lib', 'proxy']) cpSync(join(KIT, rel), join(work, rel), { recursive: true });
   git(work, 'add', '-A');
   git(work, 'commit', '-q', '-m', 'the proxy builder');
   const binary = join(work, 'packs/base/hooks/bin/darwin-arm64/hook-proxy');
