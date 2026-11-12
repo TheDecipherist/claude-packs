@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T21:53:55Z",
+  "updated": "2026-11-12T23:18:24Z",
   "steps": [
     {
       "id": "W0",
@@ -62,16 +62,16 @@
       "id": "W8",
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 9,
-      "done": 6,
+      "done": 8,
       "agent": null,
-      "note": "the daemon RSS line carried to W10 and W11 (d-29)"
+      "note": "doctor --strict to be read again on more calls"
     },
     {
       "id": "W8.8",
       "title": "The load governor",
       "items": 8,
-      "done": 5,
-      "agent": "gov-route"
+      "done": 8,
+      "agent": null
     },
     {
       "id": "W9",
@@ -92,14 +92,14 @@
       "title": "Resident runner and Go proxy under stress",
       "items": 5,
       "done": 4,
-      "agent": null
+      "agent": "w10b-soak"
     },
     {
       "id": "W11",
       "title": "The report, with the comparison",
       "items": 6,
-      "done": 1,
-      "agent": "w11-draft"
+      "done": 2,
+      "agent": null
     },
     {
       "id": "W12",
@@ -111,16 +111,10 @@
   ],
   "agents": [
     {
-      "name": "gov-route",
-      "worktree": ".claude/worktrees/gov-route",
-      "step": "W8.8",
-      "started": "2026-11-12T21:53:55Z"
-    },
-    {
-      "name": "w11-draft",
-      "worktree": ".claude/worktrees/w11-draft",
-      "step": "W11",
-      "started": "2026-11-12T21:53:55Z"
+      "name": "w10b-soak",
+      "worktree": ".claude/worktrees/w10b-soak",
+      "step": "W10b",
+      "started": "2026-11-12T23:18:24Z"
     }
   ]
 }
