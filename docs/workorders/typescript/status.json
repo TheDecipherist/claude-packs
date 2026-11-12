@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T19:41:18Z",
+  "updated": "2026-11-12T20:01:23Z",
   "steps": [
     {
       "id": "W0",
@@ -63,7 +63,7 @@
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 8,
       "done": 6,
-      "agent": "budgets",
+      "agent": null,
       "note": "the daemon RSS line carried to W10 and W11 (d-29)"
     },
     {
@@ -77,15 +77,15 @@
       "id": "W10",
       "title": "Before calling it finished",
       "items": 2,
-      "done": 1,
-      "agent": "w10-rows2"
+      "done": 2,
+      "agent": null
     },
     {
       "id": "W10b",
       "title": "Resident runner and Go proxy under stress",
       "items": 5,
       "done": 0,
-      "agent": null
+      "agent": "w10b-owners, w10b-paths, w10b-fuzz, kwb208-210"
     },
     {
       "id": "W11",
@@ -104,28 +104,28 @@
   ],
   "agents": [
     {
-      "name": "kwb199",
-      "worktree": ".claude/worktrees/kwb199",
-      "step": "W12",
-      "started": "2026-11-12T19:41:18Z"
-    },
-    {
-      "name": "budgets",
-      "worktree": ".claude/worktrees/budgets",
-      "step": "W8",
-      "started": "2026-11-12T19:41:18Z"
-    },
-    {
-      "name": "w10-rows2",
-      "worktree": ".claude/worktrees/w10-rows2",
-      "step": "W10",
-      "started": "2026-11-12T19:41:18Z"
-    },
-    {
-      "name": "w10b-review",
-      "worktree": ".claude/worktrees/w10b-review",
+      "name": "w10b-owners",
+      "worktree": ".claude/worktrees/w10b-owners",
       "step": "W10b",
-      "started": "2026-11-12T19:41:18Z"
+      "started": "2026-11-12T20:01:23Z"
+    },
+    {
+      "name": "w10b-paths",
+      "worktree": ".claude/worktrees/w10b-paths",
+      "step": "W10b",
+      "started": "2026-11-12T20:01:23Z"
+    },
+    {
+      "name": "w10b-fuzz",
+      "worktree": ".claude/worktrees/w10b-fuzz",
+      "step": "W10b",
+      "started": "2026-11-12T20:01:23Z"
+    },
+    {
+      "name": "kwb208-210",
+      "worktree": ".claude/worktrees/kwb208-210",
+      "step": "W10b",
+      "started": "2026-11-12T20:01:23Z"
     }
   ]
 }
