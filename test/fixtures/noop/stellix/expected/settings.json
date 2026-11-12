@@ -112,8 +112,8 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs\"",
+    "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" status",
     "padding": 0,
-    "refreshInterval": 5
+    "refreshInterval": 1
   }
 }
