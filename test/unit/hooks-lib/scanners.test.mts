@@ -1,8 +1,7 @@
-// The layer-0 scanners (W3): glob, prose, audience, identifier-runs, cpp-scan, rust-scan, core-budget and build-slots.
+// The layer-0 scanners (W3): glob, prose, audience, identifier-runs, cpp-scan, rust-scan, core-budget (build-slots retired: the governor owns the slots, W8.8).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { addressedOutside } from '../../../packs/base/hooks/lib/audience.mts';
-import { buildSlots, slotAt, slotOwners } from '../../../packs/base/hooks/lib/build-slots.mts';
 import { blankCode, findAudioBodies, lineAt } from '../../../packs/base/hooks/lib/cpp-scan.mts';
 import { capJobs, coreBudget, gentle } from '../../../packs/base/hooks/lib/core-budget.mts';
 import { globToRegExp, matchesAny } from '../../../packs/base/hooks/lib/glob.mts';
@@ -75,11 +74,4 @@ test('core-budget: the environment and layout are parameters; planted bad values
   assert.deepEqual(capJobs(['make', '-j18'], 3), ['make', '-j3']);
   assert.deepEqual(gentle(['a'], { platform: 'win32', env: {} }), ['a']);
   assert.deepEqual(gentle(['a'], { platform: 'linux', env: {} }), ['nice', '-n', '10', 'a']);
-});
-
-test('build-slots: the folder and count come from the environment given', () => {
-  assert.deepEqual(buildSlots({ BUILDQ_DIR: '/x', BUILDQ_SLOTS: '3' }, '/t'), { dir: '/x', slots: 3 });
-  assert.deepEqual(buildSlots({}, '/t'), { dir: '/t/claude-packs-buildq', slots: 2 });
-  assert.equal(slotAt('/x', 1), '/x/slot-1');
-  assert.equal(slotOwners('/no/such/folder').size, 0);
 });

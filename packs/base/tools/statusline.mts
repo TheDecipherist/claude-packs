@@ -4,7 +4,7 @@
 // printed line as a row; `base` wires it in .claude/settings.json (pack.json "statusLine") with refreshInterval 5 (W8.4: each refresh
 // is a node start, so it moves every five seconds during a long tool call), and says `hooks: slow path` when no daemon serves the hooks.
 //   line 1: the kit version this project runs (its lock, beside this tool), the model and effort, the context used, the 5h
-//           and 7d quotas on a subscription or the session's cost on API billing
+//           and 7d quotas on a subscription or the session's cost on API billing; the load governor's slots, queue and pauses (W8.8)
 //   line 2: the branch, its uncommitted files, ahead and behind; the last tool and its target; the last shell command
 //   then:   RUNS, every unattended work order on this machine, per project and per agent, each with a bar
 // Every feed is best-effort: a missing or broken one draws nothing, and nothing here ever stops a render.
@@ -15,6 +15,8 @@ import { isMain, readStdinText } from '../hooks/lib/hook-log.mts';
 import { readJson } from '../hooks/lib/json.mts';
 import { checkoutVersion, lockVersion, packageVersion } from '../hooks/lib/kit-version.mts';
 import { residentSegment, residentState, type Resident } from './statusline-daemon.mts';
+import { machineHost, type GovernorHost } from '../hooks/lib/governor.mts';
+import { governorSegment } from './statusline-governor.mts';
 import type { BoardRow } from '../hooks/resident/agent-board.mts';
 import { agentSegments } from './statusline-agents.mts';
 import { COLOURS as C, fitWidth, paintMode, painter, type Paint, type PaintMode } from './statusline-paint.mts';
@@ -55,6 +57,8 @@ export interface StatusBarOptions {
   /** What the daemon knows as events arrive (W8.6), so a render reads no transcript, no `ps` and no network: the live agents, the lead's
    *  last tool, npm's newest version, the kit version, and the RUNS rows (drawn by the caller's cache). Without them the bar reads its own files. */
   live?: LiveView;
+  /** The load governor's view of the machine (W8.8 item 6); the machine's own from `env` when not given. */
+  governor?: GovernorHost;
 }
 
 export interface LiveView {
@@ -67,14 +71,15 @@ export interface LiveView {
 }
 
 /** The bar's lines for one render. */
-export function statusBar(raw: string, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git, resident = 'unused', live }: StatusBarOptions = {}): string[] {
+export function statusBar(raw: string, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git, resident = 'unused', live, governor }: StatusBarOptions = {}): string[] {
   const s = sessionOf(raw);
   const mode = paintMode(env);
   const paint = painter(mode);
   const version = live ? live.version : kitVersion(toolDir, s.projectDir || env.CLAUDE_PROJECT_DIR);
   const pinned = readJson<{ model?: unknown }>(join(env.CLAUDE_CONFIG_DIR || join(env.HOME || homedir(), '.claude'), 'settings.json'))?.model;
   const top = [versionSegment(version, live ? live.newest : keptNewest(env), paint, mode), modelSegment(s, typeof pinned === 'string' ? pinned : null, paint, C),
-    contextSegment(s, paint, C), ...usageSegments(s, env, paint, C), residentSegment(resident, paint, C)];
+    contextSegment(s, paint, C), ...usageSegments(s, env, paint, C), residentSegment(resident, paint, C),
+    governorSegment(governor ?? machineHost(env), s.projectDir || env.CLAUDE_PROJECT_DIR, nowMs, paint, C)];
   const cwd = s.cwd || env.CLAUDE_PROJECT_DIR || process.cwd();
   const second = [gitSegment((git ?? ((dir) => gitState(dir, { env })))(cwd), paint, C), ...activitySegments(live ? live.activity : lastActivity(s.transcript), paint, C)];
   const cache = runsCache(env);

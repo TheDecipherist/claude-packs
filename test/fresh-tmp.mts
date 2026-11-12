@@ -57,3 +57,9 @@ if (existsSync(kitPackage)) {
 // KWB-166: a test's install takes the hooks' selftests as proved by the gate (scripts/test-changed.mts proves the changed ones first);
 // a test whose subject is doctor's selftests runs them with CLAUDE_PACKS_SELFTESTS=run
 process.env.CLAUDE_PACKS_SELFTESTS ??= 'gate';
+
+// The load governor (W8.8): a run's buildq jobs and grants live in the run's own folder, never the user's ~/.cache/claude-packs, and
+// see a planted idle machine, so a test never waits on the machine's real load or on another session's jobs. A test of the governor
+// itself plants its own cores, load and folder.
+process.env.CLAUDE_PACKS_GOVERNOR_DIR ??= join(dir, 'governor');
+process.env.CLAUDE_PACKS_GOVERNOR_LOAD ??= '0';

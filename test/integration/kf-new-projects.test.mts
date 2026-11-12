@@ -1,5 +1,6 @@
 // 1.1.0, group 3: what a new project met on the MPX 500 build (KF-1, 3, 4, 5, 6, 7, 9, 11, 16, 29, 37, 38, 41). Each test was seen red first (docs/1.1-progress.md).
-import { KIT, assert, cli, existsSync, fresh, hookRun, join, mkdirSync, readFileSync, spawnSync, test, writeFileSync } from '../kit-cli.mts';
+import { KIT, assert, cli, existsSync, fresh, hookRun, join, readFileSync, spawnSync, test } from '../kit-cli.mts';
+import { plantGovernorJob } from '../governor-plant.mts';
 import type { Spawned } from '../kit-cli.mts';
 import { lockOf } from '../fixtures/installs.mts';
 import { putIn, unit } from './new-project-rig.mts';
@@ -21,13 +22,12 @@ test('KF-1: the kit ships the queue build-guard sends you to', () => {
 test('KF-1, KF-37: the queue runs the command and ends with its status, never a later one', () => {
   const dir = unit();
   const tool = join(dir, '.claude/tools/buildq.mjs');
-  const slots = join(dir, 'slots');
-  const env = { ...process.env, BUILDQ_DIR: slots };
+  const governor = join(dir, 'governor');   // W8.8: the queue's slots are the governor's
+  const env = { ...process.env, CLAUDE_PACKS_GOVERNOR_DIR: governor, CLAUDE_PACKS_GOVERNOR_CORES: '4', CLAUDE_PACKS_GOVERNOR_LOAD: '0' };
   assert.equal(spawnSync('node', [tool, 'bash', '-c', 'exit 7'], { env, encoding: 'utf8' }).status, 7);
   assert.equal(spawnSync('node', [tool, 'true'], { env, encoding: 'utf8' }).status, 0);
   assert.match(spawnSync('node', [tool, '--status'], { env, encoding: 'utf8' }).stdout, /0 of 2 slots/);
-  mkdirSync(join(slots, 'slot-0'), { recursive: true });
-  writeFileSync(join(slots, 'slot-0/pid'), '999999999\n');
+  plantGovernorJob(governor, 999999999, 2);
   assert.equal(spawnSync('node', [tool, 'true'], { env, encoding: 'utf8', timeout: 20000 }).status, 0, 'a dead holder frees its slot');
 });
 
