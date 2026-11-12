@@ -32,3 +32,7 @@ None of the four is wave 2's code failing. (2) was a real change of behaviour th
 
 ## Checks
 `npm run check` exit 0; `node scripts/counts.mts --check` green; changed-tests gate in `build/reds-gate.txt` (see the status below).
+
+## Gate
+`build/reds-gate.txt`: 629 pass, 3 fail, none from this branch's files: the sampler memory test (the rss work's open part), "no file names a person" (briefs/S2-W11.md line 42, the lead's brief) and "no bare npx" (agents/kwb208-210-report.md line 27). All three are on the trunk as it stands. A first gate run showed two more selftest cases red from my own first change (a 4 s slow GitHub made the detached refresh outlast the wait, and a 1.5 s wall bound on the warm Stop); fixed in the second commit (3 s again, wait up to 20 s, the warm Stop judged by the slow GitHub's end) and green after.
+No daemon or sampler of mine is left (`ps` clean).
