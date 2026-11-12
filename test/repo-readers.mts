@@ -127,8 +127,9 @@ export function personalNames(root: string, files: readonly string[] = keptFiles
 
 // npx-name (KWB-28): `npx claude-packs` resolves to someone else's package; the kit names itself with the scoped name.
 export const BARE = /\bnpx(?:\s+-[-\w]+)*\s+claude-packs\b/;
-// the record of what was, a planted sample, other projects' files as they were, and a work order's recorded run output (KWB-99)
-const NPX_SKIP = new Set(['node_modules', '.git', 'worktrees', '.claude-packs-backup', 'CHANGELOG.md', 'workflow-bugs.md', 'repo-lint.test.mts', 'repo-readers.mts', 'fixtures', 'evidence']);
+// the record of what was, a planted sample, other projects' files as they were, a work order's recorded run output (KWB-99), and
+// the kit's ignored run output, where a gate's log quotes the test that refuses the form (KWB-214)
+const NPX_SKIP = new Set(['node_modules', '.git', 'worktrees', '.claude-packs-backup', 'CHANGELOG.md', 'workflow-bugs.md', 'repo-lint.test.mts', 'repo-readers.mts', 'fixtures', 'evidence', 'build']);
 export function bareNpx(root: string): string[] {
   return walk(root, (n) => NPX_SKIP.has(n)).filter((f) => /\.(mjs|js|cjs|mts|cts|ts|py|sh|md|json|txt)$/.test(f))
     .flatMap((f) => lines(readText(f) ?? '').flatMap((line, i) => (BARE.test(line) && !line.includes('BARE') ? [`${rel(root, f)}:${i + 1}`] : [])));

@@ -217,8 +217,8 @@ test('the bare-name reader finds a planted line', () => {
   assert.ok(BARE.test('run `npx claude-packs doctor`') && BARE.test('npx -y claude-packs update'));
   assert.ok(!BARE.test('npx --no-install @thedecipherist/claude-packs doctor'));
 });
-test('recorded run output under evidence/ is left out, and the same line anywhere else is found (KWB-99)', () => {
-  const root = planted(Object.fromEntries(['build/evidence/W1/gate.txt', 'docs/how.md'].map((f) => [f, 'run `npx claude-packs doctor`\n'])));
+test('recorded run output under evidence/ and build/ is left out, and the same line anywhere else is found (KWB-99, KWB-214)', () => {
+  const root = planted(Object.fromEntries(['build/evidence/W1/gate.txt', 'build/agent-gate.txt', 'docs/how.md'].map((f) => [f, 'run `npx claude-packs doctor`\n'])));
   assert.deepEqual(bareNpx(root), ['docs/how.md:1']);
 });
 

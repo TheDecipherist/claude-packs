@@ -9,7 +9,7 @@ export const WARMUP_S = 300;
 /** How far a count after a restart may differ from the count at the start and still be "back to the start". */
 const BACK_TO_START = 2;
 
-export interface Verdict { what: string; value: string; line: string; ok: boolean }
+export interface LeakVerdict { what: string; value: string; line: string; ok: boolean }
 
 /** The samples of the daemon that ran last without a restart (same pid at the end), after its warm-up of WARMUP_S seconds. */
 export function lastSegment(rows: readonly Row[]): Row[] {
@@ -48,10 +48,10 @@ export interface Facts {
 
 const near = (a: number | null, b: number | null): boolean => a !== null && b !== null && Math.abs(a - b) <= BACK_TO_START;
 
-export function verdicts(f: Facts): Verdict[] {
+export function verdicts(f: Facts): LeakVerdict[] {
   const slope = heapSlope(f.rows);
-  const v = (what: string, value: string, line: string, ok: boolean): Verdict => ({ what, value, line, ok });
-  const out: Verdict[] = [
+  const v = (what: string, value: string, line: string, ok: boolean): LeakVerdict => ({ what, value, line, ok });
+  const out: LeakVerdict[] = [
     v('samples taken', `${f.rows.length}`, `${f.expectedSamples}`, f.rows.length >= f.expectedSamples),
     v('events played', `${f.events} (of them ${f.compared} compared)`, 'over 200,000 at the full length', f.events >= 200_000),
     v('verdict differences, daemon against the TypeScript runner', `${f.differences} of ${f.compared}`, '0', f.differences === 0),
@@ -70,4 +70,4 @@ export function verdicts(f: Facts): Verdict[] {
   return out;
 }
 
-export const asTable = (rows: readonly Verdict[]): string => ['| measure | value | line | meets |', '|---|---|---|---|', ...rows.map((r) => `| ${r.what} | ${r.value} | ${r.line} | ${r.ok ? 'yes' : 'NO'} |`)].join('\n');
+export const asTable = (rows: readonly LeakVerdict[]): string => ['| measure | value | line | meets |', '|---|---|---|---|', ...rows.map((r) => `| ${r.what} | ${r.value} | ${r.line} | ${r.ok ? 'yes' : 'NO'} |`)].join('\n');
