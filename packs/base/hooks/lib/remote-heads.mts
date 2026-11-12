@@ -39,6 +39,8 @@ export interface HeadsOptions {
   live?: boolean;
   /** The time the look is kept under, in ms. */
   now?: number;
+  /** The moment (ms since the epoch) a live look must be answered by: the end of a session gives up on GitHub after one second (W8.3). */
+  until?: number;
 }
 
 /** guards.git in a project's layout: the laws of git-guard and what they name. Proposed for types.d.mts. */
@@ -57,6 +59,8 @@ export interface GitGuards extends HeadsOptions {
   refuseTrunk?: boolean;
   /** Judge from the last look alone: the end of a session tells once, with no network call for what it told before. */
   cachedOnly?: boolean;
+  /** How long the end of a session may serve its last verdict while no ref changed, in ms (60,000 by default; 0 looks every time). */
+  stopCacheMs?: number;
 }
 
 export interface HeadsFound { url: string; heads: Map<string, string>; cached: boolean }
@@ -99,7 +103,7 @@ export function urlOf(cwd: string, env: GitEnv, remote: string, { repo = null }:
   return /^(https?:|file:|\/)/.test(repo) ? repo : `https://github.com/${repo.replace(/\.git$/, '')}.git`;
 }
 
-export function remoteHeads(cwd: string, env: GitEnv, remote: string, { tokenVar = 'PERSONAL_GITHUB_TOKEN', repo = null, live = false, now = Date.now() }: HeadsOptions = {}): HeadsLook {
+export function remoteHeads(cwd: string, env: GitEnv, remote: string, { tokenVar = 'PERSONAL_GITHUB_TOKEN', repo = null, live = false, now = Date.now(), until }: HeadsOptions = {}): HeadsLook {
   const url = urlOf(cwd, env, remote, { repo });
   if (!url) return { url: null, error: `no remote named ${remote}` };
   const file = cacheFile(cwd, env);
@@ -109,8 +113,9 @@ export function remoteHeads(cwd: string, env: GitEnv, remote: string, { tokenVar
   const token = isGitHub(url) ? tokenFor(tokenVar, env) : null;
   const basic = token ? Buffer.from(`x-access-token:${token}`).toString('base64') : '';
   const extra: Record<string, string> = token ? { GIT_CONFIG_COUNT: '2', GIT_CONFIG_KEY_0: 'http.extraHeader', GIT_CONFIG_VALUE_0: `Authorization: Basic ${basic}`, GIT_CONFIG_KEY_1: 'credential.helper', GIT_CONFIG_VALUE_1: '' } : {};
-  const r = gitRun(['-c', 'protocol.version=0', 'ls-remote', '--heads', url], gitAt(cwd, env, extra));
-  if (!r.ok) return { url, error: (r.status === null ? 'no answer in 15 s' : r.stderr.trim().split('\n').pop()) || 'git failed' };
+  const allowed = until === undefined ? GIT_TIMEOUT_MS : Math.max(50, Math.min(GIT_TIMEOUT_MS, until - Date.now()));
+  const r = gitRun(['-c', 'protocol.version=0', 'ls-remote', '--heads', url], { ...gitAt(cwd, env, extra), timeoutMs: allowed });
+  if (!r.ok) return { url, error: (r.status === null ? `no answer in ${allowed < 2000 ? `${(allowed / 1000).toFixed(1)}` : Math.round(allowed / 1000)} s` : r.stderr.trim().split('\n').pop()) || 'git failed' };
   const heads = new Map<string, string>();
   for (const line of r.stdout.split('\n').filter(Boolean)) {
     const [sha, ref] = line.split('\t');

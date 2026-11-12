@@ -36,14 +36,15 @@ import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mts'
 import type { HouseEnv } from './lib/git-guard-selftest.mts';
 import { gitLines, gitOut, gitRun } from './lib/git-run.mts';
 import { escapeRegExp } from './lib/glob.mts';
-import { isMain, runAsHook } from './lib/hook-log.mts';
+import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mts';
 import { failed } from './lib/remote-heads.mts';
 import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
 import type { GitEnv, GitGuards } from './lib/remote-heads.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
+import { landedLater, refreshLater, refreshStop } from './lib/stop-look.mts';
 import { trunkLag } from './lib/trunk-lag.mts';
-import type { Hook } from './lib/types.d.mts';
+import type { Hook, HookContext } from './lib/types.d.mts';
 import { pass, refuse } from './lib/verdict.mts';
 
 // ---------- always: a token never stored ----------
@@ -217,13 +218,18 @@ function gitGuards(guards: Readonly<Record<string, unknown>> | undefined): GitGu
   return git !== null && typeof git === 'object' && !Array.isArray(git) ? git as GitGuards : {};
 }
 
+const SELF = fileURLToPath(import.meta.url);
+
+/** The project's laws: its own layout (KF-8: an existing project opts in). */
+const cfgOf = (ctx: Pick<HookContext, 'layout'>): HouseCfg => ({ ...DEFAULTS, ...(ctx.layout.enable?.includes('guards/git-house') ? NEW_INSTALL_GIT : {}), ...gitGuards(ctx.layout.guards) });
+
 export const hook: Hook = (event, ctx) => {
   const command = event.tool_input?.command ?? '';
-  // the project's laws: its own layout (KF-8: an existing project opts in)
-  const cfg: HouseCfg = { ...DEFAULTS, ...(ctx.layout.enable?.includes('guards/git-house') ? NEW_INSTALL_GIT : {}), ...gitGuards(ctx.layout.guards) };
+  const cfg = cfgOf(ctx);
   if (event.hook_event_name === 'Stop') {
     if (!cfg.house) return pass;
-    const v = stopVerdict(ctx.projectDir, ctx.env, cfg, event.session_id, { lag: trunkLag });   // KWB-96: and the main checkout's trunk
+    // KWB-96: and the main checkout's trunk; the look comes from the kept one while no ref changed (W8.3)
+    const v = stopVerdict(ctx.projectDir, ctx.env, cfg, event.session_id, { lag: trunkLag, now: ctx.now, refresh: () => refreshLater(SELF, ctx.projectDir, ctx.env, 0) });
     return { code: v.code, stdout: v.stdout ?? '', stderr: v.stderr ?? '' };
   }
   const why = problem(command);
@@ -237,6 +243,7 @@ export const hook: Hook = (event, ctx) => {
     warn: (m) => warnings.push(m),
   };
   const reason = house(command, event.cwd ?? ctx.cwd, env, cfg);
+  if (!reason && (cfg.stopCacheMs ?? 1) > 0) landedLater(SELF, command, ctx.projectDir, ctx.env);
   const stdout = warnings.length ? JSON.stringify({ systemMessage: warnings.join('\n') }) : '';
   return reason ? { ...refuse(`git-guard: ${reason}\n`), stdout } : { ...pass, stdout };
 };
@@ -256,4 +263,11 @@ export async function selftest(): Promise<number> {
   return run(fileURLToPath(import.meta.url), { problem, house });
 }
 
-if (isMain(import.meta.url)) await runAsHook(import.meta.url, 'git-guard', hook, selftest);
+/** `--refresh-stop <ms>`: the detached refresh of the kept Stop look, started by the hook itself (lib/stop-look.mts). */
+async function refreshFlag(args: readonly string[]): Promise<number> {
+  const ctx = contextOf();
+  await refreshStop(ctx.projectDir, ctx.env, cfgOf(ctx), trunkLag, Number(args[args.indexOf('--refresh-stop') + 1]) || 0);
+  return 0;
+}
+
+if (isMain(import.meta.url)) await runAsHook(import.meta.url, 'git-guard', hook, selftest, { flags: { '--refresh-stop': refreshFlag } });

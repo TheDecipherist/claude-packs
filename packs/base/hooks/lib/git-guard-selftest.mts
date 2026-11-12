@@ -3,6 +3,7 @@
 // A selftest module is left out of the repo lint's no-process gates (d-20): it runs as a process.
 import { lagCases } from './trunk-lag-selftest.mts';
 import { ownerCases, pushedCases } from './pushed-selftest.mts';
+import { stopCacheCases } from './stop-cache-selftest.mts';
 import { bashOf, runHook, scratchProject, snapshot, writtenSince } from './selftest.mts';
 import type { Unpushed } from './push-form.mts';
 import type { Failure, GitGuards } from './remote-heads.mts';
@@ -145,6 +146,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
     ['pushed law', pushedCases(hookFile)],   // KWB-26: a real repo and a bare "GitHub" beside it
     ['owner pushes', ownerCases(hookFile)],  // guards.git.pushNeedsYes (KWB-157)
     ['trunk law', lagCases(hookFile)],       // the trunk a landing leaves behind in the main checkout (KWB-96)
+    ['kept Stop look', stopCacheCases(hookFile)],   // the verdict served while no ref changed, GitHub given one second (W8.3)
     ['write trap', trapCases(hookFile)],     // a judge writes no file of the project (W4)
   ];
   for (const [name, cases] of grouped) for (const [label, got, want] of cases) if (got !== want) bad.push(`${name}: ${label} (got ${got}, wanted ${want})`);
@@ -154,7 +156,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
   const counts = [
     `${tokenCases.length + 1} token cases`, `${mustBlock.length + 7} house refusals`, `${mustPass.length + 4} passes`,
     `${n('pushed law')} pushed-law cases`, `${n('owner pushes')} owner-push cases`, `${n('trunk law')} trunk-law cases`,
-    `${n('write trap')} write-trap cases`,
+    `${n('kept Stop look')} kept-look cases`, `${n('write trap')} write-trap cases`,
   ];
   console.log(`git-guard selftest: OK (${counts.join(', ')})`);
   return 0;
