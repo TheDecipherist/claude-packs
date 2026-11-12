@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T03:29:35Z",
+  "updated": "2026-11-12T04:26:25Z",
   "steps": [
     {
       "id": "W0",
@@ -70,7 +70,7 @@
       "id": "W9",
       "title": "The release in five minutes",
       "items": 4,
-      "done": 0,
+      "done": 4,
       "agent": null
     },
     {
