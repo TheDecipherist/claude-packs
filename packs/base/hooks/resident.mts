@@ -20,7 +20,7 @@ import { real } from './lib/project.mts';
 import { cacheFolder, crashReply, daemonFiles, daemonKey, lockHash } from './lib/proxy-wire.mts';
 import { serveEvent, type Served } from './resident/event.mts';
 import { residentIndex } from './resident/index.mts';
-import { IDLE_MS, MAX_AGE_MS, MAX_RSS, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mts';
+import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mts';
 import { startPool } from './resident/pool.mts';
 import { answers, listen, prepareFolder } from './resident/socket.mts';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mts';
@@ -42,6 +42,8 @@ export interface ServeOptions {
   pool: number;
   idleMs: number;
   readyFd: number | null;
+  /** `--exit-with <pid>`: the daemon ends when that process does. A selftest's daemons carry it, so none outlives the selftest (KWB-195). */
+  exitWith: number | null;
   /** The arguments to start this same daemon again (re-exec), without the ready pipe. */
   again: readonly string[];
   maxRss: number;
@@ -64,10 +66,11 @@ export function serveOptions(argv: readonly string[], host: Host): ServeOptions 
   const hooks = valueOf(argv, '--hooks') ?? HERE;
   const pool = Math.floor(n('--pool', Math.min(16, availableParallelism())));
   const minutes = n('--idle-minutes', IDLE_MS / 60_000);
+  const exitWith = n('--exit-with', 0);
   return {
-    project, hooks, pool, idleMs: minutes * 60_000, readyFd: fd === undefined ? null : Number(fd), maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
+    project, hooks, pool, idleMs: minutes * 60_000, readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
     recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: 10 * 60_000, stateMs: n('--state-ms', STATE_EVERY_MS),
-    again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes)],
+    again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : [])],
   };
 }
 
@@ -124,7 +127,10 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
     process.on('uncaughtException', (e) => log(`uncaught exception: ${e.stack ?? e.message}`));
     process.on('unhandledRejection', (e) => log(`unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`));
     for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP'] as const) process.on(sig, () => stop(sig, false));
-    watch({ idleMs: o.idleMs, maxAgeMs: o.maxAgeMs, maxRss: o.maxRss, tickMs: o.tickMs, started, last: () => counts.last, busy: () => pool.busy() > 0 || counts.inflight > 0, rss: () => process.memoryUsage.rss(), stop });
+    watch({
+      idleMs: o.idleMs, maxAgeMs: o.maxAgeMs, maxRss: o.maxRss, tickMs: o.tickMs, started, last: () => counts.last, busy: () => pool.busy() > 0 || counts.inflight > 0,
+      rss: () => process.memoryUsage.rss(), workers: pool.size, parentGone: () => o.exitWith !== null && !alive(o.exitWith), replaced: () => (readText(join(project, LOCK_FILE)) ?? '') !== lock, stop,
+    });
     state.save(snapshot(), true);
     releaseStartLock(files.lock);
     log(`started pid ${process.pid}, ${o.pool} workers, ${hooks.length} hooks${failed.length > 0 ? `, failed to load: ${failed.join(', ')}` : ''}, key ${key}`);
