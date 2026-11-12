@@ -771,6 +771,22 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
 
 ## W11. The report, with the comparison
 
+0. Five real bandwarp tasks done again on 2.0 (the user, 2026-11-12: "take 5 random features/tasks that were build in bandwarp and
+   hand the same orders to the agents using the new kit and see if the results are the same or better"), before the rest of W11:
+   - The pick: `scripts/ab-pick.mts` lists bandwarp's agent tasks that were measured and merged (an agent id with a brief in
+     `docs/workorders/bandwarp/briefs/`, a merge commit and a gate named in its progress line), and draws five with a seed written
+     in the evidence: one each of UI panel, UI settings, DSP and presets, and one from the rest; the list, the seed and the draw in
+     `build/evidence/W11/ab-pick.md`.
+   - Each task: a fresh clone of bandwarp (read from `~/projects/bandwarp`, never written there, never pushed) into
+     `build/ab/TASK/`, checked out at the commit before the original agent's first commit; kit 2.0 installed into it from this
+     tree's packed tarball (`init --from` its own install block, or `update` over its 1.9 install); bandwarp's dependencies read
+     from where its brief names them; one agent given the original brief word for word, on the model the original agent's
+     transcript names, started through the load governor at priority 0.3, alone, on the efficiency cores.
+   - Measured for both runs, from the original agent's transcript and event log and the new run's: the gates the brief names
+     (pass or fail, by name), the files changed and the diff against the original's (each difference read and judged better, equal
+     or worse, with the reason), turns, tokens (input, output, cached, from usage), wall time, hook waiting, refusals and retries.
+   - A task that comes out worse on its gates or its diff is run a second time before anything is concluded; one run per task is a
+     sample, not a proof, and the report says so.
 1. The "after": every measurement of W0.5 (a) to (l) taken again on the finished kit, by the same command on the same machine, into
    `build/evidence/W11/after.md`; where a command changed (the release is one command, the project's events go through the proxy), the
    same thing measured end to end.
@@ -795,7 +811,7 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
    binary that lands in the user's cache and the PC's own `update` under WSL), and what the kit did well and badly with counts from
    `logs`.
 
-**Done when:** the comparison table has all twelve rows with a before, an after and a ratio, each after measured in this step (its
+**Done when:** `build/evidence/W11/ab.md` holds the five tasks, each with both runs' gates by name, the diff verdict with its reason, turns, tokens, wall time, hook waiting and refusals, 0 tasks where 2.0 failed a gate the original passed (or the second run and the KWB for it), and the report states the five-task totals; the comparison table has all twelve rows with a before, an after and a ratio, each after measured in this step (its
 evidence file named); every step W0 to W10 has its before-and-after section with at least three numbered rows, each citing its
 evidence file (a check: 0 rows without a file that exists); `showcase.md` holds ten wins, each traced to a row of the report; each of the report's 9 sections holds at least one number or a stated reason there is none (0 blank); `npm run
 check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the report is pushed.

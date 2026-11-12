@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T21:11:23Z",
+  "updated": "2026-11-12T21:22:38Z",
   "steps": [
     {
       "id": "W0",
@@ -97,7 +97,7 @@
     {
       "id": "W11",
       "title": "The report, with the comparison",
-      "items": 5,
+      "items": 6,
       "done": 1,
       "agent": null
     },
