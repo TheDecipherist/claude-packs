@@ -28,6 +28,8 @@ stopped (KWB-124).
    agents, never one; a lead with its own work may start a wave in the background and keep the turn open with short calls of its
    own, merging and refilling each slot when its notification arrives; a foreground agent hides the notifications until it
    returns; never end a turn with an agent running. Cite KWB-199 and the evidence path.
+   The split sentence is already in both (W10 rowfix, held by `test/hooks/base/agents-held.test.mts` "says to split a wave"):
+   keep it and its test, and add the background mode.
 3. Note in your report the README cell or count that moves (the lead writes README.md).
 
 ## w10-ledger: every W10 finding with its fix or why it stays
