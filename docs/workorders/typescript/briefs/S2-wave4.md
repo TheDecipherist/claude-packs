@@ -59,3 +59,12 @@ For each: run it alone on a quiet machine (load under 6), say whether it is red 
 test, when the test is what is wrong, saying why); a timing case that only fails under load is made to measure what it means
 (a count of network calls, a process count) rather than wall time, where it can. Log nothing in `workflow-bugs.md` (the lead
 does): give each red's cause, fix and test in your report. Your branch is cut from the trunk after wave 3's first two merges.
+
+### commit-cost, added: the first event after a daemon start
+
+After an update the daemon restarts, and its first event pays every hook's module load in a cold worker: 300 to 1,100 ms per
+hook on one Pre Bash (`build/session2/update4.txt` in the main checkout: 5 calls since the install, so p95 is that one call).
+doctor then reads the warm-up as every hook over budget. Decide with numbers: warm the workers at start in the background (the
+modules each worker will run, loaded before the first event; measure the RSS cost against d-31) or have doctor hold a worker's
+first call to its own cold-start line and judge the hooks on warm calls only (and judge nothing below a stated count of calls).
+Either way the first event after a start must not take a second: measure it before and after.
