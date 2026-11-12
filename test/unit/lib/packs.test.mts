@@ -63,7 +63,7 @@ test('`init sound-design` alone refuses, naming audio-core, and writes nothing (
   assert.notEqual(alone.status, 0);
   assert.match(alone.stdout + alone.stderr, /sound-design requires audio-core/);
   assert.equal(existsSync(join(dir, '.claude')), false, 'nothing was installed');
-  // with its requirement there, the same pack goes in: an audio-core install (a fixture copy) takes it (KWB-199: no init here)
+  // with its requirement there, the same pack goes in: an audio-core install (a fixture copy) takes it (KWB-200: no init here)
   const withAudio = fixture('audio-core');
   const both = spawnSync(process.execPath, [join(KIT, 'bin/claude-packs.mjs'), 'add', 'sound-design', '--dir', withAudio], { encoding: 'utf8' });
   assert.equal(both.status, 0, both.stdout + both.stderr);

@@ -28,7 +28,7 @@ test('a second doctor runs no selftest whose hook has not changed, and a changed
   assert.equal(unchanged(doctor(dir, cache).stdout), all - 1, 'the changed hook runs again, the others do not');
   assert.equal(unchanged(doctor(dir, cache).stdout), all, 'and once it passed, it is remembered too');
   // d-7: a lib some hooks import reruns those hooks, not all of them; the lib is read from the install's own imports, since which
-  // libs the runner reaches moves with the runner (glob.mjs joined its imports at W8.1 and stopped being an example, KWB-199)
+  // libs the runner reaches moves with the runner (glob.mjs joined its imports at W8.1 and stopped being an example, KWB-200)
   const lib = libSomeHooksImport(dir);
   appendFileSync(lib, '\n// changed\n');
   const afterLib = unchanged(doctor(dir, cache).stdout);
