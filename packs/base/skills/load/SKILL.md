@@ -5,12 +5,12 @@ description: Use when about to start a test run, a build, a fuzzer, an install o
 
 # Ask the load governor before anything heavy, and use its answer (one job: the machine is never maxed out)
 
-Every session, agent and project on the machine shares one budget of cores. The governor keeps it: the slots jobs hold together (60 % of the cores by default) and a ceiling on the 1-minute load (70 %). The last 20 % of the cores is never granted, whatever any setting says: it is the system's and the person's at the machine. Four agents that each ran their own tests and a fuzzer once took an 18-core machine to load 43. Asking costs one node start; guessing costs the user their machine.
+Every session, agent and project on the machine shares one budget of cores. The governor keeps it: the slots jobs hold together (60 % of the cores by default) and a ceiling on the 1-minute load (70 %). The last 20 % of the cores is never granted, whatever any setting says: it is the system's and the person's at the machine. Four agents that each ran their own tests and a fuzzer once took an 18-core machine to load 43. Asking costs a few milliseconds; guessing costs the user their machine.
 
 <constraints>
 Always do:
 1. Ask before every heavy command (a test run, a build, a fuzzer, an install, the soak) and before starting an agent or a wave:
-   `node .claude/tools/load.mjs ask --for test|build|fuzz|agent|install` (in the kit itself, `node bin/claude-packs.mjs load ask ...`; anywhere the kit is installed, `npx --no-install @thedecipherist/claude-packs load ask ...`). Add `--want N` for a job that needs N cores whole; add `--json` to read it in a script.
+   `sh .claude/hooks/bin/hook-proxy load ask --for test|build|fuzz|agent|install` (the Go client asks the project's daemon: about 30 ms; with no daemon or no binary it runs the node tool, the same answer in about 80 ms), or `node .claude/tools/load.mjs ask ...` (in the kit itself, `node bin/claude-packs.mjs load ask ...`; anywhere the kit is installed, `npx --no-install @thedecipherist/claude-packs load ask ...`). Add `--want N` for a job that needs N cores whole; add `--json` to read it in a script.
    Ask at your priority: `--priority P` (0 to 1), or `CLAUDE_PACKS_PRIORITY` in the environment, which `buildq` and `governed` read too; 0.5 when neither is set. P is the most of the budget the job may hold (0.3 of a 10-core budget is 3 cores, never less than 1). Waiting jobs are served highest priority first, a waiting job's priority rises 0.1 every 5 minutes, and when the load stays over the ceiling the lowest priority job is paused first. The answer names the priority it answered for.
 2. Use the priority the brief gives you; a lead sets it from the order: work other steps wait on (the critical path) 0.6 and up, the lead's own merge gate 0.8, verification nothing waits on (soaks, fuzzing, re-measuring, reports) 0.2 to 0.3.
 3. Read the one line and do what it says:
@@ -18,8 +18,9 @@ Always do:
    - `wait: load 14.1 over the ceiling 13; 0 cores free; ask again after the running test ends`: start nothing heavy. Do light work (reading, writing, a single test file) and ask again when it says.
 4. Hold what you use for as long as you use it, when the job is not run through `governed` or `buildq` (which take and free for you): `load take N --for KIND` prints a grant id and its settings; `load free <id>` when the job ends. A grant whose holder is gone is freed by itself on the next read, so a killed job never keeps its cores.
 5. Size a wave by the answer: the agents a lead starts at once are at most what `ask --for agent` says, and each agent's brief gives it its share (the test cores from the answer).
-6. Start every heavy job at a low OS scheduling class as well (`taskpolicy -b` on macOS, `nice -n 15` elsewhere) when the project's brief asks for it.
-7. Read the status line's `GOV used/budget` field: `queued` means jobs are waiting their turn (never stuck), `paused` means the watchdog stopped the lowest priority job while the load was over the ceiling, and resumes it when the load falls.
+6. Run a heavy command through `governed` yourself, or let the `governor-route` hook do it: it rewrites every heavy Bash command (a build, a test run, a fuzzer, an install, the soak) to `node .claude/tools/governed.mjs --for KIND --want N -- <command>`, which waits for its grant inside the call (one line on stderr every 30 s), runs the command with the granted settings at a low priority and frees the grant when it ends. An agent's start holds one slot, freed when the agent stops. A Bash call that waits keeps its own timeout: give a heavy command `timeout` room for its wait, or run it with `run_in_background`.
+7. Start every heavy job at a low OS scheduling class as well (`taskpolicy -b` on macOS, `nice -n 15` elsewhere) when the project's brief asks for it.
+8. Read the status line's `GOV used/budget` field: `queued` means jobs are waiting their turn (never stuck), `paused` means the watchdog stopped the lowest priority job while the load was over the ceiling, and resumes it when the load falls.
 
 Never do:
 - Start a heavy job without asking, or with more cores than the answer gave (`-j` of the machine, every test file at once, a fuzzer at its default worker count).
