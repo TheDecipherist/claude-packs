@@ -4,6 +4,7 @@
 // times on a commit and twice on a push, kit-fresh three to five times on a commit in the kit's repo.
 import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { refsOf } from '../../../packs/base/hooks/lib/kit-fresh-refs.mts';
 import { gitConfigRead } from '../../../packs/base/hooks/lib/git-config.mts';
 import { pushSeen } from '../../../packs/base/hooks/lib/remote-heads.mts';
 import { scratchDir } from '../../../packs/base/hooks/lib/files.mts';
@@ -28,7 +29,7 @@ function shim(): { env: Record<string, string>; calls: () => string[]; reset: ()
 }
 
 /** A work branch pushed to a bare origin, with files staged; `kit` makes it the kit's own repo with origin/work branches. */
-function repo(env: Record<string, string>, kit: boolean): string {
+function repo(env: Record<string, string>, kit: boolean, refresh = false): string {
   const root = scratchDir('cc-repo-');
   const hub = join(root, 'hub.git');
   const dir = join(root, 'w');
@@ -37,7 +38,7 @@ function repo(env: Record<string, string>, kit: boolean): string {
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'config', 'user.email', 'a@b.c');
   git(dir, 'config', 'user.name', 't');
-  put(join(dir, '.claude/layout.json'), JSON.stringify({ enable: ['guards/git-house'], guards: { git: { house: true, stopCacheMs: 0 } } }));
+  put(join(dir, '.claude/layout.json'), JSON.stringify({ enable: ['guards/git-house'], guards: { git: { house: true, ...(refresh ? {} : { stopCacheMs: 0 }) } } }));
   put(join(dir, 'package.json'), JSON.stringify(kit ? { name: KIT_NAME, version: '2.0.0' } : { name: 'x' }));
   git(dir, 'add', 'package.json', '.claude/layout.json');
   git(dir, 'commit', '-qm', 'init');
@@ -129,4 +130,35 @@ test('gitConfigRead reads remotes and upstreams, and gives way to git where git 
   git(dir, 'config', '--unset', 'url.https://example.com/.insteadOf');
   git(dir, 'config', 'include.path', '../x');
   assert.equal(gitConfigRead(dir, s.env), null, 'include: ask git');
+});
+
+/** Blocks (bounded) until `ready` holds: the detached refresh a hook starts has finished what the next event reads. */
+function until(ready: () => boolean, ms = 30_000, step = 100): boolean {
+  for (const end = Date.now() + ms; Date.now() < end; Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, step)) if (ready()) return true;
+  return false;
+}
+
+/** The kit's refs are kept for the checkout as it is now (asking git would throw here). */
+const kept = (dir: string): boolean => { try { refsOf(dir)?.missing(() => { throw new Error('not kept'); }); return true; } catch { return false; } };
+
+test('the commit after a `git commit && git push` starts no git process: the detached refresh took the looks', () => {
+  const s = shim();
+  const dir = repo(s.env, true, true);
+  for (const hook of ['git-guard.mjs', 'kit-fresh.mjs']) fire(hook, dir, 'git commit -m x -- f1.txt', s.env);   // the first looks are kept
+  for (let round = 1; round <= 2; round++) {
+    const command = `git commit -m r${round} -- f1.txt && git push origin work/2.0.0-x`;
+    fire('git-guard.mjs', dir, command, s.env);   // Pre: starts the refresh, detached
+    put(join(dir, 'f1.txt'), `round ${round}\n`);
+    git(dir, 'add', 'f1.txt');
+    git(dir, 'commit', '-qm', `r${round}`, '--', 'f1.txt');
+    git(dir, 'push', '-q', 'origin', 'work/2.0.0-x');
+    const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: dir, encoding: 'utf8' }).stdout.trim();
+    const heads = join(dir, '.git/claude-packs-heads.json');
+    assert.ok(until(() => readFileSync(heads, 'utf8').includes(head) && kept(dir)), `round ${round}: the refresh finished`);
+    let seen = -1;
+    assert.ok(until(() => { const n = s.calls().length; const quiet = n === seen; seen = n; return quiet; }, 30_000, 1000), 'the refresh went quiet');   // its own git calls are done
+    s.reset();
+    for (const hook of ['git-guard.mjs', 'kit-fresh.mjs']) assert.equal(fire(hook, dir, 'git commit -m next -- f2.txt', s.env), 0, hook);
+    assert.deepEqual(s.calls(), [], `round ${round}: processes on the next commit`);
+  }
 });

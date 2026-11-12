@@ -44,3 +44,19 @@ The lead stopped my full picked gate (load 20) and asked for direct files only. 
 - Not measured at load 1 and 10 (see above). `reds` owns git-guard's "kept Stop look" case; untouched.
 - Processes: no daemon or sampler of mine is left (checked with `ps`; the one `resident.mjs` running is the main project's own).
 - No refusal judged wrong (one template-law hit on a staging copy of a file under build/, right; one git-guard refusal of `git checkout` on a dirty tree, right).
+
+## Follow-up: the commit after `git commit && git push`, and the refresh children
+
+Why the next event still paid (reproduced with `build/cc/seq.sh`: Pre event, real commit and push, wait, next Pre; the shim counted the next event's git calls):
+1. `landedLater` read only the first of `commit`/`push` in a command. `git commit && git push` counted as a commit: no `pushSeen`, no `forget`, a refresh that waited for the commit's ref change and looked at GitHub before the push had landed.
+2. The refresh never took kit-fresh's `for-each-ref --no-merged` list, so the first commit after every ref change walked history on the event (kit-fresh 90 to 130 ms).
+3. git-guard's offline check judged the kept GitHub heads first, found the just-pushed commit "unpushed", and only then merged the tracking refs: `cat-file`, `log` and `for-each-ref` on the event (139 to 315 ms). Next event after the push: 3 processes (before), 0 (after).
+4. The refresh runs detached (own process), not under the daemon's clock; it finished, but kept nothing the Pre read.
+
+Fix: tracking refs are read from the git dir's files (`trackedRefs` in `git-files.mts`) and merged before the first judge, so a pushed commit is already known; `landedLater` sees both words; the refresh waits for the remote's tracking refs to change when the command pushes (otherwise for any ref), then takes GitHub's heads, the Stop look and the kit's kept list (`keepKitRefs`), and takes them again (up to 3 rounds) when a ref moved while it looked. Steady state on the next commit after `commit && push`: 0 git processes for git-guard and kit-fresh, at 3 s and 8 s waits (`build/cc/seq.sh`). Test: `commit-cost.test.mts` "the commit after a `git commit && git push`..." (two rounds, kit repo, real commit and push between), red `red4.txt`, green `green4.txt`.
+
+Refresh children and `daemon stop`: reproduced (`build/cc/stop.mts`). The children are children of the daemon process (started from a worker with a plain detached spawn, which the pool does not track); `daemon stop` took 154 ms and was not blocked by them, but they were left running (reparented to init) for their whole wait, up to 30 s, three at once for three pushes. I could not reproduce a stop that does not finish; the soak's "did not stop" is more likely the 5 s limit in `daemon stop` under load 20 (workers mid-git); not changed, no evidence. Fix: under a daemon (`underDaemon()` in `child-group.mts`) the refresh starts as one of the worker's process groups (`startGroup`), which the pool ends on a stop; from the per-hook runner it stays an independent spawn. Test: `test/integration/refresh-ends-with-daemon.test.mts`, red `red5.txt` (the child outlives the stop), green `green5.txt`.
+
+Tests run (`CLAUDE_PACKS_TEST_CORES=3 taskpolicy -b ... --test-concurrency=2`, output `build/commit-cost-gate.txt`): commit-cost, git-guard, kit-fresh, kit-fresh-look, remote-heads, refresh-ends-with-daemon, daemon-start-line, resident: 40 of 40 pass. `npm run check` 0; `node scripts/counts.mts --check` green.
+
+Open: a refresh for a commit made in a linked worktree is keyed to the project's main checkout (`ctx.projectDir`), as before. Several forced refreshes (one per push) still run side by side for up to their wait; each is bounded and now ends with the daemon.

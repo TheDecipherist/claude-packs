@@ -7,9 +7,12 @@
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { localBranches } from './branches-ahead.mts';
+import { startGroup, underDaemon } from './child-group.mts';
 import { put, readText } from './files.mts';
 import type { BranchOff } from './branches-ahead.mts';
-import { gitDirsOf, refsFingerprint } from './git-files.mts';
+import { gitDirsOf, refsFingerprint, trackedRefs } from './git-files.mts';
+import type { GitDirs } from './git-files.mts';
+import { keepKitRefs } from './kit-fresh-look.mts';
 import { failed, pushSeen, remoteHeads } from './remote-heads.mts';
 import type { GitEnv, GitGuards } from './remote-heads.mts';
 import { blankQuotes, dropHeredocs } from './shell-lex.mts';
@@ -55,13 +58,17 @@ export function stopLook(root: string, env: GitEnv, cfg: GitGuards, { lag, told,
 
 const sleep = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
 
-/** Waits until a ref, a worktree or the config differs from what they are now (a commit or push has landed), or `waitMs` has passed. */
-async function untilChanged(root: string, waitMs: number): Promise<void> {
+/** What the refresh waits to see change: every ref and the config; for a command that pushes, the remote's tracking refs alone (a commit before the
+ *  push moves the others at once, and the look must be taken after the push, not between the two). */
+const watched = (dirs: GitDirs, push: boolean): string => (push ? [...trackedRefs(dirs, 'origin')].map(([ref, sha]) => `${ref} ${sha}`).sort().join('\n') : refsFingerprint(dirs));
+
+/** Waits until what is watched differs from what it is now (a commit or push has landed), or `waitMs` has passed. */
+async function untilChanged(root: string, waitMs: number, push: boolean): Promise<void> {
   const dirs = gitDirsOf(root);
   if (!dirs) return;
-  const before = refsFingerprint(dirs);
+  const before = watched(dirs, push);
   const end = Date.now() + waitMs;
-  while (Date.now() < end && refsFingerprint(dirs) === before) await sleep(200);
+  while (Date.now() < end && watched(dirs, push) === before) await sleep(200);
 }
 
 const REFRESH_LOCK = 'claude-packs-stop.refresh';
@@ -69,7 +76,7 @@ const REFRESH_SKIP_MS = 10_000;
 
 /** Starts `self --refresh-stop <waitMs>` detached (a process of its own: the event never waits on it). One at a time: another
  *  started less than 10 s ago is enough, since it takes the look after the same ref change. */
-export function refreshLater(self: string, root: string, env: GitEnv, waitMs: number, force = false): void {
+export function refreshLater(self: string, root: string, env: GitEnv, waitMs: number, force = false, push = false): void {
   try {
     const dirs = gitDirsOf(root);
     if (!dirs) return;
@@ -77,27 +84,41 @@ export function refreshLater(self: string, root: string, env: GitEnv, waitMs: nu
     const last = Number(readText(lock)) || 0;
     if (!force && Date.now() - last < REFRESH_SKIP_MS) return; // a push always starts its own: it must look after the push
     put(lock, String(Date.now()));
-    spawn(process.execPath, [self, '--refresh-stop', String(waitMs)], { cwd: root, detached: true, stdio: 'ignore', env: { ...env, CLAUDE_PROJECT_DIR: root } }).unref();
+    // under the daemon the child is one of the worker's groups, so the daemon's stop ends it; from the per-hook runner it is on its own (the runner exits at once)
+    const start = underDaemon() ? startGroup : spawn;
+    start(process.execPath, [self, '--refresh-stop', String(waitMs), ...(push ? ['--push'] : [])], { cwd: root, detached: true, stdio: 'ignore', env: { ...env, CLAUDE_PROJECT_DIR: root } }).unref();
   } catch { /* the next Stop looks for itself */ }
 }
 
 const COMMIT_WAIT_MS = 30_000;
 const PUSH_WAIT_MS = 5_000;
 
-/** A command the hook let through that commits or pushes: the kept look is taken again, detached, once the ref has moved. A push
- *  by URL moves no local ref, so what was kept is dropped first. */
+/** A command the hook let through that commits or pushes (either, or both: `git commit && git push`): the kept looks are taken again, detached,
+ *  once the refs have moved. A push by URL moves no local ref, so what was kept is dropped first. */
 export function landedLater(self: string, command: string, root: string, env: GitEnv): void {
-  const did = /\bgit\b[^|;&\n]*?\b(push|commit)\b/.exec(blankQuotes(dropHeredocs(command)))?.[1];
-  if (!did) return;
-  if (did === 'push') { forget(root); pushSeen(root, env); }
-  refreshLater(self, root, env, did === 'push' ? PUSH_WAIT_MS : COMMIT_WAIT_MS, did === 'push');
+  const body = blankQuotes(dropHeredocs(command));
+  const push = /\bgit\b[^|;&\n]*?\bpush\b/.test(body);
+  if (!push && !/\bgit\b[^|;&\n]*?\bcommit\b/.test(body)) return;
+  if (push) { forget(root); pushSeen(root, env); }
+  refreshLater(self, root, env, push && !/\bcommit\b/.test(body) ? PUSH_WAIT_MS : COMMIT_WAIT_MS, push, push);
 }
 
-export async function refreshStop(root: string, env: GitEnv, cfg: GitGuards, lag: LagLook, waitMs: number): Promise<StopLook> {
-  await untilChanged(root, waitMs);
-  remoteHeads(root, env, 'origin', { ...cfg, live: true }); // keeps the heads the Pre Bash law reads offline up to date
-  const slot = slotOf(root, cfg); // the key before the look: a ref that moves during it makes the next Stop look again
-  const look = lookNow(root, env, cfg, lag, undefined);
-  keep(slot, cfg, look, Date.now());
+const SETTLE_ROUNDS = 3;
+
+/** The refresh itself: waits for the change, then takes every look the next commit's Pre would otherwise take on its own clock (GitHub's heads, the
+ *  Stop look, the kit's kept list of newer work), and again when a ref moved while it looked (the push of `commit && push` lands in the middle). */
+export async function refreshStop(root: string, env: GitEnv, cfg: GitGuards, lag: LagLook, waitMs: number, push = false): Promise<StopLook> {
+  await untilChanged(root, waitMs, push);
+  const dirs = gitDirsOf(root);
+  let look: StopLook = { found: null, behind: null };
+  for (let round = 0; round < SETTLE_ROUNDS; round += 1) {
+    const before = dirs ? refsFingerprint(dirs) : '';
+    remoteHeads(root, env, 'origin', { ...cfg, live: true }); // keeps the heads the Pre Bash law reads offline up to date
+    keepKitRefs(root, env);
+    const slot = slotOf(root, cfg); // the key before the look: a ref that moves during it makes the next Stop look again
+    look = lookNow(root, env, cfg, lag, undefined);
+    keep(slot, cfg, look, Date.now());
+    if (!dirs || refsFingerprint(dirs) === before) break;
+  }
   return look;
 }
