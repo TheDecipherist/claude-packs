@@ -59,6 +59,20 @@ async function startRegistry(): Promise<{ url: string; stop: () => void }> {
   throw new Error('verdaccio did not answer');
 }
 
+/** `npm run release -- patch --registry <url>` in the clone, asynchronously so a signal to this script still stops it and verdaccio. */
+function released(clone: string, env: NodeJS.ProcessEnv, registry: string): Promise<{ status: number | null; stdout: string; stderr: string }> {
+  return new Promise((done) => {
+    const child = spawn('npm', ['run', 'release', '--', 'patch', '--registry', registry], { cwd: clone, env, detached: true });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (d: Buffer) => { stdout += String(d); });
+    child.stderr.on('data', (d: Buffer) => { stderr += String(d); });
+    // its own process group, so the release and the tests under it all stop when this script is stopped
+    process.on('exit', () => { if (child.pid !== undefined && child.exitCode === null) try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already gone */ } });
+    child.on('close', (status) => done({ status, stdout, stderr }));
+  });
+}
+
 /** The first one-line function header of a source, with a no-op statement put after it: a change the picker reads as a changed function. */
 function touchFirstFunction(file: string): void {
   const lines = (readText(file) ?? '').split('\n');
@@ -135,10 +149,11 @@ async function main(): Promise<void> {
       const changelog = join(clone, 'CHANGELOG.md');
       put(changelog, (readText(changelog) ?? '').replace(/^# Changelog\n/, '# Changelog\n\n## Unreleased\n\n- a measured change\n'));
       // a change to an installed file comes with the regenerated manifest, as a developer commits it (the noop test holds that)
+      run(clone, 'npm', ['run', 'build'], env);
       run(clone, 'node', ['scripts/counts.mts'], env);
       run(clone, 'git', ['commit', '-q', '-a', '-m', `measure: ${c.name}`]);
       const started = Date.now();
-      const r = spawnSync('npm', ['run', 'release', '--', 'patch', '--registry', registry.url], { cwd: clone, encoding: 'utf8', env, maxBuffer: 1 << 28 });
+      const r = await released(clone, env, registry.url);
       const seen = spawnSync('npm', ['view', NAME, 'version', '--registry', registry.url], { cwd: clone, encoding: 'utf8', env }).stdout.trim();
       const seconds = (Date.now() - started) / 1000;
       const log = `${r.stdout}\n${r.stderr}`;
