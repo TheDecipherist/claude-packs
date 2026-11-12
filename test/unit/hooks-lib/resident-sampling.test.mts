@@ -112,3 +112,17 @@ test('a test run over the cap (plus a core for the runner) for 15 s is flagged, 
   d.observe(snap(40_000, []));
   assert.deepEqual(d.flags(), []);
 });
+
+// KWB-211: a Go test binary (its name ends in .test) with its fuzz workers under it is a test run too: 18 workers took load 57.
+const goFuzzOf = (workers: number): Proc[] => [
+  proc(30, 100, { comm: 'proxy.test', args: '', cpu: 0.1 }),
+  ...Array.from({ length: workers }, (_, i) => proc(31 + i, 30, { comm: 'proxy.test', args: '', cpu: 1 })),
+];
+
+test('a Go fuzz run with its workers over the cap is flagged as a test run, never stopped (KWB-211)', () => {
+  const { dog: d, kills } = dog({ stop: () => true });
+  for (let at = 0; at <= 20_000; at += 2000) d.observe(snap(at, goFuzzOf(18)));
+  const [flag] = d.flags();
+  assert.deepEqual([flag?.kind, flag?.pid, flag?.stopped], ['test-over-cap', 30, false]);
+  assert.deepEqual(kills, []);
+});
