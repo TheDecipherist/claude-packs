@@ -28,6 +28,8 @@ The order is `docs/workorders/typescript/workorder.md` (read its W8 section: ite
   `build/<name>-gate.txt`; its result in your report.
 - Write your report at `docs/workorders/typescript/agents/<name>-report.md` (commit and push it): what you made, the numbers measured
   (each with the command and evidence path), every plant with its red and green, files changed, what is open.
+- Your report and every file you write pass the repo's own lints: no person's name or home path, and the package only by its scoped
+  name (quote a test's title by its meaning, never the form it refuses).
 - End with exactly one status line: `DONE`, `DONE_WITH_CONCERNS`, `BLOCKED` or `NEEDS_CONTEXT`, and the report's path.
 
 ## w86-status: W8 item 6, the status line served by the daemon
