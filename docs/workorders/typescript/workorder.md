@@ -648,8 +648,18 @@ event stays listed past 5 minutes and is removed 5 minutes after its processes e
 ## W8.8. The load governor: everything heavy runs through it, so a machine is never maxed out
 
 The user, 2026-11-12: "we need something that controls load in the kit that everything 'runs through' so you can never max out a
-machine" (the same day this run's own agents, tests, fuzzers and soak reached load 43 and 47 on 18 cores). Before W10b's soak runs.
+machine" (the same day this run's own agents, tests, fuzzers and soak reached load 43 and 47 on 18 cores); "it should be something
+where you or agents ask before they start. how much can I use and it simple gets a straight answer based on current load". Before
+W10b's soak runs.
 
+0. The front door is a question with a straight answer: `claude-packs load ask` (and `ask --for test|build|fuzz|agent` with an
+   optional `--want N`) prints one line and the same as JSON with `--json`, from the governor's budget and the live load: `you may
+   use 3 cores now (tests: CLAUDE_PACKS_TEST_CORES=3; builds: -j3; fuzz: -parallel=2; agents: 1 more); load 9.2 of 18, ceiling
+   13, 2 jobs running` or `wait: load 14.1 over the ceiling 13; 0 cores free; ask again after the running test ends`; `load take N
+   --for KIND` reserves and prints a grant id with what it may use, `load free ID` returns it (a grant whose pid is gone is freed
+   on read). The lead asks before every wave and every heavy job and sizes them by the answer; every agent brief's first lines say
+   to ask before each heavy command and use the answer; the `load` skill says how. Items 3 and 4 below are the safety net for a
+   command that did not ask: it is routed through the same governor anyway.
 1. One owner, `packs/base/hooks/lib/governor.mts`, with the machine's budget in the user's cache folder (shared by every session,
    agent and project on the machine): slots = 60 % of the cores by default (`~/.config/claude-packs/governor.json` `budget`, a share
    or a count; a project's layout may lower it, never raise it), a load ceiling (default 70 % of the cores), the jobs in flight in a
@@ -673,8 +683,11 @@ machine" (the same day this run's own agents, tests, fuzzers and soak reached lo
    never paused; a job paused over 10 minutes is named in the status line and the log; pausing, never killing.
 6. The status line shows the governor: slots in use of the budget, jobs queued, jobs paused.
 
-**Done when:** `test/unit/hooks-lib/governor.test.mts`, `test/tools/base/governed.test.mts` and
-`test/hooks/base/governor-route.test.mts` are green with 0 failures, each case seen red on its plant: two planted heavy jobs whose
+**Done when:** `test/unit/hooks-lib/governor.test.mts`, `test/tools/base/governed.test.mts`,
+`test/hooks/base/governor-route.test.mts` and `test/integration/load-ask.test.mts` are green with 0 failures, each case seen red on
+its plant: `load ask` answers in under 50 ms with the cores, the per-kind settings and the load, and says wait under a planted load
+over the ceiling; two `load take` grants that together exceed the budget are refused for the second until the first is freed;
+a grant whose pid is gone is freed on the next ask; two planted heavy jobs whose
 weights exceed the budget run one after the other, never together; a job granted 3 slots runs with `CLAUDE_PACKS_TEST_CORES=3` and
 `-j3`; a killed job's slots are freed on the next read; a planted `npm test`, `cmake --build` and `go test -fuzz` are each rewritten
 through `governed`, and `ls`, a governed command and a pipe whose heavy part is not first are not; an agent start past the budget
