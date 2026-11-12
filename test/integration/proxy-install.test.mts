@@ -12,6 +12,7 @@ import { PACKS_DIR } from '../../lib/packs.mts';
 import { cachedBinary, hostTarget, shippedBinary } from '../../lib/proxy-binary.mts';
 import { installBinary } from '../../lib/proxy-install.mts';
 import { fixture } from '../fixtures/installs.mts';
+import { stopDaemon, until } from '../fixtures/proxy-rig.mts';
 import { CLI, assert, readFileSync, test, writeFileSync } from '../kit-cli.mts';
 
 const target = hostTarget();
@@ -50,11 +51,6 @@ function fire(r: Rig, event: string, env: Record<string, string> = r.env): { cod
 }
 
 const sources = (r: Rig): string[] => readHookLog(r.project).filter((l) => l.hook === 'event' || l.hook === 'proxy').map((l) => `${l.hook}:${l.source ?? '-'}`);
-const stopDaemon = (r: Rig): void => { spawnSync('node', [CLI, 'daemon', 'stop', '--dir', r.project], { env: r.env }); };
-async function until(what: string, done: () => boolean): Promise<void> {
-  for (let i = 0; i < 200 && !done(); i += 1) await new Promise((d) => setTimeout(d, 50));
-  assert.ok(done(), what);
-}
 
 test('an install with no binary in the cache runs the TypeScript runner through the picker, and refuses rm -rf', () => {
   const r = rig(false);

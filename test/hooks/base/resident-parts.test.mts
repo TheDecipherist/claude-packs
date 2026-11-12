@@ -84,7 +84,7 @@ test('the daemon log rotates whole past its size, and never throws', () => {
 
 test('the watch ends an idle daemon, a day-old one and a large one, between events only', async () => {
   const stops: string[] = [];
-  const base = { idleMs: 60_000, maxAgeMs: 60_000, maxRss: 1e12, tickMs: 10, started: Date.now(), last: () => Date.now(), busy: () => false, rss: () => 1, stop: (why: string, again: boolean) => stops.push(`${why}|${again}`) };
+  const base = { idleMs: 60_000, maxAgeMs: 60_000, maxRss: 1e12, tickMs: 10, started: Date.now(), last: () => Date.now(), busy: () => false, rss: () => 1, workers: () => 0, replaced: () => false, parentGone: () => false, stop: (why: string, again: boolean) => stops.push(`${why}|${again}`) };
   const idle = watch({ ...base, idleMs: 30, started: Date.now() - 1000, last: () => Date.now() - 1000 });
   await nap(60);
   clearInterval(idle);
@@ -99,6 +99,27 @@ test('the watch ends an idle daemon, a day-old one and a large one, between even
   await nap(40);
   clearInterval(big);
   assert.equal(stops[0], '500 MB resident|true');
+  stops.length = 0;
+  // KWB-197: the workers are threads of this process, so a full pool of warm workers is resident too. It is not a leak: the limit grows
+  // with the pool, and a daemon that ended at 500 MB with 16 workers ended after every burst, and left its calls to the fallback.
+  const pooled = watch({ ...base, maxRss: 400 * 1048576, rss: () => 500 * 1048576, workers: () => 16 });
+  await nap(40);
+  clearInterval(pooled);
+  assert.deepEqual(stops, [], '500 MB with 16 workers is the pool, not a leak');
+  const leaking = watch({ ...base, maxRss: 400 * 1048576, rss: () => 2000 * 1048576, workers: () => 16 });
+  await nap(40);
+  clearInterval(leaking);
+  assert.equal(stops[0], '2000 MB resident|true', 'a daemon past what its pool explains still ends');
+  stops.length = 0;
+  const replaced = watch({ ...base, replaced: () => true });
+  await nap(40);
+  clearInterval(replaced);
+  assert.equal(stops[0], 'the lock changed: a new kit has its own daemon|false', 'an update ends the daemon named for the old lock, with no restart');
+  stops.length = 0;
+  const orphan = watch({ ...base, parentGone: () => true, busy: () => true });
+  await nap(40);
+  clearInterval(orphan);
+  assert.equal(stops[0], 'the process it was started for is gone|false', 'a daemon started for a selftest ends with it, busy or not');
   stops.length = 0;
   const busy = watch({ ...base, idleMs: 1, started: Date.now() - 1000, last: () => 0, busy: () => true });
   await nap(40);

@@ -10,9 +10,12 @@ import { basename, dirname, extname, join } from 'node:path';
 export const IDLE_MS = 15 * 60_000;
 export const MAX_AGE_MS = 24 * 3_600_000;
 export const MAX_RSS = 400 * 1024 * 1024;
+/** What a warm worker may hold on top of MAX_RSS: sixteen workers that have each loaded every hook measured 500 to 800 MB, and a
+ *  daemon that ended there ended after every burst of events (KWB-197). Workers are recycled by job count and idle time, so the pool bounds them. */
+export const WORKER_RSS = 48 * 1024 * 1024;
 const LOG_MAX = 1024 * 1024;
 
-const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch (e) { return (e as NodeJS.ErrnoException).code === 'EPERM'; } };
+export const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch (e) { return (e as NodeJS.ErrnoException).code === 'EPERM'; } };
 const heldBy = (file: string): number => { try { return Number.parseInt(readFileSync(file, 'utf8'), 10); } catch { return Number.NaN; } };
 
 /** The start lock: true when this process holds it now, false when a live daemon is starting (or started). */
@@ -62,6 +65,12 @@ export interface Watch {
   last: () => number;
   busy: () => boolean;
   rss: () => number;
+  /** Workers in the pool now: each is a thread of this process, so its heap is in `rss` (KWB-197). */
+  workers: () => number;
+  /** Whether the project's lock is no longer the one this daemon was named for (an update): the new lock has its own daemon. */
+  replaced: () => boolean;
+  /** Whether the process that started this daemon for its own use (`--exit-with`: a selftest) is gone, however it went (KWB-195). */
+  parentGone: () => boolean;
   /** Ends the daemon, for `reason`; `again` re-execs it after. */
   stop: (reason: string, again: boolean) => void;
 }
@@ -69,11 +78,13 @@ export interface Watch {
 /** Checks, between events, whether the daemon is idle, old or large. The timer never keeps the process alive. */
 export function watch(w: Watch): NodeJS.Timeout {
   const timer = setInterval(() => {
+    if (w.parentGone()) { w.stop('the process it was started for is gone', false); return; }
     if (w.busy()) return;
     const now = Date.now();
-    if (now - Math.max(w.last(), w.started) > w.idleMs) w.stop(`idle for ${Math.round(w.idleMs / 60_000)} minutes`, false);
+    if (w.replaced()) w.stop('the lock changed: a new kit has its own daemon', false);
+    else if (now - Math.max(w.last(), w.started) > w.idleMs) w.stop(`idle for ${Math.round(w.idleMs / 60_000)} minutes`, false);
     else if (now - w.started > w.maxAgeMs) w.stop('24 hours old', true);
-    else if (w.rss() > w.maxRss) w.stop(`${Math.round(w.rss() / 1048576)} MB resident`, true);
+    else if (w.rss() > w.maxRss + w.workers() * WORKER_RSS) w.stop(`${Math.round(w.rss() / 1048576)} MB resident`, true);
   }, w.tickMs);
   timer.unref();
   return timer;
