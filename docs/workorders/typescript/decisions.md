@@ -176,6 +176,19 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-34 W11.0 runs the five tasks that build on this Mac, each as a child session in its clone {#d-34}
+- Question: W11.0's draw. Of bandwarp's measured and merged agent tasks on this machine (panel, dsp, demo, bypass, macdsp), four were
+  built on the PC from a base that does not configure on this Mac (xvfb-run required, gcc-only source; build/evidence/W11/ab-prep.md),
+  and their briefs, transcripts and model are on the PC.
+- Options: run the PC four here (hours spent porting, not on the task); run fewer than five; run the second draw (looks, settings,
+  presets, macdsp, developer: one of each kind the order names plus one, each with its brief and Mac transcript, from base 4444360,
+  four of them paused for the kit update rather than merged).
+- Chosen: the second draw. Each run is a child `claude -p` on the original's model with the clone as its working folder (so the
+  clone's own 2.0 install judges it, as bandwarp's 1.9 judged the original), the brief word for word with one added line saying the
+  clone replaces the worktree path it names, started under `taskpolicy -b` through the governor at priority 0.3, one at a time.
+- Why: it is the only set where both runs did the same work on the same machine; the paused originals are compared on the gates
+  they reached, and the report says so. Overturn by editing W11.0.
+
 ## d-33 A wave may run in the background while the lead works, and a turn never ends on a running agent {#d-33}
 - Question: KWB-199 (a foreground wave ties every slot to its slowest agent). Measured in a child `claude -p`
   (build/evidence/KWB-199/summary.md): a background agent lives while the lead's turn is open, and its notification arrives at
