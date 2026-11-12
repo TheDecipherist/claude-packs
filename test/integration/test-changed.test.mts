@@ -5,10 +5,11 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { cpus, tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { coreBudget } from '../../packs/base/hooks/lib/core-budget.mts';
 import { choose, graph } from '../../scripts/test-changed.mts';
 import { git } from '../kit-cli.mts';
 
@@ -49,6 +50,18 @@ test('a planted change runs only the tests that reach it, an untracked test runs
   assert.doesNotMatch(r.stdout, /b\.test\.mjs/);
   assert.match(r.stdout, /running: node --import \.\/test\/fresh-tmp\.mts --test /);
   assert.match(r.stdout, /With --base origin\/<trunk> this is the gate before landing and before a release; the full `npm test` runs only when the user asks/);
+});
+
+// 5d2e436: a session set BUILDQ_CORES=16 for builds and the gate ran every test file at once (load 20 to 25). The tests take a
+// third of the cores whatever the build queue's number says.
+test('a planted BUILDQ_CORES=16 does not raise the tests past a third of the cores', () => {
+  const dir = scratchRepo();
+  writeFileSync(join(dir, 'lib/a.mjs'), 'export const a = 1; // planted change\n');
+  const r = spawnSync('node', [SCRIPT, '--root', dir], { encoding: 'utf8', env: { ...process.env, BUILDQ_CORES: '16', CLAUDE_PACKS_TEST_CORES: '' } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const third = coreBudget({}, {});
+  assert.match(r.stdout, new RegExp(`--test-concurrency=${third}\\b`));
+  if (cpus().length === 18) assert.equal(third, 6);
 });
 
 test('a change the failing test covers runs it, and the run fails; --dry-run only prints', () => {
