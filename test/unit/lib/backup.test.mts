@@ -35,3 +35,9 @@ test('ensureGitignore appends each line once, after a file with no final newline
   ensureGitignore(dir);
   assert.equal(readText(join(dir, '.gitignore')), once, 'a second run adds nothing');
 });
+
+test('ensureGitignore keeps the compiled checks file out of git, a checkout\'s own state (KWB-194)', () => {
+  const dir = scratchDir('backup-ignore-compiled-');
+  ensureGitignore(dir);
+  assert.ok((readText(join(dir, '.gitignore')) ?? '').split('\n').includes('.claude/checks.compiled.json'));
+});

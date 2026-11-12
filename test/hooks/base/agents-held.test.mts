@@ -16,3 +16,16 @@ holdsTheContract({
   }),
   worktree: WORKTREE,
 });
+
+// KWB-199: a wave returns when its slowest agent does, so the rule and the skill tell a lead to size the agents alike.
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
+
+for (const file of ['packs/base/rules/agents-held.md', 'packs/base/skills/run-a-workorder/SKILL.md']) {
+  test(`${file} says to split a wave into agents of similar size (KWB-199)`, () => {
+    const text = readFileSync(file, 'utf8').replace(/\s+/g, ' ');
+    assert.match(text, /agents of similar size/);
+    assert.match(text, /long list to several agents, not one/);
+  });
+}

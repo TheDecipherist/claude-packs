@@ -28,7 +28,7 @@ export function backup(projectDir: string): string {
  *  (.claude/usage.log, 0.9.2) to .gitignore (appends; never rewrites the file). */
 export function ensureGitignore(projectDir: string): void {
   const file = join(projectDir, '.gitignore');
-  for (const line of [`${DIR.replace(/\\/g, '/')}/`, '.claude/state/', '.claude/usage.log', '.claude/hooks.log', '.claude/logs/']) {
+  for (const line of [`${DIR.replace(/\\/g, '/')}/`, '.claude/state/', '.claude/checks.compiled.json', '.claude/usage.log', '.claude/hooks.log', '.claude/logs/']) {
     const text = readText(file) ?? '';
     if (text.split('\n').includes(line)) continue;
     appendFileSync(file, `${text && !text.endsWith('\n') ? '\n' : ''}${line}\n`);

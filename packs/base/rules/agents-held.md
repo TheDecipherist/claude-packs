@@ -8,6 +8,7 @@ A `claude -p` session ends when its turn ends, and every agent it started in the
 <constraints>
 Always do:
 - In a run with nobody there (a work order's `run.sh`, any `claude -p`), start each agent in the foreground, and every independent agent in the same message, up to the project's agent limit: they run side by side, and the turn waits for them.
+- Split a wave into agents of similar size, and give a long list to several agents, not one: the turn waits for the slowest, so the others' slots idle and their work stays unmerged (KWB-199).
 - Do the lead's own work only when no agent is running, or no work is left to hand out.
 
 Never do:

@@ -15,7 +15,7 @@ Always do:
 4. Start it by typing `Run docs/workorders/<name>/PROMPT.md` in Claude Code to watch, or `bash docs/workorders/<name>/run.sh` to leave it. The same sentence resumes it in any later session; all progress lives in files.
 5. Watch the files, not the chat: `progress.md` (one line per finished item), `decisions.md` (overturn any by editing the order), `bugs.md`, and the evidence folder of each step.
 6. To change a run in progress, edit its `PROMPT.md` and commit it. A run refuses an instruction it cannot trace to its order or to you, so a file dropped beside it is rightly ignored.
-7. Keep a run's agents in the foreground, every independent one in the same message: a session with nobody there ends when its turn ends, and stops every agent it left in the background (`agents-held`).
+7. Keep a run's agents in the foreground, every independent one in the same message: a session with nobody there ends when its turn ends, and stops every agent it left in the background (`agents-held`). Split a wave into agents of similar size and give a long list to several agents, not one: the wave ends with its slowest agent.
 8. Land the order's branch once, when every step's Done when is measured, gated by the tests its changes reach against the trunk (`land-branch`).
 
 Never do:
