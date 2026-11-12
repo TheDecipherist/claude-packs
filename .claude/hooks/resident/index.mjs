@@ -3,6 +3,7 @@
 // `def:<name>`; and `dup:<window hash>` of the duplicate index, resident/dup-windows.mts), and the answer is those files' entries only. The index is built when first asked and rebuilt, from the files' mtimes,
 // after a tool call that may have written (a PostToolUse event marks it stale), so a write and a second write repeating it, served by
 // another worker, see the first. A key is looked up in a map built with the index, not found by a walk of every file per question (KWB-201).
+import { Worker } from 'node:worker_threads';
 import { dupWindows } from './dup-windows.mjs';
 import { defKey, repoIndex, shapeKey } from '../lib/repo-index.mjs';
 const WRITES = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Bash']);
@@ -24,6 +25,8 @@ function keysOf(index) {
     return by;
 }
 export function residentIndex(root, layout) {
+    let warming = null;
+    let builder = null;
     let built = null;
     let dirty = true;
     const fresh = () => {
@@ -43,6 +46,19 @@ export function residentIndex(root, layout) {
     return {
         // a question names either kind of key; the index it does not ask is not built for it
         candidates: (wanted) => [...(wanted.some((k) => !k.startsWith('dup:')) ? repoOf(wanted) : []), ...dup.find(wanted)],
+        warming: () => warming,
+        warm: (warmUrl) => {
+            const data = { root, layout: layout() };
+            warming = new Promise((done) => {
+                const w = new Worker(warmUrl, { workerData: data, execArgv: [] }); // none of the parent's (a test's --import gives a worker a temp folder of its own)
+                builder = w;
+                const over = () => { builder = null; warming = null; done(); }; // built, or failed: the main thread builds what is missing itself
+                w.once('message', () => void w.terminate());
+                w.once('error', over);
+                w.once('exit', over);
+            });
+        },
+        close: () => { void builder?.terminate(); },
         stale: () => { dirty = true; dup.stale(); },
         size: () => (built === null ? 0 : Object.keys(built.index).length),
     };

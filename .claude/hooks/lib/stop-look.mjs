@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { localBranches } from './branches-ahead.mjs';
 import { put, readText } from './files.mjs';
 import { gitDirsOf, refsFingerprint } from './git-files.mjs';
-import { failed } from './remote-heads.mjs';
+import { failed, pushSeen, remoteHeads } from './remote-heads.mjs';
 import { blankQuotes, dropHeredocs } from './shell-lex.mjs';
 import { forget, hitFor, keep, slotOf } from './stop-cache.mjs';
 /** How long the end of a session waits on GitHub. */
@@ -73,12 +73,15 @@ export function landedLater(self, command, root, env) {
     const did = /\bgit\b[^|;&\n]*?\b(push|commit)\b/.exec(blankQuotes(dropHeredocs(command)))?.[1];
     if (!did)
         return;
-    if (did === 'push')
+    if (did === 'push') {
         forget(root);
+        pushSeen(root, env);
+    }
     refreshLater(self, root, env, did === 'push' ? PUSH_WAIT_MS : COMMIT_WAIT_MS, did === 'push');
 }
 export async function refreshStop(root, env, cfg, lag, waitMs) {
     await untilChanged(root, waitMs);
+    remoteHeads(root, env, 'origin', { ...cfg, live: true }); // keeps the heads the Pre Bash law reads offline up to date
     const slot = slotOf(root, cfg); // the key before the look: a ref that moves during it makes the next Stop look again
     const look = lookNow(root, env, cfg, lag, undefined);
     keep(slot, cfg, look, Date.now());

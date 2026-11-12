@@ -48,6 +48,11 @@ export async function eventCases(cases) {
         cases.push(['two serial hooks (30 ms, then 0) keep their order', readText(join(rig.dir, 'ser.txt')), 'ababab']);
         const post = await ask(rig, eventText(rig, 'PostRef', {}, 'PostToolUse'));
         cases.push(['a refused PostToolUse call: its recorder does not run', post.code === 2 && !existsSync(join(rig.dir, 'post.txt')), true]);
+        const t3 = Date.now();
+        const slowPost = await ask(rig, eventText(rig, 'PostSlow', {}, 'PostToolUse'));
+        cases.push(['a PostToolUse call whose recorder takes 300 ms: answered without waiting for it', slowPost.code === 0 && Date.now() - t3 < 150 && !existsSync(join(rig.dir, 'postslow.txt')), true]);
+        await waitFor(() => existsSync(join(rig.dir, 'postslow.txt')), 3000);
+        cases.push(['and the recorder still ran, after the reply', existsSync(join(rig.dir, 'postslow.txt')), true]);
         const exited = await ask(rig, eventText(rig, 'Exit'));
         cases.push(['a hook calling process.exit(0): the event is answered, as a crash of that hook', exited.code === 2 && exited.stderr.includes('exits crashed'), true]);
         await nap(80);

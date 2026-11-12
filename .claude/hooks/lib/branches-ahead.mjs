@@ -23,7 +23,7 @@ export function unpushed(cwd, env, branch, cfg = {}) {
     const { remote } = target(cwd, env, branch);
     if (!urlOf(cwd, env, remote, cfg))
         return null; // no remote and no guards.git.repo: nothing to compare with
-    return withHeads(cwd, env, remote, cfg, (h) => {
+    return withHeads(cwd, env, remote, { ...cfg, offline: true }, (h) => {
         const commits = ownCommits(cwd, env, 'HEAD', h.heads);
         return commits?.length ? { branch, remote, url: h.url, commits } : null;
     });

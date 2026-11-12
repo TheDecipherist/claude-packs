@@ -16,13 +16,14 @@
 //   withHeads(cwd, env, remote, cfg, judge) -> what judge found, looked up live again before a refusal | { error }
 //   urlOf(cwd, env, remote, { repo }) / target(cwd, env, branch) / ownCommits(cwd, env, ref, heads, have) / knownShas(cwd, env, heads)
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { readText } from './files.mjs';
+import { dirname, join, resolve } from 'node:path';
+import { put, readText } from './files.mjs';
 import { escapeRegExp } from './glob.mjs';
 import { gitOut, gitRun } from './git-run.mjs';
 import { readJson, writeJson } from './json.mjs';
 const CACHE = 'claude-packs-heads.json';
 const GIT_TIMEOUT_MS = 15_000;
+const PUSH_SEEN = 'claude-packs-pushed';
 /** A failure, as opposed to what a judge found. */
 export const failed = (x) => typeof x === 'object' && x !== null && 'error' in x && typeof x.error === 'string';
 /** The options one git call runs with: the caller's folder and environment, no prompt, 15 s. */
@@ -53,14 +54,32 @@ export function urlOf(cwd, env, remote, { repo = null } = {}) {
         return url || null;
     return /^(https?:|file:|\/)/.test(repo) ? repo : `https://github.com/${repo.replace(/\.git$/, '')}.git`;
 }
-export function remoteHeads(cwd, env, remote, { tokenVar = 'PERSONAL_GITHUB_TOKEN', repo = null, live = false, now = Date.now(), until } = {}) {
+/** Records that a push was seen (a push by URL moves no local ref): the next offline look is taken live once. */
+export function pushSeen(cwd, env, now = Date.now()) {
+    const file = cacheFile(cwd, env);
+    if (file)
+        put(join(dirname(file), PUSH_SEEN), String(now));
+}
+/** The heads this repo's remote-tracking refs hold for a remote (every push by name and fetch updates them), keyed `<remote>/<branch>`. */
+export function trackedHeads(cwd, env, remote) {
+    const out = gitOut(['for-each-ref', '--format=%(refname)%09%(objectname)', `refs/remotes/${remote}/`], gitAt(cwd, env));
+    const heads = new Map();
+    for (const line of (out ?? '').split('\n').filter(Boolean)) {
+        const [ref, sha] = line.split('\t');
+        if (ref && sha)
+            heads.set(ref.replace(/^refs\/remotes\//, ''), sha);
+    }
+    return heads;
+}
+export function remoteHeads(cwd, env, remote, { tokenVar = 'PERSONAL_GITHUB_TOKEN', repo = null, live = false, offline = false, now = Date.now(), until } = {}) {
     const url = urlOf(cwd, env, remote, { repo });
     if (!url)
         return { url: null, error: `no remote named ${remote}` };
     const file = cacheFile(cwd, env);
     const cache = (file ? readJson(file, {}) : null) ?? {};
     const hit = cache[url];
-    if (!live && hit?.heads)
+    const pushed = offline && hit && file ? Number(readText(join(dirname(file), PUSH_SEEN))) || 0 : 0;
+    if (!live && hit?.heads && !(pushed > hit.time))
         return { url, heads: new Map(Object.entries(hit.heads)), cached: true };
     const token = isGitHub(url) ? tokenFor(tokenVar, env) : null;
     const basic = token ? Buffer.from(`x-access-token:${token}`).toString('base64') : '';
@@ -105,7 +124,10 @@ export function withHeads(cwd, env, remote, cfg, judge) {
     if ('error' in h)
         return unreached(h);
     let found = judge(h);
-    if (found && h.cached && !cfg.cachedOnly) {
+    if (found && cfg.offline && h.cached) { // the kept look and the local tracking refs together, never the network
+        found = judge({ ...h, heads: new Map([...h.heads, ...trackedHeads(cwd, env, remote)]) });
+    }
+    else if (found && h.cached && !cfg.cachedOnly) {
         h = remoteHeads(cwd, env, remote, { ...cfg, live: true });
         if ('error' in h)
             return unreached(h);

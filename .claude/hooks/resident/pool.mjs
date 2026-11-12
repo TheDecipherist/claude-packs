@@ -63,7 +63,8 @@ export function startPool(o) {
                     s.groups.delete(m.pid);
             }
             else if (m.type === 'ask')
-                send(s, { type: 'answer', id: m.id, files: o.candidates(m.hashes) });
+                void Promise.resolve(o.warming?.()).then(() => { if (!s.gone)
+                    send(s, { type: 'answer', id: m.id, files: o.candidates(m.hashes) }); });
             else
                 o.log(m.line);
         });

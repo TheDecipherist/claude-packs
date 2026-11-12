@@ -161,16 +161,6 @@
     "role": "judge"
   },
   {
-    "hook": "agents-held",
-    "events": [
-      "PreToolUse"
-    ],
-    "matcher": "Agent|Task",
-    "timeout": 10,
-    "order": 20,
-    "role": "judge"
-  },
-  {
     "hook": "brief-guard-count",
     "events": [
       "PreToolUse"
@@ -279,6 +269,15 @@
     "timeout": 20,
     "order": 20,
     "role": "recorder"
+  },
+  {
+    "hook": "agents-held",
+    "events": [
+      "Stop"
+    ],
+    "timeout": 10,
+    "order": 10,
+    "role": "judge"
   },
   {
     "hook": "making-check",
