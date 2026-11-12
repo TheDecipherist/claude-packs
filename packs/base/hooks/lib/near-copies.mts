@@ -15,8 +15,16 @@ const CANDIDATES = 3;
 
 /** A statement's shape hash and its line. */
 export type Fingerprint = readonly [hash: string, line: number];
-/** A file and the statements it holds. */
-export interface FileStatements { file: string; st: readonly Fingerprint[] }
+/** A file and the statements it holds. The daemon's index answers with what else it keeps of the file too (its element shapes, as [id, line, what],
+ *  and its definitions, as [name, line]) so a judge needs no index of its own (template-law, KWB-201). */
+export interface FileStatements {
+  file: string;
+  st: readonly Fingerprint[];
+  shapes?: ReadonlyArray<readonly [id: string, line: number, what: string]>;
+  defs?: ReadonlyArray<readonly [name: string, line: number]>;
+  /** For a `dup:<hash>` question: the file's windows with that hash, as [hash, token it starts at, its line, the line of its last token] (lib/dup-match.mts). */
+  windows?: ReadonlyArray<readonly [hash: number, at: number, line: number, end: number]>;
+}
 /** The place in another file that holds most of what was added. */
 export interface NearCopy { file: string; from: number; to: number; line: number; matched: number; of: number }
 

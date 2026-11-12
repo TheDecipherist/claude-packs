@@ -9,29 +9,14 @@
 import { closeSync, fstatSync, openSync, readSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseJson } from './json.mts';
+import { realPrompt } from './prompt-of.mts';
+import type { Block, TranscriptEntry } from './prompt-of.mts';
 import { shellWrites } from './shell-writes.mts';
 import type { Env } from './shell-writes.mts';
 import type { ToolInput } from './types.d.mts';
 
-/** One block of a transcript entry's content: text, a tool call (id, name, input) or a tool result (tool_use_id, is_error). */
-interface Block {
-  type?: string;
-  text?: string;
-  id?: string;
-  name?: string;
-  input?: ToolInput;
-  tool_use_id?: string;
-  is_error?: boolean;
-}
-
-/** One line of the transcript. Outside data, so every field is optional. */
-export interface TranscriptEntry {
-  type?: string;
-  isMeta?: boolean;
-  isSidechain?: boolean;
-  cwd?: string;
-  message?: { content?: string | readonly (Block | null)[] };
-}
+export type { TranscriptEntry } from './prompt-of.mts';
+export { lastPrompt } from './last-prompt.mts';
 
 /** One tool call of a turn. */
 export interface ToolUse {
@@ -54,18 +39,7 @@ export interface TurnWrite {
   tool: string;
 }
 
-const NOT_A_PROMPT = /^\s*(?:<|\[|Stop hook feedback|SubagentStop hook feedback|making-check|Caveat:|This session is being continued)/;
-
 const blocksOf = (e: TranscriptEntry): readonly (Block | null)[] => (Array.isArray(e.message?.content) ? e.message.content : []);
-
-function promptText(e: TranscriptEntry): string | null {
-  if (e.type !== 'user' || e.isMeta || e.isSidechain) return null;
-  const c = e.message?.content;
-  if (typeof c === 'string') return c;
-  if (!Array.isArray(c) || c.some((b: Block | null) => b?.type === 'tool_result')) return null;
-  const t = c.filter((b: Block | null) => b?.type === 'text').map((b: Block | null) => b?.text ?? '').join('\n');
-  return t || null;
-}
 
 // The transcript's last entries, read from its end: the last TAIL bytes, quadrupled until they hold the turn's prompt (KWB-24: a
 // long session's transcript is hundreds of MB, and reading all of it at every Stop took seconds). -> { entries, start }
@@ -99,21 +73,13 @@ function tailEntries(path: string): Tail {
       if (from > 0) lines.shift(); // a line cut by the start of the window
       const entries = parseEntries(lines);
       for (let i = entries.length - 1; i >= 0; i -= 1) {
-        const t = promptText(entries[i] ?? {});
-        if (t !== null && !NOT_A_PROMPT.test(t)) return { entries, start: i + 1 };
+        if (realPrompt(entries[i] ?? {}) !== null) return { entries, start: i + 1 };
       }
       if (from === 0) return { entries, start: 0 };
     }
   } finally {
     closeSync(fd);
   }
-}
-
-/** The user's own words that started the current turn, or '' (no transcript, or no prompt in it). */
-export function lastPrompt(path: string): string {
-  const { entries, start } = tailEntries(path);
-  const prompt = entries[start - 1];   // tailEntries starts the turn just after its prompt
-  return (start > 0 && prompt && promptText(prompt)) || '';
 }
 
 export function lastTurn(path: string): Turn {

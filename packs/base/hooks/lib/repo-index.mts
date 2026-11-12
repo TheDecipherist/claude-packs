@@ -37,13 +37,22 @@ export function oneOffLines(text: string): Set<number> {
 // One object set up twice is one object; a copy of a set-up has another receiver.
 const distinct = (list: Shape[]): Shape[] => list.filter((s, i) => s.kind !== 'setup' || list.findIndex((x) => x.id === s.id && x.what === s.what) === i);
 
+// A declaration file states what another file defines, and a probe script under docs/ is a throwaway beside the code it probes: neither is a
+// second definition of anything (KWB-182: `scanFile` in a .d.mts and in a docs/workorders/*/probes script refused the function's real file).
+const HOLDS_NO_DEFS = /\.d\.[cm]?ts$|^docs\/(?:.*\/)?probes\//;
+export const holdsNoDefs = (rel: string): boolean => HOLDS_NO_DEFS.test(rel);
+
+/** The keys the daemon's index is asked by: a statement's hash is its own key, an element shape's id and a definition's name are prefixed. */
+export const shapeKey = (id: string): string => `shape:${id}`;
+export const defKey = (name: string): string => `def:${name}`;
+
 // What a text holds, with its marked one-offs left out: all the law ever compares.
 export function shapesOfText(text: string, rel: string): TextShapes {
   if (GENERATED.test(text.slice(0, 400))) return { shapes: [], st: [], defs: [] };
   const off = oneOffLines(text);
   const ext = extname(rel);
   const open = <T extends readonly [unknown, number]>(list: T[]): T[] => list.filter(([, line]) => !off.has(line));
-  return { shapes: distinct(shapesOf(text, ext).filter((s) => !off.has(s.line))), st: open(fingerprint(text, ext)), defs: open(definesOf(text, ext)) };
+  return { shapes: distinct(shapesOf(text, ext).filter((s) => !off.has(s.line))), st: open(fingerprint(text, ext)), defs: holdsNoDefs(rel) ? [] : open(definesOf(text, ext)) };
 }
 
 // sha256 of the root, the first 12 digits: the names the kit has already written (hash.mts keeps sha1 for its ids).
@@ -52,17 +61,26 @@ const fileOf = (root: string): string => join(tmpdir(), `claude-packs-repo-${cre
 const isEntry = (v: unknown): v is IndexEntry => typeof v === 'object' && v !== null && 'm' in v && 's' in v
   && Array.isArray((v as IndexEntry).shapes) && Array.isArray((v as IndexEntry).st) && Array.isArray((v as IndexEntry).defs);
 
+// What this process last held of each checkout's index (by its file): the next call starts from it, not from the file (KWB-201: reading the
+// whole index back cost a worker 30 ms a write). A caller's skip list is part of the key, as the index it keeps holds only what that list leaves.
+const held = new Map<string, { skips: string; index: RepoIndex }>();
+
 export function repoIndex(root: string, skip: readonly string[], layout: Partial<Layout> = {}): RepoIndex {
   const file = fileOf(root);
-  const old = readJson<Record<string, unknown>>(file) ?? {};   // the first call builds it
+  const skips = skip.join('\0');
+  const mine = held.get(file);
+  const old: Record<string, unknown> = mine && mine.skips === skips ? mine.index : readJson<Record<string, unknown>>(file) ?? {};   // the first call builds it
   const now: RepoIndex = {};
+  let changed = false;
   for (const rel of codeFiles(root, skip, EXTS).filter((f) => !isContent(f, layout))) {
     const st = statSync(join(root, rel));
     const had = old[rel];
     if (isEntry(had) && had.m === st.mtimeMs && had.s === st.size) { now[rel] = had; continue; }
     const read = shapesOfText(readText(join(root, rel)) ?? '', rel);
     now[rel] = { m: st.mtimeMs, s: st.size, shapes: read.shapes.map((x): KeptShape => [x.id, x.line, x.what]), st: read.st, defs: read.defs };
+    changed = true;
   }
-  writeJson(file, now);   // an index that cannot be kept is built again
+  if (changed || Object.keys(old).length !== Object.keys(now).length) writeJson(file, now);   // an index that cannot be kept is built again; one that did not change is not written
+  held.set(file, { skips, index: now });
   return now;
 }
