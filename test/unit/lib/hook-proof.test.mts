@@ -25,10 +25,14 @@ test('a hook the runner\'s table has a row for is run; a row with no hook file, 
   put(join(dir, '.claude/hooks/in-table.mjs'), '');
   put(join(dir, '.claude/hooks/loose.mjs'), '');
   put(join(dir, '.claude/hooks/hooks.json'), JSON.stringify([{ hook: 'in-table', events: ['Stop'], role: 'judge' }, { hook: 'gone', events: ['Stop'], role: 'judge' }]));
-  assert.deepEqual(await hookProofProblems(dir, '{}'), [
+  assert.deepEqual(await hookProofProblems(dir, '{"command":"node \\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs\\""}'), [
     'loose.mjs is in .claude/hooks but no settings entry runs it, so it refuses nothing',
     'hooks.json has a row for gone but .claude/hooks has no such hook, so the runner crashes on it',
   ]);
+  // KWB-193: a table no settings entry starts runs nothing, so its rows register nothing (the Go proxy's picker starts it too)
+  const noRunner = await hookProofProblems(dir, '{}');
+  assert.ok(noRunner.includes('in-table.mjs is in .claude/hooks but no settings entry runs it, so it refuses nothing'), 'a row with no runner entry is no registration');
+  assert.ok(!(await hookProofProblems(dir, '{"command":"sh \\"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\\" 60"}')).some((p) => p.startsWith('in-table.mjs')), 'the picker is a runner');
 });
 
 test('the resident runner is not a hook: no entry or row names it, and it is not a problem (W8.2)', async () => {

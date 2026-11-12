@@ -23,7 +23,7 @@ test('a project\'s own node hooks, with or without an export, keep their own set
     assert.equal(pre.filter((c) => c.includes('own-hook.mjs')).length, 1, `${pass}: once`);
     const table = readJson<{ hook: string }[]>(join(dir, '.claude/hooks/hooks.json')) ?? [];
     assert.ok(table.length > 0 && !table.some((r) => r.hook.startsWith('own-')), `${pass}: the kit's table names none of the project's hooks`);
-    assert.equal(pre.filter((c) => c === 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs"').length, 1, `${pass}: one runner entry for the event`);
+    assert.equal(pre.filter((c) => c === 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/run-hooks.mjs"' || c.startsWith('sh "$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy"')).length, 1, `${pass}: one runner entry for the event (the TypeScript runner, or since W8.2 the picker of the Go proxy)`);
   }
 });
 
