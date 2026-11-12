@@ -419,7 +419,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 52 | 12 | 3 | 8 |
-| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 28 | 8 | 29 | 15 |
+| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 28 | 8 | 29 | 16 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 10 | 14 | 1 | 2 |
@@ -535,6 +535,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `fix [--from <scan.json>] [--out <file>]` | The last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none |
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook, over all the history |
 | `daemon status\|stop` | The project's resident hook runner, from its pid file: pid, age, kit hash, events served, memory; stop ends it |
+| `load ask\|take\|free\|jobs [--for test\|build\|fuzz\|agent\|install] [--want N] [--json]` | The machine's load governor, asked before every heavy job: how many cores it may use now and the settings to start it with, or wait and why; take reserves (a grant id), free returns it |
 | `survey` | Print the prompt that makes Claude write docs/project.md for tailoring |
 | `list` | Show available packs |
 | `symmetry gen --cmake <out.cmake> \| --list` | The generated gate shape_symmetry: one test per many concept in design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines) |

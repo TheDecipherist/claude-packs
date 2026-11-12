@@ -55,6 +55,9 @@ usage: npx --no-install @thedecipherist/claude-packs <command> [options]
                      logs crashes; logs clear <hook>|all fixed|superseded "<why>"
   daemon status|stop
                      the project's resident hook runner, from its pid file: pid, age, kit hash, events served, memory; stop ends it
+  load ask|take|free|jobs [--for test|build|fuzz|agent|install] [--want N] [--json]
+                     the machine's load governor, asked before every heavy job: how many cores it may use now and the
+                     settings to start it with, or wait and why; take reserves (a grant id), free returns it
   survey             print the prompt that makes Claude write docs/project.md for tailoring
   list               show available packs
   symmetry gen --cmake <out.cmake> | --list   the generated gate shape_symmetry: one test per many concept in
