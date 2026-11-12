@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T19:01:11Z",
+  "updated": "2026-11-12T19:32:36Z",
   "steps": [
     {
       "id": "W0",
@@ -62,8 +62,8 @@
       "id": "W8",
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 8,
-      "done": 4,
-      "agent": "w86-status, rss, kwb205, kwb204",
+      "done": 6,
+      "agent": "budgets",
       "note": "the daemon RSS line carried to W10 and W11 (d-29)"
     },
     {
@@ -78,7 +78,7 @@
       "title": "Before calling it finished",
       "items": 2,
       "done": 0,
-      "agent": null
+      "agent": "w10-ledger"
     },
     {
       "id": "W10b",
@@ -104,28 +104,22 @@
   ],
   "agents": [
     {
-      "name": "w86-status",
-      "worktree": ".claude/worktrees/w86-status",
-      "step": "W8",
-      "started": "2026-11-12T18:36:03Z"
+      "name": "kwb199",
+      "worktree": ".claude/worktrees/kwb199",
+      "step": "W12",
+      "started": "2026-11-12T19:32:36Z"
     },
     {
-      "name": "rss",
-      "worktree": ".claude/worktrees/rss",
-      "step": "W8",
-      "started": "2026-11-12T18:36:03Z"
+      "name": "w10-ledger",
+      "worktree": ".claude/worktrees/w10-ledger",
+      "step": "W10",
+      "started": "2026-11-12T19:32:36Z"
     },
     {
-      "name": "kwb205",
-      "worktree": ".claude/worktrees/kwb205",
+      "name": "budgets",
+      "worktree": ".claude/worktrees/budgets",
       "step": "W8",
-      "started": "2026-11-12T18:36:03Z"
-    },
-    {
-      "name": "kwb204",
-      "worktree": ".claude/worktrees/kwb204",
-      "step": "W8",
-      "started": "2026-11-12T18:36:03Z"
+      "started": "2026-11-12T19:32:36Z"
     }
   ]
 }
