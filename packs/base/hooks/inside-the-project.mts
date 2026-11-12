@@ -48,11 +48,13 @@ function checkoutOf(path: string): string | null {
   }
 }
 
-// True when a path is outside the project but inside a checkout of this same repo.
+// True when a path is outside the project but inside a checkout of this same repo kept beside it (a checkout that encloses
+// the project, the main one a worktree lives in, is not beside it).
 function besideTheProject(path: string, at: Where): boolean {
   if (insideProject(at.root, path, at.cwd)) return false;
   const checkout = checkoutOf(path);
   if (!checkout) return false;
+  if (insideProject(checkout, at.root, at.cwd)) return false;   // the checkout the project's worktree lives in is the project's (KWB-137)
   const ours = commonGitDir(at.root);
   if (ours && commonGitDir(checkout) === ours) return true;
   const origin = originOf(at.root);
@@ -150,6 +152,9 @@ export function selftest(): number {
   git(join(parent, 'other'), 'init', '-q');
   put(join(parent, 'clone/.git/config'), '[remote "origin"]\n\turl = https://github.com/owner/proj.git\n');
   put(join(parent, 'clone/src/c.ts'), 'c\n');
+  git(proj, 'worktree', 'add', '-q', join(proj, '.claude/worktrees/in'), '-b', 'in');
+  const inner = join(proj, '.claude/worktrees/in');   // a session started in a worktree inside the project (KWB-137)
+  const fromInner = (command: string): number | null => runHook(hookFile, inner, bashOf(command, inner)).status;
   const before = snapshot(parent);   // the folders as the judge finds them: the rows below must leave them as they are
   const run = (payload: unknown): number | null => runHook(hookFile, proj, payload).status;
   const sh = (command: string): number | null => run(bashOf(command, proj));
@@ -170,6 +175,8 @@ export function selftest(): number {
     ['a worktree added inside another project (KWB-104)', sh('cd ../other && git worktree add -q .claude/worktrees/w -b w main'), 0],
     ['a worktree added in another project with git -C (KWB-104)', sh('git -C ../other worktree add .claude/worktrees/w -b w'), 0],
     ['a plain command', sh('git status'), 0],
+    ['KWB-137: git -C the main checkout from a worktree session inside it', fromInner(`git -C ${proj} status`), 0],
+    ['KWB-137: a worktree session still refused a worktree beside the project', fromInner(`git -C ${join(parent, 'proj-W3')} status`), 2],
     ['a judge writes no file (the write trap)', writtenSince(parent, before).join(','), ''],
   ]);
 }
