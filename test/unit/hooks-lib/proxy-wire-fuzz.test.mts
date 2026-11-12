@@ -1,6 +1,6 @@
 // Fuzzing of lib/proxy-wire.mts and the daemon's socket (typescript order W10b item 3): truncated frames, a length over the cap, bad
 // JSON, a zero length and a megabyte of garbage, mutated from a seeded generator. The short run is part of the suite; the long run is
-// `FUZZ_SECONDS=600 node --import ./test/fresh-tmp.mts --test test/unit/hooks-lib/proxy-wire-fuzz.test.mts` (FUZZ_SEED picks the seed,
+// `FUZZ_SECONDS=600` before the usual one-file test command (FUZZ_SEED picks the seed,
 // FUZZ_OUT a file for the numbers). Nothing may throw or hang, a request is whole or refused, and no connection gets exit 0 unjudged.
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
