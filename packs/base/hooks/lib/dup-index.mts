@@ -58,7 +58,7 @@ export interface DupWrite {
   ranges?: readonly (readonly [number, number])[];
 }
 /** `persist: false` judges from the index as it stands, brought up to date in memory only: a judge writes nothing (once-only-index records it). */
-export interface JudgeOptions { env: Env; layout?: Partial<Layout>; shape?: ShapeExclude | null; ignore?: readonly string[]; persist?: boolean }
+export interface JudgeOptions { env: Env; layout?: Partial<Layout>; shape?: ShapeExclude | null; ignore?: readonly string[]; persist?: boolean; keep?: boolean }
 export interface JudgeResult { clones: BlockClone[]; error?: string; index: DupIndex }
 export interface Tokens { t: string[]; l: number[] }
 
@@ -121,14 +121,20 @@ function sourceStats(root: string, ex: readonly string[]): Record<string, Stat> 
 
 interface StoredIndex { v?: number; root?: string; files: Record<string, IndexedFile> }
 
-/** The checkout's index, read from the temp folder and brought up to date for the files that changed. */
-export function loadIndex(root: string, { layout = {}, shape = null, persist = true }: { layout?: Partial<Layout>; shape?: ShapeExclude | null; persist?: boolean } = {}): DupIndex {
+// What a judge in this process last held of a checkout's index (`keep`): the next call starts from it, not from the file, so a call costs the
+// walk of the folders and the files that moved, not a parse of the whole index (KWB-201: 30 ms and 5 MB a write). A recorder never keeps it: it
+// reads the file to know what is persisted. A file the recorder of another worker moved is read again once, in memory, as any file that changed.
+const kept = new Map<string, StoredIndex>();
+
+/** The checkout's index, read from the temp folder (or from this process's memory with `keep`) and brought up to date for the files that changed. */
+export function loadIndex(root: string, { layout = {}, shape = null, persist = true, keep = false }: { layout?: Partial<Layout>; shape?: ShapeExclude | null; persist?: boolean; keep?: boolean } = {}): DupIndex {
   const file = fileOf(root);
   const real = realPath(root);
   // read whole, not through readText: a big checkout's index is past its 8 MB cap
   let text: string | null = null;
-  try { text = readFileSync(file, 'utf8'); } catch { /* built below */ }
-  let old = parseJson<StoredIndex>(text);
+  const held = keep ? kept.get(file) : undefined;
+  if (!held) try { text = readFileSync(file, 'utf8'); } catch { /* built below */ }
+  let old = held ?? parseJson<StoredIndex>(text);
   if (old?.v !== VERSION || old.root !== real || typeof old.files !== 'object') old = null;
   const ex = excludeGlobs(layout, shape);
   const now = sourceStats(root, ex);
@@ -148,6 +154,7 @@ export function loadIndex(root: string, { layout = {}, shape = null, persist = t
     try { mkdirSync(join(file, '..'), { recursive: true }); } catch { /* judged all the same */ }
     writeJson(file, { v: VERSION, root: real, files });   // false when refused: judged all the same
   }
+  if (keep) kept.set(file, { v: VERSION, root: real, files });
   return { root: real, files, built: !old, read };
 }
 
@@ -233,8 +240,8 @@ const holdsLogic = (text: string, { start, end }: { start: number; end: number }
   text.split('\n').slice(start - 1, end).filter((l) => !DECLARATION.test(l)).length >= MIN_LOGIC_LINES;
 
 /** The clones the writes would add, as jscpd over the repo would find them: the index picks the candidates, jscpd confirms. */
-export function judgeCopyWrites(root: string, writes: readonly DupWrite[], { env, layout = {}, shape = null, ignore = [], persist = true }: JudgeOptions): JudgeResult {
-  const index = loadIndex(root, { layout, shape, persist });
+export function judgeCopyWrites(root: string, writes: readonly DupWrite[], { env, layout = {}, shape = null, ignore = [], persist = true, keep = false }: JudgeOptions): JudgeResult {
+  const index = loadIndex(root, { layout, shape, persist, keep });
   const maybe = clonesIn(index, writes, { ignore });
   if (!maybe.length) return { clones: [], index };
   const tmp = scratchDir('once-only-new-');

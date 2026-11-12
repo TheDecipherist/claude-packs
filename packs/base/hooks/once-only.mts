@@ -66,7 +66,7 @@ export function copiesIn(event: HookEvent, ctx: HookContext): string | null {
     const first = mine[0];
     if (!first) continue;
     const writes: DupWrite[] = mine.map((j) => ({ path: j.w.path, after: j.w.after ?? '', range: j.range }));
-    const r = judgeCopyWrites(root, writes, { env: ctx.env, layout: first.layout, shape: first.shape, ignore: gone, persist: false });
+    const r = judgeCopyWrites(root, writes, { env: ctx.env, layout: first.layout, shape: first.shape, ignore: gone, persist: false, keep: true });
     if (r.error) return null; // once-only could not judge (doctor shows a missing detector)
     const base = realPath(root);
     const show = (s: { file: string; start: number; end: number }): string => `${relative(base, s.file)}:${s.start}-${s.end}`;
