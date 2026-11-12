@@ -13,6 +13,7 @@ import { worktreeCase as LOOK_GATE } from '../packs/base/hooks/look-gate.mts';
 import { worktreeCase as MAKING_CHECK } from '../packs/base/hooks/making-check.mts';
 import { worktreeCase as MAKING_CHECK_COUNT } from '../packs/base/hooks/making-check-count.mts';
 import { worktreeCase as NO_FIND } from '../packs/base/hooks/no-find.mts';
+import { worktreeCase as NO_POLLING } from '../packs/base/hooks/no-polling.mts';
 import { worktreeCase as REPO_LITTER } from '../packs/base/hooks/repo-litter.mts';
 import { worktreeCase as SUITE_ONCE } from '../packs/base/hooks/suite-once.mts';
 import { worktreeCase as TEMPLATE_LAW } from '../packs/base/hooks/template-law.mts';
@@ -65,6 +66,7 @@ export const COMMAND_CASES: Record<string, CheckoutCase> = {
   },
   // a hook moved onto the contract (W4) exports its own worktree case as data, beside its selftest
   'no-find.mjs': caseFrom('no-find.mjs', NO_FIND),
+  'no-polling.mjs': caseFrom('no-polling.mjs', NO_POLLING),
   'untrusted-boundary.mjs': caseFrom('untrusted-boundary.mjs', UNTRUSTED_BOUNDARY),
   'template-law.mjs': caseFrom('template-law.mjs', TEMPLATE_LAW),
   'brief-guard.mjs': caseFrom('brief-guard.mjs', BRIEF_GUARD),

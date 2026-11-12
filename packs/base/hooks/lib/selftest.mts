@@ -38,6 +38,8 @@ export function scratchProject(files: Record<string, string> = {}, layout: Parti
  *  by path with those swapped in. The step's event is the payload as Claude Code sends it. */
 export interface WorktreeStep { label: string; event: Record<string, unknown>; want: number }
 export interface WorktreeCase { files?: Readonly<Record<string, string>>; steps: readonly WorktreeStep[] }
+/** A worktree step that fires a Bash command (KWB-204: the rows of a command judge differ only in label, command and want). */
+export const bashStep = (label: string, command: string, want: number): WorktreeStep => ({ label, event: { tool_name: 'Bash', tool_input: { command } }, want });
 
 // The runner's own logs are not a judge's writes (the runner writes them for every hook, a judge or not).
 const RUNNER_LOGS = /(?:^|\/)\.claude\/(?:hooks\.log|logs\/)/;

@@ -2,8 +2,8 @@
 //
 // "nothing should be able to take the entire system". Five agents each compiling with -j18 at once put
 // ~90 jobs on 18 cores and every build took hours. Every compile and test run goes through the machine-wide queue
-// .claude/tools/buildq.mjs (two at a time; the kit ships it, KF-1). This refuses (exit 2) a heavy command started any other way, a polling loop, an
-// agent's build or test run of everything, and any build from an agent started as `KIND: light`
+// .claude/tools/buildq.mjs (two at a time; the kit ships it, KF-1). This refuses (exit 2) a heavy command started any other way, an
+// agent's build or test run of everything (a polling loop is base's no-polling hook, KWB-204), and any build from an agent started as `KIND: light`
 // (~/.claude/agent-cap-state.json keeps the kinds).
 //
 // Allowed: a command run as `node .claude/tools/buildq.mjs <cmd>` (or a `buildq` on the path), or through a project's own wrapper that
@@ -70,16 +70,6 @@ export function offending(cmd: string): string | null {
     if (WRAPPERS.includes(base(exe)) || (['bash', 'sh', 'zsh', 'node'].includes(exe) && w.length > 1 && WRAPPERS.includes(base(next)))) continue;
     if (heavy(w)) return w.slice(0, 3).join(' ');
   }
-  return null;
-}
-
-// A sleep loop or a long sleep, in the commands this shell runs.
-export function polling(cmd: string): string | null {
-  const body = blankQuotes(dropHeredocs(cmd));
-  if (/\b(until|while)\b[^\n]*\bdo\b[\s\S]*\bsleep\b/.test(body) || /\b(until|while)\b[\s\S]*;\s*do\b[\s\S]*\bsleep\b/.test(body)) return 'a loop that sleeps';
-  for (const m of body.matchAll(/(?:^|[;&|(\n]|\bdo\b|\bthen\b)\s*sleep\s+([0-9.]+)/g)) if (Number(m[1]) > 5) return `sleep ${m[1]}`;
-  if (/for\s+\w+\s+in\s+\$\(seq[^)]*\)[\s\S]*\bsleep\b/.test(body)) return 'a loop that sleeps';
-  if (/\btail\s+(-\S*\s+)*-[a-zA-Z]*[fF]\b/.test(body)) return 'tail -f on a log (watching, not working)';
   return null;
 }
 
@@ -152,13 +142,6 @@ export const hook: Hook = (event, ctx) => {
         'The whole suite runs only when the user asks for a full run; the gate before landing is the tests the branch reaches.');
     }
   }
-  // NO POLLING (agents ran `until grep -q done log; do sleep 10` for minutes on end)
-  const poll = polling(cmd);
-  if (poll) {
-    return refuse(`build-guard: polling refused (${poll}). Waiting in a sleep loop hides what you are doing and burns turns. Run the job in the FOREGROUND ` +
-      'through the queue (.claude/tools/buildq.mjs and tools/build.sh wait for a slot themselves; the Bash tool allows up to 10 minutes), or start it with ' +
-      'run_in_background and you are notified when it ends.');
-  }
   // A light agent may RUN an already-built program through the queue (a render), never compile or run a test suite
   if (aid && /(cmake\s+--build|\bctest\b|\bmake\b|\bninja\b|xcodebuild|tools\/build\.sh\s+(build|test))/.test(maskQuotes(dropHeredocs(cmd))) && lightAgent(event, ctx.env.HOME ?? homedir())) {
     return refuse('build-guard: this agent was started as KIND: light, and light agents do not build or run tests (at most 3 build agents run at once, ' +
@@ -181,7 +164,7 @@ export const worktreeCase: WorktreeCase = {
 };
 
 export async function selftest(): Promise<number> {
-  const laws: BuildLaws = { offending, polling, launchesApp, tooWide };
+  const laws: BuildLaws = { offending, launchesApp, tooWide };
   return (await import('./lib/build-guard-selftest.mts')).selftest(fileURLToPath(import.meta.url), laws);
 }
 
