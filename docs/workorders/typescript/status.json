@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T19:32:36Z",
+  "updated": "2026-11-12T19:41:18Z",
   "steps": [
     {
       "id": "W0",
@@ -77,8 +77,8 @@
       "id": "W10",
       "title": "Before calling it finished",
       "items": 2,
-      "done": 0,
-      "agent": "w10-ledger"
+      "done": 1,
+      "agent": "w10-rows2"
     },
     {
       "id": "W10b",
@@ -107,19 +107,25 @@
       "name": "kwb199",
       "worktree": ".claude/worktrees/kwb199",
       "step": "W12",
-      "started": "2026-11-12T19:32:36Z"
-    },
-    {
-      "name": "w10-ledger",
-      "worktree": ".claude/worktrees/w10-ledger",
-      "step": "W10",
-      "started": "2026-11-12T19:32:36Z"
+      "started": "2026-11-12T19:41:18Z"
     },
     {
       "name": "budgets",
       "worktree": ".claude/worktrees/budgets",
       "step": "W8",
-      "started": "2026-11-12T19:32:36Z"
+      "started": "2026-11-12T19:41:18Z"
+    },
+    {
+      "name": "w10-rows2",
+      "worktree": ".claude/worktrees/w10-rows2",
+      "step": "W10",
+      "started": "2026-11-12T19:41:18Z"
+    },
+    {
+      "name": "w10b-review",
+      "worktree": ".claude/worktrees/w10b-review",
+      "step": "W10b",
+      "started": "2026-11-12T19:41:18Z"
     }
   ]
 }
