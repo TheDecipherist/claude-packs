@@ -547,7 +547,6 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `dispatch-once` | Write, Bash | Refuses a `switch` on a kind already switched on in another file. In Rust, a second lookup table on an enum, outside the enum |
 | `template-law` | Write, Bash | Refuses a copy, a near copy or a function made again |
 | `code-shape` | Write, Bash | Refuses wide lines, packed lines, long functions, long parameter lists |
-| `agents-held` | Agent | Refuses an agent started in the background in a session with nobody there (`claude -p`, a work order's runner): the session's end would stop it mid-work |
 | `git-guard` | Bash, Stop | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
 | `kit-fresh` | Bash, Session start | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
 | `suite-once` | Bash | Refuses the whole test suite unless the user's prompt asks for a full run |
@@ -556,6 +555,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `look-gate` | Bash, After Bash | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
 | `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |
+| `agents-held` | Stop | Refuses the end of a turn in a session with nobody there (`claude -p`, a work order's runner) while an agent it started in the background has not returned: the session's end would stop it mid-work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 | `making-check-count` | Stop | Counts the times a turn was sent back, so a repeat is known |
 | `making` | Prompt | Asks what is being made and what it reuses |
