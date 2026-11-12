@@ -5,19 +5,16 @@
 // Write PreToolUse events through it as Claude Code does (stdin JSON, CLAUDE_PROJECT_DIR), then holds the proxy line's p50 per event class.
 // It stops the daemon it started. The RSS case: 16 workers after 1,024 events (Bash, Write and Stop) stay under RSS_BUDGET_MB. Run alone: `npm run test:changed` with this file changed.
 import { spawnSync } from 'node:child_process';
-import { chmodSync, closeSync, existsSync, mkdirSync, openSync, writeFileSync, writeSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, writeFileSync, writeSync } from 'node:fs';
 import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { scratchDir } from '../../packs/base/hooks/lib/files.mts';
 import { readHookLog } from '../../packs/base/hooks/lib/hook-log.mts';
 import { toJson } from '../../packs/base/hooks/lib/json.mts';
 import { PACKS_DIR } from '../../lib/packs.mts';
 import { percentile } from '../../lib/hook-budget.mts';
 import { hostTarget, shippedBinary } from '../../lib/proxy-binary.mts';
-import { installBinary } from '../../lib/proxy-install.mts';
-import { fixture } from '../fixtures/installs.mts';
 import { type ProxyRig, stopDaemon, until } from '../fixtures/proxy-rig.mts';
-import { fire, fireAsync, pidOf } from './proxy-fire-rig.mts';
+import { fire, fireAsync, pidOf, proxyRig } from './proxy-fire-rig.mts';
 import { CLI, assert, test } from '../kit-cli.mts';
 
 
@@ -70,11 +67,7 @@ function source(i: number): string {
 }
 
 function rig(files: number, mb: number): Live {
-  const project = fixture('js-ts');
-  const cache = scratchDir('live-speed-cache-');
-  chmodSync(cache, 0o700);
-  const env = { PATH: process.env.PATH ?? '', HOME: cache, CLAUDE_PROJECT_DIR: project, CLAUDE_PACKS_CACHE: cache };
-  assert.equal(installBinary(KIT, env).kind, 'installed');
+  const { project, cache, env } = proxyRig('live-speed-cache-');
   mkdirSync(join(project, 'src'), { recursive: true });
   for (let i = 0; i < files; i += 1) writeFileSync(join(project, 'src', `mod${i}.ts`), source(i));
   const transcript = join(project, 'transcript.jsonl');
@@ -120,6 +113,19 @@ test('a live Pre Bash event costs under 20 ms at p50 and a Pre Write under 110 m
     process.stdout.write(`# ${line}\n`);
     assert.ok(percentile(bash, 50) < 20, `Pre Bash p50 over the proxy line: ${line}`);
     assert.ok(percentile(write, 50) < 110, `Pre Write p50 over the proxy line: ${line}`);
+  } finally { stopDaemon(r); }
+});
+
+test('the first Pre Write after a daemon starts finds the index built: under 200 ms, not the build (1,516 ms in the kit\'s own install)', { skip, timeout: 300_000 }, async () => {
+  const r = rig(300, 1);
+  try {
+    fire(r, event(r, 'Bash', 0));
+    await until('a daemon is listening', () => pidOf(r) > 0);
+    await sleep(SETTLE_MS + 1000);   // the warm-up worker is a thread of the daemon: it ends beside the start, before any Write of a session
+    fire(r, event(r, 'Write', 1));
+    const first = walls(r, 'Write', 0)[0] ?? Infinity;
+    process.stdout.write(`# first Write after the start: ${first} ms\n`);
+    assert.ok(first < 200, `the first Pre Write took ${first} ms`);
   } finally { stopDaemon(r); }
 });
 
