@@ -29,9 +29,9 @@ export interface GovernorHost {
   alive: (pid: number) => boolean;
 }
 
-/** The machine this process runs on. CLAUDE_PACKS_GOVERNOR_CORES and CLAUDE_PACKS_GOVERNOR_LOAD plant the cores and the load for a
+/** The machine this process runs on, read through the caller's environment. CLAUDE_PACKS_GOVERNOR_CORES and CLAUDE_PACKS_GOVERNOR_LOAD plant the cores and the load for a
  *  test (the load W8.7's sampler sees is the same kernel number, `vm.loadavg`, so this reads it directly). */
-export function machineHost(env: Env = process.env): GovernorHost {
+export function machineHost(env: Env): GovernorHost {
   const plantedCores = Number(env['CLAUDE_PACKS_GOVERNOR_CORES']);
   const plantedLoad = env['CLAUDE_PACKS_GOVERNOR_LOAD'];
   return {
