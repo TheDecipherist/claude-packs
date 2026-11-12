@@ -271,7 +271,7 @@ export async function selftest() {
 /** `--refresh-stop <ms>`: the detached refresh of the kept Stop look, started by the hook itself (lib/stop-look.mts). */
 async function refreshFlag(args) {
     const ctx = contextOf();
-    await refreshStop(ctx.projectDir, ctx.env, cfgOf(ctx), trunkLag, Number(args[args.indexOf('--refresh-stop') + 1]) || 0);
+    await refreshStop(ctx.projectDir, ctx.env, cfgOf(ctx), trunkLag, Number(args[args.indexOf('--refresh-stop') + 1]) || 0, args.includes('--push'));
     return 0;
 }
 if (isMain(import.meta.url))

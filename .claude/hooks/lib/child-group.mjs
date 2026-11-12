@@ -10,6 +10,8 @@ import { spawn } from 'node:child_process';
 const live = new Set();
 let listener = null;
 export function watchGroups(next) { listener = next; }
+/** Whether someone listens: this thread is a daemon worker, whose pool ends the groups it reports when the worker or the daemon ends. */
+export const underDaemon = () => listener !== null;
 export function startGroup(command, args, options = {}) {
     const child = spawn(command, [...args], { ...options, detached: true });
     const pid = child.pid;

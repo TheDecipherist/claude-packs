@@ -58,6 +58,19 @@ function fullRef(dirs, name) {
         return loose;
     return packedRefs(dirs.common).get(name) ?? null;
 }
+/** The commits of every remote-tracking ref of `remote` (loose files over packed-refs), keyed by the ref's full name; symbolic refs (origin/HEAD) left out. */
+export function trackedRefs(dirs, remote) {
+    const prefix = `refs/remotes/${remote}/`;
+    const refs = new Map([...packedRefs(dirs.common)].filter(([name]) => name.startsWith(prefix)));
+    const loose = [];
+    looseRefs(join(dirs.common, 'refs', 'remotes', remote), prefix, loose);
+    for (const line of loose) {
+        const at = line.lastIndexOf(' ');
+        if (SHA.test(line.slice(at + 1)))
+            refs.set(line.slice(0, at), line.slice(at + 1));
+    }
+    return refs;
+}
 export function currentHead(dirs) {
     const head = readText(join(dirs.gitDir, 'HEAD'))?.trim() ?? '';
     const ref = head.match(/^ref:\s*(\S+)$/)?.[1];

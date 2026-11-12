@@ -20,7 +20,7 @@ import { dirname, join, resolve } from 'node:path';
 import { put, readText } from './files.mjs';
 import { escapeRegExp } from './glob.mjs';
 import { gitConfigRead } from './git-config.mjs';
-import { findGitDirs } from './git-files.mjs';
+import { findGitDirs, trackedRefs } from './git-files.mjs';
 import { gitOut, gitRun } from './git-run.mjs';
 import { readJson, writeJson } from './json.mjs';
 const CACHE = 'claude-packs-heads.json';
@@ -68,6 +68,9 @@ export function pushSeen(cwd, env, now = Date.now()) {
 }
 /** The heads this repo's remote-tracking refs hold for a remote (every push by name and fetch updates them), keyed `<remote>/<branch>`. */
 export function trackedHeads(cwd, env, remote) {
+    const dirs = findGitDirs(cwd, env);
+    if (dirs)
+        return new Map([...trackedRefs(dirs, remote)].map(([ref, sha]) => [ref.replace(/^refs\/remotes\//, ''), sha])); // the files, no process
     const out = gitOut(['for-each-ref', '--format=%(refname)%09%(objectname)', `refs/remotes/${remote}/`], gitAt(cwd, env));
     const heads = new Map();
     for (const line of (out ?? '').split('\n').filter(Boolean)) {
@@ -130,11 +133,13 @@ export function withHeads(cwd, env, remote, cfg, judge) {
     let h = remoteHeads(cwd, env, remote, cfg);
     if ('error' in h)
         return unreached(h);
+    // offline: the kept look and the local tracking refs together, never the network. A commit pushed since the kept look is a tracking
+    // ref already, so the judge is not made to walk history for it (commit-cost: it cost cat-file, log and for-each-ref on every commit
+    // after a push).
+    if (cfg.offline && h.cached)
+        h = { ...h, heads: new Map([...h.heads, ...trackedHeads(cwd, env, remote)]) };
     let found = judge(h);
-    if (found && cfg.offline && h.cached) { // the kept look and the local tracking refs together, never the network
-        found = judge({ ...h, heads: new Map([...h.heads, ...trackedHeads(cwd, env, remote)]) });
-    }
-    else if (found && h.cached && !cfg.cachedOnly) {
+    if (!cfg.offline && found && h.cached && !cfg.cachedOnly) {
         h = remoteHeads(cwd, env, remote, { ...cfg, live: true });
         if ('error' in h)
             return unreached(h);
