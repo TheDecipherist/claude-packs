@@ -32,7 +32,6 @@
     "**/*.d.mjs",
     "**/*.d.cjs"
   ],
-  "newFilesOnly": true,
   "code": true,
   "pattern": "^\\s*\\S",
   "bad": "export const answer = 42;\n",
