@@ -24,6 +24,8 @@ import { readPayload } from './writes.mts';
 import type { Hook, HookContext, Verdict } from './types.d.mts';
 
 export const LOG: string = join('.claude', WIRE.hooksLog.file);
+/** The hook name of the line a daemon writes when it starts listening: doctor judges the calls after it as a cold start (lib/hook-budget.mts). */
+export const DAEMON_START = 'daemon-start';
 export const LOG_MAX_BYTES = 1024 * 1024;
 export const LOGS: string = join('.claude', 'logs');
 

@@ -3,6 +3,9 @@
 // parsed and carried by this row alone. `--ready-fd` is the one row a re-exec leaves out: the pipe it names is the first start's.
 import { WIRE } from '../lib/proxy-wire-table.mts';
 
+/** At most this many workers import any one hook while the pool is not full (W8.4); doctor lets each hook this many cold calls after a start (one per worker). */
+export const SPREAD = 4;
+
 export interface FlagRow {
   flag: string;
   /** Whether the flag takes a value (`--pool 4`) or stands alone (`--no-npm`). */
