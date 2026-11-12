@@ -29,7 +29,7 @@ const SETTLE_MS = 2000;
 const POOL = 16;   // the daemon's warm workers, and so the events at once that keep every one of them busy
 const ROUNDS = 64;
 const IDLE_BUDGET_MB = 250;   // the order's budget, held by a daemon with its 16 workers warm (measured 176 MB)
-// 16 workers all busy with Bash, Write and Stop events. Measured 315 MB with the turn read by bytes, the duplicate windows in typed arrays,
+// 16 workers all busy with Bash, Write and Stop events. Measured 315 to 326 MB (993 MB on the code before) with the turn read by bytes, the duplicate windows in typed arrays,
 // the size-over-speed V8 flags and the pool held at 16 (before them: see agents/rss-report.md). The order's 250 MB is not reached: that report says why.
 const RSS_BUDGET_MB = 380;
 const STOP_EVERY = 8;
