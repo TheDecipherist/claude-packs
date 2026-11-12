@@ -34,8 +34,20 @@ const freePort = (): Promise<number> => new Promise((done, fail) => {
   });
 });
 
+/** A user made on the local registry (npm's own protocol), and the token it answers with: a publish needs one, though any user may. */
+async function scratchToken(url: string): Promise<string> {
+  const made = await fetch(`${url}/-/user/org.couchdb.user:scratch`, {
+    method: 'PUT', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'scratch', password: 'scratch-password-1', email: 'scratch@local', type: 'user' }),
+  });
+  const body: unknown = await made.json();
+  const token = typeof body === 'object' && body !== null && 'token' in body ? body.token : undefined;
+  if (typeof token !== 'string') throw new Error(`the local registry made no token: ${made.status}`);
+  return token;
+}
+
 /** Verdaccio, installed in its own scratch folder and started on a free port with open publish and no uplink. */
-async function startRegistry(): Promise<{ url: string; stop: () => void }> {
+async function startRegistry(): Promise<{ url: string; stop: () => void; token: string }> {
   const home = ensureDir(join(SCRATCH, 'verdaccio'));
   if (readText(join(home, 'package.json')) === null) put(join(home, 'package.json'), '{"name":"scratch-registry","private":true}\n');
   run(home, 'npm', ['install', '--no-audit', '--no-fund', '--save-exact', `verdaccio@${VERDACCIO}`]);
@@ -52,7 +64,7 @@ async function startRegistry(): Promise<{ url: string; stop: () => void }> {
   process.on('exit', stop);
   for (const signal of ['SIGINT', 'SIGTERM'] as const) process.on(signal, () => { stop(); process.exit(1); });
   for (let i = 0; i < READY_ATTEMPTS; i++) {
-    try { if ((await fetch(`${url}/-/ping`)).ok) return { url, stop }; } catch { /* not up yet */ }
+    try { if ((await fetch(`${url}/-/ping`)).ok) return { url, stop, token: await scratchToken(url) }; } catch { /* not up yet */ }
     await sleep(READY_EVERY_MS);
   }
   stop();
@@ -103,7 +115,8 @@ function setAsideKnownReds(clone: string, env: NodeJS.ProcessEnv): void {
 type Case = { name: string; what: string; change: (clone: string) => void };
 const CASES: Record<string, Case> = {
   hook: { name: 'one hook', what: 'packs/base/hooks/no-find.mts: a no-op statement in searcherIn', change: (c) => touchFirstFunction(join(c, 'packs/base/hooks/no-find.mts')) },
-  lib: { name: 'one lib', what: 'lib/configs.mts: a no-op statement in its first function', change: (c) => touchFirstFunction(join(c, 'lib/configs.mts')) },
+  lib: { name: 'one lib', what: 'lib/found-folders.mts: a no-op statement in its first function', change: (c) => touchFirstFunction(join(c, 'lib/found-folders.mts')) },
+  libcore: { name: 'one core lib', what: 'lib/configs.mts (what every install reads): a no-op statement in its first function', change: (c) => touchFirstFunction(join(c, 'lib/configs.mts')) },
   content: {
     name: 'content', what: 'packs/base/rules/agents-held.md: one more line',
     change: (c) => { const f = join(c, 'packs/base/rules/agents-held.md'); put(f, `${readText(f) ?? ''}\nA function that needs a comment to say what it does wants a better name.\n`); },
@@ -136,7 +149,7 @@ async function main(): Promise<void> {
     for (const [k, v] of [['user.name', 'scratch'], ['user.email', 'scratch@local']] as const) run(clone, 'git', ['config', k, v]);
     setAsideKnownReds(clone, env0(registry.url));
     const npmrc = join(SCRATCH, 'npmrc');
-    put(npmrc, `//${registry.url.replace('http://', '')}/:_authToken=scratch\n`);
+    put(npmrc, `//${registry.url.replace('http://', '')}/:_authToken=${registry.token}\n`);
     const env = { ...process.env, NPM_CONFIG_USERCONFIG: npmrc, GH_TOKEN: '' };
     run(clone, 'npm', ['ci', '--no-audit', '--no-fund'], env);
     run(clone, 'npm', ['run', 'build'], env);
