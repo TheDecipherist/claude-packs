@@ -38,4 +38,4 @@ Open items: [gap] the kit's own enable line is not applied (the lead's); [gap] b
 
 DONE_WITH_CONCERNS: the kit's own enable line (above) is the lead's to apply, and the bin/ shim question for the kit's own install is unverified.
 
-Report: /Users/tim.clausen/projects/claude-packs/.claude/worktrees/w8-ts/docs/workorders/typescript/agents/w8-ts-report.md
+Report: docs/workorders/typescript/agents/w8-ts-report.md (written in the agent's worktree, .claude/worktrees/w8-ts)

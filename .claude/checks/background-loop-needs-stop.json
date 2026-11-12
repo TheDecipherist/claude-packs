@@ -1,0 +1,28 @@
+{
+  "id": "background-loop-needs-stop",
+  "why": "A for(;;)/while(true) loop with no stop handle can never be shut down: tests cannot end it and shutdown cannot drain it. Take an AbortSignal and return a stop function.",
+  "rule": ".claude/rules/process-lifecycle.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "mode": "needs",
+  "pattern": "\\bfor\\s*\\(\\s*;\\s*;\\s*\\)|\\bwhile\\s*\\(\\s*true\\s*\\)",
+  "needs": [
+    "\\b(AbortSignal|AbortController|signal\\.aborted|stop\\b|stopped\\b)"
+  ],
+  "bad": "export function startHoldReleaser() {\n  void (async () => { for (;;) { await tick(); await sleep(2000); } })();\n}",
+  "good": "export function startHoldReleaser(signal: AbortSignal) {\n  for (;;) { if (signal.aborted) return; await tick(); await sleep(2000, undefined, { signal }); }\n}"
+}

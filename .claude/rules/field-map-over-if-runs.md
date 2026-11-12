@@ -9,9 +9,9 @@ paths:
   - "tests/**/*.h"
   - "packs/**/*.cpp"
   - "packs/**/*.h"
-  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx}"
-  - "tests/**/*.{js,mjs,cjs,ts,tsx}"
-  - "test/**/*.{js,mjs,cjs,ts,tsx}"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
 ---
 
 # Three ifs in a row on one object's fields: a field table and one loop

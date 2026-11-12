@@ -29,7 +29,7 @@ test('a project\'s own node hooks, with or without an export, keep their own set
 
 test('the kit repo has its own base pack installed: kit-lock and every base hook registered, git-guard on Bash and Stop', () => {
   const lock = readJson<{ packs: string[] }>(join(KIT, '.claude/claude-packs.lock.json'));
-  assert.deepEqual(lock?.packs, ['base']);
+  assert.deepEqual(lock?.packs, ['base', 'js-ts'], 'base, and js-ts for its TypeScript laws and typescript-only (d-28)');
   const settings = readJson<SettingsFile>(join(KIT, '.claude/settings.json'));
   assert.ok(settings, 'the kit has settings');
   // a hook is registered by a settings entry, or by a row of the table the runner reads (W8.1)

@@ -16,9 +16,9 @@ paths:
   - "docs/**/*.md"
   - "build.md"
   - "**/build.md"
-  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx}"
-  - "tests/**/*.{js,mjs,cjs,ts,tsx}"
-  - "test/**/*.{js,mjs,cjs,ts,tsx}"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
 ---
 
 # Identical containers by index, different things by ID; never a literal of either in logic

@@ -132,5 +132,5 @@ Skills and checks run these; use them, not the raw tools:
 - test-changed: `npm run test:changed`
 - doctor: `node bin/claude-packs.mjs doctor --strict`
 
-Installed packs: base.
+Installed packs: base, js-ts.
 <!-- claude-packs:end -->

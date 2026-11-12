@@ -1,0 +1,24 @@
+{
+  "id": "no-shell-string-interpolation",
+  "why": "A path or argument interpolated into a shell string breaks on a space and injects on a $. Pass argv arrays to spawn/execFile, never a template string to bash -c.",
+  "rule": ".claude/rules/await-handled-at-a-boundary.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "pattern": "\\b(?:exec|execSync|spawn|spawnSync)\\(\\s*`[^`]*\\$\\{|\\[\\s*['\"]-c['\"]\\s*,\\s*`[^`]*\\$\\{",
+  "bad": "command: `bash ${join(dir, hook.script)} ${TAG}`,\nspawn('bash', ['-c', `git log ${ref}`]);",
+  "good": "command: ['bash', join(dir, hook.script), TAG],\nexecFile('git', ['log', ref]);",
+  "strings": true
+}

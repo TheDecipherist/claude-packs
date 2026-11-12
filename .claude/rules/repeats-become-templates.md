@@ -9,9 +9,9 @@ paths:
   - "tests/**/*.h"
   - "packs/**/*.cpp"
   - "packs/**/*.h"
-  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx}"
-  - "tests/**/*.{js,mjs,cjs,ts,tsx}"
-  - "test/**/*.{js,mjs,cjs,ts,tsx}"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
 ---
 
 # Anything repeated becomes a template: pick the form that fits the repeat

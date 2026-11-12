@@ -1,0 +1,20 @@
+{
+  "id": "no-ts-enum",
+  "why": "A TypeScript enum emits runtime code and fights structural typing. Use a union of string literals.",
+  "rule": ".claude/rules/unions-over-enums.md",
+  "concepts": [
+    "ts"
+  ],
+  "globs": [],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    ".claude/**",
+    "**/.claude/**"
+  ],
+  "code": true,
+  "pattern": "^\\s*(?:export\\s+)?(?:const\\s+)?enum\\s+\\w+",
+  "flags": "m",
+  "bad": "export enum Mode { Fast, Slow }\n",
+  "good": "export type Mode = 'fast' | 'slow';\n"
+}

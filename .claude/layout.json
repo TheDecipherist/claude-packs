@@ -156,6 +156,56 @@
     "hook-config": [
       "**/.claude/settings.json",
       "**/.claude/settings.local.json"
+    ],
+    "ts": [
+      "**/*.ts",
+      "**/*.tsx"
+    ],
+    "js-tests": [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.test.js",
+      "**/*.test.mjs"
+    ],
+    "tsconfig": [
+      "**/tsconfig*.json"
+    ],
+    "routes": [
+      "**/routes/**/*.ts",
+      "**/server/**/*.ts",
+      "**/app.ts",
+      "**/server.ts"
+    ],
+    "entry": [
+      "**/server.ts",
+      "**/server.js",
+      "**/server.mjs",
+      "**/src/index.ts",
+      "**/src/index.js",
+      "**/src/main.ts",
+      "**/src/app.ts",
+      "**/index.ts",
+      "**/bin/**",
+      "**/worker/**/index.*",
+      "**/*.worker.ts",
+      "**/lifecycle.*"
+    ],
+    "schemas": [
+      "**/schemas/**",
+      "**/schema/**",
+      "**/*.schema.ts",
+      "**/*.schema.js",
+      "**/models/**",
+      "**/types/**"
+    ],
+    "handlers": [
+      "**/routes/**",
+      "**/handlers/**",
+      "**/adapters/**",
+      "**/services/**",
+      "**/controllers/**",
+      "**/app/api/**"
     ]
   },
   "kinds": {

@@ -1,0 +1,25 @@
+{
+  "id": "no-local-sleep",
+  "why": "Five hand-rolled sleep() helpers in one package. node:timers/promises exports setTimeout(ms, value, { signal }) which also cancels.",
+  "rule": ".claude/rules/ts-source-stays-plain.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*_test.*"
+  ],
+  "code": true,
+  "pattern": "new\\s+Promise\\s*(?:<[^>]*>)?\\s*\\(\\s*\\(?\\s*(\\w+)\\s*\\)?\\s*=>\\s*(?:global)?setTimeout\\s*\\(\\s*\\1\\b",
+  "bad": "const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));",
+  "good": "import { setTimeout as sleep } from 'node:timers/promises';\nawait sleep(500, undefined, { signal });"
+}

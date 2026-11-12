@@ -1,0 +1,25 @@
+{
+  "id": "no-dynamic-import-node-builtin",
+  "why": "await import('node:\u2026') in a handler re-resolves a built-in on every call. Built-ins are static imports at the top of the file.",
+  "rule": ".claude/rules/ts-source-stays-plain.md",
+  "concepts": [
+    "js"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*_test.*"
+  ],
+  "code": false,
+  "pattern": "\\bimport\\s*\\(\\s*['\\\"]node:",
+  "bad": "const { createHash } = await import('node:crypto');",
+  "good": "import { createHash } from 'node:crypto';"
+}

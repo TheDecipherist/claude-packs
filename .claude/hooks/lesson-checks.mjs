@@ -5,7 +5,9 @@
 //     "bad": "<snippet the check must catch>", "good": "<fixed snippet it must pass>",
 //     "examples": [{ "bad", "good" }, ...],   // more pairs, each proved like the first: a pattern widened to another language
 //                                              // brings that language's pair (admiral-fleet W2: the tenant checks in Go)
-//     "mode": "forbid" (default) | "require" | "needs",  "needs": ["<regex>", ...] }
+//     "mode": "forbid" (default) | "require" | "needs",  "needs": ["<regex>", ...],
+//     "newFilesOnly": true }   // forbid, but only in a file that does not exist yet (an edit to an existing file passes; KWB-198)
+//   A glob that ends in .ts, or in a brace that lists ts, names .mts and .cts too (glob.mts withModuleForms, KWB-198).
 //   "code": true blanks comments and strings before matching; "strings": true blanks comments only (a check that reads string literals);
 //   "prose": true blanks what a reader does not read as prose in markdown: code, URLs, frontmatter (a check on public text)
 //   "language": "rust" blanks with that row of the language table instead, for a language C's blanker misreads (a Rust lifetime reads as a char
@@ -22,7 +24,7 @@ import { join, relative } from 'node:path';
 import { readCompiled } from './lib/checks-compiled.mjs';
 import { blankCode } from './lib/cpp-scan.mjs';
 import { isContent } from './lib/content.mjs';
-import { matchesAny } from './lib/glob.mjs';
+import { allWithModuleForms, matchesAny } from './lib/glob.mjs';
 import { isMain, projectRoot, runAsHook } from './lib/hook-log.mjs';
 import { readJson } from './lib/json.mjs';
 import { languageNamed } from './lib/languages.mjs';
@@ -73,7 +75,8 @@ export function loadChecks(root) {
     const read = readCompiled(root) ?? files.map((f) => readCheck(dir, f));
     return withoutReplaced(read.filter((c) => appliesTo(root, c)).map((c) => {
         const fromConcepts = (c.concepts ?? []).flatMap((k) => conceptGlobs(layout, k) ?? []);
-        return { ...c, globs: [...resolveAliases(layout, c.globs ?? []), ...fromConcepts], exclude: resolveAliases(layout, c.exclude ?? []) };
+        // KWB-198: a check that names .ts files judges .mts and .cts files too, and leaves out the same ones
+        return { ...c, globs: allWithModuleForms([...resolveAliases(layout, c.globs ?? []), ...fromConcepts]), exclude: allWithModuleForms(resolveAliases(layout, c.exclude ?? [])) };
     }));
 }
 // What a check reads: one blanking per kind. strings: comments blanked, strings kept.
@@ -113,7 +116,8 @@ function unmetNeeds(c, text) {
 const MODES = {
     forbid: {
         violates: (c, text) => matchedTexts(c, text).length > 0,
-        added: (c, before, after) => { const had = new Set(matchedTexts(c, before)); return matchedTexts(c, after).filter((t) => !had.has(t)); },
+        added: (c, before, after) => { if (c.newFilesOnly && before !== '')
+            return []; const had = new Set(matchedTexts(c, before)); return matchedTexts(c, after).filter((t) => !had.has(t)); },
     },
     require: {
         violates: (c, text) => matchedTexts(c, text).length === 0,

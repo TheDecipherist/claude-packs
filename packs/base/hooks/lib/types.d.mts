@@ -246,6 +246,8 @@ export interface LessonCheck {
   strings?: boolean;
   language?: string;
   notInTests?: boolean;
+  /** Forbid only in a file that is new (its text before the write is empty), never in an edit to an existing one (KWB-198). */
+  newFilesOnly?: boolean;
   kind?: string;
   /** The check's file, once loaded from a pack or a project. */
   file?: string;

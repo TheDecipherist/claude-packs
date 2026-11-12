@@ -9,9 +9,9 @@ paths:
   - "tests/**/*.h"
   - "packs/**/*.cpp"
   - "packs/**/*.h"
-  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx}"
-  - "tests/**/*.{js,mjs,cjs,ts,tsx}"
-  - "test/**/*.{js,mjs,cjs,ts,tsx}"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
 ---
 
 # A comment goes at the end of its line, after the code, never in the middle of it
