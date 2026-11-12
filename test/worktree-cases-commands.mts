@@ -11,6 +11,7 @@ import { worktreeCase as BRIEF_GUARD_COUNT } from '../packs/base/hooks/brief-gua
 import { worktreeCase as INSIDE_THE_PROJECT } from '../packs/base/hooks/inside-the-project.mts';
 import { worktreeCase as LOOK_GATE } from '../packs/base/hooks/look-gate.mts';
 import { worktreeCase as MAKING_CHECK } from '../packs/base/hooks/making-check.mts';
+import { worktreeCase as GOVERNOR_ROUTE } from '../packs/base/hooks/governor-route.mts';
 import { worktreeCase as MAKING_CHECK_COUNT } from '../packs/base/hooks/making-check-count.mts';
 import { worktreeCase as NO_FIND } from '../packs/base/hooks/no-find.mts';
 import { worktreeCase as NO_POLLING } from '../packs/base/hooks/no-polling.mts';
@@ -74,6 +75,7 @@ export const COMMAND_CASES: Record<string, CheckoutCase> = {
   // a hook moved onto the contract (W4) exports its own worktree case as data, beside its selftest
   'no-find.mjs': caseFrom('no-find.mjs', NO_FIND),
   'no-polling.mjs': caseFrom('no-polling.mjs', NO_POLLING),
+  'governor-route.mjs': caseFrom('governor-route.mjs', GOVERNOR_ROUTE),
   'untrusted-boundary.mjs': caseFrom('untrusted-boundary.mjs', UNTRUSTED_BOUNDARY),
   'template-law.mjs': caseFrom('template-law.mjs', TEMPLATE_LAW),
   'brief-guard.mjs': caseFrom('brief-guard.mjs', BRIEF_GUARD),

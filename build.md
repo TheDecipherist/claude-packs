@@ -11,6 +11,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 gov-route (work/2.0.0-ts-gov-route), started 2026-11-12: W8.8 items 3, 4 and 5: `governed`, the Bash routing by updatedInput and the Agent slot, the watchdog's pause and resume; `load ask` answered by the Go client.
+  making: packs/base/tools/governed.mts, packs/base/hooks/governor-route.mts (heavy-form table in hooks lib governor-route-table.mts), resident/governor-pause.mts, the daemon's `load` message and `hook-proxy load`; concepts: none (design/shape.json declares none); reuse: take/free/queueUp/settingsFor/pauseOrder/resumeOrder/setPaused (hooks lib governor.mts), napSync (governor-store.mts), the shell segment reader (hooks lib), machineHost (governor-budget.mts).
 - 2.0.0 gov-core (work/2.0.0-ts-gov-core), started 2026-11-12: W8.8 items 0, 1, 2 and 6, the load governor's owner, `load ask|take|free`, the build queue folded in, the status line's field.
   making: packs/base/hooks/lib/governor.mts (budget, ask, take, free, jobs, settingsFor) and its CLI (lib/load-cli.mts), buildq on it, the status line's governor segment, the `load` skill; concepts: none (design/shape.json declares none); reuse: alive (hooks lib daemon-find.mts), capJobs/budgetEnv (hooks lib core-budget.mts), readJson/isRecord (hooks lib json.mts).
 - 2.0.0 pool (work/2.0.0-ts-pool), started 2026-11-12: the daemon's pool at 2 warm, grown to 8, idle 2 minutes.

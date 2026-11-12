@@ -12,12 +12,9 @@
 import { spawnSync } from 'node:child_process';
 import { capJobs, coreBudget, gentle, projectLayout } from '../hooks/lib/core-budget.mts';
 import type { Env } from '../hooks/lib/core-budget.mts';
-import { budgetOf, free, inFlight, machineHost, queueUp, take } from '../hooks/lib/governor.mts';
-import type { GovernorHost, Request, TakeResult } from '../hooks/lib/governor.mts';
-import { napSync } from '../hooks/lib/governor-store.mts';
+import { budgetOf, free, grantWhenFree, inFlight, machineHost } from '../hooks/lib/governor.mts';
+import type { GovernorHost } from '../hooks/lib/governor.mts';
 import { isMain } from '../hooks/lib/hook-log.mts';
-
-const WAIT_MS = 500;
 
 /** What `--status` prints: the governor's slots in use of its budget (every governed job, builds and the rest). */
 export function statusText(host: GovernorHost, project: string): string {
@@ -28,16 +25,6 @@ export function statusText(host: GovernorHost, project: string): string {
 /** Where the job runs and with what: the caller's environment, folder, pid and platform. */
 export interface Where { env: Env; cwd: string; pid: number; platform: string }
 
-/** Takes a grant for the build, waiting in the governor's queue (first in, first served) while it says wait. */
-function grantFor(host: GovernorHost, request: Request & { pid: number; command: string }): Extract<TakeResult, { ok: true }> {
-  let ticket: string | null = null;
-  for (let r = take(host, request); ; r = take(host, { ...request, ticket })) {
-    if (r.ok) return r;
-    ticket ??= queueUp(host, request);
-    napSync(WAIT_MS);
-  }
-}
-
 /** Runs `asked` once the governor grants it cores (up to the job's own budget), at a low priority; the command's own exit status. */
 export function run(asked: readonly string[], { env, cwd, pid, platform }: Where, host: GovernorHost = machineHost(env)): number {
   const project = env['CLAUDE_PROJECT_DIR'] ?? cwd;
@@ -45,7 +32,7 @@ export function run(asked: readonly string[], { env, cwd, pid, platform }: Where
   // may ask for, and KWB-150 holds: a build alone takes all of it, a build beside others takes what is free (at least 1 core)
   // W8.8 0b: the build runs at its agent's priority (CLAUDE_PACKS_PRIORITY, set from the brief), the governor's default without one
   const priority = env['CLAUDE_PACKS_PRIORITY'] ? Number(env['CLAUDE_PACKS_PRIORITY']) : undefined;
-  const { grant } = grantFor(host, { kind: 'build', upTo: coreBudget(env, projectLayout(project)), priority, pid, project, command: asked.join(' ') });
+  const grant = grantWhenFree(host, { kind: 'build', upTo: coreBudget(env, projectLayout(project)), priority, pid, project, command: asked.join(' ') });
   try {
     const command = gentle(capJobs(asked, grant.slots), { platform, env });
     const [program = '', ...rest] = command;

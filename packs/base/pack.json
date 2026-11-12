@@ -14,6 +14,7 @@
     "hooks/file-size-guard.mts": ["test/hooks/base/file-size-guard.test.mts"],
     "hooks/folder-law.mts": ["test/hooks/base/folder-law.test.mts"],
     "hooks/git-guard.mts": ["test/hooks/base/git-guard.test.mts"],
+    "hooks/governor-route.mts": ["test/hooks/base/governor-route.test.mts"],
     "hooks/heartbeat.mts": ["test/hooks/base/heartbeat.test.mts"],
     "hooks/inside-the-project.mts": ["test/hooks/base/inside-the-project.test.mts"],
     "hooks/kit-fresh.mts": ["test/hooks/base/kit-fresh.test.mts"],
@@ -22,7 +23,10 @@
     "hooks/lib/audience.mts": ["test/unit/hooks-lib/audience.test.mts"],
     "hooks/lib/branches-ahead.mts": ["test/unit/hooks-lib/git-guard-libs.test.mts", "test/unit/hooks-lib/hub-rig.test.mts", "test/unit/hooks-lib/push-form.test.mts", "test/unit/hooks-lib/remote-heads.test.mts", "test/unit/hooks-lib/stop-verdict.test.mts"],
     "hooks/lib/brief-findings.mts": ["test/unit/hooks-lib/brief-findings.test.mts"],
-    "hooks/lib/governor.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts"],
+    "hooks/lib/governor.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts", "test/tools/base/governed.test.mts"],
+    "hooks/lib/governor-agents.mts": ["test/hooks/base/governor-route.test.mts"],
+    "hooks/lib/heavy-commands.mts": ["test/hooks/base/governor-route.test.mts"],
+    "hooks/lib/governor-route-selftest.mts": ["test/hooks/base/governor-route.test.mts"],
     "hooks/lib/governor-budget.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts"],
     "hooks/lib/governor-policy.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts"],
     "hooks/lib/governor-settings.mts": ["test/unit/hooks-lib/governor.test.mts"],
@@ -150,6 +154,7 @@
     "hooks/template-law.mts": ["test/hooks/base/template-law.test.mts"],
     "hooks/untrusted-boundary.mts": ["test/hooks/base/untrusted-boundary.test.mts"],
     "tools/load.mts": ["test/integration/load-ask.test.mts"],
+    "tools/governed.mts": ["test/tools/base/governed.test.mts"],
     "tools/quiet-test.mts": ["test/tools/base/quiet-test.test.mts"],
     "tools/shape-symmetry-selftest.mts": ["test/tools/base/shape-symmetry.test.mts"],
     "tools/shape-symmetry.mts": ["test/tools/base/shape-symmetry.test.mts"],
@@ -373,6 +378,13 @@
             "role": "recorder",
             "order": 30,
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/governor-route.mjs\"",
+            "role": "judge",
+            "order": 40,
+            "timeout": 60
           }
         ]
       },
@@ -427,6 +439,13 @@
             "role": "judge",
             "order": 80,
             "timeout": 20
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/governor-route.mjs\"",
+            "role": "judge",
+            "order": 90,
+            "timeout": 10
           }
         ]
       },
@@ -544,6 +563,19 @@
             "role": "judge",
             "order": 10,
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/governor-route.mjs\"",
+            "role": "recorder",
+            "order": 10,
+            "timeout": 10
           }
         ]
       }
