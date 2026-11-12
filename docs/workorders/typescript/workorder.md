@@ -777,7 +777,8 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
      `docs/workorders/bandwarp/briefs/`, a merge commit and a gate named in its progress line), and draws five with a seed written
      in the evidence: one each of UI panel, UI settings, DSP and presets, and one from the rest; the list, the seed and the draw in
      `build/evidence/W11/ab-pick.md`.
-   - Each task: a fresh clone of bandwarp (read from `~/projects/bandwarp`, never written there, never pushed) into
+   - Each task: a fresh clone of bandwarp (read from `~/projects/bandwarp`, never written there; bandwarp is being completed on the
+     PC and the Mac never commits, merges or pushes on it, the user, 2026-11-12; the clone has no push remote) into
      `build/ab/TASK/`, checked out at the commit before the original agent's first commit; kit 2.0 installed into it from this
      tree's packed tarball (`init --from` its own install block, or `update` over its 1.9 install); bandwarp's dependencies read
      from where its brief names them; one agent given the original brief word for word, on the model the original agent's
