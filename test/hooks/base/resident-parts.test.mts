@@ -3,6 +3,7 @@ import { chmodSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createConnection } from 'node:net';
 import { join } from 'node:path';
 import { fingerprint } from '../../../packs/base/hooks/lib/near-copies.mts';
+import { tmpKeyed } from '../../../packs/base/hooks/lib/hash.mts';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { decodeReply, encodeRequest, PROTOCOL } from '../../../packs/base/hooks/lib/proxy-wire.mts';
 import { residentIndex, mayHaveWritten } from '../../../packs/base/hooks/resident/index.mts';
@@ -155,6 +156,23 @@ test('the index: built on the first query, the files holding a statement, stale 
   assert.deepEqual(index.candidates(hashes).map((f) => f.file).sort(), ['src/a.ts', 'src/b.ts']);
   assert.deepEqual(index.candidates(['nothing']), []);
   assert.deepEqual(['Write', 'Edit', 'Bash', 'Read'].map(mayHaveWritten), [true, true, true, false]);
+});
+
+test('the index warms in a worker thread of its own: the main thread is free meanwhile, and the kept index is there when it ends', async () => {
+  const dir = scratchDir('resident-warm-');
+  put(join(dir, 'src/a.ts'), 'const total = items.reduce((sum, item) => sum + item.price * item.count, 0);\nconst label = names.map((name) => name.trim().toLowerCase()).join(", ");\n');
+  const index = residentIndex(dir, () => ({ folders: {}, concepts: {} }));
+  const kept = tmpKeyed('claude-packs-repo-', dir, '.json');
+  assert.equal(index.warming(), null, 'nothing warms until it is started');
+  index.warm(new URL('../../../packs/base/hooks/resident/warm.mjs', import.meta.url));
+  const warming = index.warming();
+  assert.notEqual(warming, null, 'started: a query would wait for it');
+  assert.equal(index.size(), 0, 'and the main thread has built nothing');
+  await warming;
+  assert.equal(index.warming(), null);
+  assert.match(readFileSync(kept, 'utf8'), /src\/a\.ts/, 'the worker kept the index it built');
+  assert.equal(index.size(), 0, 'the main thread reads it on its first query, not before');
+  index.close();
 });
 
 // ---- the pool, on the real worker with a folder of three small hooks ----

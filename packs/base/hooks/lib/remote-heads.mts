@@ -16,8 +16,8 @@
 //   withHeads(cwd, env, remote, cfg, judge) -> what judge found, looked up live again before a refusal | { error }
 //   urlOf(cwd, env, remote, { repo }) / target(cwd, env, branch) / ownCommits(cwd, env, ref, heads, have) / knownShas(cwd, env, heads)
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { readText } from './files.mts';
+import { dirname, join, resolve } from 'node:path';
+import { put, readText } from './files.mts';
 import { escapeRegExp } from './glob.mts';
 import { gitOut, gitRun } from './git-run.mts';
 import type { GitOptions } from './git-run.mts';
@@ -39,6 +39,9 @@ export interface HeadsOptions {
   live?: boolean;
   /** The time the look is kept under, in ms. */
   now?: number;
+  /** Answer from the kept look and this repo's own remote-tracking refs only, never the network (git-guard's Pre Bash law, W-budgets):
+   *  a look is taken live only when none was ever kept, or a push was seen since the kept one (`pushSeen`). */
+  offline?: boolean;
   /** The moment (ms since the epoch) a live look must be answered by: the end of a session gives up on GitHub after one second (W8.3). */
   until?: number;
 }
@@ -69,6 +72,8 @@ export interface HeadsFound { url: string; heads: Map<string, string>; cached: b
 export interface HeadsFailed { url: string | null; error: string }
 export type HeadsLook = HeadsFound | HeadsFailed;
 export interface Failure { error: string }
+
+const PUSH_SEEN = 'claude-packs-pushed';
 
 interface CacheEntry { time: number; heads: Record<string, string> }
 
@@ -105,13 +110,31 @@ export function urlOf(cwd: string, env: GitEnv, remote: string, { repo = null }:
   return /^(https?:|file:|\/)/.test(repo) ? repo : `https://github.com/${repo.replace(/\.git$/, '')}.git`;
 }
 
-export function remoteHeads(cwd: string, env: GitEnv, remote: string, { tokenVar = 'PERSONAL_GITHUB_TOKEN', repo = null, live = false, now = Date.now(), until }: HeadsOptions = {}): HeadsLook {
+/** Records that a push was seen (a push by URL moves no local ref): the next offline look is taken live once. */
+export function pushSeen(cwd: string, env: GitEnv, now = Date.now()): void {
+  const file = cacheFile(cwd, env);
+  if (file) put(join(dirname(file), PUSH_SEEN), String(now));
+}
+
+/** The heads this repo's remote-tracking refs hold for a remote (every push by name and fetch updates them), keyed `<remote>/<branch>`. */
+export function trackedHeads(cwd: string, env: GitEnv, remote: string): Map<string, string> {
+  const out = gitOut(['for-each-ref', '--format=%(refname)%09%(objectname)', `refs/remotes/${remote}/`], gitAt(cwd, env));
+  const heads = new Map<string, string>();
+  for (const line of (out ?? '').split('\n').filter(Boolean)) {
+    const [ref, sha] = line.split('\t');
+    if (ref && sha) heads.set(ref.replace(/^refs\/remotes\//, ''), sha);
+  }
+  return heads;
+}
+
+export function remoteHeads(cwd: string, env: GitEnv, remote: string, { tokenVar = 'PERSONAL_GITHUB_TOKEN', repo = null, live = false, offline = false, now = Date.now(), until }: HeadsOptions = {}): HeadsLook {
   const url = urlOf(cwd, env, remote, { repo });
   if (!url) return { url: null, error: `no remote named ${remote}` };
   const file = cacheFile(cwd, env);
   const cache = (file ? readJson<Record<string, CacheEntry>>(file, {}) : null) ?? {};
   const hit = cache[url];
-  if (!live && hit?.heads) return { url, heads: new Map(Object.entries(hit.heads)), cached: true };
+  const pushed = offline && hit && file ? Number(readText(join(dirname(file), PUSH_SEEN))) || 0 : 0;
+  if (!live && hit?.heads && !(pushed > hit.time)) return { url, heads: new Map(Object.entries(hit.heads)), cached: true };
   const token = isGitHub(url) ? tokenFor(tokenVar, env) : null;
   const basic = token ? Buffer.from(`x-access-token:${token}`).toString('base64') : '';
   const extra: Record<string, string> = token ? { GIT_CONFIG_COUNT: '2', GIT_CONFIG_KEY_0: 'http.extraHeader', GIT_CONFIG_VALUE_0: `Authorization: Basic ${basic}`, GIT_CONFIG_KEY_1: 'credential.helper', GIT_CONFIG_VALUE_1: '' } : {};
@@ -156,7 +179,9 @@ export function withHeads<T>(cwd: string, env: GitEnv, remote: string, cfg: GitG
   let h = remoteHeads(cwd, env, remote, cfg);
   if ('error' in h) return unreached(h);
   let found = judge(h);
-  if (found && h.cached && !cfg.cachedOnly) {
+  if (found && cfg.offline && h.cached) { // the kept look and the local tracking refs together, never the network
+    found = judge({ ...h, heads: new Map([...h.heads, ...trackedHeads(cwd, env, remote)]) });
+  } else if (found && h.cached && !cfg.cachedOnly) {
     h = remoteHeads(cwd, env, remote, { ...cfg, live: true });
     if ('error' in h) return unreached(h);
     found = judge(h);

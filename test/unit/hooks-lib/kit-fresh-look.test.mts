@@ -56,11 +56,11 @@ test('the kit\'s own checkout lacking origin/main refuses a commit; a planted on
   const dir = scratchDir('fresh-kit-');
   put(join(dir, 'package.json'), toJson({ name: KIT, version: '2.0.0' }));
   assert.equal(isKitRepo(dir), true);
-  const behind = answers({ fetch: { ok: true, out: '', err: '' }, 'rev-parse': { ok: true, out: 'work/2.0.0-x', err: '' }, 'for-each-ref': { ok: true, out: '', err: '' }, 'merge-base': { ok: false, out: '', err: '' } });
+  const behind = answers({ fetch: { ok: true, out: '', err: '' }, 'rev-parse': { ok: true, out: 'work/2.0.0-x', err: '' }, 'for-each-ref': { ok: true, out: 'origin/main', err: '' } });
   assert.equal(kitVerdict(dir, { git: behind, fetch: false })?.refuseCommit, true);
   assert.match(atCommit(dir, 'git commit -m x', { env: {}, git: behind }) ?? '', /lacks newer work: origin\/main/);
   assert.equal(atCommit(dir, 'git status', { env: {}, git: behind }), null, 'not a commit');
-  const level = answers({ fetch: { ok: true, out: '', err: '' }, 'rev-parse': { ok: true, out: 'main', err: '' }, 'for-each-ref': { ok: true, out: '', err: '' }, 'merge-base': { ok: true, out: '', err: '' } });
+  const level = answers({ fetch: { ok: true, out: '', err: '' }, 'rev-parse': { ok: true, out: 'main', err: '' }, 'for-each-ref': { ok: true, out: '', err: '' } });
   assert.equal(kitVerdict(dir, { git: level, fetch: false }), null);
   assert.equal(atStart(dir, { env: {}, now: 0, git: level }), null);
 });

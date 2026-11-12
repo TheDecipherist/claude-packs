@@ -3,16 +3,24 @@
 // `def:<name>`; and `dup:<window hash>` of the duplicate index, resident/dup-windows.mts), and the answer is those files' entries only. The index is built when first asked and rebuilt, from the files' mtimes,
 // after a tool call that may have written (a PostToolUse event marks it stale), so a write and a second write repeating it, served by
 // another worker, see the first. A key is looked up in a map built with the index, not found by a walk of every file per question (KWB-201).
+import { Worker } from 'node:worker_threads';
 import { dupWindows } from './dup-windows.mts';
 import { defKey, repoIndex, shapeKey, type RepoIndex } from '../lib/repo-index.mts';
 import type { FileStatements } from '../lib/near-copies.mts';
+import type { WarmData } from './warm.mts';
 import type { Layout } from '../lib/types.d.mts';
 
 export interface ResidentIndex {
   /** The files that hold any of the keys (statement hashes, `shape:` ids, `def:` names), with their statements, shapes and definitions. */
   candidates: (keys: readonly string[]) => FileStatements[];
+  /** The warm-up still running (a query waits for it), or null. */
+  warming: () => Promise<void> | null;
   /** A tool call may have written: the next query reads the files' mtimes again. */
   stale: () => void;
+  /** Builds both indexes in a worker thread of their own (`warmUrl`), so the first query reads them kept; the pool holds an ask meanwhile (`warming`), the main thread never blocked. */
+  warm: (warmUrl: URL) => void;
+  /** Ends the warm-up worker, if it still runs. */
+  close: () => void;
   /** Files indexed now (0 before the first query). */
   size: () => number;
 }
@@ -32,6 +40,8 @@ function keysOf(index: RepoIndex): Map<string, string[]> {
 }
 
 export function residentIndex(root: string, layout: () => Layout): ResidentIndex {
+  let warming: Promise<void> | null = null;
+  let builder: Worker | null = null;
   let built: { index: RepoIndex; keys: Map<string, string[]> } | null = null;
   let dirty = true;
   const fresh = (): { index: RepoIndex; keys: Map<string, string[]> } => {
@@ -51,6 +61,19 @@ export function residentIndex(root: string, layout: () => Layout): ResidentIndex
   return {
     // a question names either kind of key; the index it does not ask is not built for it
     candidates: (wanted) => [...(wanted.some((k) => !k.startsWith('dup:')) ? repoOf(wanted) : []), ...dup.find(wanted)],
+    warming: () => warming,
+    warm: (warmUrl) => {
+      const data: WarmData = { root, layout: layout() };
+      warming = new Promise<void>((done) => {
+        const w = new Worker(warmUrl, { workerData: data, execArgv: [] }); // none of the parent's (a test's --import gives a worker a temp folder of its own)
+        builder = w;
+        const over = (): void => { builder = null; warming = null; done(); };   // built, or failed: the main thread builds what is missing itself
+        w.once('message', () => void w.terminate());
+        w.once('error', over);
+        w.once('exit', over);
+      });
+    },
+    close: () => { void builder?.terminate(); },
     stale: () => { dirty = true; dup.stale(); },
     size: () => (built === null ? 0 : Object.keys(built.index).length),
   };

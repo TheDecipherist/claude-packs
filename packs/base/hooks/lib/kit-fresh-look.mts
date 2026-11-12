@@ -108,11 +108,10 @@ export function kitVerdict(root: string, { git, fetch }: { git: KitGit; fetch: b
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD').out;
   const own = [readJson<{ version?: unknown }>(join(root, 'package.json'))?.version, /^work\/(\d+\.\d+\.\d+)-/.exec(branch)?.[1]]
     .filter((v): v is string => parseVersion(v) !== null).sort(compareVersions).at(-1);
-  const contained = (ref: string): boolean => git('merge-base', '--is-ancestor', ref, 'HEAD').ok;
-  const refs = git('for-each-ref', '--format=%(refname:short)', 'refs/remotes/origin/work').out.split('\n').filter((r) => WORK_BRANCH.test(r));
-  const newer = refs.filter((r) => compareVersions(workVersion(r), own) > 0 && !contained(r))
-    .sort((a, b) => compareVersions(workVersion(b), workVersion(a)));
-  const behindMain = git('rev-parse', '-q', '--verify', 'origin/main').ok && !contained('origin/main');
+  // the refs HEAD does not contain, in one call (a merge-base each took 100 to 800 ms on a commit in a worktree-heavy kit repo)
+  const missing = git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
+  const newer = missing.filter((r) => compareVersions(workVersion(r), own) > 0).sort((a, b) => compareVersions(workVersion(b), workVersion(a)));
+  const behindMain = missing.includes('origin/main');
   const lacks = [...(behindMain ? ['origin/main'] : []), ...newer];
   if (!lacks.length) return notes.length ? { say: `kit-fresh: ${notes.join('; ')}. Not checked, not blocked.`, refuseCommit: false } : null;
   const say = `kit-fresh: this checkout (${branch}, ${own ?? 'no version'}) lacks newer work: ${lacks.slice(0, 4).join(', ')}. ` +

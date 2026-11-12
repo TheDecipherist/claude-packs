@@ -1,7 +1,7 @@
 // resident/event: one event, from a decoded request to its reply (review-2-go 1.4, 1.11, 2.9 to 2.13, 4.2). The judges of the table's
 // rows for the event run at once on the pool; after the first exit 2 the rest get GRACE_MS more, and every refusal is returned in the
 // table's order, never the order they arrived in. Recorders then run in turn: those of a PreToolUse call for every call (they record
-// the call, a refusal included), the rest only when nothing refused. A hook that has not answered by the client's deadline is named in
+// the call, a refusal included), the rest only when nothing refused; a PostToolUse call's are not waited for (the reply goes first). A hook that has not answered by the client's deadline is named in
 // an "over time" line and in the crash log; one that answers after the reply is logged `late`, its exit 2 counted by `logs`. The
 // timing and event lines are written here, in one append, by this thread: workers only return `{hook, ms, code}`.
 import { crashVerdict } from '../lib/crash-policy.mts';
@@ -107,9 +107,15 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
   // the recorders: in turn, and only while the client still waits
   const record = rows.filter((r) => r.role === 'recorder' && (ev.hook_event_name === 'PreToolUse' || !refused));
   const skipped: string[] = [];
-  for (const { hook } of record) {
-    if (Date.now() >= request.deadline) { skipped.push(hook); continue; }
-    phase.ran.set(hook, await d.pool.run(job(hook)));
+  if (ev.hook_event_name === 'PostToolUse') {
+    // a Post recorder refuses nothing and the call has already happened: the reply does not wait for it (once-only-index took 120 to 148 ms
+    // in a worktree). They run in turn, as before, and are logged when each ends, as a hook that answers after the reply is.
+    void (async () => { for (const { hook } of record) lateLine(root, ev, hook, await d.pool.run(job(hook))); })();
+  } else {
+    for (const { hook } of record) {
+      if (Date.now() >= request.deadline) { skipped.push(hook); continue; }
+      phase.ran.set(hook, await d.pool.run(job(hook)));
+    }
   }
   const slow = [...phase.slow, ...skipped];
 

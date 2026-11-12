@@ -135,6 +135,7 @@
     "hooks/resident/socket.mts": ["test/hooks/base/resident-parts.test.mts"],
     "hooks/resident/state.mts": ["test/hooks/base/resident-parts.test.mts", "test/unit/lib/daemon-cli.test.mts"],
     "hooks/resident/status.mts": ["test/integration/status-served.test.mts", "test/unit/hooks-lib/status-keeper.test.mts"],
+    "hooks/resident/warm.mts": ["test/hooks/base/resident-parts.test.mts"],
     "hooks/resident/worker.mts": ["test/hooks/base/hook-children.test.mts", "test/hooks/base/resident-parts.test.mts"],
     "hooks/reuse-hint.mts": ["test/hooks/base/reuse-hint.test.mts"],
     "hooks/run-hooks.mts": ["test/hooks/base/run-hooks-crashes.test.mts", "test/hooks/base/run-hooks.test.mts"],

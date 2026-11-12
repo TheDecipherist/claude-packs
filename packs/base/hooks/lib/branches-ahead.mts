@@ -29,7 +29,7 @@ export function unpushed(cwd: string, env: GitEnv, branch: string | null, cfg: G
   if (!branch || branch === 'HEAD' || gitOut(['rev-parse', '-q', '--verify', 'HEAD'], gitAt(cwd, env)) === null) return null;
   const { remote } = target(cwd, env, branch);
   if (!urlOf(cwd, env, remote, cfg)) return null; // no remote and no guards.git.repo: nothing to compare with
-  return withHeads<Unpushed>(cwd, env, remote, cfg, (h) => {
+  return withHeads<Unpushed>(cwd, env, remote, { ...cfg, offline: true }, (h) => {
     const commits = ownCommits(cwd, env, 'HEAD', h.heads);
     return commits?.length ? { branch, remote, url: h.url, commits } : null;
   });

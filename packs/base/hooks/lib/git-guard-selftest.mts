@@ -2,7 +2,7 @@
 // pushed-selftest.mts), the owner-push laws (KWB-157) and the trunk law (KWB-96, trunk-lag-selftest.mts), each on a real repo.
 // A selftest module is left out of the repo lint's no-process gates (d-20): it runs as a process.
 import { lagCases } from './trunk-lag-selftest.mts';
-import { ownerCases, pushedCases } from './pushed-selftest.mts';
+import { offlineCases, ownerCases, pushedCases } from './pushed-selftest.mts';
 import { stopCacheCases } from './stop-cache-selftest.mts';
 import { bashOf, runHook, scratchProject, snapshot, writtenSince } from './selftest.mts';
 import type { Unpushed } from './push-form.mts';
@@ -144,6 +144,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
   }
   const grouped: readonly (readonly [string, VerdictRow[]])[] = [
     ['pushed law', pushedCases(hookFile)],   // KWB-26: a real repo and a bare "GitHub" beside it
+    ['offline law', offlineCases(hookFile)],  // the Pre Bash law never waits on the network
     ['owner pushes', ownerCases(hookFile)],  // guards.git.pushNeedsYes (KWB-157)
     ['trunk law', lagCases(hookFile)],       // the trunk a landing leaves behind in the main checkout (KWB-96)
     ['kept Stop look', stopCacheCases(hookFile)],   // the verdict served while no ref changed, GitHub given one second (W8.3)
@@ -155,7 +156,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
   const n = (name: string): number => grouped.find(([g]) => g === name)?.[1].length ?? 0;
   const counts = [
     `${tokenCases.length + 1} token cases`, `${mustBlock.length + 7} house refusals`, `${mustPass.length + 4} passes`,
-    `${n('pushed law')} pushed-law cases`, `${n('owner pushes')} owner-push cases`, `${n('trunk law')} trunk-law cases`,
+    `${n('pushed law')} pushed-law cases`, `${n('offline law')} offline cases`, `${n('owner pushes')} owner-push cases`, `${n('trunk law')} trunk-law cases`,
     `${n('kept Stop look')} kept-look cases`, `${n('write trap')} write-trap cases`,
   ];
   console.log(`git-guard selftest: OK (${counts.join(', ')})`);

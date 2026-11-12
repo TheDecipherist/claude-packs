@@ -41,6 +41,7 @@ export const PLANTS: readonly Plant[] = [
   { name: 'rm-judge', source: source("return no('rm refused');"), row: judge('Race') },
   { name: 'post-judge', source: source("return no('post refused');"), row: judge('PostRef', 10, ['PostToolUse']) },
   { name: 'rec-post', source: source("note(ctx, 'post.txt', 'rec-post\\n');\nreturn pass;"), row: recorder('PostRef', 20, ['PostToolUse']) },
+  { name: 'rec-post-slow', source: source("await nap(300);\nnote(ctx, 'postslow.txt', 'rec-post-slow\\n');\nreturn pass;"), row: recorder('PostSlow', 20, ['PostToolUse']) },
 ];
 
 /** A judge that writes a file: the table check of a judge (parallel, writes nothing) finds it. Not in the daemon's table. */

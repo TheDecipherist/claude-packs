@@ -125,3 +125,36 @@ export function ownerCases(hookFile: string): VerdictRow[] {
   rmSync(top, { recursive: true, force: true });
   return cases;
 }
+
+// The Pre Bash law never waits on the network (W-budgets): it reads the kept look and the local remote-tracking refs. A push by
+// URL moves no local ref, so the hook's sight of the push command sends the next commit to GitHub once; with none seen, GitHub
+// is out of reach for the law, which then judges from what this machine holds.
+export function offlineCases(hookFile: string): VerdictRow[] {
+  const { top, dir, hub, commit, push, run: runAt } = hubRepo('git-guard-offline-');
+  const bash = (command: string): HookRun => runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } });
+  const cases: VerdictRow[] = [];
+  const C = "git commit -m 'next' -- a.txt";
+  const away = `${hub}.away`;
+  commit('first');
+  push('main');
+  git(dir, 'switch', '-q', '-c', 'work/x');
+  commit('one');
+  cases.push(['an unpushed commit: the next commit is refused', bash(C).status, 2]);
+  git(dir, 'push', '-q', hub, 'work/x'); // by URL: no tracking ref moves, the kept look is old
+  renameSync(hub, away);
+  const blind = bash(C);
+  cases.push(['GitHub away, no push seen: judged from this machine alone, with no network call and no warning', blind.status === 2 && !/could not be reached/.test(blind.stdout + blind.stderr), true]);
+  renameSync(away, hub);
+  cases.push(['the push command seen: the next commit is looked up once and passes', bash(`git push ${hub} work/x`).status, 0]);
+  cases.push(['and the commit after the push passes (the look is kept)', bash(C).status, 0]);
+  renameSync(hub, away);
+  cases.push(['and once kept, GitHub away changes nothing', bash(C).status, 0]);
+  renameSync(away, hub);
+  commit('two');
+  git(dir, 'push', '-q', 'origin', 'work/x'); // by name: the tracking ref answers
+  renameSync(hub, away);
+  cases.push(['pushed by name, GitHub away: the tracking ref clears the commit', bash(C).status, 0]);
+  renameSync(away, hub);
+  rmSync(top, { recursive: true, force: true });
+  return cases;
+}

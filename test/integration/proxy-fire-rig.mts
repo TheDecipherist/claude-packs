@@ -1,9 +1,24 @@
 // What the proxy tests share for firing an event as Claude Code does: through the project's picker (stdin JSON, CLAUDE_PROJECT_DIR in the
 // environment), and finding the daemon that served it.
 import { spawn, spawnSync } from 'node:child_process';
+import { chmodSync } from 'node:fs';
 import { join } from 'node:path';
+import { scratchDir } from '../../packs/base/hooks/lib/files.mts';
+import { PACKS_DIR } from '../../lib/packs.mts';
+import { installBinary } from '../../lib/proxy-install.mts';
+import { fixture } from '../fixtures/installs.mts';
 import type { ProxyRig } from '../fixtures/proxy-rig.mts';
-import { CLI } from '../kit-cli.mts';
+import { CLI, assert } from '../kit-cli.mts';
+
+/** A scratch install of the js-ts configuration with the proxy binary installed in a cache folder of its own, and the environment the picker runs in. */
+export function proxyRig(cachePrefix: string): ProxyRig {
+  const project = fixture('js-ts');
+  const cache = scratchDir(cachePrefix);
+  chmodSync(cache, 0o700);
+  const env = { PATH: process.env.PATH ?? '', HOME: cache, CLAUDE_PROJECT_DIR: project, CLAUDE_PACKS_CACHE: cache };
+  assert.equal(installBinary(join(PACKS_DIR, '..'), env).kind, 'installed');
+  return { project, cache, env };
+}
 
 const picker = (r: ProxyRig): string[] => [join(r.project, '.claude', 'hooks', 'bin', 'hook-proxy'), '60'];
 /** One event (its JSON) through the picker, waited for: the exit code. */
