@@ -47,9 +47,3 @@ export function promptOfLine(line: string): string | null {
   const e = parseJson<TranscriptEntry>(line);   // a torn line is null
   return e ? realPrompt(e) : null;
 }
-
-/** The prompt a line's bytes hold, or null: a line that is no user entry, or holds a tool result, is passed over undecoded. */
-export function promptOfBytes(line: Buffer): string | null {
-  if (line.length === 0 || !line.includes('"user"') || line.includes('"type":"tool_result"')) return null;
-  return promptOfLine(line.toString('utf8'));
-}

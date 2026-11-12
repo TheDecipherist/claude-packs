@@ -6,11 +6,10 @@
 //       when it cannot be known, e.g. a sed -i), by the shared write reader for the shell.
 // A prompt starts a turn; tool results, hook feedback, task notifications and the system's own lines do not, so a turn
 // sent back by a Stop hook is judged again with everything it wrote before.
-import { closeSync, fstatSync, openSync } from 'node:fs';
+import { closeSync, fstatSync, openSync, readSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseJson } from './json.mts';
-import { eachLineBack } from './lines-back.mts';
-import { promptOfBytes } from './prompt-of.mts';
+import { realPrompt } from './prompt-of.mts';
 import type { Block, TranscriptEntry } from './prompt-of.mts';
 import { shellWrites } from './shell-writes.mts';
 import type { Env } from './shell-writes.mts';
@@ -42,6 +41,15 @@ export interface TurnWrite {
 
 const blocksOf = (e: TranscriptEntry): readonly (Block | null)[] => (Array.isArray(e.message?.content) ? e.message.content : []);
 
+// The transcript's last entries, read from its end: the last TAIL bytes, quadrupled until they hold the turn's prompt (KWB-24: a
+// long session's transcript is hundreds of MB, and reading all of it at every Stop took seconds). -> { entries, start }
+const TAIL = 1 << 20;
+
+interface Tail {
+  entries: TranscriptEntry[];
+  start: number;
+}
+
 function parseEntries(lines: readonly string[]): TranscriptEntry[] {
   const entries: TranscriptEntry[] = [];
   for (const l of lines) {
@@ -52,39 +60,34 @@ function parseEntries(lines: readonly string[]): TranscriptEntry[] {
   return entries;
 }
 
-// The turn's entries, read from the transcript's end back to its prompt by eachLineBack (KWB-24: a long session's transcript is hundreds of
-// MB). Only the lines the turn is made of become strings: an assistant entry (its text and tool calls) and a refused call's result. Every
-// quote inside a JSON string is escaped, so `"assistant"` and `"is_error":true` are an entry's own fields, never text inside it; a tool
-// result that went well, nearly every byte of an unattended run's turn, is passed over undecoded (rss: the two Stop hooks that read the
-// turn decoded and parsed all 25 MB of one, 213 MB of a worker's RSS each).
-const KEPT = ['"assistant"', '"is_error":true'];
-
-let decoded = 0;
-/** Bytes of transcript lines this process made strings of, so far (a counter for tests). */
-export const bytesDecoded = (): number => decoded;
-
-function turnEntries(path: string): TranscriptEntry[] {
+function tailEntries(path: string): Tail {
   let fd: number;
-  try { fd = openSync(path, 'r'); } catch { return []; }
-  const lines: string[] = [];
+  try { fd = openSync(path, 'r'); } catch { return { entries: [], start: 0 }; }
   try {
-    eachLineBack(fd, fstatSync(fd).size, (line) => {
-      if (promptOfBytes(line) !== null) return true;
-      if (KEPT.some((k) => line.includes(k))) { decoded += line.length; lines.push(line.toString('utf8')); }
-      return false;
-    });
+    const size = fstatSync(fd).size;
+    for (let want = TAIL; ; want *= 4) {
+      const from = Math.max(0, size - want);
+      const buf = Buffer.alloc(size - from);
+      readSync(fd, buf, 0, buf.length, from);
+      const lines = buf.toString('utf8').split('\n');
+      if (from > 0) lines.shift(); // a line cut by the start of the window
+      const entries = parseEntries(lines);
+      for (let i = entries.length - 1; i >= 0; i -= 1) {
+        if (realPrompt(entries[i] ?? {}) !== null) return { entries, start: i + 1 };
+      }
+      if (from === 0) return { entries, start: 0 };
+    }
   } finally {
     closeSync(fd);
   }
-  return parseEntries(lines.reverse());
 }
 
 export function lastTurn(path: string): Turn {
-  const entries = turnEntries(path);
+  const { entries, start } = tailEntries(path);
   const refused = new Set<string>();
   const uses: ToolUse[] = [];
   const text: string[] = [];
-  for (const e of entries) {
+  for (const e of entries.slice(start)) {
     if (e.isSidechain) continue;
     const content = blocksOf(e);
     if (e.type === 'user') for (const b of content) if (b?.type === 'tool_result' && b.is_error && b.tool_use_id) refused.add(b.tool_use_id);

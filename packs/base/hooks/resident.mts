@@ -11,7 +11,6 @@
 import { availableParallelism, homedir } from 'node:os';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { setFlagsFromString } from 'node:v8';
 import { readText } from './lib/files.mts';
 import { isMain } from './lib/hook-log.mts';
 import { readHookTable } from './lib/hook-table.mts';
@@ -36,10 +35,6 @@ const LOCK_FILE = join('.claude', 'claude-packs.lock.json');
 const PRELOAD = 1;
 /** At most this many workers import any one hook while the pool is not full (W8.4). */
 const SPREAD = 4;
-/** V8 flags the daemon sets before its workers start, for every isolate after (rss: 16 workers that each ran every hook held 389 MB
- *  with V8's defaults and 264 MB with these, build/evidence/rss): no optimizing or baseline compiler, and V8's size-over-speed choices.
- *  A hook runs a few milliseconds of code per event, its time in I/O and regular expressions, which these leave alone. */
-export const SMALL_V8 = ['--optimize-for-size', '--no-turbofan', '--no-maglev', '--no-sparkplug'] as const;
 
 /** What the daemon takes of its process, given by whoever starts it (the tail below, or a test). */
 export interface Host { env: Readonly<Record<string, string | undefined>>; uid: number; home: string; platform: string; node: string; script: string }
@@ -103,12 +98,10 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
   if (await answers(files.socket)) { releaseStartLock(files.lock); sayReady(o.readyFd, 'busy\n'); return 0; }
   const table = readHookTable(o.hooks);
   if (table === null) { log(`start refused: ${o.hooks} holds no hook table`); releaseStartLock(files.lock); sayReady(o.readyFd, 'failed no hook table\n'); return 1; }
-  for (const flag of SMALL_V8) setFlagsFromString(flag);
   const index = residentIndex(project, () => readLayout(project));
   const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
-  // the pool never grows past its size: a burst of 16 events at once grew it to 20 to 22 workers, each about 10 MB the daemon kept (rss)
   const pool = startPool({
-    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, preload: Math.min(PRELOAD, o.pool), spread: SPREAD, max: o.pool,
+    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, preload: Math.min(PRELOAD, o.pool), spread: SPREAD, max: Math.max(32, o.pool),
     idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, log,
   });
   const failed = await pool.ready();

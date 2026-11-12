@@ -5,8 +5,7 @@
 // prompt (a tool result, nearly every line, is never made a string); the answer is kept by path with the size and mtime it was read at and the
 // offset after the last whole line, and a later call reads only what was appended since. A file that shrank or changed at its size is read again.
 import { closeSync, fstatSync, openSync, readSync } from 'node:fs';
-import { eachLineBack } from './lines-back.mts';
-import { promptOfBytes } from './prompt-of.mts';
+import { promptOfLine } from './prompt-of.mts';
 
 const CHUNK = 1 << 20;
 const KEPT = 8;   // transcripts remembered: a session has one, agents a few
@@ -20,12 +19,35 @@ let total = 0;
 /** Bytes read from transcripts by this process so far (a counter for tests: a second call must read none). */
 export const bytesRead = (): number => total;
 
-/** The whole file, last line first: the prompt of the last line that holds one, and the offset after the last newline. */
+/** The prompt a line's bytes hold, or null: a line that is no user entry, or holds a tool result, is passed over undecoded. */
+function promptOfBytes(line: Buffer): string | null {
+  if (line.length === 0 || !line.includes('"user"') || line.includes('"type":"tool_result"')) return null;
+  return promptOfLine(line.toString('utf8'));
+}
+
+/** The whole file, last piece first: the prompt of the last line that holds one, and the offset after the last newline. */
 function scanBack(fd: number, size: number): Scan {
-  const found: { prompt: string | null } = { prompt: null };
-  const walked = eachLineBack(fd, size, (line) => (found.prompt = promptOfBytes(line)) !== null);
-  total += walked.read;
-  return { prompt: found.prompt ?? '', scanned: walked.lastNewline };
+  let scratch: Buffer = Buffer.allocUnsafe(2 * CHUNK);   // the piece, then the start of the line it cut (the end of the piece after it)
+  let carry: Buffer = Buffer.alloc(0);
+  let prompt: string | null = null;
+  let scanned = -1;
+  for (let end = size; end > 0 && (prompt === null || scanned < 0); end -= CHUNK) {
+    const from = Math.max(0, end - CHUNK);
+    const n = readSync(fd, scratch, 0, end - from, from);
+    total += n;
+    if (n + carry.length > scratch.length) scratch = Buffer.concat([scratch.subarray(0, n), carry], 2 * (n + carry.length));
+    else carry.copy(scratch, n);
+    const buf = scratch.subarray(0, n + carry.length);
+    if (scanned < 0 && buf.includes(NEWLINE)) scanned = from + buf.lastIndexOf(NEWLINE) + 1;
+    carry = Buffer.alloc(0);
+    for (let pos = buf.length; pos > 0 && prompt === null;) {
+      const nl = buf.lastIndexOf(NEWLINE, pos - 1);
+      if (nl < 0 && from > 0) { carry = Buffer.from(buf.subarray(0, pos)); break; }   // a line cut by the piece's start
+      prompt = promptOfBytes(buf.subarray(nl + 1, pos));
+      pos = nl;
+    }
+  }
+  return { prompt: prompt ?? '', scanned: Math.max(0, scanned) };
 }
 
 /** What was appended after `from`: the newest prompt in its whole lines (the old one when none), and the offset after the last whole line. */
