@@ -535,7 +535,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `fix [--from <scan.json>] [--out <file>]` | The last scan as a work order for Claude, .claude/fix-plan.md; scans first if there is none |
 | `logs` | Which hooks earn their place: calls, refusals and verdicts per hook, over all the history |
 | `daemon status\|stop` | The project's resident hook runner, from its pid file: pid, age, kit hash, events served, memory; stop ends it |
-| `load ask\|take\|free\|jobs [--for test\|build\|fuzz\|agent\|install] [--want N] [--json]` | The machine's load governor, asked before every heavy job: how many cores it may use now and the settings to start it with, or wait and why; take reserves (a grant id), free returns it |
+| `load ask\|take\|free\|jobs [--for test\|build\|fuzz\|agent\|install] [--want N] [--priority P] [--json]` | The machine's load governor, asked before every heavy job: how many cores it may use now and the settings to start it with at that priority (0 to 1: the most of the budget it may hold), or wait and why; take reserves (a grant id), free returns it; the last 20 % of the cores is never granted |
 | `survey` | Print the prompt that makes Claude write docs/project.md for tailoring |
 | `list` | Show available packs |
 | `symmetry gen --cmake <out.cmake> \| --list` | The generated gate shape_symmetry: one test per many concept in design/shape.json (add_test lines a CMakeLists includes at configure time, or plain lines) |

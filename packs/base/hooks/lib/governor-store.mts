@@ -14,8 +14,12 @@ export type JobKind = 'test' | 'build' | 'fuzz' | 'agent' | 'install' | 'other';
 export const KINDS: readonly JobKind[] = ['test', 'build', 'fuzz', 'agent', 'install', 'other'];
 export const isKind = (word: string): word is JobKind => (KINDS as readonly string[]).includes(word);
 
-/** What a job and a waiter share: an id, the holder's pid (the entry is dropped when it is gone), what it is, its project. */
-interface Entry { id: string; pid: number; kind: JobKind; project: string }
+/** A job's priority when it names none (item 0b): 0 to 1, the most of the budget it may hold. */
+export const DEFAULT_PRIORITY = 0.5;
+
+/** What a job and a waiter share: an id, the holder's pid (the entry is dropped when it is gone), what it is, its priority (item 0b)
+ *  and its project. */
+interface Entry { id: string; pid: number; kind: JobKind; priority: number; project: string }
 
 /** A job holding slots: its process group when it has one of its own (the watchdog pauses the group), how many slots it holds
  *  and when it started. */
@@ -63,17 +67,18 @@ function entryOf<K extends string>(v: unknown, numbers: readonly K[]): (Entry & 
     values[key] = n;
   }
   // every key of `numbers` was set by the loop above (it returns on the first one missing); the compiler cannot follow a loop
-  return { id, pid, kind, project: str(v['project']), raw: v, ...(values as Record<K, number>) };
+  return { id, pid, kind, priority: num(v['priority']) ?? DEFAULT_PRIORITY, project: str(v['project']), raw: v, ...(values as Record<K, number>) };
 }
 
 function jobOf(v: unknown): Job | null {
   const e = entryOf(v, ['slots', 'start'] as const);
-  return e && { id: e.id, pid: e.pid, kind: e.kind, project: e.project, slots: e.slots, start: e.start, pgid: num(e.raw['pgid']), pausedAt: num(e.raw['pausedAt']), command: str(e.raw['command']) };
+  return e && { id: e.id, pid: e.pid, kind: e.kind, priority: e.priority, project: e.project, slots: e.slots, start: e.start,
+    pgid: num(e.raw['pgid']), pausedAt: num(e.raw['pausedAt']), command: str(e.raw['command']) };
 }
 
 function waiterOf(v: unknown): Waiter | null {
   const e = entryOf(v, ['want', 'since'] as const);
-  return e && { id: e.id, pid: e.pid, kind: e.kind, project: e.project, want: e.want, since: e.since };
+  return e && { id: e.id, pid: e.pid, kind: e.kind, priority: e.priority, project: e.project, want: e.want, since: e.since };
 }
 
 /** The state as the file holds it, every entry checked; a missing or broken file is an empty state. */

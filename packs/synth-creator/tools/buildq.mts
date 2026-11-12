@@ -43,7 +43,9 @@ export function run(asked: readonly string[], { env, cwd, pid, platform }: Where
   const project = env['CLAUDE_PROJECT_DIR'] ?? cwd;
   // W8.8 item 2: the governor owns the slots (BUILDQ_DIR's slot folders are retired); KWB-111's core budget stays the most one build
   // may ask for, and KWB-150 holds: a build alone takes all of it, a build beside others takes what is free (at least 1 core)
-  const { grant } = grantFor(host, { kind: 'build', upTo: coreBudget(env, projectLayout(project)), pid, project, command: asked.join(' ') });
+  // W8.8 0b: the build runs at its agent's priority (CLAUDE_PACKS_PRIORITY, set from the brief), the governor's default without one
+  const priority = env['CLAUDE_PACKS_PRIORITY'] ? Number(env['CLAUDE_PACKS_PRIORITY']) : undefined;
+  const { grant } = grantFor(host, { kind: 'build', upTo: coreBudget(env, projectLayout(project)), priority, pid, project, command: asked.join(' ') });
   try {
     const command = gentle(capJobs(asked, grant.slots), { platform, env });
     const [program = '', ...rest] = command;

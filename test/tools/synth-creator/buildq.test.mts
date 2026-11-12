@@ -1,13 +1,17 @@
 // buildq (synth-creator's tool): the machine-wide build queue every heavy job goes through, on the load governor since W8.8 item 2 (its
 // own slot folders retired). The governor has its own unit test (test/unit/hooks-lib/governor.test.mts); this one runs the installed
-// tool on a governor folder of its own with 4 planted cores (2 slots) and an idle planted load, so no test waits on the machine's real
+// tool on a governor folder of its own with 4 planted cores (2 slots), an idle planted load and priority 1 (the whole budget may be
+// granted to one build), so no test waits on the machine's real
 // jobs or load. First test for the command (W5).
-import { assert, fresh, join, plantGovernorJob, readFileSync, spawn, spawnSync, test } from '../../kit-cli.mts';
+import { spawn } from 'node:child_process';
+import { assert, fresh, join, readFileSync, spawnSync, test } from '../../kit-cli.mts';
+import { plantGovernorJob } from '../../governor-plant.mts';
 import { fixture } from '../../fixtures/installs.mts';
 
 const TOOL = join(fixture('synth-creator'), '.claude/tools/buildq.mjs');
 const envOf = (governor: string): NodeJS.ProcessEnv =>
-  ({ ...process.env, CLAUDE_PACKS_GOVERNOR_DIR: governor, CLAUDE_PACKS_GOVERNOR_CORES: '4', CLAUDE_PACKS_GOVERNOR_LOAD: '0', BUILDQ_PRIORITY: 'normal' });
+  ({ ...process.env, CLAUDE_PACKS_GOVERNOR_DIR: governor, CLAUDE_PACKS_GOVERNOR_CORES: '4', CLAUDE_PACKS_GOVERNOR_LOAD: '0', CLAUDE_PACKS_PRIORITY: '1',
+    BUILDQ_PRIORITY: 'normal' });
 /** The tool run on its own governor folder, the way a project's build-guard runs it. */
 const buildq = (governor: string, args: readonly string[]) => spawnSync('node', [TOOL, ...args], { encoding: 'utf8', env: envOf(governor) });
 

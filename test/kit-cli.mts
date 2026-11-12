@@ -16,7 +16,6 @@ import { writeJson } from '../packs/base/hooks/lib/json.mts';
 import { readLayout } from '../packs/base/hooks/lib/layout.mts';
 import { proved, remember, selftestKey, sharedHash } from '../lib/selftest-cache.mts';
 
-export { spawn } from 'node:child_process';
 export { default as assert } from 'node:assert/strict';
 export { test } from 'node:test';
 export { execFileSync, spawnSync, join, put };
@@ -129,10 +128,4 @@ export function registeredHooks(dir: string): string[] {
 
 /** A `guards` block as a hand-written layout.json may hold it, wrong shapes included: nothing validates a project's layout, so the
  *  readers must cope, and a test plants the wrong shape through here (the one cast, W10 finding 3). */
-/** A planted job in a governor folder (W8.8): `pid` holds `slots`, as the governor's own file records it. */
-export function plantGovernorJob(governor: string, pid: number, slots: number): void {
-  const job = { id: `g-planted-${pid}`, pid, pgid: null, kind: 'build', slots, project: '', start: 0, pausedAt: null, command: 'planted' };
-  put(join(governor, 'jobs.json'), `${JSON.stringify({ v: 1, jobs: [job], waiting: [] })}\n`);
-}
-
-export const plantedGuards =(guards: unknown): LayoutGuards => guards as LayoutGuards;
+export const plantedGuards = (guards: unknown): LayoutGuards => guards as LayoutGuards;

@@ -23,6 +23,8 @@
     "hooks/lib/branches-ahead.mts": ["test/unit/hooks-lib/git-guard-libs.test.mts", "test/unit/hooks-lib/hub-rig.test.mts", "test/unit/hooks-lib/push-form.test.mts", "test/unit/hooks-lib/remote-heads.test.mts", "test/unit/hooks-lib/stop-verdict.test.mts"],
     "hooks/lib/brief-findings.mts": ["test/unit/hooks-lib/brief-findings.test.mts"],
     "hooks/lib/governor.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts", "test/tools/synth-creator/buildq.test.mts"],
+    "hooks/lib/governor-budget.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts"],
+    "hooks/lib/governor-policy.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts"],
     "hooks/lib/governor-settings.mts": ["test/unit/hooks-lib/governor.test.mts"],
     "hooks/lib/governor-store.mts": ["test/unit/hooks-lib/governor.test.mts"],
     "hooks/lib/code-shapes.mts": ["test/unit/hooks-lib/code-shapes.test.mts"],

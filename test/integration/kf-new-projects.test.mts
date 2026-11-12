@@ -1,5 +1,6 @@
 // 1.1.0, group 3: what a new project met on the MPX 500 build (KF-1, 3, 4, 5, 6, 7, 9, 11, 16, 29, 37, 38, 41). Each test was seen red first (docs/1.1-progress.md).
-import { KIT, assert, cli, existsSync, fresh, hookRun, join, plantGovernorJob, readFileSync, spawnSync, test } from '../kit-cli.mts';
+import { KIT, assert, cli, existsSync, fresh, hookRun, join, readFileSync, spawnSync, test } from '../kit-cli.mts';
+import { plantGovernorJob } from '../governor-plant.mts';
 import type { Spawned } from '../kit-cli.mts';
 import { lockOf } from '../fixtures/installs.mts';
 import { putIn, unit } from './new-project-rig.mts';
