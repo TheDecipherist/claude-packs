@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PRESETS, availablePacks, isDisabled, kitHookScripts, normalisePacks, planFiles, readPack, registerPack } from '../../../lib/packs.mjs';
 import { notInstalled, put, scratchDir, walk } from '../../../packs/base/hooks/lib/files.mts';
+import { fixture } from '../../fixtures/installs.mts';
 
 const KIT = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -62,7 +63,9 @@ test('`init sound-design` alone refuses, naming audio-core, and writes nothing (
   assert.notEqual(alone.status, 0);
   assert.match(alone.stdout + alone.stderr, /sound-design requires audio-core/);
   assert.equal(existsSync(join(dir, '.claude')), false, 'nothing was installed');
-  const both = spawnSync(process.execPath, [join(KIT, 'bin/claude-packs.mjs'), 'init', '--config', 'synth-creator', 'cpp', 'audio-core', 'sound-design', '--dir', dir], { encoding: 'utf8' });
+  // with its requirement there, the same pack goes in: an audio-core install (a fixture copy) takes it (KWB-199: no init here)
+  const withAudio = fixture('audio-core');
+  const both = spawnSync(process.execPath, [join(KIT, 'bin/claude-packs.mjs'), 'add', 'sound-design', '--dir', withAudio], { encoding: 'utf8' });
   assert.equal(both.status, 0, both.stdout + both.stderr);
 });
 

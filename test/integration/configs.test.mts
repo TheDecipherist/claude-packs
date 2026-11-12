@@ -44,11 +44,17 @@ test('init --config base: base alone, its own preamble, no synth folders or line
 
 test('a pack outside the configuration is refused, naming the ones it takes', () => {
   const dir = project();
-  const r = cli(dir, 'init', 'audio-core', '--config', 'base');
-  assert.equal(r.status, 2);
-  assert.match(r.stderr, /audio-core is not in configuration base/);
-  assert.ok(!existsSync(join(dir, '.claude/layout.json')), 'nothing was installed');
-  assert.match(cli(dir, 'init', '--config', 'nope').stderr, /unknown configuration "nope" \(available: .*base.*synth-creator/);
+  // each refused init: its arguments and what the refusal names; nothing is installed by either
+  const refused: readonly (readonly [readonly string[], RegExp])[] = [
+    [['audio-core', '--config', 'base'], /audio-core is not in configuration base/],
+    [['--config', 'nope'], /unknown configuration "nope" \(available: .*base.*synth-creator/],
+  ];
+  for (const [args, says] of refused) {
+    const r = cli(dir, 'init', ...args);
+    assert.equal(r.status, 2, args.join(' '));
+    assert.match(r.stderr, says);
+    assert.ok(!existsSync(join(dir, '.claude/layout.json')), `${args.join(' ')}: nothing was installed`);
+  }
 });
 
 test('init without --config takes the configuration its packs belong to', () => {
