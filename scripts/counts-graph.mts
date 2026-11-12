@@ -20,8 +20,8 @@ export const factorOf = (m: Measure): string => {
 };
 const shown = (value: number, unit: string): string => `${value >= 1000 && unit === 'ms' ? value.toLocaleString('en-US') : value} ${unit}`;
 
-interface Look { surface: string; text: string; muted: string; before: string; after: string }
-const LOOKS: Record<'light' | 'dark', Look> = {
+interface GraphColours { surface: string; text: string; muted: string; before: string; after: string }
+const COLOURS: Record<'light' | 'dark', GraphColours> = {
   light: { surface: '#fcfcfb', text: '#0b0b0b', muted: '#52514e', before: '#eb6834', after: '#2a78d6' },
   dark: { surface: '#1a1a19', text: '#f0efec', muted: '#c3c2b7', before: '#d95926', after: '#3987e5' },
 };
@@ -29,7 +29,7 @@ const W = 760, LEFT = 24, BAR = 380, ROW = 66, TOP = 52;
 
 /** The graph for one theme: a bar pair per measure, each row on its own scale (the before bar is the whole bar), the factor at the end. */
 export function svgOf(measures: readonly Measure[], mode: 'light' | 'dark'): string {
-  const c = LOOKS[mode];
+  const c = COLOURS[mode];
   const height = TOP + measures.length * ROW + 12;
   const rows = measures.map((m, i) => {
     const y = TOP + i * ROW;
