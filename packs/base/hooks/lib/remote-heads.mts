@@ -19,6 +19,8 @@ import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { put, readText } from './files.mts';
 import { escapeRegExp } from './glob.mts';
+import { gitConfigRead } from './git-config.mts';
+import { findGitDirs } from './git-files.mts';
 import { gitOut, gitRun } from './git-run.mts';
 import type { GitOptions } from './git-run.mts';
 import { readJson, writeJson } from './json.mts';
@@ -99,13 +101,16 @@ export function tokenFor(tokenVar: string, env: GitEnv): string | null {
 export const isGitHub = (url: string | null): boolean => /^https:\/\/([^@/]+@)?github\.com\//.test(url ?? '');
 
 function cacheFile(cwd: string, env: GitEnv): string | null {
+  const dirs = findGitDirs(cwd, env);   // the git dir's files, no process
+  if (dirs) return join(dirs.common, CACHE);
   const d = gitOut(['rev-parse', '--git-common-dir'], gitAt(cwd, env));
   return d ? join(resolve(cwd, d), CACHE) : null;
 }
 
 /** The URL a remote name stands for, else the layout's repo. */
 export function urlOf(cwd: string, env: GitEnv, remote: string, { repo = null }: { repo?: string | null } = {}): string | null {
-  const url = gitOut(['remote', 'get-url', remote], gitAt(cwd, env));
+  const config = gitConfigRead(cwd, env);
+  const url = config ? config.get('remote', remote, 'url') : gitOut(['remote', 'get-url', remote], gitAt(cwd, env));
   if (url || !repo) return url || null;
   return /^(https?:|file:|\/)/.test(repo) ? repo : `https://github.com/${repo.replace(/\.git$/, '')}.git`;
 }
@@ -152,8 +157,9 @@ export function remoteHeads(cwd: string, env: GitEnv, remote: string, { tokenVar
 
 /** The remote a branch pushes to and its name there: its upstream, else origin and the same name. */
 export function target(cwd: string, env: GitEnv, branch: string): { remote: string; name: string } {
-  const remote = gitOut(['config', `branch.${branch}.remote`], gitAt(cwd, env));
-  const merge = gitOut(['config', `branch.${branch}.merge`], gitAt(cwd, env));
+  const config = gitConfigRead(cwd, env);
+  const remote = config ? config.get('branch', branch, 'remote') : gitOut(['config', `branch.${branch}.remote`], gitAt(cwd, env));
+  const merge = config ? config.get('branch', branch, 'merge') : gitOut(['config', `branch.${branch}.merge`], gitAt(cwd, env));
   if (remote && remote !== '.') return { remote, name: merge ? merge.replace(/^refs\/heads\//, '') : branch };
   return { remote: 'origin', name: branch };
 }

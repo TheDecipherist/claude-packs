@@ -12,6 +12,8 @@ import { join } from 'node:path';
 import { put } from './files.mts';
 import { gitRun } from './git-run.mts';
 import { readJson, toJson } from './json.mts';
+import { refsOf } from './kit-fresh-refs.mts';
+import type { RepoRefs } from './kit-fresh-refs.mts';
 import { KIT, runningKit } from './kit-version.mts';
 import type { Env } from './shell-writes.mts';
 
@@ -99,19 +101,20 @@ export const kitGit = (root: string, env: Env): KitGit => (...args) => {
 const workVersion = (ref: string): string | null => WORK_BRANCH.exec(ref)?.[1] ?? null;
 
 /** the kit's own checkout against origin/main and every origin/work/<version>-* newer than the checkout's own version */
-export function kitVerdict(root: string, { git, fetch }: { git: KitGit; fetch: boolean }): KitVerdict | null {
+export function kitVerdict(root: string, { git, fetch, refs = null }: { git: KitGit; fetch: boolean; refs?: RepoRefs | null }): KitVerdict | null {
   const notes: string[] = [];
   if (fetch) {
     const f = git('fetch', '-q', 'origin');
     if (!f.ok) notes.push(`could not fetch origin (${f.err || 'no answer'}): compared with what was fetched before`);
   }
-  const branch = git('rev-parse', '--abbrev-ref', 'HEAD').out;
+  const branch = refs?.branch ?? git('rev-parse', '--abbrev-ref', 'HEAD').out;
   const own = [readJson<{ version?: unknown }>(join(root, 'package.json'))?.version, /^work\/(\d+\.\d+\.\d+)-/.exec(branch)?.[1]]
     .filter((v): v is string => parseVersion(v) !== null).sort(compareVersions).at(-1);
   // the refs HEAD does not contain, in one call (a merge-base each took 100 to 800 ms on a commit in a worktree-heavy kit repo)
-  const missing = git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
+  const askMissing = (): string[] => git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
+  const missing = refs ? refs.missing(askMissing) : askMissing();
   // a later version made from this checkout's branch (its fork point is a commit main lacks) is the next work, landed after this (KWB-208)
-  const mainKnown = git('rev-parse', '--verify', '-q', 'origin/main').ok;
+  const mainKnown = refs?.mainKnown ?? git('rev-parse', '--verify', '-q', 'origin/main').ok;
   const stackedOnHere = (ref: string): boolean => {
     const base = git('merge-base', 'HEAD', ref);
     return mainKnown && base.ok && base.out !== '' && !git('merge-base', '--is-ancestor', base.out, 'origin/main').ok;
@@ -133,17 +136,19 @@ const COMMIT = /(?:^|[;&|(\s])git\b(?:\s+-C\s+\S+|\s+-c\s+\S+)*\s+commit\b/;
 export interface StartOptions { env: Env; now: number; unattended?: boolean; npm?: () => NpmAnswer; git?: KitGit }
 
 /** what to say at a session's start, and whether it must not start: { say, block } | null */
-export function atStart(root: string, { env, now, unattended = env['CLAUDE_PACKS_UNATTENDED'] === '1', npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git = kitGit(root, env) }: StartOptions): FreshVerdict | null {
+export function atStart(root: string, { env, now, unattended = env['CLAUDE_PACKS_UNATTENDED'] === '1', npm = () => newestOnNpm({ now, dir: cacheDir(env) }), git: plantedGit }: StartOptions): FreshVerdict | null {
+  const planted = plantedGit !== undefined;
+  const git = plantedGit ?? kitGit(root, env);
   if (isKitRepo(root)) {
-    const v = kitVerdict(root, { git, fetch: true });
+    const v = kitVerdict(root, { git, fetch: true, refs: planted ? null : refsOf(root) });
     return v && { say: v.say, block: false };
   }
   return projectVerdict(root, { unattended, npm });
 }
 
 /** a commit in the kit's own repo while it lacks newer work: the refusal, or null (no fetch: what the session start fetched) */
-export function atCommit(root: string, command: string | null | undefined, { env, git = kitGit(root, env) }: { env: Env; git?: KitGit }): string | null {
+export function atCommit(root: string, command: string | null | undefined, { env, git: plantedGit }: { env: Env; git?: KitGit }): string | null {
   if (!COMMIT.test(command ?? '') || !isKitRepo(root)) return null;
-  const v = kitVerdict(root, { git, fetch: false });
+  const v = kitVerdict(root, { git: plantedGit ?? kitGit(root, env), fetch: false, refs: plantedGit ? null : refsOf(root) });
   return v?.refuseCommit ? v.say : null;
 }

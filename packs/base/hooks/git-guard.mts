@@ -34,6 +34,7 @@ import { fileURLToPath } from 'node:url';
 import { bareWords } from './lib/command-prefix.mts';
 import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mts';
 import type { HouseEnv } from './lib/git-guard-selftest.mts';
+import { gitConfigRead } from './lib/git-config.mts';
 import { gitLines, gitOut, gitRun } from './lib/git-run.mts';
 import { headRead } from './lib/git-state.mts';
 import { escapeRegExp } from './lib/glob.mts';
@@ -108,7 +109,7 @@ function realEnv(env: NonNullable<GitEnv>): HouseEnv {
     // the branch and HEAD's commit come from the git dir's files (no process); a folder that is not a checkout's own asks git
     branch: (cwd) => headRead(cwd, () => gitOut(['rev-parse', '--abbrev-ref', 'HEAD'], at(cwd, env)) ?? '', (h) => (h.sha === null ? '' : h.branch ?? 'HEAD')),
     hasHead: (cwd) => headRead(cwd, () => gitRun(['rev-parse', '-q', '--verify', 'HEAD'], at(cwd, env)).ok, (h) => h.sha !== null),
-    remoteUrl: (cwd, name) => gitOut(['remote', 'get-url', name], at(cwd, env)) || null,
+    remoteUrl: (cwd, name) => { const config = gitConfigRead(cwd, env); return (config ? config.get('remote', name, 'url') : gitOut(['remote', 'get-url', name], at(cwd, env))) || null; },
     merging: (cwd) => gitRun(['rev-parse', '-q', '--verify', 'MERGE_HEAD'], at(cwd, env)).ok,
   };
 }
