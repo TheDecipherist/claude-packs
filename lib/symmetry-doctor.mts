@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
+import { constantOnce } from './constant-checks.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
 /** The part of design/shape.json this check reads. */
@@ -21,15 +22,19 @@ function printedBy(error: unknown): string {
 }
 
 /** The problems doctor lists for the shape_symmetry gate; `env` is the caller's (the selftest runs under it, in `projectDir`). */
-export function symmetryProblems(projectDir: string, log: Logger = console.log, env: Readonly<Record<string, string | undefined>> = process.env): string[] {
+export function symmetryProblems(projectDir: string, log: Logger = console.log, env: Readonly<Record<string, string | undefined>> = process.env, fresh = false): string[] {
   const problems: string[] = [];
   const tool = join(projectDir, '.claude', 'tools', 'shape-symmetry.mjs');
   if (existsSync(tool)) {
-    try {
-      execFileSync('node', [tool, '--selftest'], { env: { ...env, CLAUDE_PROJECT_DIR: projectDir }, stdio: 'pipe' });
-    } catch (e) {
-      problems.push(`shape-symmetry.mjs fails its selftest:\n${printedBy(e)}`.trim());
-    }
+    // a constant check (W8.4, d-9): the tool proves itself on planted faults, so it runs once per kit version and tool bytes
+    problems.push(...constantOnce('shape-symmetry', tool, env, fresh, () => {
+      try {
+        execFileSync('node', [tool, '--selftest'], { env: { ...env, CLAUDE_PROJECT_DIR: projectDir }, stdio: 'pipe' });
+        return [];
+      } catch (e) {
+        return [`shape-symmetry.mjs fails its selftest:\n${printedBy(e)}`.trim()];
+      }
+    }));
   }
   const file = join(projectDir, 'design', 'shape.json');
   if (existsSync(file)) {

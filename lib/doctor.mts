@@ -10,7 +10,9 @@ import type { Layout, LayoutFolder, Logger } from '../packs/base/hooks/lib/types
 import { buildQueueProblems } from './build-queue.mts';
 import { configProblems, sourceFilesOf } from './configs.mts';
 import { coverage } from './coverage.mts';
+import { daemonNotes } from './doctor-daemon.mts';
 import { tokenProblems } from './git-tokens.mts';
+import { budgetProblems } from './hook-budget.mts';
 import { proxyProblems } from './doctor-proxy.mts';
 import { hookProofProblems, isRegistered, statusProblems } from './hook-proof.mts';
 import { timingProblems } from './hook-timing.mts';
@@ -19,12 +21,13 @@ import { isModified, readLock } from './manifest.mts';
 import { onceOnlyDoctor, useJscpd } from './once-only-report.mts';
 import type { DetectorEnv } from './once-only-report.mts';
 import { manifestProblems } from './pack-manifest.mts';
-import { HOOK_FILE, readPack } from './packs.mts';
+import { HOOK_FILE, availablePacks, readPack } from './packs.mts';
 import { ruleTestProblems } from './rule-tests.mts';
 import { applyPaths } from './rules.mts';
 import { proved, remember, selftestKey, sharedHash } from './selftest-cache.mts';
 import { shapeProblems } from './shape-cli.mts';
 import { symmetryProblems } from './symmetry-doctor.mts';
+import { wallProblem } from './wall-budget.mts';
 
 export interface DoctorOptions {
   strict?: boolean;
@@ -132,11 +135,16 @@ function skillProblems(projectDir: string, managed: readonly string[]): string[]
 // installing: doctor run at the end of an install. What the project has yet to do (a rule's test, a parameter lock) is a note there: an install on
 // a project with code has not failed. The `doctor` command is red for it.
 export async function doctor(projectDir: string, log: Logger = console.log, { strict = false, fresh = false, installing = false, env = process.env }: DoctorOptions = {}): Promise<number> {
+  const began = Date.now();
   const claudeDir = join(projectDir, '.claude');
   const lock = readLock(claudeDir);
   const problems: string[] = [];
+  // custom packs are fetched only by init, add and update (W8.4): doctor reads the stock packs and names the others
+  const stock = new Set(availablePacks());
+  const packs = lock.packs.filter((p) => stock.has(p));
+  if (packs.length < lock.packs.length) log(`  note: custom pack(s) ${lock.packs.filter((p) => !stock.has(p)).join(', ')} are not fetched by doctor (update does)`);
   if (lock.packs.length === 0) problems.push('no packs installed (run `npx --no-install @thedecipherist/claude-packs init <packs>`)');
-  else problems.push(...configProblems(projectDir, lock.packs, log)); // the configuration installed, and a pack it does not take (0.10.0)
+  else problems.push(...configProblems(projectDir, packs, log)); // the configuration installed, and a pack it does not take (0.10.0)
 
   const theirs = new Set(
     readdirSync(join(claudeDir, 'rules'))
@@ -161,10 +169,10 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
   useJscpd(projectDir, env); // once-only's and making-check's selftests need the detector (0.9.0)
   const ran = await runSelftests(projectDir, layout, { fresh, env });
   problems.push(...selftestProblems(ran.results, ran.byGate, fresh, ran.seconds, log));
-  problems.push(...symmetryProblems(projectDir, log, env));
+  problems.push(...symmetryProblems(projectDir, log, env, fresh));
   problems.push(...skillProblems(projectDir, Object.keys(lock.files)));
 
-  for (const name of lock.packs) problems.push(...manifestProblems(readPack(name), name));
+  for (const name of packs) problems.push(...manifestProblems(readPack(name), name));
   problems.push(...await hookProofProblems(projectDir, settings)); // a guard that fails open fails silently (0.18.0)
   problems.push(...proxyProblems(projectDir, env, log, fresh)); // the proxy's own selftest, and which path an event takes (W8.2)
   const toDo = (found: readonly string[]): void => { if (installing) found.forEach((f) => log(`  note: ${f}`)); else problems.push(...found); };
@@ -173,11 +181,13 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
   problems.push(...await pageGateProblems(projectDir, layout, env)); // UI code is proved rendered (0.17.0)
   problems.push(...await hoverGateProblems(projectDir, layout, env)); // UI code needs a declared hover gate (0.10.1, Stellix B-261)
   problems.push(...tokenProblems(projectDir, layout.siblings ?? []));
-  problems.push(...shapeProblems(projectDir, lock.packs)); // the shape law: a synth has design/shape.json, and its rows keep the contract
+  problems.push(...shapeProblems(projectDir, packs)); // the shape law: a synth has design/shape.json, and its rows keep the contract
   problems.push(...onceOnlyDoctor(projectDir, log, env)); // making's cost per turn, the duplicate count (0.9.0)
+  problems.push(...budgetProblems(projectDir, log)); // each event and each hook at it held to the budget table; a full pool named, not a hook (W8.4)
+  daemonNotes(projectDir, env, log); // a daemon serving the hooks of an older lock is said, with both hashes (review-2-go 6.4)
   problems.push(...timingProblems(projectDir, log)); // each hook's median and worst from .claude/hooks.log; a median over 500 ms is red (KWB-24)
 
-  const cov = await coverage(projectDir, sourceFilesOf(projectDir, lock.packs), env); // the configuration says what is source (KWB-32)
+  const cov = await coverage(projectDir, sourceFilesOf(projectDir, packs), env); // the configuration says what is source (KWB-32)
   const ruleTests = ruleTestProblems(projectDir, layout, cov); // a rule's own test can be missing for a whole build (KF-31)
   if (layout.ruleTests) toDo(ruleTests); // a new law never turns an installed project red: the key in layout.json is the choice
   else ruleTests.forEach((f) => log(`  note: ${f}\n    To be held to this, add "ruleTests": {} to .claude/layout.json.`));
@@ -188,6 +198,8 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
     if (cov.uncovered.length) say(`${cov.uncovered.length} source file(s) no rule covers (outside the structure?): ${more(cov.uncovered)}`);
   }
 
+  const slow = fresh && !installing ? wallProblem('doctor --fresh', began, Date.now(), env) : null; // its own budget (W8.4)
+  if (slow !== null) problems.push(slow);
   const edited = Object.keys(lock.files).filter((rel) => isModified(projectDir, rel, lock));
   for (const rel of edited) log(`  note: you edited ${rel} (updates keep your version)`);
   for (const p of problems) log(`  PROBLEM: ${p}`);

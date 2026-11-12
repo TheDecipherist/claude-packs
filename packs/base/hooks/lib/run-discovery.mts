@@ -54,6 +54,9 @@ export function runnersIn(psText: string): Runner[] {
   });
 }
 
+/** Whether a process's command line is a resident runner serving a project (`node .../resident.mjs --serve <project> ...`). */
+export const isDaemon = (args: string): boolean => /\bresident\.m?[jt]s\s+--serve\b/.test(args);
+
 /** Every process's working folder, CPU, resident memory and whether it is a build waiting for a slot of the build queue:
  *  /proc on Linux, one lsof call elsewhere; [] when neither works. */
 export function processesOf(env: Env): Proc[] {
@@ -64,6 +67,7 @@ export function processesOf(env: Env): Proc[] {
     const m = l.trim().match(/^(\d+)\s+([\d.]+)\s+(\d+)\s+(.*)$/);
     if (!m) return [];
     const pid = Number(m[1]);
+    if (isDaemon(m[4] ?? '')) return [];   // the resident runner's own process is the kit's, no agent's work (W8.4)
     return [{ pid, cpu: Number(m[2]) || 0, rssKb: Number(m[3]) || 0, queued: /^node\s+\S*buildq\.mjs\s+(?!--status)/.test(m[4] ?? '') && !owners.has(pid) }];
   });
   let cwds: Map<number, string | null>;

@@ -162,7 +162,7 @@ test('an install wires the kit\'s status line where the project has none, keeps 
     readJson<{ statusLine?: { command?: string; refreshInterval?: number } }>(join(claudeDir, 'settings.json'))?.statusLine;
   assert.equal(syncSettings(claudeDir, ['base'], {}).statusLine, 'set');
   assert.match(line()?.command ?? '', /\.claude\/tools\/statusline\.mjs/);
-  assert.equal(line()?.refreshInterval, 1);
+  assert.equal(line()?.refreshInterval, 5);   // W8.4: each refresh is a node start
   assert.equal(syncSettings(claudeDir, ['base'], { disable: ['tools/statusline.mjs'] }).statusLine, 'removed');
   assert.equal(line(), undefined);
   writeFileSync(join(claudeDir, 'settings.json'), toJson({ statusLine: { type: 'command', command: 'my-own-bar' } }));
