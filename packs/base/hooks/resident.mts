@@ -23,17 +23,22 @@ import { serveEvent, type Served } from './resident/event.mts';
 import { residentIndex } from './resident/index.mts';
 import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mts';
 import { startPool } from './resident/pool.mts';
-import { answers, listen, prepareFolder } from './resident/socket.mts';
+import { answers, listen, prepareFolder, type Incoming, type Listening } from './resident/socket.mts';
 import { SAMPLE_MS, startSampling, type Sampling } from './resident/sampling.mts';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mts';
 import { StatusKeeper, type Bar } from './resident/status.mts';
-import { usage } from './resident/usage.mts';
+import { closeInOrder } from './resident/shutdown.mts';
+import { UsageStore } from './resident/usage.mts';
 import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mts';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const EXT = extname(fileURLToPath(import.meta.url));
 const LOCK_FILE = join('.claude', 'claude-packs.lock.json');
 /** The warm workers that import every hook at start; the others import a hook when a job first brings it (W8.4: 16 workers holding every hook were 270 MB). */
+/** A stop that has not ended the process in this long ends it (each closing step is bounded too, resident/shutdown). */
+const FORCE_EXIT_MS = 15_000;
+/** Uncaught exceptions and rejections the daemon logs and carries on after, before it restarts itself. */
+const MAX_FAULTS = 5;
 const PRELOAD = 1;
 /** At most this many workers import any one hook while the pool is not full (W8.4). */
 const SPREAD = 4;
@@ -43,7 +48,9 @@ const SPREAD = 4;
 export const SMALL_V8 = ['--optimize-for-size', '--no-turbofan', '--no-maglev', '--no-sparkplug'] as const;
 
 /** What the daemon takes of its process, given by whoever starts it (the tail below, or a test). */
-export interface Host { env: Readonly<Record<string, string | undefined>>; uid: number; home: string; platform: string; node: string; script: string }
+export interface Host { env: Readonly<Record<string, string | undefined>>; uid: number; home: string; platform: string; node: string; script: string;
+  /** Ends the process: given by the tail below, so a stop that hangs still ends the daemon; a test's host has none. */
+  exit?: (code: number) => void }
 
 export interface ServeOptions {
   project: string;
@@ -94,7 +101,8 @@ export function serveOptions(argv: readonly string[], host: Host): ServeOptions 
 }
 
 /** Runs the daemon until it stops: 0 when it was stopped, idle or replaced; 1 when it could not start. */
-export async function serve(o: ServeOptions, host: Host): Promise<number> {
+/** `usage` is this daemon's one store of the sampler's totals: the sampler writes it, the state file and the status line read it (W10b finding 18). */
+export async function serve(o: ServeOptions, host: Host, usage = new UsageStore()): Promise<number> {
   const project = real(o.project);
   const lock = readText(join(project, LOCK_FILE)) ?? '';
   const key = daemonKey(host.uid, project, lock, host.node);
@@ -125,9 +133,9 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
     usage: usage.all(), flags: sampling?.flags() ?? [], ...(sampling?.pid() ? { sampler: sampling.pid() ?? 0 } : {}),
   });
   // the status line's facts, kept as events arrive and as the sampler reports (W8.6)
-  const status = new StatusKeeper({ project, env: host.env, log, ...(o.npm ? {} : { askNpm: () => Promise.resolve(null) }), load: () => import(new URL(`../tools/statusline-live${EXT}`, import.meta.url).href) as Promise<Bar> });
+  const status = new StatusKeeper({ project, env: host.env, log, usageOf: (owner) => usage.usageOf(owner), ...(o.npm ? {} : { askNpm: () => Promise.resolve(null) }), load: () => import(new URL(`../tools/statusline-live${EXT}`, import.meta.url).href) as Promise<Bar> });
   const served: Served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`), status };
-  const listening = await listen(files.socket, (incoming) => {
+  const onRequest = (incoming: Incoming): void => {
     // the status line's ask: the daemon's state, no event (counts.last is the idle clock and is left alone, review-2-go 7.1)
     if (incoming.request.status === true && incoming.request.render === true) {   // `hook-proxy status`: the line, drawn from what the daemon holds
       status.render(incoming.stdin.toString('utf8'), incoming.request.env).then((text) => incoming.reply({ code: 0, stdout: text, stderr: '' }),
@@ -140,35 +148,54 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
       log(`event failed: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);
       incoming.reply(crashReply('the daemon failed on this event'));
     }).finally(() => { counts.inflight -= 1; state.save(snapshot()); });
-  }, log);
+  };
+  let listening: Listening;
+  try { listening = await listen(files.socket, onRequest, log); } catch (e) {
+    // the socket could not be made (taken, no right to it, a path too long): nothing is left running, and the client is told
+    const why = e instanceof Error ? e.message : String(e);
+    log(`start failed: listen: ${why}`);
+    await closeInOrder([['pool', () => pool.close()], ['index', () => index.close()]], log);
+    releaseStartLock(files.lock);
+    sayReady(o.readyFd, `failed listen ${why.replace(/\s+/g, ' ')}\n`);
+    return 1;
+  }
 
   return new Promise<number>((done) => {
     let ending = false;
+    // process-wide handlers belong to this serve and go with its stop; faults swallowed past a few mean the daemon is in an unknown state
+    let faults = 0;
+    const fault = (what: string): void => { log(what); faults += 1; if (faults > MAX_FAULTS) stop(`${faults} uncaught faults`, true); };
+    const onException = (e: Error): void => fault(`uncaught exception: ${e.stack ?? e.message}`);
+    const onRejection = (e: unknown): void => fault(`unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);
+    const signals = (['SIGTERM', 'SIGINT', 'SIGHUP'] as const).map((sig) => [sig, (): void => stop(sig, false)] as const);
     const stop = (reason: string, again: boolean): void => {
       if (ending) return;
       ending = true;
       log(`stopping: ${reason}`);
+      // however a closing step ends, the process ends: a worker that will not terminate must not leave a daemon that serves nothing
+      const force = setTimeout(() => host.exit?.(0), FORCE_EXIT_MS);
+      force.unref();
       sampling?.stop();
       clearInterval(ticker);
-      void listening.close().then(() => pool.close()).then(() => {
-        index.close();
-        state.remove();
-        releaseStartLock(files.lock);
-        if (again) reexec(host.node, o.again, host.env);
-        done(0);
-      });
+      clearInterval(watcher);
+      process.off('uncaughtException', onException);
+      process.off('unhandledRejection', onRejection);
+      for (const [sig, handler] of signals) process.off(sig, handler);
+      void closeInOrder([['socket', () => listening.close()], ['pool', () => pool.close()], ['index', () => index.close()], ['state', () => state.remove()], ['start lock', () => releaseStartLock(files.lock)]], log)
+        .then(() => (again ? reexec(host.node, o.again, host.env, log) : undefined))
+        .finally(() => { clearTimeout(force); done(0); });
     };
     const ticker = setInterval(() => status.tick(Date.now()), o.sampleMs);
     ticker.unref();
     void status.refreshNewest(Date.now());
-    process.on('uncaughtException', (e) => log(`uncaught exception: ${e.stack ?? e.message}`));
-    process.on('unhandledRejection', (e) => log(`unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`));
-    for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP'] as const) process.on(sig, () => stop(sig, false));
-    watch({
+    process.on('uncaughtException', onException);
+    process.on('unhandledRejection', onRejection);
+    for (const [sig, handler] of signals) process.on(sig, handler);
+    const watcher = watch({
       idleMs: o.idleMs, maxAgeMs: o.maxAgeMs, maxRss: o.maxRss, tickMs: o.tickMs, started, last: () => counts.last, busy: () => pool.busy() > 0 || counts.inflight > 0,
       rss: () => process.memoryUsage.rss(), workers: pool.size, parentGone: () => o.exitWith !== null && !alive(o.exitWith), replaced: () => (readText(join(project, LOCK_FILE)) ?? '') !== lock, stop,
     });
-    if (o.proxy !== null) sampling = startSampling({ proxy: o.proxy, project, intervalMs: o.sampleMs, orphanMs: o.orphanMs, testMs: o.testMs, log, env: host.env });
+    if (o.proxy !== null) sampling = startSampling({ proxy: o.proxy, project, intervalMs: o.sampleMs, orphanMs: o.orphanMs, testMs: o.testMs, log, env: host.env, store: usage });
     state.save(snapshot(), true);
     releaseStartLock(files.lock);
     log(`started pid ${process.pid}, ${o.pool} workers, ${hooks.length} hooks${failed.length > 0 ? `, failed to load: ${failed.join(', ')}` : ''}, key ${key}`);
@@ -178,7 +205,7 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
 
 if (isMain(import.meta.url)) {
   const argv = process.argv.slice(2);
-  const host: Host = { env: process.env, uid: process.getuid?.() ?? 0, home: homedir(), platform: process.platform, node: process.execPath, script: process.argv[1] ?? '' };
+  const host: Host = { env: process.env, uid: process.getuid?.() ?? 0, home: homedir(), platform: process.platform, node: process.execPath, script: process.argv[1] ?? '', exit: (code) => process.exit(code) };
   const options = serveOptions(argv, host);
   if (argv.includes('--selftest')) process.exit(await (await import('./resident/selftest.mts')).selftest());   // loaded only here: the daemon never carries it
   else if (options !== null) process.exit(await serve(options, host));

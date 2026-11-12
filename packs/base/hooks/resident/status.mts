@@ -11,7 +11,7 @@ import { toJson } from '../lib/json.mts';
 import { KIT, cacheDir, parseVersion } from '../lib/kit-fresh-look.mts';
 import type { Env, HookEvent } from '../lib/types.d.mts';
 import { AgentBoard } from './agent-board.mts';
-import { usageOf as sampled, type Usage } from './usage.mts';
+import type { Usage } from './usage.mts';
 
 /** How old git's state or the RUNS rows get before they are drawn again; the version is read again this often too. */
 export const GIT_MS = 4000;
@@ -27,8 +27,8 @@ export interface StatusOptions {
   project: string;
   /** The drawing module (tools/statusline), loaded at start so the first render does not pay for it. */
   load: () => Promise<Bar>;
-  /** The sampler's totals for an owner (W8.7); a test plants it. */
-  usageOf?: (owner: string) => Usage | null;
+  /** The sampler's totals for an owner (W8.7): the daemon's own store, or a test's plant. */
+  usageOf: (owner: string) => Usage | null;
   /** npm's newest version, or null when it could not be had. It may hang or throw: the render never waits for it. */
   askNpm?: () => Promise<string | null>;
   /** git's state of a folder, asked in the background. */
@@ -66,7 +66,7 @@ export class StatusKeeper {
   note(ev: HookEvent, ppid: number, now: number): void { this.board.note(ev, ppid, now); }
 
   /** The sampler's tick: agents with no process and no event for five minutes are dropped even when no one renders. */
-  tick(now: number): void { this.board.observe(now, this.o.usageOf ?? sampled); void this.refreshNewest(now); }
+  tick(now: number): void { this.board.observe(now, this.o.usageOf); void this.refreshNewest(now); }
 
   /** Asks npm in the background when the last ask is an hour old; never waits, never throws. A failed or hung ask leaves the last answer. */
   async refreshNewest(now: number): Promise<void> {
@@ -100,7 +100,7 @@ export class StatusKeeper {
     const bar = await this.bar;
     const project = this.o.project;
     if (this.version === null || now - this.version.at >= VERSION_MS) this.version = { at: now, value: bar.kitVersion(join(project, '.claude', 'tools'), project) };
-    const usageOf = this.o.usageOf ?? sampled;
+    const usageOf = this.o.usageOf;
     const refreshRuns = this.o.refreshRuns !== false;
     const lines = bar.statusBar(raw, {
       env, nowMs: now, refresh: false, resident: 'up', toolDir: join(project, '.claude', 'tools'),

@@ -25,7 +25,10 @@ export function startGroup(command: string, args: readonly string[], options: Sp
   return child;
 }
 
+/** Ends the group led by `pid`. A pid that is not a process id (0 is this group, 1 is init, -1 is everything the user owns) ends nothing.
+ *  No TERM goes first, and a daemon that is itself killed leaves its hooks' groups to the sampler's watchdog (a known gap). */
 export function killGroup(pid: number): boolean {
+  if (!Number.isInteger(pid) || pid <= 1) return false;
   try { process.kill(-pid, 'SIGKILL'); return true; } catch { return false; }
 }
 

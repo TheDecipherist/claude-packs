@@ -67,13 +67,20 @@ export function releaseCheck(out: string, targets: readonly Target[] = TARGETS):
   return problems;
 }
 
+let builds = 0;
+/** A temp name no other build shares, in this process or another: two builds into one folder never write the same file (W10b finding 17). */
+export const tempOf = (final: string): string => { builds += 1; return `${final}.${process.pid}.${builds}.new`; };
+/** A `go build` that has not ended in this long is killed: it holds the whole `npm run build` otherwise. */
+const BUILD_MS = 10 * 60_000;
+
 function buildOne(root: string, out: string, target: Target, env: Env): Promise<string | null> {
   const [goos = '', goarch = ''] = target.split('-');
   const final = binaryPath(out, target);
   mkdirSync(join(out, target), { recursive: true });
-  const temp = `${final}.new`;
+  const temp = tempOf(final);
   return new Promise((done) => {
-    const child = spawn('go', ['build', ...FLAGS, '-o', temp, '.'], { cwd: join(root, 'proxy'), env: { ...process.env, ...env, CGO_ENABLED: '0', GOOS: goos, GOARCH: goarch, GOCACHE: goCache(env), GOFLAGS: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
+    const goEnv = { ...process.env, ...env, CGO_ENABLED: '0', GOOS: goos, GOARCH: goarch, GOCACHE: goCache(env), GOFLAGS: '' };
+    const child = spawn('go', ['build', ...FLAGS, '-o', temp, '.'], { cwd: join(root, 'proxy'), env: goEnv, stdio: ['ignore', 'pipe', 'pipe'], timeout: BUILD_MS, killSignal: 'SIGKILL' });
     let said = '';
     child.stdout.on('data', (d: Buffer) => { said += String(d); });
     child.stderr.on('data', (d: Buffer) => { said += String(d); });

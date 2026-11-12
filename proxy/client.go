@@ -14,6 +14,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -204,10 +205,25 @@ func (j *job) fallback(why string, start bool) int {
 func (j *job) runTypeScript() int {
 	cmd := exec.Command(j.node, filepath.Join(j.project, ".claude", "hooks", "run-hooks.mjs"))
 	cmd.Dir, cmd.Env, cmd.Stdin, cmd.Stdout, cmd.Stderr = j.cwd, j.env, strings.NewReader(string(j.stdin)), j.stdout, j.stderr
+	// its own process group, so that when Claude ends this client (the entry's timeout) the runner and the hooks it started end with it
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP)
+	defer signal.Stop(signals)
 	if err := cmd.Start(); err != nil {
 		return j.failOpen("node could not start (" + err.Error() + ")")
 	}
-	if err := cmd.Wait(); err != nil {
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
+	var err error
+	select {
+	case err = <-done:
+	case <-signals:
+		syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		<-done
+		return 1 // told to end: a crash, never exit 0
+	}
+	if err != nil {
 		var exit *exec.ExitError
 		if errors.As(err, &exit) && exit.ExitCode() > 0 {
 			return exit.ExitCode()

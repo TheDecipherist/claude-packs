@@ -18,22 +18,38 @@ const LOG_MAX = 1024 * 1024;
 export const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch (e) { return (e as NodeJS.ErrnoException).code === 'EPERM'; } };
 const heldBy = (file: string): number => { try { return Number.parseInt(readFileSync(file, 'utf8'), 10); } catch { return Number.NaN; } };
 
-/** The start lock: true when this process holds it now, false when a live daemon is starting (or started). */
+/** The start lock: true when this process holds it now, false when a live daemon is starting (or started). A dead holder's lock is
+ *  taken over under a second file, `<lock>.takeover`, made with `wx` by one taker at a time: a starter that read the dead holder
+ *  before another finished taking over finds the new holder when it has the guard, and backs off (W10b finding 13). */
 export function takeStartLock(file: string, pid: number): boolean {
-  for (let tries = 0; tries < 2; tries += 1) {
-    try {
-      const fd = openSync(file, 'wx');
-      writeSync(fd, `${pid}\n`);
-      closeSync(fd);
-      return true;
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== 'EEXIST') return false;
-      const holder = heldBy(file);
-      if (Number.isInteger(holder) && holder !== pid && alive(holder)) return false;
-      rmSync(file, { force: true });   // its holder is gone: a lock left by a crash
+  const guard = `${file}.takeover`;
+  for (let tries = 0; tries < 3; tries += 1) {
+    if (create(file, pid)) return true;
+    const holder = heldBy(file);
+    if (Number.isInteger(holder) && holder !== pid && alive(holder)) return false;
+    if (!create(guard, pid)) {
+      const taker = heldBy(guard);
+      if (Number.isInteger(taker) && taker !== pid && alive(taker)) return false;   // someone is taking it over now
+      rmSync(guard, { force: true });   // a taker that died with the guard
+      continue;
     }
+    try {
+      const again = heldBy(file);
+      if (Number.isInteger(again) && again !== pid && alive(again) && again !== holder) return false;   // it was taken over while the guard was waited for
+      rmSync(file, { force: true });   // its holder is gone: a lock left by a crash
+      return create(file, pid);
+    } finally { rmSync(guard, { force: true }); }
   }
   return false;
+}
+/** A file made with `wx` that holds `pid`: false when it exists (or cannot be made). */
+function create(file: string, pid: number): boolean {
+  try {
+    const fd = openSync(file, 'wx');
+    writeSync(fd, `${pid}\n`);
+    closeSync(fd);
+    return true;
+  } catch { return false; }
 }
 export const releaseStartLock = (file: string): void => rmSync(file, { force: true });
 
@@ -90,8 +106,13 @@ export function watch(w: Watch): NodeJS.Timeout {
   return timer;
 }
 
-/** Starts this same daemon again, detached, in `/`, with HOME, PATH and the cache folder only: the old one has let go of its socket. */
-export function reexec(node: string, argv: readonly string[], env: Readonly<Record<string, string | undefined>>): void {
+/** Starts this same daemon again, detached, in `/`, with HOME, PATH and the cache folder only: the old one has let go of its socket.
+ *  True when the new process started; false (and a line in the log) when it could not (W10b finding 16). */
+export function reexec(node: string, argv: readonly string[], env: Readonly<Record<string, string | undefined>>, log: (line: string) => void): Promise<boolean> {
   const keep = Object.fromEntries(['HOME', 'PATH', 'CLAUDE_PACKS_CACHE', 'XDG_RUNTIME_DIR'].flatMap((k) => (env[k] === undefined ? [] : [[k, env[k]]])));
-  spawn(node, [...argv], { detached: true, cwd: '/', env: keep, stdio: 'ignore' }).unref();
+  return new Promise((done) => {
+    const child = spawn(node, [...argv], { detached: true, cwd: '/', env: keep, stdio: 'ignore' });
+    child.once('error', (e) => { log(`re-exec could not start: ${e.message}; no daemon follows this one`); done(false); });
+    child.once('spawn', () => { child.unref(); done(true); });
+  });
 }

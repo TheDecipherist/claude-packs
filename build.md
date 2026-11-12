@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w10b-paths (work/2.0.0-ts-w10b-paths), started 2026-11-12: W10b review findings 8 to 20, each test red first.
+  making: the daemon's closed error paths and owned state (serve/stop, socket deadlines, gathered frames, start lock, killGroup, Go client death, spawn errors, buildOne temp, usage store); concepts: none (design/shape.json declares none); reuse: startPool/listen/takeStartLock (resident/), askDaemon/startDaemon (lib/proxy-client.mts), the resident selftest rig (resident/selftest-rig.mts).
+
 - 2.0.0 w10-rows2 (work/2.0.0-ts-w10-rows2), started 2026-11-12: KWB-137, KWB-135, KWB-115 fixed, each test red first.
   making: inside-the-project's enclosing main checkout, idle-wake's soft import or a hook-level needs, protect-vendor's delete of a buildOutput; concepts: none (design/shape.json declares none); reuse: insideProject/checkoutRoot (packs/base/hooks/lib/project.mts), switches (lib/switches.mts), writesOf (lib/writes.mts).
 

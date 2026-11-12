@@ -4,7 +4,8 @@
 // client never retries in a loop.
 import { spawn } from 'node:child_process';
 import { connect } from 'node:net';
-import { crashReply, decodeReply, encodeRequest, type Reply, type WireRequest } from './proxy-wire.mts';
+import { FrameGather } from './frame-gather.mts';
+import { MAX_STDIN, crashReply, decodeReply, encodeRequest, type Reply, type WireRequest } from './proxy-wire.mts';
 
 /** What asking a daemon came to: its whole reply, a reply that was cut or was not a record (a crash), or no daemon to ask. */
 export type Answer = { kind: 'reply'; reply: Reply } | { kind: 'cut'; reply: Reply } | { kind: 'none'; why: string };
@@ -13,7 +14,7 @@ export type Answer = { kind: 'reply'; reply: Reply } | { kind: 'cut'; reply: Rep
 export function askDaemon(socket: string, request: WireRequest, stdin: string | Uint8Array, waitMs = request.deadline - Date.now() + 500): Promise<Answer> {
   return new Promise((done) => {
     const conn = connect(socket);
-    const chunks: Buffer[] = [];
+    const gather = new FrameGather(1, MAX_STDIN);   // a reply is capped at the same 64 MB
     let settled = false;
     const finish = (answer: Answer): void => {
       if (settled) return;
@@ -25,13 +26,14 @@ export function askDaemon(socket: string, request: WireRequest, stdin: string | 
     const timer = setTimeout(() => finish({ kind: 'cut', reply: crashReply('no reply by the deadline') }), Math.max(waitMs, 1));
     conn.on('connect', () => conn.write(encodeRequest(request, stdin)));
     conn.on('data', (chunk: Buffer) => {
-      chunks.push(chunk);
-      const got = decodeReply(Buffer.concat(chunks));
+      const bytes = gather.push(chunk);
+      if (bytes === null) return;
+      const got = decodeReply(bytes);
       if (got.kind === 'whole') finish({ kind: 'reply', reply: got.value });
       else if (got.kind === 'bad' || got.kind === 'too-big') finish({ kind: 'cut', reply: crashReply(got.kind === 'bad' ? got.why : 'a reply too large') });
     });
-    conn.on('close', () => finish({ kind: 'cut', reply: crashReply(`closed after ${Buffer.concat(chunks).length} bytes`) }));
-    conn.on('error', (e: NodeJS.ErrnoException) => finish(chunks.length === 0 && e.syscall === 'connect' ? { kind: 'none', why: e.code ?? e.message } : { kind: 'cut', reply: crashReply(e.message) }));
+    conn.on('close', () => finish({ kind: 'cut', reply: crashReply(`closed after ${gather.length} bytes`) }));
+    conn.on('error', (e: NodeJS.ErrnoException) => finish(gather.length === 0 && e.syscall === 'connect' ? { kind: 'none', why: e.code ?? e.message } : { kind: 'cut', reply: crashReply(e.message) }));
   });
 }
 
@@ -67,13 +69,23 @@ export function startDaemon({ node, script, args, env, waitMs = 10_000 }: StartO
       done(result);
     };
     const timer = setTimeout(() => finish({ kind: 'failed', why: 'no word on the ready pipe in time' }), waitMs);
+    // the pipe is read to its end, as the Go client reads it: a daemon that says `busy` and exits at once has exited before the pipe's
+    // data is delivered, and its exit alone says nothing (W10b finding 12)
+    let exited: number | null | undefined;
+    const word = (): Started => {
+      const ready = /^ready (\d+)\n/.exec(said);
+      if (ready) return { kind: 'ready', pid: Number(ready[1]) };
+      if (said.startsWith('busy\n')) return { kind: 'busy' };
+      if (said.startsWith('failed ')) return { kind: 'failed', why: said.slice('failed '.length).trim() };
+      if (said.startsWith('refused ')) return { kind: 'failed', why: said.trim() };
+      return { kind: 'failed', why: exited === undefined ? 'the ready pipe closed with no word' : `exited ${exited} before it was ready` };
+    };
     child.on('error', (e) => finish({ kind: 'failed', why: e.message }));
-    child.on('exit', (code) => finish({ kind: 'failed', why: `exited ${code} before it was ready` }));
+    child.on('exit', (code) => { exited = code; });
     pipe?.on('data', (d: Buffer) => {
       said += d.toString();
-      const ready = /^ready (\d+)\n/.exec(said);
-      if (ready) finish({ kind: 'ready', pid: Number(ready[1]) });
-      else if (said.startsWith('busy\n')) finish({ kind: 'busy' });
+      if (/^ready (\d+)\n/.test(said) || said.startsWith('busy\n')) finish(word());
     });
+    pipe?.on('close', () => finish(word()));
   });
 }
