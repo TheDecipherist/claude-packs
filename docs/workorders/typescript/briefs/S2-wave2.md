@@ -7,7 +7,7 @@ here word for word. Your own section below says what is yours.
 ## kwb199: refill a slot as each agent returns
 
 Read `workflow-bugs.md` row KWB-199 and the measurement `build/evidence/KWB-199/summary.md` in the main checkout
-(/Users/tim.clausen/projects/claude-packs/build/evidence/KWB-199/; copy the summary and `marks/` into your worktree's
+(`build/evidence/KWB-199/` there; copy the summary and `marks/` into your worktree's
 `build/evidence/KWB-199/` so the branch carries them). The measurement: a background agent lives while the lead's turn is open,
 and its completion reaches the lead at its next tool-call boundary; an agent still running when a `claude -p` turn ends is
 stopped (KWB-124).
@@ -18,7 +18,7 @@ stopped (KWB-124).
    description and telling the lead to keep working or wait in the foreground; pass when none is pending, when someone is there
    (`unattended` false), and when `stop_hook_active` is true after a first refusal only if the agents are still pending (say so:
    never let a turn end on a pending agent). Read a real transcript's shapes first: the main checkout's session transcripts
-   under `~/.claude/projects/-Users-tim-clausen-projects-claude-packs/` hold background launches and task notifications
+   under `~/.claude/projects/` (the folder named for this checkout's path) hold background launches and task notifications
    (read only; put a small anonymised sample under `test/fixtures/` for the test, every path and name replaced). Register the
    Stop event in `packs/base/pack.json`. Selftest cases: a pending background agent refused at Stop, a returned one passes, a
    foreground one never counts, a background start in an unattended run now passes at PreToolUse, someone there passes; each
@@ -50,7 +50,7 @@ only those files.
 ## budgets: doctor --strict green on the kit's own live install
 
 `node bin/claude-packs.mjs doctor --strict` in the main checkout is red on the budgets (its output:
-/Users/tim.clausen/projects/claude-packs/build/session2/doctor1.txt; the live log is the main checkout's `.claude/hooks.log`, read
+`build/session2/doctor1.txt` in the main checkout; the live log is the main checkout's `.claude/hooks.log`, read
 only). Every slow call is a `git commit`, `git push`, `git merge` or `git add` Bash call, or the first event after the daemon
 starts:
 - git-guard at Pre Bash 1,201 to 2,082 ms on commit and push: law 9 asks GitHub (`git ls-remote --heads`, lib/remote-heads.mts
