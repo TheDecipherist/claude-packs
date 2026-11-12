@@ -12,7 +12,7 @@ const KEPT = 8;   // transcripts remembered: a session has one, agents a few
 const NEWLINE = 10;
 
 interface Known { size: number; mtimeMs: number; scanned: number; prompt: string }
-interface Look { prompt: string; scanned: number }
+interface Scan { prompt: string; scanned: number }
 const known = new Map<string, Known>();
 let total = 0;
 
@@ -26,7 +26,7 @@ function promptOfBytes(line: Buffer): string | null {
 }
 
 /** The whole file, last piece first: the prompt of the last line that holds one, and the offset after the last newline. */
-function scanBack(fd: number, size: number): Look {
+function scanBack(fd: number, size: number): Scan {
   let scratch: Buffer = Buffer.allocUnsafe(2 * CHUNK);   // the piece, then the start of the line it cut (the end of the piece after it)
   let carry: Buffer = Buffer.alloc(0);
   let prompt: string | null = null;
@@ -51,7 +51,7 @@ function scanBack(fd: number, size: number): Look {
 }
 
 /** What was appended after `from`: the newest prompt in its whole lines (the old one when none), and the offset after the last whole line. */
-function scanForward(fd: number, from: number, size: number, prompt: string): Look {
+function scanForward(fd: number, from: number, size: number, prompt: string): Scan {
   let found = prompt;
   let rest: Buffer = Buffer.alloc(0);
   for (let at = from; at < size; at += 4 * CHUNK) {
