@@ -22,6 +22,8 @@ export interface PoolOptions {
   growAfterMs: number;
   /** The index on the main thread, asked by a worker. */
   candidates: (hashes: readonly string[]) => FileStatements[];
+  /** A warm-up the main thread's index is still waiting on: an ask is answered after it (null: none). */
+  warming?: () => Promise<void> | null;
   log: (line: string) => void;
 }
 
@@ -89,7 +91,7 @@ export function startPool(o: PoolOptions): Pool {
         if (s.events >= o.recycleAfter) { drop(s); if (!closing) spawn(s.preload); } else pump();
       } else if (m.type === 'group') {
         if (m.kind === 'started') s.groups.add(m.pid); else s.groups.delete(m.pid);
-      } else if (m.type === 'ask') send(s, { type: 'answer', id: m.id, files: o.candidates(m.hashes) });
+      } else if (m.type === 'ask') void Promise.resolve(o.warming?.()).then(() => { if (!s.gone) send(s, { type: 'answer', id: m.id, files: o.candidates(m.hashes) }); });
       else o.log(m.line);
     });
     worker.on('error', (e) => o.log(`worker error: ${e.stack ?? e.message}`));

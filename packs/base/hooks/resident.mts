@@ -108,11 +108,12 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
   if (table === null) { log(`start refused: ${o.hooks} holds no hook table`); releaseStartLock(files.lock); sayReady(o.readyFd, 'failed no hook table\n'); return 1; }
   for (const flag of SMALL_V8) setFlagsFromString(flag);
   const index = residentIndex(project, () => readLayout(project));
+  index.warm(new URL(`./resident/warm${EXT}`, import.meta.url));   // the indexes are built beside the start, not on the first Write
   const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
   // the pool never grows past its size: a burst of 16 events at once grew it to 20 to 22 workers, each about 10 MB the daemon kept (rss)
   const pool = startPool({
     workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, preload: Math.min(PRELOAD, o.pool), spread: SPREAD, max: o.pool,
-    idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, log,
+    idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, warming: index.warming, log,
   });
   const failed = await pool.ready();
   const counts = { events: 0, last: 0, inflight: 0 };
@@ -150,6 +151,7 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
       sampling?.stop();
       clearInterval(ticker);
       void listening.close().then(() => pool.close()).then(() => {
+        index.close();
         state.remove();
         releaseStartLock(files.lock);
         if (again) reexec(host.node, o.again, host.env);
