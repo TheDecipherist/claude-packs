@@ -710,7 +710,7 @@ check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the rep
    matters"): an SVG made by `scripts/counts.mts` from W11's evidence (never drawn by hand), one horizontal bar pair per measure
    that a user feels (the wait per turn, Stop at p95, a release from commit to npm, the gate for a one-hook change, a Bash call's
    hooks live, `doctor` cached, `update` warm), before and after on one row with the factor written at the end, a light and a dark
-   file shown through `<picture>`, its colours and marks from the `dataviz` skill; a plain table of the same numbers under it for
+   file shown through an HTML picture element, its colours and marks from the `dataviz` skill; a plain table of the same numbers under it for
    readers without images; `counts --check` red when the graph and the evidence disagree (a plant).
 
 **Done when (items 3 and 4):** `whats-new-in-2.0.md` exists with every section above, every number traced to a row of the report
