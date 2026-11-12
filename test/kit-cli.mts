@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { put } from '../packs/base/hooks/lib/files.mts';
+import { put, readText } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
 import { TABLE_FILE, readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import { writeJson } from '../packs/base/hooks/lib/json.mts';
@@ -114,4 +114,13 @@ export function keepHooks(dir: string, also: readonly string[] = []): string {
   const table = readHookTable(hooks);
   if (table !== null) writeJson(join(hooks, TABLE_FILE), table.filter((r) => hookFiles(hooks).includes(`${r.hook}.mjs`)), { pretty: true });
   return dir;
+}
+
+/** The hooks an install registers (names without the extension): those a settings entry names (a project's own, heartbeat, a pre-W8.1
+ *  install) and every row of the table the runner reads (`.claude/hooks/hooks.json`, W8.1); since then settings.json names the runner. */
+export function registeredHooks(dir: string): string[] {
+  const settings = readText(join(dir, '.claude/settings.json')) ?? '';
+  const named = [...settings.matchAll(/\.claude\/hooks\/([\w-]+)\.(?:mjs|py)/g)].map((m) => m[1] ?? '');
+  const rows = (readHookTable(join(dir, '.claude/hooks')) ?? []).map((r) => r.hook);
+  return [...new Set([...named, ...rows])];
 }

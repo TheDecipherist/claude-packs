@@ -1,6 +1,6 @@
 // End-to-end tests of the CLI against throwaway projects. (The edited rule and the existing .claude: install-update.test.mts and
 // install-existing.test.mts, split so no file sums over a minute.)
-import { assert, cli, existsSync, hookStatus, join, mkdirSync, profile, readdirSync, run, test, writeFileSync } from '../kit-cli.mts';
+import { assert, cli, existsSync, hookStatus, join, mkdirSync, profile, readdirSync, registeredHooks, run, test, writeFileSync } from '../kit-cli.mts';
 import { fixture } from '../fixtures/installs.mts';
 import { project, text } from './install-rig.mts';
 
@@ -15,8 +15,8 @@ test('full Stellix install: nested GPU skills, CLAUDE.md block, hooks', () => {
   const md = text(dir, 'CLAUDE.md');
   assert.match(md, /^# Stellix\nMy own intro\./);
   assert.match(md, /`src\/world\/`/);
-  const settings = text(dir, '.claude/settings.json');
-  for (const h of ['lesson-checks', 'folder-law', 'realtime-guard', 'no-shipped-images', 'param-id-lock']) assert.match(settings, new RegExp(h));
+  const registered = registeredHooks(dir);
+  for (const h of ['lesson-checks', 'folder-law', 'realtime-guard', 'no-shipped-images', 'param-id-lock']) assert.ok(registered.includes(h), h);
 });
 
 test('folder law refuses new source files outside the layout', () => {

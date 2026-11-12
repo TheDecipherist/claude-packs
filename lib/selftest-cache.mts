@@ -26,7 +26,9 @@ export const filesUnder = (dir: string): string[] => walk(dir, notInstalled);
 export function sharedHash(claudeDir: string, guards: unknown = {}, env: CacheEnv = process.env): string {
   const h = createHash('sha256');
   const runner = join(claudeDir, 'hooks', 'run-hooks.mjs');
-  if (existsSync(runner)) h.update(readFileSync(runner));
+  // Every selftest runs through the runner, so the runner's own imports are what every one of them runs on (KWB-193): a change to
+  // one of them proves every hook again; a lib only some hooks import reruns those.
+  for (const f of importsOf(runner)) h.update(readFileSync(f)).update('\0');
   h.update(`${process.version}\0${process.platform}\0${env.CLAUDE_PACKS_JSCPD ?? ''}\0${JSON.stringify(guards)}`);
   return h.digest('hex');
 }

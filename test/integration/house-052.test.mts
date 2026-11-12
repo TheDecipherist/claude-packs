@@ -2,7 +2,7 @@
 // enables it, update prints what it holds back, and an enabled git-guard still leaves main alone until refuseTrunk.
 // The install is by the old kit itself (git archive of c671865), so this flow installs on purpose.
 import { execFileSync } from 'node:child_process';
-import { KIT, assert, existsSync, fresh, git, hookRun, join, mkdirSync, readFileSync, run, test, writeFileSync } from '../kit-cli.mts';
+import { KIT, assert, existsSync, fresh, git, hookRun, join, mkdirSync, readFileSync, registeredHooks, run, test, writeFileSync } from '../kit-cli.mts';
 import { withLayout } from '../fixtures/installs.mts';
 
 test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable, and update prints the list', () => {
@@ -28,7 +28,7 @@ test('a 0.5.x project updated to 0.6.0 switches on nothing new it did not enable
   const settings = readFileSync(join(dir, '.claude/settings.json'), 'utf8');
   for (const h of ['git-guard', 'build-guard', 'time-guard', 'user-asks', 'idle-wake', 'browser-guard']) assert.doesNotMatch(settings, new RegExp(`hooks/${h}\\.(py|mjs)`), h);
   assert.match(before, /protect-vendor/);
-  assert.match(settings, /protect-vendor/, 'what it had stays on');
+  assert.ok(registeredHooks(dir).includes('protect-vendor'), 'what it had stays on');
   assert.match(run(dir, 'doctor'), /OK:/);
 
   withLayout(dir, { enable: ['hooks/git-guard.mjs'] });

@@ -1,7 +1,7 @@
 // planner W3: a work order's install block (a ```claude-packs fence) is what `init --from` and `new --from` install, so the order is
 // the one source of a project's set-up. Its keys are the kit's own; an unknown one is refused by name and nothing is installed.
 // (The rebuild template and the plugin templates: install-block-rebuild and install-block-plugin, split so no file sums over a minute.)
-import { assert, cli, existsSync, fresh, git, join, readFileSync, test, writeFileSync } from '../kit-cli.mts';
+import { assert, cli, existsSync, fresh, git, join, registeredHooks, test, writeFileSync } from '../kit-cli.mts';
 import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
 import { holdsTemplates, initFrom, orderWith } from './install-block-rig.mts';
 
@@ -16,7 +16,7 @@ test('the block\'s own layout keys land in layout.json, and what enable names sw
   assert.deepEqual(layout.enable, ['hooks/user-asks.mjs']);
   assert.equal(layout.commands?.test, 'ctest --preset dev');
   assert.ok(existsSync(join(dir, '.claude/hooks/user-asks.mjs')), 'the opt-in hook enable names is installed');
-  assert.match(readFileSync(join(dir, '.claude/settings.json'), 'utf8'), /user-asks\.mjs/, 'and runs');
+  assert.ok(registeredHooks(dir).includes('user-asks'), 'and runs');
 });
 
 test('an unknown key is refused by name, and nothing is installed', () => {
