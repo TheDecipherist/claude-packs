@@ -57,7 +57,7 @@ export interface ClassTimes { wall: Spread; wallFrom: 'proxy' | 'event'; queue: 
 function lastOf<T>(list: readonly T[]): T[] { return list.slice(-LAST); }
 
 /** Per event class, from the log's last LAST calls of each series. */
-export function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, ClassTimes> {
+function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, ClassTimes> {
   const byClass = new Map<EventClass, HookLogEntry[]>();
   for (const e of entries) {
     const c = classOf(e.event, e.tool);

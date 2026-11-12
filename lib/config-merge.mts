@@ -49,13 +49,13 @@ export function applyLines(base: readonly string[], delta: LineDelta = {}): stri
 }
 
 /** The packs a configuration always installs: base first, the delta's own, then the rest of the shared list. */
-export function alwaysPacks(shared: readonly string[], own: readonly string[] = []): string[] {
+function alwaysPacks(shared: readonly string[], own: readonly string[] = []): string[] {
   const [first, ...rest] = shared;
   return [...(first === undefined ? [] : [first]), ...own, ...rest];
 }
 
 /** The packs that may join a configuration: every one whose `fits` names it and that it does not install already. */
-export function chosenPacks(name: string, always: readonly string[], fits: Readonly<Record<string, readonly string[]>>): string[] {
+function chosenPacks(name: string, always: readonly string[], fits: Readonly<Record<string, readonly string[]>>): string[] {
   return Object.keys(fits).filter((pack) => (fits[pack] ?? []).includes(name) && !always.includes(pack)).sort();
 }
 

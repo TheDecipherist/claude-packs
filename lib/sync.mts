@@ -156,7 +156,7 @@ export async function sync(projectDir: string, requested: readonly string[] | nu
   const kept = lock.packs.length > 0 && (!before?.configuration || before.configuration === config.name);
   const sw = switches(projectDir, packNames, layout, { ...lock, packs: kept ? [...lock.packs, ...config.packs.always] : lock.packs });
   reportSwitches(sw, log);
-  const installed: Layout = { ...layout, disable: [...(layout.disable ?? []), ...sw.held, ...(Array.isArray(config['leaveOut']) ? (config['leaveOut'] as string[]) : [])] };
+  const installed: Layout = { ...layout, disable: [...(layout.disable ?? []), ...sw.held, ...(config.leaveOut ?? [])] };
   const { files, untouchable } = copyPackFiles(projectDir, packNames, installed, lock, force, log);
   removeDropped(projectDir, lock, files, log);
   const proxy = installBinary(join(PACKS_DIR, '..'), process.env);

@@ -106,6 +106,7 @@ func (p *proc) judge(project string) int {
 		return p.failOpen("node is not on PATH")
 	}
 	j := &job{proc: p, project: realPath(project), node: realPath(node)}
+	// fail-open: a lock that cannot be read reads as no lock, and no home folder as an empty one (the call goes through unjudged)
 	lock, _ := os.ReadFile(filepath.Join(j.project, ".claude", "claude-packs.lock.json"))
 	home := p.get("HOME")
 	if home == "" {
@@ -154,6 +155,7 @@ func (j *job) ask() (*reply, error) {
 			env[k] = v
 		}
 	}
+	// Marshal of this map of strings and numbers cannot fail
 	header, _ := json.Marshal(map[string]any{"v": protocol, "env": env, "cwd": j.cwd, "ppid": j.ppid, "deadline": deadline.UnixMilli()})
 	if _, err = conn.Write(request(header, j.stdin)); err != nil {
 		return nil, fmt.Errorf("the resident runner took no request: %w", err)
@@ -203,6 +205,7 @@ func (j *job) runTypeScript() int {
 
 // failOpen: the one way a call goes through unjudged, said in a systemMessage.
 func (p *proc) failOpen(why string) int {
+	// Marshal of a string map cannot fail
 	msg, _ := json.Marshal(map[string]string{"systemMessage": "claude-packs: " + why + ", so this call was not judged"})
 	fmt.Fprintf(p.stdout, "%s\n", msg)
 	return 0

@@ -23,7 +23,6 @@ function required(path: string): string {
 // project's configuration (a rebuild and a new synth share synth-creator): `generic` (blank steps, the default), `plugin` (a new
 // synth or effect, the house's decisions written in), `rebuild` (a hardware instrument rebuilt as a plugin, from four rebuilds).
 export const workorderTemplates = (): string[] => readdirSync(TEMPLATES).flatMap((f) => f.match(/^([\w-]+)\.md$/)?.[1] ?? []).sort();
-export const templateText = (template: string): string => required(join(TEMPLATES, `${template}.md`));
 
 // Refuses a template the kit does not have, naming the ones it has, before anything is written.
 export function assertTemplate(template: string): void {

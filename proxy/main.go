@@ -24,6 +24,7 @@ func main() {
 			timeout = time.Duration(seconds) * time.Second
 		}
 	}
+	// fail-open by contract: the proxy never blocks a call on its own fault, so a stdin or cwd it cannot read is an empty one
 	stdin, _ := io.ReadAll(os.Stdin)
 	cwd, _ := os.Getwd()
 	p := &proc{env: os.Environ(), cwd: cwd, ppid: os.Getppid(), uid: os.Getuid(), goos: runtime.GOOS, stdin: stdin, stdout: os.Stdout, stderr: os.Stderr, timeout: timeout, start: start, spawn: true}

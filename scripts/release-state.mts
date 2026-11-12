@@ -70,10 +70,13 @@ export interface Facts {
   scratchProblems: string[];
 }
 
+/** How long a release's git step (a push to the remote) may take before it is called failed: five minutes. */
+const GIT_STEP_PATIENCE_MS = 300_000;
+
 export const git = (ctx: Pick<Ctx, 'root' | 'env'>, args: readonly string[]): string => gitOut(args, { cwd: ctx.root, env: ctx.env }) ?? '';
 /** git with its whole output, for a step that must say why it failed. */
 export function gitDo(ctx: Pick<Ctx, 'root' | 'env'>, args: readonly string[]): { ok: boolean; text: string } {
-  const r = gitRun(args, { cwd: ctx.root, env: ctx.env, timeoutMs: 300_000 });
+  const r = gitRun(args, { cwd: ctx.root, env: ctx.env, timeoutMs: GIT_STEP_PATIENCE_MS });
   return { ok: r.ok, text: (r.stdout + r.stderr).trim() };
 }
 

@@ -49,7 +49,7 @@ export function configsAt(kit: string): Configuration[] {
 }
 
 /** What each stock pack says of the configurations it may join: pack name, then its `fits`. */
-export function packFits(): Record<string, string[]> {
+function packFits(): Record<string, string[]> {
   return Object.fromEntries(readdirSync(PACKS_DIR).filter((d) => existsSync(join(PACKS_DIR, d, 'pack.json'))).sort().map((d) => [d, fitsOf(readPack(d))]));
 }
 

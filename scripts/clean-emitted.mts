@@ -13,7 +13,7 @@ const KIT = fileURLToPath(new URL('..', import.meta.url));
 const FOLDERS = ['bin', 'lib', 'global', 'scripts', 'packs', '.claude/hooks'];
 
 /** The ignored .mjs, .cjs and .js under the source folders whose TypeScript source is gone. */
-export function strayEmitted(root: string, env: Readonly<Record<string, string | undefined>>): string[] {
+function strayEmitted(root: string, env: Readonly<Record<string, string | undefined>>): string[] {
   const ignored = gitLines(['ls-files', '--others', '--ignored', '--exclude-standard', '--', ...FOLDERS], { cwd: root, env });
   return ignored.filter((rel) => /\.(?:mjs|cjs|js)$/.test(rel) && !rel.includes('node_modules/') && emittedFrom(join(root, rel)) === null);
 }
