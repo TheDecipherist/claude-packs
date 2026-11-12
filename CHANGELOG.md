@@ -2,7 +2,7 @@
 
 ## 2.0.0 (unreleased: work/2.0.0-typescript)
 
-The kit in strict TypeScript, its hooks behind a resident runner and a Go proxy (work order `typescript`). 1.9.0 below was never published on its own and folds into this release (d-1).
+The kit is now strict TypeScript, and a project's hooks run in one resident process behind a small Go proxy instead of a fresh node process per hook. A Bash call that waited on seven node starts now waits on one proxy call, and the hooks of an event run side by side. The status line is served live by that process, and a Go sampler watches CPU, memory and stray processes. JavaScript projects get TypeScript and the language server on `init`. Releasing the kit is one command. 1.9.0 was never published on its own and is folded in below (d-1).
 
 - KWB-176: the repo-wide copy count (doctor's ratchet, `dup scan`) no longer counts shared import statements as a copy; a project's count falls by every import header it held.
 - KWB-170 and W1.6: the repetition and size readers read `.mts` and `.cts` (one table of source extensions, `source-exts`), and never take a `.mjs` a TypeScript build emitted beside its source for a copy of it.

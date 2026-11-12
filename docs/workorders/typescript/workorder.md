@@ -208,7 +208,7 @@ Never do:
   `ROOT` at import today; agents-held and time-guard walk the ppid chain); the daemon loads hooks only from the folder its hash names,
   and a request whose `projectDir` is another folder is answered by the TypeScript path. *Judges and recorders:* a hook is a judge
   (`parallel`, writes nothing, proved by a write trap in its selftest) or a recorder (`serial`, refuses nothing), never both; a Write's
-  judges run at once in a pool of `min(16, cores)` warm worker threads (grown to 32, retired after 10 idle minutes, recycled after 500
+  judges run at once in a pool of 2 warm worker threads (grown on demand to 8, retired after 2 idle minutes, recycled after 500
   events), the main thread doing only socket I/O, framing, the table, the repetition index (queried by message) and every state-file
   and timing write; after the first exit 2 the daemon waits up to 30 ms for the rest and returns every refusal sorted by table order,
   so the same call reads the same; recorders that record the call itself (the event log, the heartbeat) run for every call, updaters
@@ -546,8 +546,9 @@ Sequential: (1), then (2), then (3), then (4), then (5).
      recorded in the crash log (review-2 1.1, 1.2, 1.9, 1.11).
    - *The daemon* (`packs/base/hooks/resident.mts`, split by job under `resident/`: `socket`, `pool`, `event`, `index`, `state`,
      `lifecycle`): the socket in d-10's folder with d-10's name, refused when the folder is not the user's at mode 700; the hook table
-     loaded once from the folder its hash names, only the hooks the table marks for it (never `async`); the worker pool `min(16, cores)`
-     warm, grown to 32, retired after 10 idle minutes, recycled after 500 events, a worker that exits replaced and its hook counted a
+     loaded once from the folder its hash names, only the hooks the table marks for it (never `async`); the worker pool of 2
+     warm, grown on demand to 8, retired after 2 idle minutes (bandwarp's log: 90 % of busy time one event at a time, 99 % at most
+     two, never more than 5 at once; the user: "we never need 16"), recycled after 500 events, a worker that exits replaced and its hook counted a
      crash; the main thread doing only socket I/O, framing, the table, the repetition index (a worker asks it by message for the
      candidate lines of the added text, never for the index) and every state-file (`writeJson` by rename) and timing write (workers
      return `{hook, ms, code}`, the main thread appends the event's lines in one write and owns rotation); judges at once, the first
@@ -630,7 +631,7 @@ settings and seen in its log, each proxy call under 20 ms on this Mac by the `pr
 under 110 ms p50 and a Bash event's under 20 ms, against W0's (g) measured wall for the same events (wall to wall, never a sum); the
 daemon's and the client's selftests green with every plant seen red, eight racing clients making one daemon, and a `rm -rf` PreToolUse
 refused on the very first event of a session with no daemon; an install with no binary in the cache runs the TypeScript runner through
-the `sh` picker and passes the same tests; the daemon's RSS under 250 MB with 16 workers after 1,000 events; W0's replay fixture played
+the `sh` picker and passes the same tests; the daemon's RSS under 150 MB with its pool at 8 after 1,000 events, and under 100 MB idle at 2; W0's replay fixture played
 through an install with bandwarp's pack set gives Stop p50 under 200 ms and p95 under 1,000 ms over its 51 Stops (from 1,880 and 7,785)
 and no hook over its budget; `doctor` red on the sleeping plant and naming the pool on a planted full pool; `init --config
 synth-creator cpp audio-core` plus `doctor` under 40 s uncached and 10 s cached, and `update` under 30 s, on this Mac; the status line
@@ -660,9 +661,20 @@ W10b's soak runs.
    on read). The lead asks before every wave and every heavy job and sizes them by the answer; every agent brief's first lines say
    to ask before each heavy command and use the answer; the `load` skill says how. Items 3 and 4 below are the safety net for a
    command that did not ask: it is routed through the same governor anyway.
+0b. Priority (the user, 2026-11-12: "give an agent in the order a priority its allowed to request. So if it says something like I
+   am priority 0.3 then it can get max 3 cores ... it should be prioritized by what work is required before other things"): every
+   ask and take carries `--priority P` (0 to 1, default 0.5): P is the most of the budget the job may hold (0.3 of a 10-core budget
+   is at most 3 cores); asks waiting together are served highest priority first, each given its share of what is free; when load
+   stays over the ceiling, the lowest priority job is paused first (not the newest), the highest last; a waiting job's priority rises
+   0.1 every 5 minutes it waits, and every granted job holds at least 1 core, so none starves; the last 20 % of the cores
+   is never granted, for the system and the person at the machine (the user: "we can never use the last 20%. thats reserved for
+   the system and you"): a hard limit, not a default; no setting can raise it. The lead sets each agent's priority in its brief from the order:
+   work other steps wait on (the critical path) high (0.6 and up), the lead's own merge gate highest (0.8), verification nothing
+   waits on (soaks, fuzzing, re-measuring, reports) low (0.2 to 0.3); the brief template carries the field, and `load ask` prints the
+   priority it answered for.
 1. One owner, `packs/base/hooks/lib/governor.mts`, with the machine's budget in the user's cache folder (shared by every session,
-   agent and project on the machine): slots = 60 % of the cores by default (`~/.config/claude-packs/governor.json` `budget`, a share
-   or a count; a project's layout may lower it, never raise it), a load ceiling (default 70 % of the cores), the jobs in flight in a
+   agent and project on the machine): slots = 60 % of the cores by default, never more than 80 % (`~/.config/claude-packs/governor.json` `budget`, a share
+   or a count; a project's layout may lower it, never raise it), a load ceiling (default 70 % of the cores, never above 80 %), the jobs in flight in a
    lock-guarded file (each with its pid, process group, slots, project and start), a stale job (pid gone) freed on read.
 2. The build queue folds into it: `buildq`'s slot and core budget become the governor's (its callers and its tests kept, its own
    state file retired), one owner for "how many cores may this job use".
@@ -687,7 +699,10 @@ W10b's soak runs.
 `test/hooks/base/governor-route.test.mts` and `test/integration/load-ask.test.mts` are green with 0 failures, each case seen red on
 its plant: `load ask` answers in under 50 ms with the cores, the per-kind settings and the load, and says wait under a planted load
 over the ceiling; two `load take` grants that together exceed the budget are refused for the second until the first is freed;
-a grant whose pid is gone is freed on the next ask; two planted heavy jobs whose
+a grant whose pid is gone is freed on the next ask; a `--priority 0.3` take on a 10-core budget is granted at most 3 cores; of two
+asks waiting, the higher priority is granted first; under a planted load over the ceiling, the lowest priority of three running
+jobs is paused first and the highest last; a planted low-priority ask waiting 15 minutes rises to its aged priority and is granted;
+the last 20 % of the cores is never granted and a setting that asks for more is clamped to 80 % (a planted budget of 100 %); two planted heavy jobs whose
 weights exceed the budget run one after the other, never together; a job granted 3 slots runs with `CLAUDE_PACKS_TEST_CORES=3` and
 `-j3`; a killed job's slots are freed on the next read; a planted `npm test`, `cmake --build` and `go test -fuzz` are each rewritten
 through `governed`, and `ls`, a governed command and a pipe whose heavy part is not first are not; an agent start past the budget
@@ -756,6 +771,23 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
 
 ## W11. The report, with the comparison
 
+0. Five real bandwarp tasks done again on 2.0 (the user, 2026-11-12: "take 5 random features/tasks that were build in bandwarp and
+   hand the same orders to the agents using the new kit and see if the results are the same or better"), before the rest of W11:
+   - The pick: `scripts/ab-pick.mts` lists bandwarp's agent tasks that were measured and merged (an agent id with a brief in
+     `docs/workorders/bandwarp/briefs/`, a merge commit and a gate named in its progress line), and draws five with a seed written
+     in the evidence: one each of UI panel, UI settings, DSP and presets, and one from the rest; the list, the seed and the draw in
+     `build/evidence/W11/ab-pick.md`.
+   - Each task: a fresh clone of bandwarp (read from `~/projects/bandwarp`, never written there; bandwarp is being completed on the
+     PC and the Mac never commits, merges or pushes on it, the user, 2026-11-12; the clone has no push remote) into
+     `build/ab/TASK/`, checked out at the commit before the original agent's first commit; kit 2.0 installed into it from this
+     tree's packed tarball (`init --from` its own install block, or `update` over its 1.9 install); bandwarp's dependencies read
+     from where its brief names them; one agent given the original brief word for word, on the model the original agent's
+     transcript names, started through the load governor at priority 0.3, alone, on the efficiency cores.
+   - Measured for both runs, from the original agent's transcript and event log and the new run's: the gates the brief names
+     (pass or fail, by name), the files changed and the diff against the original's (each difference read and judged better, equal
+     or worse, with the reason), turns, tokens (input, output, cached, from usage), wall time, hook waiting, refusals and retries.
+   - A task that comes out worse on its gates or its diff is run a second time before anything is concluded; one run per task is a
+     sample, not a proof, and the report says so.
 1. The "after": every measurement of W0.5 (a) to (l) taken again on the finished kit, by the same command on the same machine, into
    `build/evidence/W11/after.md`; where a command changed (the release is one command, the project's events go through the proxy), the
    same thing measured end to end.
@@ -780,7 +812,7 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
    binary that lands in the user's cache and the PC's own `update` under WSL), and what the kit did well and badly with counts from
    `logs`.
 
-**Done when:** the comparison table has all twelve rows with a before, an after and a ratio, each after measured in this step (its
+**Done when:** `build/evidence/W11/ab.md` holds the five tasks, each with both runs' gates by name, the diff verdict with its reason, turns, tokens, wall time, hook waiting and refusals, 0 tasks where 2.0 failed a gate the original passed (or the second run and the KWB for it), and the report states the five-task totals; the comparison table has all twelve rows with a before, an after and a ratio, each after measured in this step (its
 evidence file named); every step W0 to W10 has its before-and-after section with at least three numbered rows, each citing its
 evidence file (a check: 0 rows without a file that exists); `showcase.md` holds ten wins, each traced to a row of the report; each of the report's 9 sections holds at least one number or a stated reason there is none (0 blank); `npm run
 check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the report is pushed.

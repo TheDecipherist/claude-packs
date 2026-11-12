@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -197,3 +199,32 @@ func TestSampleEndsWithItsDaemon(t *testing.T) {
 		t.Errorf("not a snapshot line: %q", out.String()[:min(80, out.Len())])
 	}
 }
+
+// W10b item 1: SIGUSR1 makes the sampler say its Go heap on the stream the daemon logs, and it keeps sampling after.
+func TestMemstatsAnswersSIGUSR1(t *testing.T) {
+	var buf lockedBuffer
+	stop := watchMemstats(&buf)
+	defer stop()
+	if err := syscall.Kill(os.Getpid(), syscall.SIGUSR1); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	for !strings.Contains(buf.String(), "memstats heapAlloc=") && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if !strings.Contains(buf.String(), "memstats heapAlloc=") || !strings.Contains(buf.String(), "goroutines=") {
+		t.Fatalf("no memstats line: %q", buf.String())
+	}
+}
+
+type lockedBuffer struct {
+	mu sync.Mutex
+	b  bytes.Buffer
+}
+
+func (l *lockedBuffer) Write(p []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.b.Write(p)
+}
+func (l *lockedBuffer) String() string { l.mu.Lock(); defer l.mu.Unlock(); return l.b.String() }
