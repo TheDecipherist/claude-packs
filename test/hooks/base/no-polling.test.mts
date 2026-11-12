@@ -19,4 +19,6 @@ test('the sleep loops are found, the quiet twins are not', () => {
   assert.equal(pollingIn("cat > f.sh <<'EOF'\nwhile true; do sleep 9; done\nEOF"), null);
   assert.equal(pollingIn('tail --pid=12345 -f /dev/null'), null);   // KWB-210: a wait on a process
   assert.ok(pollingIn('tail --pid=12345 -f build/x.log'));
+  assert.ok(pollingIn('timeout 590 tail -n +1 -f build/gate.txt'));   // KWB-213: a value before -f is still tail -f
+  assert.equal(pollingIn('tail -n 20 build/x.log | grep -f pats.txt'), null);   // grep's -f is not tail's
 });
