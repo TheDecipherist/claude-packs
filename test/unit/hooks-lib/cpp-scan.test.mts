@@ -45,3 +45,12 @@ test('an unbalanced body is skipped, not thrown on, and lineAt counts newlines b
   assert.equal(lineAt('a\nb\nc', 2), 2);
   assert.equal(lineAt('a\nb\nc', 4), 3);
 });
+
+test('a backtick inside a regex literal opens no template string (KWB-178)', () => {
+  const src = "const a = /[`]/.test(s);\nconst b = 1; // gone\nconst c = x / 2 + `t`;\nconst d = 3;";
+  const out = blankCode(src);
+  assert.equal(out.length, src.length);
+  assert.ok(out.includes('const b = 1;') && out.includes('const d = 3;'));
+  assert.ok(!out.includes('gone'));
+  assert.ok(out.includes('x / 2'), 'a division is no regex');
+});

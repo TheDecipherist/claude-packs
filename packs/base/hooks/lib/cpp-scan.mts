@@ -16,6 +16,34 @@ const NOT_FUNCTIONS: ReadonlySet<string> = new Set(['if', 'for', 'while', 'switc
 const TRAILER = /^[\s\w:<>,&*\[\]\-]*$/;
 const NOEXCEPT_ARG = /noexcept\s*\([^()]*\)/g;
 
+const REGEX_AFTER = new Set(['(', ',', '=', ':', '[', '!', '&', '|', '?', '{', ';', '+', '-', '*', '%', '<', '>', '~', '^']);
+
+// A `/` opens a regex literal when what comes before it is an operator, an opening bracket, `return`/`typeof`, or nothing,
+// and a closing `/` follows on the same line; after a name, a number or `)` it is a division.
+function regexAt(src: string, i: number): boolean {
+  const before = src.slice(0, i).trimEnd();
+  const prev = before.slice(-1);
+  const startsOne = prev === '' || REGEX_AFTER.has(prev) || /\b(?:return|typeof|case|in|of)$/.test(before);
+  return startsOne && regexEnd(src, i) > i + 1;
+}
+
+// The offset after a regex literal opened at `i` (its flags included), or `i` when the line ends before it closes.
+function regexEnd(src: string, i: number): number {
+  let inClass = false;
+  for (let j = i + 1; j < src.length && src[j] !== '\n'; j += 1) {
+    const c = src[j];
+    if (c === '\\') j += 1;
+    else if (c === '[') inClass = true;
+    else if (c === ']') inClass = false;
+    else if (c === '/' && !inClass) {
+      let end = j + 1;
+      while (/[a-z]/.test(src.charAt(end))) end += 1;
+      return end;
+    }
+  }
+  return i;
+}
+
 // keepStrings: blank comments only, so a check can read string literals in code but not prose
 export function blankCode(src: string, keepStrings = false): string {
   let out = '';
@@ -33,6 +61,11 @@ export function blankCode(src: string, keepStrings = false): string {
       const stop = end === -1 ? src.length : end + 2;
       out += blank(src.slice(i, stop));
       i = stop;
+    } else if (src[i] === '/' && regexAt(src, i)) {
+      // A regex literal is kept as written; a quote or backtick inside it opens no string (KWB-178).
+      const end = regexEnd(src, i);
+      out += src.slice(i, end);
+      i = end;
     } else if (src[i] === '"' || src[i] === "'" || src[i] === '`') {
       // A string is walked either way, so a // inside one is no comment. A template string can span lines and stays as written.
       const q = src.charAt(i);

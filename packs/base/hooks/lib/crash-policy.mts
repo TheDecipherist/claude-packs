@@ -49,7 +49,7 @@ export function crashVerdict(root: string, ev: HookEvent, judged: readonly Judge
   if (!ev.tool_name || !TOOL_EVENTS.has(ev.hook_event_name)) return { stdout: notice(`${said}\n${after}`) };
   const held = readHeld(root);
   const keys = crashed.map((c) => keyOf(ev, c.hook));
-  if (keys.every((k) => held[k])) return { stdout: notice(`${said}\nThe call went through unjudged, and the crash is logged (\`logs crashes\`). ${after}`) };
+  if (keys.every((k) => (held[k] ?? -Infinity) > now - HOLD_MS)) return { stdout: notice(`${said}\nThe call went through unjudged, and the crash is logged (\`logs crashes\`). ${after}`) };
   if (!hold(root, held, keys, now)) return { stdout: notice(said) };
   const ran = ev.hook_event_name === 'PostToolUse' ? 'The call has already run.' : 'The call has not run.';
   return { code: 2, stderr: `${said}\n${ran} This is a fault in the hook, not a verdict on your work. The same call again goes through unjudged, and is logged. Report the fault. ${after}\n` };

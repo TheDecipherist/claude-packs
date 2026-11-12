@@ -200,7 +200,7 @@ export function house(cmd: string, cwd: string, env: HouseEnv, cfg: HouseCfg = {
     }
     const ghRefused = ghLaw(cmd, p, c, env.vars ?? {}, env.login);   // env.login: gh's own account, asked only when a gh call is refused
     if (ghRefused) return ghRefused;
-    if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private'))) return `A repo is created as ${owner}/<name> --private.`;
+    if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private'))) return `A repo is created as ${owner ? `${owner}/` : ''}<name> --private.`;
     if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${escapeRegExp(tok)}`).test(p)) {
       return 'The token is never stored in a remote URL or a config file. Name it on the push only.';
     }

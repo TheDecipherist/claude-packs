@@ -55,7 +55,7 @@ function paramsIn(inner: string): number {
 // `name (params) ... {`: the head before a body's brace, or null when it is a block, a call or a type.
 function headOf(code: string, brace: number): Head | null {
   const head = code.slice(Math.max(0, brace - 400), brace);
-  const close = head.search(/\)(?:\s*(?:const|noexcept|override|final|mutable|throws\s+[\w, ]+|->\s*[^{;]+|:\s*[\w<>[\]., |?]+))*\s*$/);
+  const close = head.search(/\)(?:\s*(?:const|noexcept|override|final|mutable|throws\s+[\w, ]+|->\s*[^{;]+|=>|:\s*[\w<>[\]., |?]+))*\s*$/);
   if (close < 0) return null;
   const at = brace - head.length + close;
   const open = openerOf(code, at);

@@ -151,3 +151,12 @@ test('WB-3: git-guard refuses a command that writes a token URL into git config'
     'git status',
   ]) assert.equal(status(c), 0, c);
 });
+
+test('KWB-133: a repo created without --private, with no owner set, is told without a missing owner', () => {
+  const named: HouseEnv = { ...clean, vars: { PERSONAL_GITHUB_TOKEN: 'set' } };
+  const said = house('GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create app', '/tmp/p', named);
+  assert.ok(said, 'refused');
+  assert.ok(!/undefined|null/.test(said), said);
+  assert.match(said, /<name> --private/);
+  assert.match(house('GH_TOKEN=$PERSONAL_GITHUB_TOKEN gh repo create app', '/tmp/p', named, { owner: 'HouseOwner' }) ?? '', /HouseOwner\/<name> --private/);
+});

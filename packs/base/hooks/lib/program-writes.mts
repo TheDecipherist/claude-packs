@@ -18,6 +18,7 @@ import { basename, join } from 'node:path';
 import { closeOf, evaluate, scan, splitArgs, statements } from './program-read.mts';
 import type { EvalContext, Lang, Value } from './program-read.mts';
 import { isDir } from './files.mts';
+import { addNamedWrites } from './program-named.mts';
 import type { WriteOp } from './types.d.mts';
 
 /** An inline program: the interpreter's language and its source text. */
@@ -139,10 +140,12 @@ export function programWrites(
   const out: ProgramWrite[] = [];
   const handles = new Map<string, Handle>();
   let unresolved = false;
-  // add() answers the last record of `out`, which is the one just made, or an earlier one when the path was unresolved (kept as it was; see the report).
+  // add() answers the record it made; a path that did not resolve makes none (KWB-177), so no later change reaches an earlier write.
   const add = (path: string | null, op: WriteOp, content: string | null, extra: { from?: string } = {}): ProgramWrite | undefined => {
-    if (path === null) unresolved = true; else out.push({ path, op, content, ...extra });
-    return out.at(-1);
+    if (path === null) { unresolved = true; return undefined; }
+    const made: ProgramWrite = { path, op, content, ...extra };
+    out.push(made);
+    return made;
   };
   const modeArg = (e: string | undefined): string | null | undefined => {
     if (e === undefined) return undefined;
@@ -240,13 +243,6 @@ export function programWrites(
     }
   }
   for (const rec of handles.values()) rec.site.content = rec.ok && rec.uses <= 1 ? rec.parts.join('') : null;
-  if (unresolved) {
-    const named = new Set(out.map((w) => w.path));
-    for (const l of lits) {
-      if (l === null || l.length > 300 || !/^[~\w.@+\-/]+$/.test(l) || /^[-.]+$|^-|^\d+(\.\d+)*$/.test(l) || !(l.includes('/') || /\.[A-Za-z][A-Za-z0-9]{0,7}$/.test(l))) continue;
-      const p = at(l);
-      if (!named.has(p) && !reads.has(p)) { named.add(p); out.push({ path: p, op: 'write', content: null, named: true }); }
-    }
-  }
+  if (unresolved) addNamedWrites(out, lits, at, reads);
   return out;
 }

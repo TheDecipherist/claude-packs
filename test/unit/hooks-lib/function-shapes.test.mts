@@ -34,3 +34,10 @@ test('an extension no row reads gives nothing, and an empty text gives nothing: 
   assert.deepEqual(functionsOf('', '.js'), []);
   assert.deepEqual(functionsOf('{ { } ', '.c'), []);
 });
+
+test('a block-bodied arrow function is a function, with its parameters (KWB-186)', () => {
+  const text = 'const f = (x, y) => {\n  const z = x + y;\n  return z;\n};\nconst g = async (a: number): Promise<number> => {\n  return a;\n};\n';
+  const found = functionsOf(text, '.ts');
+  assert.deepEqual(found.map((f) => [f.name, f.params]), [['f', 2], ['g', 1]]);
+  assert.deepEqual([found[0]?.line, found[0]?.end], [1, 4]);
+});

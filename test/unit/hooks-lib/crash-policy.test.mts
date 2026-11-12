@@ -33,3 +33,11 @@ test('no .claude folder to remember in: never a refusal; an event with no tool: 
   assert.match(crashVerdict(root, call, crash, NOW).stdout ?? '', /systemMessage/);
   assert.match(crashVerdict(root, { hook_event_name: 'Stop' }, crash, NOW).stdout ?? '', /logs clear once-only/);
 });
+
+test('a hold older than an hour is no hold: the call is refused again (KWB-174)', () => {
+  const root = ensureDir(scratchDir('crash-'));
+  ensureDir(join(root, '.claude'));
+  assert.equal(crashVerdict(root, call, crash, NOW).code, 2);
+  assert.equal(crashVerdict(root, call, crash, NOW + 59 * 60 * 1000).code, undefined);
+  assert.equal(crashVerdict(root, call, crash, NOW + 2 * 60 * 60 * 1000).code, 2);
+});

@@ -41,3 +41,8 @@ test('languages and content', () => {
   assert.equal(isContent('src/blog/page.tsx'), false);
   assert.equal(isContent('docs/a.md', { guards: { content: ['docs/**'] } }), true);
 });
+
+test('programWrites: a write whose path did not resolve leaves an earlier write alone (KWB-177)', () => {
+  const w = programWrites({ lang: 'python', code: "open('a.txt','w').write('x')\nopen(dyn + '.txt','w').write('y')" }, at, none);
+  assert.equal(w.find((r) => r.path === '/proj/a.txt')?.content, 'x');
+});
