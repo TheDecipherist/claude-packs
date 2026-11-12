@@ -39,6 +39,9 @@ test('every layout key the kit reads survives an update', () => {
   walk(join(kit, 'packs')); walk(join(kit, 'lib'));
   const read = new Set<string>();
   for (const f of files) {
+    // KWB-193: config-merge reads `layout.own` of a configuration's delta (configurations/<name>/config.json), which is no project's
+    // layout.json: a project never holds it, so update has nothing to keep.
+    if (f.endsWith('/lib/config-merge.mts')) continue;
     const t = readFileSync(f, 'utf8');
     for (const m of t.matchAll(/\blayout\??\.([a-zA-Z_]+)\b/g)) read.add(m[1] ?? '');
     for (const m of t.matchAll(/layout\.json'\), 'utf8'\)\)\.([a-zA-Z_]+)/g)) read.add(m[1] ?? '');

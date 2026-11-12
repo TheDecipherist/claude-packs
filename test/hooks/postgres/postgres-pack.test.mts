@@ -1,6 +1,6 @@
 // 1.1.0: the postgres pack. No hook owns these: what suggest finds, and what init --auto installs for a project that uses Postgres.
 // The pack's checks fired through the hook are in lesson-checks.test.mts, its wipe guard in db-wipe-guard.test.mts.
-import { assert, cli, existsSync, fresh, initAuto, join, mkdirSync, readFileSync, test, writeFileSync } from '../../kit-cli.mts';
+import { assert, cli, existsSync, fresh, initAuto, join, mkdirSync, registeredHooks, test, writeFileSync } from '../../kit-cli.mts';
 
 test('suggest finds Postgres in a dependency, and init --auto installs the pack and its hook', () => {
   const dir = fresh('pg-');
@@ -10,7 +10,7 @@ test('suggest finds Postgres in a dependency, and init --auto installs the pack 
   assert.match(cli(dir, 'suggest').stdout, /postgres +dependency: pg/);
   initAuto(dir);
   assert.ok(existsSync(join(dir, '.claude/rules/postgres-values-are-bound.md')));
-  assert.match(readFileSync(join(dir, '.claude/settings.json'), 'utf8'), /db-wipe-guard/);
+  assert.ok(registeredHooks(dir).includes('db-wipe-guard'), 'the wipe guard is registered and run');
   const strict = cli(dir, 'doctor', '--strict');
   assert.equal(strict.status, 0, strict.stdout);
 });

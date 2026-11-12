@@ -14,8 +14,13 @@ test('a second doctor runs no selftest whose hook has not changed, and a changed
   appendFileSync(join(dir, '.claude/hooks/folder-law.mjs'), '\n// changed\n');
   assert.equal(unchanged(doctor(dir, cache).stdout), all - 1, 'the changed hook runs again, the others do not');
   assert.equal(unchanged(doctor(dir, cache).stdout), all, 'and once it passed, it is remembered too');
+  // d-7: a lib some hooks import reruns those hooks, not all of them
   appendFileSync(join(dir, '.claude/hooks/lib/glob.mjs'), '\n// changed\n');
-  assert.equal(unchanged(doctor(dir, cache).stdout), 0, 'a shared lib changed: every hook is proved again');
+  const afterGlob = unchanged(doctor(dir, cache).stdout);
+  assert.ok(afterGlob < all && afterGlob > 0, `a lib some hooks import changed: those are proved again, not every hook (${afterGlob} of ${all} unchanged)`);
+  // a lib the runner imports is what every selftest runs on (KWB-193)
+  appendFileSync(join(dir, '.claude/hooks/lib/json.mjs'), '\n// changed\n');
+  assert.equal(unchanged(doctor(dir, cache).stdout), 0, 'a lib the runner imports changed: every hook is proved again');
 });
 
 test('under the kit\'s default test env doctor takes every selftest as proved by the gate and runs none', () => {

@@ -10,9 +10,9 @@ import { pathToFileURL } from 'node:url';
 import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Env, InstalledHookLogModule } from '../packs/base/hooks/lib/types.d.mts';
 import { ANSWERS, clearedAt, clearsOf } from './logs.mts';
+import { PICKER, RUNNER } from './hook-entries.mts';
 import { HOOK_FILE } from './packs.mts';
 
-const RUNNER = 'run-hooks.mjs';
 /** The resident runner (W8.2) is not a hook: the client starts it, and no settings entry or table row names it. */
 const DAEMON = 'resident.mjs';
 const hookName = (file: string): string => file.replace(HOOK_FILE, '');
@@ -31,10 +31,12 @@ export function statusProblems(projectDir: string, env: Env = process.env): stri
   });
 }
 
-/** Whether a hook file is run: a settings entry names it, or the hook table the runner reads has a row for it (W8.1). */
+/** Whether a hook file is run: a settings entry names it, or the hook table has a row for it and settings runs the runner that reads
+ *  the table (W8.1; a table no settings entry starts runs nothing, KWB-193). */
 export function isRegistered(projectDir: string, settingsText: string, file: string): boolean {
   const table = readHookTable(join(projectDir, '.claude', 'hooks')) ?? [];
-  return settingsText.includes(`.claude/hooks/${file}`) || table.some((r) => r.hook === hookName(file));
+  const runs = settingsText.includes(`.claude/hooks/${RUNNER}`) || settingsText.includes(PICKER);
+  return settingsText.includes(`.claude/hooks/${file}`) || (runs && table.some((r) => r.hook === hookName(file)));
 }
 
 export async function hookProofProblems(projectDir: string, settingsText: string): Promise<string[]> {
