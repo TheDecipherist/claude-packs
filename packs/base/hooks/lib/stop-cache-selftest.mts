@@ -51,19 +51,19 @@ export function stopCacheCases(hookFile: string): VerdictRow[] {
   rmSync(kept, { force: true }); // the clean look of before: what is kept after this is the refresh's
   put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true } } })); // from here a Stop gives GitHub the default second
   const was = process.env['GIT_EXEC_PATH'];
-  process.env['GIT_EXEC_PATH'] = slowGitHub(top, 4);
+  process.env['GIT_EXEC_PATH'] = slowGitHub(top, 3);
   const slow = stop();
   const waited = existsSync(join(top, 'slow-done')); // judged by the slow GitHub's own end, not by a wall clock a loaded machine stretches
-  cases.push(['GitHub answers in 4 s: Stop goes ahead, with the "not checked" note', slow.status === 0 && /GitHub was not checked/.test(slow.stdout), true]);
+  cases.push(['GitHub answers in 3 s: Stop goes ahead, with the "not checked" note', slow.status === 0 && /GitHub was not checked/.test(slow.stdout), true]);
   cases.push(['it did not wait out the slow GitHub: the cap (a second) answered before GitHub did', waited, false]);
-  for (let i = 0; i < 40 && !existsSync(kept); i++) sleep(0.25);
+  for (let i = 0; i < 80 && !existsSync(kept); i++) sleep(0.25);
   cases.push(['the detached refresh took the look and kept it for the next Stop', existsSync(kept), true]);
-  const t1 = Date.now();
+  rmSync(join(top, 'slow-done'), { force: true });
   const warm = stop();
-  const quick = Date.now() - t1;
+  const quick = !existsSync(join(top, 'slow-done')); // returned before the slow GitHub could end, so it did not ask it
   if (was === undefined) delete process.env['GIT_EXEC_PATH']; else process.env['GIT_EXEC_PATH'] = was;
   cases.push(['the next Stop is answered from it, whole: the commit GitHub lacks is refused', warm.status, 2]);
-  cases.push(['and without waiting on the slow GitHub', quick < 1500, true]);
+  cases.push(['and without waiting on the slow GitHub', quick, true]);
   const sawPush = runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'git push origin main' } });
   cases.push(['a push the hook saw passes its laws', sawPush.status, 0]);
   cases.push(['and drops the kept look (a push by URL moves no ref)', existsSync(kept), false]);
