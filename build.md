@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 session 2 kwb208-210 (work/2.0.0-ts-kwb208-210), started 2026-11-12: KWB-208 and KWB-210 fixed, selftest cases red first.
+  making: kit-fresh's newer-work list leaves out a later-version branch stacked on this checkout's branch; no-polling passes a wait on a process (`tail --pid=N -f /dev/null`); concepts: none (design/shape.json declares none); reuse: kitVerdict (lib/kit-fresh-look.mts), pollingIn (lib/polling.mts), kitRepo in the selftest.
+
 - 2.0.0 w10-rows2 (work/2.0.0-ts-w10-rows2), started 2026-11-12: KWB-137, KWB-135, KWB-115 fixed, each test red first.
   making: inside-the-project's enclosing main checkout, idle-wake's soft import or a hook-level needs, protect-vendor's delete of a buildOutput; concepts: none (design/shape.json declares none); reuse: insideProject/checkoutRoot (packs/base/hooks/lib/project.mts), switches (lib/switches.mts), writesOf (lib/writes.mts).
 

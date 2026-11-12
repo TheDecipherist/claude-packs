@@ -17,4 +17,6 @@ test('the sleep loops are found, the quiet twins are not', () => {
   assert.equal(pollingIn('sleep 2 && ls'), null);
   assert.equal(pollingIn('for f in a b; do echo "$f"; done'), null);
   assert.equal(pollingIn("cat > f.sh <<'EOF'\nwhile true; do sleep 9; done\nEOF"), null);
+  assert.equal(pollingIn('tail --pid=12345 -f /dev/null'), null);   // KWB-210: a wait on a process
+  assert.ok(pollingIn('tail --pid=12345 -f build/x.log'));
 });

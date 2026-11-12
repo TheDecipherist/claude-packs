@@ -39,6 +39,31 @@ function kitRepo(version: string, newer: string): string {
   return dir;
 }
 
+/** a work branch of `own` with a commit of its own; origin's `work/<newer>-z` made from it (stacked) or `work/<newer>-x` from main
+ *  (separate); then the checkout takes one more commit, so it is ahead of the fork point */
+function stackedRepo(own: string, newer: string, stacked: boolean): string {
+  const dir = kitRepo(own, newer);   // main at `own`, origin/work/<newer>-x made from main
+  git(dir, 'switch', '-q', '-c', `work/${own}-y`);
+  put(join(dir, 'own.txt'), 'own work\n');
+  git(dir, 'add', 'own.txt');
+  git(dir, 'commit', '-qm', 'own');
+  if (stacked) {
+    git(dir, 'push', '-q', 'origin', `work/${own}-y`);
+    git(dir, 'push', '-q', 'origin', '--delete', `work/${newer}-x`);
+    git(dir, 'switch', '-q', '-c', `work/${newer}-z`);
+    put(join(dir, 'next.txt'), 'the next order\n');
+    git(dir, 'add', 'next.txt');
+    git(dir, 'commit', '-qm', 'next');
+    git(dir, 'push', '-q', 'origin', `work/${newer}-z`);
+    git(dir, 'switch', '-q', `work/${own}-y`);
+  }
+  put(join(dir, 'more.txt'), 'own work, later\n');
+  git(dir, 'add', 'more.txt');
+  git(dir, 'commit', '-qm', 'more');
+  git(dir, 'fetch', '-q', 'origin');
+  return dir;
+}
+
 export function selftest(): number {
   const cases: VerdictRow[] = [];
   const say = (v: FreshVerdict | null): string => v?.say ?? '';
@@ -92,6 +117,12 @@ export function selftest(): number {
   cases.push(['a judge writes no file of the project (the write trap)', writtenSince(kit, kitBefore).filter((f) => !f.startsWith('.git/')).join(','), '']);
   git(kit, 'merge', '-q', '--ff-only', 'origin/work/1.9.0-x');
   cases.push(['merged, the commit is allowed', atCommit(kit, COMMIT, { env: process.env }), null]);
+
+  // KWB-208: a later-version branch made from this checkout's branch is the next work, never missing work; one made from main is
+  const stack = stackedRepo('1.5.13', '1.9.0', true);
+  cases.push(['a branch stacked on this checkout is not newer work', Boolean(atCommit(stack, COMMIT, { env: process.env })), false]);
+  cases.push(['a stacked branch is not named at the start', /work\/1\.9\.0-z/.test(say(atStart(stack, START))), false]);
+  cases.push(['its twin, made from main, is still refused', Boolean(atCommit(stackedRepo('1.5.13', '1.9.0', false), COMMIT, { env: process.env })), true]);
 
   // 4. the kit's repo with origin unreachable: said, not blocked
   const lost = kitRepo('1.9.0', '1.8.0');
