@@ -1,7 +1,7 @@
 // A pack.json is a manifest like a package.json (0.19.0: it says stock or custom, has a git url, and who made it). A custom pack comes
 // from somebody else's repository, so these fields are how a project knows what it is running: what it is, who made it, where it lives.
-import { join, relative, sep } from 'node:path';
-import { walk } from '../packs/base/hooks/lib/files.mts';
+import { join, relative } from 'node:path';
+import { slash, walk } from '../packs/base/hooks/lib/files.mts';
 import type { PackManifest } from '../packs/base/hooks/lib/types.d.mts';
 
 const TYPES: readonly string[] = ['stock', 'custom'];
@@ -45,7 +45,7 @@ const CODE_FILE = /(?<!\.d)\.mts$|\.(?:py|sh|h|cpp)$/;
 export function unnamedCodeFiles(packDir: string, pack: PackFields): string[] {
   const named = new Set(Object.keys(pack.tests ?? {}));
   return ['hooks', 'tools'].flatMap((dir) => walk(join(packDir, dir)))
-    .map((abs) => relative(packDir, abs).split(sep).join('/'))
+    .map((abs) => slash(relative(packDir, abs)))
     .filter((rel) => CODE_FILE.test(rel) && !named.has(rel));
 }
 

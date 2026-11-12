@@ -5,6 +5,7 @@
 //   askedIndex(event, ctx) -> RepoIndex | null   null: no daemon to ask (the one-shot runner), or a write lands in a worktree, whose tree the
 //   daemon's index is not (the caller reads the checkout's own index)
 import { extname, relative } from 'node:path';
+import { slash } from './files.mts';
 import { matchesAny } from './glob.mts';
 import { checkoutRoot, insideProject } from './project.mts';
 import { EXTS, defKey, shapeKey, shapesOfText } from './repo-index.mts';
@@ -19,7 +20,7 @@ function keysOfWrites(event: HookEvent, ctx: HookContext): Set<string> | null {
     if (w.op === 'delete' || w.after === null || !EXTS.has(extname(w.path)) || !insideProject(ctx.projectDir, w.path, ctx.cwd)) continue;
     const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
     if (root !== checkoutRoot(ctx.projectDir, null, ctx.cwd)) return null;
-    const held = shapesOfText(w.after, relative(root, w.path).replace(/\\/g, '/'));
+    const held = shapesOfText(w.after, slash(relative(root, w.path)));
     for (const [hash] of held.st) keys.add(hash);
     for (const s of held.shapes) keys.add(shapeKey(s.id));
     for (const [name] of held.defs) keys.add(defKey(name));

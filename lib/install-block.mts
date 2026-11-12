@@ -5,7 +5,7 @@
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { readText } from '../packs/base/hooks/lib/files.mts';
-import { readJson, writeJson } from '../packs/base/hooks/lib/json.mts';
+import { asRecord, readJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { readConfig } from './configs.mts';
 import { OWNED } from './layout.mts';
@@ -29,8 +29,8 @@ export function installBlockOf(text: string, where = 'the order'): InstallBlock 
   } catch (e) {
     throw new Error(`${where}: the install block is not YAML: ${(e instanceof Error ? e.message : String(e)).split('\n')[0]}`);
   }
-  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error(`${where}: the install block holds no keys`);
-  const keys = data as Record<string, unknown>;
+  const keys = asRecord(data);
+  if (!keys) throw new Error(`${where}: the install block holds no keys`);
   const unknown = Object.keys(keys).filter((k) => !BLOCK_KEYS.includes(k));
   if (unknown.length) throw new Error(`${where}: the install block has ${unknown.map((k) => `"${k}"`).join(', ')}, a key the kit does not read. It takes: ${BLOCK_KEYS.join(', ')}. Nothing was installed`);
   const { configuration = null, packs, ...owned } = keys;

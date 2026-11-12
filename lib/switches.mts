@@ -8,6 +8,8 @@
 // `update` prints both lists before it changes anything.
 import { existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { slash } from '../packs/base/hooks/lib/files.mts';
+import { toJson } from '../packs/base/hooks/lib/json.mts';
 import type { Layout, Lock, Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { HOOK_FILE, packRoot, planFiles, readPack } from './packs.mts';
 import { OLD_ASKS, readSettings } from './settings.mts';
@@ -25,7 +27,7 @@ const listed = (list: readonly string[] | undefined, packRel: string): boolean =
 /** The hooks and checks of the packs that switch on now, and those held back (a pack the project already had, a new item it
  *  did not name in "enable"). */
 export function switches(projectDir: string, packNames: readonly string[], layout: Layout, lock: Lock): Switches {
-  const hooks = JSON.stringify(readSettings(join(projectDir, '.claude')).hooks ?? {});
+  const hooks = toJson(readSettings(join(projectDir, '.claude')).hooks ?? {});
   const on: string[] = [];
   const held: string[] = [];
   for (const name of packNames) {
@@ -33,7 +35,7 @@ export function switches(projectDir: string, packNames: readonly string[], layou
     const optIn = pack.optIn ?? [];
     const onByDefault = Array.isArray(pack['onByDefault']) ? (pack['onByDefault'] as readonly string[]) : []; // the law (pack.json "onByDefault"): on in every project, new or updated
     for (const { src, rel } of planFiles(name, layout)) {
-      const packRel = relative(packRoot(name), src).replace(/\\/g, '/');
+      const packRel = slash(relative(packRoot(name), src));
       if (!isSwitch(packRel)) continue;
       // A hook counts as had under either of its names: a Node hook's Python forerunner (git-guard.py) is the same hook.
       const names = packRel.startsWith('hooks/') ? [packRel, packRel.replace(/\.(mjs|py)$/, '.py'), packRel.replace(/\.(mjs|py)$/, '.mjs')] : [packRel];

@@ -4,12 +4,12 @@
 // ADDS that content, outside the kind's concept folders is refused. Content is read in C, C++ and shader files, or in the
 // kind's own "extensions" (a TypeScript kind: [".ts", ".tsx"]; KWB-36). `--selftest` proves it.
 // A judge on the hook contract (typescript order W4): hook(event, ctx) returns its Verdict and writes nothing.
-import { extname, join, relative } from 'node:path';
+import { extname, join } from 'node:path';
 import { matchesAny } from './lib/glob.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { toJson } from './lib/json.mts';
 import { conceptGlobs, readLayout } from './lib/layout.mts';
-import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mts';
+import { claudeRoot, insideProject, relInCheckout } from './lib/project.mts';
 import { put, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook, Layout, LayoutKind } from './lib/types.d.mts';
@@ -67,7 +67,7 @@ function refusalOf(rel: string, hit: Misplaced): string {
 export const hook: Hook = (event, ctx) => {
   for (const w of writesOf(event, ctx.cwd, ctx.env)) {
     if (w.op === 'delete' || !insideProject(ctx.projectDir, w.path, ctx.cwd)) continue;
-    const rel = relative(checkoutRoot(ctx.projectDir, w.path, ctx.cwd), w.path).replace(/\\/g, '/');
+    const rel = relInCheckout(ctx.projectDir, w.path, ctx.cwd);
     // an unknown result (a program's output) is judged by name only
     const hit = misplaced(placementOf(readLayout(claudeRoot(ctx.projectDir, w.path, ctx.cwd))), rel, w.before ?? '', w.after ?? w.before ?? '');
     if (hit) return refuse(refusalOf(rel, hit));

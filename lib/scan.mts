@@ -6,13 +6,12 @@
 //   3. every check runs over every file, and the secret patterns, the line limit and coverage with them;
 //   4. the report and every hit go beside the copy. A hit is a candidate, not a bug: a real install's run had 189 real of 302 counted.
 // The bugs that hurt most are the ones no check sees, so the report ends with the review step: `scan --prompt` (prompts/scan-review.md).
-import { createHash } from 'node:crypto';
 import { copyFileSync, lstatSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { isContent } from '../packs/base/hooks/lib/content.mts';
 import { ensureDir, scratchDir } from '../packs/base/hooks/lib/files.mts';
+import { tmpKeyed } from '../packs/base/hooks/lib/hash.mts';
 import { readLayout } from '../packs/base/hooks/lib/layout.mts';
 import { writeJson } from '../packs/base/hooks/lib/json.mts';
 import { isSecretFile } from '../packs/base/hooks/lib/secret-patterns.mts';
@@ -63,7 +62,7 @@ export interface ScanPick {
 }
 
 // Which scan a project's `fix` reads: a pointer in the temp folder, named for the project's path. `scan` writes it and `fix-plan` reads it.
-export const pointerOf = (dir: string): string => join(tmpdir(), `claude-packs-last-scan-${createHash('sha256').update(resolve(dir)).digest('hex').slice(0, 12)}`);
+export const pointerOf = (dir: string): string => tmpKeyed('claude-packs-last-scan-', resolve(dir));
 export const rememberScan = (dir: string, json: string): void => writeFileSync(pointerOf(dir), json);
 
 const copyable = (dir: string, rel: string): boolean => {

@@ -4,7 +4,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { isDir, readText, walk } from '../packs/base/hooks/lib/files.mts';
+import { isDir, readText, slash, walk } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
 import type { InstalledGlobModule, InstalledLayoutModule } from '../packs/base/hooks/lib/types.d.mts';
 
@@ -28,7 +28,6 @@ export interface CoverageReport {
 
 interface RuleGlobs { rule: string; globs: string[] }
 
-const slashed = (path: string): string => path.replace(/\\/g, '/');
 
 // The files git would not ignore (tracked, and untracked but not ignored), relative to root; null
 // when root is not inside a git work tree. Build output a project ignores (Stellix's out/**) is
@@ -47,7 +46,7 @@ function insideForeignClaude(rel: string): boolean {
 /** The files of the project a rule may govern, relative to its root: what git shows when it can, else a walk. */
 export function projectFiles(root: string, env: Env = process.env): string[] {
   const visible = gitVisible(root, env);
-  const rels = visible ? visible.filter((rel) => existsSync(join(root, rel))) : walk(root, (name) => SKIP.test(name)).map((abs) => slashed(relative(root, abs)));
+  const rels = visible ? visible.filter((rel) => existsSync(join(root, rel))) : walk(root, (name) => SKIP.test(name)).map((abs) => slash(relative(root, abs)));
   return rels.filter((rel) => !SKIP.test(rel) && !insideForeignClaude(rel));
 }
 
@@ -60,7 +59,7 @@ function claudeFiles(projectDir: string): string[] {
   for (const name of readdirSync(top).sort()) {
     if (/^(worktrees|\.claude-packs-backup|state)$/.test(name)) continue;
     const abs = join(top, name);
-    for (const file of isDir(abs) ? walk(abs, () => false) : [abs]) out.push(slashed(relative(projectDir, file)));
+    for (const file of isDir(abs) ? walk(abs, () => false) : [abs]) out.push(slash(relative(projectDir, file)));
   }
   return out;
 }

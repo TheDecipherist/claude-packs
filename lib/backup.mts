@@ -3,7 +3,7 @@
 // Keeps the last 5 backups.
 import { appendFileSync, copyFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { ensureDir, readText } from '../packs/base/hooks/lib/files.mts';
+import { ensureDir, readText, slash } from '../packs/base/hooks/lib/files.mts';
 
 const DIR = join('.claude', '.claude-packs-backup');
 const KEEP = 5;
@@ -28,7 +28,7 @@ export function backup(projectDir: string): string {
  *  (.claude/usage.log, 0.9.2) to .gitignore (appends; never rewrites the file). */
 export function ensureGitignore(projectDir: string): void {
   const file = join(projectDir, '.gitignore');
-  for (const line of [`${DIR.replace(/\\/g, '/')}/`, '.claude/state/', '.claude/checks.compiled.json', '.claude/usage.log', '.claude/hooks.log', '.claude/logs/']) {
+  for (const line of [`${slash(DIR)}/`, '.claude/state/', '.claude/checks.compiled.json', '.claude/usage.log', '.claude/hooks.log', '.claude/logs/']) {
     const text = readText(file) ?? '';
     if (text.split('\n').includes(line)) continue;
     appendFileSync(file, `${text && !text.endsWith('\n') ? '\n' : ''}${line}\n`);

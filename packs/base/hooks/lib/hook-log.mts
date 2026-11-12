@@ -14,11 +14,10 @@
 // exit), so the repo lint's gates 11 and 12 leave it out by name.
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeSync } from 'node:fs';
 import { basename, extname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { logCall } from './event-log.mts';
 import { readJson } from './json.mts';
 import { readLayout } from './layout.mts';
-import { real } from './project.mts';
+import { isMain } from './project.mts';
 import { isVerdict } from './verdict.mts';
 import { readPayload } from './writes.mts';
 import type { Hook, HookContext, Verdict } from './types.d.mts';
@@ -53,7 +52,8 @@ function maxBytes(root: string): number {
   limits.set(key, bytes);
   return bytes;
 }
-const stamp = (): string => new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
+/** The time as a name part: `20261112-071314`. The one stamp of a rotated log's name (the daemon's log, in resident/, has a copy to drop). */
+export const stamp = (): string => new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
 
 // Moves a full log to .claude/logs/<name>-<time><ext>. A second writer finding it gone just carries on: nothing is lost.
 function rotate(root: string, file: string): void {
@@ -77,8 +77,8 @@ export function appendRotated(root: string, rel: string, text: string): void {
   } catch { /* the log never stops a hook */ }
 }
 
-/** True when this module's file `url` is the program node was started with (never when the runner imports it). */
-export const isMain = (url: string): boolean => Boolean(process.argv[1]) && real(process.argv[1] ?? '') === real(fileURLToPath(url));
+/** True when this module's file `url` is the program node was started with: project.mts owns it, every hook imports it from here. */
+export { isMain };
 /** The project the hook runs for: CLAUDE_PROJECT_DIR, else the folder the process runs in. */
 export const projectRoot = (): string => resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 
@@ -157,10 +157,13 @@ export function writeVerdict(verdict: Verdict): void {
   for (const [fd, text] of [[1, verdict.stdout], [2, verdict.stderr]] as const) if (text) try { writeSync(fd, text); } catch { /* a closed pipe */ }
 }
 
-const stdinText = (): string => readFileSync(0, 'utf8');
+/** What arrives on stdin; empty when nothing does (a hook started by hand). The one stdin reader of the runner, the hooks and the bar. */
+export function readStdinText(): string {
+  try { return readFileSync(0, 'utf8'); } catch { return ''; }
+}
 
 /** A hook run on its own: the time is from the process's start (node's own start-up included, which is what a hook costs). */
-export async function asHook(name: string | null | undefined, fn: HookFn, readStdin: () => string = stdinText): Promise<number> {
+export async function asHook(name: string | null | undefined, fn: HookFn, readStdin: () => string = readStdinText): Promise<number> {
   let text = '';
   try { text = readStdin(); } catch { /* no stdin */ }
   const said: string[] = [];

@@ -4,7 +4,7 @@
 // Kit hooks are node (.mjs); browser-guard.py is the one Python hook left (see README).
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { readText } from '../packs/base/hooks/lib/files.mts';
+import { readText, slash } from '../packs/base/hooks/lib/files.mts';
 import { parseJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { Layout } from '../packs/base/hooks/lib/types.d.mts';
 import { PICKER, RUNNER, forSettings, runnable, type HookEntry, type HookGroup, type ReadGroup } from './hook-entries.mts';
@@ -77,7 +77,7 @@ export function orderHooks(hooks: readonly HookEntry[], isOurs: (command?: strin
 // the kit's out again. Returns what it did: 'set', 'kept' (the user's own stays), 'removed' or null.
 interface StatusLine { command: string; [field: string]: unknown }
 const isStatusLine = (line: unknown): line is StatusLine => typeof line === 'object' && line !== null && 'command' in line && typeof line.command === 'string';
-const isKitStatusLine = (line: unknown, tool: string): boolean => isStatusLine(line) && line.command.replace(/\\/g, '/').includes(`.claude/${tool}`);
+const isKitStatusLine = (line: unknown, tool: string): boolean => isStatusLine(line) && slash(line.command).includes(`.claude/${tool}`);
 
 function syncStatusLine(settings: Settings, packNames: readonly string[], layout: Partial<Layout>): SyncResult['statusLine'] {
   const line = packNames.map((name) => readPack(name).statusLine).find(isStatusLine);
@@ -102,7 +102,7 @@ export function syncSettings(claudeDir: string, packNames: readonly string[], la
   for (const [event, groups] of Object.entries(settings.hooks ?? {})) events[event] = groups.map((g) => ({ ...g, hooks: unfold(g.hooks ?? []) }));
   const ours = new Set([...kitHookScripts(), ...RETIRED]);
   for (const rel of previous) {
-    const m = rel.replace(/\\/g, '/').match(/^\.claude\/hooks\/([\w-]+\.(?:mjs|py))$/);
+    const m = slash(rel).match(/^\.claude\/hooks\/([\w-]+\.(?:mjs|py))$/);
     if (m?.[1] !== undefined) ours.add(m[1]);
   }
   const isOurs = (command = ''): boolean => ours.has(SCRIPT.exec(command)?.[1] ?? '') || command.includes(PICKER);

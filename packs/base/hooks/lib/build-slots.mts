@@ -6,6 +6,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { alive } from './daemon-find.mts';
 
 /** Where the slots live and how many there are. */
 export interface BuildSlots { dir: string; slots: number }
@@ -22,13 +23,7 @@ export function ownerOf(slot: string): number | null {
 
 export function isLive(slot: string): boolean {
   const pid = ownerOf(slot);
-  if (pid === null) return false;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (e) {
-    return (e as NodeJS.ErrnoException).code === 'EPERM'; // another user's job holds it
-  }
+  return pid !== null && alive(pid); // alive counts another user's job as live: it holds the slot
 }
 
 /** The pids that hold a slot now: a buildq job not among them is waiting for one. */

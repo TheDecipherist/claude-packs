@@ -8,11 +8,10 @@
 //   line 2: the branch, its uncommitted files, ahead and behind; the last tool and its target; the last shell command
 //   then:   RUNS, every unattended work order on this machine, per project and per agent, each with a bar
 // Every feed is best-effort: a missing or broken one draws nothing, and nothing here ever stops a render.
-import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isMain } from '../hooks/lib/hook-log.mts';
+import { isMain, readStdinText } from '../hooks/lib/hook-log.mts';
 import { readJson } from '../hooks/lib/json.mts';
 import { checkoutVersion, lockVersion, packageVersion } from '../hooks/lib/kit-version.mts';
 import { residentSegment, residentState, type Resident } from './statusline-daemon.mts';
@@ -71,8 +70,7 @@ export function statusBar(raw: string, { env = process.env, nowMs = Date.now(), 
 }
 
 if (isMain(import.meta.url)) {
-  let raw = '';
-  try { raw = readFileSync(0, 'utf8'); } catch { /* no stdin: a bar with what it can find */ }
+  const raw = readStdinText(); // empty with no stdin: a bar with what it can find
   const project = sessionOf(raw).projectDir || process.env.CLAUDE_PROJECT_DIR;
   process.stdout.write(statusBar(raw, { resident: await residentState(project, process.env) }).join('\n'));
 }

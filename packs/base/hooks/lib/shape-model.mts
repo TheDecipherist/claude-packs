@@ -11,7 +11,7 @@
 // (planet: DELAY, FILTER, REVERB): frozen IDs, not instance numbers. The role-name check ("the PAD slot") allows a listed
 // name before the concept word ("the DELAY planet"); an unlisted uppercase word is still a role. doctor: a list of strings.
 import { join } from 'node:path';
-import { parseJson } from './json.mts';
+import { asRecord, isRecord, parseJson } from './json.mts';
 import { readText } from './files.mts';
 
 export const SHAPE_FILE = 'design/shape.json';
@@ -49,8 +49,9 @@ export interface LoadedShape {
   error?: string;
 }
 
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
-const asRecord = (v: unknown): Record<string, unknown> => (isRecord(v) ? v : {});
+/** An object, or an empty one. Arrays are not objects here: a shape file holding a list where a table belongs reads as no rows
+ *  (before W10 an array passed as a record; its keys were its indexes, which matched nothing). */
+const recordOf = (v: unknown): Record<string, unknown> => asRecord(v) ?? {};
 const isWhole = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v);
 const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
 
@@ -69,8 +70,8 @@ function compile(name: string, row: ShapeRowData): ShapeConceptData {
     try { patterns.push(new RegExp(String(p), 'g')); } catch (e) { bad.push(`${String(p)}: ${e instanceof Error ? e.message : String(e)}`); }
   }
   const generatorName = String(row.generator ?? '').match(/^\s*([A-Za-z_]\w*)\s*\(/)?.[1] ?? null;
-  const selectors = asRecord(row.selectors);
-  const constants = asRecord(row.constants);
+  const selectors = recordOf(row.selectors);
+  const constants = recordOf(row.constants);
   return {
     name, row, shape: row.shape, count: isWhole(row.count) ? row.count : null, id: row.id ?? null,
     words, plural, single: single.length > 0 ? single : words, patterns, badPatterns: bad,
@@ -78,16 +79,16 @@ function compile(name: string, row: ShapeRowData): ShapeConceptData {
     names: new Set(strings(row.names).map((n) => n.toUpperCase())),
     selectors: Object.keys(selectors), constants: Object.keys(constants),
     // manifest prose (a constant's reason, a selector's description) quoted in a brief is never an instance literal
-    quotes: [...(Array.isArray(row.senses) ? row.senses : []), ...Object.values(constants).map((c) => asRecord(c).reason), ...Object.values(selectors)]
+    quotes: [...(Array.isArray(row.senses) ? row.senses : []), ...Object.values(constants).map((c) => recordOf(c).reason), ...Object.values(selectors)]
       .filter((q): q is string => typeof q === 'string' && q.length > 3),
   };
 }
 
 export function normaliseShape(json: unknown): LoadedShape {
-  const top = asRecord(json);
+  const top = recordOf(json);
   const concepts: Record<string, ShapeConceptData> = {};
-  const raw = isRecord(top.concepts) && !Array.isArray(top.concepts) ? top.concepts : {};
-  for (const [name, row] of Object.entries(raw)) concepts[name] = compile(name, asRecord(row));
+  const raw = isRecord(top.concepts) ? top.concepts : {};
+  for (const [name, row] of Object.entries(raw)) concepts[name] = compile(name, recordOf(row));
   return { concepts, exclude: Array.isArray(top.exclude) ? strings(top.exclude) : [], values: new Set(strings(top.values)), json };
 }
 
@@ -113,8 +114,8 @@ function conceptProblems(c: ShapeConceptData): string[] {
   if (c.shape === 'one' && row.count !== undefined) out.push(`${at}: a one concept has no count`);
   for (const b of c.badPatterns) out.push(`${at}: pattern does not compile: ${b}`);
   if (row.selectors !== undefined && (typeof row.selectors !== 'object' || Array.isArray(row.selectors))) out.push(`${at}: selectors must be { name: "what it picks" }`);
-  for (const [k, v] of Object.entries(asRecord(row.constants))) {
-    const constant = asRecord(v);
+  for (const [k, v] of Object.entries(recordOf(row.constants))) {
+    const constant = recordOf(v);
     if (!nonEmpty(constant.reason)) out.push(`${at}: constant ${k} has no reason (a declared instance says why it is that one)`);
     if (constant.instance === undefined) out.push(`${at}: constant ${k} names no instance`);
     else if (c.count !== null && isWhole(constant.instance) && (constant.instance < 0 || constant.instance > c.count)) out.push(`${at}: constant ${k} is instance ${constant.instance}, outside the ${c.count}`);
@@ -130,8 +131,8 @@ export function validateShape(shape: LoadedShape | null): string[] {
   if (!shape) return [`no ${SHAPE_FILE}`];
   if (shape.error) return [shape.error];
   const out: string[] = [];
-  const j = asRecord(shape.json);
-  if (!isRecord(j.concepts) || Array.isArray(j.concepts)) out.push(`${SHAPE_FILE}: "concepts" must be an object`);
+  const j = recordOf(shape.json);
+  if (!isRecord(j.concepts)) out.push(`${SHAPE_FILE}: "concepts" must be an object`);
   if (!Array.isArray(j.exclude)) out.push(`${SHAPE_FILE}: "exclude" must be a list of globs`);
   if (j.values !== undefined && !(Array.isArray(j.values) && j.values.every(nonEmpty))) out.push(`${SHAPE_FILE}: "values" must be a list of type names (strings)`);
   for (const c of Object.values(shape.concepts)) out.push(...conceptProblems(c));

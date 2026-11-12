@@ -5,7 +5,7 @@
 // The environment, the platform and the layout are the caller's to pass, never read from the process here.
 import { cpus } from 'node:os';
 import { join } from 'node:path';
-import { readJson } from './json.mts';
+import { isRecord, readJson } from './json.mts';
 
 /** The environment a caller passes. */
 import type { Env } from './types.d.mts';
@@ -17,7 +17,7 @@ export interface BudgetLayout { guards?: { buildq?: { cores?: unknown } } }
 /** The layout's guards, read from the project the job runs in; empty when there is none. */
 export function projectLayout(root: string): BudgetLayout {
   const layout = readJson<unknown>(join(root, '.claude', 'layout.json'));
-  return typeof layout === 'object' && layout !== null && !Array.isArray(layout) ? layout as BudgetLayout : {};
+  return isRecord(layout) ? layout as BudgetLayout : {};
 }
 
 /** Cores every job together may use: BUILDQ_CORES, else layout guards.buildq.cores, else a third of the machine (at least 2). */

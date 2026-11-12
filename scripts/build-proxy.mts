@@ -16,6 +16,7 @@ import { readText } from '../packs/base/hooks/lib/files.mts';
 import { isMain } from '../packs/base/hooks/lib/hook-log.mts';
 import { parseJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { Env } from '../packs/base/hooks/lib/types.d.mts';
+import { hashFile } from '../lib/manifest.mts';
 import { BINARY, TARGETS, hostTarget, type Target } from '../lib/proxy-binary.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
@@ -42,8 +43,6 @@ export function sourceHash(root: string): string {
   for (const f of readdirSync(dir).filter((n) => n === 'go.mod' || (n.endsWith('.go') && !n.endsWith('_test.go'))).sort()) h.update(`${f}\0`).update(readFileSync(join(dir, f))).update('\0');
   return h.digest('hex');
 }
-
-export const sha256Of = (file: string): string => createHash('sha256').update(readFileSync(file)).digest('hex');
 
 const goCache = (env: Env): string => join(env.CLAUDE_PACKS_GO_CACHE ?? join(env.CLAUDE_PACKS_CACHE ?? join(homedir(), '.cache', 'claude-packs'), 'go'));
 
@@ -98,7 +97,7 @@ export async function buildProxy({ root = KIT, out = binariesFolder(root), targe
   const source = sourceHash(root);
   const last = parseJson<Stamp>(readText(stampFile(root)));
   const custom = out !== binariesFolder(root);
-  const upToDate = !force && !custom && last?.source === source && last.go === go && targets.every((t) => existsSync(binaryPath(out, t)) && last.sha[t] === sha256Of(binaryPath(out, t)));
+  const upToDate = !force && !custom && last?.source === source && last.go === go && targets.every((t) => existsSync(binaryPath(out, t)) && last.sha[t] === hashFile(binaryPath(out, t)));
   if (upToDate) {
     log(`proxy: up to date (${go}, sources ${source.slice(0, 12)})`);
     return { built: [], skipped: true, problems: releaseCheck(out, targets), goVersion: go, ms: Date.now() - started };
@@ -106,7 +105,7 @@ export async function buildProxy({ root = KIT, out = binariesFolder(root), targe
   const failed = (await Promise.all(targets.map((t) => buildOne(root, out, t, env)))).filter((f): f is string => f !== null);
   const problems = [...failed, ...releaseCheck(out, targets.filter((t) => existsSync(binaryPath(out, t))))];
   if (!custom && failed.length === 0) {
-    const sha = Object.fromEntries(targets.map((t) => [t, sha256Of(binaryPath(out, t))]));
+    const sha = Object.fromEntries(targets.map((t) => [t, hashFile(binaryPath(out, t))]));
     mkdirSync(join(root, 'build'), { recursive: true });
     writeJson(stampFile(root), { source, go, sha: { ...(last?.source === source && last.go === go ? last.sha : {}), ...sha } } satisfies Stamp, { pretty: true });
   }

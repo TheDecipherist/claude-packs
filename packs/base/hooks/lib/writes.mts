@@ -11,7 +11,7 @@
 import { relative, resolve } from 'node:path';
 import { checkoutRoot, commandLeavesProject, insideProject } from './project.mts';
 import { computeEdit } from './apply-edit.mts';
-import { parseJson } from './json.mts';
+import { isRecord, parseJson } from './json.mts';
 import { afterText, readText, shellWrites } from './shell-writes.mts';
 import type { Env, ShellWrite } from './shell-writes.mts';
 import { pass, refuse } from './verdict.mts';
@@ -61,7 +61,7 @@ export function writesOf(payload: HookEvent, base: string, env: Env): FileWrite[
 /** The event on stdin as a value, or null when it is not a JSON object. The one place a payload is parsed. */
 export function readPayload(text: string): HookEvent | null {
   const event = parseJson<unknown>(text);
-  return event !== null && typeof event === 'object' && !Array.isArray(event) ? event as HookEvent : null;
+  return isRecord(event) ? event as HookEvent : null;
 }
 
 /** What a guard's frame reads from the process it runs in: its folder, its environment and where a refusal is written. The

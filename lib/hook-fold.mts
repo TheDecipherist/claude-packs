@@ -5,7 +5,7 @@
 import { join } from 'node:path';
 import { ensureDir } from '../packs/base/hooks/lib/files.mts';
 import { unionMatcher, TABLE_FILE } from '../packs/base/hooks/lib/hook-table.mts';
-import { writeJson } from '../packs/base/hooks/lib/json.mts';
+import { toJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { HookEventName, HookTableRow } from '../packs/base/hooks/lib/types.d.mts';
 import { PICKER, RUNNER, forSettings, nodeScript, type HookEntry, type ReadGroup } from './hook-entries.mts';
 
@@ -21,7 +21,7 @@ const rowOf = (event: string, matcher: string | undefined, h: HookEntry, script:
 });
 
 // A hook with the same matcher, timeout, order and role in two events is one row naming both.
-const sameRow = (a: HookTableRow, b: HookTableRow): boolean => JSON.stringify({ ...a, events: 0 }) === JSON.stringify({ ...b, events: 0 });
+const sameRow = (a: HookTableRow, b: HookTableRow): boolean => toJson({ ...a, events: 0 }) === toJson({ ...b, events: 0 });
 function addRow(rows: HookTableRow[], row: HookTableRow): void {
   const twin = rows.findIndex((r) => sameRow(r, row));
   const found = rows[twin];

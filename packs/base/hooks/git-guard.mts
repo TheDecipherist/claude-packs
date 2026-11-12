@@ -38,6 +38,7 @@ import { gitLines, gitOut, gitRun } from './lib/git-run.mts';
 import { headRead } from './lib/git-state.mts';
 import { escapeRegExp } from './lib/glob.mts';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
+import { isRecord, toJson } from './lib/json.mts';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mts';
 import { failed } from './lib/remote-heads.mts';
 import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
@@ -217,7 +218,7 @@ const TOKEN_HELP = 'A token is used, never stored. Push with a one-shot credenti
 /** guards.git from the layout, as an object, whatever else the layout holds under it. */
 function gitGuards(guards: Readonly<Record<string, unknown>> | undefined): GitGuards {
   const git = guards?.['git'];
-  return git !== null && typeof git === 'object' && !Array.isArray(git) ? git as GitGuards : {};
+  return isRecord(git) ? git as GitGuards : {};
 }
 
 const SELF = fileURLToPath(import.meta.url);
@@ -246,7 +247,7 @@ export const hook: Hook = (event, ctx) => {
   };
   const reason = house(command, event.cwd ?? ctx.cwd, env, cfg);
   if (!reason && (cfg.stopCacheMs ?? 1) > 0) landedLater(SELF, command, ctx.projectDir, ctx.env);
-  const stdout = warnings.length ? JSON.stringify({ systemMessage: warnings.join('\n') }) : '';
+  const stdout = warnings.length ? toJson({ systemMessage: warnings.join('\n') }) : '';
   return reason ? { ...refuse(`git-guard: ${reason}\n`), stdout } : { ...pass, stdout };
 };
 

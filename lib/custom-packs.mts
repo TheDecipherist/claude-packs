@@ -3,12 +3,12 @@
 // `add <name> --from <git-url>`: the repository is fetched to a cache, never run, and the lock records its url and commit, so a teammate's
 // checkout restores the same pack and `update` pulls the newest. Who can fetch it is the git host's business. Its hooks stay off until the
 // project's "enable" names them (lib/packs.mjs): a hook runs code on every tool call.
-import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { childError, put } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
+import { sha256 } from '../packs/base/hooks/lib/hash.mts';
 import type { GitIdentity } from '../packs/base/hooks/lib/git-run.mts';
 import type { Env, Logger, PackManifest } from '../packs/base/hooks/lib/types.d.mts';
 import { readLock } from './manifest.mts';
@@ -34,7 +34,7 @@ function git(cwd: string, env: Env, args: readonly string[], identity?: GitIdent
 // The repository at a commit, or at its newest.
 function fetchRepo(url: string, env: Env, commit: string | null = null): { folder: string; commit: string } {
   if (url.startsWith('-')) throw new Error(`not a git url: ${url}`);
-  const folder = join(cacheRoot(env), createHash('sha256').update(url).digest('hex').slice(0, 16));
+  const folder = join(cacheRoot(env), sha256(url, 16));
   if (existsSync(join(folder, '.git'))) git(folder, env, ['fetch', '--quiet', 'origin']);
   else {
     mkdirSync(dirname(folder), { recursive: true });
