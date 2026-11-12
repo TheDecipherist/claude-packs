@@ -52,7 +52,7 @@ async function startRegistry(): Promise<{ url: string; stop: () => void; token: 
   if (readText(join(home, 'package.json')) === null) put(join(home, 'package.json'), '{"name":"scratch-registry","private":true}\n');
   run(home, 'npm', ['install', '--no-audit', '--no-fund', '--save-exact', `verdaccio@${VERDACCIO}`]);
   const port = await freePort();
-  rmSync(join(home, 'storage'), { recursive: true, force: true });
+  for (const stale of ['storage', 'htpasswd']) rmSync(join(home, stale), { recursive: true, force: true });
   put(join(home, 'config.yaml'), [
     'storage: ./storage', 'uplinks: {}', 'max_body_size: 500mb',
     'packages:', "  '**':", '    access: $all', '    publish: $all', '    unpublish: $all',
