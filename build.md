@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w10b-fuzz (work/2.0.0-ts-w10b-fuzz), started 2026-11-12: W10b item 3 (fuzz of the wire, go test -race, vet, staticcheck) and review finding 21 (the macOS sampler's start check).
+  making: proxy/fuzz_test.go, test/unit/hooks-lib/proxy-wire-fuzz.test.mts, the sampler's self-check in proxy/sample_darwin.go; concepts: none (design/shape.json declares none); reuse: newRig/serve (proxy/selftest.go), listen (resident/socket.mts), encodeRequest/decodeRequest (lib/proxy-wire.mts).
+
 - 2.0.0 w10-rows2 (work/2.0.0-ts-w10-rows2), started 2026-11-12: KWB-137, KWB-135, KWB-115 fixed, each test red first.
   making: inside-the-project's enclosing main checkout, idle-wake's soft import or a hook-level needs, protect-vendor's delete of a buildOutput; concepts: none (design/shape.json declares none); reuse: insideProject/checkoutRoot (packs/base/hooks/lib/project.mts), switches (lib/switches.mts), writesOf (lib/writes.mts).
 

@@ -50,6 +50,10 @@ func newNative() (source, error) {
 			d.nsPerTick = 1e9 / float64(hz)
 		}
 	}
+	// the offsets are private: a reading that disagrees with this very process is refused, and the sampler uses `ps` (finding 21)
+	if err := d.selfCheck(); err != nil {
+		return nil, err
+	}
 	return d, nil
 }
 
