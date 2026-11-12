@@ -42,7 +42,7 @@ test('git commit, git add and the other git calls never wait on the network or s
     git(r.project, 'remote', 'add', 'origin', hub);
     git(r.project, 'push', '-q', 'origin', 'work/x');          // the remote-tracking ref now holds the commit
     git(r.project, 'remote', 'set-url', 'origin', url);         // and GitHub is out of reach, with a kept look that lacks the commit
-    const common = gitOut(['rev-parse', '--git-common-dir'], { cwd: r.project }) ?? '.git';
+    const common = gitOut(['rev-parse', '--git-common-dir'], { cwd: r.project, env: process.env }) ?? '.git';
     writeFileSync(join(r.project, common, 'claude-packs-heads.json'), toJson({ [url]: { time: Date.now() - 3_600_000, heads: { 'work/x': '0'.repeat(40) } } }));
     writeFileSync(join(r.project, 'notes.txt'), 'x');
     for (let i = 0; i < 3; i += 1) assert.equal(fire(r, bash(r.project, "git commit -m 'next' -- notes.txt")), 0);
