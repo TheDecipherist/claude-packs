@@ -208,7 +208,7 @@ Never do:
   `ROOT` at import today; agents-held and time-guard walk the ppid chain); the daemon loads hooks only from the folder its hash names,
   and a request whose `projectDir` is another folder is answered by the TypeScript path. *Judges and recorders:* a hook is a judge
   (`parallel`, writes nothing, proved by a write trap in its selftest) or a recorder (`serial`, refuses nothing), never both; a Write's
-  judges run at once in a pool of `min(16, cores)` warm worker threads (grown to 32, retired after 10 idle minutes, recycled after 500
+  judges run at once in a pool of 2 warm worker threads (grown on demand to 8, retired after 2 idle minutes, recycled after 500
   events), the main thread doing only socket I/O, framing, the table, the repetition index (queried by message) and every state-file
   and timing write; after the first exit 2 the daemon waits up to 30 ms for the rest and returns every refusal sorted by table order,
   so the same call reads the same; recorders that record the call itself (the event log, the heartbeat) run for every call, updaters
@@ -546,8 +546,9 @@ Sequential: (1), then (2), then (3), then (4), then (5).
      recorded in the crash log (review-2 1.1, 1.2, 1.9, 1.11).
    - *The daemon* (`packs/base/hooks/resident.mts`, split by job under `resident/`: `socket`, `pool`, `event`, `index`, `state`,
      `lifecycle`): the socket in d-10's folder with d-10's name, refused when the folder is not the user's at mode 700; the hook table
-     loaded once from the folder its hash names, only the hooks the table marks for it (never `async`); the worker pool `min(16, cores)`
-     warm, grown to 32, retired after 10 idle minutes, recycled after 500 events, a worker that exits replaced and its hook counted a
+     loaded once from the folder its hash names, only the hooks the table marks for it (never `async`); the worker pool of 2
+     warm, grown on demand to 8, retired after 2 idle minutes (bandwarp's log: 90 % of busy time one event at a time, 99 % at most
+     two, never more than 5 at once; the user: "we never need 16"), recycled after 500 events, a worker that exits replaced and its hook counted a
      crash; the main thread doing only socket I/O, framing, the table, the repetition index (a worker asks it by message for the
      candidate lines of the added text, never for the index) and every state-file (`writeJson` by rename) and timing write (workers
      return `{hook, ms, code}`, the main thread appends the event's lines in one write and owns rotation); judges at once, the first
@@ -630,7 +631,7 @@ settings and seen in its log, each proxy call under 20 ms on this Mac by the `pr
 under 110 ms p50 and a Bash event's under 20 ms, against W0's (g) measured wall for the same events (wall to wall, never a sum); the
 daemon's and the client's selftests green with every plant seen red, eight racing clients making one daemon, and a `rm -rf` PreToolUse
 refused on the very first event of a session with no daemon; an install with no binary in the cache runs the TypeScript runner through
-the `sh` picker and passes the same tests; the daemon's RSS under 250 MB with 16 workers after 1,000 events; W0's replay fixture played
+the `sh` picker and passes the same tests; the daemon's RSS under 150 MB with its pool at 8 after 1,000 events, and under 100 MB idle at 2; W0's replay fixture played
 through an install with bandwarp's pack set gives Stop p50 under 200 ms and p95 under 1,000 ms over its 51 Stops (from 1,880 and 7,785)
 and no hook over its budget; `doctor` red on the sleeping plant and naming the pool on a planted full pool; `init --config
 synth-creator cpp audio-core` plus `doctor` under 40 s uncached and 10 s cached, and `update` under 30 s, on this Mac; the status line
