@@ -699,6 +699,24 @@ evidence file named); every step W0 to W10 has its before-and-after section with
 evidence file (a check: 0 rows without a file that exists); `showcase.md` holds ten wins, each traced to a row of the report; each of the report's 9 sections holds at least one number or a stated reason there is none (0 blank); `npm run
 check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the report is pushed.
 
+3. `docs/whats-new-in-2.0.md` (the user, 2026-11-12: "a detailed whats-new-in-2.0.md report"), public, its copy through
+   `tim-writing` before it is written: what 2.0 is in one paragraph; what changed for a project (TypeScript with the LSP, the Go
+   proxy and the resident runner, hooks in parallel, the status line served live, the Go sampler and its watchdog, TypeScript
+   enforced in JavaScript projects, the pack template, the generated counts); what changed for working on the kit (the
+   change-to-tests map, the release in one command); every number from W11's report with its evidence file, the targets missed
+   said plainly; what a project does to move to 2.0 (`update`, what its settings migration does, what lands in the user's cache);
+   what is not proved (Windows natively, WSL for the proxy, Node 22.0 to 22.17).
+4. The README's performance graph (the user: "a graph that shows high level performance increases and where it counts and
+   matters"): an SVG made by `scripts/counts.mts` from W11's evidence (never drawn by hand), one horizontal bar pair per measure
+   that a user feels (the wait per turn, Stop at p95, a release from commit to npm, the gate for a one-hook change, a Bash call's
+   hooks live, `doctor` cached, `update` warm), before and after on one row with the factor written at the end, a light and a dark
+   file shown through `<picture>`, its colours and marks from the `dataviz` skill; a plain table of the same numbers under it for
+   readers without images; `counts --check` red when the graph and the evidence disagree (a plant).
+
+**Done when (items 3 and 4):** `whats-new-in-2.0.md` exists with every section above, every number traced to a row of the report
+(a check: 0 numbers without one); the README shows the graph in both themes and the table under it; a planted change to one
+evidence number turns `counts --check` red until the graph is generated again.
+
 ## W12. Land and publish 2.0.0 (the one stop)
 
 The one landing and the one publish, after W11: the CHANGELOG's 2.0.0 section (1.9.0 folded in with KWB-165 to 167 and the admiral

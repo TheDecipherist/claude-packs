@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T04:38:35Z",
+  "updated": "2026-11-12T18:59:53Z",
   "steps": [
     {
       "id": "W0",
@@ -63,7 +63,7 @@
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 8,
       "done": 4,
-      "agent": null,
+      "agent": "w86-status, rss, kwb205, kwb204",
       "note": "the daemon RSS line carried to W10 and W11 (d-29)"
     },
     {
@@ -83,7 +83,7 @@
     {
       "id": "W11",
       "title": "The report, with the comparison",
-      "items": 3,
+      "items": 5,
       "done": 0,
       "agent": null
     },
@@ -95,5 +95,30 @@
       "agent": null
     }
   ],
-  "agents": []
+  "agents": [
+    {
+      "name": "w86-status",
+      "worktree": ".claude/worktrees/w86-status",
+      "step": "W8",
+      "started": "2026-11-12T18:36:03Z"
+    },
+    {
+      "name": "rss",
+      "worktree": ".claude/worktrees/rss",
+      "step": "W8",
+      "started": "2026-11-12T18:36:03Z"
+    },
+    {
+      "name": "kwb205",
+      "worktree": ".claude/worktrees/kwb205",
+      "step": "W8",
+      "started": "2026-11-12T18:36:03Z"
+    },
+    {
+      "name": "kwb204",
+      "worktree": ".claude/worktrees/kwb204",
+      "step": "W8",
+      "started": "2026-11-12T18:36:03Z"
+    }
+  ]
 }
