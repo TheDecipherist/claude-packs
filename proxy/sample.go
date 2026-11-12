@@ -185,14 +185,18 @@ func round3(f float64) float64 { return float64(int64(f*1000+0.5)) / 1000 }
 // chooseSource: native system calls where there are some, else `ps` (and `lsof` for the folders). `which` is auto, native or ps.
 func chooseSource(which string) (source, error) {
 	if which != "ps" {
-		if n, err := newNative(); err == nil {
-			if _, err := n.list(); err == nil {
-				return n, nil
-			}
+		n, err := newNative()
+		if err == nil {
+			_, err = n.list()
+		}
+		if err == nil {
+			return n, nil
 		}
 		if which == "native" {
-			return nil, fmt.Errorf("native process reading is not available on this system")
+			return nil, fmt.Errorf("native process reading is not available on this system: %w", err)
 		}
+		// the sampler's stderr goes to the daemon's log: the reason `ps` is used is kept there
+		fmt.Fprintf(os.Stderr, "hook-proxy sample: native reading refused (%v), using ps\n", err)
 	}
 	return newPS(), nil
 }

@@ -204,12 +204,12 @@ func cases() []func() result {
 			code := r.run()
 			return expect("no node on PATH: the call goes through, said in a systemMessage", code == 0 && strings.Contains(r.out.String(), `"systemMessage"`) && strings.Contains(r.out.String(), "node is not on PATH"), said(r, code))
 		},
-		with("", none, func(r *rig, code int, _ *fake) result {
+		with("", none, func(r *rig, _ int, _ *fake) result {
 			r.p.spawn, r.p.ready = true, 10*time.Second
 			os.WriteFile(filepath.Join(r.project, ".claude", "hooks", "resident.mjs"), []byte(residentStub), 0o600)
 			r.out.Reset()
 			r.err.Reset()
-			code = r.run()
+			code := r.run()
 			started, _ := os.ReadFile(filepath.Join(r.project, ".claude", "hooks", "started.json"))
 			ok := judged(r, code) && strings.Contains(string(started), `"cwd":"/"`) && strings.Contains(strings.ReplaceAll(string(started), `,"__CF_USER_TEXT_ENCODING"`, ""), `"env":["CLAUDE_PACKS_CACHE","HOME","PATH"]`) &&
 				strings.Contains(string(started), `"--serve","`+r.project+`"`) && strings.Contains(string(started), `"--ready-fd","3"`)

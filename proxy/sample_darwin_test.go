@@ -43,3 +43,14 @@ func TestNativeReadsThisProcess(t *testing.T) {
 		t.Errorf("comm %q", me.Comm)
 	}
 }
+
+// The sampler takes the native reader here: its start check agrees with this process (a wrong offset makes it use `ps`, finding 21).
+func TestSelfCheckPassesAndTheNativeReaderIsChosen(t *testing.T) {
+	src, err := chooseSource("auto")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(src.name(), "native") {
+		t.Fatalf("chose %s", src.name())
+	}
+}
