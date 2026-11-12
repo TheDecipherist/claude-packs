@@ -24,6 +24,6 @@ Merge note: the manifest and the pin are generated; on a clash rerun `node scrip
 `npm run check` 0; `node scripts/counts.mts` run. `npm run test:changed -- --base origin/work/2.0.0-typescript` (build/kwb208-210-gate.txt):
 489 tests, 6 failed: (a) 3 noop tests and (b) the manifest line: the generated manifest/pin, fixed after (noop.test 5/5 pass);
 (c) WB-4 hook-selftests: load timeout, passes on rerun (build/kwb208-210-rerun.txt); (d) git-guard's selftest "kept Stop look within
-about a second" (a timing case, 142 s under load, not a file I touched; not rerun, open); (e) repo-lint "bare npx claude-packs" at
+about a second" (a timing case, 142 s under load, not a file I touched; not rerun, open); (e) repo-lint "bare the unscoped npx form" at
 `docs/workorders/typescript/agents/kwb199-report.md:18`, another agent's report, not mine.
 No refusal met needed marking wrong.

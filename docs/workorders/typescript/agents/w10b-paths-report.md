@@ -48,6 +48,6 @@ Also from finding 22: the probe timeout in `answers`. Not done from 22: the `Dae
 `npm run test:changed -- --base origin/work/2.0.0-typescript` (`build/w10b-paths-gate.txt`): 637 tests, 6 red on the first run, five fixed here and
 rerun green (repo-lint gates 11/12: the force-exit backstop now goes through an optional `host.exit` that only the daemon's tail gives; the
 JSON helper rule in my test; the noop pin and the two noop tests: `node scripts/noop-pin.mts` run, 30 lines, all the resident files this change
-touches plus the two new ones). One red is not mine: "nothing in the kit names the bare `npx claude-packs`" hits
+touches plus the two new ones). One red is not mine: "nothing in the kit names the bare the unscoped npx form" hits
 `docs/workorders/typescript/agents/kwb199-report.md:18` (the kwb199 report, already on the base branch). The lead merging should keep the
 pin from whichever merge comes last, and rerun `node scripts/noop-pin.mts`, since w10b-owners changes the same files.

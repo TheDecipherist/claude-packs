@@ -15,4 +15,4 @@
 - Not looked at in a browser; geometry checked by arithmetic only.
 
 ## Gate
-`npm run check` 0; `counts --check` green; `build/w11-graph-gate.txt` (first run 113 of 117): my two faults fixed (interface `Look` clashed with a shared shape, gate 4; emitted .mjs stale, gate 5; both now pass). The other two reds are not mine: "no file names a person" and "bare npx claude-packs" both point at `agents/kwb208-210-report.md` (an earlier agent's report).
+`npm run check` 0; `counts --check` green; `build/w11-graph-gate.txt` (first run 113 of 117): my two faults fixed (interface `Look` clashed with a shared shape, gate 4; emitted .mjs stale, gate 5; both now pass). The other two reds are not mine: "no file names a person" and "bare the unscoped npx form" both point at `agents/kwb208-210-report.md` (an earlier agent's report).
