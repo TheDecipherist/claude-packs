@@ -27,7 +27,9 @@ function scratchClone(unreleased: string): { work: string; remote: string } {
   put(join(work, 'package.json'), '{"name":"scratch-kit","version":"1.0.0"}\n');
   put(join(work, 'package-lock.json'), LOCK);
   put(join(work, 'CHANGELOG.md'), '# Changelog\n\n## 1.0.0 (2026-01-01)\n\n- the first\n');
-  put(join(work, 'scripts/counts.mts'), 'process.exit(0);\n');
+  put(join(work, 'README.md'), 'a readme\n');
+  // the generators: one tracked file rewritten and one new file, as counts.mts does
+  put(join(work, 'scripts/counts.mts'), "import { appendFileSync } from 'node:fs';\nappendFileSync('README.md', 'counted\\n');\nappendFileSync('manifest.json', '{}\\n');\n");
   put(join(work, 'scripts/build-proxy.mts'), 'process.exit(0);\n');
   put(join(work, '.gitignore'), 'packs/base/hooks/bin/*/\nbuild/\n');
   git(work, 'add', '-A');
@@ -66,6 +68,8 @@ test('a red gate refuses the release before anything is changed; the same releas
   assert.match(green.log, /done: bump the version to 1\.0\.1/);
   assert.match(green.log, /done: date the CHANGELOG heading of 1\.0\.1/);
   assert.equal(headOf(remote, 'main'), headOf(work, 'HEAD'), 'main was landed on the scratch remote');
+  assert.match(git(work, 'log', '--format=%s', '-3'), /release 1\.0\.1: the generated files/);
+  assert.equal(git(work, 'show', '--name-only', '--format=', 'HEAD~0').split('\n').filter(Boolean).sort().join(), 'README.md,manifest.json', 'the generated files, tracked and new, are committed by name');
   assert.match(readFileSync(join(work, 'CHANGELOG.md'), 'utf8'), /^## 1\.0\.1 \(2026-11-12\)$/m);
   const again = releaseOf(work, { gate: FAIL });
   assert.match(again.log, /done already: the gate/, 'run again, the steps done are skipped (the red gate is not asked again)');

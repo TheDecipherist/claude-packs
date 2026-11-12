@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { put, readText } from '../packs/base/hooks/lib/files.mts';
-import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
+import { gitLines, gitRun } from '../packs/base/hooks/lib/git-run.mts';
 import { gitDo, git, registryArgs, remoteArgs, trunkRef, type Ctx, type Facts } from './release-state.mts';
 import { datedChangelog, notesFor } from './release-version.mts';
 
@@ -115,7 +115,7 @@ export const STEPS: readonly Step[] = [
   }),
   step('generators', (_c, f) => (behind(f) ? 'done' : 'todo'), (ctx, f, log) => {
     sh(ctx, log, ['node', 'scripts/counts.mts']);
-    const changed = git(ctx, ['status', '--porcelain']).split('\n').filter(Boolean).map((l) => l.slice(3));
+    const changed = [...gitLines(['diff', '--name-only', 'HEAD'], { cwd: ctx.root, env: ctx.env }), ...gitLines(['ls-files', '--others', '--exclude-standard'], { cwd: ctx.root, env: ctx.env })];
     if (changed.length > 0) commit(ctx, `release ${f.target}: the generated files`, changed);
   }),
   step('proxy', (_c, f) => (behind(f) ? 'done' : 'todo'), (ctx, _f, log) => sh(ctx, log, BUILD)),

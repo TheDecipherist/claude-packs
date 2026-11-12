@@ -105,8 +105,8 @@ const CASES: Record<string, Case> = {
   hook: { name: 'one hook', what: 'packs/base/hooks/no-find.mts: a no-op statement in searcherIn', change: (c) => touchFirstFunction(join(c, 'packs/base/hooks/no-find.mts')) },
   lib: { name: 'one lib', what: 'lib/configs.mts: a no-op statement in its first function', change: (c) => touchFirstFunction(join(c, 'lib/configs.mts')) },
   content: {
-    name: 'content', what: 'packs/base/rules/small-functions.md: one more line',
-    change: (c) => { const f = join(c, 'packs/base/rules/small-functions.md'); put(f, `${readText(f) ?? ''}\nA function that needs a comment to say what it does wants a better name.\n`); },
+    name: 'content', what: 'packs/base/rules/agents-held.md: one more line',
+    change: (c) => { const f = join(c, 'packs/base/rules/agents-held.md'); put(f, `${readText(f) ?? ''}\nA function that needs a comment to say what it does wants a better name.\n`); },
   },
   suite: {
     name: 'whole suite', what: 'every packs/*/pack.json: one trailing newline (a change touching every pack)',
