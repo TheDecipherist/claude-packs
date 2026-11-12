@@ -14,6 +14,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 - 2.0.0 w10-rows2 (work/2.0.0-ts-w10-rows2), started 2026-11-12: KWB-137, KWB-135, KWB-115 fixed, each test red first.
   making: inside-the-project's enclosing main checkout, idle-wake's soft import or a hook-level needs, protect-vendor's delete of a buildOutput; concepts: none (design/shape.json declares none); reuse: insideProject/checkoutRoot (packs/base/hooks/lib/project.mts), switches (lib/switches.mts), writesOf (lib/writes.mts).
 
+- 2.0.0 KWB-199 (work/2.0.0-ts-kwb199), started 2026-11-12: agents-held lets a background agent start and refuses the end of a turn while one is pending.
+  making: packs/base/hooks/lib/background-agents.mts (pending background agents of a transcript) and agents-held's Stop judge, the rule and skill text; concepts: none (design/shape.json declares none); reuse: readText/lines (lib/files.mts), pass/refuse (lib/verdict.mts), the Stop shape of making-check.
 - 2.0.0 KWB-204 (work/2.0.0-ts-kwb204), started 2026-11-12: polling in a sleep loop refused in every project.
   making: packs/base/hooks/no-polling.mts and its shared function, build-guard without its polling part, the pack row, the worktree case, the test; concepts: none (design/shape.json declares none); reuse: blankQuotes/dropHeredocs (lib/shell-lex.mts), judgeVerdict (lib/writes.mts), the no-find hook's shape, the build-guard polling plants.
 - 2.0.0 session 2 rss (work/2.0.0-ts-rss), started 2026-11-12: the daemon's RSS with 16 workers after 1,000 events, measured and brought down.

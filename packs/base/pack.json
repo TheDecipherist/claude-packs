@@ -366,13 +366,6 @@
             "role": "recorder",
             "order": 30,
             "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/agents-held.mjs\"",
-            "role": "judge",
-            "order": 20,
-            "timeout": 10
           }
         ]
       },
@@ -446,6 +439,13 @@
     "Stop": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/agents-held.mjs\"",
+            "role": "judge",
+            "order": 10,
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/making-check.mjs\"",
