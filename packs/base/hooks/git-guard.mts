@@ -35,6 +35,7 @@ import { bareWords } from './lib/command-prefix.mts';
 import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mts';
 import type { HouseEnv } from './lib/git-guard-selftest.mts';
 import { gitLines, gitOut, gitRun } from './lib/git-run.mts';
+import { headRead } from './lib/git-state.mts';
 import { escapeRegExp } from './lib/glob.mts';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mts';
@@ -103,8 +104,9 @@ function realEnv(env: NonNullable<GitEnv>): HouseEnv {
     vars: env,
     login: () => loggedInAs(env),
     dirty: (cwd) => gitLines(['--no-optional-locks', 'status', '--porcelain'], at(cwd, env)).filter((l) => l.trim()),
-    branch: (cwd) => gitOut(['rev-parse', '--abbrev-ref', 'HEAD'], at(cwd, env)) ?? '',
-    hasHead: (cwd) => gitRun(['rev-parse', '-q', '--verify', 'HEAD'], at(cwd, env)).ok,
+    // the branch and HEAD's commit come from the git dir's files (no process); a folder that is not a checkout's own asks git
+    branch: (cwd) => headRead(cwd, () => gitOut(['rev-parse', '--abbrev-ref', 'HEAD'], at(cwd, env)) ?? '', (h) => (h.sha === null ? '' : h.branch ?? 'HEAD')),
+    hasHead: (cwd) => headRead(cwd, () => gitRun(['rev-parse', '-q', '--verify', 'HEAD'], at(cwd, env)).ok, (h) => h.sha !== null),
     remoteUrl: (cwd, name) => gitOut(['remote', 'get-url', name], at(cwd, env)) || null,
     merging: (cwd) => gitRun(['rev-parse', '-q', '--verify', 'MERGE_HEAD'], at(cwd, env)).ok,
   };

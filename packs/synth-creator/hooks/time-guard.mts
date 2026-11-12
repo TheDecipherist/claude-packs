@@ -22,11 +22,13 @@
 import { fileURLToPath } from 'node:url';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { cutHeredocs } from './lib/shell-lex.mts';
-import { ownProcesses, processTable } from './lib/own-processes.mts';
+import { parseJson } from './lib/json.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { DEFAULTS, LIMITS, machineFindings, readOnlyCommand } from './lib/time-findings.mts';
 import type { Row, TimeCfg } from './lib/time-findings.mts';
-import { agentRunning, lastCommitMin, lateOf, loadState, placeOf, readLate, saveState, scanLater, scanNow, unsavedMin } from './lib/time-state.mts';
+import { lookLater, minutesSince, readLook, takeLook } from './lib/time-look.mts';
+import type { LookAsk } from './lib/time-look.mts';
+import { agentRunning, lastCommitMin, lateOf, loadState, placeOf, readLate, saveState, scanLater, scanNow } from './lib/time-state.mts';
 import type { GuardState, Late, Place } from './lib/time-state.mts';
 import type { Hook, HookEvent } from './lib/types.d.mts';
 import { pass, refuse } from './lib/verdict.mts';
@@ -87,12 +89,16 @@ export function run(event: HookEvent, opts: RunOptions): string[] {
   if (started !== undefined && event.tool_name !== 'AskUserQuestion' && (now - started) / 60 > LIMITS.slowCall) {
     said.push(`this call took ${((now - started) / 60).toFixed(0)} min (more than ${LIMITS.slowCall}): \`${String(input.command ?? event.tool_name ?? '').slice(0, 80)}\`. Find what made it slow before running it again; never wait on it as normal`);
   }
-  // 2. the machine, once a minute at most
-  if (now - (st.looked ?? 0) >= LIMITS.lookEveryS || rows !== null) {
-    st.looked = now;
-    const table = rows === null ? processTable() : null;
-    const found = rows !== null ? machineFindings(rows, opts.own ?? null, cfg) : machineFindings((table ?? []).map((r): Row => [r.pid, r.age, r.cmd]), ownProcesses(table ?? [], opts.sessionPid), cfg);
-    for (const [key, msg] of found) { const m = sayOnce(key, msg, now, st); if (m) said.push(m); }
+  // 2. the machine, once a minute at most: looked at in a process of its own (W8.3: `ps` and a git call per worktree are 40 to 500 ms),
+  //    the finding said by the event after it. A selftest hands its own table and looks at once.
+  const look = rows === null ? readLook(place) : null;
+  const ask: LookAsk = { cfg, sessionPid: opts.sessionPid, worktrees: [] };
+  let lookDue = false;
+  const tellFindings = (found: readonly (readonly [string, string])[]): void => { for (const [key, msg] of found) { const m = sayOnce(key, msg, now, st); if (m) said.push(m); } };
+  if (rows !== null) { st.looked = now; tellFindings(machineFindings(rows, opts.own ?? null, cfg)); }
+  else {
+    if (now - (st.looked ?? 0) >= LIMITS.lookEveryS) { st.looked = now; lookDue = true; }
+    if (look && look.at > (st.lookTold ?? 0)) { st.lookTold = look.at; tellFindings(look.findings); }
   }
   // 3. each agent's own worktree, learned from the commands it runs (.claude/worktrees/<name>)
   const who = event.agent_id ?? 'main';
@@ -126,11 +132,12 @@ export function run(event: HookEvent, opts: RunOptions): string[] {
   if (mine && !readOnly) ((st.wrote ??= {})[who] ??= {})[mine] = true;
   if (mine && readOnly && !st.wrote?.[who]?.[mine]) mine = null; // a look at a worktree this session has not written to says nothing
   // its git status at most once a minute (KWB-24: two git commands on every call of every agent)
-  if (mine && (rows !== null || now - (st.checked?.[mine] ?? 0) >= LIMITS.lookEveryS)) {
-    if (rows === null) (st.checked ??= {})[mine] = now;
-    const u = rows === null ? unsavedMin(mine, now, place.env) : null; // a selftest case: never git on a made-up path
+  if (mine && rows === null && now - (st.checked?.[mine] ?? 0) >= LIMITS.lookEveryS) { (st.checked ??= {})[mine] = now; ask.worktrees.push(mine); lookDue = true; }
+  if (mine && (rows !== null || look)) {
     const cm = opts.commitMin;
-    const cmn = typeof cm === 'function' ? cm(mine) : cm ?? lastCommitMin(mine, now, place.env);
+    // the look's times, as minutes ago now; a selftest case: never git on a made-up path
+    const u = rows === null ? minutesSince(look?.unsaved[mine], now) : null;
+    const cmn = rows === null ? minutesSince(look?.commit[mine], now) : typeof cm === 'function' ? cm(mine) : cm ?? lastCommitMin(mine, now, place.env);
     if (u !== null && u > LIMITS.save) {
       const s = sayOnce(`unsaved-${mine}`, `your worktree (${mine.split('/').pop()}) holds work unsaved for ${u.toFixed(0)} min (more than ${LIMITS.save}). Save it now: ${cfg.saveCommand}`, now, st);
       if (s) said.push(s);
@@ -153,6 +160,7 @@ export function run(event: HookEvent, opts: RunOptions): string[] {
   if (controller && found && found.at > (st.lateTold ?? 0)) { st.lateTold = found.at; tell(found.list); }
   st.starts = Object.fromEntries(Object.entries(st.starts ?? {}).filter(([, v]) => now - v < 86400));
   keep();
+  if (lookDue) lookLater(place, opts.self, ask);
   return said;
 }
 
@@ -188,6 +196,13 @@ export async function selftest(): Promise<number> {
 
 if (isMain(import.meta.url)) {
   await runAsHook(import.meta.url, 'time-guard', hook, selftest, {
-    flags: { '--scan-worktrees': () => { const ctx = contextOf(); return scanNow(placeOf(ctx.projectDir, ctx.env), Date.now() / 1000); } },
+    flags: {
+      '--scan-worktrees': () => { const ctx = contextOf(); return scanNow(placeOf(ctx.projectDir, ctx.env), Date.now() / 1000); },
+      '--look': (args) => {
+        const ask = parseJson<LookAsk>(args[args.indexOf('--look') + 1]);
+        const ctx = contextOf();
+        return ask ? takeLook(placeOf(ctx.projectDir, ctx.env), ask, Date.now() / 1000) : 1;
+      },
+    },
   });
 }
