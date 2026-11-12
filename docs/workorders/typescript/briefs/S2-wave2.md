@@ -1,4 +1,4 @@
-# Session 2, wave 2: two agents (KWB-199, W10's ledger)
+# Session 2, wave 2: three agents (KWB-199, the budgets, W10's rows left); the lead writes W10's ledger
 
 The order is `docs/workorders/typescript/workorder.md`, run unattended from its `PROMPT.md` (read its constraints). The rules
 for every agent are those of `briefs/S2-wave1.md`, section "Rules for every agent", with your own name and branch; they hold
@@ -71,3 +71,14 @@ starts:
 Measure each before and after by driving the scratch rig (`test/integration/proxy-fire-rig.mts`, `live-event-speed.test.mts`) with
 the same commands; each fix gets a test or selftest case seen red first. Never run the main checkout's daemon or change its install;
 the lead updates it after the merge.
+
+## w10-rows2: the three W10 rows left (replaces w10-ledger, which the lead does)
+
+`review/w10-rows.md` recommends fixing three open rows of `workflow-bugs.md`, and `agents/w10-rowfix-report.md` left them for lack
+of time. Fix each with its test red first: KWB-137 (`inside-the-project` refuses the main checkout's `git -C` that git-guard's Stop
+demands when a session starts in a worktree: the main checkout that encloses a worktree root counts as inside); KWB-135 (`idle-wake`
+switched on alone imports the opt-in `user-asks` and crashes: make the import soft, or a hook-level `needs` in `pack.json` read by
+`lib/switches.mts`, whichever is smaller); KWB-115 (`protect-vendor` refuses clearing a declared build output: a `delete` of a path
+under a declared `buildOutput` passes, a write into it still refused). Each in its own commit; report each row's cause, fix and
+test for the lead to close in `workflow-bugs.md`. Run `node scripts/counts.mts` and `node scripts/noop-pin.mts` if an installed
+file changed, and read the noop diff.
