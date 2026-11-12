@@ -27,6 +27,7 @@ import { applyPaths } from './rules.mts';
 import { proved, remember, selftestKey, sharedHash } from './selftest-cache.mts';
 import { shapeProblems } from './shape-cli.mts';
 import { symmetryProblems } from './symmetry-doctor.mts';
+import { typescriptProblems } from './ts-project.mts';
 import { wallProblem } from './wall-budget.mts';
 
 export interface DoctorOptions {
@@ -180,6 +181,7 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
   toDo(buildQueueProblems(projectDir, layout)); // a queue that is not there queues nothing (KF-1)
   problems.push(...await pageGateProblems(projectDir, layout, env)); // UI code is proved rendered (0.17.0)
   problems.push(...await hoverGateProblems(projectDir, layout, env)); // UI code needs a declared hover gate (0.10.1, Stellix B-261)
+  problems.push(...typescriptProblems(projectDir)); // a project holding typescript-only holds typescript and the declaration (W8.5)
   problems.push(...tokenProblems(projectDir, layout.siblings ?? []));
   problems.push(...shapeProblems(projectDir, packs)); // the shape law: a synth has design/shape.json, and its rows keep the contract
   problems.push(...onceOnlyDoctor(projectDir, log, env)); // making's cost per turn, the duplicate count (0.9.0)

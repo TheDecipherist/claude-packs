@@ -1,0 +1,39 @@
+{
+  "id": "typescript-only",
+  "why": "A project that holds typescript and the language server is read through types. A new .js, .mjs or .cjs source file is code the types do not reach. Write .ts, .mts or .cts. Files a tool requires in JavaScript (*.config.js, .eslintrc.cjs) are left out.",
+  "rule": ".claude/rules/typescript-only.md",
+  "globs": [
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/*.config.js",
+    "**/*.config.mjs",
+    "**/*.config.cjs",
+    "**/.*rc.js",
+    "**/.*rc.mjs",
+    "**/.*rc.cjs",
+    "**/.pnp.cjs",
+    "**/.yarn/**",
+    "**/public/**",
+    "**/vendor/**",
+    "**/*.d.js",
+    "**/*.d.mjs",
+    "**/*.d.cjs"
+  ],
+  "code": true,
+  "pattern": "^\\s*\\S",
+  "bad": "export const answer = 42;\n",
+  "good": "// only a note: no code in this file\n"
+}

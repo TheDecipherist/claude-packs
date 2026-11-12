@@ -24,6 +24,7 @@ import { installBinary } from './proxy-install.mts';
 import { applyPaths, renderRule } from './rules.mts';
 import { readSettings, syncSettings } from './settings.mts';
 import { reportSwitches, switches } from './switches.mts';
+import { TS_CHECK, enforceTypeScript } from './ts-project.mts';
 
 const NEW_SUFFIX = '.pack-new';
 // the lock says which kit wrote it (AdmiralMCP B-13)
@@ -165,6 +166,7 @@ export async function sync(projectDir: string, requested: readonly string[] | nu
   const tableRel = join('.claude', 'hooks', TABLE_FILE);
   if (table) files[tableRel] = hashFile(join(projectDir, tableRel));
   else rmSync(join(projectDir, tableRel), { force: true });
+  if (sw.on.includes(TS_CHECK)) enforceTypeScript(projectDir, log); // the check came on: what it assumes is written (W8.5, d-5)
   if (retired.length) log(`  retired settings entries (merged into protect-vendor, or global by design): ${retired.join(', ')}`);
   if (statusLine === 'kept') log('  status line: the project has its own, kept; the kit\'s is .claude/tools/statusline.mjs, to wire by hand');
   const { stale } = await applyPaths(projectDir, { skip: untouchable });
