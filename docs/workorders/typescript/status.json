@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T02:17:42Z",
+  "updated": "2026-11-12T02:41:57Z",
   "steps": [
     {
       "id": "W0",
@@ -62,7 +62,7 @@
       "id": "W8",
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 6,
-      "done": 3,
+      "done": 4,
       "agent": null
     },
     {
