@@ -609,10 +609,21 @@ Sequential: (1), then (2), then (3), then (4), then (5).
    50 ms deadline and prints the answer, and with no daemon prints the TypeScript status line's own render marked `slow path`;
    `refreshInterval` 1, migrated by `update`; every live line carries a ticking clock (its tool and how long it has run, `Bash
    0:42`) so it changes every render, and a line with no event for 2 minutes turns yellow and says `quiet 2m`, a stopped one leaves
-   the list, and one with no event of any kind for 5 minutes is removed as abandoned (it returns on its next event), so the list can
-   never go stale (the user, 2026-11-12); a SessionStart clears the list, and a live agent of any session returns on its next event; a red dot beside the version when npm's latest is newer than the project's own `package.json` version, read from
+   the list, and one with no event of any kind for 5 minutes and no CPU or process of its own (W8.7's sampler) is removed as
+   abandoned (it returns on its next event), so the list can never go stale while a long command keeps its agent listed (the user,
+   2026-11-12: "if an agent is in the middle of work its cpu/mem/processes would reflect that"); a SessionStart clears the list, and a live agent of any session returns on its next event; a red dot beside the version when npm's latest is newer than the project's own `package.json` version, read from
    kit-fresh's cached look that the daemon refreshes at most hourly (no render waits on the network; a `work/` version ahead of
    npm shows no dot).
+
+7. A resident Go sampler for CPU, memory and processes (the user, 2026-11-12: "a go agent would also be able to actually
+   monitor, cpu, processes and memory better"), first as a probe: on this Mac with `CGO_ENABLED=0`, what a raw system call reads per
+   process (CPU time, resident memory, parent, working folder) and at what cost, against `ps`; on Linux from `/proc`; the result and
+   the choice in `decisions.md` (if macOS needs cgo, the Mac falls back to `ps` and says so). Then `hook-proxy sample`, started and
+   stopped with the daemon, one snapshot every 2 s kept in the daemon: each process's CPU and memory, its owner (a session by its
+   `claude` process tree, an agent by its worktree folder; an agent in its lead's folder is attributed to the lead); the status line
+   shows CPU and memory per session and agent; W8.6's abandonment reads it; a watchdog flags in the status line and the log, and
+   with `guards.watchdog.stop` set stops, a process whose parent is gone that holds a core for 60 s (the 49 orphaned spinners of
+   2026-11-11) and a test run above the kit's test cap.
 
 **Done when:** a Bash call waits on 2 proxy processes (from 7 node runners) and a Write on 2 (from 4), counted in a fresh install's
 settings and seen in its log, each proxy call under 20 ms on this Mac by the `proxy` line's wall (from 85 ms); a Write event's wall
@@ -629,7 +640,10 @@ from it; `hook-proxy status` renders in under 15 ms p50 over 100 renders on this
 a planted agent shows its tool with a clock that differs between two renders a second apart, turns `quiet 2m` after a planted
 2-minute silence, is gone after a planted 5-minute silence and back on its next event, and leaves the list on its stop; a planted
 SessionStart empties the list and a live agent's next event brings it back; the red dot shows on a planted older install and not on the kit's own `work/`
-version; a planted network outage leaves the render under 15 ms.
+version; a planted network outage leaves the render under 15 ms; the sampler's probe recorded with its numbers and its decision; one
+snapshot under 5 ms of CPU on this Mac (or the `ps` fallback's cost stated); a planted agent running a 10-minute command with no
+event stays listed past 5 minutes and is removed 5 minutes after its processes end; a planted orphan spinning for 60 s is flagged
+(and stopped with the guard set), seen red first; the daemon and the sampler together under 300 MB.
 
 ## W9. The release in five minutes (measured without publishing)
 
