@@ -12,12 +12,12 @@
 // index it reads is brought up to date in memory only. Keeping it up to date after a write that happened is
 // once-only-index (PostToolUse, role recorder), so a write another hook refused never reaches the index.
 //   node once-only.mjs --selftest   (the rows are in lib/once-only-selftest.mts)
-import { relative } from 'node:path';
+import { relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isContent } from './lib/content.mts';
 import { changedLines, copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './lib/dup.mts';
 import type { DupWrite } from './lib/dup-index.mts';
-import { judgeCopyWrites } from './lib/dup-index.mts';
+import { judgeCopyWrites, judgeCopyWritesAsked } from './lib/dup-index.mts';
 import { matchesAny } from './lib/glob.mts';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { FN, selftest as rows } from './lib/once-only-selftest.mts';
@@ -55,18 +55,19 @@ function judged(event: HookEvent, ctx: HookContext): { list: Judged[]; gone: str
 }
 
 /** What the write repeats: the refusal's text, or null when it repeats nothing the repo has. */
-export function copiesIn(event: HookEvent, ctx: HookContext): string | null {
+export async function copiesIn(event: HookEvent, ctx: HookContext): Promise<string | null> {
   const { list, gone } = judged(event, ctx);
   if (!list.length) return null;
   const found: string[] = [];
-  // each checkout written to: its index finds the candidates (built once, then only changed files are read again), jscpd
-  // confirms on those files alone (lib/dup-index.mts judgeCopyWrites)
+  // each checkout written to: its index finds the candidates (the resident runner's main thread holds the main checkout's, a worktree's
+  // is read here: built once, then only changed files are read again), jscpd confirms on those files alone (lib/dup-index.mts)
   for (const root of new Set(list.map((j) => j.root))) {
     const mine = list.filter((j) => j.root === root);
     const first = mine[0];
     if (!first) continue;
     const writes: DupWrite[] = mine.map((j) => ({ path: j.w.path, after: j.w.after ?? '', range: j.range }));
-    const r = judgeCopyWrites(root, writes, { env: ctx.env, layout: first.layout, shape: first.shape, ignore: gone, persist: false, keep: true });
+    const options = { env: ctx.env, layout: first.layout, shape: first.shape, ignore: gone, persist: false };
+    const r = ctx.candidates && root === resolve(ctx.projectDir) ? await judgeCopyWritesAsked(root, writes, ctx.candidates, options) : judgeCopyWrites(root, writes, options);
     if (r.error) return null; // once-only could not judge (doctor shows a missing detector)
     const base = realPath(root);
     const show = (s: { file: string; start: number; end: number }): string => `${relative(base, s.file)}:${s.start}-${s.end}`;
@@ -78,8 +79,8 @@ export function copiesIn(event: HookEvent, ctx: HookContext): string | null {
   return `BLOCKED by once-only: this write repeats code the repo already has.\n${listed.slice(0, 6).map((f) => `  ${f}`).join('\n')}${more}\n${HOW}`;
 }
 
-export const hook: Hook = (event, ctx) => {
-  const why = copiesIn(event, ctx);
+export const hook: Hook = async (event, ctx) => {
+  const why = await copiesIn(event, ctx);
   return why === null ? pass : refuse(why);
 };
 

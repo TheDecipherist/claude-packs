@@ -1,13 +1,14 @@
 // KWB-201: what a Pre Write pays for the repetition index. template-law asks the daemon's index (ctx.candidates) when it is there, and the one-shot
-// runner's index is written back only when something in it changed (it was rewritten whole on every call). once-only's judge keeps its index in
-// memory (`keep`). KWB-182 (a declaration file or a docs probe as a second definition) is a template-law selftest row.
+// runner's index is written back only when something in it changed (it was rewritten whole on every call). once-only's judge asks the main
+// thread's duplicate index by window hash and finds what the index in its own process finds. KWB-182 (a declaration file or a docs probe as a second definition) is a template-law selftest row.
 import assert from 'node:assert/strict';
 import { readdirSync, statSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
-import { loadIndex } from '../../../packs/base/hooks/lib/dup-index.mts';
+import { clonesAsked, clonesIn, loadIndex } from '../../../packs/base/hooks/lib/dup-index.mts';
+import { dupWindows } from '../../../packs/base/hooks/resident/dup-windows.mts';
 import { repoIndex } from '../../../packs/base/hooks/lib/repo-index.mts';
 import { hook } from '../../../packs/base/hooks/template-law.mts';
 import { residentIndex } from '../../../packs/base/hooks/resident/index.mts';
@@ -58,12 +59,20 @@ test('the one-shot runner writes the repetition index only when a file of it cha
   assert.notEqual(statSync(file).mtimeMs, past.getTime(), 'a new file is written');
 });
 
-test('a judge that keeps its index reads a file once, and a recorder that does not keep it reads what is persisted', () => {
-  const dir = scratchDir('dup-kept-');
-  put(join(dir, 'src/a.ts'), 'export function a() { return 1; }\n');
-  assert.equal(loadIndex(dir, { persist: false, keep: true }).read, 1);
-  assert.equal(loadIndex(dir, { persist: false, keep: true }).read, 0, 'the second judge starts from memory');
-  assert.equal(loadIndex(dir, { persist: false }).read, 1, 'nothing was persisted by a judge');
-  put(join(dir, 'src/b.ts'), 'export function b() { return 2; }\n');
-  assert.equal(loadIndex(dir, { persist: false, keep: true }).read, 1, 'a file that landed is read once');
+test('the main thread holds the duplicate index: a worker asks by window hash and finds the same clone the index in its own process finds', async () => {
+  const dir = scratchDir('dup-asked-');
+  const body = (n: string): string => `export function ${n}(a: number, b: number): number {\n${Array.from({ length: 14 }, (_, i) => `  const v${i} = (a * ${i + 3} + b) % ${i + 11};\n  if (v${i} > ${i}) { return v${i} - ${i}; }`).join('\n')}\n  return a + b;\n}\n`;
+  put(join(dir, 'src/a.ts'), body('first'));
+  const dup = dupWindows(dir, () => layout);
+  const write = { path: join(dir, 'src/b.ts'), after: body('second'), range: [1, 31] as const };
+  const asked: string[][] = [];
+  const ask = (keys: readonly string[]): Promise<FileStatements[]> => { asked.push([...keys]); return Promise.resolve(dup.find(keys)); };
+  const viaMain = await clonesAsked(dir, [write], ask);
+  const inProcess = clonesIn(loadIndex(dir, { persist: false }), [write]);
+  assert.ok(viaMain.length > 0, 'a function copied with another name is a candidate');
+  assert.deepEqual(viaMain, inProcess);
+  assert.ok(asked[0]?.every((k) => k.startsWith('dup:')));
+  put(join(dir, 'src/a.ts'), 'export const gone = 1;\n');
+  dup.stale();
+  assert.deepEqual(await clonesAsked(dir, [write], ask), [], 'a file that changed no longer holds the window');
 });

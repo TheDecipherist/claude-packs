@@ -1,8 +1,9 @@
-// resident/index: the repetition index, kept on the daemon's main thread (review-2-go 2.5). A worker never holds it and never gets
-// it: it asks by message which files hold any of the keys it names (a statement's hash, an element shape's `shape:<id>`, a definition's
-// `def:<name>`), and the answer is those files' entries only. The index is built when first asked and rebuilt, from the files' mtimes,
+// resident/index: the repetition indexes, kept on the daemon's main thread (review-2-go 2.5). A worker never holds one and never gets
+// one: it asks by message which files hold any of the keys it names (a statement's hash, an element shape's `shape:<id>`, a definition's
+// `def:<name>`; and `dup:<window hash>` of the duplicate index, resident/dup-windows.mts), and the answer is those files' entries only. The index is built when first asked and rebuilt, from the files' mtimes,
 // after a tool call that may have written (a PostToolUse event marks it stale), so a write and a second write repeating it, served by
 // another worker, see the first. A key is looked up in a map built with the index, not found by a walk of every file per question (KWB-201).
+import { dupWindows } from './dup-windows.mts';
 import { defKey, repoIndex, shapeKey, type RepoIndex } from '../lib/repo-index.mts';
 import type { FileStatements } from '../lib/near-copies.mts';
 import type { Layout } from '../lib/types.d.mts';
@@ -41,13 +42,16 @@ export function residentIndex(root: string, layout: () => Layout): ResidentIndex
     }
     return built;
   };
+  const dup = dupWindows(root, layout);
+  const repoOf = (wanted: readonly string[]): FileStatements[] => {
+    const { index, keys } = fresh();
+    const files = new Set(wanted.flatMap((k) => keys.get(k) ?? []));
+    return [...files].flatMap((file) => { const e = index[file]; return e ? [{ file, st: e.st, shapes: e.shapes, defs: e.defs }] : []; });
+  };
   return {
-    candidates: (wanted) => {
-      const { index, keys } = fresh();
-      const files = new Set(wanted.flatMap((k) => keys.get(k) ?? []));
-      return [...files].flatMap((file) => { const e = index[file]; return e ? [{ file, st: e.st, shapes: e.shapes, defs: e.defs }] : []; });
-    },
-    stale: () => { dirty = true; },
+    // a question names either kind of key; the index it does not ask is not built for it
+    candidates: (wanted) => [...(wanted.some((k) => !k.startsWith('dup:')) ? repoOf(wanted) : []), ...dup.find(wanted)],
+    stale: () => { dirty = true; dup.stale(); },
     size: () => (built === null ? 0 : Object.keys(built.index).length),
   };
 }

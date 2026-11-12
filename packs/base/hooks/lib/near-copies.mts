@@ -22,6 +22,8 @@ export interface FileStatements {
   st: readonly Fingerprint[];
   shapes?: ReadonlyArray<readonly [id: string, line: number, what: string]>;
   defs?: ReadonlyArray<readonly [name: string, line: number]>;
+  /** For a `dup:<hash>` question: the file's windows with that hash, as [hash, token it starts at, its line, the line of its last token] (lib/dup-match.mts). */
+  windows?: ReadonlyArray<readonly [hash: number, at: number, line: number, end: number]>;
 }
 /** The place in another file that holds most of what was added. */
 export interface NearCopy { file: string; from: number; to: number; line: number; matched: number; of: number }
