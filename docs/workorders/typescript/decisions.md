@@ -176,6 +176,14 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-28 js-ts fits the base configuration, and the kit takes it {#d-28}
+- Question: W8.5 asks the kit's own repo to refuse a new .mjs source at write time through the typescript-only check, which lives in
+  js-ts; the kit's configuration is base, and js-ts fitted only the language configurations.
+- Options: switch the kit to the node configuration (its layout, preamble and CLAUDE.md block all change); or let js-ts fit base, so
+  a base project with TypeScript code may take the TypeScript laws, and add js-ts to the kit.
+- Chosen: js-ts fits base; the kit adds js-ts. A project gets it only by naming it (add or init), so no project's install changes.
+- Why: the smaller change, true of more projects than the kit; the kit is TypeScript and its own laws should hold on it.
+
 ## d-27 W5's two time lines are measured again after W8 {#d-27}
 - Question: W5's Done when asks for the suite's wall under 180 s (median of two) and no file over 60 s summed. Measured after every
   W5 wave (build/evidence/W5/summary.md): wall 989 s and 976 s (median 982 s) at load 4 to 12, with the user's cap of 6 files at

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper.",
   "type": "stock",
-  "fits": ["full-stack", "go", "node", "python", "rust"],
+  "fits": ["base", "full-stack", "go", "node", "python", "rust"],
   "requires": [],
   "tests": {},
   "author": "claude-packs",
