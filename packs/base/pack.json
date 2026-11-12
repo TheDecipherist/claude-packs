@@ -154,6 +154,7 @@
     "tools/statusline-daemon.mts": ["test/tools/base/statusline-daemon.test.mts"],
     "tools/statusline-live.mts": ["test/unit/hooks-lib/status-keeper.test.mts"],
     "tools/statusline-agents.mts": ["test/unit/hooks-lib/agent-board.test.mts"],
+    "tools/statusline-governor.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline-paint.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline-runs.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline-session.mts": ["test/tools/base/statusline.test.mts"],

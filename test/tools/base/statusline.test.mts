@@ -6,6 +6,7 @@ import { utimesSync } from 'node:fs';
 import { assert, execFileSync, existsSync, fresh, join, mkdirSync, test, writeFileSync } from '../../kit-cli.mts';
 import { readJson, toJson } from '../../../packs/base/hooks/lib/json.mts';
 import { statusBar } from '../../../packs/base/tools/statusline.mts';
+import { machineHost } from '../../../packs/base/hooks/lib/governor.mts';
 import { gitState, parseStatusV2 } from '../../../packs/base/tools/statusline-work.mts';
 import type { GitAsk } from '../../../packs/base/tools/statusline-work.mts';
 import { refreshRuns } from '../../../packs/base/tools/statusline-runs.mts';
@@ -175,4 +176,24 @@ test('an install wires the kit\'s status line where the project has none, keeps 
   writeFileSync(join(claudeDir, 'settings.json'), toJson({ statusLine: { type: 'command', command: 'my-own-bar' } }));
   assert.equal(syncSettings(claudeDir, ['base'], {}).statusLine, 'kept');
   assert.equal(line()?.command, 'my-own-bar');
+});
+
+test('the governor field shows the slots in use of the budget, the jobs queued and paused, and names a job paused past 10 minutes', () => {
+  const governor = fresh('statusline-governor-');
+  const job = (id: string, slots: number, pausedAt: number | null, command: string): unknown =>
+    ({ id, pid: process.pid, pgid: null, kind: 'test', slots, project: '', start: NOW - 3_600_000, pausedAt, command });
+  writeFileSync(join(governor, 'jobs.json'), toJson({ v: 1,
+    jobs: [job('g1', 3, null, 'npm test'), job('g2', 2, NOW - 12 * 60_000, 'go test -fuzz FuzzWire ./proxy/...')],
+    waiting: [{ id: 'w1', pid: process.pid, kind: 'build', want: 4, project: '', since: NOW }] }));
+  const host = machineHost({ CLAUDE_PACKS_GOVERNOR_DIR: governor, CLAUDE_PACKS_GOVERNOR_CORES: '18', HOME: governor });
+  const env = { HOME: governor, NO_COLOR: '1' };
+  const [top] = statusBar('{}', { env, nowMs: NOW, toolDir: governor, refresh: false, git: () => ({}), governor: host });
+  assert.match(top ?? '', /(^| \| )GOV 5\/10 1 queued 1 paused paused 12m: go test -fuzz FuzzWire \.\/proxy\/\.\.\.$/);
+});
+
+test('the governor field is gone when no job holds or waits for slots', () => {
+  const governor = fresh('statusline-governor-idle-');
+  const host = machineHost({ CLAUDE_PACKS_GOVERNOR_DIR: governor, CLAUDE_PACKS_GOVERNOR_CORES: '18', HOME: governor });
+  const [top] = statusBar('{}', { env: { HOME: governor, NO_COLOR: '1' }, nowMs: NOW, toolDir: governor, refresh: false, git: () => ({}), governor: host });
+  assert.doesNotMatch(top ?? '', /GOV/);
 });
