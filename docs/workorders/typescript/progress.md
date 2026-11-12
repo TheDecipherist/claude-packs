@@ -130,3 +130,4 @@ marked done, at its first unticked item.
 - 2026-11-12 W10 done: every finding and CARRY row written above with its fix or why it stays (0 blank); the rows wave 2 fixed closed in workflow-bugs.md
 - 2026-11-12 W8 live, after wave 2: Pre Bash p50 6 ms, Pre Write 6, Post 3 (doctor's event table, build/session2/doctor2.txt); doctor --strict still red on commit and push calls (git-guard 244 to 385 ms, kit-fresh 87 to 121) in the minutes after the update; open
 - 2026-11-12 wave 3 started in the background (4 agents at load 6.3, d-33's mode): w10b-owners, w10b-paths, w10b-fuzz, kwb208-210 (briefs/S2-wave3.md)
+- 2026-11-12 15:12 the overseeing session: load 43 on 18 cores from wave 3 (three agents' test runs at 6 each and the W10b fuzzer at 4 workers, each within its own cap); the run's processes reniced; PROMPT.md now gives the run one shared budget of 6 parallel jobs split among a wave's agents, and heavy waves at most two agents. Read PROMPT.md before wave 4.
