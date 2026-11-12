@@ -27,7 +27,7 @@ export interface StopLook { found: BranchOff[] | Failure | null; behind: LagVerd
 interface Kept { key: string; at: number; look: StopLook }
 
 /** The settings that change what a look finds; the look's own plumbing (a deadline, the clock) does not. */
-const settingsOf = (cfg: GitGuards): string => toJson({ ...cfg, until: undefined, now: undefined, live: undefined, cachedOnly: undefined, stopCacheMs: undefined });
+const settingsOf = (cfg: GitGuards): string => toJson({ ...cfg, until: undefined, now: undefined, live: undefined, cachedOnly: undefined, stopCacheMs: undefined, stopLiveMs: undefined });
 
 /** Where a look is kept and the key it is kept under, as the repo is at the moment this is asked: taken BEFORE a look, so a look
  *  that a ref moved during is kept under the key it began at, and is not served for the state after. */

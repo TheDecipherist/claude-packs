@@ -94,7 +94,7 @@ export function pushedCases(hookFile: string): VerdictRow[] {
 // once a session and never refused; a branch missing on GitHub by name only, every commit of it there, is not told.
 export function ownerCases(hookFile: string): VerdictRow[] {
   const { top, dir, hub, commit, push, run: runAt } = hubRepo('git-guard-owner-');
-  put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true, trunkNeedsYes: true, pushNeedsYes: true } } }));
+  put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true, trunkNeedsYes: true, pushNeedsYes: true, stopLiveMs: 20_000 } } }));
   const bash = (command: string): HookRun => runAt(hookFile, { hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } });
   const stop = (): HookRun => runAt(hookFile, { hook_event_name: 'Stop', stop_hook_active: false });
   const told = (r: HookRun): string => parseJson<{ systemMessage?: string }>(r.stdout)?.systemMessage ?? '';

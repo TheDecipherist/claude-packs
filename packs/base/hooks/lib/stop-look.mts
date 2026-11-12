@@ -47,7 +47,7 @@ export function stopLook(root: string, env: GitEnv, cfg: GitGuards, { lag, told,
   const slot = slotOf(root, cfg);
   const kept = hitFor(slot, cfg, now);
   if (kept) return kept;
-  const look = lookNow(root, env, { ...cfg, until: now + STOP_LIVE_MS }, lag, told);
+  const look = lookNow(root, env, { ...cfg, until: now + (cfg.stopLiveMs ?? STOP_LIVE_MS) }, lag, told);
   keep(slot, cfg, look, now);
   if (failed(look.found) || look.behind?.error) refresh?.();
   return look;

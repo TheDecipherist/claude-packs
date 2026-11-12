@@ -6,7 +6,9 @@
 import { chmodSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { put } from './files.mts';
 import { hubRepo } from './hub-rig.mts';
+import { toJson } from './json.mts';
 import type { HookRun } from './selftest.mts';
 import type { VerdictRow } from './types.d.mts';
 
@@ -47,6 +49,7 @@ export function stopCacheCases(hookFile: string): VerdictRow[] {
   // a slow GitHub: one second, the existing note, and the look kept for the next Stop by a detached refresh
   commit('three');
   rmSync(kept, { force: true }); // the clean look of before: what is kept after this is the refresh's
+  put(join(dir, '.claude/layout.json'), toJson({ folders: {}, guards: { git: { house: true } } })); // from here a Stop gives GitHub the default second
   const was = process.env['GIT_EXEC_PATH'];
   process.env['GIT_EXEC_PATH'] = slowGitHub(top, 3);
   const t0 = Date.now();

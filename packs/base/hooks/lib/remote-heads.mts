@@ -61,6 +61,8 @@ export interface GitGuards extends HeadsOptions {
   cachedOnly?: boolean;
   /** How long the end of a session may serve its last verdict while no ref changed, in ms (60,000 by default; 0 looks every time). */
   stopCacheMs?: number;
+  /** How long the end of a session waits on GitHub before it says "not checked", in ms (1,000 by default). */
+  stopLiveMs?: number;
 }
 
 export interface HeadsFound { url: string; heads: Map<string, string>; cached: boolean }
