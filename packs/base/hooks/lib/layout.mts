@@ -4,6 +4,7 @@
 // a layout read is always the file as it is now (no memo, so no stale one).
 import { join } from 'node:path';
 import { readText } from './files.mts';
+import { allWithModuleForms } from './glob.mts';
 import { parseJson } from './json.mts';
 import type { Layout, LayoutFolder } from './types.d.mts';
 
@@ -28,7 +29,7 @@ export function conceptGlobs(layout: Layout, concept: string): string[] | null {
     const globs = folder ? [`${folder.path}/**`] : e.startsWith('kind:') ? foldersOfKind(layout, e.slice(5)).map((p) => `${p}/**`) : [e];
     for (const glob of globs) if (!out.includes(glob)) out.push(glob);
   }
-  return out;
+  return allWithModuleForms(out);   // KWB-198: a TypeScript glob names .mts and .cts too
 }
 
 // The paths of every layout folder of one kind ("copy": read-only copies of another project's code).

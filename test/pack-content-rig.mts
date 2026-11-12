@@ -15,7 +15,7 @@ export interface Finding { id: string; file: string; note: string }
 export const HARD: ReadonlySet<string> = new Set(['R2', 'R3', 'R4', 'C1', 'C4', 'S1', 'S2', 'S5', 'P1', 'P2', 'P5', 'P6']);
 
 /** The fields a lesson check may have (CLAUDE.md "Authoring pack content", plus the four it never named). */
-export const CHECK_FIELDS: ReadonlySet<string> = new Set(['id', 'why', 'rule', 'globs', 'concepts', 'exclude', 'pattern', 'code', 'strings', 'language', 'mode', 'needs', 'whenDep', 'kind', 'bad', 'good', 'notInTests', 'replaces', 'flags', 'prose', 'examples']);
+export const CHECK_FIELDS: ReadonlySet<string> = new Set(['id', 'why', 'rule', 'globs', 'concepts', 'exclude', 'pattern', 'code', 'strings', 'language', 'mode', 'needs', 'whenDep', 'kind', 'bad', 'good', 'notInTests', 'newFilesOnly', 'replaces', 'flags', 'prose', 'examples']);
 
 const PROJECT_NAMES = /\b(?:Stellix|Solera|MegaSynth|MPX)\b/;
 const SECOND_PERSON = /\byou (?:can|should|must)\b|\bWe must\b/i;
