@@ -24,6 +24,8 @@ export const FILES: readonly (readonly [from: string, to: string])[] = [
   ['hooks/version-pin-guard.mjs', 'hooks/claude-packs/version-pin-guard.mjs'],
   ['../packs/base/hooks/lib/shell-writes.mjs', 'hooks/claude-packs/lib/shell-writes.mjs'],
   ['../packs/base/hooks/lib/program-writes.mjs', 'hooks/claude-packs/lib/program-writes.mjs'],
+  ['../packs/base/hooks/lib/program-named.mjs', 'hooks/claude-packs/lib/program-named.mjs'],   // program-writes names the paths a program writes through it
+  ['../packs/base/hooks/lib/project.mjs', 'hooks/claude-packs/lib/project.mjs'],   // shell-writes reads isMain from it (W10 review, finding 9)
   ['../packs/base/hooks/lib/program-read.mjs', 'hooks/claude-packs/lib/program-read.mjs'],
   ['../packs/base/hooks/lib/command-prefix.mjs', 'hooks/claude-packs/lib/command-prefix.mjs'],   // shell-writes reads through it (KWB-101)
   ['../packs/base/hooks/lib/shell-lex.mjs', 'hooks/claude-packs/lib/shell-lex.mjs'],   // shell-writes' reader of the text, split out (KWB-118)
