@@ -176,6 +176,44 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-33 A wave may run in the background while the lead works, and a turn never ends on a running agent {#d-33}
+- Question: KWB-199 (a foreground wave ties every slot to its slowest agent). Measured in a child `claude -p`
+  (build/evidence/KWB-199/summary.md): a background agent lives while the lead's turn is open, and its notification arrives at
+  the lead's next tool-call boundary, never during a foreground agent.
+- Options: keep foreground only and split waves by size; allow background agents and refuse the end of a turn while one runs;
+  both.
+- Chosen: both. agents-held allows a background start in an unattended run and refuses `Stop` while an agent started in the
+  background has not returned; the rule and the run-a-workorder skill split waves by size and give a long list to several agents.
+- Why: the measurement shows the refill works only while the lead keeps making calls, and the Stop refusal is what makes the
+  KWB-124 loss impossible either way. Overturn by editing KWB-199's row or this order's PROMPT.
+
+## d-32 W11's row (a) is the one whole-suite run after W6 {#d-32}
+- Question: the PROMPT lets the whole suite run where a step's Done when names it (W0, W4, W5, W6, W12); W11's Done when asks for
+  all twelve rows of W0.5 measured again in W11, and row (a) is the whole suite.
+- Options: run it in W11; take W12's run instead; leave row (a) open.
+- Chosen: run it once in W11, by the lead, in the main checkout, as `npm test`, after every code change of the order has merged,
+  and let W12's gate be the picked tests against the trunk.
+- Why: W11's Done when names the row and asks that it be measured in that step; one run serves both. Overturn by editing W11.
+
+## d-31 The daemon's RSS: the order's 250 MB holds on a fresh install, not on the kit's own repo {#d-31}
+- Question: W8's Done when, the daemon's RSS under 250 MB with 16 workers after 1,000 events (d-29 carried it).
+- Measured: a fresh scratch install 166 MB after 1,000 events with 16 workers (agents/w8-sampler-report.md section 5; with the
+  sampler 177 MB, under 300); a copy of the kit's own install (760 sources, a 25 MB transcript) 731 to 320 MB after session 2's
+  rss agent (agents/rss-report.md); its floor about 270 MB: 16 workers that loaded the hook lib about 200 MB, the main thread's
+  indexes about 67 MB.
+- Options: fewer than 16 warm workers; a smaller lib per hook; the indexes out of the process; the line stated with both numbers.
+- Chosen: the line is met as written on a fresh install and stated as not met on the kit's own repo, with the floor and its parts;
+  the test holds 380 MB on the rig. The pool size stays the order's.
+- Why: below 270 MB needs fewer workers than the order names, which trades event time; fewer hooks per worker was measured and
+  saved nothing. Overturn by editing W8's pool size.
+
+## d-30 The sampler reads processes by raw system calls on macOS {#d-30}
+- Question: W8.7, cgo or not on this Mac.
+- Chosen: sysctl KERN_PROC_ALL plus proc_info with no cgo on macOS, /proc on Linux, `ps` (and `lsof` for folders every 10 s)
+  where neither exists. One snapshot about 1 ms CPU steady, 6 to 12 ms first, against `ps` at about 27 ms
+  (agents/w8-sampler-report.md section 1).
+- Why: no cgo keeps the four binaries cross-built and reproducible (d-13). Overturn by editing W8 item 7.
+
 ## d-29 The daemon's RSS line is reviewed at W10 and measured again at W11 {#d-29}
 - Question: W8's Done when asks for the daemon's RSS under 250 MB with 16 workers after 1,000 events. Measured: on a scratch install
   225 to 247 MB by the daemon's own count and 246 to 266 MB by ps at 8 events at once, after lazy loading and job routing (W8.4); in
