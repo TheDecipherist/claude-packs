@@ -96,7 +96,7 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
 
     const state = readState(filesOf(rig).pid);
     cases.push(['the pid file says which daemon, how many events and how many workers', up.kind === 'ready' && state?.pid === up.pid && (state?.events ?? 0) > 30 && state?.workers === 4, true]);
-    cases.push(['the daemon\'s log says how it started', /started pid \d+, 4 workers (at most 4)/.test(readFileSync(filesOf(rig).log, 'utf8')), true]);
+    cases.push(['the daemon\'s log says how it started', /started pid \d+, 4 workers \(at most 4\)/.test(readFileSync(filesOf(rig).log, 'utf8')), true]);
   } finally {
     await stopAll(rig);
   }
