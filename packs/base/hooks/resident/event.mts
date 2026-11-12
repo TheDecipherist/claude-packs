@@ -48,6 +48,7 @@ interface JudgePhase { ran: Map<string, Ran>; slow: string[] }
  *  answers after that is handed to `late`. */
 function judgeAll(d: Served, judges: readonly HookTableRow[], job: (hook: string) => Job, deadline: number, late: (hook: string, done: Ran) => void): Promise<JudgePhase> {
   const ran = new Map<string, Ran>();
+  const jobs = new Map(names(judges).map((h) => [h, job(h)]));
   return new Promise((resolve) => {
     let over = false;
     let grace: NodeJS.Timeout | undefined;
@@ -55,12 +56,14 @@ function judgeAll(d: Served, judges: readonly HookTableRow[], job: (hook: string
       over = true;
       clearTimeout(grace);
       clearTimeout(cutoff);
-      resolve({ ran, slow: names(judges).filter((h) => !ran.has(h)) });
+      const slow = names(judges).filter((h) => !ran.has(h));
+      d.pool.abandon(slow.flatMap((h) => jobs.get(h) ?? []));   // KWB-205: what a judge past the deadline started does not outlive it
+      resolve({ ran, slow });
     };
     const cutoff = setTimeout(finish, Math.max(0, deadline - Date.now()));
     if (judges.length === 0) finish();
     for (const { hook } of judges) {
-      void d.pool.run(job(hook)).then((done) => {
+      void d.pool.run(jobs.get(hook) ?? job(hook)).then((done) => {
         if (over) { late(hook, done); return; }
         ran.set(hook, done);
         if (done.code === 2 && grace === undefined) grace = setTimeout(finish, GRACE_MS);

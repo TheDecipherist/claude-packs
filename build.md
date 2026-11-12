@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 KWB-205 (work/2.0.0-ts-kwb205), started 2026-11-12: a hook past its deadline takes its children with it.
+  making: lib/child-group.mts (children spawned detached, killed as a group), the pool's abandon/drop/close kills, the runner's and the selftest rig's group kill, test/hooks/base/hook-children.test.mts; concepts: none (design/shape.json declares none); reuse: startPool and the worker message types (resident/), runHook (lib/selftest.mts), scratchDir/put (lib/files.mts).
+
 - 2.0.0 W9 (work/2.0.0-ts-w9-release), started 2026-11-11: the release in one command, measured on a local registry.
   making: scripts/release.mts and its parts (release-version, release-state, release-steps), their tests, the measuring script scripts/measure-release.mts; concepts: none (design/shape.json declares none); reuse: gitRun/gitOut/gitLines (packs/base/hooks/lib/git-run.mts), readText/put/scratchDir (files.mts), parseJson/readJson/writeJson (json.mts), buildProxy/releaseCheck (scripts/build-proxy.mts), the test picker (scripts/test-changed.mts).
 

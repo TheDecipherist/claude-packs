@@ -14,6 +14,7 @@
 import { rmSync } from 'node:fs';
 import { basename, dirname, extname, isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { killGroups } from './lib/child-group.mts';
 import { crashVerdict } from './lib/crash-policy.mts';
 import { logCall } from './lib/event-log.mts';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mts';
@@ -109,6 +110,7 @@ export async function runAll(args: readonly string[], text: string, root: string
       err.push(`run-hooks: ${name} failed: ${e instanceof Error ? (e.stack ?? e.message) : childError(e)}\n`);
     } finally {
       for (const u of undo) u();
+      killGroups();   // a hook is done: what it left running in its process group is ended with it (KWB-205)
     }
     outs.push(out.join(''));
     const ms = performance.now() - t0;

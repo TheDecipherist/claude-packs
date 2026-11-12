@@ -27,4 +27,5 @@ export type FromWorker =
   | { type: 'ready'; failed: readonly string[]; loaded: readonly string[] }
   | { type: 'done'; id: number; done: Done }
   | { type: 'ask'; id: number; hashes: readonly string[] }
+  | { type: 'group'; kind: 'started' | 'ended'; pid: number }
   | { type: 'log'; line: string };

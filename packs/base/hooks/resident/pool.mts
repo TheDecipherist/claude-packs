@@ -3,6 +3,7 @@
 // that exits (a hook called process.exit, an uncaught error) is replaced and its hook counted as a crash. One hook runs on one
 // worker at a time, so the main thread does only I/O and the table.
 import { Worker } from 'node:worker_threads';
+import { killGroup } from '../lib/child-group.mts';
 import type { FileStatements } from '../lib/near-copies.mts';
 import type { Done, FromWorker, Job, ToWorker, WorkerData } from './messages.mts';
 
@@ -25,10 +26,12 @@ export interface PoolOptions {
 }
 
 /** `has`: the hooks this worker has imported; a job goes to an idle worker that has its hook, and a hook new to the pool to the one holding the fewest. */
-interface Slot { worker: Worker; ready: boolean; busy: { id: number; job: Job; take: (d: Done) => void } | null; events: number; idleSince: number; gone: boolean; preload: boolean; has: Set<string> }
+interface Slot { worker: Worker; ready: boolean; busy: { id: number; job: Job; take: (d: Done) => void } | null; events: number; idleSince: number; gone: boolean; preload: boolean; has: Set<string>; groups: Set<number> }
 interface Waiting { id: number; job: Job; take: (d: Done) => void; at: number }
 
 export interface Pool {
+  /** The deadline passed for these jobs: the process groups their hooks started are killed (KWB-205); a hook waiting on them ends by itself. */
+  abandon: (jobs: readonly Job[]) => void;
   run: (job: Job) => Promise<Done & { queue: number }>;
   /** Resolves when the warm workers have loaded their hooks. */
   ready: () => Promise<readonly string[]>;
@@ -61,11 +64,12 @@ export function startPool(o: PoolOptions): Pool {
   let recheck: NodeJS.Timeout | undefined;
 
   const send = (s: Slot, m: ToWorker): void => s.worker.postMessage(m);
-  const drop = (s: Slot): void => { s.gone = true; slots.delete(s); void s.worker.terminate(); };
+  const killGroups = (s: Slot): void => { for (const pid of s.groups) killGroup(pid); s.groups.clear(); };
+  const drop = (s: Slot): void => { s.gone = true; slots.delete(s); killGroups(s); void s.worker.terminate(); };
 
   function spawn(preload = false): void {
     const worker = new Worker(o.workerUrl, { workerData: { ...o.data, preload }, stdin: false, resourceLimits: WORKER_HEAP });
-    const s: Slot = { worker, ready: false, busy: null, events: 0, idleSince: Date.now(), gone: false, preload, has: new Set() };
+    const s: Slot = { worker, ready: false, busy: null, events: 0, idleSince: Date.now(), gone: false, preload, has: new Set(), groups: new Set() };
     slots.add(s);
     worker.on('message', (m: FromWorker) => {
       if (m.type === 'ready') {
@@ -83,6 +87,8 @@ export function startPool(o: PoolOptions): Pool {
         s.idleSince = Date.now();
         job?.take(m.done);
         if (s.events >= o.recycleAfter) { drop(s); if (!closing) spawn(s.preload); } else pump();
+      } else if (m.type === 'group') {
+        if (m.kind === 'started') s.groups.add(m.pid); else s.groups.delete(m.pid);
       } else if (m.type === 'ask') send(s, { type: 'answer', id: m.id, files: o.candidates(m.hashes) });
       else o.log(m.line);
     });
@@ -91,6 +97,7 @@ export function startPool(o: PoolOptions): Pool {
       if (s.gone) return;
       slots.delete(s);
       s.gone = true;
+      killGroups(s);
       const held = s.busy;
       if (held) held.take(crash(held.job, `its worker exited (${code}) while it ran`));
       if (!s.ready && warming > 0 && (warming -= 1) === 0) onWarm?.();
@@ -146,6 +153,7 @@ export function startPool(o: PoolOptions): Pool {
       queue.push({ id: nextId, job, at, take: (d) => resolve({ ...d, queue: Math.max(0, Date.now() - at - d.ms) }) });
       pump();
     }),
+    abandon: (jobs) => { for (const s of slots) if (s.busy !== null && jobs.includes(s.busy.job)) killGroups(s); },
     ready: () => new Promise((resolve) => {
       if (warming <= 0) resolve([...failed]);
       else onWarm = () => resolve([...failed]);
@@ -157,7 +165,7 @@ export function startPool(o: PoolOptions): Pool {
       closing = true;
       clearInterval(reaper);
       clearTimeout(recheck);
-      await Promise.all([...slots].map((s) => { s.gone = true; return s.worker.terminate(); }));
+      await Promise.all([...slots].map((s) => { s.gone = true; killGroups(s); return s.worker.terminate(); }));
       slots.clear();
     },
   };
