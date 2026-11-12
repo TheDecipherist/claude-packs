@@ -665,14 +665,15 @@ W10b's soak runs.
    ask and take carries `--priority P` (0 to 1, default 0.5): P is the most of the budget the job may hold (0.3 of a 10-core budget
    is at most 3 cores); asks waiting together are served highest priority first, each given its share of what is free; when load
    stays over the ceiling, the lowest priority job is paused first (not the newest), the highest last; a waiting job's priority rises
-   0.1 every 5 minutes it waits, and every granted job holds at least 1 core, so none starves; a headroom outside the budget (2 cores
-   by default) is never granted, for the person at the machine. The lead sets each agent's priority in its brief from the order:
+   0.1 every 5 minutes it waits, and every granted job holds at least 1 core, so none starves; the last 20 % of the cores
+   is never granted, for the system and the person at the machine (the user: "we can never use the last 20%. thats reserved for
+   the system and you"): a hard limit, not a default; no setting can raise it. The lead sets each agent's priority in its brief from the order:
    work other steps wait on (the critical path) high (0.6 and up), the lead's own merge gate highest (0.8), verification nothing
    waits on (soaks, fuzzing, re-measuring, reports) low (0.2 to 0.3); the brief template carries the field, and `load ask` prints the
    priority it answered for.
 1. One owner, `packs/base/hooks/lib/governor.mts`, with the machine's budget in the user's cache folder (shared by every session,
-   agent and project on the machine): slots = 60 % of the cores by default (`~/.config/claude-packs/governor.json` `budget`, a share
-   or a count; a project's layout may lower it, never raise it), a load ceiling (default 70 % of the cores), the jobs in flight in a
+   agent and project on the machine): slots = 60 % of the cores by default, never more than 80 % (`~/.config/claude-packs/governor.json` `budget`, a share
+   or a count; a project's layout may lower it, never raise it), a load ceiling (default 70 % of the cores, never above 80 %), the jobs in flight in a
    lock-guarded file (each with its pid, process group, slots, project and start), a stale job (pid gone) freed on read.
 2. The build queue folds into it: `buildq`'s slot and core budget become the governor's (its callers and its tests kept, its own
    state file retired), one owner for "how many cores may this job use".
@@ -700,7 +701,7 @@ over the ceiling; two `load take` grants that together exceed the budget are ref
 a grant whose pid is gone is freed on the next ask; a `--priority 0.3` take on a 10-core budget is granted at most 3 cores; of two
 asks waiting, the higher priority is granted first; under a planted load over the ceiling, the lowest priority of three running
 jobs is paused first and the highest last; a planted low-priority ask waiting 15 minutes rises to its aged priority and is granted;
-the headroom cores are never granted; two planted heavy jobs whose
+the last 20 % of the cores is never granted and a setting that asks for more is clamped to 80 % (a planted budget of 100 %); two planted heavy jobs whose
 weights exceed the budget run one after the other, never together; a job granted 3 slots runs with `CLAUDE_PACKS_TEST_CORES=3` and
 `-j3`; a killed job's slots are freed on the next read; a planted `npm test`, `cmake --build` and `go test -fuzz` are each rewritten
 through `governed`, and `ls`, a governed command and a pipe whose heavy part is not first are not; an agent start past the budget
