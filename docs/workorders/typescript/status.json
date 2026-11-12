@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T21:07:02Z",
+  "updated": "2026-11-12T21:11:23Z",
   "steps": [
     {
       "id": "W0",
@@ -63,8 +63,15 @@
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 9,
       "done": 6,
-      "agent": "reds, commit-cost",
+      "agent": null,
       "note": "the daemon RSS line carried to W10 and W11 (d-29)"
+    },
+    {
+      "id": "W8.8",
+      "title": "The load governor",
+      "items": 8,
+      "done": 0,
+      "agent": "gov-core"
     },
     {
       "id": "W9",
@@ -84,8 +91,8 @@
       "id": "W10b",
       "title": "Resident runner and Go proxy under stress",
       "items": 5,
-      "done": 2,
-      "agent": "w10b-fuzz, w10b-soak"
+      "done": 4,
+      "agent": "w10b-soak (waits for W8.8)"
     },
     {
       "id": "W11",
@@ -104,28 +111,16 @@
   ],
   "agents": [
     {
-      "name": "w10b-fuzz",
-      "worktree": ".claude/worktrees/w10b-fuzz",
-      "step": "W10b",
-      "started": "2026-11-12T20:43:58Z"
-    },
-    {
-      "name": "reds",
-      "worktree": ".claude/worktrees/reds",
-      "step": "W8",
-      "started": "2026-11-12T20:43:58Z"
+      "name": "gov-core",
+      "worktree": ".claude/worktrees/gov-core",
+      "step": "W8.8",
+      "started": "2026-11-12T21:11:23Z"
     },
     {
       "name": "w10b-soak",
       "worktree": ".claude/worktrees/w10b-soak",
       "step": "W10b",
-      "started": "2026-11-12T20:43:58Z"
-    },
-    {
-      "name": "commit-cost",
-      "worktree": ".claude/worktrees/commit-cost",
-      "step": "W8",
-      "started": "2026-11-12T20:43:58Z"
+      "started": "2026-11-12T21:11:23Z"
     }
   ]
 }
