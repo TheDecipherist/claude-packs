@@ -609,7 +609,8 @@ Sequential: (1), then (2), then (3), then (4), then (5).
    50 ms deadline and prints the answer, and with no daemon prints the TypeScript status line's own render marked `slow path`;
    `refreshInterval` 1, migrated by `update`; every live line carries a ticking clock (its tool and how long it has run, `Bash
    0:42`) so it changes every render, and a line with no event for 2 minutes turns yellow and says `quiet 2m`, a stopped one leaves
-   the list; a red dot beside the version when npm's latest is newer than the project's own `package.json` version, read from
+   the list, and one with no event of any kind for 5 minutes is removed as abandoned (it returns on its next event), so the list can
+   never go stale (the user, 2026-11-12); a SessionStart clears the list, and a live agent of any session returns on its next event; a red dot beside the version when npm's latest is newer than the project's own `package.json` version, read from
    kit-fresh's cached look that the daemon refreshes at most hourly (no render waits on the network; a `work/` version ahead of
    npm shows no dot).
 
@@ -626,7 +627,8 @@ renders in under 80 ms with the marker when no daemon runs, and `workIn` counts 
 `init` holds `typescript` and the declaration, a planted `.mjs` write in it is refused, and `doctor` is red when `typescript` is removed
 from it; `hook-proxy status` renders in under 15 ms p50 over 100 renders on this Mac, the TypeScript render's time stated beside it;
 a planted agent shows its tool with a clock that differs between two renders a second apart, turns `quiet 2m` after a planted
-2-minute silence and leaves the list on its stop; the red dot shows on a planted older install and not on the kit's own `work/`
+2-minute silence, is gone after a planted 5-minute silence and back on its next event, and leaves the list on its stop; a planted
+SessionStart empties the list and a live agent's next event brings it back; the red dot shows on a planted older install and not on the kit's own `work/`
 version; a planted network outage leaves the render under 15 ms.
 
 ## W9. The release in five minutes (measured without publishing)
