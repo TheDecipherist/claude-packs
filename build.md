@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w10b-soak (work/2.0.0-ts-w10b-soak), started 2026-11-12: W10b items 1 and 2, the soak and the leak checks.
+  making: scripts/soak.mts (+ soak-client, soak-probe, soak-inspect, soak-heap parts), scripts/replay-lib.mts taken out of replay-play, a sampler memstats line (proxy/sample_memstats.go), test/integration/soak-leaks.test.mts; concepts: none (design/shape.json declares none); reuse: makeScratch/payloadOf from replay-play (now scripts/replay-lib.mts), daemonsOf (hooks lib daemon-find.mts), proxyRig/fire/pidOf (test/integration/proxy-fire-rig.mts).
+
 - 2.0.0 w11-graph (work/2.0.0-ts-w11-graph), started 2026-11-12: W11 item 4, the README's performance graph.
   making: scripts/counts-graph.mts (numbers.json to two SVGs and a table), their GENERATED files and the README's performance block; concepts: none (design/shape.json declares none); reuse: between/renderAll (scripts/counts-render.mts), readJson (hooks lib json.mts).
 

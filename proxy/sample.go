@@ -222,6 +222,7 @@ func runSample(args []string, out io.Writer) int {
 	if *bench > 0 {
 		return s.runBench(*bench, out)
 	}
+	defer watchMemstats(os.Stderr)()
 	enc := json.NewEncoder(out)
 	tick := time.NewTicker(*interval)
 	defer tick.Stop()
