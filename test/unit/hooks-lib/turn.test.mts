@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { join } from 'node:path';
-import { lastPrompt, lastTurn, writesOfTurn } from '../../../packs/base/hooks/lib/turn.mts';
+import { bytesDecoded, lastPrompt, lastTurn, writesOfTurn } from '../../../packs/base/hooks/lib/turn.mts';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { toJson } from '../../../packs/base/hooks/lib/json.mts';
 
@@ -24,6 +24,29 @@ test('a hook\'s feedback is not a prompt, and a torn last line is dropped', () =
   const f = transcript([user('real'), asst({ type: 'text', text: 'a' }), user('Stop hook feedback: fix'), asst({ type: 'text', text: 'b' }), '{"type":"assis']);
   assert.equal(lastPrompt(f), 'real');
   assert.equal(lastTurn(f).text, 'a\nb');
+});
+
+test('a 30 MB turn of tool results is read without decoding them: its calls are found and under 1 MB is made strings (rss)', () => {
+  // an unattended run's turn is the whole transcript; each Stop's two turn readers decoded and parsed all of it, 213 MB of a worker's RSS on 25 MB
+  const f = join(scratchDir('turn-big-'), 't.jsonl');
+  const lines = [user('run everything')];
+  for (let n = 0; n < 150; n += 1) {
+    lines.push(asst(tool(`t${n}`, 'Bash', { command: `ls ${n}` })));
+    lines.push(toJson({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: `t${n}`, content: 'x'.repeat(200 * 1024) }] } }));
+  }
+  lines.push(toJson({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 't7', is_error: true, content: 'refused' }] } }));
+  put(f, `${lines.join('\n')}\n`);
+  const before = bytesDecoded();
+  const turn = lastTurn(f);
+  const decoded = bytesDecoded() - before;
+  assert.equal(turn.uses.length, 149);
+  assert.ok(!turn.uses.some((u) => u.id === 't7'), 'the refused call is left out');
+  assert.ok(decoded < 1024 * 1024, `the turn's reader decoded ${decoded} bytes`);
+});
+
+test('a turn whose prompt is the last line holds nothing, and a file with no prompt is all one turn', () => {
+  assert.deepEqual(lastTurn(transcript([asst({ type: 'text', text: 'before' }), user('now')])), { text: '', uses: [] });
+  assert.equal(lastTurn(transcript([asst({ type: 'text', text: 'a' }), asst({ type: 'text', text: 'b' })])).text, 'a\nb');
 });
 
 test('a planted missing transcript is an empty turn', () => {

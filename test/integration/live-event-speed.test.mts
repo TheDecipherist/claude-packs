@@ -3,7 +3,7 @@
 // once-only and template-law read, stat and write back the whole repetition index on every Pre Write call. This installs a scratch project
 // (base and js-ts) with a 25 MB transcript and a few hundred source files, starts its daemon through the picker and drives 100 Bash and 100
 // Write PreToolUse events through it as Claude Code does (stdin JSON, CLAUDE_PROJECT_DIR), then holds the proxy line's p50 per event class.
-// It stops the daemon it started. The RSS case: 16 workers after 1,000 events stay under 250 MB. Run alone: `npm run test:changed` with this file changed.
+// It stops the daemon it started. The RSS case: 16 workers after 1,024 events (Bash, Write and Stop) stay under RSS_BUDGET_MB. Run alone: `npm run test:changed` with this file changed.
 import { spawnSync } from 'node:child_process';
 import { chmodSync, closeSync, existsSync, mkdirSync, openSync, writeFileSync, writeSync } from 'node:fs';
 import { join } from 'node:path';
@@ -29,7 +29,10 @@ const SETTLE_MS = 2000;
 const POOL = 16;   // the daemon's warm workers, and so the events at once that keep every one of them busy
 const ROUNDS = 64;
 const IDLE_BUDGET_MB = 250;   // the order's budget, held by a daemon with its 16 workers warm (measured 176 MB)
-const RSS_BUDGET_MB = 650;    // 16 workers all busy with Bash and Write events (measured 520 to 590 MB; 1,091 MB before KWB-201). The order's 250 MB is not reached under load: see agents/kwb201-report.md
+// 16 workers all busy with Bash, Write and Stop events. Measured 315 to 326 MB (993 MB on the code before) with the turn read by bytes, the duplicate windows in typed arrays,
+// the size-over-speed V8 flags and the pool held at 16 (before them: see agents/rss-report.md). The order's 250 MB is not reached: that report says why.
+const RSS_BUDGET_MB = 380;
+const STOP_EVERY = 8;
 const RESULT = 'x'.repeat(200 * 1024);
 
 /** A scratch install with its transcript. */
@@ -120,12 +123,17 @@ test('a live Pre Bash event costs under 20 ms at p50 and a Pre Write under 110 m
   } finally { stopDaemon(r); }
 });
 
-test(`a pool of ${POOL} workers busy through ${ROUNDS * POOL} events (Bash and Write alike) holds under ${RSS_BUDGET_MB} MB, and the warm pool under ${IDLE_BUDGET_MB} MB`, { skip, timeout: 600_000 }, async () => {
+/** The n-th event of a burst: Write and Bash in turn, and every STOP_EVERY-th a Stop, whose hooks read the whole 25 MB turn (rss). */
+const burstEvent = (r: Live, n: number): string => (n % STOP_EVERY === STOP_EVERY - 1
+  ? toJson({ session_id: 's', cwd: r.project, hook_event_name: 'Stop', stop_hook_active: false, transcript_path: r.transcript })
+  : event(r, n % 2 === 0 ? 'Write' : 'Bash', n));
+
+test(`a pool of ${POOL} workers busy through ${ROUNDS * POOL} events (Bash, Write and Stop) holds under ${RSS_BUDGET_MB} MB, and the warm pool under ${IDLE_BUDGET_MB} MB`, { skip, timeout: 600_000 }, async () => {
   const r = await started();
   try {
     const idle = rssOf(pidOf(r));
     for (let round = 0; round < ROUNDS; round += 1) {
-      await Promise.all(Array.from({ length: POOL }, (_, i) => fireAsync(r, event(r, i % 2 === 0 ? 'Write' : 'Bash', round * 100 + i))));
+      await Promise.all(Array.from({ length: POOL }, (_, i) => fireAsync(r, burstEvent(r, round * 100 + i))));
     }
     await sleep(SETTLE_MS);
     const status = spawnSync('node', [CLI, 'daemon', 'status', '--dir', r.project], { env: r.env, encoding: 'utf8' }).stdout.split('\n')[0] ?? '';
