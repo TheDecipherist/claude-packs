@@ -11,6 +11,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w11-draft (work/2.0.0-ts-w11-draft), started 2026-11-12: W11 item 2, the report's sections for W0 to W7 and W9.
+  making: docs/workorders/typescript/report.md (internal prose, no code); concepts: none (design/shape.json declares none); reuse: numbers from build/evidence, progress.md and the agents' reports.
 - 2.0.0 gov-core (work/2.0.0-ts-gov-core), started 2026-11-12: W8.8 items 0, 1, 2 and 6, the load governor's owner, `load ask|take|free`, the build queue folded in, the status line's field.
   making: packs/base/hooks/lib/governor.mts (budget, ask, take, free, jobs, settingsFor) and its CLI (lib/load-cli.mts), buildq on it, the status line's governor segment, the `load` skill; concepts: none (design/shape.json declares none); reuse: alive (hooks lib daemon-find.mts), capJobs/budgetEnv (hooks lib core-budget.mts), readJson/isRecord (hooks lib json.mts).
 - 2.0.0 pool (work/2.0.0-ts-pool), started 2026-11-12: the daemon's pool at 2 warm, grown to 8, idle 2 minutes.
