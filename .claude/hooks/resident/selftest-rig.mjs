@@ -36,7 +36,7 @@ const envOf = (rig) => ({ HOME: rig.dir, PATH: process.env.PATH, CLAUDE_PACKS_CA
 /** The daemon's files for the rig's project as its lock reads now: the key is what the client computes. */
 export const filesOf = (rig) => daemonFiles(rig.cache, daemonKey(UID, real(rig.dir), readText(join(rig.dir, LOCK)) ?? '', process.execPath), UID);
 /** Starts a daemon for the rig the way the Go client does; `args` are its flags (`--pool 4`). */
-export async function start(rig, args = ['--pool', '4']) {
+export async function start(rig, args = ['--pool', '4', '--warm', '4']) {
     const started = await startDaemon({ node: process.execPath, script: RESIDENT, args: ['--serve', rig.dir, '--hooks', rig.hooks, ...args, '--no-npm', '--exit-with', String(process.pid)], env: envOf(rig) });
     if (started.kind === 'ready')
         rig.pids.add(started.pid);

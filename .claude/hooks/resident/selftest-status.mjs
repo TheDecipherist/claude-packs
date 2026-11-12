@@ -11,7 +11,7 @@ export async function statusCases(cases) {
     const rig = makeRig(PLANTS, {}, 'resident-status-');
     try {
         // 0.04 minutes of idle (2.4 s): one event, then only status asks, every 250 ms
-        const up = await start(rig, ['--pool', '2', '--idle-minutes', '0.04', '--state-ms', '20']);
+        const up = await start(rig, ['--pool', '2', '--warm', '2', '--idle-minutes', '0.04', '--state-ms', '20']);
         const pid = up.kind === 'ready' ? up.pid : 0;
         await client(rig, eventText(rig, 'Race'));
         await nap(60);

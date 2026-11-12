@@ -14,6 +14,7 @@ const crash = (job, why) => ({ hook: job.hook, ms: 0, code: 1, stdout: '', stder
 export function startPool(o) {
     const slots = new Set();
     const queue = [];
+    const clock = o.now ?? Date.now;
     const failed = new Set();
     let nextId = 0;
     let closing = false;
@@ -27,7 +28,7 @@ export function startPool(o) {
     const drop = (s) => { s.gone = true; slots.delete(s); killGroups(s); void s.worker.terminate(); };
     function spawn(preload = false) {
         const worker = new Worker(o.workerUrl, { workerData: { ...o.data, preload }, stdin: false, resourceLimits: WORKER_HEAP });
-        const s = { worker, ready: false, busy: null, events: 0, idleSince: Date.now(), gone: false, preload, has: new Set(), groups: new Set() };
+        const s = { worker, ready: false, busy: null, events: 0, idleSince: clock(), gone: false, preload, has: new Set(), groups: new Set() };
         slots.add(s);
         worker.on('message', (m) => {
             if (m.type === 'ready') {
@@ -36,7 +37,7 @@ export function startPool(o) {
                 for (const h of m.loaded)
                     s.has.add(h);
                 s.ready = true;
-                s.idleSince = Date.now();
+                s.idleSince = clock();
                 if (warming > 0 && (warming -= 1) === 0)
                     onWarm?.();
                 pump();
@@ -46,7 +47,7 @@ export function startPool(o) {
                 s.busy = null;
                 s.events += 1;
                 s.has.add(m.done.hook);
-                s.idleSince = Date.now();
+                s.idleSince = clock();
                 job?.take(m.done);
                 if (s.events >= o.recycleAfter) {
                     drop(s);
@@ -124,17 +125,18 @@ export function startPool(o) {
             return;
         const starting = [...slots].filter((s) => !s.ready).length;
         const idle = [...slots].some((s) => s.ready && s.busy === null);
-        if (!idle && queue.length > starting && slots.size < o.max && now - grownAt >= GROW_EVERY_MS) {
+        if (!idle && queue.length > starting && slots.size < o.max && now - grownAt >= (o.growEveryMs ?? GROW_EVERY_MS)) {
             grownAt = now;
             spawn();
         }
     }
     // the grown workers go after idleMs without work; the warm ones stay
-    const reaper = setInterval(() => {
-        for (const s of slots)
-            if (slots.size > o.warm && s.ready && s.busy === null && Date.now() - s.idleSince > o.idleMs)
+    const reap = () => {
+        for (const s of [...slots])
+            if (slots.size > o.warm && s.ready && s.busy === null && clock() - s.idleSince > o.idleMs)
                 drop(s);
-    }, Math.max(10, Math.min(60_000, o.idleMs / 4)));
+    };
+    const reaper = setInterval(reap, Math.max(10, Math.min(60_000, o.idleMs / 4)));
     reaper.unref();
     for (let i = 0; i < o.warm; i += 1)
         spawn(i < (o.preload ?? 0));
@@ -154,6 +156,7 @@ export function startPool(o) {
             else
                 onWarm = () => resolve([...failed]);
         }),
+        reap,
         size: () => slots.size,
         busy: () => [...slots].filter((s) => s.busy !== null).length,
         holders: (hook) => [...slots].filter((s) => s.has.has(hook)).length,
