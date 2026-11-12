@@ -21,5 +21,7 @@ global/**/*.mjs
 scripts/*.mjs
 lib/*.mjs
 bin/*.mjs
+# a test rig scripts/pack-content-fix.mts imports, emitted beside its source by the build (W10)
+test/pack-content-rig.mjs
 # the proxy's binaries, built by scripts/build-proxy.mts and shipped in the package, never committed (d-13)
 packs/base/hooks/bin/*/
