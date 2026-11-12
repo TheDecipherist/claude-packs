@@ -111,10 +111,12 @@ const NAME = new RegExp(['\\b[Tt]' + 'im\\b', 'Clau' + 'sen', 'ti' + 'ms-', 'ti'
 // A work order's prompt and steps are the user's own instructions, with the user's own yes for a publish: a run never rewrites
 // them (d-26). Never shipped: docs/ is not in the package.
 // lib/settings keeps one old hook name, so a project that still runs it can be moved on (the check's one exception since it began).
-const USERS_OWN = new Set(['docs/workorders/typescript/PROMPT.md', 'docs/workorders/typescript/workorder.md', 'lib/settings.mts']);
+const USERS_OWN = new Set(['lib/settings.mts']);
+// every work order's prompt and steps, not one order's by name (KWB-209: a second order turned the lint red on the user's own yes line)
+const usersOwn = (name: string): boolean => USERS_OWN.has(name) || /^docs\/workorders\/[^/]+\/(?:PROMPT|workorder)\.md$/.test(name);
 export function personalNames(root: string, files: readonly string[] = keptFiles(root)): string[] {
   const hits: string[] = [];
-  for (const f of files.filter((name) => !name.startsWith('test/fixtures/') && !USERS_OWN.has(name))) {   // fixtures: real projects' files, kept verbatim and never shipped
+  for (const f of files.filter((name) => !name.startsWith('test/fixtures/') && !usersOwn(name))) {   // fixtures: real projects' files, kept verbatim and never shipped
     if (NAME.test(f)) hits.push(f);
     const text = readText(join(root, f));
     if (text === null) continue;
