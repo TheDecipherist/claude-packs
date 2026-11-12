@@ -29,7 +29,8 @@ test('applyPaths counts stale rules, writes them unless checkOnly, and leaves a 
   const dir = scratchDir('rules-');
   put(join(dir, '.claude/layout.json'), JSON.stringify(LAYOUT));
   put(join(dir, '.claude/hooks/lib/layout.mjs'), readFileSync(new URL('../../../packs/base/hooks/lib/layout.mjs', import.meta.url), 'utf8'));
-  for (const f of ['files', 'json']) put(join(dir, `.claude/hooks/lib/${f}.mjs`), readFileSync(new URL(`../../../packs/base/hooks/lib/${f}.mjs`, import.meta.url), 'utf8'));
+  // layout.mjs's own imports (glob since KWB-198's module forms)
+  for (const f of ['files', 'json', 'glob']) put(join(dir, `.claude/hooks/lib/${f}.mjs`), readFileSync(new URL(`../../../packs/base/hooks/lib/${f}.mjs`, import.meta.url), 'utf8'));
   put(join(dir, '.claude/rules/a.md'), RULE);
   put(join(dir, '.claude/rules/mine.md'), RULE);
   const skip = new Set([join('.claude', 'rules', 'mine.md')]);

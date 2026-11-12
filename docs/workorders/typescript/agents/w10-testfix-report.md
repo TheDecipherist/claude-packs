@@ -41,4 +41,4 @@ no-find (a `find` on a known folder): right (1d533d45). once-only, twice (a real
 - A file a person judges is left whole rather than half-fixed, to keep law 2 green.
 - `test/pack-content-rig.mjs` is an untracked emitted file present before my work; I committed it once by mistake and removed it in the next commit.
 
-DONE_WITH_CONCERNS: red was seen for the ratchet only; the other plants were written green. Report: /Users/tim.clausen/projects/claude-packs/.claude/worktrees/w10-testfix/docs/workorders/typescript/agents/w10-testfix-report.md
+DONE_WITH_CONCERNS: red was seen for the ratchet only; the other plants were written green. Report: docs/workorders/typescript/agents/w10-testfix-report.md (written in the agent's worktree, .claude/worktrees/w10-testfix)

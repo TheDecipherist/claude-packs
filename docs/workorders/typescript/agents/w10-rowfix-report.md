@@ -26,4 +26,4 @@ Branch work/2.0.0-ts-w10-rowfix (from work/2.0.0-typescript), one commit 31eaeae
 - git-guard's selftest "kept Stop look ... within about a second of GitHub" failed once when run alongside the rest of the gate (189 s, machine loaded) and passed on the second run; a timing flake, not caused by this change (git-guard only changed one message).
 - No refusal by a hook this run was a wrong one; the no-find and git-stash refusals of my own commands were right and not logged.
 
-DONE_WITH_CONCERNS: 137, 135, 115 not done. Report: /Users/tim.clausen/projects/claude-packs/.claude/worktrees/w10-rowfix/docs/workorders/typescript/agents/w10-rowfix-report.md
+DONE_WITH_CONCERNS: 137, 135, 115 not done. Report: docs/workorders/typescript/agents/w10-rowfix-report.md (written in the agent's worktree, .claude/worktrees/w10-rowfix)
