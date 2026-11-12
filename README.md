@@ -6,7 +6,7 @@ AI coding agents make the same small mistakes again and again, and every fix cos
 
 You install once. From then on Claude Code reads the rules and meets the hooks in every session, with nothing to run or remember. The files live in the repo, so the whole team gets them.
 
-It works on a project in any language. The machine needs Node 22, because the hooks are Node scripts, and the project itself can be Rust, Python, Go, C++ or anything else.
+It works on a project in any language. The machine needs Node 22, because the hooks are JavaScript built from the kit's TypeScript, and the project itself can be Rust, Python, Go, C++ or anything else. On macOS and Linux a small Go client sits in front of them; without it the same hooks run straight from Node.
 
 <!-- generated:performance:start -->
 <picture>
@@ -24,6 +24,16 @@ It works on a project in any language. The machine needs Node 22, because the ho
 | doctor, cached | 4.5 s | 0.85 s | 5.3x |
 | update, warm | 4.6 s | 1.1 s | 4.2x |
 <!-- generated:performance:end -->
+
+## What changed in 2.0
+
+The kit is now strict TypeScript, and the hooks no longer start a fresh Node process for every call. One resident runner per project answers every hook event, behind a small Go client called `hook-proxy`, so a Bash call that used to wait on seven Node processes now makes one quick call. The numbers above were measured on the same Mac before and after, and [docs/whats-new-in-2.0.md](docs/whats-new-in-2.0.md) has every one of them with the file it came from.
+
+- **Hooks in parallel.** The hooks of one event run side by side in a small pool of workers.
+- **A load governor.** `claude-packs load ask` tells an agent how much of the machine it may use right now. Heavy commands (tests, builds, fuzzers, installs) wait for their share, and the last 20 % of the cores is never handed out.
+- **A live status line.** The runner keeps it as events arrive: every line ticks, a quiet agent turns yellow, and a red dot marks an old kit.
+- **TypeScript for JavaScript projects.** `init` adds TypeScript, a strict `tsconfig.json` and the language server, and refuses a new `.js` file.
+- **The release in one command.** `npm run release major` gates, lands, publishes and tags.
 
 ## Getting started
 
@@ -584,7 +594,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 
 Packs add their own: `realtime-guard`, `param-id-lock` and `settings-layer` (`audio-core`; every plugin has a settings layer with the standard settings, and its standalone no JUCE Options button), `stack-guard` (`full-stack`), `schemas-only` (`zod`), `firmware-out-of-git` (`reverse-engineering`), `db-wipe-guard` (`postgres`), `browser-guard` (`gpu-painter`), `no-shipped-images` (`stellix`), and the `synth-creator` set: `build-guard`, `time-guard`, `spec-lock`, `frozen-files`, `protect-vendor`, `stage-guard`, `chart-first`, and the opt-in `build-sweep`, `idle-wake` and `user-asks`.
 
-Every hook is timed to `.claude/hooks.log`, and `doctor` is red for a median over 500 ms. Nothing is ever cleared: a log past 1 MB moves to `.claude/logs/` under a dated name (`"guards": { "logs": { "maxKb": 1024 } }`). A hook that crashes lets a call through, so `doctor` is red for that too, and the `hook-proof` pack holds hooks to exit 2. Hooks of one entry run in one Node process, through `run-hooks.mjs`.
+Every hook is timed to `.claude/hooks.log`, and `doctor` holds each event and each hook to a budget (a Bash call's hooks 100 ms at the median, any one hook 10 ms). Nothing is ever cleared: a log past 1 MB moves to `.claude/logs/` under a dated name (`"guards": { "logs": { "maxKb": 1024 } }`). A hook that crashes refuses that one call and says so, `doctor` is red for it, and the `hook-proof` pack holds hooks to exit 2. All the hooks of an event run in the resident runner, or in one Node process through `run-hooks.mjs` where it is not running.
 
 ## Instruments, proved in the audio
 
@@ -689,7 +699,7 @@ Global by design: they fix this machine's shell for Claude, not any project's ru
 
 ## Working on the kit
 
-`CLAUDE.md` is the guide. `CHANGELOG.md` has every release, and [docs/history.md](docs/history.md) keeps the notes from earlier versions, with upgrade notes for old installs. `npm test` runs the whole suite, and `test/readme.test.mjs` fails when this page falls behind the packs, the configurations or the commands.
+`CLAUDE.md` is the guide. `CHANGELOG.md` has every release, and [docs/history.md](docs/history.md) keeps the notes from earlier versions, with upgrade notes for old installs. `npm test` runs the whole suite, `npm run test:changed` the tests a change reaches, and `node scripts/counts.mts --check` fails when this page falls behind the packs, the configurations, the commands or the measurements.
 
 ## Credits
 
