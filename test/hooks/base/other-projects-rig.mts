@@ -3,7 +3,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
-import { assert, test } from '../../kit-cli.mts';
+import { assert, registeredHooks, test } from '../../kit-cli.mts';
 import { fixture } from '../hook-rig.mts';
 
 /** A copy of the stellix install, with the folders its profile's layout names (what the old test made before `init`). */
@@ -26,7 +26,9 @@ export function holdsOtherProjectsAlone(first: string, last: string): void {
     const nasty = `${'y\n'.repeat(330)}void processBlock() { new int[3]; std::mutex m; std::rand(); }\n#include <cmath>\nstd::unordered_map<int,int> u; sin(1.0);\n`;
     const targets = ['src/dsp/Big.cpp', 'src/dsp/New.cpp', 'lib/world/src/sim.cpp', 'lib/engines/src/tabula/Voice.h', 'docs/stellix-spec.md', 'Resources/logo.png', 'CMakeLists.txt'];
     // Every hook, node and python, as a PreToolUse call (time-guard's PostToolUse reports on the machine, not on a file).
-    const all = readdirSync(join(here, '.claude/hooks')).filter((f) => /\.(mjs|py)$/.test(f));
+    // the hooks the install registers, never every file there: the daemon resident.mjs is no hook and answers a payload with its usage (KWB-207)
+    const registered = new Set(registeredHooks(here));
+    const all = readdirSync(join(here, '.claude/hooks')).filter((f) => /\.(mjs|py)$/.test(f) && registered.has(f.replace(/\.(mjs|py)$/, '')));
     assert.ok(all.includes('git-guard.mjs') && all.includes('browser-guard.mjs'), 'the house hooks are installed and fired too');
     const hooks = all.filter((h) => h[0] !== undefined && h[0] >= first && h[0] <= last);
     assert.ok(hooks.length > 0, `hooks from ${first} to ${last}`);
