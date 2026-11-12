@@ -12,7 +12,7 @@ import { basename } from 'node:path';
 import { ask, free, inFlight, machineHost, take } from '../hooks/lib/governor.mts';
 import type { GovernorHost, JobKind } from '../hooks/lib/governor.mts';
 import { isKind } from '../hooks/lib/governor-store.mts';
-import { isMain } from '../hooks/lib/hook-log.mts';
+import { isMain } from '../hooks/lib/project.mts';
 import type { Env } from '../hooks/lib/types.d.mts';
 
 const USAGE = 'usage: load ask [--for KIND] [--want N] [--json] | load take [N] --for KIND [--pid P] [--json] | load free ID | load jobs [--json]';
