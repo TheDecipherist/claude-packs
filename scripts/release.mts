@@ -5,6 +5,7 @@
 // the branch, the branch into main, push main), `npm publish`, the tag and the GitHub release.
 //   node scripts/release.mjs [patch|minor|major] [--dry-run] [--registry <url>] [--remote <name>]
 //     --dry-run   plan only: each step, whether it is done, its wall (the last measured, else an estimate) and every refusal
+//     --root      the checkout to release (default: the one this script is in), e.g. to plan a release of another worktree
 //     --registry  a local registry: publish goes there, and the landing, tag and push go to the scratch remote (--remote, else the
 //                 clone's own origin), never GitHub; the GitHub release is skipped. Both are refused if they name a public one.
 import { join } from 'node:path';
@@ -65,7 +66,7 @@ export function parseArgs(argv: readonly string[], root: string, now: Date): Rel
   const registry = flag('--registry');
   const remote = flag('--remote');
   if (argv.includes('--registry') && !registry) return '--registry needs a url';
-  return { root, kind, dryRun: argv.includes('--dry-run'), date: now.toISOString().slice(0, 10), ...(registry ? { registry } : {}), ...(remote ? { remote } : {}) };
+  return { root: flag('--root') ?? root, kind, dryRun: argv.includes('--dry-run'), date: now.toISOString().slice(0, 10), ...(registry ? { registry } : {}), ...(remote ? { remote } : {}) };
 }
 
 if (isMain(import.meta.url)) {
