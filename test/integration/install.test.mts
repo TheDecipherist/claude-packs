@@ -32,7 +32,7 @@ test('removing a pack removes its rules and hooks', () => {
   run(dir, 'remove', 'stellix');
   const rules = readdirSync(join(dir, '.claude', 'rules'));
   assert.ok(!rules.includes('world-fp-determinism.md'));
-  assert.doesNotMatch(text(dir, '.claude/settings.json'), /no-shipped-images/);
+  assert.ok(!registeredHooks(dir).includes('no-shipped-images'), 'no settings entry and no table row runs it (KWB-193)');
 });
 
 test('a malformed settings.json stops the install before anything changes', () => {
@@ -56,6 +56,6 @@ test('the Stellix profile installs onto the real lib/ layout without touching ho
   assert.match(text(dir, '.claude/rules/world-fp-determinism.md'), /"lib\/world\/\*\*"/);
   assert.ok(existsSync(join(dir, 'lib', 'painter', '.claude', 'skills', 'gpu-capture', 'SKILL.md')));
   assert.ok(!existsSync(join(dir, '.claude', 'checks', 'one-seeded-random.json')), 'disabled in favour of the house gate');
-  assert.doesNotMatch(text(dir, '.claude/settings.json'), /no-shipped-images/);
+  assert.ok(!registeredHooks(dir).includes('no-shipped-images'), 'no settings entry and no table row runs it (KWB-193)');
   assert.equal(hookStatus(dir, 'protect-vendor.mjs', { tool_name: 'Edit', tool_input: { file_path: join(dir, 'lib/engines/src/tabula/Voice.h') } }), 2);
 });
