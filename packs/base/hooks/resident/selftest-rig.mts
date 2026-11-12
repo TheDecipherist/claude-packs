@@ -1,6 +1,7 @@
 // resident/selftest-rig: what the daemon's selftests (and the load tests under test/integration) stand on: a scratch project with a hooks
 // folder of planted hooks and a table, a cache folder, a real daemon started the way the client starts it, and a fake client that
 // does what the Go proxy does: ask the socket, start a daemon on none, and judge by the TypeScript runner when the daemon cannot.
+import { alive } from '../lib/daemon-find.mts';
 import { chmodSync, existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -81,7 +82,7 @@ export async function ask(rig: Rig, text: string, over: Partial<WireRequest> = {
   return a.kind === 'none' ? { code: 1, stdout: '', stderr: `no daemon: ${a.why}`, fallback: 'ts' } : a.reply;
 }
 
-export const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } };
+export { alive };
 export const waitFor = async (what: () => boolean, ms = 5000): Promise<boolean> => {
   for (const t = Date.now(); Date.now() - t < ms; await new Promise((d) => setTimeout(d, 20))) if (what()) return true;
   return what();

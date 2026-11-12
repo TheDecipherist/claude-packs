@@ -9,6 +9,7 @@ import { alive, daemonsOf } from '../hooks/lib/daemon-find.mts';
 import { readText } from '../hooks/lib/files.mts';
 import { askDaemon } from '../hooks/lib/proxy-client.mts';
 import { PROTOCOL, lockHash } from '../hooks/lib/proxy-wire.mts';
+import { WIRE } from '../hooks/lib/proxy-wire-table.mts';
 import type { Env } from '../hooks/lib/types.d.mts';
 import type { Colours, Paint } from './statusline-paint.mts';
 
@@ -23,8 +24,8 @@ export type Resident = 'up' | 'down' | 'unused';
 
 /** Whether the project's hooks are served by a live daemon of the lock's kit; `ms` bounds the socket ask. */
 export async function residentState(project: string | undefined, env: Env, ms: number = ASK_MS): Promise<Resident> {
-  if (project === undefined || project === '' || env.CLAUDE_PACKS_DAEMON === 'off' || !existsSync(join(project, '.claude', 'hooks', 'bin', 'hook-proxy'))) return 'unused';
-  const lock = lockHash(readText(join(project, '.claude', 'claude-packs.lock.json')) ?? '');
+  if (project === undefined || project === '' || env[WIRE.env.daemon] === 'off' || !existsSync(join(project, '.claude', 'hooks', 'bin', 'hook-proxy'))) return 'unused';
+  const lock = lockHash(readText(join(project, WIRE.lockFile)) ?? '');
   const host = { env, home: env.HOME || homedir(), platform: process.platform, uid: process.getuid?.() ?? 0 };
   const mine = daemonsOf(project, host).find((d) => d.state.lockHash === lock && alive(d.state.pid));
   if (mine === undefined) return 'down';

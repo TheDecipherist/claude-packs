@@ -4,7 +4,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,7 +21,7 @@ func holderAlive(lockFile string) bool {
 		return false
 	}
 	pid, err := strconv.Atoi(strings.TrimSpace(string(text)))
-	return err == nil && pid > 0 && syscall.Kill(pid, 0) == nil
+	return err == nil && pid > 0 && pidAlive(pid)
 }
 
 // startDaemon starts `node .claude/hooks/resident.mjs --serve <project>` detached (its own session), in `/`, with HOME, PATH and the
@@ -38,14 +37,14 @@ func (j *job) startDaemon() <-chan string {
 	if err != nil {
 		return nil
 	}
-	args := []string{script, "--serve", j.project, "--hooks", hooks, "--ready-fd", "3"}
+	args := []string{script, flagServe, j.project, flagHooks, hooks, flagReadyFd, strconv.Itoa(readyFd)}
 	// this binary is the sampler the daemon starts and stops with itself (`hook-proxy sample`, W8.7)
 	if self, err := os.Executable(); err == nil {
-		args = append(args, "--proxy", self)
+		args = append(args, flagProxy, self)
 	}
 	cmd := exec.Command(j.node, args...)
 	cmd.Dir = "/"
-	cmd.Env = []string{"HOME=" + j.get("HOME"), "PATH=" + j.get("PATH"), "CLAUDE_PACKS_CACHE=" + j.folder}
+	cmd.Env = keptEnv(j.get, j.folder)
 	cmd.ExtraFiles = []*os.File{write}
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	err = cmd.Start()
@@ -70,7 +69,7 @@ func (j *job) startDaemon() <-chan string {
 
 // wallOf is what the log line says of the event: its name and its tool (or its source), read off the event on stdin.
 func wallOf(stdin []byte) (event, tool string) {
-	event, tool = "-", "-"
+	event, tool = logEmpty, logEmpty
 	if len(stdin) > 1<<20 {
 		return
 	}
@@ -87,7 +86,7 @@ func wallOf(stdin []byte) (event, tool string) {
 
 func orDash(s string) string {
 	if s == "" {
-		return "-"
+		return logEmpty
 	}
 	return strings.ReplaceAll(strings.ReplaceAll(s, "\t", " "), "\n", " ")
 }
@@ -101,8 +100,11 @@ func (p *proc) logWall(project string, code int) {
 	}
 	event, tool := wallOf(p.stdin)
 	ms := time.Since(p.start).Round(time.Millisecond).Milliseconds()
-	line := fmt.Sprintf("%s\t%s\tproxy\t%d\t%d\t%s\t0\tproxy\n", time.Now().UTC().Format("2006-01-02T15:04:05.000Z"), event, ms, code, tool)
-	f, err := os.OpenFile(filepath.Join(dir, "hooks.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	line := logLine(map[string]string{
+		"time": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"), "event": event, "hook": logHook, "ms": strconv.FormatInt(ms, 10), "code": strconv.Itoa(code),
+		"tool": tool, "queue": "0", "source": logSource,
+	})
+	f, err := os.OpenFile(filepath.Join(dir, logFile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return
 	}

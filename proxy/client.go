@@ -91,7 +91,7 @@ func folderRefused(folder string, uid int) string {
 
 // run judges one event and returns the exit code, and records the call's wall as the `proxy` line of the project's hooks.log.
 func (p *proc) run() int {
-	project := p.get("CLAUDE_PROJECT_DIR")
+	project := p.get(envProject)
 	if project == "" {
 		project = p.cwd
 	}
@@ -101,13 +101,13 @@ func (p *proc) run() int {
 }
 
 func (p *proc) judge(project string) int {
-	node := lookPath(p.get("PATH"), "node")
+	node := lookPath(p.get(envPath), "node")
 	if node == "" {
 		return p.failOpen("node is not on PATH")
 	}
 	j := p.jobFor(project, node)
 	switch {
-	case p.get("CLAUDE_PACKS_DAEMON") == "off":
+	case p.get(envDaemon) == "off":
 		return j.fallback("", false)
 	case len(p.stdin) > maxStdin:
 		return j.fallback("", false) // too large to hold in the daemon
@@ -135,8 +135,8 @@ func (p *proc) judge(project string) int {
 func (p *proc) jobFor(project, node string) *job {
 	j := &job{proc: p, project: realPath(project), node: realPath(node)}
 	// fail-open: a lock that cannot be read reads as no lock, and no home folder as an empty one (the call goes through unjudged)
-	lock, _ := os.ReadFile(filepath.Join(j.project, ".claude", "claude-packs.lock.json"))
-	home := p.get("HOME")
+	lock, _ := os.ReadFile(filepath.Join(j.project, lockFile))
+	home := p.get(envHome)
 	if home == "" {
 		home, _ = os.UserHomeDir()
 	}
