@@ -660,6 +660,16 @@ W10b's soak runs.
    on read). The lead asks before every wave and every heavy job and sizes them by the answer; every agent brief's first lines say
    to ask before each heavy command and use the answer; the `load` skill says how. Items 3 and 4 below are the safety net for a
    command that did not ask: it is routed through the same governor anyway.
+0b. Priority (the user, 2026-11-12: "give an agent in the order a priority its allowed to request. So if it says something like I
+   am priority 0.3 then it can get max 3 cores ... it should be prioritized by what work is required before other things"): every
+   ask and take carries `--priority P` (0 to 1, default 0.5): P is the most of the budget the job may hold (0.3 of a 10-core budget
+   is at most 3 cores); asks waiting together are served highest priority first, each given its share of what is free; when load
+   stays over the ceiling, the lowest priority job is paused first (not the newest), the highest last; a waiting job's priority rises
+   0.1 every 5 minutes it waits, and every granted job holds at least 1 core, so none starves; a headroom outside the budget (2 cores
+   by default) is never granted, for the person at the machine. The lead sets each agent's priority in its brief from the order:
+   work other steps wait on (the critical path) high (0.6 and up), the lead's own merge gate highest (0.8), verification nothing
+   waits on (soaks, fuzzing, re-measuring, reports) low (0.2 to 0.3); the brief template carries the field, and `load ask` prints the
+   priority it answered for.
 1. One owner, `packs/base/hooks/lib/governor.mts`, with the machine's budget in the user's cache folder (shared by every session,
    agent and project on the machine): slots = 60 % of the cores by default (`~/.config/claude-packs/governor.json` `budget`, a share
    or a count; a project's layout may lower it, never raise it), a load ceiling (default 70 % of the cores), the jobs in flight in a
@@ -687,7 +697,10 @@ W10b's soak runs.
 `test/hooks/base/governor-route.test.mts` and `test/integration/load-ask.test.mts` are green with 0 failures, each case seen red on
 its plant: `load ask` answers in under 50 ms with the cores, the per-kind settings and the load, and says wait under a planted load
 over the ceiling; two `load take` grants that together exceed the budget are refused for the second until the first is freed;
-a grant whose pid is gone is freed on the next ask; two planted heavy jobs whose
+a grant whose pid is gone is freed on the next ask; a `--priority 0.3` take on a 10-core budget is granted at most 3 cores; of two
+asks waiting, the higher priority is granted first; under a planted load over the ceiling, the lowest priority of three running
+jobs is paused first and the highest last; a planted low-priority ask waiting 15 minutes rises to its aged priority and is granted;
+the headroom cores are never granted; two planted heavy jobs whose
 weights exceed the budget run one after the other, never together; a job granted 3 slots runs with `CLAUDE_PACKS_TEST_CORES=3` and
 `-j3`; a killed job's slots are freed on the next read; a planted `npm test`, `cmake --build` and `go test -fuzz` are each rewritten
 through `governed`, and `ls`, a governed command and a pipe whose heavy part is not first are not; an agent start past the budget
