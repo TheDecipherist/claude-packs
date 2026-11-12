@@ -7,6 +7,7 @@
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { localBranches } from './branches-ahead.mts';
+import { startGroup, underDaemon } from './child-group.mts';
 import { put, readText } from './files.mts';
 import type { BranchOff } from './branches-ahead.mts';
 import { gitDirsOf, refsFingerprint, trackedRefs } from './git-files.mts';
@@ -83,7 +84,9 @@ export function refreshLater(self: string, root: string, env: GitEnv, waitMs: nu
     const last = Number(readText(lock)) || 0;
     if (!force && Date.now() - last < REFRESH_SKIP_MS) return; // a push always starts its own: it must look after the push
     put(lock, String(Date.now()));
-    spawn(process.execPath, [self, '--refresh-stop', String(waitMs), ...(push ? ['--push'] : [])], { cwd: root, detached: true, stdio: 'ignore', env: { ...env, CLAUDE_PROJECT_DIR: root } }).unref();
+    // under the daemon the child is one of the worker's groups, so the daemon's stop ends it; from the per-hook runner it is on its own (the runner exits at once)
+    const start = underDaemon() ? startGroup : spawn;
+    start(process.execPath, [self, '--refresh-stop', String(waitMs), ...(push ? ['--push'] : [])], { cwd: root, detached: true, stdio: 'ignore', env: { ...env, CLAUDE_PROJECT_DIR: root } }).unref();
   } catch { /* the next Stop looks for itself */ }
 }
 

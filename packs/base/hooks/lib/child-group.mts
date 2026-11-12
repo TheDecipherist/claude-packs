@@ -15,6 +15,9 @@ let listener: ((e: GroupEvent) => void) | null = null;
 
 export function watchGroups(next: ((e: GroupEvent) => void) | null): void { listener = next; }
 
+/** Whether someone listens: this thread is a daemon worker, whose pool ends the groups it reports when the worker or the daemon ends. */
+export const underDaemon = (): boolean => listener !== null;
+
 export function startGroup(command: string, args: readonly string[], options: SpawnOptions = {}): ChildProcess {
   const child = spawn(command, [...args], { ...options, detached: true });
   const pid = child.pid;
