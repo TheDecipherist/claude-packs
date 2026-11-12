@@ -15,7 +15,6 @@
 //   - the table (test-changed-table.mts), for what no import or name shows: pack files reach a project only through an install.
 // Every run uses the fresh-tmp preload (running without it was KWB-2's cause). The graph and the choice are in
 // test-changed-graph.mts, the hook proving in test-changed-hooks.mts.
-import { spawnSync } from 'node:child_process';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { coreBudget, projectLayout } from '../packs/base/hooks/lib/core-budget.mts';
@@ -26,6 +25,7 @@ import { changedNames } from './changed-functions.mts';
 import { choose, graph } from './test-changed-graph.mts';
 import { proveHooks, selftestsOf } from './test-changed-hooks.mts';
 import { TABLE } from './test-changed-table.mts';
+import { runHeld } from './run-held.mts';
 
 export { changedNames, choose, graph, proveHooks, selftestsOf, TABLE };
 
@@ -122,9 +122,10 @@ export async function main(argv: readonly string[], env: Env, log: (line: string
   log(`running: node ${args.join(' ')}`);
   // NODE_TEST_CONTEXT is set when this runs under a test runner; passed on, the nested run reports to it and exits 0 on a failure.
   const { NODE_TEST_CONTEXT: _context, ...nested } = env;
-  const r = spawnSync(process.execPath, args, { cwd: o.root, stdio: 'inherit', env: nested });
+  // held: a stop of this script stops the test runner and every file it started (KWB-212)
+  const code = await runHeld(process.execPath, args, { cwd: o.root, env: nested });
   log(GATE);
-  return r.status ?? 1;
+  return code;
 }
 
 if (isMain(import.meta.url)) process.exit(await main(process.argv.slice(2), process.env));
