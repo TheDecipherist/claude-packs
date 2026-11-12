@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T03:04:53Z",
+  "updated": "2026-11-12T03:29:35Z",
   "steps": [
     {
       "id": "W0",
@@ -62,7 +62,7 @@
       "id": "W8",
       "title": "Per-call cost, Go proxy, TypeScript in projects",
       "items": 6,
-      "done": 5,
+      "done": 4,
       "agent": null,
       "note": "the daemon RSS line carried to W10 and W11 (d-29)"
     },
