@@ -3,8 +3,10 @@
 // wall, the `proxy` line's when the client wrote one (the whole call as the user waits for it) and the runner's or daemon's `event`
 // line when not. A daemon whose pool is full (the `queue` of its event lines over 20 ms at p95) is named as the cause, and no hook of
 // that event is blamed for time it spent waiting. Fewer than MIN_CALLS calls are printed, not judged (one call is not a p95).
+import { statSync } from 'node:fs';
 import { join } from 'node:path';
 import { readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
+import { readJson } from '../packs/base/hooks/lib/json.mts';
 import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { median } from './hook-timing.mts';
@@ -80,6 +82,14 @@ export function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, Cl
 
 const fmt = (s: Spread): string => `${s.p50}/${s.p95}`;
 
+/** When the project's current install was written, in ms since the epoch: the lock's `updated`, else its file's mtime, else 0 (no lock). */
+function installedAt(projectDir: string): number {
+  const file = join(projectDir, '.claude', 'claude-packs.lock.json');
+  const updated = Date.parse(readJson<{ updated?: string }>(file)?.updated ?? '');
+  if (!Number.isNaN(updated)) return updated;
+  try { return statSync(file).mtimeMs; } catch { return 0; }   // no lock: every call is the project's
+}
+
 /** The problems of one event class: a full pool (and nothing else of it), else a slow event, else each hook over its budget. */
 function classProblems(c: EventClass, t: ClassTimes): string[] {
   if (t.queue !== null && t.queue.calls >= MIN_CALLS && t.queue.p95 > POOL_QUEUE_MS) {
@@ -109,7 +119,10 @@ export function budgetProblems(projectDir: string, log: Logger = console.log): s
   // the median check of hook-timing.mts. A project with no table has every hook judged.
   const table = readHookTable(join(projectDir, '.claude', 'hooks'));
   const named = table === null ? null : new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook));
-  const times = classTimes(readHookLog(projectDir).filter((e) => named === null || NOT_HOOKS.has(e.hook) || named.has(e.hook)));
+  // the calls since the current install only: an update changes the hooks, and the calls before it were another install's (KWB-196)
+  const since = installedAt(projectDir);
+  const current = readHookLog(projectDir).filter((e) => Date.parse(e.time) >= since);
+  const times = classTimes(current.filter((e) => named === null || NOT_HOOKS.has(e.hook) || named.has(e.hook)));
   if (times.size === 0) return [];
   log(`  event budgets (wall p50/p95 ms, last ${LAST} calls): ${EVENT_CLASSES.filter((c) => times.has(c)).map((c) => {
     const t = times.get(c);

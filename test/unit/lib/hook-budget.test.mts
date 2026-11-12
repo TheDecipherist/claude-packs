@@ -1,8 +1,10 @@
 // lib/hook-budget.mts: doctor holds each hook per event (not pooled) and each event to the order's budget table (W8.4, d-9, review-2-go 6.3).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
+import { toJson } from '../../../packs/base/hooks/lib/json.mts';
 import { logHook, type HookLogCall } from '../../../packs/base/hooks/lib/hook-log.mts';
 import { EVENT_BUDGET, POOL_QUEUE_MS, budgetProblems, classOf, percentile } from '../../../lib/hook-budget.mts';
 
@@ -19,6 +21,17 @@ test('a hook that sleeps 300 ms at one event is named at that event; the same ho
   const { problems } = said(dir);
   assert.equal(problems.length, 1, problems.join('\n'));
   assert.match(problems[0] ?? '', /^slow-fake at Pre Bash: 300\/300 ms \(p50\/p95, worst 300\) over its last 8 calls, over its budget of 10\/50 ms and worst 200/);
+});
+
+test('only the calls since the current install are judged: slow calls before an update count against nothing (KWB-196)', () => {
+  const dir = project();
+  const pause = (): void => { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5); };
+  lines(dir, 8, { ...BASH, hook: 'once-slow', ms: 300, code: 0 });
+  pause();
+  writeFileSync(join(dir, '.claude/claude-packs.lock.json'), toJson({ kit: 'x', packs: ['base'], files: {}, updated: new Date().toISOString() }));
+  pause();
+  lines(dir, 8, { ...BASH, hook: 'once-slow', ms: 3, code: 0 });
+  assert.deepEqual(said(dir).problems, []);
 });
 
 test('hooks are held per event, never pooled: 50 quick calls at one event do not hide a slow median at another', () => {

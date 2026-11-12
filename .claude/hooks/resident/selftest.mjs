@@ -4,9 +4,11 @@
 import { verdicts } from '../lib/selftest.mjs';
 import { eventCases } from './selftest-events.mjs';
 import { lifecycleCases } from './selftest-lifecycle.mjs';
+import { statusCases } from './selftest-status.mjs';
 export async function selftest() {
     const cases = [];
     await eventCases(cases);
     await lifecycleCases(cases);
+    await statusCases(cases);
     return verdicts('resident', cases);
 }

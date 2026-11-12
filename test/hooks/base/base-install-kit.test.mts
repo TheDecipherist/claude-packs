@@ -48,7 +48,8 @@ test('the kit repo has its own base pack installed: kit-lock and every base hook
   const table = readJson<{ hook: string; events: string[] }[]>(join(KIT, '.claude/hooks/hooks.json')) ?? [];
   const guard = table.filter((r) => r.hook === 'git-guard').flatMap((r) => r.events);
   assert.ok(guard.includes('Stop') && guard.includes('PreToolUse'), `git-guard judges Bash and the end of a session: ${guard.join(', ')}`);
-  assert.ok(commandsOf(settings, 'Stop').some((c) => c.includes('.claude/hooks/run-hooks.mjs')), 'the runner answers Stop');
+  // the runner, or since W8.2 the picker that starts the proxy (which falls back to the runner)
+  assert.ok(commandsOf(settings, 'Stop').some((c) => /\.claude\/hooks\/(run-hooks\.mjs|bin\/hook-proxy)/.test(c)), 'the runner answers Stop');
   const layout = readJson<{ guards: { git: { house: boolean } }; folders: Record<string, { path: string }> }>(join(KIT, '.claude/layout.json'));
   assert.equal(layout?.guards.git.house, true, 'the house git laws hold on the kit');
   for (const f of ['bin', 'lib', 'packs', 'global', 'test', 'docs']) assert.ok(Object.values(layout?.folders ?? {}).some((x) => x.path === f), f);

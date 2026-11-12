@@ -92,7 +92,7 @@
     "type": "command",
     "command": "node \"$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs\"",
     "padding": 0,
-    "refreshInterval": 1
+    "refreshInterval": 5
   },
   "extraKnownMarketplaces": {
     "claude-packs-kit": {
