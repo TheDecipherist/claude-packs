@@ -23,7 +23,10 @@ import { residentIndex } from './resident/index.mts';
 import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mts';
 import { startPool } from './resident/pool.mts';
 import { answers, listen, prepareFolder } from './resident/socket.mts';
+import { SAMPLE_MS, startSampling, type Sampling } from './resident/sampling.mts';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mts';
+import { usage } from './resident/usage.mts';
+import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mts';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const EXT = extname(fileURLToPath(import.meta.url));
@@ -53,6 +56,12 @@ export interface ServeOptions {
   poolIdleMs: number;
   /** How often the pid file is rewritten while events are served. */
   stateMs: number;
+  /** `--proxy <hook-proxy binary>`: the daemon starts its sampler (`hook-proxy sample`) and stops it with itself; none given, none started (W8.7). */
+  proxy: string | null;
+  sampleMs: number;
+  /** How long an orphan holds a core before the watchdog flags it (`--watchdog-ms`), and a test run over the cap (`--test-ms`). */
+  orphanMs: number;
+  testMs: number;
 }
 
 const valueOf = (argv: readonly string[], flag: string): string | undefined => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : undefined; };
@@ -67,10 +76,12 @@ export function serveOptions(argv: readonly string[], host: Host): ServeOptions 
   const pool = Math.floor(n('--pool', Math.min(16, availableParallelism())));
   const minutes = n('--idle-minutes', IDLE_MS / 60_000);
   const exitWith = n('--exit-with', 0);
+  const proxy = valueOf(argv, '--proxy');
   return {
     project, hooks, pool, idleMs: minutes * 60_000, readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
     recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: 10 * 60_000, stateMs: n('--state-ms', STATE_EVERY_MS),
-    again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : [])],
+    proxy: valueOf(argv, '--proxy') ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS),
+    again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : []), ...(proxy === undefined ? [] : ['--proxy', proxy])],
   };
 }
 
@@ -97,8 +108,10 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
   const counts = { events: 0, last: 0, inflight: 0 };
   const started = Date.now();
   const state = stateFile(files.pid, o.stateMs);
+  let sampling: Sampling | null = null;
   const snapshot = (): Parameters<typeof state.save>[0] => ({
     pid: process.pid, key, project, hooks: o.hooks, node: host.node, lockHash: lockHash(lock), started, lastEvent: counts.last, events: counts.events, workers: pool.size(), rss: process.memoryUsage.rss(), heap: process.memoryUsage().heapUsed,
+    usage: usage.all(), flags: sampling?.flags() ?? [], ...(sampling?.pid() ? { sampler: sampling.pid() ?? 0 } : {}),
   });
   const served: Served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`) };
   const listening = await listen(files.socket, (incoming) => {
@@ -117,6 +130,7 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
       if (ending) return;
       ending = true;
       log(`stopping: ${reason}`);
+      sampling?.stop();
       void listening.close().then(() => pool.close()).then(() => {
         state.remove();
         releaseStartLock(files.lock);
@@ -131,6 +145,7 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
       idleMs: o.idleMs, maxAgeMs: o.maxAgeMs, maxRss: o.maxRss, tickMs: o.tickMs, started, last: () => counts.last, busy: () => pool.busy() > 0 || counts.inflight > 0,
       rss: () => process.memoryUsage.rss(), workers: pool.size, parentGone: () => o.exitWith !== null && !alive(o.exitWith), replaced: () => (readText(join(project, LOCK_FILE)) ?? '') !== lock, stop,
     });
+    if (o.proxy !== null) sampling = startSampling({ proxy: o.proxy, project, intervalMs: o.sampleMs, orphanMs: o.orphanMs, testMs: o.testMs, log, env: host.env });
     state.save(snapshot(), true);
     releaseStartLock(files.lock);
     log(`started pid ${process.pid}, ${o.pool} workers, ${hooks.length} hooks${failed.length > 0 ? `, failed to load: ${failed.join(', ')}` : ''}, key ${key}`);

@@ -3,6 +3,8 @@
 // stop. `events` counts the hook events served (status-line asks are not events).
 import { rmSync } from 'node:fs';
 import { readJson, writeJson } from '../lib/json.mts';
+import type { Usage } from './usage.mts';
+import type { Flag } from './watchdog.mts';
 
 export interface DaemonState {
   pid: number;
@@ -21,6 +23,11 @@ export interface DaemonState {
   rss: number;
   /** The main thread's V8 heap in use: what separates a leak from memory the allocator keeps. */
   heap: number;
+  /** The sampler's latest totals by owner (`session:<pid>`, `agent:<name>`; resident/usage.mts) and the watchdog's standing flags (W8.7). */
+  usage?: Record<string, Usage>;
+  flags?: Flag[];
+  /** The sampler's pid, when one is running. */
+  sampler?: number;
 }
 
 export interface StateFile {

@@ -38,7 +38,12 @@ func (j *job) startDaemon() <-chan string {
 	if err != nil {
 		return nil
 	}
-	cmd := exec.Command(j.node, script, "--serve", j.project, "--hooks", hooks, "--ready-fd", "3")
+	args := []string{script, "--serve", j.project, "--hooks", hooks, "--ready-fd", "3"}
+	// this binary is the sampler the daemon starts and stops with itself (`hook-proxy sample`, W8.7)
+	if self, err := os.Executable(); err == nil {
+		args = append(args, "--proxy", self)
+	}
+	cmd := exec.Command(j.node, args...)
 	cmd.Dir = "/"
 	cmd.Env = []string{"HOME=" + j.get("HOME"), "PATH=" + j.get("PATH"), "CLAUDE_PACKS_CACHE=" + j.folder}
 	cmd.ExtraFiles = []*os.File{write}

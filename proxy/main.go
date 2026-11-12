@@ -20,6 +20,9 @@ func main() {
 		if os.Args[1] == "--selftest" {
 			os.Exit(selftest(os.Stdout))
 		}
+		if os.Args[1] == "sample" {
+			os.Exit(runSample(os.Args[2:], os.Stdout))
+		}
 		if seconds, err := strconv.Atoi(os.Args[1]); err == nil && seconds > 0 {
 			timeout = time.Duration(seconds) * time.Second
 		}
