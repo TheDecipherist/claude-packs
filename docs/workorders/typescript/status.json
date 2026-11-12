@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T21:22:38Z",
+  "updated": "2026-11-12T21:53:55Z",
   "steps": [
     {
       "id": "W0",
@@ -70,8 +70,8 @@
       "id": "W8.8",
       "title": "The load governor",
       "items": 8,
-      "done": 0,
-      "agent": "gov-core"
+      "done": 5,
+      "agent": "gov-route"
     },
     {
       "id": "W9",
@@ -92,14 +92,14 @@
       "title": "Resident runner and Go proxy under stress",
       "items": 5,
       "done": 4,
-      "agent": "w10b-soak (waits for W8.8)"
+      "agent": null
     },
     {
       "id": "W11",
       "title": "The report, with the comparison",
       "items": 6,
       "done": 1,
-      "agent": null
+      "agent": "w11-draft"
     },
     {
       "id": "W12",
@@ -111,16 +111,16 @@
   ],
   "agents": [
     {
-      "name": "gov-core",
-      "worktree": ".claude/worktrees/gov-core",
+      "name": "gov-route",
+      "worktree": ".claude/worktrees/gov-route",
       "step": "W8.8",
-      "started": "2026-11-12T21:11:23Z"
+      "started": "2026-11-12T21:53:55Z"
     },
     {
-      "name": "w10b-soak",
-      "worktree": ".claude/worktrees/w10b-soak",
-      "step": "W10b",
-      "started": "2026-11-12T21:11:23Z"
+      "name": "w11-draft",
+      "worktree": ".claude/worktrees/w11-draft",
+      "step": "W11",
+      "started": "2026-11-12T21:53:55Z"
     }
   ]
 }
