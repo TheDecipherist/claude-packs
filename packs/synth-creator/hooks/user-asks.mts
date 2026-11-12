@@ -14,12 +14,12 @@
 //   node user-asks.mjs --selftest
 // On the hook contract (typescript order W4): the hook reads and says, a judge. What it reads from the process (the ledger's
 // place, the hours) comes from the event's environment; `--mark` is the one command that writes the ledger.
-import { createHash } from 'node:crypto';
 import { mkdirSync, renameSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mts';
+import { shortHash } from './lib/hash.mts';
 import { isMain, projectRoot, runAsHook } from './lib/hook-log.mts';
 import type { FlagHandler } from './lib/hook-log.mts';
 import { parseJson, readJson, toJson } from './lib/json.mts';
@@ -85,7 +85,7 @@ export function asks(transcript: string, hours: number, now: number): Ask[] {
   return out;
 }
 
-export const askId = (t: string): string => createHash('sha1').update(squash(t)).digest('hex').slice(0, 8);
+export const askId = (t: string): string => shortHash(squash(t), 8);
 export const loadLedger = (path: string): Ledger => readJson<Ledger>(path) ?? {};
 
 /** Marks an ask in the ledger file, at `now`; throws when the status is unknown or a status other than open has no evidence. */

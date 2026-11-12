@@ -11,14 +11,14 @@
 // reading a long transcript again; a judge writes no state, and the transcript is read only when a source file was named, so the
 // marker is gone (W4 report).
 import { existsSync } from 'node:fs';
-import { basename, dirname, join, relative } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mts';
 import { matchesAny } from './lib/glob.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { parseJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
-import { checkoutRoot, claudeRoot } from './lib/project.mts';
+import { claudeRoot, relInCheckout } from './lib/project.mts';
 import { selftest as selftestOf } from './lib/skill-first-selftest.mts';
 import type { TranscriptEntry } from './lib/turn.mts';
 import type { Hook, HookContext, HookEvent, Layout } from './lib/types.d.mts';
@@ -67,7 +67,7 @@ function rowsFor(file: string, project: string, at: Where): Row[] {
 // The row a source file belongs to: by its name, or by a glob of its own checkout's layout.
 function sourceRow(file: string, cwd: string, project: string, at: Where): Row | null {
   const path = full(file, cwd);
-  const rel = relative(checkoutRoot(at.projectDir, path, at.cwd), path).replace(/\\/g, '/');
+  const rel = relInCheckout(at.projectDir, path, at.cwd);
   const inGlobs = (r: Row): boolean => PICTURE.test(path) && !rel.startsWith('..') && matchesAny(rel, r.globs(checkoutLayout(path, at)));
   return rowsFor(path, project, at).find((r) => (r.named?.test(path) ?? false) || inGlobs(r)) ?? null;
 }

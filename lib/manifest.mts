@@ -1,15 +1,15 @@
 // Tracks every file the packs installed, with its hash, so updates never overwrite a file
 // The user changed and files removed from a pack are cleaned up.
-import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { sha256 } from '../packs/base/hooks/lib/hash.mts';
 import { readJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { Lock } from '../packs/base/hooks/lib/types.d.mts';
 
 export const LOCK = 'claude-packs.lock.json';
 
 /** The sha256 of a file's bytes: the hash the lock keeps per managed file. */
-export const hashFile = (path: string): string => createHash('sha256').update(readFileSync(path)).digest('hex');
+export const hashFile = (path: string): string => sha256(readFileSync(path));
 
 /** The install lock of a project's `.claude` folder; an empty one when there is none. A lock that is not JSON throws: an
  *  install must not carry on, and write a new lock over what it could not read. */

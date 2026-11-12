@@ -13,8 +13,9 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { slash } from '../packs/base/hooks/lib/files.mts';
 import { readLayout } from '../packs/base/hooks/lib/layout.mts';
-import { readJson } from '../packs/base/hooks/lib/json.mts';
+import { readJson, toJson } from '../packs/base/hooks/lib/json.mts';
 import type { Configuration, Layout, Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { mergeConfig, type ConfigDelta, type SharedConfig } from './config-merge.mts';
 import { fitsOf, type PackFields } from './pack-manifest.mts';
@@ -114,7 +115,7 @@ export function planOf(config: Configuration, sources: readonly string[], layout
 export function itemsOf(files: Iterable<string>): Items {
   const by: Items = { rules: [], hooks: [], checks: [], skills: [] };
   for (const rel of files) {
-    const p = rel.replace(/\\/g, '/');
+    const p = slash(rel);
     const skill = p.match(/(?:^|\/)\.claude\/skills\/([^/]+)\/SKILL\.md$/)?.[1];
     if (skill !== undefined) by.skills.push(skill);
     else if (/^\.claude\/rules\/[^/]+\.md$/.test(p)) by.rules.push(basename(p));
@@ -156,7 +157,7 @@ export function describeSwitch(from: Configuration, fromSources: readonly string
     if (plus.length) lines.push(`  ${kind} added (${plus.length}): ${plus.join(', ')}`);
     if (minus.length) lines.push(`  ${kind} removed (${minus.length}): ${minus.join(', ')}`);
   }
-  if (JSON.stringify(from.preamble) !== JSON.stringify(to.preamble)) lines.push('  CLAUDE.md preamble: changes');
+  if (toJson(from.preamble) !== toJson(to.preamble)) lines.push('  CLAUDE.md preamble: changes');
   const missing = Object.values(to.layout?.folders ?? {}).filter((f) => !Object.values(layout.folders ?? {}).some((g) => g.path === f.path));
   if (missing.length && !layout.complete) lines.push(`  folders added from its template: ${missing.map((f) => `${f.path}/`).join(' ')}`);
   return lines.length > 1 ? lines : [...lines, '  no change'];

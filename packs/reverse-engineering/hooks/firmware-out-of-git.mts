@@ -3,6 +3,7 @@
 // `--selftest` proves it. On the hook contract (typescript order W4): `hook(event, ctx)` returns its Verdict.
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { slash } from './lib/files.mts';
 import { gitAdds } from './lib/git-adds.mts';
 import { gitLines } from './lib/git-run.mts';
 import { matchesAny } from './lib/glob.mts';
@@ -35,7 +36,7 @@ function judgeAdd(command: string, cwd: string, ctx: HookContext): string | null
     const root = checkoutRoot(ctx.projectDir, join(dir, 'x'), ctx.cwd);
     const fixtures = fixturesOf(readLayout(claudeRoot(ctx.projectDir, join(dir, 'x'), ctx.cwd)).guards);
     for (const abs of args.filter((a) => !a.startsWith('-')).flatMap((a) => staged(dir, a, ctx))) {
-      const rel = relative(root, abs).replace(/\\/g, '/');
+      const rel = slash(relative(root, abs));
       if (FIRMWARE.test(rel) && !OWN_BUILD.test(rel) && !matchesAny(rel, fixtures)) return refusalFor(rel);
     }
   }

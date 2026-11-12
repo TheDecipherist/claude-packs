@@ -2,7 +2,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { notInstalled, readText, walk } from '../packs/base/hooks/lib/files.mts';
+import { notInstalled, readText, slash, walk } from '../packs/base/hooks/lib/files.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Layout, PackManifest } from '../packs/base/hooks/lib/types.d.mts';
 
@@ -84,7 +84,7 @@ export function kitHookScripts(): Set<string> {
 // layout.disable lists pack items a project switches off because it already has its own:
 // "checks/one-seeded-random.json", "hooks/no-shipped-images.mjs", "rules/x.md", "skills/gpu-capture".
 export function isDisabled(layout: Partial<Pick<Layout, 'disable'>>, packRel: string): boolean {
-  const p = packRel.replace(/\\/g, '/');
+  const p = slash(packRel);
   return (layout.disable ?? []).some((d) => p === d || p.startsWith(`${d.replace(/\/$/, '')}/`));
 }
 

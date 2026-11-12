@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { isContent } from './lib/content.mts';
 import { changedLines, copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './lib/dup.mts';
 import type { DupWrite } from './lib/dup-index.mts';
+import { slash } from './lib/files.mts';
 import { judgeCopyWrites, judgeCopyWritesAsked } from './lib/dup-index.mts';
 import { matchesAny } from './lib/glob.mts';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
@@ -44,7 +45,7 @@ function judged(event: HookEvent, ctx: HookContext): { list: Judged[]; gone: str
     if (w.op === 'delete') { gone.push(w.path); continue; }
     if (w.after === null || !isSource(w.path) || isGenerated(w.after)) continue;
     const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
-    const rel = relative(root, w.path).replace(/\\/g, '/');
+    const rel = slash(relative(root, w.path));
     const layout = layoutOfWrite(ctx, w.path);
     const shape = readShape(root);
     if (matchesAny(rel, [...excludeGlobs(layout, shape), ...copyGlobs(layout)]) || isContent(rel, layout)) continue;

@@ -1,14 +1,13 @@
 // What a checkout already holds, per file: its element shapes, its statements and its definitions, kept between calls in the temp folder and read
 // again only for a file whose time or size moved. template-law judges a write against it; reuse-hint shows it at the prompt.
 //   repoIndex(root, skipGlobs, layout) -> { rel: { m, s, shapes: [[id, line, what]], st: [[hash, line]], defs: [[name, line]] } }
-import { createHash } from 'node:crypto';
 import { statSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { extname, join } from 'node:path';
 import { isContent } from './content.mts';
 import { MARKUP, codeFiles, shapesOf } from './elements.mts';
 import type { Shape } from './elements.mts';
 import { readText } from './files.mts';
+import { tmpKeyed } from './hash.mts';
 import { readJson, writeJson } from './json.mts';
 import { ALL_CODE } from './languages.mts';
 import { definesOf, fingerprint } from './near-copies.mts';
@@ -56,7 +55,7 @@ export function shapesOfText(text: string, rel: string): TextShapes {
 }
 
 // sha256 of the root, the first 12 digits: the names the kit has already written (hash.mts keeps sha1 for its ids).
-const fileOf = (root: string): string => join(tmpdir(), `claude-packs-repo-${createHash('sha256').update(root).digest('hex').slice(0, 12)}.json`);
+const fileOf = (root: string): string => tmpKeyed('claude-packs-repo-', root, '.json');
 
 const isEntry = (v: unknown): v is IndexEntry => typeof v === 'object' && v !== null && 'm' in v && 's' in v
   && Array.isArray((v as IndexEntry).shapes) && Array.isArray((v as IndexEntry).st) && Array.isArray((v as IndexEntry).defs);

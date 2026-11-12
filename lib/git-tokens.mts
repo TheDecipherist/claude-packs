@@ -4,7 +4,7 @@
 import { existsSync, readdirSync, realpathSync } from 'node:fs';
 import type { Dirent } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
-import { isDir, readText } from '../packs/base/hooks/lib/files.mts';
+import { isDir, readText, slash } from '../packs/base/hooks/lib/files.mts';
 
 const SECRET_URL = /\b[a-z][\w+.-]*:\/\/([^\s/@'"]+)@\S*/gi;
 const SECRET_USER = /:|^(gh[pousr]_|github_pat_|glpat-|x-access-token|oauth2)/i;
@@ -61,7 +61,7 @@ export function tokenProblems(projectDir: string, siblings: readonly string[] = 
     if (seen.has(real)) continue;
     seen.add(real);
     const hits = findings(readText(cfg) ?? '');
-    const name = relative(projectDir, join(dir, '.git', 'config')).replace(/\\/g, '/');
+    const name = slash(relative(projectDir, join(dir, '.git', 'config')));
     if (hits.length) problems.push(`${name} holds a token (${hits.join('; ')}); set the URL back to the plain one and rotate the token`);
   }
   return problems;

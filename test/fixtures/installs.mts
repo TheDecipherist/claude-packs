@@ -6,6 +6,7 @@
 import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
+import { alive } from '../../packs/base/hooks/lib/daemon-find.mts';
 import { ensureDir, isDir, put, readText, scratchDir, walk } from '../../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../../packs/base/hooks/lib/git-run.mts';
 import { readJson, toJson, writeJson } from '../../packs/base/hooks/lib/json.mts';
@@ -57,7 +58,6 @@ export function strayPaths(copy: string, source: string): string[] {
 }
 
 const sleep = (ms: number): void => { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); };
-const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } };
 
 /** `name` built once under `root`, however many processes ask: the first takes the lock (an atomic `mkdir`) and builds beside, then
  *  renames the result into place; the others wait for it. A lock whose holder is gone is taken over. Returns the built folder. */

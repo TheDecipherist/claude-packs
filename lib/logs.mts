@@ -8,7 +8,7 @@ import { appendFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, readText } from '../packs/base/hooks/lib/files.mts';
 import { readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
-import { parseJson } from '../packs/base/hooks/lib/json.mts';
+import { asRecord, parseJson, toJson } from '../packs/base/hooks/lib/json.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
 const DIR = join('.claude', 'logs');
@@ -49,16 +49,15 @@ export interface LogsSummary { first: string | undefined; last: string | undefin
 
 const str = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
 const num = (v: unknown): number | undefined => (typeof v === 'number' ? v : undefined);
-const asObject = (v: unknown): Record<string, unknown> | null => (v !== null && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v)) : null);
 
 function loggedHook(value: unknown): LoggedHook[] {
-  const h = asObject(value);
+  const h = asRecord(value);
   return h ? [{ hook: str(h['hook']) ?? '', ms: num(h['ms']) ?? 0, code: num(h['code']) }] : [];
 }
 
 /** A parsed line as a record, or none when it is not an object. */
 function recordOf(value: unknown): LogRecord[] {
-  const r = asObject(value);
+  const r = asRecord(value);
   if (!r) return [];
   const hooks = Array.isArray(r['hooks']) ? r['hooks'].flatMap(loggedHook) : [];
   return [{
@@ -88,7 +87,7 @@ export const clearedAt = (clears: ReadonlyMap<string, string>, hook: string): st
 
 const addVerdict = (dir: string, line: Record<string, string>): void => {
   ensureDir(join(dir, DIR));
-  appendFileSync(join(dir, DIR, 'verdicts.jsonl'), `${JSON.stringify({ ...line, t: new Date().toISOString() })}\n`);
+  appendFileSync(join(dir, DIR, 'verdicts.jsonl'), `${toJson({ ...line, t: new Date().toISOString() })}\n`);
 };
 
 function clearCrashes(dir: string, [, hook, how, ...why]: readonly string[], log: Logger): number {

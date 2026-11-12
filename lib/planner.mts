@@ -6,6 +6,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from '../packs/base/hooks/lib/files.mts';
+import { asRecord } from '../packs/base/hooks/lib/json.mts';
 import type { Configuration, LayoutKind, Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { availableConfigs, itemsOf, planOf, readConfig } from './configs.mts';
 import { kitCommandAnywhere } from './kit-command.mts';
@@ -17,8 +18,8 @@ interface Preamble { always: readonly string[]; never: readonly string[] }
 
 const lines = (value: unknown): string[] => (Array.isArray(value) ? value.filter((l): l is string => typeof l === 'string') : []);
 function preambleOf(config: Configuration): Preamble {
-  const own: unknown = config.preamble;
-  const read = (key: string): string[] => (typeof own === 'object' && own !== null && !Array.isArray(own) ? lines(Object.entries(own).find(([k]) => k === key)?.[1]) : []);
+  const own = asRecord(config.preamble);
+  const read = (key: string): string[] => (own ? lines(Object.entries(own).find(([k]) => k === key)?.[1]) : []);
   return { always: read('always'), never: read('never') };
 }
 

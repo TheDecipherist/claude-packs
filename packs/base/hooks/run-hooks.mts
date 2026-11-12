@@ -11,14 +11,14 @@
 // line saying what was cut. Every hook still runs on its own too (node .claude/hooks/a.mjs, its selftest, a hand-made entry).
 //   node run-hooks.mjs <hook path or name>...   (stdin: the event)
 //   node run-hooks.mjs --selftest
-import { readFileSync, rmSync, writeSync } from 'node:fs';
+import { rmSync } from 'node:fs';
 import { basename, dirname, extname, isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { crashVerdict } from './lib/crash-policy.mts';
 import { logCall } from './lib/event-log.mts';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mts';
 import { keepGitState, noteEventGitState } from './lib/git-state.mts';
-import { appendRotated, isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mts';
+import { appendRotated, isMain, logHook, projectRoot, readHookLog, readStdinText, writeVerdict } from './lib/hook-log.mts';
 import { hookRowsFor, readHookTable } from './lib/hook-table.mts';
 import { parseJson, toJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
@@ -227,8 +227,7 @@ if (isMain(import.meta.url)) {
   const caller: Caller = { env: process.env, stdout: process.stdout, stderr: process.stderr, cwd: process.cwd(), sessionPid: process.ppid };
   if (args.includes('--selftest')) process.exit(await selftest(caller));
   if (args[0] === '--git-state') { keepGitState(args[1] ?? process.cwd(), process.env); process.exit(0); }
-  let text = '';
-  try { text = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
+  const text = readStdinText();
   const root = projectRoot();
   // the event arrived when node started: its own start-up is part of what the event cost
   const arrival: Arrival = { at: Date.now() - Math.round(process.uptime() * 1000), source: 'runner' };
@@ -238,7 +237,7 @@ if (isMain(import.meta.url)) {
     : table !== null ? await runEvent(table, HERE, text, root, caller, arrival)
       : { code: 1, stdout: '', stderr: `${RUNNER}: ${join(HERE, 'hooks.json')} is missing or is not the hook table, so no hook judged this call: run claude-packs update\n` };
   // written at once, then out: a hook may leave a timer or a child behind, and the event never waits on it
-  for (const [fd, s] of [[1, r.stdout], [2, r.stderr]] as const) if (s) try { writeSync(fd, s); } catch { /* a closed pipe */ }
+  writeVerdict(r);
   // the git facts the hooks of the next event read are kept again, detached, when they went stale (lib/git-state.mts)
   const eventCwd = asRecord(parseJson(text))?.['cwd'];
   if (table !== null) noteEventGitState(table, root, typeof eventCwd === 'string' ? eventCwd : caller.cwd, caller.env, fileURLToPath(import.meta.url));

@@ -56,6 +56,12 @@ function plainCopy(value: unknown, path: Set<object>): unknown {
   return copy;
 }
 
+/** Whether a value is a plain object: not an array, not null, not a scalar. The one guard; every reader of untrusted JSON calls it. */
+export const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** A value as an object, or null when it is an array, a scalar or nothing. */
+export const asRecord = (value: unknown): Record<string, unknown> | null => (isRecord(value) ? value : null);
+
 /** JSON text as a value, or `fallback` (null) when it is empty or not JSON; never throws. The caller names the shape it
  *  reads and narrows what it uses of it: the text is outside data, and this is the one place it becomes a shape. */
 export function parseJson<T = unknown>(text: unknown, fallback: T | null = null): T | null {

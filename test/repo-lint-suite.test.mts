@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { alive } from '../packs/base/hooks/lib/daemon-find.mts';
 import { put, scratchDir } from '../packs/base/hooks/lib/files.mts';
 import { toJson } from '../packs/base/hooks/lib/json.mts';
 import { INIT_SITE_LIMIT, initSites } from './repo-readers.mts';
@@ -39,7 +40,6 @@ function startResident(withPreload: boolean): { pid: number; cache: string } {
   const [pid = '0', cache = ''] = r.stdout.split(' ');
   return { pid: Number(pid), cache };
 }
-const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } };
 
 test('the run\'s temp folder holds the daemon cache, and no resident.mjs is left after a process that started one (planted: a leftover is found)', async () => {
   assert.match(process.env.CLAUDE_PACKS_CACHE ?? '', /claude-packs-test-/, 'the suite\'s CLAUDE_PACKS_CACHE is in the run\'s own folder');

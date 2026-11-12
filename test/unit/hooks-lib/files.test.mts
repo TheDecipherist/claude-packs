@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { join } from 'node:path';
-import { childError, ensureDir, isDir, put, readText, scratchDir, walk } from '../../../packs/base/hooks/lib/files.mts';
+import { childError, ensureDir, isDir, put, readText, scratchDir, slash, walk } from '../../../packs/base/hooks/lib/files.mts';
 
 test('readText: the text, or null for a folder, a missing file or one over 8 MB', () => {
   const dir = scratchDir('files-');
@@ -37,4 +37,10 @@ test('childError: the first line of stderr, else the message, else the value', (
   assert.equal(childError(new Error('plain')), 'plain');
   assert.equal(childError('text'), 'text');
   assert.equal(childError(null), 'null');
+});
+
+test('slash: backslashes become forward slashes, a path with none is as it was', () => {
+  assert.equal(slash('a\\b\\c.txt'), 'a/b/c.txt');
+  assert.equal(slash('a/b'), 'a/b');
+  assert.equal(slash(''), '');
 });

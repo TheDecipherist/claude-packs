@@ -9,7 +9,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { codeFolders, readLayout } from './lib/layout.mts';
-import { checkoutRoot, claudeRoot } from './lib/project.mts';
+import { claudeRoot, relInCheckout } from './lib/project.mts';
 import { bashOf, editOf, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook, HookContext, Layout } from './lib/types.d.mts';
@@ -22,7 +22,7 @@ export const isSource = (file: string, layout: Pick<Layout, 'sourceFiles'>): boo
 
 function outsideLayout(file: string, layout: Layout, ctx: HookContext): string | null {
   if (relative(ctx.projectDir, file).startsWith('..')) return null;
-  const rel = relative(checkoutRoot(ctx.projectDir, file, ctx.cwd), file).replace(/\\/g, '/');
+  const rel = relInCheckout(ctx.projectDir, file, ctx.cwd);
   if (rel.startsWith('..')) return null;
 
   const folders = codeFolders(layout);

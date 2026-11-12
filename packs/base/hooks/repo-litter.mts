@@ -5,6 +5,7 @@
 // reads them too; they are re-exported here so lib/repo-weight.mjs keeps its import until the CLI moves (wave 2).
 import { statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
+import { slash } from './lib/files.mts';
 import { gitAdds } from './lib/git-adds.mts';
 import { gitLines } from './lib/git-run.mts';
 import { matchesAny } from './lib/glob.mts';
@@ -58,7 +59,7 @@ function litterFault(command: string, cwd: string, ctx: HookContext): string | n
     const root = checkoutRoot(ctx.projectDir, join(dir, 'x'), ctx.cwd);
     const cfg = litterConfig(readLayout(claudeRoot(ctx.projectDir, join(dir, 'x'), ctx.cwd)));
     for (const abs of args.filter((a) => !a.startsWith('-')).flatMap((a) => staged(dir, a, ctx.env))) {
-      const fault = faultOf(relative(root, abs).replace(/\\/g, '/'), abs, cfg);
+      const fault = faultOf(slash(relative(root, abs)), abs, cfg);
       if (fault) return `${fault}\nA real asset can be named in guards.repoLitter.allow.\n`;
     }
   }

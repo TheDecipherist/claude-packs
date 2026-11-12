@@ -6,7 +6,6 @@
 // Same never-overwrite law as project installs. A hook already there, byte for byte the package's, is taken over, and
 // its settings entry with it, never doubled. The house's hand-installed Python forerunners (~/.claude/hooks/
 // shell-traps.py and gnu-shell.py) lose their settings entries to the Node hooks; their files are left where they are.
-import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -15,6 +14,7 @@ import { spawnSync } from 'node:child_process';
 import { ensureDir } from '../packs/base/hooks/lib/files.mts';
 import { parseJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
+import { hashFile as sha } from './manifest.mts';
 
 const SRC = fileURLToPath(new URL('../global/', import.meta.url));
 
@@ -24,6 +24,8 @@ export const FILES: readonly (readonly [from: string, to: string])[] = [
   ['hooks/version-pin-guard.mjs', 'hooks/claude-packs/version-pin-guard.mjs'],
   ['../packs/base/hooks/lib/shell-writes.mjs', 'hooks/claude-packs/lib/shell-writes.mjs'],
   ['../packs/base/hooks/lib/program-writes.mjs', 'hooks/claude-packs/lib/program-writes.mjs'],
+  ['../packs/base/hooks/lib/program-named.mjs', 'hooks/claude-packs/lib/program-named.mjs'],   // program-writes names the paths a program writes through it
+  ['../packs/base/hooks/lib/project.mjs', 'hooks/claude-packs/lib/project.mjs'],   // shell-writes reads isMain from it (W10 review, finding 9)
   ['../packs/base/hooks/lib/program-read.mjs', 'hooks/claude-packs/lib/program-read.mjs'],
   ['../packs/base/hooks/lib/command-prefix.mjs', 'hooks/claude-packs/lib/command-prefix.mjs'],   // shell-writes reads through it (KWB-101)
   ['../packs/base/hooks/lib/shell-lex.mjs', 'hooks/claude-packs/lib/shell-lex.mjs'],   // shell-writes' reader of the text, split out (KWB-118)
@@ -49,7 +51,6 @@ const HOOKS: readonly GlobalHook[] = [
 ];
 // The Python forerunners: their settings entries are the package's to replace.
 const FORERUNNERS = ['hooks/shell-traps.py', 'hooks/gnu-shell.py'];
-const sha = (p: string): string => createHash('sha256').update(readFileSync(p)).digest('hex');
 
 // The user's ~/.claude/settings.json, as far as this command reads it: every other key is the user's and is kept.
 interface EntryOfSettings { type?: string; command?: string; timeout?: number; [key: string]: unknown }

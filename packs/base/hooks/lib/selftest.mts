@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { put, scratchDir, walk } from './files.mts';
+import { put, scratchDir, slash, walk } from './files.mts';
 import { gitRun } from './git-run.mts';
 import { toJson } from './json.mts';
 import type { Layout, VerdictRow } from './types.d.mts';
@@ -44,7 +44,7 @@ const RUNNER_LOGS = /(?:^|\/)\.claude\/(?:hooks\.log|logs\/)/;
 export function snapshot(dir: string): Map<string, string> {
   const seen = new Map<string, string>();
   for (const file of walk(dir)) {
-    const rel = relative(dir, file).replace(/\\/g, '/');
+    const rel = slash(relative(dir, file));
     if (RUNNER_LOGS.test(rel)) continue;
     const s = statSync(file);
     seen.set(rel, `${s.size}:${s.mtimeMs}`);

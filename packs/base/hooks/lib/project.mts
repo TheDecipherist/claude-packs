@@ -5,9 +5,14 @@
 // relative path is measured from where it matters, from its caller (the event's own, never this process's).
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { slash } from './files.mts';
 
 /** A path's real folder (links resolved), or its resolved self when it does not exist. */
 export const real = (p: string): string => { try { return realpathSync(p); } catch { return resolve(p); } };
+
+/** True when this module's file `url` is the program node was started with (never when the runner or another module imports it). */
+export const isMain = (url: string): boolean => Boolean(process.argv[1]) && real(process.argv[1] ?? '') === real(fileURLToPath(url));
 
 /** True when `path`, measured from `base`, is inside the project at `root`. */
 export function insideProject(root: string, path: string | null | undefined, base: string): boolean {
@@ -88,5 +93,5 @@ export function claudeRoot(root: string, file: string | null | undefined, base: 
 
 // A path relative to its own checkout, with forward slashes.
 export function relInCheckout(root: string, file: string, base: string): string {
-  return relative(checkoutRoot(root, file, base), resolve(base, file)).replace(/\\/g, '/');
+  return slash(relative(checkoutRoot(root, file, base), resolve(base, file)));
 }

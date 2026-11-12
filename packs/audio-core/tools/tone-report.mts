@@ -5,6 +5,7 @@
 // Exit 1 when a given threshold fails, so it can run as a test.
 import { readFileSync } from 'node:fs';
 import { isMain } from '../hooks/lib/hook-log.mts';
+import { toJson } from '../hooks/lib/json.mts';
 import { analyse } from './lib/spectrum.mts';
 import { readWav } from './lib/wav.mts';
 
@@ -33,7 +34,7 @@ export function main(args: readonly string[], out: (line: string) => void, err: 
   if (snrMin !== null && r.snrDb < snrMin) fails.push(`SNR ${r.snrDb.toFixed(1)} dB < ${snrMin}`);
   if (dcMax !== null && r.dcDbfs > dcMax) fails.push(`DC ${r.dcDbfs.toFixed(1)} dBFS > ${dcMax}`);
 
-  if (args.includes('--json')) out(JSON.stringify({ ...r, pass: fails.length === 0, fails }));
+  if (args.includes('--json')) out(toJson({ ...r, pass: fails.length === 0, fails }));
   else {
     const f = (x: number): string => (Number.isFinite(x) ? x.toFixed(1) : String(x));
     const lines = [

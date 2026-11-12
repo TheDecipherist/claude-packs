@@ -15,12 +15,12 @@
 // missing, failing or stale refuses the landing. `--selftest` proves it; `--key <name>` prints a look's key by hand.
 // A judge on the hook contract (typescript order W4): it writes no file. The one hash here is sha256, kept: every key a report
 // already holds was made with it (hash.mts owns the kit's sha1 ids, which these are not).
-import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mts';
 import { checkoutBranch, refExistsIn } from './lib/git-state.mts';
 import { gitOut } from './lib/git-run.mts';
+import { sha256 } from './lib/hash.mts';
 import { contextOf, isMain, runAsHook, writeVerdict } from './lib/hook-log.mts';
 import { parseJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
@@ -53,7 +53,7 @@ const touched = (root: string, env: Env, looks: readonly DeclaredLook[], from: s
 /** The key of a look's drawing code at `ref`: a hash of each file's mode, blob and path, so it moves only when that code does. */
 export function codeKey(root: string, env: Env, look: Look, ref: string): string {
   const rows = (git(root, env, 'ls-tree', '-r', ref) ?? '').split('\n').filter((r) => matchesAny(r.slice(r.indexOf('\t') + 1), look.code ?? []));
-  return createHash('sha256').update(rows.join('\n')).digest('hex').slice(0, 16);
+  return sha256(rows.join('\n'), 16);
 }
 
 // Why a look may not land on `ref`, or null: its report must be on the branch, pass, and judge the code's last change.

@@ -40,6 +40,9 @@ export function isDir(path: string): boolean {
   try { return statSync(path).isDirectory(); } catch { return false; }
 }
 
+/** A path with forward slashes, whatever the platform wrote it with: the one spelling globs, locks and layouts compare. */
+export const slash = (path: string): string => path.replace(/\\/g, '/');
+
 /** A name no walk returns by default. */
 export const isJunk = (name: string): boolean => JUNK.test(name);
 /** A name the installer never copies into a project: junk, or what only the kit's build reads (d-2). */

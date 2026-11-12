@@ -5,6 +5,7 @@ import { existsSync, mkdtempSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { daemonCommand, type DaemonHost } from '../../../lib/daemon-cli.mts';
+import { alive } from '../../../packs/base/hooks/lib/daemon-find.mts';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { toJson } from '../../../packs/base/hooks/lib/json.mts';
 import { real } from '../../../packs/base/hooks/lib/project.mts';
@@ -48,4 +49,10 @@ test('stop: ends the live one and removes its pid file; a dead one\'s file is re
   assert.equal(existsSync(join(folder, 'a.pid')) || existsSync(join(folder, 'b.pid')), false);
   assert.equal((await say(dir, ['stop'], folder)).out, `no resident runner for ${real(dir)}`);
   await assert.rejects(say(dir, ['restart'], folder), /daemon status/);
+});
+
+test('alive: a process that exists is alive even when this user may not signal it (pid 1: EPERM), a gone one is not', () => {
+  assert.equal(alive(process.pid), true);
+  assert.equal(alive(1), true);
+  assert.equal(alive(2147483646), false);
 });

@@ -1,16 +1,14 @@
 // How test-changed reads the repo: the graph of what imports what, and the choice of tests a change reaches, each with its reason.
 import { readFileSync } from 'node:fs';
-import { dirname, join, relative, resolve, sep } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { usesAny } from './changed-functions.mts';
 import { pathTests } from './test-changed-paths.mts';
 import { GENERIC, HOOK, HUBS, MAX_HOPS, MODULE, SKIP_DIRS, TABLE, TEST } from './test-changed-table.mts';
-import { walk as walkFolder } from '../packs/base/hooks/lib/files.mts';
+import { slash, walk as walkFolder } from '../packs/base/hooks/lib/files.mts';
 import { emittedFrom } from '../packs/base/hooks/lib/source-exts.mts';
 
-export const posix = (p: string): string => p.split(sep).join('/');
-
 /** Every file of the repo, as a posix path from the root, its folders that are no part of it left out. */
-const walk = (root: string): string[] => walkFolder(root, (name) => SKIP_DIRS.has(name)).map((abs) => posix(relative(root, abs)));
+const walk = (root: string): string[] => walkFolder(root, (name) => SKIP_DIRS.has(name)).map((abs) => slash(relative(root, abs)));
 
 // Relative specifiers a module reaches: imports and new URL(..., import.meta.url); a template keeps its text before `${`.
 function references(root: string, rel: string): string[] {
@@ -19,7 +17,7 @@ function references(root: string, rel: string): string[] {
     ...text.matchAll(/\bfrom\s+['"](\.{1,2}\/[^'"]*)['"]/g), ...text.matchAll(/\bimport\s*\(\s*['"`](\.{1,2}\/[^'"`$]*)/g),
     ...text.matchAll(/\bimport\s+['"](\.{1,2}\/[^'"]*)['"]/g), ...text.matchAll(/new URL\(\s*['"`](\.{1,2}\/?[^'"`$]*)/g),
   ].flatMap((m) => (m[1] === undefined ? [] : [m[1]]));
-  return specs.map((s) => posix(relative(root, resolve(root, dirname(rel), s)))).filter((p) => p && !p.startsWith('..'));
+  return specs.map((s) => slash(relative(root, resolve(root, dirname(rel), s)))).filter((p) => p && !p.startsWith('..'));
 }
 
 /** The repo's files and, for each, the modules that reference it. */

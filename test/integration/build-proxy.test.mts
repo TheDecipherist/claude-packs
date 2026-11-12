@@ -5,7 +5,8 @@ import { cpSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { scratchDir } from '../../packs/base/hooks/lib/files.mts';
 import { hostTarget } from '../../lib/proxy-binary.mts';
-import { binaryPath, buildProxy, goVersion, releaseCheck, sha256Of, sourceHash } from '../../scripts/build-proxy.mts';
+import { binaryPath, buildProxy, goVersion, releaseCheck, sourceHash } from '../../scripts/build-proxy.mts';
+import { hashFile } from '../../lib/manifest.mts';
 import { KIT, assert, test } from '../kit-cli.mts';
 
 const go = goVersion(KIT, process.env);
@@ -25,7 +26,7 @@ test('two builds of one source, the second with an empty Go build cache, give on
   const one = await buildProxy({ root, out: join(root, 'one'), targets, force: true });
   const two = await buildProxy({ root, out: join(root, 'two'), targets, force: true, env: { ...process.env, CLAUDE_PACKS_GO_CACHE: join(scratchDir('go-cache-'), 'go') } });
   assert.deepEqual([one.problems.filter((p) => !/darwin-amd64/.test(p)), two.problems.filter((p) => !/darwin-amd64/.test(p))], [[], []]);
-  for (const t of targets) assert.equal(sha256Of(binaryPath(join(root, 'one'), t)), sha256Of(binaryPath(join(root, 'two'), t)), t);
+  for (const t of targets) assert.equal(hashFile(binaryPath(join(root, 'one'), t)), hashFile(binaryPath(join(root, 'two'), t)), t);
 });
 
 test('a source and Go\'s version equal to the last build\'s are not built again; a changed source is', { skip, timeout: 120_000 }, async () => {

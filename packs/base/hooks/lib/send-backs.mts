@@ -2,10 +2,10 @@
 // instead of looping. The count is state kept per session in the temp folder. making-check (a judge) only reads it through
 // `endsTheTurn`; making-check-count (the recorder) is the one that writes it through `recordSendBack` (typescript W4: a hook that
 // judges and records is split in two).
-import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { put } from './files.mts';
+import { shortHash } from './hash.mts';
 import { readJson, toJson } from './json.mts';
 
 export const MAX_SENDS = 3;
@@ -17,7 +17,7 @@ export interface SendBacks { hash?: unknown; count?: unknown }
 export const sendBackFile = (env: Readonly<Record<string, string | undefined>>, session: string | undefined): string =>
   join(env['TMPDIR'] ?? tmpdir(), `making-check-${String(session ?? 'session').replace(/[^\w-]/g, '')}.json`);
 
-const hashOf = (problems: readonly string[]): string => createHash('sha1').update(problems.join('\n')).digest('hex');
+const hashOf = (problems: readonly string[]): string => shortHash(problems.join('\n'));
 
 /** The count after this stop: consecutive stops with the same findings count whether or not the host marks them as a continuation
  *  (stop_hook_active): a host that delivers each send-back as a new turn reset the count to 1 every time, and the limit was never
