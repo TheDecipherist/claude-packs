@@ -1,0 +1,1 @@
+{ "name": "kwb204", "step": "KWB-204", "items": ["no-polling hook", "build-guard drops polling", "pack row", "worktree case", "test"], "done": ["no-polling hook", "build-guard drops polling", "pack row", "worktree case", "test"], "now": "gate running, report", "updated": "2026-11-12" }

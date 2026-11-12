@@ -1,5 +1,5 @@
 // polling: a sleep loop or a long sleep in the commands a shell line runs. The one reader, shared by base's no-polling hook
-// (KWB-204: the refusal lived only in synth-creator's build-guard, so a base install refused nothing).
+// (KWB-204: the refusal lived only in one configuration's build guard, so a base install refused nothing).
 import { blankQuotes, dropHeredocs } from './shell-lex.mts';
 
 /** What a line waits in, or null: a loop that sleeps, a sleep over 5 seconds, `tail -f`. Quoted text and heredoc bodies are no commands. */

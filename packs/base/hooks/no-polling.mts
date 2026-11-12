@@ -1,5 +1,5 @@
 // no-polling (PreToolUse, Bash; KWB-204): waiting in a sleep loop is refused in every project. The law is base's
-// (long-work-in-the-background, work-inside-the-project); the refusal lived only in synth-creator's build-guard, so the kit's own
+// (long-work-in-the-background, work-inside-the-project); the refusal lived only in one configuration's build guard, so the kit's own
 // install refused nothing, and two agents waited on their tests in `until ...; do sleep N; done` loops writing to /tmp.
 // Refused: a while/until loop that sleeps, a sleep over 5 seconds, `tail -f`. Allowed: `sleep 2`, a loop with no sleep, and text
 // that only mentions them (a quoted string, a heredoc body).
