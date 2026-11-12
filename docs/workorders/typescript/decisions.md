@@ -176,6 +176,18 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-29 The daemon's RSS line is reviewed at W10 and measured again at W11 {#d-29}
+- Question: W8's Done when asks for the daemon's RSS under 250 MB with 16 workers after 1,000 events. Measured: on a scratch install
+  225 to 247 MB by the daemon's own count and 246 to 266 MB by ps at 8 events at once, after lazy loading and job routing (W8.4); in
+  this repo a warm pool of 16 to 20 workers holds 500 to 950 MB (KWB-197, whose leak guard now allows 48 MB a worker). Each worker
+  is a V8 isolate of about 14 MB plus the hooks it has loaded and what they hold (the repetition index is the main thread's).
+- Options: a smaller pool than the order's min(16, cores); workers that drop a hook's module after idle; hooks that load less; or
+  the line carried with its numbers.
+- Chosen: carried. W8 is closed with every other line met; W10's review reads where a worker's memory goes in a large repo and
+  decides between a smaller pool and leaner hooks; W11 measures the scratch install and this repo again for report.md.
+- Why: the pool size is the order's own figure, and cutting it trades the event times W8 exists for; the measure needs a reading
+  of the heap, which is review work, not a guess made at the end of W8. Overturn by editing W8's Done when or the pool size.
+
 ## d-28 js-ts fits the base configuration, and the kit takes it {#d-28}
 - Question: W8.5 asks the kit's own repo to refuse a new .mjs source at write time through the typescript-only check, which lives in
   js-ts; the kit's configuration is base, and js-ts fitted only the language configurations.
