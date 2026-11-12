@@ -1,7 +1,17 @@
 // glob.mts: the dependency-free glob matcher (**, *, ?, {a,b}) and the one regexp escape.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { escapeRegExp, globToRegExp, matchesAny } from '../../../packs/base/hooks/lib/glob.mts';
+import { allWithModuleForms, escapeRegExp, globToRegExp, matchesAny, withModuleForms } from '../../../packs/base/hooks/lib/glob.mts';
+
+test('a glob that names .ts names .mts and .cts too, in a suffix or a brace; .tsx and other globs are left as they are (KWB-198)', () => {
+  assert.deepEqual(withModuleForms('**/*.ts'), ['**/*.ts', '**/*.mts', '**/*.cts']);
+  assert.deepEqual(withModuleForms('**/*.test.ts'), ['**/*.test.ts', '**/*.test.mts', '**/*.test.cts']);
+  assert.deepEqual(withModuleForms('src/**/*.{js,mjs,cjs,jsx,ts,tsx}'), ['src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}']);
+  assert.deepEqual(withModuleForms('**/*.{ts,mts}'), ['**/*.{ts,mts,cts}']);
+  for (const same of ['**/*.tsx', '**/*.js', '**/*.{js,mjs}', 'src/**', '**/tsconfig*.json']) assert.deepEqual(withModuleForms(same), [same]);
+  assert.deepEqual(allWithModuleForms(['**/a.ts', '**/a.mts']), ['**/a.ts', '**/a.mts', '**/a.cts']);
+  assert.equal(matchesAny('lib/x.cts', withModuleForms('lib/**/*.ts')), true);
+});
 
 test('* stays inside a folder, ** crosses folders, a leading **/ also matches the root, ? is one character', () => {
   assert.equal(matchesAny('src/a.ts', ['src/*.ts']), true);
