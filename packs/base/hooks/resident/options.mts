@@ -17,6 +17,7 @@ export interface FlagRow {
 export const FLAGS: readonly FlagRow[] = [
   { flag: WIRE.flag.hooks, value: true, again: true },
   { flag: '--pool', value: true, again: true },
+  { flag: '--warm', value: true, again: true },
   { flag: '--idle-minutes', value: true, again: true },
   { flag: '--exit-with', value: true, again: true },
   { flag: '--max-rss-mb', value: true, again: true },

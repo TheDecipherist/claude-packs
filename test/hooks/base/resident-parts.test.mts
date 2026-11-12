@@ -233,6 +233,29 @@ test('the pool grows under load to its limit and retires the grown ones after th
   } finally { await pool.close(); }
 });
 
+// W8 item 2 (2026-11-12): 2 warm workers, grown on demand to 8, retired after 2 idle minutes (a planted clock, never real waiting).
+test('the pool at the order\'s numbers: starts 2, grows under 8 concurrent events to 8 and never past, falls back to 2 after the idle time', async () => {
+  let clock = 1_000_000;
+  const pool = poolOf(hooksDir(), { warm: 2, preload: 0, max: 8, idleMs: 120_000, growAfterMs: 5, growEveryMs: 5, now: () => clock });
+  try {
+    await pool.ready();
+    assert.equal(pool.size(), 2, 'starts with two');
+    let widest = 0;
+    const watching = setInterval(() => { widest = Math.max(widest, pool.size()); }, 5);
+    await Promise.all(Array.from({ length: 24 }, () => pool.run(job('slow'))));
+    clearInterval(watching);
+    widest = Math.max(widest, pool.size());
+    assert.equal(widest, 8, 'grew to eight under eight at once, never past');
+    clock += 119_000;
+    pool.reap();
+    assert.equal(pool.size(), widest, 'not retired before the idle time');
+    clock += 2_000;
+    pool.reap();
+    for (let i = 0; i < 100 && pool.size() > 2; i += 1) await nap(20);
+    assert.equal(pool.size(), 2, 'back to the two warm ones after two idle minutes');
+  } finally { await pool.close(); }
+});
+
 // W8.4, memory: a worker holds the hooks it has run; the first `preload` workers import them all at start.
 test('the pool: only a preloaded worker imports every hook at start; the others import a hook when a job first brings it', async () => {
   const pool = poolOf(hooksDir(), { warm: 3, preload: 1 });

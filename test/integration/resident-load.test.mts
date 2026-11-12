@@ -20,7 +20,7 @@ async function events(rig: ReturnType<typeof makeRig>, n: number): Promise<void>
 test('10,000 events: the daemon\'s resident set after the first 1,000 and after the last differ by under 50 MB', { timeout: 300_000 }, async () => {
   const rig = makeRig(PLANTS, {}, 'resident-load-');
   try {
-    const up = await start(rig, ['--pool', String(POOL), '--state-ms', '1']);
+    const up = await start(rig, ['--pool', String(POOL), '--warm', String(POOL), '--state-ms', '1']);
     assert.equal(up.kind, 'ready');
     await events(rig, 1000);
     await new Promise((d) => setTimeout(d, 50));
