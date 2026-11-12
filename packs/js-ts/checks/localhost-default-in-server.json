@@ -2,6 +2,7 @@
   "id": "localhost-default-in-server",
   "why": "A production default of localhost sends real traffic nowhere, silently.",
   "rule": ".claude/rules/env-through-config.md",
+  "code": false,
   "globs": [],
   "exclude": [
     "**/tests/**",

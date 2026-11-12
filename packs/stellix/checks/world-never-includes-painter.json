@@ -2,6 +2,8 @@
   "id": "world-never-includes-painter",
   "why": "Stellix 8: the world is coordinates, not graphics. The audio side includes nothing from the painter or any GPU API; it publishes a plain-data snapshot and nothing else.",
   "rule": ".claude/rules/stellix-world-snapshot.md",
+  "code": false,
+  "exclude": [],
   "concepts": [
     "world",
     "audio"

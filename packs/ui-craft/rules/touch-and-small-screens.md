@@ -17,3 +17,6 @@ Never do:
 - Disable zoom (`ui-no-zoom-lock`).
 - `autoFocus` on a phone: it opens the keyboard over the page.
 </constraints>
+
+## Check
+Lesson check for this rule: `ui-no-zoom-lock`.

@@ -2,6 +2,7 @@
   "id": "client-calls-a-version",
   "why": "A client that calls an unversioned path breaks the day the API changes.",
   "rule": ".claude/rules/apis-are-versioned.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.tsx",

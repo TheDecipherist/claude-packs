@@ -35,3 +35,6 @@ Always do:
 
 On the taste-skill study of 247 sites: those scored 7.5 or higher used icon feature cards 1% of the time against 28% for sites under 6.5, pill badges 14% against 34%, gradients 22% against 52%, shadows 24% against 48%, tiny tracked caps 16% against 57%.
 </constraints>
+
+## Check
+Lesson checks for this rule: `ui-no-ai-palette`, `ui-no-assistant-palette`, `ui-no-emoji-as-ui`, `ui-no-eyebrow`, `ui-no-gradient-text`, `ui-no-index-numbering`, `ui-no-side-tab`.

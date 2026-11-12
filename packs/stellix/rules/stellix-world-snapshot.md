@@ -25,3 +25,4 @@ Never do:
 - Torn-snapshot gate: a reader hammering the snapshot while the world writes at full rate must never see a mixed one. Plant the fault by writing in place, and the gate goes red.
 - Prediction gate: play a passage; every predicted hit happens, and no unpredicted hit occurs.
 - The realtime-guard hook blocks GPU calls in audio-thread code.
+Lesson check for this rule: `world-never-includes-painter`.

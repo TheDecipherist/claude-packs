@@ -20,3 +20,6 @@ Never do:
 - A second `escapeHtml` in an auth or oauth module.
 - `rel="noreferrer"` alone.
 </constraints>
+
+## Check
+Lesson checks for this rule: `external-link-rel`, `no-duplicate-escape`, `no-inline-client-script`, `no-inline-style`.

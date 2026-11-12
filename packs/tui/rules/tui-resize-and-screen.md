@@ -23,3 +23,6 @@ Never do:
 - Resize logic split across several handlers that each clear, draw or set state.
 - A TUI on a non-TTY stdout (CI, a pipe): the escape codes become garbage in the log.
 </constraints>
+
+## Check
+Lesson checks for this rule: `tui-entry-restores-terminal`, `tui-gates-on-tty`, `tui-no-ris-reset`, `tui-resize-listener-removed`, `tui-width-is-state`.

@@ -2,6 +2,7 @@
   "id": "ui-no-zoom-lock",
   "why": "Disabling zoom locks out people who need it (WCAG 1.4.4).",
   "rule": ".claude/rules/touch-and-small-screens.md",
+  "code": false,
   "concepts": [
     "ui-markup"
   ],

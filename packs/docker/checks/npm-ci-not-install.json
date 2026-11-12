@@ -2,6 +2,7 @@
   "id": "npm-ci-not-install",
   "why": "npm install can rewrite the lockfile and resolve different versions per build. npm ci installs exactly the lockfile or fails.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "concepts": [
     "dockerfile"
   ],

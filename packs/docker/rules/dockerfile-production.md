@@ -23,3 +23,6 @@ Never do:
 - `COPY . .` before the dependency install.
 - Run as root, use `:latest`, or write files inside the container that must survive a restart (named volume or object storage).
 </constraints>
+
+## Check
+Lesson checks for this rule: `alpine-with-native-build`, `copy-needs-chown-with-user`, `copy-source-before-deps`, `dockerfile-needs-healthcheck`, `dockerfile-needs-user`, `dockerignore-has-the-basics`, `gitattributes-forces-lf`, `no-crlf-in-scripts`, `no-latest-base`, `no-secret-in-image`, `no-sensitive-file-copy`, `node-env-before-install`, `npm-ci-not-install`.

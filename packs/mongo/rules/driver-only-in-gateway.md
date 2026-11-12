@@ -24,3 +24,6 @@ Never do:
 - `MongoClient`, `db.collection(`, `getDb()` in routes, handlers, services, UI or lifecycle code. The `driver-outside-gateway` check refuses them. The gateway's **typed scope** (`forSession(id).experiments.insertOne(...)`) is its exported surface and is fine to call; a raw `Collection` is not.
 - Pass a raw `Collection` out of the gateway "just this once".
 </constraints>
+
+## Check
+Lesson checks for this rule: `driver-outside-gateway`, `no-mongoose`.

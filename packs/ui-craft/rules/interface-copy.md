@@ -24,3 +24,6 @@ Never do:
 - Use furniture text: "Est. 2024", coordinates, "Scroll to explore", "Available for work", labels pretending to be editorial like "Field notes" (`ui-no-furniture-text`). "Pricing" can simply say Pricing.
 - Write captions that narrate the design, or ship placeholder copy (`ui-no-lorem`).
 </constraints>
+
+## Check
+Lesson checks for this rule: `ui-no-furniture-text`, `ui-no-lorem`, `ui-no-marketing-buzzword`, `ui-no-stock-labels`.

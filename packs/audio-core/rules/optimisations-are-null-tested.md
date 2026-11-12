@@ -21,3 +21,4 @@ Never do:
 ## Check
 - A CTest render-diff test compares against the golden files.
 - `.claude/checks/dsp-without-apvts.json` blocks DSP folders from reaching into the parameter tree.
+Lesson check for this rule: `dsp-without-apvts`.

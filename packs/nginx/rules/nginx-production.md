@@ -24,3 +24,6 @@ Never do:
 - `'unsafe-inline'` or `'unsafe-eval'` in the CSP (`nginx-csp-no-unsafe`); use a nonce or a hash.
 - Logs to `/var/log/nginx/*.log`.
 </constraints>
+
+## Check
+Lesson checks for this rule: `nginx-csp-no-unsafe`, `nginx-headers-always`, `nginx-keepalive-http11`, `nginx-logs-to-stdout`, `nginx-no-crlf`, `nginx-resolver-ttl`.

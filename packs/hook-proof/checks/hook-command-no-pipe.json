@@ -2,6 +2,7 @@
   "id": "hook-command-no-pipe",
   "why": "A piped command exits with the pipe's last command, so a hook's exit 2 is lost.",
   "rule": ".claude/rules/a-refusal-is-exit-2.md",
+  "code": false,
   "concepts": [
     "hook-config"
   ],

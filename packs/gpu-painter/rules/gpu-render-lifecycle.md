@@ -23,3 +23,4 @@ Never do:
 ## Check
 - `gpu-lifecycle-stress`: open and close the editor 100 times under AddressSanitizer with audio at 96 voices, then 8 copies at once. Pass: no reports, no leaks, render CPU 0 after the last close.
 - Golden test at scale 2.0, plus a test that the surface texture size equals the view bounds × scale.
+Lesson check for this rule: `gpu-no-frame-stalls`.

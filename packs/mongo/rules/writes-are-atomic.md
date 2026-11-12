@@ -25,3 +25,6 @@ Never do:
 - `(await col.findOne(...))!` right after a write (`no-non-null-after-findone`): return the document from the write.
 - `.find(...)` then `.filter(...)` in JS: the `$nin`/`$match` belongs in the query.
 </constraints>
+
+## Check
+Lesson checks for this rule: `created-at-immutable`, `no-count-plus-one-ids`, `no-db-write-in-loop`, `no-non-null-after-findone`, `objectid-equals`, `update-then-reread`, `watch-not-poll`.

@@ -19,3 +19,6 @@ Never do:
 - `loading="lazy"` or `fetchpriority="low"` on the hero/LCP element (`wp-hero-not-lazy`).
 - A `<script>` in `<head>` without `defer`.
 </constraints>
+
+## Check
+Lesson checks for this rule: `wp-hero-not-lazy`, `wp-img-needs-dimensions`.

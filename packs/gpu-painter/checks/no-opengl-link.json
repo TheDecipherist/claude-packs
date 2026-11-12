@@ -1,7 +1,9 @@
 {
   "id": "no-opengl-link",
-  "why": "No target of a Dawn-painted app links JUCE's OpenGL module or the OpenGL framework (no-opengl.json holds the sources; Stellix work order F, F7.6).",
+  "why": "No target of a Dawn-painted app links JUCE's OpenGL module or the OpenGL framework (no-opengl.json holds the sources; work order F, F7.6).",
   "rule": ".claude/rules/gpu-frame-work.md",
+  "code": false,
+  "exclude": [],
   "concepts": [
     "build"
   ],

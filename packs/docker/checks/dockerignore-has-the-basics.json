@@ -2,6 +2,7 @@
   "id": "dockerignore-has-the-basics",
   "why": "Without node_modules, .git, .env and dist in .dockerignore the build context is huge and the host's node_modules, secrets and stale builds land in the image.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "globs": [
     "**/.dockerignore"
   ],

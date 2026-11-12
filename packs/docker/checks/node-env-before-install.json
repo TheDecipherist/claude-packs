@@ -2,6 +2,7 @@
   "id": "node-env-before-install",
   "why": "NODE_ENV=production set before npm ci skips devDependencies, so the TypeScript build in the same stage fails or ships untranspiled. Set it after the build, in the runtime stage.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "concepts": [
     "dockerfile"
   ],

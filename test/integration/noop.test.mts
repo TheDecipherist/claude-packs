@@ -6,27 +6,21 @@
 // the files and hashes of packs/manifest-<version>.json (scripts/counts.mts writes it). That file is the list of what changed on
 // purpose: a change to an installed file shows in its diff, is read, and is kept; a change nobody listed is red here.
 import { KIT, assert, join, readFileSync, test } from '../kit-cli.mts';
-import { type Manifest, type ProjectInstall, type ProjectName, installOf, readManifest, updatedProject } from '../../scripts/counts.mts';
+import { type Manifest, type ProjectInstall, type ProjectName, installOf, updatedProject } from '../../scripts/counts.mts';
+import { drift, readPin } from '../../scripts/noop-pin.mts';
 import { parseJson, toJson } from '../../packs/base/hooks/lib/json.mts';
 
 const FX = join(KIT, 'test/fixtures/noop');
 const expected = (project: string, file: string): string => readFileSync(join(FX, project, 'expected', file), 'utf8');
 const before = (project: string, file: string): string => readFileSync(join(FX, project, 'before', file), 'utf8');
+// The oracle is the pinned manifest (test/fixtures/noop/pinned-manifest.json), not packs/manifest-<version>.json: that one is written by
+// the code under test. The pin changes only by `node scripts/noop-pin.mts`, which prints each file that differs; a red here lists them.
 const manifest = (): Manifest => {
-  const held = readManifest(KIT);
-  if (held === null) throw new Error('packs/manifest-2.0.0.json is missing: run node scripts/counts.mts');
+  const held = readPin(KIT);
+  if (held === null) throw new Error('test/fixtures/noop/pinned-manifest.json is missing: run node scripts/noop-pin.mts');
   return held;
 };
-
-/** What an install differs from the manifest in: files added, files gone, files changed (path, with a reason). */
-export function drift(want: ProjectInstall, got: ProjectInstall): string[] {
-  return [
-    ...Object.keys(got.files).filter((f) => want.files[f] === undefined).map((f) => `${f}: not in the manifest`),
-    ...Object.keys(want.files).filter((f) => got.files[f] === undefined).map((f) => `${f}: in the manifest, not installed`),
-    ...Object.keys(got.files).filter((f) => want.files[f] !== undefined && want.files[f] !== got.files[f]).map((f) => `${f}: changed`),
-    ...(toJson(want.packs) === toJson(got.packs) ? [] : ['the packs the lock names differ']),
-  ];
-}
+const AFTER_PIN = 'an installed file differs from the pinned manifest: read the list, then run node scripts/noop-pin.mts to pin it';
 
 for (const project of ['stellix', 'sub37'] as const) {
   test(`${project}: update in synth-creator makes what 0.9.15 made, but for the configuration key`, () => {
@@ -45,7 +39,7 @@ for (const project of ['stellix', 'sub37'] as const) {
     const was = parseJson<ProjectInstall>(expected(project, 'lock.json'));
     const got = installOf(dir);
     assert.deepEqual(was?.packs, got.packs, 'the packs the lock names');
-    assert.deepEqual(drift(manifest().projects[project], got), [], 'the files and hashes the manifest lists, no more, no fewer');
+    assert.deepEqual(drift(manifest().projects[project], got), [], `the files and hashes the pin lists, no more, no fewer: ${AFTER_PIN}`);
     const moved = 'analyse-reference-look/SKILL.md';   // 1.4.0 (admiral-fleet W4): moved from audio-core to base, installed at the same place
     assert.equal(readFileSync(join(dir, '.claude/skills', moved), 'utf8'), readFileSync(join(KIT, 'packs/base/skills', moved), 'utf8'), `${moved}: moved, not lost`);
   });
@@ -67,14 +61,14 @@ test('full-stack: an update keeps an existing project\'s own layout, and changes
   assert.deepEqual(layout?.folders, was?.folders, 'its folders, no more, no fewer');
   assert.deepEqual(layout?.concepts, was?.concepts, 'its concepts');
   assert.equal(readFileSync(join(dir, 'CLAUDE.md'), 'utf8'), before('full-stack', 'claude-md.txt'), 'CLAUDE.md');
-  assert.deepEqual(drift(manifest().projects['full-stack'], installOf(dir)), [], 'the files and hashes the manifest lists');
+  assert.deepEqual(drift(manifest().projects['full-stack'], installOf(dir)), [], `the files and hashes the pin lists: ${AFTER_PIN}`);
 });
 
 test('an installed file the manifest does not list, and one changed, are found (the plant)', () => {
   const held = manifest().projects.stellix;
   const [first = ''] = Object.keys(held.files);
   const planted: ProjectInstall = { packs: held.packs, files: { ...held.files, '.claude/hooks/unlisted.mjs': 'abc', [first]: 'changed' } };
-  assert.deepEqual(drift(held, planted).sort(), [`${first}: changed`, '.claude/hooks/unlisted.mjs: not in the manifest'].sort());
+  assert.deepEqual(drift(held, planted).sort(), [`${first}: changed`, '.claude/hooks/unlisted.mjs: not in the pin'].sort());
   assert.deepEqual(drift(held, held), []);
   const names: ProjectName[] = ['stellix', 'sub37', 'full-stack'];
   assert.deepEqual(Object.keys(manifest().projects), names);

@@ -18,3 +18,4 @@ Never do:
 ## Check
 - `.claude/checks/no-fast-math.json` blocks fast-math flags being added.
 - `.claude/checks/keep-werror.json` blocks an edit that removes `-Werror` from a CMake file that had it.
+Lesson checks for this rule: `keep-werror`, `no-fast-math`.

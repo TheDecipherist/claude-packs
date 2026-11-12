@@ -21,3 +21,6 @@ Never do:
 - `100vw` (`rcss-no-100vw`); `width`/`min-width` of 500px or more (`rcss-no-fixed-wide-width`).
 - A CSS reset that sets `button { cursor: default }` (several popular ones do).
 </constraints>
+
+## Check
+Lesson checks for this rule: `css-no-inline-style`, `rcss-button-cursor`, `rcss-no-100vw`, `rcss-no-fixed-wide-width`, `rcss-viewport-meta`.

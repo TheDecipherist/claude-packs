@@ -43,7 +43,7 @@ test('GitHub is reached over HTTPS with the token from the environment, never th
   assert.doesNotMatch(args, /ssh|git@/, 'no SSH');
 });
 
-const READY = { branch: 'work/x', dirty: false, token: true, changelog: '', remoteMain: 'abc1234', scratchProblems: [], landed: false };
+const READY = { branch: 'work/x', dirty: false, token: true, changelog: '', remoteMain: 'abc1234', remoteHead: 'abc1234', scratchProblems: [], landed: false };
 
 test('a release is refused with no token, on a dirty tree, with no fetched trunk and with a CHANGELOG problem; a dry run needs no token', () => {
   assert.deepEqual(refusals(READY), []);
@@ -51,7 +51,9 @@ test('a release is refused with no token, on a dirty tree, with no fetched trunk
   assert.deepEqual(refusals({ ...READY, token: false }, { dryRun: true }), []);
   assert.deepEqual(refusals({ ...READY, token: false }, { scratch: true }), [], 'a rehearsal never reaches GitHub, so it needs no token');
   assert.match(refusals({ ...READY, dirty: true }).join(), /uncommitted/);
-  assert.match(refusals({ ...READY, remoteMain: '' }).join(), /not fetched/);
+  assert.match(refusals({ ...READY, remoteMain: '', remoteHead: '' }).join(), /not fetched/);
+  assert.match(refusals({ ...READY, remoteHead: 'fff0000aaa' }).join(), /is not the remote's main/, 'the local trunk is not the remote head (W10 review 7)');
+  assert.match(refusals({ ...READY, remoteHead: '' }).join(), /the remote has no main/);
   assert.match(refusals({ ...READY, changelog: 'CHANGELOG.md\'s "## 2.0.0" section is empty' }).join(), /is empty/);
   assert.deepEqual(refusals({ ...READY, changelog: 'is empty', landed: true }), [], 'a landed release needs no section to date');
   assert.match(refusals({ ...READY, branch: 'HEAD' }).join(), /detached/);

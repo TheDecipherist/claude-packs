@@ -2,6 +2,7 @@
   "id": "encrypted-name-plaintext-value",
   "why": "A field named encrypted that holds plain text tells every reader it is safe.",
   "rule": ".claude/rules/credentials-handled-safely.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.js",

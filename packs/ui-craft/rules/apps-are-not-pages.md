@@ -24,3 +24,6 @@ Never do, on an app screen:
 
 Removing every tell leaves a tidy template. What fills the space is the product: its own data at its real size, and a grid whose sums close.
 </constraints>
+
+## Check
+Lesson checks for this rule: `ui-no-uppercase-table-header`, `ui-no-zebra-rows`.

@@ -2,6 +2,7 @@
   "id": "compose-db-needs-auth",
   "why": "A database with no auth belongs to every container on its network.",
   "rule": ".claude/rules/compose-pinned-and-closed.md",
+  "code": false,
   "globs": [
     "**/*compose*.yml",
     "**/*compose*.yaml"

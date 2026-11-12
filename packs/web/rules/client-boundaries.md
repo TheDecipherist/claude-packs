@@ -21,3 +21,6 @@ Never do:
 - `window.location.href = '/…'`, `.assign`, `.replace`, `.reload` for an internal route (`client-no-window-location-nav`).
 - An API key or `MONGODB_URI` anywhere under `app/`, `components/`, `client/`, `public/` (`client-no-api-key`).
 </constraints>
+
+## Check
+Lesson checks for this rule: `client-no-api-key`, `client-no-browser-global-at-module-scope`, `client-no-server-import`, `client-no-window-location-nav`.

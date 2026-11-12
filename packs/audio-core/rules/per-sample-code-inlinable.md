@@ -20,3 +20,4 @@ Never do:
 ## Check
 - The benchmark from `cpu-worst-case-per-block.md` shows the gain when the loop is restructured; keep the faster version only if its null test passes.
 - Manual review: grep the per-sample loops for `->` calls on interface pointers.
+Lesson check for this rule: `no-march-native`.

@@ -24,3 +24,6 @@ Never do:
 - Give the content-reading call tools that fetch, read files or execute.
 - Treat marker scanning as prevention; it catches the clumsy attacks, the allowlist stops the clever ones.
 </constraints>
+
+## Check
+Lesson check for this rule: `model-output-validated`.

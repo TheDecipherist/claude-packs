@@ -2,6 +2,8 @@
   "id": "dawn-backends-and-validation",
   "why": "Only Metal (macOS) and D3D12 (Windows) ship; extra Dawn backends add size and attack surface. skip_validation removes Dawn's safety net and is never used.",
   "rule": ".claude/rules/dawn-build-and-shaders.md",
+  "code": false,
+  "exclude": [],
   "concepts": ["build", "painter"],
   "pattern": "DAWN_(ENABLE_(VULKAN|D3D11|NULL|DESKTOP_GL|OPENGLES)|BUILD_PROTOBUF)[\"']?\\s+(ON|TRUE|1)\\b|skip_validation",
   "bad": "set(DAWN_ENABLE_VULKAN ON CACHE BOOL \"\" FORCE)",

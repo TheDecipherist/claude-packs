@@ -26,3 +26,6 @@ Never do:
 - A source-IP check as authorization behind a proxy: `req.ip` is attacker-controlled when proxies are trusted. A real credential, or an unpublished port.
 - A route that builds its own 404/400 body (`one-error-body`).
 </constraints>
+
+## Check
+Lesson checks for this rule: `no-err-message-to-client`, `no-trust-proxy-true`, `one-error-body`, `sec-headers-present`.

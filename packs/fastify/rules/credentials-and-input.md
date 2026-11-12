@@ -21,3 +21,6 @@ Never do:
 - `===` on a token or secret.
 - `err.message` in a client-facing body.
 </constraints>
+
+## Check
+Lesson checks for this rule: `no-regexp-from-input`, `password-needs-slow-hash`, `secrets-compared-constant-time`.

@@ -2,6 +2,7 @@
   "id": "stored-text-through-renderer",
   "why": "A stored document put straight into markup shows its markdown as symbols, its code as one grey block and its \\r as stray characters. It goes through the renderer. A field that truly is plain gets a `plain text:` comment on its line.",
   "rule": ".claude/rules/stored-text-renders-once.md",
+  "code": false,
   "concepts": [
     "stored-text-ui"
   ],

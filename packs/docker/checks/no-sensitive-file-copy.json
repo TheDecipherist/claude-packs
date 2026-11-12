@@ -2,6 +2,7 @@
   "id": "no-sensitive-file-copy",
   "why": "COPY of .env, .npmrc, keys or credentials bakes the secret into a layer. Exclude them in .dockerignore and mount at build (--mount=type=secret) or run time.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "concepts": [
     "dockerfile"
   ],

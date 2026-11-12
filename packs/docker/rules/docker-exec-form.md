@@ -17,3 +17,6 @@ Never do:
 - `CMD node dist/index.js` or `CMD npm start` (shell form, and npm adds a second process between Docker and Node). The `docker-exec-form` check refuses shell form.
 - Secrets in `ENV` or build args; they land in the image history.
 </constraints>
+
+## Check
+Lesson check for this rule: `docker-exec-form`.

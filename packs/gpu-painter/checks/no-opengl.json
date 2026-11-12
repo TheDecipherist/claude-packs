@@ -1,7 +1,8 @@
 {
   "id": "no-opengl",
-  "why": "OpenGL is not a drawing path in a Dawn-painted app: Dawn (WebGPU on Metal or D3D12) draws everything through the painter. A GL call, a GL constant, an OpenGL header or JUCE's OpenGL module or classes brings back a second drawing path the picture gates do not judge (Stellix work order F, F7.6, deleted it for good).",
+  "why": "OpenGL is not a drawing path in a Dawn-painted app: Dawn (WebGPU on Metal or D3D12) draws everything through the painter. A GL call, a GL constant, an OpenGL header or JUCE's OpenGL module or classes brings back a second drawing path the picture gates do not judge (work order F, F7.6, deleted it for good).",
   "rule": ".claude/rules/gpu-frame-work.md",
+  "exclude": [],
   "concepts": [
     "cpp",
     "shaders"

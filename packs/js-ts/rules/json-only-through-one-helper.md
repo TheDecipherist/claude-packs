@@ -60,3 +60,4 @@ export function parseJson<T>(text: string, schema: z.ZodType<T>): Parsed<T> {
 
 ## Check
 `.claude/checks/json-only-through-helper.json` refuses an edit that adds `JSON.parse(` or `JSON.stringify(` outside `**/lib/json.*`, tests and config files. If a raw call slips in by another route (`Response.json()` on unknown input, `structuredClone` of an unknown value, a `toJSON` that throws), add that shape to the check.
+Lesson check for this rule: `json-only-through-helper`.

@@ -45,3 +45,6 @@ export function installLifecycle(app: FastifyInstance): void {
   process.on('unhandledRejection', (err) => { console.error('unhandledRejection', err); run('unhandledRejection', 1); });
 }
 ```
+
+## Check
+Lesson checks for this rule: `background-loop-needs-stop`, `entry-registers-shutdown`, `job-only-in-memory`.

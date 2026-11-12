@@ -20,3 +20,6 @@ Never do:
 - `Promise.race` with a bare `setTimeout` (the loser leaks); use `AbortSignal.timeout(ms)` or `setTimeout` from `node:timers/promises` with a signal.
 - An in-memory `Map` used as a session/transport store without a TTL sweep and a max size.
 </constraints>
+
+## Check
+Lesson checks for this rule: `hijack-needs-try`, `sse-needs-error-listener`.

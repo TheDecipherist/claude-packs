@@ -24,3 +24,6 @@ Never do:
 - Parse JSON with `grep -o '"key":"value"'` that depends on `JSON.stringify` key order; use `node -e` with `JSON.parse`.
 - Rewrite `settings.local.json` on server boot; installers are explicit commands with a dry run.
 </constraints>
+
+## Check
+Lesson checks for this rule: `gnu-only-in-shell`, `hook-command-anchored`, `hook-json-by-tool`, `no-bash-c-with-variable`.

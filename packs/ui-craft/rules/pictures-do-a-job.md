@@ -23,3 +23,6 @@ Never do:
 - Present a found picture as the client's own product, room or team.
 - Use an unrelated stock photograph where a drawing of the real subject would do.
 </constraints>
+
+## Check
+Lesson check for this rule: `ui-no-empty-image`.

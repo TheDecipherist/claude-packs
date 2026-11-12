@@ -37,6 +37,20 @@ test('a README without its markers, or a base hook with no description, is an er
   assert.match(documentsOf(KIT, { ...stand, 'README.md': undescribed }).errors.join('\n'), /without a description in the table: making/);
 });
 
+test('a missing configuration, preset or command row in the README is seen red (W10 review 7)', () => {
+  const stand = standing(KIT);
+  const without = (row: RegExp): string => {
+    const text = stand['README.md'].replace(row, '');
+    assert.notEqual(text, stand['README.md'], `the README has the row ${String(row)}`);
+    return text;
+  };
+  for (const row of [/^\| `go` \| .*\n/m, /^\| `node-api` \| .*\n/m, /^\| `lock status.*\n/m]) {
+    const readme = without(row);
+    const found = documentsOf(KIT, { ...stand, 'README.md': readme });
+    assert.ok(found.stale.includes('README.md') || found.errors.length > 0, `the README without ${String(row)} is red`);
+  }
+});
+
 test('a stale version in the docs is seen red: the status-line sample, the planner and the versions table follow package.json', () => {
   const stand = standing(KIT);
   assert.deepEqual(documentsOf(KIT, { ...stand, 'README.md': stand['README.md'].replace(/^claude-packs \d+\.\d+\.\d+ \|/m, 'claude-packs 0.0.1 |') }).stale, ['README.md']);

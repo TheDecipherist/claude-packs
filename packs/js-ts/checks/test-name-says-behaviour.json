@@ -2,6 +2,7 @@
   "id": "test-name-says-behaviour",
   "why": "A test named `works` says nothing when it fails. Name the behaviour.",
   "rule": ".claude/rules/test-names-describe-behavior.md",
+  "code": false,
   "concepts": [
     "js-tests"
   ],

@@ -67,6 +67,8 @@ export interface Facts {
   /** The CHANGELOG's own problem with this release (no section, an empty one), or ''. */
   changelog: string;
   remoteMain: string;
+  /** The head the remote itself reports for its main (ls-remote), or '' when it has none or cannot be asked. */
+  remoteHead: string;
   scratchProblems: string[];
 }
 
@@ -126,11 +128,12 @@ export function factsOf(ctx: Ctx): Facts {
     token: Boolean(ctx.env[TOKEN]),
     changelog,
     remoteMain: git(ctx, ['rev-parse', trunk]),
+    remoteHead: git(ctx, remoteArgs(ctx, 'ls-remote', ctx.target, 'refs/heads/main')).split(/\s/)[0] ?? '',
     scratchProblems: ctx.scratch ? scratchProblems(ctx.registry ?? '', git(ctx, ['remote', 'get-url', ctx.remoteName])) : [],
   };
 }
 
-type Readiness = Pick<Facts, 'branch' | 'dirty' | 'token' | 'changelog' | 'remoteMain' | 'scratchProblems' | 'landed'>;
+type Readiness = Pick<Facts, 'branch' | 'dirty' | 'token' | 'changelog' | 'remoteMain' | 'remoteHead' | 'scratchProblems' | 'landed'>;
 
 /** Why the repo is not ready to release, one line per reason; an empty list means it is. A dry run does not need the token. */
 export function refusals(f: Readiness, { dryRun = false, scratch = false } = {}): string[] {
@@ -139,6 +142,7 @@ export function refusals(f: Readiness, { dryRun = false, scratch = false } = {})
     f.branch === 'HEAD' && 'HEAD is detached: release from a branch',
     f.dirty && 'the tree has uncommitted changes: the gate judges committed work',
     f.remoteMain === '' && 'the trunk (origin/main) is not fetched: fetch it first',
+    f.remoteMain !== '' && f.remoteHead !== f.remoteMain && (f.remoteHead === '' ? 'the remote has no main' : `the fetched trunk (${f.remoteMain.slice(0, 7)}) is not the remote's main (${f.remoteHead.slice(0, 7)}): fetch it first`),
     f.changelog !== '' && !f.landed && f.changelog,
     ...f.scratchProblems,
   ].filter((reason): reason is string => typeof reason === 'string');

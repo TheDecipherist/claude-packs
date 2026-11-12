@@ -2,6 +2,7 @@
   "id": "copy-source-before-deps",
   "why": "COPY . . before the package-file copy means a one-line code change reinstalls every dependency. Copy package.json + lockfile, install, then copy source.",
   "rule": ".claude/rules/dockerfile-production.md",
+  "exclude": [],
   "concepts": [
     "dockerfile"
   ],

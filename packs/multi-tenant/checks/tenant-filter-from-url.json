@@ -2,6 +2,7 @@
   "id": "tenant-filter-from-url",
   "why": "A query that takes its key from the URL and carries no tenant key reads or writes any tenant.",
   "rule": ".claude/rules/no-role-crosses-a-tenant.md",
+  "code": false,
   "globs": [
     "**/routes/**/*.ts",
     "**/routes/**/*.js",

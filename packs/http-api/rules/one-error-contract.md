@@ -15,3 +15,6 @@ Never do:
 - Answer an empty 200 when a dependency is down: that is a 503. A failure and nothing to report never look the same.
 - Send an error body by hand from a route or handler, or return a stack trace or a driver message to the client.
 </constraints>
+
+## Check
+Lesson check for this rule: `failure-is-not-empty`.

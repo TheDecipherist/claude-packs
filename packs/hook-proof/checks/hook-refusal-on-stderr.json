@@ -2,6 +2,7 @@
   "id": "hook-refusal-on-stderr",
   "why": "On exit 2 only stderr reaches Claude: a reason echoed to stdout is lost, and the refusal reads as nothing.",
   "rule": ".claude/rules/a-refusal-is-exit-2.md",
+  "code": false,
   "concepts": [
     "hook-files"
   ],

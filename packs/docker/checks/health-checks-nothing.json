@@ -2,6 +2,7 @@
   "id": "health-checks-nothing",
   "why": "A health check that always says ok keeps a broken service in rotation.",
   "rule": ".claude/rules/compose-pinned-and-closed.md",
+  "code": false,
   "globs": [
     "**/*.ts",
     "**/*.js",

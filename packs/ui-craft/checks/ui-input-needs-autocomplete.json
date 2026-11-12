@@ -2,6 +2,7 @@
   "id": "ui-input-needs-autocomplete",
   "why": "An email, password or phone field with no autocomplete makes everyone type it by hand.",
   "rule": ".claude/rules/forms-never-fight.md",
+  "code": false,
   "concepts": [
     "ui-markup"
   ],

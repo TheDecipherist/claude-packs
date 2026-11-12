@@ -2,6 +2,7 @@
   "id": "sh-no-pipe-to-shell",
   "why": "A download piped into a shell runs whatever the server sends, unread.",
   "rule": ".claude/rules/shell-strict-and-quoted.md",
+  "code": false,
   "concepts": [
     "shell"
   ],

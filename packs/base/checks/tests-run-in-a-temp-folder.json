@@ -2,6 +2,7 @@
   "id": "tests-run-in-a-temp-folder",
   "why": "A test target whose run environment names a path under the user's home reads and may write the user's own files, so it passes or fails by what this user has done in the app. Give the test copies in a fresh temporary folder, made by the test harness's one helper, and name that folder in place of the user's paths before the code under test starts.",
   "rule": ".claude/rules/tests-never-touch-user-files.md",
+  "code": false,
   "globs": [
     "**/CMakeLists.txt",
     "**/*.cmake"
