@@ -6,14 +6,16 @@ import { dirname, join } from 'node:path';
 import { real } from './project.mjs';
 import { cacheFolder } from './proxy-wire.mjs';
 import { readState } from '../resident/state.mjs';
-/** Whether a process is alive (signal 0 reaches it). */
-export const alive = (pid) => { try {
-    process.kill(pid, 0);
-    return true;
-}
-catch {
-    return false;
-} };
+/** Whether a process is alive: signal 0 reaches it, or it exists but another user owns it (EPERM). The one `alive` of the kit. */
+export const alive = (pid) => {
+    try {
+        process.kill(pid, 0);
+        return true;
+    }
+    catch (e) {
+        return e instanceof Error && 'code' in e && e.code === 'EPERM';
+    }
+};
 /** The pid files of the project's daemons, in the folders a daemon may have used (its own, and the /tmp one for a long path). */
 export function daemonsOf(dir, host) {
     const project = real(dir);

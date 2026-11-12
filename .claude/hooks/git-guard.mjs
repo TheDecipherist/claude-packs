@@ -37,6 +37,7 @@ import { gitLines, gitOut, gitRun } from './lib/git-run.mjs';
 import { headRead } from './lib/git-state.mjs';
 import { escapeRegExp } from './lib/glob.mjs';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mjs';
+import { isRecord, toJson } from './lib/json.mjs';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mjs';
 import { failed } from './lib/remote-heads.mjs';
 import { blankQuotes, dropHeredocs } from './lib/shell-lex.mjs';
@@ -205,7 +206,7 @@ export function house(cmd, cwd, env, cfg = {}) {
         if (ghRefused)
             return ghRefused;
         if (/\bgh\s+repo\s+create\b/.test(p) && ((owner && !p.includes(`${owner}/`)) || !p.includes('--private')))
-            return `A repo is created as ${owner}/<name> --private.`;
+            return `A repo is created as ${owner ? `${owner}/` : ''}<name> --private.`;
         if (/\bgit\b.*\b(remote\s+(add|set-url)|config)\b/.test(p) && new RegExp(`x-access-token|ghp_|github_pat_|${escapeRegExp(tok)}`).test(p)) {
             return 'The token is never stored in a remote URL or a config file. Name it on the push only.';
         }
@@ -221,7 +222,7 @@ const TOKEN_HELP = 'A token is used, never stored. Push with a one-shot credenti
 /** guards.git from the layout, as an object, whatever else the layout holds under it. */
 function gitGuards(guards) {
     const git = guards?.['git'];
-    return git !== null && typeof git === 'object' && !Array.isArray(git) ? git : {};
+    return isRecord(git) ? git : {};
 }
 const SELF = fileURLToPath(import.meta.url);
 /** The project's laws: its own layout (KF-8: an existing project opts in). */
@@ -251,7 +252,7 @@ export const hook = (event, ctx) => {
     const reason = house(command, event.cwd ?? ctx.cwd, env, cfg);
     if (!reason && (cfg.stopCacheMs ?? 1) > 0)
         landedLater(SELF, command, ctx.projectDir, ctx.env);
-    const stdout = warnings.length ? JSON.stringify({ systemMessage: warnings.join('\n') }) : '';
+    const stdout = warnings.length ? toJson({ systemMessage: warnings.join('\n') }) : '';
     return reason ? { ...refuse(`git-guard: ${reason}\n`), stdout } : { ...pass, stdout };
 };
 const TOKEN_URL = 'https://x-access-token:abc@github.com/a/b.git';

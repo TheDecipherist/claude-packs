@@ -11,12 +11,13 @@
 // (planet: DELAY, FILTER, REVERB): frozen IDs, not instance numbers. The role-name check ("the PAD slot") allows a listed
 // name before the concept word ("the DELAY planet"); an unlisted uppercase word is still a role. doctor: a list of strings.
 import { join } from 'node:path';
-import { parseJson } from './json.mjs';
+import { asRecord, isRecord, parseJson } from './json.mjs';
 import { readText } from './files.mjs';
 export const SHAPE_FILE = 'design/shape.json';
 export const EMPTY_SHAPE = { concepts: {}, exclude: ['out/**', 'build/**', 'third_party/**', 'JUCE/**', 'node_modules/**'] };
-const isRecord = (v) => typeof v === 'object' && v !== null;
-const asRecord = (v) => (isRecord(v) ? v : {});
+/** An object, or an empty one. Arrays are not objects here: a shape file holding a list where a table belongs reads as no rows
+ *  (before W10 an array passed as a record; its keys were its indexes, which matched nothing). */
+const recordOf = (v) => asRecord(v) ?? {};
 const isWhole = (v) => typeof v === 'number' && Number.isInteger(v);
 const strings = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []);
 /** An identifier as lower-case parts: "kSlotNames" -> k slot names; "slot2Gain" -> slot 2 gain. */
@@ -38,8 +39,8 @@ function compile(name, row) {
         }
     }
     const generatorName = String(row.generator ?? '').match(/^\s*([A-Za-z_]\w*)\s*\(/)?.[1] ?? null;
-    const selectors = asRecord(row.selectors);
-    const constants = asRecord(row.constants);
+    const selectors = recordOf(row.selectors);
+    const constants = recordOf(row.constants);
     return {
         name, row, shape: row.shape, count: isWhole(row.count) ? row.count : null, id: row.id ?? null,
         words, plural, single: single.length > 0 ? single : words, patterns, badPatterns: bad,
@@ -47,16 +48,16 @@ function compile(name, row) {
         names: new Set(strings(row.names).map((n) => n.toUpperCase())),
         selectors: Object.keys(selectors), constants: Object.keys(constants),
         // manifest prose (a constant's reason, a selector's description) quoted in a brief is never an instance literal
-        quotes: [...(Array.isArray(row.senses) ? row.senses : []), ...Object.values(constants).map((c) => asRecord(c).reason), ...Object.values(selectors)]
+        quotes: [...(Array.isArray(row.senses) ? row.senses : []), ...Object.values(constants).map((c) => recordOf(c).reason), ...Object.values(selectors)]
             .filter((q) => typeof q === 'string' && q.length > 3),
     };
 }
 export function normaliseShape(json) {
-    const top = asRecord(json);
+    const top = recordOf(json);
     const concepts = {};
-    const raw = isRecord(top.concepts) && !Array.isArray(top.concepts) ? top.concepts : {};
+    const raw = isRecord(top.concepts) ? top.concepts : {};
     for (const [name, row] of Object.entries(raw))
-        concepts[name] = compile(name, asRecord(row));
+        concepts[name] = compile(name, recordOf(row));
     return { concepts, exclude: Array.isArray(top.exclude) ? strings(top.exclude) : [], values: new Set(strings(top.values)), json };
 }
 const UNPARSED = Symbol('unparsed');
@@ -85,8 +86,8 @@ function conceptProblems(c) {
         out.push(`${at}: pattern does not compile: ${b}`);
     if (row.selectors !== undefined && (typeof row.selectors !== 'object' || Array.isArray(row.selectors)))
         out.push(`${at}: selectors must be { name: "what it picks" }`);
-    for (const [k, v] of Object.entries(asRecord(row.constants))) {
-        const constant = asRecord(v);
+    for (const [k, v] of Object.entries(recordOf(row.constants))) {
+        const constant = recordOf(v);
         if (!nonEmpty(constant.reason))
             out.push(`${at}: constant ${k} has no reason (a declared instance says why it is that one)`);
         if (constant.instance === undefined)
@@ -109,8 +110,8 @@ export function validateShape(shape) {
     if (shape.error)
         return [shape.error];
     const out = [];
-    const j = asRecord(shape.json);
-    if (!isRecord(j.concepts) || Array.isArray(j.concepts))
+    const j = recordOf(shape.json);
+    if (!isRecord(j.concepts))
         out.push(`${SHAPE_FILE}: "concepts" must be an object`);
     if (!Array.isArray(j.exclude))
         out.push(`${SHAPE_FILE}: "exclude" must be a list of globs`);

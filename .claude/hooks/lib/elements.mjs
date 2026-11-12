@@ -8,6 +8,7 @@
 import { readdirSync, statSync } from 'node:fs';
 import { extname, join, relative } from 'node:path';
 import { codeShapes } from './code-shapes.mjs';
+import { slash } from './files.mjs';
 import { matchesAny } from './glob.mjs';
 import { emittedFrom, extsOf } from './source-exts.mjs';
 export const CODE = extsOf('c', 'cpp', 'objc', 'js', 'ts');
@@ -86,7 +87,7 @@ export function codeFiles(root, skipGlobs = [], exts = CODE) {
     const walk = (dir) => {
         for (const e of readdirSync(dir, { withFileTypes: true })) {
             const abs = join(dir, e.name);
-            const rel = relative(root, abs).replace(/\\/g, '/');
+            const rel = slash(relative(root, abs));
             if (SKIP.test(rel) || matchesAny(rel, skipGlobs))
                 continue;
             if (e.isDirectory())

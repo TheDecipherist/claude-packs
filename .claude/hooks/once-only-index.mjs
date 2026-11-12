@@ -4,7 +4,7 @@
 // nothing. A write another hook refused never reaches here (Claude Code fires PostToolUse only for a call that ran), and a
 // call that failed says so in its response and is left out. It writes the index in the system's temp folder, never the project.
 //   node once-only-index.mjs --selftest
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isSource } from './lib/dup.mjs';
 import { loadIndex } from './lib/dup-index.mjs';
@@ -31,6 +31,8 @@ export const hook = (event, ctx) => {
             roots.add(checkoutRoot(ctx.projectDir, w.path, ctx.cwd));
     }
     for (const root of roots) {
+        if (ctx.candidates && root === resolve(ctx.projectDir))
+            continue; // the resident runner's main thread holds this checkout's index and brings it up to date when it is asked (KWB-201)
         const sample = join(root, 'x');
         loadIndex(root, { layout: layoutOfWrite(ctx, sample), shape: readShape(root) });
     }

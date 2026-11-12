@@ -6,6 +6,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { alive } from './daemon-find.mjs';
 export function buildSlots(env, tmp = tmpdir()) {
     return { dir: env.BUILDQ_DIR ?? join(tmp, 'claude-packs-buildq'), slots: Number(env.BUILDQ_SLOTS ?? 2) };
 }
@@ -20,15 +21,7 @@ export function ownerOf(slot) {
 }
 export function isLive(slot) {
     const pid = ownerOf(slot);
-    if (pid === null)
-        return false;
-    try {
-        process.kill(pid, 0);
-        return true;
-    }
-    catch (e) {
-        return e.code === 'EPERM'; // another user's job holds it
-    }
+    return pid !== null && alive(pid); // alive counts another user's job as live: it holds the slot
 }
 /** The pids that hold a slot now: a buildq job not among them is waiting for one. */
 export function slotOwners(dir) {

@@ -17,6 +17,7 @@
 import { basename, join } from 'node:path';
 import { closeOf, evaluate, scan, splitArgs, statements } from './program-read.mjs';
 import { isDir } from './files.mjs';
+import { addNamedWrites } from './program-named.mjs';
 const INLINE = { python: /^-[A-Za-z]*c$/, node: /^(-e|--eval|-p|--print|-pe)$/, perl: /^-[A-Za-z]*[eE]$/, ruby: /^-[A-Za-z]*e$/ };
 const TAKES_VALUE = {
     python: /^-[WXQ]$/,
@@ -137,13 +138,15 @@ export function programWrites({ lang, code: src }, at, readText, home) {
     const out = [];
     const handles = new Map();
     let unresolved = false;
-    // add() answers the last record of `out`, which is the one just made, or an earlier one when the path was unresolved (kept as it was; see the report).
+    // add() answers the record it made; a path that did not resolve makes none (KWB-177), so no later change reaches an earlier write.
     const add = (path, op, content, extra = {}) => {
-        if (path === null)
+        if (path === null) {
             unresolved = true;
-        else
-            out.push({ path, op, content, ...extra });
-        return out.at(-1);
+            return undefined;
+        }
+        const made = { path, op, content, ...extra };
+        out.push(made);
+        return made;
     };
     const modeArg = (e) => {
         if (e === undefined)
@@ -284,17 +287,7 @@ export function programWrites({ lang, code: src }, at, readText, home) {
     }
     for (const rec of handles.values())
         rec.site.content = rec.ok && rec.uses <= 1 ? rec.parts.join('') : null;
-    if (unresolved) {
-        const named = new Set(out.map((w) => w.path));
-        for (const l of lits) {
-            if (l === null || l.length > 300 || !/^[~\w.@+\-/]+$/.test(l) || /^[-.]+$|^-|^\d+(\.\d+)*$/.test(l) || !(l.includes('/') || /\.[A-Za-z][A-Za-z0-9]{0,7}$/.test(l)))
-                continue;
-            const p = at(l);
-            if (!named.has(p) && !reads.has(p)) {
-                named.add(p);
-                out.push({ path: p, op: 'write', content: null, named: true });
-            }
-        }
-    }
+    if (unresolved)
+        addNamedWrites(out, lits, at, reads);
     return out;
 }

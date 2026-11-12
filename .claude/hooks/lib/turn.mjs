@@ -9,20 +9,10 @@
 import { closeSync, fstatSync, openSync, readSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseJson } from './json.mjs';
+import { realPrompt } from './prompt-of.mjs';
 import { shellWrites } from './shell-writes.mjs';
-const NOT_A_PROMPT = /^\s*(?:<|\[|Stop hook feedback|SubagentStop hook feedback|making-check|Caveat:|This session is being continued)/;
+export { lastPrompt } from './last-prompt.mjs';
 const blocksOf = (e) => (Array.isArray(e.message?.content) ? e.message.content : []);
-function promptText(e) {
-    if (e.type !== 'user' || e.isMeta || e.isSidechain)
-        return null;
-    const c = e.message?.content;
-    if (typeof c === 'string')
-        return c;
-    if (!Array.isArray(c) || c.some((b) => b?.type === 'tool_result'))
-        return null;
-    const t = c.filter((b) => b?.type === 'text').map((b) => b?.text ?? '').join('\n');
-    return t || null;
-}
 // The transcript's last entries, read from its end: the last TAIL bytes, quadrupled until they hold the turn's prompt (KWB-24: a
 // long session's transcript is hundreds of MB, and reading all of it at every Stop took seconds). -> { entries, start }
 const TAIL = 1 << 20;
@@ -56,8 +46,7 @@ function tailEntries(path) {
                 lines.shift(); // a line cut by the start of the window
             const entries = parseEntries(lines);
             for (let i = entries.length - 1; i >= 0; i -= 1) {
-                const t = promptText(entries[i] ?? {});
-                if (t !== null && !NOT_A_PROMPT.test(t))
+                if (realPrompt(entries[i] ?? {}) !== null)
                     return { entries, start: i + 1 };
             }
             if (from === 0)
@@ -67,12 +56,6 @@ function tailEntries(path) {
     finally {
         closeSync(fd);
     }
-}
-/** The user's own words that started the current turn, or '' (no transcript, or no prompt in it). */
-export function lastPrompt(path) {
-    const { entries, start } = tailEntries(path);
-    const prompt = entries[start - 1]; // tailEntries starts the turn just after its prompt
-    return (start > 0 && prompt && promptText(prompt)) || '';
 }
 export function lastTurn(path) {
     const { entries, start } = tailEntries(path);

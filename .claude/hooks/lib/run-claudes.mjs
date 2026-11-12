@@ -9,6 +9,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readlinkSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { slash } from './files.mjs';
 export const LIVE_MS = 60 * 60 * 1000;
 export const UNSUPPORTED = 'finding a run by its Claude Code session is not supported on Windows yet: only run.sh runs are found';
 const MAX_UP = 8; // folders walked up from a session's working folder to its project
@@ -58,7 +59,7 @@ export function cwdsOf(pids, platform) {
 }
 /** The project a session's working folder belongs to: the first folder up (a worktree's main checkout first) that holds docs/workorders. */
 export function orderProjectOf(dir, exists = existsSync) {
-    const path = dir.replace(/\\/g, '/');
+    const path = slash(dir);
     const at = path.indexOf('/.claude/worktrees/');
     let d = at >= 0 ? path.slice(0, at) : path;
     for (let i = 0; i < MAX_UP; i += 1) {

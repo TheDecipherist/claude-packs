@@ -14,11 +14,10 @@
 // exit), so the repo lint's gates 11 and 12 leave it out by name.
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeSync } from 'node:fs';
 import { basename, extname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { logCall } from './event-log.mjs';
 import { readJson } from './json.mjs';
 import { readLayout } from './layout.mjs';
-import { real } from './project.mjs';
+import { isMain } from './project.mjs';
 import { isVerdict } from './verdict.mjs';
 import { readPayload } from './writes.mjs';
 export const LOG = join('.claude', 'hooks.log');
@@ -44,7 +43,8 @@ function maxBytes(root) {
     limits.set(key, bytes);
     return bytes;
 }
-const stamp = () => new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
+/** The time as a name part: `20261112-071314`. The one stamp of a rotated log's name (the daemon's log, in resident/, has a copy to drop). */
+export const stamp = () => new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
 // Moves a full log to .claude/logs/<name>-<time><ext>. A second writer finding it gone just carries on: nothing is lost.
 function rotate(root, file) {
     const ext = extname(file);
@@ -69,8 +69,8 @@ export function appendRotated(root, rel, text) {
     }
     catch { /* the log never stops a hook */ }
 }
-/** True when this module's file `url` is the program node was started with (never when the runner imports it). */
-export const isMain = (url) => Boolean(process.argv[1]) && real(process.argv[1] ?? '') === real(fileURLToPath(url));
+/** True when this module's file `url` is the program node was started with: project.mts owns it, every hook imports it from here. */
+export { isMain };
 /** The project the hook runs for: CLAUDE_PROJECT_DIR, else the folder the process runs in. */
 export const projectRoot = () => resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 export function hookLogLine({ event = '-', hook, ms, code, tool = '-', queue, source }) {
@@ -158,9 +158,17 @@ export function writeVerdict(verdict) {
             }
             catch { /* a closed pipe */ }
 }
-const stdinText = () => readFileSync(0, 'utf8');
+/** What arrives on stdin; empty when nothing does (a hook started by hand). The one stdin reader of the runner, the hooks and the bar. */
+export function readStdinText() {
+    try {
+        return readFileSync(0, 'utf8');
+    }
+    catch {
+        return '';
+    }
+}
 /** A hook run on its own: the time is from the process's start (node's own start-up included, which is what a hook costs). */
-export async function asHook(name, fn, readStdin = stdinText) {
+export async function asHook(name, fn, readStdin = readStdinText) {
     let text = '';
     try {
         text = readStdin();

@@ -10,7 +10,7 @@ import { gitLines, gitRun } from './git-run.mjs';
 import { matchesAny } from './glob.mjs';
 import { readLayout } from './layout.mjs';
 import { conceptsIn, makingLines, unknownConcepts } from './making-concepts.mjs';
-import { checkoutRoot, claudeRoot, insideProject } from './project.mjs';
+import { checkoutRoot, claudeRoot, insideProject, relInCheckout } from './project.mjs';
 import { readShape } from './shape.mjs';
 import { emittedFrom } from './source-exts.mjs';
 import { lastTurn, writesOfTurn } from './turn.mjs';
@@ -192,7 +192,7 @@ export function check(event, ctx) {
     const turn = lastTurn(path ?? '');
     const text = `${turn.text}\n${event.last_assistant_message ?? ''}`;
     const writes = writesOfTurn(turn, cwd, ctx.env).filter((w) => insideProject(ctx.projectDir, w.path, ctx.cwd));
-    const rel = (p) => relative(checkoutRoot(ctx.projectDir, p, ctx.cwd), p).replace(/\\/g, '/');
+    const rel = (p) => relInCheckout(ctx.projectDir, p, ctx.cwd);
     // Each write is judged against its own checkout (a worktree's own build.md, manifest and layout), never the session's folder:
     // a lead in the main checkout writing in a worktree has its making line in that worktree's build.md (Stellix WB-86).
     const byRoot = new Map();

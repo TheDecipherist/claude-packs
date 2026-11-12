@@ -55,3 +55,4 @@ for (const [key, put] of Object.entries(FILTER_FIELDS)) {
 
 ## Check
 `.claude/checks/field-map-over-if-runs.json` refuses an edit that **adds** three ifs on fields of the same object within a few lines of each other. It covers `!== undefined`, `!= null`, truthy tests, `?.`, `.` and `->`. Its companion is `lookup-over-if-chains`, for branches on one value. If a run ever slips through in a new shape, tighten the check rather than fixing the one case.
+Lesson check for this rule: `field-map-over-if-runs`.

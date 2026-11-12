@@ -11,14 +11,14 @@
 // reading a long transcript again; a judge writes no state, and the transcript is read only when a source file was named, so the
 // marker is gone (W4 report).
 import { existsSync } from 'node:fs';
-import { basename, dirname, join, relative } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
 import { parseJson } from './lib/json.mjs';
 import { readLayout } from './lib/layout.mjs';
-import { checkoutRoot, claudeRoot } from './lib/project.mjs';
+import { claudeRoot, relInCheckout } from './lib/project.mjs';
 import { selftest as selftestOf } from './lib/skill-first-selftest.mjs';
 import { pass, refuse } from './lib/verdict.mjs';
 const PICTURE = /\.(pdf|png|jpe?g|webp|gif|bmp|tiff?)$/i;
@@ -51,7 +51,7 @@ function rowsFor(file, project, at) {
 // The row a source file belongs to: by its name, or by a glob of its own checkout's layout.
 function sourceRow(file, cwd, project, at) {
     const path = full(file, cwd);
-    const rel = relative(checkoutRoot(at.projectDir, path, at.cwd), path).replace(/\\/g, '/');
+    const rel = relInCheckout(at.projectDir, path, at.cwd);
     const inGlobs = (r) => PICTURE.test(path) && !rel.startsWith('..') && matchesAny(rel, r.globs(checkoutLayout(path, at)));
     return rowsFor(path, project, at).find((r) => (r.named?.test(path) ?? false) || inGlobs(r)) ?? null;
 }

@@ -9,7 +9,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
 import { codeFolders, readLayout } from './lib/layout.mjs';
-import { checkoutRoot, claudeRoot } from './lib/project.mjs';
+import { claudeRoot, relInCheckout } from './lib/project.mjs';
 import { bashOf, editOf, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mjs';
 import { judgeVerdict } from './lib/writes.mjs';
 const SOURCE = /\.(c|cc|cpp|cxx|h|hh|hpp|mm|m|wgsl|metal|glsl|hlsl|slang)$/i;
@@ -18,7 +18,7 @@ export const isSource = (file, layout) => (layout.sourceFiles ? new RegExp(layou
 function outsideLayout(file, layout, ctx) {
     if (relative(ctx.projectDir, file).startsWith('..'))
         return null;
-    const rel = relative(checkoutRoot(ctx.projectDir, file, ctx.cwd), file).replace(/\\/g, '/');
+    const rel = relInCheckout(ctx.projectDir, file, ctx.cwd);
     if (rel.startsWith('..'))
         return null;
     const folders = codeFolders(layout);

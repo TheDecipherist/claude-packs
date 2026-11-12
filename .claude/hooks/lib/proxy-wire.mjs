@@ -5,9 +5,9 @@
 // stdout travels byte for byte (plain text too: SessionStart and UserPromptSubmit add plain stdout as context). A reply that is not
 // a whole record is a crash, never exit 0. A request whose stdin is over MAX_STDIN is the TypeScript path's. `deadline` is ms since
 // the epoch: the entry's timeout minus 1 s, by which the daemon answers with what it has.
-import { createHash } from 'node:crypto';
 import { join } from 'node:path';
-import { parseJson, toJson } from './json.mjs';
+import { sha256 } from './hash.mjs';
+import { isRecord, parseJson, toJson } from './json.mjs';
 export const PROTOCOL = 1;
 /** A request whose stdin is longer than this is judged by the TypeScript runner, not held in the daemon's memory (review-2 1.9). */
 export const MAX_STDIN = 64 * 1024 * 1024;
@@ -15,7 +15,6 @@ const MAX_HEADER = 1024 * 1024;
 const MAX_REPLY = 64 * 1024 * 1024;
 /** macOS's sun_path is 104 bytes and Linux's 108: past this the socket lives under /tmp (review-2 3.11). */
 export const MAX_SOCKET_PATH = 100;
-const isRecord = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
 /** One frame: its length, then its bytes. */
 const frame = (body) => {
     const n = Buffer.alloc(4);
@@ -66,12 +65,11 @@ export function decodeReply(buf) {
 export const crashReply = (why) => ({ code: 1, stdout: '', stderr: `claude-packs: the resident runner's reply was not whole (${why}), so this call was not judged by it\n`, fallback: 'ts' });
 /** The line a reply carries for the hooks that had not answered by the client's deadline. */
 export const overTime = (hooks) => `not judged by ${hooks.join(', ')} (over time)`;
-const sha = (text) => createHash('sha256').update(text).digest('hex');
 /** The first 16 hex characters of the lock's hash: what a daemon says its kit is, and what doctor compares with the project's lock. */
-export const lockHash = (lockText) => sha(lockText).slice(0, 16);
+export const lockHash = (lockText) => sha256(lockText, 16);
 /** The 16 hex characters that name a daemon: the user, the project's real path, the lock's hash and node's path. A kit update changes
  *  the lock, so a new lock means a new name, and another project or kit version never shares a daemon (review-2 3.4). */
-export const daemonKey = (uid, projectReal, lockText, nodePath) => sha(['claude-packs', uid, projectReal, sha(lockText), nodePath].join('\0')).slice(0, 16);
+export const daemonKey = (uid, projectReal, lockText, nodePath) => sha256(['claude-packs', uid, projectReal, sha256(lockText), nodePath].join('\0'), 16);
 /** The folder the daemon's files live in, and that it makes at mode 700: CLAUDE_PACKS_CACHE (a test's own), else
  *  $XDG_RUNTIME_DIR/claude-packs, else ~/Library/Caches/claude-packs (macOS) or ~/.cache/claude-packs. */
 export function cacheFolder(env, home, platform) {

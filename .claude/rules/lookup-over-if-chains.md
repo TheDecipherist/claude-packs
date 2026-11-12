@@ -57,3 +57,4 @@ return (builders[action] ?? buildDefault)(p);
 
 ## Check
 `.claude/checks/lookup-over-if-chains.json` refuses an edit that **adds** three `==`/`===` branches on the same value, and `lookup-over-ternary-chains` three `?` in one chain. Existing chains are only judged when an edit touches them. If a chain ever slips through in a new shape, tighten the check rather than fixing the one case.
+Lesson check for this rule: `lookup-over-if-chains`.

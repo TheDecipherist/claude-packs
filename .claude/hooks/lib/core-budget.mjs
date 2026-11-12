@@ -5,11 +5,11 @@
 // The environment, the platform and the layout are the caller's to pass, never read from the process here.
 import { cpus } from 'node:os';
 import { join } from 'node:path';
-import { readJson } from './json.mjs';
+import { isRecord, readJson } from './json.mjs';
 /** The layout's guards, read from the project the job runs in; empty when there is none. */
 export function projectLayout(root) {
     const layout = readJson(join(root, '.claude', 'layout.json'));
-    return typeof layout === 'object' && layout !== null && !Array.isArray(layout) ? layout : {};
+    return isRecord(layout) ? layout : {};
 }
 /** Cores every job together may use: BUILDQ_CORES, else layout guards.buildq.cores, else a third of the machine (at least 2). */
 export function coreBudget(env, layout = {}, cores = cpus().length) {

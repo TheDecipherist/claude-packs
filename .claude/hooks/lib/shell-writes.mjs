@@ -15,13 +15,12 @@
 //   `node shell-writes.mjs --json` reads { command, cwd } on stdin and prints the writes with before and after
 //   (the python hooks use this, so there is one reader of the shell). `--selftest`: each route and program form.
 // Text inside quotes, and a heredoc's body, is never read as a command.
-import { realpathSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { bareWords } from './command-prefix.mjs';
 import { isDir, readText } from './files.mjs';
-import { parseJson } from './json.mjs';
+import { asRecord, parseJson } from './json.mjs';
 import { programOf, programWrites } from './program-writes.mjs';
+import { isMain } from './project.mjs';
 import { cutHeredocs, lex } from './shell-lex.mjs';
 import { inPlaceFiles, runSed, sedPlan } from './shell-sed.mjs';
 export { readText }; // its importers' name for the file reader; files.mts owns it
@@ -237,21 +236,10 @@ export function afterText(w, before = readText(w.path) ?? '') {
         default: return { before, after: null };
     }
 }
-// True when this module is the program node was started with (never when a hook runner or another module imports it).
-const real = (p) => { try {
-    return realpathSync(p);
-}
-catch {
-    return resolve(p);
-} };
-const isMain = (url) => {
-    const argv1 = process.argv[1];
-    return argv1 !== undefined && real(argv1) === real(fileURLToPath(url));
-};
 // What the `--json` tail was asked: the command and the folder it ran in.
 const asked = (raw) => {
     const q = parseJson(raw || '{}', null);
-    const o = q !== null && typeof q === 'object' && !Array.isArray(q) ? q : {};
+    const o = asRecord(q) ?? {};
     return { command: typeof o.command === 'string' ? o.command : '', cwd: typeof o.cwd === 'string' ? o.cwd : null };
 };
 if (isMain(import.meta.url)) {

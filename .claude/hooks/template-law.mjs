@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { askedIndex, without } from './lib/asked-index.mjs';
 import { parametersOf } from './lib/code-shapes.mjs';
 import { isContent } from './lib/content.mjs';
 import { TEMPLATE, TESTS, copiesNeeded, skippedBy } from './lib/elements.mjs';
@@ -74,7 +75,8 @@ function remade(defs, entries, rel) {
     return null;
 }
 const countById = (list) => list.reduce((m, s) => m.set(s.id, (m.get(s.id) ?? 0) + 1), new Map());
-export function judgeWrite(w, rel, ctx) {
+/** `asked`: the index of the files that share something with the event's writes, as the daemon answered it (lib/asked-index.mts); without it the checkout's whole index is read. */
+export function judgeWrite(w, rel, ctx, asked = null) {
     if (w.op === 'delete' || w.after === null || !EXTS.has(extname(w.path)) || matchesAny(rel, TESTS))
         return null;
     const before = shapesOfText(w.before ?? '', rel);
@@ -90,7 +92,7 @@ export function judgeWrite(w, rel, ctx) {
     if (matchesAny(rel, skip) || isContent(rel, layout))
         return null;
     const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
-    const entries = repoIndex(root, [...TESTS, ...skip], layout);
+    const entries = asked ? without(asked, [...TESTS, ...skip]) : repoIndex(root, [...TESTS, ...skip], layout);
     const others = copiesElsewhere(entries, rel);
     for (const s of fresh) {
         const elsewhere = others.get(s.id) ?? [];
@@ -101,7 +103,10 @@ export function judgeWrite(w, rel, ctx) {
     const near = nearCopy(statements, Object.entries(entries).filter(([f]) => f !== rel && sameLanguage(rel, f)).map(([file, e]) => ({ file, st: e.st })));
     return near ? nearRefusal(near) : remade(defs, entries, rel);
 }
-export const hook = (event, ctx) => judgeVerdict(event, { name: 'template-law', write: (w, rel) => judgeWrite(w, rel, ctx) }, ctx);
+export const hook = async (event, ctx) => {
+    const asked = await askedIndex(event, ctx); // null with no daemon to ask, or a write in a worktree
+    return judgeVerdict(event, { name: 'template-law', write: (w, rel) => judgeWrite(w, rel, ctx, asked) }, ctx);
+};
 const EL = (t) => `<div class="tile"><h3 class="name">${t}</h3><p>${t}</p></div>\n`;
 /** The worktree's branch already has this element; main does not: each checkout is read on its own. */
 export const worktreeCase = {
@@ -144,6 +149,8 @@ export function selftest() {
         'src/rows.cpp': table('kOne'),
         'vendored/gate.h': reader('tapOf', 'key'),
         'kept/gate.h': reader('holdOf', 'key'),
+        'src/types.d.mts': 'export function scanWordsAll(a: string, b: string): string;\nexport function scanWordsAll(a: string): string;\n',
+        'docs/workorders/x/probes/probe.mts': 'export function scanLinesAll(a: string, b: string): string {\n  return a + b;\n}\n',
     };
     const dir = scratchProject(files, { folders: { vendored: { path: 'vendored', kind: 'copy' } }, concepts: {}, guards: { templates: { exclude: ['kept/**'] } } });
     const before = snapshot(dir); // the project as the judge finds it: the rows below must leave it as it is
@@ -162,6 +169,8 @@ export function selftest() {
         ['a tutorial sample in a content folder', w('articles/guide/gate.h', reader('tapOf', 'key')), 0],
         ['a near copy, with a line added every few lines', w('src/steps2.py', steps('load_more', true)), 2],
         ['a function the repo already has, written again', w('src/other.ts', 'export function formatDateRange(x, y) {\n  return `${x} to ${y}`;\n}\n'), 2],
+        ['a function a declaration file states is no second definition (KWB-182)', w('src/scan.mts', 'export function scanWordsAll(a: string, b: string): string {\n  return b + a;\n}\n'), 0],
+        ['a function a docs probe script defines is no second definition (KWB-182)', w('src/lines.mts', 'export function scanLinesAll(a: string, b: string): string {\n  return b + a;\n}\n'), 0],
         ['a plain-word name is not judged', w('src/plain.ts', 'export function render(x) {\n  return x;\n}\n'), 0],
         ['the same name in another language', w('src/dates.py', 'def formatDateRange(a, b):\n    return a\n'), 0],
         ['the component used three times', w('src/use.tsx', '<Card t="a" />\n<Card t="b" />\n<Card t="c" />\n'), 0],

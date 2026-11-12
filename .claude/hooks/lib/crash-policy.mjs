@@ -40,7 +40,7 @@ export function crashVerdict(root, ev, judged, now) {
         return { stdout: notice(`${said}\n${after}`) };
     const held = readHeld(root);
     const keys = crashed.map((c) => keyOf(ev, c.hook));
-    if (keys.every((k) => held[k]))
+    if (keys.every((k) => (held[k] ?? -Infinity) > now - HOLD_MS))
         return { stdout: notice(`${said}\nThe call went through unjudged, and the crash is logged (\`logs crashes\`). ${after}`) };
     if (!hold(root, held, keys, now))
         return { stdout: notice(said) };

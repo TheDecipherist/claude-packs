@@ -31,3 +31,6 @@ Never do:
 - Copy an element and change it: a one-off is a second template, and a second place to fix. A real exception says so on its line: `one-off: <reason>`.
 - Skip the structural pass: instances with their own code path are how one of four identical slots came to behave differently. An instance that has its own code path is not an instance, and is tested on its own.
 </constraints>
+
+## Check
+Lesson check for this rule: `one-walk-per-template`.

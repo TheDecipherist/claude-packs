@@ -12,11 +12,12 @@
 // index it reads is brought up to date in memory only. Keeping it up to date after a write that happened is
 // once-only-index (PostToolUse, role recorder), so a write another hook refused never reaches the index.
 //   node once-only.mjs --selftest   (the rows are in lib/once-only-selftest.mts)
-import { relative } from 'node:path';
+import { relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isContent } from './lib/content.mjs';
 import { changedLines, copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './lib/dup.mjs';
-import { judgeCopyWrites } from './lib/dup-index.mjs';
+import { slash } from './lib/files.mjs';
+import { judgeCopyWrites, judgeCopyWritesAsked } from './lib/dup-index.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mjs';
 import { FN, selftest as rows } from './lib/once-only-selftest.mjs';
@@ -41,7 +42,7 @@ function judged(event, ctx) {
         if (w.after === null || !isSource(w.path) || isGenerated(w.after))
             continue;
         const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
-        const rel = relative(root, w.path).replace(/\\/g, '/');
+        const rel = slash(relative(root, w.path));
         const layout = layoutOfWrite(ctx, w.path);
         const shape = readShape(root);
         if (matchesAny(rel, [...excludeGlobs(layout, shape), ...copyGlobs(layout)]) || isContent(rel, layout))
@@ -53,20 +54,21 @@ function judged(event, ctx) {
     return { list, gone };
 }
 /** What the write repeats: the refusal's text, or null when it repeats nothing the repo has. */
-export function copiesIn(event, ctx) {
+export async function copiesIn(event, ctx) {
     const { list, gone } = judged(event, ctx);
     if (!list.length)
         return null;
     const found = [];
-    // each checkout written to: its index finds the candidates (built once, then only changed files are read again), jscpd
-    // confirms on those files alone (lib/dup-index.mts judgeCopyWrites)
+    // each checkout written to: its index finds the candidates (the resident runner's main thread holds the main checkout's, a worktree's
+    // is read here: built once, then only changed files are read again), jscpd confirms on those files alone (lib/dup-index.mts)
     for (const root of new Set(list.map((j) => j.root))) {
         const mine = list.filter((j) => j.root === root);
         const first = mine[0];
         if (!first)
             continue;
         const writes = mine.map((j) => ({ path: j.w.path, after: j.w.after ?? '', range: j.range }));
-        const r = judgeCopyWrites(root, writes, { env: ctx.env, layout: first.layout, shape: first.shape, ignore: gone, persist: false });
+        const options = { env: ctx.env, layout: first.layout, shape: first.shape, ignore: gone, persist: false };
+        const r = ctx.candidates && root === resolve(ctx.projectDir) ? await judgeCopyWritesAsked(root, writes, ctx.candidates, options) : judgeCopyWrites(root, writes, options);
         if (r.error)
             return null; // once-only could not judge (doctor shows a missing detector)
         const base = realPath(root);
@@ -80,8 +82,8 @@ export function copiesIn(event, ctx) {
     const more = listed.length > 6 ? `\n  ... and ${listed.length - 6} more` : '';
     return `BLOCKED by once-only: this write repeats code the repo already has.\n${listed.slice(0, 6).map((f) => `  ${f}`).join('\n')}${more}\n${HOW}`;
 }
-export const hook = (event, ctx) => {
-    const why = copiesIn(event, ctx);
+export const hook = async (event, ctx) => {
+    const why = await copiesIn(event, ctx);
     return why === null ? pass : refuse(why);
 };
 const writeAt = (file, content) => ({ tool_name: 'Write', tool_input: { file_path: file, content } });

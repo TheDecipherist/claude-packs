@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { put, scratchDir, walk } from './files.mjs';
+import { put, scratchDir, slash, walk } from './files.mjs';
 import { gitRun } from './git-run.mjs';
 import { toJson } from './json.mjs';
 const made = [];
@@ -35,7 +35,7 @@ const RUNNER_LOGS = /(?:^|\/)\.claude\/(?:hooks\.log|logs\/)/;
 export function snapshot(dir) {
     const seen = new Map();
     for (const file of walk(dir)) {
-        const rel = relative(dir, file).replace(/\\/g, '/');
+        const rel = slash(relative(dir, file));
         if (RUNNER_LOGS.test(rel))
             continue;
         const s = statSync(file);

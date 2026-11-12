@@ -11,7 +11,7 @@
 import { relative, resolve } from 'node:path';
 import { checkoutRoot, commandLeavesProject, insideProject } from './project.mjs';
 import { computeEdit } from './apply-edit.mjs';
-import { parseJson } from './json.mjs';
+import { isRecord, parseJson } from './json.mjs';
 import { afterText, readText, shellWrites } from './shell-writes.mjs';
 import { pass, refuse } from './verdict.mjs';
 export const WRITE_TOOLS = ['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Bash'];
@@ -58,7 +58,7 @@ export function writesOf(payload, base, env) {
 /** The event on stdin as a value, or null when it is not a JSON object. The one place a payload is parsed. */
 export function readPayload(text) {
     const event = parseJson(text);
-    return event !== null && typeof event === 'object' && !Array.isArray(event) ? event : null;
+    return isRecord(event) ? event : null;
 }
 // One guard's frame (0.10.0): read the event, judge its shell command (`command(text, cwd)`, unless it leaves the project) and
 // every write inside the project (`write(w, rel)`, rel from the file's own checkout); the first finding refuses, exit 2.

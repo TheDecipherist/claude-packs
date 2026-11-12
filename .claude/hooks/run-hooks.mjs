@@ -19,14 +19,14 @@ var __rewriteRelativeImportExtension = (this && this.__rewriteRelativeImportExte
 // line saying what was cut. Every hook still runs on its own too (node .claude/hooks/a.mjs, its selftest, a hand-made entry).
 //   node run-hooks.mjs <hook path or name>...   (stdin: the event)
 //   node run-hooks.mjs --selftest
-import { readFileSync, rmSync, writeSync } from 'node:fs';
+import { rmSync } from 'node:fs';
 import { basename, dirname, extname, isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { crashVerdict } from './lib/crash-policy.mjs';
 import { logCall } from './lib/event-log.mjs';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mjs';
 import { keepGitState, noteEventGitState } from './lib/git-state.mjs';
-import { appendRotated, isMain, logHook, projectRoot, readHookLog } from './lib/hook-log.mjs';
+import { appendRotated, isMain, logHook, projectRoot, readHookLog, readStdinText, writeVerdict } from './lib/hook-log.mjs';
 import { hookRowsFor, readHookTable } from './lib/hook-table.mjs';
 import { parseJson, toJson } from './lib/json.mjs';
 import { readLayout } from './lib/layout.mjs';
@@ -225,11 +225,7 @@ if (isMain(import.meta.url)) {
         keepGitState(args[1] ?? process.cwd(), process.env);
         process.exit(0);
     }
-    let text = '';
-    try {
-        text = readFileSync(0, 'utf8');
-    }
-    catch { /* no stdin */ }
+    const text = readStdinText();
     const root = projectRoot();
     // the event arrived when node started: its own start-up is part of what the event cost
     const arrival = { at: Date.now() - Math.round(process.uptime() * 1000), source: 'runner' };
@@ -239,12 +235,7 @@ if (isMain(import.meta.url)) {
         : table !== null ? await runEvent(table, HERE, text, root, caller, arrival)
             : { code: 1, stdout: '', stderr: `${RUNNER}: ${join(HERE, 'hooks.json')} is missing or is not the hook table, so no hook judged this call: run claude-packs update\n` };
     // written at once, then out: a hook may leave a timer or a child behind, and the event never waits on it
-    for (const [fd, s] of [[1, r.stdout], [2, r.stderr]])
-        if (s)
-            try {
-                writeSync(fd, s);
-            }
-            catch { /* a closed pipe */ }
+    writeVerdict(r);
     // the git facts the hooks of the next event read are kept again, detached, when they went stale (lib/git-state.mts)
     const eventCwd = asRecord(parseJson(text))?.['cwd'];
     if (table !== null)

@@ -1,11 +1,11 @@
 // merge-out: what the runner does with the stdout of the hooks of one event: one is passed as it is, JSON objects are merged
 // (their messages joined), anything else is joined by lines; the merged text is held to OUT_CAP (Claude Code cuts a hook's output at
 // 10,000 characters), with a line saying what was cut. Split from run-hooks.mts (W8.1) so the runner stays within the file limit.
-import { parseJson, toJson } from './json.mjs';
+import { asRecord, parseJson, toJson } from './json.mjs';
 /** What the merged text of one event may hold: Claude Code cuts a hook's output at 10,000 characters. */
 export const OUT_CAP = 9000;
-/** A value as an object, or null when it is an array, a scalar or nothing. */
-export const asRecord = (value) => (value !== null && typeof value === 'object' && !Array.isArray(value) ? value : null);
+// asRecord lives in json.mts; the resident files still import it from here until they are pointed at json.mts (W10 review, finding 2).
+export { asRecord };
 const cutNote = (n) => `\n[run-hooks: ${n} characters of the hooks' output were cut here; Claude Code cuts a hook's output at 10,000]\n`;
 // The text of the longest string field a merged JSON object carries, found where hooks put their words.
 function wordiest(obj) {

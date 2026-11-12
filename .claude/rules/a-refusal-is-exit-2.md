@@ -33,3 +33,4 @@ Never do:
 
 ## Check
 `doctor` is red for a hook that crashed since it or a file in `hooks/lib/` last changed (`.claude/hooks.log`), until `logs clear <hook> fixed|superseded "<why>"`, and for one no settings entry runs. It cannot see a hook killed at its timeout: that leaves no line.
+Lesson checks for this rule: `hook-catch-must-not-allow`, `hook-command-no-pipe`, `hook-exit-1-does-not-block`, `hook-no-or-true`, `hook-refusal-on-stderr`.
