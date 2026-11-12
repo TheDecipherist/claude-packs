@@ -8,7 +8,8 @@ import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { assert, fresh, test } from '../../kit-cli.mts';
-import { inFlight, machineHost } from '../../../packs/base/hooks/lib/governor.mts';
+import { inFlight, machineHost, take } from '../../../packs/base/hooks/lib/governor.mts';
+import { HOLD_MS, Pauser, RESUME_GAP_MS } from '../../../packs/base/hooks/resident/governor-pause.mts';
 import { settingsFor } from '../../../packs/base/hooks/lib/governor-settings.mts';
 import { grantedEnv, lowPriority, withFlags } from '../../../packs/base/tools/governed.mts';
 
@@ -94,5 +95,66 @@ test('a killed job\'s slots are freed on the next read', async () => {
     child.kill('SIGKILL');
     // the sleep's own group outlives governed's kill: the teardown ends it whatever happened
     if (group !== null) try { process.kill(-group, 'SIGKILL'); } catch { /* already gone */ }
+  }
+});
+
+/** A spinner in a process group of its own: a governed job's command, as the watchdog finds it. */
+const spinner = (): number => {
+  const child = spawn('sh', ['-c', 'while :; do :; done'], { detached: true, stdio: 'ignore' });
+  child.unref();
+  return child.pid ?? 0;
+};
+/** A process's state letter from ps: T when it is stopped. */
+const stateOf = (pid: number): string => spawnSync('ps', ['-o', 'stat=', '-p', String(pid)], { encoding: 'utf8' }).stdout.trim().slice(0, 1);
+
+test('planted spinner jobs over the ceiling for 30 s: the lowest priority paused first, the oldest never, resumed when the load falls', () => {
+  const env = planted('10');
+  let now = 1_000_000;
+  let load = 0;
+  const host = { ...machineHost(env), now: () => now, load: () => load };
+  const groups = [spinner(), spinner(), spinner()];
+  const lines: string[] = [];
+  try {
+    // the oldest job holds priority 0.1: still never paused; then 0.3 and 0.8
+    const [oldest, low, high] = [0.1, 0.3, 0.8].map((priority, i) => {
+      now += 1000;
+      const r = take(host, { kind: 'test', want: 1, priority, pid: process.pid, pgid: groups[i] ?? 0 });
+      assert.ok(r.ok);
+      return r.grant.id;
+    });
+    const pauser = new Pauser({ host, self: process.pid, log: (l) => lines.push(l), signal: (pgid, sig) => process.kill(-pgid, sig) });
+    const paused = (): string[] => inFlight(host).jobs.filter((j) => j.pausedAt !== null).map((j) => j.id);
+    load = 9;   // the ceiling on 10 cores is 7
+    pauser.observe();
+    now += HOLD_MS - 1;
+    pauser.observe();
+    assert.deepEqual(paused(), [], 'nothing is paused before the load has held for 30 s');
+    now += 1;
+    pauser.observe();
+    assert.deepEqual(paused(), [low], 'the lowest priority (but the oldest) is paused first');
+    assert.equal(stateOf(groups[1] ?? 0), 'T', 'its process group is stopped');
+    now += HOLD_MS;
+    pauser.observe();
+    assert.deepEqual(paused().sort(), [low, high].sort(), 'then the highest');
+    now += HOLD_MS;
+    pauser.observe();
+    assert.deepEqual(paused().sort(), [low, high].sort(), 'the oldest job is never paused');
+    assert.notEqual(stateOf(groups[0] ?? 0), 'T');
+    load = 6.5;   // under the ceiling, not under it less 10 %: still paused
+    now += RESUME_GAP_MS;
+    pauser.observe();
+    assert.equal(paused().length, 2);
+    load = 5;
+    pauser.observe();
+    assert.deepEqual(paused(), [low], 'the highest priority is resumed first');
+    assert.notEqual(stateOf(groups[2] ?? 0), 'T');
+    now += RESUME_GAP_MS;
+    pauser.observe();
+    assert.deepEqual(paused(), []);
+    assert.notEqual(stateOf(groups[1] ?? 0), 'T', 'pausing, never killing: the spinner runs on');
+    assert.ok(lines.some((l) => l.includes(`paused ${low}`)) && lines.some((l) => l.includes(`resumed ${high}`)), lines.join('\n'));
+    assert.ok(oldest !== undefined);
+  } finally {
+    for (const g of groups) try { process.kill(-g, 'SIGKILL'); } catch { /* gone */ }
   }
 });

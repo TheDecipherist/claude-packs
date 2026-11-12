@@ -129,6 +129,7 @@
     "hooks/resident.mts": ["test/hooks/base/resident-parts.test.mts", "test/hooks/base/resident.test.mts"],
     "hooks/resident/agent-board.mts": ["test/unit/hooks-lib/agent-board.test.mts"],
     "hooks/resident/event.mts": ["test/hooks/base/resident.test.mts"],
+    "hooks/resident/governor-pause.mts": ["test/tools/base/governed.test.mts"],
     "hooks/resident/index.mts": ["test/hooks/base/resident-parts.test.mts"],
     "hooks/resident/judge-check.mts": ["test/hooks/base/resident.test.mts"],
     "hooks/resident/lifecycle.mts": ["test/hooks/base/resident-parts.test.mts"],
