@@ -44,3 +44,18 @@ same numbers under it; `counts --check` red when the graph or the table disagree
 number). Load the `dataviz` skill before choosing colours and marks. The README text around the graph is the lead's: write only
 the generated block between markers named like the other generated tables, and its marker pair, at the end of the README's
 opening section.
+
+## reds: four reds the gates see since wave 2's merge
+
+Seen in the lead's partial gate (`build/session2/gate2-partial.txt` in the main checkout) and in wave 3's agent gates, each also
+on the unchanged trunk: (1) git-guard's selftest case "kept Stop look: within about a second of GitHub, never its 3 s" (in
+"git-guard: its selftest passes in an install" and "the house hooks pass their selftests"); (2) "every installed hook writes one
+timing line per call: time, event, hook, ms, exit code" (once-only-index wrote no timing line); (3) "doctor is red on a hook that
+sleeps 300 ms at one event, and names the hook and the event"; (4) "git commit, git add and the other git calls never wait on the
+network or scan the tree: each hook p50 under 50 ms, worst under 500 ms". Wave 2's budgets change (merged in the order's branch:
+the daemon answers PostToolUse before its recorders run; git-guard's law on the kept look and remote-tracking refs; the daemon's
+indexes built at start in a worker) is the first suspect for (1) to (3); read `docs/workorders/typescript/agents/budgets-report.md`.
+For each: run it alone on a quiet machine (load under 6), say whether it is red there, find the cause, and fix the code (or the
+test, when the test is what is wrong, saying why); a timing case that only fails under load is made to measure what it means
+(a count of network calls, a process count) rather than wall time, where it can. Log nothing in `workflow-bugs.md` (the lead
+does): give each red's cause, fix and test in your report. Your branch is cut from the trunk after wave 3's first two merges.
