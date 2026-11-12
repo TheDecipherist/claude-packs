@@ -18,8 +18,9 @@ export interface Step {
   run: (ctx: Ctx, f: Facts, log: (line: string) => void) => void;
 }
 
-/** What a dry run says a step takes where no real run of this tree measured it (seconds, from the W9 measurements on the Mac). */
-export const ESTIMATED_S: Record<StepId, number> = { gate: 90, bump: 2, changelog: 1, generators: 30, proxy: 8, land: 3, verify: 3, publish: 20, tag: 1, release: 2 };
+/** What a dry run says a step takes where no real run of this tree measured it (seconds: the medians of the W9 measurements on the
+ *  Mac for a change reaching a few tests; a gate over a core lib took 400 s and one touching every pack 277 s). The GitHub release is a guess. */
+export const ESTIMATED_S: Record<StepId, number> = { gate: 15, bump: 1, changelog: 1, generators: 5, proxy: 1, land: 1, verify: 1, publish: 4, tag: 1, release: 2 };
 
 const TAIL_LINES = 40;
 const SAID_LINES = 6;

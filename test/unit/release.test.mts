@@ -70,6 +70,9 @@ test('the steps run in the order of the work order, each with an estimate, and t
   const now = new Date('2026-11-12T10:00:00Z');
   assert.deepEqual(parseArgs(['major', '--dry-run'], '/k', now), { root: '/k', kind: 'major', dryRun: true, date: '2026-11-12' });
   assert.deepEqual(parseArgs(['patch', '--registry', 'http://localhost:4873', '--remote', 'scratch'], '/k', now), { root: '/k', kind: 'patch', dryRun: false, date: '2026-11-12', registry: 'http://localhost:4873', remote: 'scratch' });
+  const other = parseArgs(['major', '--dry-run', '--root', '/other'], '/k', now);
+  assert.ok(typeof other !== 'string');
+  assert.equal(other.root, '/other', '--root plans another checkout');
   assert.match(String(parseArgs([], '/k', now)), /^usage/);
   assert.match(String(parseArgs(['patch', '--registry'], '/k', now)), /needs a url/);
 });
