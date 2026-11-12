@@ -1,4 +1,4 @@
-# Session 2, wave 2: three agents (KWB-199, the budgets, W10's rows left); the lead writes W10's ledger
+# Session 2, wave 2: four agents (KWB-199, the budgets, W10's rows left, W10b's review); the lead writes W10's ledger
 
 The order is `docs/workorders/typescript/workorder.md`, run unattended from its `PROMPT.md` (read its constraints). The rules
 for every agent are those of `briefs/S2-wave1.md`, section "Rules for every agent", with your own name and branch; they hold
@@ -82,3 +82,16 @@ switched on alone imports the opt-in `user-asks` and crashes: make the import so
 under a declared `buildOutput` passes, a write into it still refused). Each in its own commit; report each row's cause, fix and
 test for the lead to close in `workflow-bugs.md`. Run `node scripts/counts.mts` and `node scripts/noop-pin.mts` if an installed
 file changed, and read the noop diff.
+
+## w10b-review: W10b item 4, an independent read of the daemon, the proxy and the sampler
+
+You did not write this code. Read it for DRY and best practice: `packs/base/hooks/resident.mts`, `packs/base/hooks/resident/`,
+`packs/base/hooks/lib/proxy-wire.mts`, `packs/base/hooks/lib/daemon-find.mts`, `packs/base/hooks/lib/child-group.mts`, `proxy/*.go`
+(client, daemon, status, sample), `scripts/build-proxy.mts`. Questions: is there one owner for each of the framing, the socket's name,
+the cache folder, the lock hash, the deadline and the process-group kill, across TypeScript and Go (a constant both languages need
+should come from one table and be generated for the other, never written twice)? Is every error path closed (sockets, workers,
+children, files, timers)? Is there global state outside the main thread's owners? Anything else a senior reviewer would refuse. For
+each finding: file and symbol (never a line number), what is wrong, the smallest fix, its size (S, M, L). Write
+`docs/workorders/typescript/review/w10b-review.md` in your worktree and nothing else (read-only work otherwise; you may run `go vet`,
+`go test ./proxy/...` and read-only commands). Count the findings at the top. Note: another agent of this wave is changing the
+daemon's index start and git-guard; read the code as it is on your branch.
