@@ -712,7 +712,9 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
    a before-and-after section for every step W0 to W10 (the user, 2026-11-12: "keep a detailed comparison report of before and
    after on all steps so we can showcase how sick version 2.0 gets"), each row a number from that step's `build/evidence/` with its
    file named (gate times per changed file, the suite's wall and its slowest file, init and update and doctor cold and cached, the
-   hook wall per event and per tool through the runner and the proxy, Stop's p50 and p95 on the replay, the release's wall per
+   hook wall per event and per tool through the runner and the proxy, Stop's p50 and p95 on the replay, the replay's summed hook
+   wait, its mean per event, per prompt and per tool call, the node processes started and the hook CPU (every total a sum over
+   the real events, never a median times a count), the release's wall per
    kind of change, npm pack's size, tsc's build, the copies removed per helper, the files and lines per folder, the pack files
    passing the template, the hand-kept facts now generated, the faults found by typing), the targets missed in their own rows with
    the reason; then a showcase page `docs/workorders/typescript/showcase.md`, the ten biggest wins as before, after and the factor,
