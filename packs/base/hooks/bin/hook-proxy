@@ -1,6 +1,7 @@
 #!/bin/sh
 # The hook proxy picker (typescript order W8.2, d-13, review-2-go 3.6, 5.4). settings.json runs this for every hook event:
 #   sh "$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy" <timeout seconds>
+# and, as the status line (W8.6), with the word `status`.
 # It picks this machine's binary by `uname` from the user's cache (the install puts it there; a project's git holds no binary, so a
 # clone on another platform picks its own) and execs it. When there is none for this machine, or the OS is older than Go's minimum
 # (macOS 12 = Darwin 21, Linux kernel 3.2), it execs the TypeScript runner, which judges the same event the same way, only slower.
@@ -8,6 +9,8 @@
 root=${CLAUDE_PROJECT_DIR:-.}
 timeout=$1
 node_runner() { exec node "$root/.claude/hooks/run-hooks.mjs"; }
+# `status` (the status line, W8.6) is the same picker with another word: with no binary it draws the TypeScript status line instead
+if [ "$timeout" = status ]; then node_runner() { exec node "$root/.claude/tools/statusline.mjs"; }; fi
 
 # shellcheck disable=SC2046
 set -- $(uname -srm 2>/dev/null)

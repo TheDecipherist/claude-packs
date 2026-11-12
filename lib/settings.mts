@@ -78,17 +78,20 @@ export function orderHooks(hooks: readonly HookEntry[], isOurs: (command?: strin
 interface StatusLine { command: string; [field: string]: unknown }
 const isStatusLine = (line: unknown): line is StatusLine => typeof line === 'object' && line !== null && 'command' in line && typeof line.command === 'string';
 const isKitStatusLine = (line: unknown, tool: string): boolean => isStatusLine(line) && slash(line.command).includes(`.claude/${tool}`);
+const PROXY_STATUS = `sh "$CLAUDE_PROJECT_DIR/${PICKER}" status`;
+const isProxyStatusLine = (line: unknown): boolean => isStatusLine(line) && slash(line.command).includes(`${PICKER}" status`);
 
 function syncStatusLine(settings: Settings, packNames: readonly string[], layout: Partial<Layout>): SyncResult['statusLine'] {
   const line = packNames.map((name) => readPack(name).statusLine).find(isStatusLine);
   const tool = line?.command.match(/\.claude\/(tools\/[\w.-]+\.mjs)/)?.[1];
-  const ours = tool !== undefined && isKitStatusLine(settings.statusLine, tool);
+  const ours = tool !== undefined && (isKitStatusLine(settings.statusLine, tool) || isProxyStatusLine(settings.statusLine));
   if (line && tool !== undefined && !isDisabled(layout, tool)) {
     if (settings.statusLine && !ours) return 'kept';
-    settings.statusLine = line;
+    // W8.6: the Go proxy serves the line (`hook-proxy status`, once a second) unless the project switched the proxy off
+    settings.statusLine = isDisabled(layout, 'hooks/bin/hook-proxy') ? line : { ...line, command: PROXY_STATUS };
     return 'set';
   }
-  const anyKit = isKitStatusLine(settings.statusLine, 'tools/statusline.mjs');
+  const anyKit = isKitStatusLine(settings.statusLine, 'tools/statusline.mjs') || isProxyStatusLine(settings.statusLine);
   if (anyKit) delete settings.statusLine;
   return anyKit ? 'removed' : null;
 }

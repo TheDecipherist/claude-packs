@@ -161,8 +161,15 @@ test('an install wires the kit\'s status line where the project has none, keeps 
   const line = (): { command?: string; refreshInterval?: number } | undefined =>
     readJson<{ statusLine?: { command?: string; refreshInterval?: number } }>(join(claudeDir, 'settings.json'))?.statusLine;
   assert.equal(syncSettings(claudeDir, ['base'], {}).statusLine, 'set');
-  assert.match(line()?.command ?? '', /\.claude\/tools\/statusline\.mjs/);
-  assert.equal(line()?.refreshInterval, 5);   // W8.4: each refresh is a node start
+  assert.match(line()?.command ?? '', /hooks\/bin\/hook-proxy" status$/);   // W8.6: the Go proxy serves the line
+  assert.equal(line()?.refreshInterval, 1);   // W8.6: once a second, so no line seems stuck
+  // an old install (the node command, every five seconds) is migrated by the next update; the proxy switched off keeps the node form
+  writeFileSync(join(claudeDir, 'settings.json'), toJson({ statusLine: { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs"', padding: 0, refreshInterval: 5 } }));
+  assert.equal(syncSettings(claudeDir, ['base'], {}).statusLine, 'set');
+  assert.deepEqual([line()?.command, line()?.refreshInterval], ['sh "$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy" status', 1]);
+  assert.equal(syncSettings(claudeDir, ['base'], { disable: ['hooks/bin/hook-proxy'] }).statusLine, 'set');
+  assert.match(line()?.command ?? '', /^node .*statusline\.mjs/);
+  assert.equal(syncSettings(claudeDir, ['base'], {}).statusLine, 'set');
   assert.equal(syncSettings(claudeDir, ['base'], { disable: ['tools/statusline.mjs'] }).statusLine, 'removed');
   assert.equal(line(), undefined);
   writeFileSync(join(claudeDir, 'settings.json'), toJson({ statusLine: { type: 'command', command: 'my-own-bar' } }));

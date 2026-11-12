@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 W8.6 (work/2.0.0-ts-w86-status), started 2026-11-12: the status line served by the daemon.
+  making: packs/base/hooks/lib/agent-board.mts (the live agents, kept as events arrive), resident/status.mts (the daemon's render), packs/base/tools/statusline-agents.mts and statusline-version.mts (the agent rows, the red dot), proxy/status.go (`hook-proxy status`), the picker's status case, refreshInterval 1; concepts: none (design/shape.json declares none); reuse: statusBar (packs/base/tools/statusline.mts), usageOf/agentOwner/sessionOwner (resident/usage.mts), newestOnNpm/compareVersions (hooks/lib/kit-fresh-look.mts), askDaemon (hooks/lib/proxy-client.mts), parseStatusV2 (statusline-work.mts).
+
 - 2.0.0 session 2 (work/2.0.0-typescript; agents work/2.0.0-ts-{w86-status,rss,kwb205,kwb204}), started 2026-11-12: W8 reopened closed on live numbers, W8.6, KWB-199/204/205/206, W10's findings, W11, W12.
   making: briefs/S2-wave1.md, the merges, progress.md lines, the KWB-199 probe (build/evidence/KWB-199), W11's report and showcase; concepts: none (design/shape.json declares none); reuse: the order's existing scripts (scripts/release.mts, scripts/counts.mts, scripts/test-changed.mts).
 

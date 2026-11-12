@@ -18,8 +18,8 @@ const MAX_REPLY = 64 * 1024 * 1024;
 /** macOS's sun_path is 104 bytes and Linux's 108: past this the socket lives under /tmp (review-2 3.11). */
 export const MAX_SOCKET_PATH = 100;
 
-/** `status`: a status-line ask (W8.4), answered with the daemon's own state; it is no event, runs no hook and leaves the idle clock alone. */
-export interface WireRequest { v: number; env: Readonly<Record<string, string>>; cwd: string; ppid: number; deadline: number; status?: boolean }
+/** `status`: a status-line ask (W8.4), answered with the daemon's own state; it is no event, runs no hook and leaves the idle clock alone. `render` (W8.6, `hook-proxy status`): the stdin is Claude Code's session JSON and the reply's stdout the status line, drawn from what the daemon holds. */
+export interface WireRequest { v: number; env: Readonly<Record<string, string>>; cwd: string; ppid: number; deadline: number; status?: boolean; render?: boolean }
 /** What a reply says: a verdict, and `fallback` when the daemon declined the event (another project's, a protocol it does not speak, a
  *  request too large): the client runs the TypeScript runner on the same stdin. */
 export type Reply = Verdict & { fallback?: 'ts' };

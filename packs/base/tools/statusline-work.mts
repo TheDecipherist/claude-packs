@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 import { gitOut } from '../hooks/lib/git-run.mts';
 import { shortHash } from '../hooks/lib/hash.mts';
 import { parseJson, readJson, writeJson } from '../hooks/lib/json.mts';
+import { oneLine, targetOf } from '../hooks/lib/tool-target.mts';
 import type { Colours, Paint } from './statusline-paint.mts';
 
 const TAIL_BYTES = 256 * 1024;
@@ -79,9 +80,6 @@ function tailOf(file: string): string {
   } catch { return ''; } finally { if (fd !== undefined) closeSync(fd); }
 }
 
-const oneLine = (v: unknown): string => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
-const TARGET_FIELDS = ['file_path', 'notebook_path', 'path', 'url', 'pattern', 'query', 'description'];
-
 /** One transcript line, as far as the bar reads it. */
 interface TranscriptLine { message?: { content?: unknown } }
 interface ToolUse { type?: unknown; name?: unknown; input?: Record<string, unknown> | null }
@@ -99,7 +97,7 @@ export function lastActivity(transcript: string | undefined): Activity {
       const name = typeof c.name === 'string' ? c.name : undefined;
       if (!found.tool) {
         found.tool = name;
-        found.target = oneLine(TARGET_FIELDS.map((f) => input[f]).find((v) => typeof v === 'string'));
+        found.target = targetOf(input);
       }
       if (!found.command && name === 'Bash') found.command = oneLine(input.command);
     }

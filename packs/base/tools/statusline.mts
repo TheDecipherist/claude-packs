@@ -15,11 +15,14 @@ import { isMain, readStdinText } from '../hooks/lib/hook-log.mts';
 import { readJson } from '../hooks/lib/json.mts';
 import { checkoutVersion, lockVersion, packageVersion } from '../hooks/lib/kit-version.mts';
 import { residentSegment, residentState, type Resident } from './statusline-daemon.mts';
-import { bold, COLOURS as C, fitWidth, paintMode, painter } from './statusline-paint.mts';
+import type { BoardRow } from '../hooks/resident/agent-board.mts';
+import { agentSegments } from './statusline-agents.mts';
+import { COLOURS as C, fitWidth, paintMode, painter, type Paint, type PaintMode } from './statusline-paint.mts';
 import { refreshRuns, runsSegments } from './statusline-runs.mts';
 import { contextSegment, modelSegment, sessionOf, usageSegments } from './statusline-session.mts';
 import { activitySegments, gitSegment, gitState, lastActivity } from './statusline-work.mts';
-import type { GitState } from './statusline-work.mts';
+import type { Activity, GitState } from './statusline-work.mts';
+import { keptNewest, versionSegment } from './statusline-version.mts';
 
 const SELF = fileURLToPath(import.meta.url);
 const SEPARATOR = ' | ';
@@ -49,23 +52,35 @@ export interface StatusBarOptions {
   git?: (cwd: string) => GitState;
   /** Whether a daemon serves the project's hooks (statusline-daemon.mts asks it; the bar draws the marker when it is `down`). */
   resident?: Resident;
+  /** What the daemon knows as events arrive (W8.6), so a render reads no transcript, no `ps` and no network: the live agents, the lead's
+   *  last tool, npm's newest version, the kit version, and the RUNS rows (drawn by the caller's cache). Without them the bar reads its own files. */
+  live?: LiveView;
+}
+
+export interface LiveView {
+  agents: readonly BoardRow[];
+  lastCommit: { at: number; who: string } | null;
+  activity: Activity;
+  newest: string | null;
+  version: string | null;
+  runs: (paint: Paint, mode: PaintMode) => string[];
 }
 
 /** The bar's lines for one render. */
-export function statusBar(raw: string, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git, resident = 'unused' }: StatusBarOptions = {}): string[] {
+export function statusBar(raw: string, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git, resident = 'unused', live }: StatusBarOptions = {}): string[] {
   const s = sessionOf(raw);
   const mode = paintMode(env);
   const paint = painter(mode);
-  const version = kitVersion(toolDir, s.projectDir || env.CLAUDE_PROJECT_DIR);
+  const version = live ? live.version : kitVersion(toolDir, s.projectDir || env.CLAUDE_PROJECT_DIR);
   const pinned = readJson<{ model?: unknown }>(join(env.CLAUDE_CONFIG_DIR || join(env.HOME || homedir(), '.claude'), 'settings.json'))?.model;
-  const top = [version ? bold(paint(`claude-packs ${version}`, C.orange), mode) : '', modelSegment(s, typeof pinned === 'string' ? pinned : null, paint, C),
+  const top = [versionSegment(version, live ? live.newest : keptNewest(env), paint, mode), modelSegment(s, typeof pinned === 'string' ? pinned : null, paint, C),
     contextSegment(s, paint, C), ...usageSegments(s, env, paint, C), residentSegment(resident, paint, C)];
   const cwd = s.cwd || env.CLAUDE_PROJECT_DIR || process.cwd();
-  const second = [gitSegment((git ?? ((dir) => gitState(dir, { env })))(cwd), paint, C), ...activitySegments(lastActivity(s.transcript), paint, C)];
+  const second = [gitSegment((git ?? ((dir) => gitState(dir, { env })))(cwd), paint, C), ...activitySegments(live ? live.activity : lastActivity(s.transcript), paint, C)];
   const cache = runsCache(env);
-  if (refresh) refreshRuns(cache, nowMs);
+  if (refresh && !live) refreshRuns(cache, nowMs);
   const columns = Number.parseInt(env.COLUMNS ?? '', 10) || 0;
-  return [top.filter(Boolean).join(SEPARATOR), second.filter(Boolean).join(SEPARATOR), ...runsSegments(cache, nowMs, paint, mode)]
+  return [top.filter(Boolean).join(SEPARATOR), second.filter(Boolean).join(SEPARATOR), ...(live ? agentSegments(live.agents, paint, C, live.lastCommit, nowMs) : []), ...(live ? live.runs(paint, mode) : runsSegments(cache, nowMs, paint, mode))]
     .filter(Boolean).map((line) => fitWidth(line, columns));
 }
 

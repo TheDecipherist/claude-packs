@@ -25,6 +25,7 @@ import { startPool } from './resident/pool.mts';
 import { answers, listen, prepareFolder } from './resident/socket.mts';
 import { SAMPLE_MS, startSampling, type Sampling } from './resident/sampling.mts';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mts';
+import { StatusKeeper, type Bar } from './resident/status.mts';
 import { usage } from './resident/usage.mts';
 import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mts';
 
@@ -62,6 +63,8 @@ export interface ServeOptions {
   /** How long an orphan holds a core before the watchdog flags it (`--watchdog-ms`), and a test run over the cap (`--test-ms`). */
   orphanMs: number;
   testMs: number;
+  /** `--no-npm`: the daemon never asks npm for the newest kit version (the red dot then reads only what kit-fresh kept); a test's daemon carries it. */
+  npm: boolean;
 }
 
 const valueOf = (argv: readonly string[], flag: string): string | undefined => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : undefined; };
@@ -80,8 +83,8 @@ export function serveOptions(argv: readonly string[], host: Host): ServeOptions 
   return {
     project, hooks, pool, idleMs: minutes * 60_000, readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
     recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: 10 * 60_000, stateMs: n('--state-ms', STATE_EVERY_MS),
-    proxy: valueOf(argv, '--proxy') ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS),
-    again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : []), ...(proxy === undefined ? [] : ['--proxy', proxy])],
+    proxy: valueOf(argv, '--proxy') ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS), npm: !argv.includes('--no-npm'),
+    again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : []), ...(proxy === undefined ? [] : ['--proxy', proxy]), ...(argv.includes('--no-npm') ? ['--no-npm'] : [])],
   };
 }
 
@@ -113,9 +116,16 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
     pid: process.pid, key, project, hooks: o.hooks, node: host.node, lockHash: lockHash(lock), started, lastEvent: counts.last, events: counts.events, workers: pool.size(), rss: process.memoryUsage.rss(), heap: process.memoryUsage().heapUsed,
     usage: usage.all(), flags: sampling?.flags() ?? [], ...(sampling?.pid() ? { sampler: sampling.pid() ?? 0 } : {}),
   });
-  const served: Served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`) };
+  // the status line's facts, kept as events arrive and as the sampler reports (W8.6)
+  const status = new StatusKeeper({ project, env: host.env, log, ...(o.npm ? {} : { askNpm: () => Promise.resolve(null) }), load: () => import(new URL(`../tools/statusline-live${EXT}`, import.meta.url).href) as Promise<Bar> });
+  const served: Served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`), status };
   const listening = await listen(files.socket, (incoming) => {
     // the status line's ask: the daemon's state, no event (counts.last is the idle clock and is left alone, review-2-go 7.1)
+    if (incoming.request.status === true && incoming.request.render === true) {   // `hook-proxy status`: the line, drawn from what the daemon holds
+      status.render(incoming.stdin.toString('utf8'), incoming.request.env).then((text) => incoming.reply({ code: 0, stdout: text, stderr: '' }),
+        () => incoming.reply({ code: 0, stdout: '', stderr: '', fallback: 'ts' }));
+      return;
+    }
     if (incoming.request.status === true) { incoming.reply({ code: 0, stdout: toJson(snapshot()), stderr: '' }); return; }
     counts.inflight += 1;
     serveEvent(served, incoming.request, incoming.stdin, incoming.arrival).then(incoming.reply, (e: unknown) => {
@@ -131,6 +141,7 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
       ending = true;
       log(`stopping: ${reason}`);
       sampling?.stop();
+      clearInterval(ticker);
       void listening.close().then(() => pool.close()).then(() => {
         state.remove();
         releaseStartLock(files.lock);
@@ -138,6 +149,9 @@ export async function serve(o: ServeOptions, host: Host): Promise<number> {
         done(0);
       });
     };
+    const ticker = setInterval(() => status.tick(Date.now()), o.sampleMs);
+    ticker.unref();
+    void status.refreshNewest(Date.now());
     process.on('uncaughtException', (e) => log(`uncaught exception: ${e.stack ?? e.message}`));
     process.on('unhandledRejection', (e) => log(`unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`));
     for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP'] as const) process.on(sig, () => stop(sig, false));

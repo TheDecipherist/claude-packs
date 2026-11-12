@@ -105,15 +105,7 @@ func (p *proc) judge(project string) int {
 	if node == "" {
 		return p.failOpen("node is not on PATH")
 	}
-	j := &job{proc: p, project: realPath(project), node: realPath(node)}
-	// fail-open: a lock that cannot be read reads as no lock, and no home folder as an empty one (the call goes through unjudged)
-	lock, _ := os.ReadFile(filepath.Join(j.project, ".claude", "claude-packs.lock.json"))
-	home := p.get("HOME")
-	if home == "" {
-		home, _ = os.UserHomeDir()
-	}
-	j.folder = cacheFolder(p.get, home, p.goos)
-	j.files = daemonFiles(j.folder, daemonKey(p.uid, j.project, string(lock), j.node), p.uid)
+	j := p.jobFor(project, node)
 	switch {
 	case p.get("CLAUDE_PACKS_DAEMON") == "off":
 		return j.fallback("", false)
@@ -139,14 +131,32 @@ func (p *proc) judge(project string) int {
 	}
 }
 
+// jobFor names the project's daemon files: its real path, node's, and the socket the lock's hash and node give.
+func (p *proc) jobFor(project, node string) *job {
+	j := &job{proc: p, project: realPath(project), node: realPath(node)}
+	// fail-open: a lock that cannot be read reads as no lock, and no home folder as an empty one (the call goes through unjudged)
+	lock, _ := os.ReadFile(filepath.Join(j.project, ".claude", "claude-packs.lock.json"))
+	home := p.get("HOME")
+	if home == "" {
+		home, _ = os.UserHomeDir()
+	}
+	j.folder = cacheFolder(p.get, home, p.goos)
+	j.files = daemonFiles(j.folder, daemonKey(p.uid, j.project, string(lock), j.node), p.uid)
+	return j
+}
+
 // ask sends the event and waits for a whole reply, until the deadline.
 func (j *job) ask() (*reply, error) {
+	return j.exchange(map[string]any{}, max(j.timeout-time.Second, 250*time.Millisecond))
+}
+
+// exchange sends one request (the header's own fields and `extra`) with stdin and reads the reply, waiting `wait` at most.
+func (j *job) exchange(extra map[string]any, wait time.Duration) (*reply, error) {
 	conn, err := net.DialTimeout("unix", j.files.socket, 500*time.Millisecond)
 	if err != nil {
 		return nil, unreachable{err}
 	}
 	defer conn.Close()
-	wait := max(j.timeout-time.Second, 250*time.Millisecond)
 	deadline := j.start.Add(wait)
 	conn.SetDeadline(deadline)
 	env := map[string]string{}
@@ -156,7 +166,11 @@ func (j *job) ask() (*reply, error) {
 		}
 	}
 	// Marshal of this map of strings and numbers cannot fail
-	header, _ := json.Marshal(map[string]any{"v": protocol, "env": env, "cwd": j.cwd, "ppid": j.ppid, "deadline": deadline.UnixMilli()})
+	fields := map[string]any{"v": protocol, "env": env, "cwd": j.cwd, "ppid": j.ppid, "deadline": deadline.UnixMilli()}
+	for k, v := range extra {
+		fields[k] = v
+	}
+	header, _ := json.Marshal(fields)
 	if _, err = conn.Write(request(header, j.stdin)); err != nil {
 		return nil, fmt.Errorf("the resident runner took no request: %w", err)
 	}
