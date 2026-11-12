@@ -647,7 +647,15 @@ touched its files and the test that holds the behaviour it describes.
 1. The "after": every measurement of W0.5 (a) to (l) taken again on the finished kit, by the same command on the same machine, into
    `build/evidence/W11/after.md`; where a command changed (the release is one command, the project's events go through the proxy), the
    same thing measured end to end.
-2. `docs/workorders/typescript/report.md`: the comparison table first (one row per measurement, before, after, the ratio), then what
+2. `docs/workorders/typescript/report.md`: the comparison table first (one row per measurement, before, after, the ratio); then
+   a before-and-after section for every step W0 to W10 (the user, 2026-11-12: "keep a detailed comparison report of before and
+   after on all steps so we can showcase how sick version 2.0 gets"), each row a number from that step's `build/evidence/` with its
+   file named (gate times per changed file, the suite's wall and its slowest file, init and update and doctor cold and cached, the
+   hook wall per event and per tool through the runner and the proxy, Stop's p50 and p95 on the replay, the release's wall per
+   kind of change, npm pack's size, tsc's build, the copies removed per helper, the files and lines per folder, the pack files
+   passing the template, the hand-kept facts now generated, the faults found by typing), the targets missed in their own rows with
+   the reason; then a showcase page `docs/workorders/typescript/showcase.md`, the ten biggest wins as before, after and the factor,
+   its copy through `tim-writing` (it is public: the README's 2.0 section and the GitHub release notes are made from it); then what
    was converted (files and lines per folder, before and after), the owners made and the copies removed (counts against the surveys),
    what is proved and how, the bugs typing found (each KWB), what is not done (other languages' LSP, the CARRY rows, Windows natively,
    WSL and a shared Linux box for the proxy, an older macOS than Go's minimum, Node 22.0 to 22.17, npm's OTP, the hand copies left),
@@ -656,7 +664,8 @@ touched its files and the test that holds the behaviour it describes.
    `logs`.
 
 **Done when:** the comparison table has all twelve rows with a before, an after and a ratio, each after measured in this step (its
-evidence file named); each of the report's 9 sections holds at least one number or a stated reason there is none (0 blank); `npm run
+evidence file named); every step W0 to W10 has its before-and-after section with at least three numbered rows, each citing its
+evidence file (a check: 0 rows without a file that exists); `showcase.md` holds ten wins, each traced to a row of the report; each of the report's 9 sections holds at least one number or a stated reason there is none (0 blank); `npm run
 check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the report is pushed.
 
 ## W12. Land and publish 2.0.0 (the one stop)
