@@ -31,4 +31,8 @@ One refusal met (git-guard: `git checkout` of a file with uncommitted work, id 2
 
 ## Checks
 - `npm run build` green; `node scripts/counts.mts --check` and `node scripts/noop-pin.mts --check` green after regenerating both.
-- `npm run test:changed -- --base work/2.0.0-typescript`: see the status block below.
+- `npm run test:changed -- --base work/2.0.0-typescript` (once, on ef5273c): 302 of 348 files (the hubs `files`, `json`, `daemon-find` are reached through `test/fixtures/installs.mts`). 4 reds:
+  - `global add ...` x2 (`test/integration/global.test.mts`): the global install lists its shell-reader libs by hand; `shell-writes` now imports `project.mjs` (my change, finding 9), and `program-writes` already imported `program-named.mjs` on the base (that one was red before this branch). Fixed in 92bbaf3 and the next commit: both added to `FILES` in `lib/global.mts` and to the expected lists and the count (18) in the two global tests.
+  - `a proxy binary changed after it was built ...` (`release.test.mts`): `build-proxy.mts` now imports `lib/manifest.mts` (`hashFile`), which the test's scratch clone did not copy. Fixed in 92bbaf3 (the test copies it).
+  - `git-guard at Stop, fired from a worktree ... (KWB-96)` (`worktrees-checkouts.test.mts`): not fixed, not re-run. The first pass saw git-guard Stop cases red under load (a wall-clock bound to GitHub, four test runs sharing the machine); this run used 6-way concurrency beside other agents. My only git-guard changes are `isRecord`/`toJson` for two plain-object checks. For the lead: re-run that file on a quiet machine; if it is red there, look at git-guard's Stop path first.
+- Re-run of the failed ones only (`--base HEAD~1` after the fix commits): global and release tests 29 of 31 passed, then the two global-list tests were fixed and the last run is 8 of 8 green.
