@@ -6,8 +6,11 @@ import { readdirSync, statSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { setFlagsFromString } from 'node:v8';
+import { runInNewContext } from 'node:vm';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { clonesAsked, clonesIn, loadIndex } from '../../../packs/base/hooks/lib/dup-index.mts';
+import { dupKey } from '../../../packs/base/hooks/lib/dup-match.mts';
 import { dupWindows } from '../../../packs/base/hooks/resident/dup-windows.mts';
 import { repoIndex } from '../../../packs/base/hooks/lib/repo-index.mts';
 import { hook } from '../../../packs/base/hooks/template-law.mts';
@@ -59,6 +62,27 @@ test('the one-shot runner writes the repetition index only when a file of it cha
   assert.notEqual(statSync(file).mtimeMs, past.getTime(), 'a new file is written');
 });
 
+test('the duplicate index costs the main thread under 40 bytes a window, the clone still found (rss: a map of half a million windows was 55 MB)', () => {
+  setFlagsFromString('--expose-gc');
+  const gc = runInNewContext('gc') as () => void;
+  const dir = scratchDir('dup-cost-');
+  const line = (f: number, i: number): string => `  const v${i} = (a * ${(f * 31 + i) % 997} + b) % ${(f * 7 + i) % 991} + ${f};\n`;
+  const file = (f: number): string => `export function f${f}(a: number, b: number): number {\n${Array.from({ length: 200 }, (_, i) => line(f, i)).join('')}  return a;\n}\n`;
+  for (let f = 0; f < 150; f += 1) put(join(dir, 'src', `m${f}.ts`), file(f));
+  put(join(dir, 'src', 'copy.ts'), file(3).replace('f3(', 'other('));
+  const files = loadIndex(dir, { persist: false });
+  const windows = Object.values(files.files).reduce((n, f) => n + f.h.length, 0);
+  // the heap and the typed arrays' buffers, which live outside it
+  const held = (): number => { gc(); const m = process.memoryUsage(); return m.heapUsed + m.arrayBuffers; };
+  const before = held();
+  const dup = dupWindows(dir, () => layout);
+  const copy = files.files['src/copy.ts']?.h[100] ?? 0;
+  const found = dup.find([dupKey(copy)]).map((f) => f.file).sort();
+  const perWindow = (held() - before) / windows;
+  assert.deepEqual(found, ['src/copy.ts', 'src/m3.ts']);
+  assert.ok(perWindow < 40, `${perWindow.toFixed(0)} bytes a window over ${windows} windows`);
+});
+
 test('the main thread holds the duplicate index: a worker asks by window hash and finds the same clone the index in its own process finds', async () => {
   const dir = scratchDir('dup-asked-');
   const body = (n: string): string => `export function ${n}(a: number, b: number): number {\n${Array.from({ length: 14 }, (_, i) => `  const v${i} = (a * ${i + 3} + b) % ${i + 11};\n  if (v${i} > ${i}) { return v${i} - ${i}; }`).join('\n')}\n  return a + b;\n}\n`;
@@ -75,4 +99,8 @@ test('the main thread holds the duplicate index: a worker asks by window hash an
   put(join(dir, 'src/a.ts'), 'export const gone = 1;\n');
   dup.stale();
   assert.deepEqual(await clonesAsked(dir, [write], ask), [], 'a file that changed no longer holds the window');
+  put(join(dir, 'src/a.ts'), `${body('first')}// again\n`);
+  dup.stale();
+  assert.deepEqual(await clonesAsked(dir, [write], ask), clonesIn(loadIndex(dir, { persist: false }), [write]), 'a file that changed back holds it again');
+  assert.ok((await clonesAsked(dir, [write], ask)).length > 0);
 });
