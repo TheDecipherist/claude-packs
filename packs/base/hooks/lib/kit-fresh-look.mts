@@ -110,7 +110,13 @@ export function kitVerdict(root: string, { git, fetch }: { git: KitGit; fetch: b
     .filter((v): v is string => parseVersion(v) !== null).sort(compareVersions).at(-1);
   // the refs HEAD does not contain, in one call (a merge-base each took 100 to 800 ms on a commit in a worktree-heavy kit repo)
   const missing = git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
-  const newer = missing.filter((r) => compareVersions(workVersion(r), own) > 0).sort((a, b) => compareVersions(workVersion(b), workVersion(a)));
+  // a later version made from this checkout's branch (its fork point is a commit main lacks) is the next work, landed after this (KWB-208)
+  const mainKnown = git('rev-parse', '--verify', '-q', 'origin/main').ok;
+  const stackedOnHere = (ref: string): boolean => {
+    const base = git('merge-base', 'HEAD', ref);
+    return mainKnown && base.ok && base.out !== '' && !git('merge-base', '--is-ancestor', base.out, 'origin/main').ok;
+  };
+  const newer = missing.filter((r) => compareVersions(workVersion(r), own) > 0 && !stackedOnHere(r)).sort((a, b) => compareVersions(workVersion(b), workVersion(a)));
   const behindMain = missing.includes('origin/main');
   const lacks = [...(behindMain ? ['origin/main'] : []), ...newer];
   if (!lacks.length) return notes.length ? { say: `kit-fresh: ${notes.join('; ')}. Not checked, not blocked.`, refuseCommit: false } : null;
