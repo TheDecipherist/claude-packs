@@ -8,15 +8,16 @@
 import { join } from 'node:path';
 import { sha256 } from './hash.mts';
 import { isRecord, parseJson, toJson } from './json.mts';
+import { WIRE } from './proxy-wire-table.mts';
 import type { Verdict } from './types.d.mts';
 
-export const PROTOCOL = 1;
+export const PROTOCOL: number = WIRE.protocol;
 /** A request whose stdin is longer than this is judged by the TypeScript runner, not held in the daemon's memory (review-2 1.9). */
-export const MAX_STDIN = 64 * 1024 * 1024;
-const MAX_HEADER = 1024 * 1024;
-const MAX_REPLY = 64 * 1024 * 1024;
+export const MAX_STDIN: number = WIRE.maxStdin;
+const MAX_HEADER: number = WIRE.maxHeader;
+const MAX_REPLY: number = WIRE.maxReply;
 /** macOS's sun_path is 104 bytes and Linux's 108: past this the socket lives under /tmp (review-2 3.11). */
-export const MAX_SOCKET_PATH = 100;
+export const MAX_SOCKET_PATH: number = WIRE.maxSocketPath;
 
 /** `status`: a status-line ask (W8.4), answered with the daemon's own state; it is no event, runs no hook and leaves the idle clock alone. `render` (W8.6, `hook-proxy status`): the stdin is Claude Code's session JSON and the reply's stdout the status line, drawn from what the daemon holds. */
 export interface WireRequest { v: number; env: Readonly<Record<string, string>>; cwd: string; ppid: number; deadline: number; status?: boolean; render?: boolean }
@@ -90,21 +91,46 @@ export const lockHash = (lockText: string): string => sha256(lockText, 16);
 /** The 16 hex characters that name a daemon: the user, the project's real path, the lock's hash and node's path. A kit update changes
  *  the lock, so a new lock means a new name, and another project or kit version never shares a daemon (review-2 3.4). */
 export const daemonKey = (uid: number, projectReal: string, lockText: string, nodePath: string): string =>
-  sha256(['claude-packs', uid, projectReal, sha256(lockText), nodePath].join('\0'), 16);
+  sha256([WIRE.name, uid, projectReal, sha256(lockText), nodePath].join('\0'), 16);
 
 /** The folder the daemon's files live in, and that it makes at mode 700: CLAUDE_PACKS_CACHE (a test's own), else
- *  $XDG_RUNTIME_DIR/claude-packs, else ~/Library/Caches/claude-packs (macOS) or ~/.cache/claude-packs. */
+ *  $XDG_RUNTIME_DIR/claude-packs, else ~/Library/Caches/claude-packs (macOS) or ~/.cache/claude-packs. This is the folder of sockets, pid
+ *  files and logs: a runtime place (a tmpfs under XDG_RUNTIME_DIR is right for it). The built binaries live apart, see `binaryCache`. */
 export function cacheFolder(env: Readonly<Record<string, string | undefined>>, home: string, platform: string): string {
-  if (env.CLAUDE_PACKS_CACHE) return env.CLAUDE_PACKS_CACHE;
-  if (env.XDG_RUNTIME_DIR) return join(env.XDG_RUNTIME_DIR, 'claude-packs');
-  return platform === 'darwin' ? join(home, 'Library', 'Caches', 'claude-packs') : join(home, '.cache', 'claude-packs');
+  const cache = env[WIRE.env.cache];
+  if (cache) return cache;
+  const runtime = env[WIRE.env.runtime];
+  if (runtime) return join(runtime, WIRE.name);
+  return platform === 'darwin' ? join(home, 'Library', 'Caches', WIRE.name) : join(home, '.cache', WIRE.name);
 }
+
+/** The root of the built client binaries (`<root>/bin/<target>/hook-proxy`) and of the Go build cache: apart from `cacheFolder` on purpose
+ *  (W10b finding 3). Binaries must outlive a reboot and a logout, which $XDG_RUNTIME_DIR does not, and `hooks/bin/hook-proxy` (a `sh`
+ *  file that cannot import this) picks them from `${CLAUDE_PACKS_CACHE:-$HOME/.cache/claude-packs}`, the line this returns. A test sets
+ *  CLAUDE_PACKS_CACHE, and then both roots are that one folder. Nothing moved: binaries were always here, so no migration is needed. */
+export const binaryCache = (env: Readonly<Record<string, string | undefined>>, home: string): string => env[WIRE.env.cache] || join(home, '.cache', WIRE.name);
+
+/** `/tmp/claude-packs-<uid>`: where the files go when the cache folder's socket path is too long. */
+export const tmpFolder = (uid: number): string => join('/tmp', `${WIRE.tmpPrefix}${uid}`);
+
+/** The folders a daemon of this machine may have used: its cache folder, and the /tmp one for a long path. */
+export const socketFolders = (host: { env: Readonly<Record<string, string | undefined>>; home: string; platform: string; uid: number }): string[] =>
+  [cacheFolder(host.env, host.home, host.platform), tmpFolder(host.uid)];
+
+/** The socket of the daemon named `key` in `folder`. */
+export const socketOf = (folder: string, key: string): string => join(folder, `${key}${WIRE.suffix.socket}`);
+
+/** The environment a detached child keeps: `keys` of `env`, those it has (W10b finding 5). */
+export const keepEnv = (env: Readonly<Record<string, string | undefined>>, keys: readonly string[]): Record<string, string> =>
+  Object.fromEntries(keys.flatMap((k) => { const v = env[k]; return v === undefined ? [] : [[k, v]]; }));
 
 export interface DaemonFiles { folder: string; socket: string; pid: string; lock: string; log: string }
 
 /** The daemon's files for a key: all in one folder, which is /tmp/claude-packs-<uid> when the socket's path would be over the limit. */
 export function daemonFiles(folder: string, key: string, uid: number): DaemonFiles {
-  const at = (dir: string): DaemonFiles => ({ folder: dir, socket: join(dir, `${key}.sock`), pid: join(dir, `${key}.pid`), lock: join(dir, `${key}.lock`), log: join(dir, `daemon-${key}.log`) });
+  const at = (dir: string): DaemonFiles => ({
+    folder: dir, socket: socketOf(dir, key), pid: join(dir, `${key}${WIRE.suffix.pid}`), lock: join(dir, `${key}${WIRE.suffix.lock}`), log: join(dir, `${WIRE.logPrefix}${key}${WIRE.logSuffix}`),
+  });
   const first = at(folder);
-  return Buffer.byteLength(first.socket) > MAX_SOCKET_PATH ? at(join('/tmp', `claude-packs-${uid}`)) : first;
+  return Buffer.byteLength(first.socket) > MAX_SOCKET_PATH ? at(tmpFolder(uid)) : first;
 }

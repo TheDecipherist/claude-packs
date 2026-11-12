@@ -12,17 +12,10 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
-)
-
-const (
-	protocol = 1
-	// a request whose stdin is longer than this is the TypeScript runner's (review-2 1.9)
-	maxStdin = 64 * 1024 * 1024
-	maxReply = 64 * 1024 * 1024
-	// macOS's sun_path is 104 bytes and Linux's 108: past this the socket lives under /tmp (review-2 3.11)
-	maxSocketPath = 100
+	"syscall"
 )
 
 type reply struct {
@@ -76,21 +69,21 @@ func sha(text string) string {
 
 // daemonKey: the 16 hex characters that name a daemon: the user, the project's real path, the lock's hash and node's path.
 func daemonKey(uid int, project, lock, node string) string {
-	return sha(strings.Join([]string{"claude-packs", strconv.Itoa(uid), project, sha(lock), node}, "\x00"))[:16]
+	return sha(strings.Join([]string{wireName, strconv.Itoa(uid), project, sha(lock), node}, "\x00"))[:16]
 }
 
 // cacheFolder: CLAUDE_PACKS_CACHE, else $XDG_RUNTIME_DIR/claude-packs, else ~/Library/Caches/claude-packs (macOS) or ~/.cache/claude-packs.
 func cacheFolder(get func(string) string, home, goos string) string {
-	if v := get("CLAUDE_PACKS_CACHE"); v != "" {
+	if v := get(envCache); v != "" {
 		return v
 	}
-	if v := get("XDG_RUNTIME_DIR"); v != "" {
-		return filepath.Join(v, "claude-packs")
+	if v := get(envRuntime); v != "" {
+		return filepath.Join(v, wireName)
 	}
 	if goos == "darwin" {
-		return filepath.Join(home, "Library", "Caches", "claude-packs")
+		return filepath.Join(home, "Library", "Caches", wireName)
 	}
-	return filepath.Join(home, ".cache", "claude-packs")
+	return filepath.Join(home, ".cache", wireName)
 }
 
 // files: the daemon's files for a key, all in one folder, which is /tmp/claude-packs-<uid> when the socket's path would be too long.
@@ -98,11 +91,48 @@ type files struct{ folder, socket, lock string }
 
 func daemonFiles(folder, key string, uid int) files {
 	at := func(dir string) files {
-		return files{folder: dir, socket: filepath.Join(dir, key+".sock"), lock: filepath.Join(dir, key+".lock")}
+		return files{folder: dir, socket: filepath.Join(dir, key+suffixSocket), lock: filepath.Join(dir, key+suffixLock)}
 	}
 	first := at(folder)
 	if len(first.socket) > maxSocketPath {
-		return at(filepath.Join("/tmp", "claude-packs-"+strconv.Itoa(uid)))
+		return at(filepath.Join("/tmp", tmpPrefix+strconv.Itoa(uid)))
 	}
 	return first
+}
+
+// pidAlive: whether a process exists. A process another user owns (EPERM) is alive, as lib/daemon-find.mts `alive` reads it.
+func pidAlive(pid int) bool {
+	err := syscall.Kill(pid, 0)
+	return err == nil || err == syscall.EPERM
+}
+
+// keptEnv: the environment a detached daemon carries (daemonKeeps), the cache folder being the one the client resolved.
+func keptEnv(get func(string) string, folder string) []string {
+	out := []string{}
+	for _, k := range daemonKeeps {
+		v := get(k)
+		if k == envCache {
+			v = folder
+		}
+		if v != "" {
+			out = append(out, k+"="+v)
+		}
+	}
+	return out
+}
+
+// logLine: one hooks.log line in the column order of the table; a column the client has no value for reads as the empty mark.
+func logLine(values map[string]string) string {
+	cols := []string{}
+	for _, c := range logColumns {
+		v, ok := values[c]
+		if !ok {
+			if slices.Contains(logOptional, c) {
+				continue
+			}
+			v = logEmpty
+		}
+		cols = append(cols, v)
+	}
+	return strings.Join(cols, "\t") + "\n"
 }

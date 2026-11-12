@@ -4,7 +4,8 @@
 // client never retries in a loop.
 import { spawn } from 'node:child_process';
 import { connect } from 'node:net';
-import { crashReply, decodeReply, encodeRequest, type Reply, type WireRequest } from './proxy-wire.mts';
+import { crashReply, decodeReply, encodeRequest, keepEnv, type Reply, type WireRequest } from './proxy-wire.mts';
+import { WIRE } from './proxy-wire-table.mts';
 
 /** What asking a daemon came to: its whole reply, a reply that was cut or was not a record (a crash), or no daemon to ask. */
 export type Answer = { kind: 'reply'; reply: Reply } | { kind: 'cut'; reply: Reply } | { kind: 'none'; why: string };
@@ -48,13 +49,10 @@ export interface StartOptions {
   waitMs?: number;
 }
 
-const KEEP = ['HOME', 'PATH', 'CLAUDE_PACKS_CACHE', 'XDG_RUNTIME_DIR'] as const;
-
 /** Starts a daemon and waits for its word on the ready pipe (fd 3): `ready <pid>`, or `busy` when another daemon holds the start lock. */
 export function startDaemon({ node, script, args, env, waitMs = 10_000 }: StartOptions): Promise<Started> {
   return new Promise((done) => {
-    const reduced = Object.fromEntries(KEEP.flatMap((k) => (env[k] === undefined ? [] : [[k, env[k]]])));
-    const child = spawn(node, [script, ...args, '--ready-fd', '3'], { detached: true, cwd: '/', env: reduced, stdio: ['ignore', 'ignore', 'ignore', 'pipe'] });
+    const child = spawn(node, [script, ...args, WIRE.flag.readyFd, String(WIRE.readyFd)], { detached: true, cwd: '/', env: keepEnv(env, WIRE.daemonKeeps), stdio: ['ignore', 'ignore', 'ignore', 'pipe'] });
     const pipe = child.stdio[3];
     let said = '';
     let settled = false;

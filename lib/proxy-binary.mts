@@ -3,6 +3,7 @@
 // finds it. A project's git never holds a binary (review-2 3.6, 5.1).
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { binaryCache } from '../packs/base/hooks/lib/proxy-wire.mts';
 import type { Env } from '../packs/base/hooks/lib/types.d.mts';
 
 export const TARGETS = ['darwin-arm64', 'darwin-amd64', 'linux-arm64', 'linux-amd64'] as const;
@@ -16,7 +17,7 @@ export function hostTarget(platform: string = process.platform, arch: string = p
 }
 
 /** The user's cache of binaries: CLAUDE_PACKS_CACHE (a test's own) or ~/.cache/claude-packs, then bin/OS-ARCH/hook-proxy. The picker reads the same. */
-export const cachedBinary = (env: Env, target: Target, home: string = homedir()): string => join(env.CLAUDE_PACKS_CACHE ?? join(home, '.cache', 'claude-packs'), 'bin', target, BINARY);
+export const cachedBinary = (env: Env, target: Target, home: string = homedir()): string => join(binaryCache(env, home), 'bin', target, BINARY);
 
 /** The kit's own built binary for a target, under the pack's hooks/bin (`kitRoot`: the kit's checkout, or an installed package). */
 export const shippedBinary = (kitRoot: string, target: Target): string => join(kitRoot, 'packs', 'base', 'hooks', 'bin', target, BINARY);

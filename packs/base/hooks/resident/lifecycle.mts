@@ -5,6 +5,9 @@
 // 400 MB resident, since a hook may leave a timer or a child behind that a one-shot runner dropped by exiting.
 import { spawn } from 'node:child_process';
 import { appendFileSync, closeSync, openSync, readFileSync, renameSync, rmSync, statSync, writeSync } from 'node:fs';
+import { alive } from '../lib/daemon-find.mts';
+import { keepEnv } from '../lib/proxy-wire.mts';
+import { WIRE } from '../lib/proxy-wire-table.mts';
 import { basename, dirname, extname, join } from 'node:path';
 
 export const IDLE_MS = 15 * 60_000;
@@ -15,7 +18,7 @@ export const MAX_RSS = 400 * 1024 * 1024;
 export const WORKER_RSS = 48 * 1024 * 1024;
 const LOG_MAX = 1024 * 1024;
 
-export const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch (e) { return (e as NodeJS.ErrnoException).code === 'EPERM'; } };
+export { alive };
 const heldBy = (file: string): number => { try { return Number.parseInt(readFileSync(file, 'utf8'), 10); } catch { return Number.NaN; } };
 
 /** The start lock: true when this process holds it now, false when a live daemon is starting (or started). */
@@ -92,6 +95,5 @@ export function watch(w: Watch): NodeJS.Timeout {
 
 /** Starts this same daemon again, detached, in `/`, with HOME, PATH and the cache folder only: the old one has let go of its socket. */
 export function reexec(node: string, argv: readonly string[], env: Readonly<Record<string, string | undefined>>): void {
-  const keep = Object.fromEntries(['HOME', 'PATH', 'CLAUDE_PACKS_CACHE', 'XDG_RUNTIME_DIR'].flatMap((k) => (env[k] === undefined ? [] : [[k, env[k]]])));
-  spawn(node, [...argv], { detached: true, cwd: '/', env: keep, stdio: 'ignore' }).unref();
+  spawn(node, [...argv], { detached: true, cwd: '/', env: keepEnv(env, WIRE.daemonKeeps), stdio: 'ignore' }).unref();
 }

@@ -4,7 +4,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { real } from './project.mts';
-import { cacheFolder } from './proxy-wire.mts';
+import { socketFolders, socketOf } from './proxy-wire.mts';
 import { readState, type DaemonState } from '../resident/state.mts';
 
 /** What a caller says of the machine: the environment, the home folder, the platform and the user. */
@@ -21,10 +21,9 @@ export const alive = (pid: number): boolean => {
 /** The pid files of the project's daemons, in the folders a daemon may have used (its own, and the /tmp one for a long path). */
 export function daemonsOf(dir: string, host: DaemonHost): FoundDaemon[] {
   const project = real(dir);
-  const folders = [cacheFolder(host.env, host.home, host.platform), join('/tmp', `claude-packs-${host.uid}`)];
-  return folders.filter((f) => existsSync(f)).flatMap((f) => readdirSync(f).filter((n) => n.endsWith('.pid')).map((n) => join(f, n)))
+  return socketFolders(host).filter((f) => existsSync(f)).flatMap((f) => readdirSync(f).filter((n) => n.endsWith('.pid')).map((n) => join(f, n)))
     .flatMap((file) => {
       const state = readState(file);
-      return state !== null && state.project === project ? [{ file, socket: join(dirname(file), `${state.key}.sock`), state }] : [];
+      return state !== null && state.project === project ? [{ file, socket: socketOf(dirname(file), state.key), state }] : [];
     });
 }

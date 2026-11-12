@@ -12,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -236,7 +235,7 @@ func runSample(args []string, out io.Writer) int {
 			return 0 // the daemon's pipe is closed: the daemon is gone
 		}
 		<-tick.C
-		if *exitWith > 0 && syscall.Kill(*exitWith, 0) != nil {
+		if *exitWith > 0 && !pidAlive(*exitWith) {
 			return 0
 		}
 	}

@@ -7,6 +7,8 @@ import { createInterface } from 'node:readline';
 import { coreBudget, projectLayout } from '../lib/core-budget.mts';
 import { readLayout } from '../lib/layout.mts';
 import { asRecord } from '../lib/merge-out.mts';
+import { keepEnv } from '../lib/proxy-wire.mts';
+import { WIRE } from '../lib/proxy-wire-table.mts';
 import { parseSnapshot, usage, type Snapshot, type UsageStore } from './usage.mts';
 import { Watchdog, type Flag } from './watchdog.mts';
 
@@ -49,7 +51,7 @@ export function startSampling(o: SamplingOptions): Sampling {
   let ending = false;
   let restarts = 0;
   const launch = (): void => {
-    const env = Object.fromEntries(['HOME', 'PATH'].flatMap((k) => (o.env[k] === undefined ? [] : [[k, o.env[k]]])));
+    const env = keepEnv(o.env, WIRE.samplerKeeps);
     const c = spawn(o.proxy, ['sample', '--project', o.project, '--interval', `${o.intervalMs}ms`, '--exit-with', String(process.pid)], { stdio: ['ignore', 'pipe', 'pipe'], env });
     child = c;
     createInterface({ input: c.stdout }).on('line', (line) => { const snap = parseSnapshot(line); if (snap !== null) onSnapshot(snap); });

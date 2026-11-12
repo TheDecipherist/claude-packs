@@ -27,16 +27,16 @@ func stdinText() []byte {
 }
 
 func (p *proc) runStatus() int {
-	project := p.get("CLAUDE_PROJECT_DIR")
+	project := p.get(envProject)
 	if project == "" {
 		project = p.cwd
 	}
-	node := lookPath(p.get("PATH"), "node")
+	node := lookPath(p.get(envPath), "node")
 	if node == "" {
 		return 0
 	}
 	j := p.jobFor(project, node)
-	if p.get("CLAUDE_PACKS_DAEMON") != "off" && folderRefused(j.files.folder, p.uid) == "" {
+	if p.get(envDaemon) != "off" && folderRefused(j.files.folder, p.uid) == "" {
 		if r, err := j.exchange(map[string]any{"status": true, "render": true}, statusWait); err == nil && !r.Fallback && r.Code == 0 {
 			p.stdout.Write([]byte(r.Stdout))
 			return 0

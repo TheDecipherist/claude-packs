@@ -15,8 +15,10 @@ import { fileURLToPath } from 'node:url';
 import { readText } from '../packs/base/hooks/lib/files.mts';
 import { isMain } from '../packs/base/hooks/lib/hook-log.mts';
 import { parseJson, writeJson } from '../packs/base/hooks/lib/json.mts';
+import { binaryCache } from '../packs/base/hooks/lib/proxy-wire.mts';
 import type { Env } from '../packs/base/hooks/lib/types.d.mts';
 import { hashFile } from '../lib/manifest.mts';
+import { writeWireGo, wireGoCurrent } from './wire-gen.mts';
 import { BINARY, TARGETS, hostTarget, type Target } from '../lib/proxy-binary.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
@@ -44,7 +46,7 @@ export function sourceHash(root: string): string {
   return h.digest('hex');
 }
 
-const goCache = (env: Env): string => join(env.CLAUDE_PACKS_GO_CACHE ?? join(env.CLAUDE_PACKS_CACHE ?? join(homedir(), '.cache', 'claude-packs'), 'go'));
+const goCache = (env: Env): string => env.CLAUDE_PACKS_GO_CACHE ?? join(binaryCache(env, homedir()), 'go');
 
 /** Go's version as the proxy folder builds it (its go.mod's toolchain line may fetch a newer one), or null when Go is not on PATH. */
 export function goVersion(root: string, env: Env): string | null {
@@ -94,6 +96,7 @@ export async function buildProxy({ root = KIT, out = binariesFolder(root), targe
   const started = Date.now();
   const go = goVersion(root, env);
   if (go === null) return { built: [], skipped: false, problems: ['go is not on PATH'], goVersion: '', ms: 0 };
+  if (root === KIT) writeWireGo(root);   // the generated Go constants are part of what the hash covers
   const source = sourceHash(root);
   const last = parseJson<Stamp>(readText(stampFile(root)));
   const custom = out !== binariesFolder(root);
@@ -118,6 +121,7 @@ if (isMain(import.meta.url)) {
   const host = hostTarget();
   if (args.includes('--check')) {
     const problems = releaseCheck(binariesFolder(KIT));
+    if (!wireGoCurrent(KIT)) problems.push('proxy/wire_gen.go is not the wire table\'s rendering (node scripts/wire-gen.mts)');
     for (const p of problems) console.error(`proxy: ${p}`);
     process.exit(problems.length === 0 ? 0 : 1);
   }

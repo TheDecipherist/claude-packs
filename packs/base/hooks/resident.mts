@@ -19,8 +19,10 @@ import { toJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
 import { real } from './lib/project.mts';
 import { cacheFolder, crashReply, daemonFiles, daemonKey, lockHash } from './lib/proxy-wire.mts';
+import { WIRE } from './lib/proxy-wire-table.mts';
 import { serveEvent, type Served } from './resident/event.mts';
 import { residentIndex } from './resident/index.mts';
+import { againOf, givenOf, numberOf, textOf } from './resident/options.mts';
 import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mts';
 import { startPool } from './resident/pool.mts';
 import { answers, listen, prepareFolder } from './resident/socket.mts';
@@ -32,7 +34,7 @@ import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mts';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const EXT = extname(fileURLToPath(import.meta.url));
-const LOCK_FILE = join('.claude', 'claude-packs.lock.json');
+const LOCK_FILE: string = WIRE.lockFile;
 /** The warm workers that import every hook at start; the others import a hook when a job first brings it (W8.4: 16 workers holding every hook were 270 MB). */
 const PRELOAD = 1;
 /** At most this many workers import any one hook while the pool is not full (W8.4). */
@@ -72,24 +74,21 @@ export interface ServeOptions {
   npm: boolean;
 }
 
-const valueOf = (argv: readonly string[], flag: string): string | undefined => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : undefined; };
-
-/** The options a command line gives: `--serve <project>` and its flags; null when it is not one. */
+/** The options a command line gives: `--serve <project>` and its flags (resident/options.mts is their one table); null when it is not one. */
 export function serveOptions(argv: readonly string[], host: Host): ServeOptions | null {
-  const project = valueOf(argv, '--serve');
+  const at = argv.indexOf(WIRE.flag.serve);
+  const project = at >= 0 ? argv[at + 1] : undefined;
   if (project === undefined) return null;
-  const n = (flag: string, otherwise: number): number => { const v = Number(valueOf(argv, flag)); return Number.isFinite(v) && v > 0 ? v : otherwise; };
-  const fd = valueOf(argv, '--ready-fd');
-  const hooks = valueOf(argv, '--hooks') ?? HERE;
-  const pool = Math.floor(n('--pool', Math.min(16, availableParallelism())));
-  const minutes = n('--idle-minutes', IDLE_MS / 60_000);
+  const given = givenOf(argv);
+  const n = (flag: string, otherwise: number): number => numberOf(given, flag, otherwise);
+  const fd = textOf(given, WIRE.flag.readyFd);
   const exitWith = n('--exit-with', 0);
-  const proxy = valueOf(argv, '--proxy');
   return {
-    project, hooks, pool, idleMs: minutes * 60_000, readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
+    project, hooks: textOf(given, WIRE.flag.hooks) ?? HERE, pool: Math.floor(n('--pool', Math.min(16, availableParallelism()))), idleMs: n('--idle-minutes', IDLE_MS / 60_000) * 60_000,
+    readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
     recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: 10 * 60_000, stateMs: n('--state-ms', STATE_EVERY_MS),
-    proxy: valueOf(argv, '--proxy') ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS), npm: !argv.includes('--no-npm'),
-    again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : []), ...(proxy === undefined ? [] : ['--proxy', proxy]), ...(argv.includes('--no-npm') ? ['--no-npm'] : [])],
+    proxy: textOf(given, WIRE.flag.proxy) ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS), npm: !given.has('--no-npm'),
+    again: againOf(host.script, project, given),
   };
 }
 
@@ -182,5 +181,5 @@ if (isMain(import.meta.url)) {
   const options = serveOptions(argv, host);
   if (argv.includes('--selftest')) process.exit(await (await import('./resident/selftest.mts')).selftest());   // loaded only here: the daemon never carries it
   else if (options !== null) process.exit(await serve(options, host));
-  else { process.stderr.write('usage: node resident.mjs --serve <project> [--hooks <dir>] [--pool <n>] [--ready-fd <n>] | --selftest\n'); process.exit(2); }
+  else { process.stderr.write(`usage: node resident.mjs ${WIRE.flag.serve} <project> [${WIRE.flag.hooks} <dir>] [--pool <n>] [${WIRE.flag.readyFd} <n>] | --selftest\n`); process.exit(2); }
 }
