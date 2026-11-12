@@ -1,5 +1,8 @@
 // idle-wake (opt-in): a turn that ends with work named and not started is woken. The hook's contract, then the refusals that sat in the
 // old root test files.
+import { existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { test } from 'node:test';
 import { join } from 'node:path';
 import { assert, put } from '../../kit-cli.mts';
 import { fireAs } from '../../worktree-rig.mts';
@@ -27,4 +30,12 @@ holdsTheContract({
     const stop = fireAs(here, 'idle-wake.mjs', { hook_event_name: 'Stop', transcript_path: transcript, last_assistant_message: 'Next I would build P4.' }, env);
     assert.equal(stop.status, 2);
   },
+});
+
+// KWB-135: user-asks is opt-in too; idle-wake enabled alone must still pass its own selftest (it once crashed on the import).
+test('idle-wake enabled alone passes its selftest', () => {
+  const dir = enabledFixture('idle-wake-alone', 'synth-creator', 'hooks/idle-wake.mjs');
+  assert.equal(existsSync(join(dir, '.claude/hooks/user-asks.mjs')), false);
+  const ran = spawnSync(process.execPath, [join(dir, '.claude/hooks/idle-wake.mjs'), '--selftest'], { encoding: 'utf8' });
+  assert.equal(ran.status, 0, ran.stdout + ran.stderr);
 });

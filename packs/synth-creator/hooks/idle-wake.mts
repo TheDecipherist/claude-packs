@@ -11,13 +11,13 @@
 // On the hook contract (typescript order W4): `hook(event, ctx)` waits and returns its Verdict, and the import does nothing (it
 // once ran at the top level). It keeps its own settings entry (asyncRewake: it never runs inside the runner).
 import { appendFileSync, statSync } from 'node:fs';
+import { extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { promptFile, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
-import type { Hook, HookEvent } from './lib/types.d.mts';
+import type { Env, Hook, HookEvent } from './lib/types.d.mts';
 import { pass, refuse } from './lib/verdict.mts';
-import { listFor } from './user-asks.mts';
 
 const PROPOSES = new RegExp([
   "\\bnext,?\\s+(?:I(?:'d|\\s+would|\\s+will|'ll)|is|up|step|on\\s+my\\s+list|comes?)\\b",
@@ -58,7 +58,14 @@ export async function watch(event: HookEvent, waitS: number, lookS: number, slee
   return [2, words];
 }
 
+// user-asks is opt-in too, so idle-wake enabled alone has no such file beside it (KWB-135): the asks are then left out of the wake.
+type AsksOf = (transcript: string, env: Env, root: string, now: number) => string;
+async function asksReader(): Promise<AsksOf> {
+  try { return ((await import(new URL(`./user-asks${extname(import.meta.url)}`, import.meta.url).href)) as { listFor: AsksOf }).listFor; } catch { return () => ''; }
+}
+
 export const hook: Hook = async (event, ctx) => {
+  const listFor = await asksReader();
   const waitS = Number(ctx.env['IDLE_WAKE_MIN'] ?? 15) * 60;
   const lookS = Number(ctx.env['IDLE_WAKE_LOOK_S'] ?? 10);
   const [code, words] = await watch(event, waitS, lookS, nap, (path) => listFor(path, ctx.env, ctx.projectDir, ctx.now / 1000 + waitS));
