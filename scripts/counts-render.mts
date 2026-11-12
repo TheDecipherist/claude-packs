@@ -6,10 +6,11 @@ import { parseJson } from '../packs/base/hooks/lib/json.mts';
 import { configsAt } from '../lib/configs.mts';
 import { PRESETS } from '../lib/packs.mts';
 import { rulesWithoutChecks, totals } from './counts-facts.mts';
+import { GRAPH_FILES, graphBlock, measuresOf, svgOf, type Measure } from './counts-graph.mts';
 import { baseHooksTable, commandsTable, configurationsTable, describedHooks, packsTable, presetsTable } from './counts-tables.mts';
 
 /** The files a generation writes into, by their place in the kit. */
-export const GENERATED = ['README.md', 'site/index.html', 'docs/rules-without-checks.md', 'docs/versions.md', 'planner/README.md'] as const;
+export const GENERATED = ['README.md', 'site/index.html', 'docs/rules-without-checks.md', 'docs/versions.md', 'planner/README.md', GRAPH_FILES.light, GRAPH_FILES.dark] as const;
 export type GeneratedFile = (typeof GENERATED)[number];
 
 /** The kit's version and dependencies, from its package.json. */
@@ -25,13 +26,13 @@ export function between(text: string, name: string, body: string): string | null
   return from < 0 || to < from ? null : `${text.slice(0, from + open.length)}\n${body}\n${text.slice(to)}`;
 }
 
-/** The README as the kit makes it: its five tables between their markers, and the version in the status-line sample. */
-export function readmeOf(root: string, text: string, version: string, errors: string[]): string {
+/** The README as the kit makes it: its five tables and the performance graph between their markers, and the version in the status-line sample. */
+export function readmeOf(root: string, text: string, version: string, errors: string[], measures: readonly Measure[] = measuresOf(root)): string {
   const help = readText(join(root, 'prompts/help.txt')) ?? '';
   const hooks = baseHooksTable(root, describedHooks(text));
   if (hooks.missing.length > 0) errors.push(`README.md: the base hooks without a description in the table: ${hooks.missing.join(', ')}`);
   const bodies: [string, string][] = [['packs', packsTable(root)], ['configurations', configurationsTable(configsAt(root))], ['presets', presetsTable(PRESETS)],
-    ['commands', commandsTable(help)], ['base-hooks', hooks.table]];
+    ['commands', commandsTable(help)], ['base-hooks', hooks.table], ['performance', graphBlock(measures)]];
   let made = text;
   for (const [name, body] of bodies) {
     const next = between(made, name, body);
@@ -82,15 +83,17 @@ export function versionsOf(root: string, text: string, errors: string[]): string
 }
 
 /** Every generated file as the kit makes it, from the files as they stand (by place). Errors say what only a person can write. */
-export function renderAll(root: string, texts: Readonly<Record<GeneratedFile, string>>): { files: Record<GeneratedFile, string>; errors: string[] } {
+export function renderAll(root: string, texts: Readonly<Record<GeneratedFile, string>>, measures: readonly Measure[] = measuresOf(root)): { files: Record<GeneratedFile, string>; errors: string[] } {
   const errors: string[] = [];
   const version = parseJson<PackageFields>(readText(join(root, 'package.json')))?.version ?? '0.0.0';
   const files: Record<GeneratedFile, string> = {
-    'README.md': readmeOf(root, texts['README.md'], version, errors),
+    'README.md': readmeOf(root, texts['README.md'], version, errors, measures),
     'site/index.html': siteOf(root, texts['site/index.html']),
     'docs/rules-without-checks.md': rulesWithoutChecksOf(root),
     'docs/versions.md': versionsOf(root, texts['docs/versions.md'], errors),
     'planner/README.md': texts['planner/README.md'].replace(/Real at \d+\.\d+\.\d+/, `Real at ${version}`),
+    [GRAPH_FILES.light]: svgOf(measures, 'light'),
+    [GRAPH_FILES.dark]: svgOf(measures, 'dark'),
   };
   return { files, errors };
 }

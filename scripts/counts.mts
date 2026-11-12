@@ -14,6 +14,7 @@ import { put, readText } from '../packs/base/hooks/lib/files.mts';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
 import { isMain } from '../packs/base/hooks/lib/hook-log.mts';
 import { parseJson, readJson, toJson, writeJson } from '../packs/base/hooks/lib/json.mts';
+import type { Measure } from './counts-graph.mts';
 import { GENERATED, renderAll, type GeneratedFile } from './counts-render.mts';
 
 /** The old projects the manifest is made from, and the configuration each one's update is made in. */
@@ -67,8 +68,8 @@ export function manifestOf(kit: string): Manifest {
 export const readManifest = (kit: string): Manifest | null => parseJson<Manifest>(readText(manifestFile(kit)));
 
 /** The generated documents of a kit folder as they stand, and as the kit makes them: the files that differ, and what only a person writes. */
-export function documentsOf(kit: string, stand: Readonly<Record<GeneratedFile, string>> = standing(kit)): { stale: GeneratedFile[]; files: Record<GeneratedFile, string>; errors: string[] } {
-  const { files, errors } = renderAll(kit, stand);
+export function documentsOf(kit: string, stand: Readonly<Record<GeneratedFile, string>> = standing(kit), measures?: readonly Measure[]): { stale: GeneratedFile[]; files: Record<GeneratedFile, string>; errors: string[] } {
+  const { files, errors } = renderAll(kit, stand, measures);
   return { stale: GENERATED.filter((f) => files[f] !== stand[f]), files, errors };
 }
 /** The generated documents as they stand in a kit folder. */

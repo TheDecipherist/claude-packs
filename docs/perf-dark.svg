@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 526" width="760" height="526" role="img" aria-label="Before and after on one row for 7 measures, 1.9 against 2.0, with the factor at the end">
+  <style>text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}</style>
+  <rect width="760" height="526" fill="#1a1a19"/>
+  <text x="24" y="26" font-size="16" font-weight="600" fill="#f0efec">claude-packs 1.9 against 2.0, where it counts</text>
+  <rect x="24" y="36" width="10" height="10" rx="2" fill="#d95926"/><text x="40" y="45" font-size="12" fill="#c3c2b7">1.9</text>
+  <rect x="80" y="36" width="10" height="10" rx="2" fill="#3987e5"/><text x="96" y="45" font-size="12" fill="#c3c2b7">2.0 (each row on its own scale; shorter is faster)</text>
+  <text x="24" y="64" font-size="14" fill="#f0efec">Hook wait per turn (Stop p50 + prompt p50)</text>
+  <rect x="24" y="72" width="380" height="12" rx="4" fill="#d95926"/>
+  <text x="412" y="83" font-size="12" fill="#c3c2b7">326 ms</text>
+  <rect x="24" y="88" width="129" height="12" rx="4" fill="#3987e5"/>
+  <text x="161" y="99" font-size="12" fill="#c3c2b7">111 ms</text>
+  <text x="736" y="99" font-size="18" font-weight="600" text-anchor="end" fill="#f0efec">2.9x</text>
+  <text x="24" y="130" font-size="14" fill="#f0efec">Stop at p95 (replay)</text>
+  <rect x="24" y="138" width="380" height="12" rx="4" fill="#d95926"/>
+  <text x="412" y="149" font-size="12" fill="#c3c2b7">6,067 ms</text>
+  <rect x="24" y="154" width="6" height="12" rx="4" fill="#3987e5"/>
+  <text x="38" y="165" font-size="12" fill="#c3c2b7">90 ms</text>
+  <text x="736" y="165" font-size="18" font-weight="600" text-anchor="end" fill="#f0efec">67x</text>
+  <text x="24" y="196" font-size="14" fill="#f0efec">Release, commit to npm (one-hook change)</text>
+  <rect x="24" y="204" width="380" height="12" rx="4" fill="#d95926"/>
+  <text x="412" y="215" font-size="12" fill="#c3c2b7">937 s</text>
+  <rect x="24" y="220" width="9" height="12" rx="4" fill="#3987e5"/>
+  <text x="41" y="231" font-size="12" fill="#c3c2b7">22.8 s</text>
+  <text x="736" y="231" font-size="18" font-weight="600" text-anchor="end" fill="#f0efec">41x</text>
+  <text x="24" y="262" font-size="14" fill="#f0efec">Gate for a one-hook change</text>
+  <rect x="24" y="270" width="380" height="12" rx="4" fill="#d95926"/>
+  <text x="412" y="281" font-size="12" fill="#c3c2b7">188.3 s</text>
+  <rect x="24" y="286" width="28" height="12" rx="4" fill="#3987e5"/>
+  <text x="60" y="297" font-size="12" fill="#c3c2b7">14 s</text>
+  <text x="736" y="297" font-size="18" font-weight="600" text-anchor="end" fill="#f0efec">13x</text>
+  <text x="24" y="328" font-size="14" fill="#f0efec">A Bash call's hooks, live (Pre p50)</text>
+  <rect x="24" y="336" width="380" height="12" rx="4" fill="#d95926"/>
+  <text x="412" y="347" font-size="12" fill="#c3c2b7">105 ms</text>
+  <rect x="24" y="352" width="22" height="12" rx="4" fill="#3987e5"/>
+  <text x="54" y="363" font-size="12" fill="#c3c2b7">6 ms</text>
+  <text x="736" y="363" font-size="18" font-weight="600" text-anchor="end" fill="#f0efec">18x</text>
+  <text x="24" y="394" font-size="14" fill="#f0efec">doctor, cached</text>
+  <rect x="24" y="402" width="380" height="12" rx="4" fill="#d95926"/>
+  <text x="412" y="413" font-size="12" fill="#c3c2b7">4.5 s</text>
+  <rect x="24" y="418" width="72" height="12" rx="4" fill="#3987e5"/>
+  <text x="104" y="429" font-size="12" fill="#c3c2b7">0.85 s</text>
+  <text x="736" y="429" font-size="18" font-weight="600" text-anchor="end" fill="#f0efec">5.3x</text>
+  <text x="24" y="460" font-size="14" fill="#f0efec">update, warm</text>
+  <rect x="24" y="468" width="380" height="12" rx="4" fill="#d95926"/>
+  <text x="412" y="479" font-size="12" fill="#c3c2b7">4.6 s</text>
+  <rect x="24" y="484" width="91" height="12" rx="4" fill="#3987e5"/>
+  <text x="123" y="495" font-size="12" fill="#c3c2b7">1.1 s</text>
+  <text x="736" y="495" font-size="18" font-weight="600" text-anchor="end" fill="#f0efec">4.2x</text>
+</svg>
