@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 session 2 rss (work/2.0.0-ts-rss), started 2026-11-12: the daemon's RSS with 16 workers after 1,000 events, measured and brought down.
+  making: the measuring probe (build/rss-probe, scratch), the pool's and worker's memory changes in packs/base/hooks/resident/, the RSS case of test/integration/live-event-speed.test.mts, agents/rss.json and rss-report.md; concepts: none (design/shape.json declares none); reuse: startPool (packs/base/hooks/resident/pool.mts), fire/fireAsync/pidOf (test/integration/proxy-fire-rig.mts), the live rig (test/integration/live-event-speed.test.mts).
+
 - 2.0.0 session 2 (work/2.0.0-typescript; agents work/2.0.0-ts-{w86-status,rss,kwb205,kwb204}), started 2026-11-12: W8 reopened closed on live numbers, W8.6, KWB-199/204/205/206, W10's findings, W11, W12.
   making: briefs/S2-wave1.md, the merges, progress.md lines, the KWB-199 probe (build/evidence/KWB-199), W11's report and showcase; concepts: none (design/shape.json declares none); reuse: the order's existing scripts (scripts/release.mts, scripts/counts.mts, scripts/test-changed.mts).
 
