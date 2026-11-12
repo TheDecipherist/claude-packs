@@ -714,7 +714,10 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
    file named (gate times per changed file, the suite's wall and its slowest file, init and update and doctor cold and cached, the
    hook wall per event and per tool through the runner and the proxy, Stop's p50 and p95 on the replay, the replay's summed hook
    wait, its mean per event, per prompt and per tool call, the node processes started and the hook CPU (every total a sum over
-   the real events, never a median times a count), the release's wall per
+   the real events, never a median times a count), the hook waiting per feature task (bandwarp's event log grouped by its
+   `agent` id, each kind of task's calls times the real cost of a call, before and after) and one scripted feature task (a knob
+   added to a planted panel and a gain changed in a planted DSP block, the same tool calls in the same order) timed end to end on
+   1.9 and on 2.0, the release's wall per
    kind of change, npm pack's size, tsc's build, the copies removed per helper, the files and lines per folder, the pack files
    passing the template, the hand-kept facts now generated, the faults found by typing), the targets missed in their own rows with
    the reason; then a showcase page `docs/workorders/typescript/showcase.md`, the ten biggest wins as before, after and the factor,
