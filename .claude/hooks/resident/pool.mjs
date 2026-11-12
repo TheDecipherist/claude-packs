@@ -3,6 +3,7 @@
 // that exits (a hook called process.exit, an uncaught error) is replaced and its hook counted as a crash. One hook runs on one
 // worker at a time, so the main thread does only I/O and the table.
 import { Worker } from 'node:worker_threads';
+import { killGroup } from '../lib/child-group.mjs';
 /** A worker's heap is kept small: its hooks make short-lived garbage, and a large young generation is memory the daemon holds for nothing. */
 /** How long a job waits for a worker that already holds its hook before a worker that does not may import it. */
 const SPREAD_WAIT_MS = 50;
@@ -21,10 +22,12 @@ export function startPool(o) {
     let onWarm = null;
     let recheck;
     const send = (s, m) => s.worker.postMessage(m);
-    const drop = (s) => { s.gone = true; slots.delete(s); void s.worker.terminate(); };
+    const killGroups = (s) => { for (const pid of s.groups)
+        killGroup(pid); s.groups.clear(); };
+    const drop = (s) => { s.gone = true; slots.delete(s); killGroups(s); void s.worker.terminate(); };
     function spawn(preload = false) {
         const worker = new Worker(o.workerUrl, { workerData: { ...o.data, preload }, stdin: false, resourceLimits: WORKER_HEAP });
-        const s = { worker, ready: false, busy: null, events: 0, idleSince: Date.now(), gone: false, preload, has: new Set() };
+        const s = { worker, ready: false, busy: null, events: 0, idleSince: Date.now(), gone: false, preload, has: new Set(), groups: new Set() };
         slots.add(s);
         worker.on('message', (m) => {
             if (m.type === 'ready') {
@@ -53,6 +56,12 @@ export function startPool(o) {
                 else
                     pump();
             }
+            else if (m.type === 'group') {
+                if (m.kind === 'started')
+                    s.groups.add(m.pid);
+                else
+                    s.groups.delete(m.pid);
+            }
             else if (m.type === 'ask')
                 send(s, { type: 'answer', id: m.id, files: o.candidates(m.hashes) });
             else
@@ -64,6 +73,7 @@ export function startPool(o) {
                 return;
             slots.delete(s);
             s.gone = true;
+            killGroups(s);
             const held = s.busy;
             if (held)
                 held.take(crash(held.job, `its worker exited (${code}) while it ran`));
@@ -134,6 +144,9 @@ export function startPool(o) {
             queue.push({ id: nextId, job, at, take: (d) => resolve({ ...d, queue: Math.max(0, Date.now() - at - d.ms) }) });
             pump();
         }),
+        abandon: (jobs) => { for (const s of slots)
+            if (s.busy !== null && jobs.includes(s.busy.job))
+                killGroups(s); },
         ready: () => new Promise((resolve) => {
             if (warming <= 0)
                 resolve([...failed]);
@@ -147,7 +160,7 @@ export function startPool(o) {
             closing = true;
             clearInterval(reaper);
             clearTimeout(recheck);
-            await Promise.all([...slots].map((s) => { s.gone = true; return s.worker.terminate(); }));
+            await Promise.all([...slots].map((s) => { s.gone = true; killGroups(s); return s.worker.terminate(); }));
             slots.clear();
         },
     };

@@ -26,6 +26,7 @@ const names = (rows) => rows.map((r) => r.hook);
  *  answers after that is handed to `late`. */
 function judgeAll(d, judges, job, deadline, late) {
     const ran = new Map();
+    const jobs = new Map(names(judges).map((h) => [h, job(h)]));
     return new Promise((resolve) => {
         let over = false;
         let grace;
@@ -33,13 +34,15 @@ function judgeAll(d, judges, job, deadline, late) {
             over = true;
             clearTimeout(grace);
             clearTimeout(cutoff);
-            resolve({ ran, slow: names(judges).filter((h) => !ran.has(h)) });
+            const slow = names(judges).filter((h) => !ran.has(h));
+            d.pool.abandon(slow.flatMap((h) => jobs.get(h) ?? [])); // KWB-205: what a judge past the deadline started does not outlive it
+            resolve({ ran, slow });
         };
         const cutoff = setTimeout(finish, Math.max(0, deadline - Date.now()));
         if (judges.length === 0)
             finish();
         for (const { hook } of judges) {
-            void d.pool.run(job(hook)).then((done) => {
+            void d.pool.run(jobs.get(hook) ?? job(hook)).then((done) => {
                 if (over) {
                     late(hook, done);
                     return;
@@ -77,6 +80,7 @@ export async function serveEvent(d, request, stdin, arrival) {
     const job = (hook) => ({ hook, event: ev, ctx: base });
     d.counts.events += 1;
     d.counts.last = Date.now();
+    d.status.note(ev, request.ppid, d.counts.last);
     const judges = rows.filter((r) => r.role === 'judge');
     const phase = await judgeAll(d, judges, job, request.deadline, (hook, done) => lateLine(root, ev, hook, done));
     const refused = [...phase.ran.values()].some((r) => r.code === 2);

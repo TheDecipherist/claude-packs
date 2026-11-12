@@ -402,7 +402,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 52 | 12 | 3 | 8 |
-| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 28 | 8 | 28 | 15 |
+| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 28 | 8 | 29 | 15 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 10 | 14 | 1 | 2 |
@@ -552,6 +552,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `kit-fresh` | Bash, Session start | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
 | `suite-once` | Bash | Refuses the whole test suite unless the user's prompt asks for a full run |
 | `no-find` | Bash | Refuses `find`, `bfs`, `fd`, `locate` and `mdfind` unless the user's prompt asks for one: every location is named in the order and the layout |
+| `no-polling` | Bash | Refuses a `while` or `until` loop that sleeps, a sleep over 5 seconds and `tail -f`: a long job runs in the background with its output in a file in the project |
 | `repo-litter` | Bash | Refuses `git add` of a big file, a working screenshot in the root, or a debug dump |
 | `look-gate` | Bash, After Bash | Names the reference looks a branch's code changed after a build, and refuses to land the branch without a passing look report for each |
 | `skill-first` | Read, Bash | Refuses a read of a schematic, a service manual, a data sheet or a design reference until its skill is loaded, where that skill is installed |

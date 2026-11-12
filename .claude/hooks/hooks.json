@@ -221,6 +221,16 @@
     "role": "judge"
   },
   {
+    "hook": "no-polling",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 65,
+    "role": "judge"
+  },
+  {
     "hook": "repo-litter",
     "events": [
       "PreToolUse"

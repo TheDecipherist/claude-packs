@@ -14,10 +14,12 @@ import { parentPort, workerData } from 'node:worker_threads';
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { childError } from '../lib/files.mjs';
+import { watchGroups } from '../lib/child-group.mjs';
 import { isVerdict } from '../lib/verdict.mjs';
 const port = parentPort;
 const data = workerData;
 const say = (m) => port?.postMessage(m);
+watchGroups((e) => say({ type: 'group', ...e })); // the children a hook starts are the main thread's to end (KWB-205)
 const loaded = new Map();
 const waiting = new Map();
 let asked = 0;

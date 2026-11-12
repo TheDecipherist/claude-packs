@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 import { gitOut } from '../hooks/lib/git-run.mjs';
 import { shortHash } from '../hooks/lib/hash.mjs';
 import { parseJson, readJson, writeJson } from '../hooks/lib/json.mjs';
+import { oneLine, targetOf } from '../hooks/lib/tool-target.mjs';
 const TAIL_BYTES = 256 * 1024;
 /** `git status --porcelain=v2 --branch` read: { branch, uncommitted, ahead, behind }. */
 export function parseStatusV2(text) {
@@ -72,8 +73,6 @@ function tailOf(file) {
             closeSync(fd);
     }
 }
-const oneLine = (v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
-const TARGET_FIELDS = ['file_path', 'notebook_path', 'path', 'url', 'pattern', 'query', 'description'];
 /** The last tool call in the transcript, { tool, target, command }: command is the last shell command, wherever it was. */
 export function lastActivity(transcript) {
     const found = {};
@@ -88,7 +87,7 @@ export function lastActivity(transcript) {
             const name = typeof c.name === 'string' ? c.name : undefined;
             if (!found.tool) {
                 found.tool = name;
-                found.target = oneLine(TARGET_FIELDS.map((f) => input[f]).find((v) => typeof v === 'string'));
+                found.target = targetOf(input);
             }
             if (!found.command && name === 'Bash')
                 found.command = oneLine(input.command);

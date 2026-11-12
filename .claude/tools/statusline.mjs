@@ -15,10 +15,12 @@ import { isMain, readStdinText } from '../hooks/lib/hook-log.mjs';
 import { readJson } from '../hooks/lib/json.mjs';
 import { checkoutVersion, lockVersion, packageVersion } from '../hooks/lib/kit-version.mjs';
 import { residentSegment, residentState } from './statusline-daemon.mjs';
-import { bold, COLOURS as C, fitWidth, paintMode, painter } from './statusline-paint.mjs';
+import { agentSegments } from './statusline-agents.mjs';
+import { COLOURS as C, fitWidth, paintMode, painter } from './statusline-paint.mjs';
 import { refreshRuns, runsSegments } from './statusline-runs.mjs';
 import { contextSegment, modelSegment, sessionOf, usageSegments } from './statusline-session.mjs';
 import { activitySegments, gitSegment, gitState, lastActivity } from './statusline-work.mjs';
+import { keptNewest, versionSegment } from './statusline-version.mjs';
 const SELF = fileURLToPath(import.meta.url);
 const SEPARATOR = ' | ';
 /** The kit version the project runs (KWB-162, lib/kit-version.mjs): the installed package of the install this tool belongs to
@@ -34,21 +36,21 @@ export function kitVersion(toolDir, projectDir) {
 /** Where the RUNS cache lives: the user's cache folder, shared by every project's bar. */
 export const runsCache = (env) => join(env.XDG_CACHE_HOME || join(env.HOME || homedir(), '.cache'), 'claude-packs', 'runs.json');
 /** The bar's lines for one render. */
-export function statusBar(raw, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git, resident = 'unused' } = {}) {
+export function statusBar(raw, { env = process.env, nowMs = Date.now(), toolDir = dirname(SELF), refresh = true, git, resident = 'unused', live } = {}) {
     const s = sessionOf(raw);
     const mode = paintMode(env);
     const paint = painter(mode);
-    const version = kitVersion(toolDir, s.projectDir || env.CLAUDE_PROJECT_DIR);
+    const version = live ? live.version : kitVersion(toolDir, s.projectDir || env.CLAUDE_PROJECT_DIR);
     const pinned = readJson(join(env.CLAUDE_CONFIG_DIR || join(env.HOME || homedir(), '.claude'), 'settings.json'))?.model;
-    const top = [version ? bold(paint(`claude-packs ${version}`, C.orange), mode) : '', modelSegment(s, typeof pinned === 'string' ? pinned : null, paint, C),
+    const top = [versionSegment(version, live ? live.newest : keptNewest(env), paint, mode), modelSegment(s, typeof pinned === 'string' ? pinned : null, paint, C),
         contextSegment(s, paint, C), ...usageSegments(s, env, paint, C), residentSegment(resident, paint, C)];
     const cwd = s.cwd || env.CLAUDE_PROJECT_DIR || process.cwd();
-    const second = [gitSegment((git ?? ((dir) => gitState(dir, { env })))(cwd), paint, C), ...activitySegments(lastActivity(s.transcript), paint, C)];
+    const second = [gitSegment((git ?? ((dir) => gitState(dir, { env })))(cwd), paint, C), ...activitySegments(live ? live.activity : lastActivity(s.transcript), paint, C)];
     const cache = runsCache(env);
-    if (refresh)
+    if (refresh && !live)
         refreshRuns(cache, nowMs);
     const columns = Number.parseInt(env.COLUMNS ?? '', 10) || 0;
-    return [top.filter(Boolean).join(SEPARATOR), second.filter(Boolean).join(SEPARATOR), ...runsSegments(cache, nowMs, paint, mode)]
+    return [top.filter(Boolean).join(SEPARATOR), second.filter(Boolean).join(SEPARATOR), ...(live ? agentSegments(live.agents, paint, C, live.lastCommit, nowMs) : []), ...(live ? live.runs(paint, mode) : runsSegments(cache, nowMs, paint, mode))]
         .filter(Boolean).map((line) => fitWidth(line, columns));
 }
 if (isMain(import.meta.url)) {

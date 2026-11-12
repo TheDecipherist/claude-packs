@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { killGroup } from './child-group.mjs';
 import { put, scratchDir, slash, walk } from './files.mjs';
 import { gitRun } from './git-run.mjs';
 import { toJson } from './json.mjs';
@@ -29,6 +30,8 @@ export function scratchProject(files = {}, layout = null) {
         put(join(dir, rel), text);
     return dir;
 }
+/** A worktree step that fires a Bash command (KWB-204: the rows of a command judge differ only in label, command and want). */
+export const bashStep = (label, command, want) => ({ label, event: { tool_name: 'Bash', tool_input: { command } }, want });
 // The runner's own logs are not a judge's writes (the runner writes them for every hook, a judge or not).
 const RUNNER_LOGS = /(?:^|\/)\.claude\/(?:hooks\.log|logs\/)/;
 /** Every file under `dir` with its size and mtime, but the runner's logs: the state a judge's selftest must leave as it was. */
@@ -52,10 +55,11 @@ export function writtenSince(dir, before) {
 // hook inside the runner; a by-hand mode (args, e.g. --init) runs the hook file itself.
 const RUNNER = fileURLToPath(new URL('../run-hooks.mjs', import.meta.url));
 export const runHook = (hook, dir, payload, args = []) => {
-    const r = spawnSync(process.execPath, args.length || !existsSync(RUNNER) ? [hook, ...args] : [RUNNER, hook], {
-        cwd: dir, input: payload ? toJson(payload) : '', encoding: 'utf8',
-        env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
-    });
+    // detached: its own process group, so what the hook left running is ended with it (KWB-205); spawnSync takes it, its typings do not list it
+    const options = { cwd: dir, input: payload ? toJson(payload) : '', encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, detached: true };
+    const r = spawnSync(process.execPath, args.length || !existsSync(RUNNER) ? [hook, ...args] : [RUNNER, hook], options);
+    if (r.pid)
+        killGroup(r.pid);
     return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
 };
 export const writeOf = (file_path, content = '// new\n') => ({ tool_name: 'Write', tool_input: { file_path, content } });

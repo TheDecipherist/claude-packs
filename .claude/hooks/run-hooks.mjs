@@ -22,6 +22,7 @@ var __rewriteRelativeImportExtension = (this && this.__rewriteRelativeImportExte
 import { rmSync } from 'node:fs';
 import { basename, dirname, extname, isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { killGroups } from './lib/child-group.mjs';
 import { crashVerdict } from './lib/crash-policy.mjs';
 import { logCall } from './lib/event-log.mjs';
 import { childError, ensureDir, put, readText, scratchDir } from './lib/files.mjs';
@@ -105,6 +106,7 @@ export async function runAll(args, text, root, caller, arrival = { at: Date.now(
         finally {
             for (const u of undo)
                 u();
+            killGroups(); // a hook is done: what it left running in its process group is ended with it (KWB-205)
         }
         outs.push(out.join(''));
         const ms = performance.now() - t0;

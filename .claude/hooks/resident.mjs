@@ -1,3 +1,11 @@
+var __rewriteRelativeImportExtension = (this && this.__rewriteRelativeImportExtension) || function (path, preserveJsx) {
+    if (typeof path === "string" && /^\.\.?\//.test(path)) {
+        return path.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function (m, tsx, d, ext, cm) {
+            return tsx ? preserveJsx ? ".jsx" : ".js" : d && (!ext || !cm) ? m : (d + ext + "." + cm.toLowerCase() + "js");
+        });
+    }
+    return path;
+};
 // resident: the resident runner (typescript order W8.2, d-10, review-2-go). One daemon per project folder, shared by every session and
 // agent there, serves the hook events the Go proxy sends over a unix socket: the table is loaded once, the hooks sit on a pool of
 // worker threads, and an event is answered in the time its hooks take, not the time node takes to start. It is not a hook: no
@@ -11,6 +19,7 @@
 import { availableParallelism, homedir } from 'node:os';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { setFlagsFromString } from 'node:v8';
 import { readText } from './lib/files.mjs';
 import { isMain } from './lib/hook-log.mjs';
 import { readHookTable } from './lib/hook-table.mjs';
@@ -25,6 +34,7 @@ import { startPool } from './resident/pool.mjs';
 import { answers, listen, prepareFolder } from './resident/socket.mjs';
 import { SAMPLE_MS, startSampling } from './resident/sampling.mjs';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mjs';
+import { StatusKeeper } from './resident/status.mjs';
 import { usage } from './resident/usage.mjs';
 import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mjs';
 const HERE = fileURLToPath(new URL('.', import.meta.url));
@@ -34,6 +44,10 @@ const LOCK_FILE = join('.claude', 'claude-packs.lock.json');
 const PRELOAD = 1;
 /** At most this many workers import any one hook while the pool is not full (W8.4). */
 const SPREAD = 4;
+/** V8 flags the daemon sets before its workers start, for every isolate after (rss: 16 workers that each ran every hook held 389 MB
+ *  with V8's defaults and 264 MB with these, build/evidence/rss): no optimizing or baseline compiler, and V8's size-over-speed choices.
+ *  A hook runs a few milliseconds of code per event, its time in I/O and regular expressions, which these leave alone. */
+export const SMALL_V8 = ['--optimize-for-size', '--no-turbofan', '--no-maglev', '--no-sparkplug'];
 const valueOf = (argv, flag) => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : undefined; };
 /** The options a command line gives: `--serve <project>` and its flags; null when it is not one. */
 export function serveOptions(argv, host) {
@@ -50,8 +64,8 @@ export function serveOptions(argv, host) {
     return {
         project, hooks, pool, idleMs: minutes * 60_000, readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
         recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: 10 * 60_000, stateMs: n('--state-ms', STATE_EVERY_MS),
-        proxy: valueOf(argv, '--proxy') ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS),
-        again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : []), ...(proxy === undefined ? [] : ['--proxy', proxy])],
+        proxy: valueOf(argv, '--proxy') ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS), npm: !argv.includes('--no-npm'),
+        again: [host.script, '--serve', project, '--hooks', hooks, '--pool', String(pool), '--idle-minutes', String(minutes), ...(exitWith > 0 ? ['--exit-with', String(exitWith)] : []), ...(proxy === undefined ? [] : ['--proxy', proxy]), ...(argv.includes('--no-npm') ? ['--no-npm'] : [])],
     };
 }
 /** Runs the daemon until it stops: 0 when it was stopped, idle or replaced; 1 when it could not start. */
@@ -82,10 +96,13 @@ export async function serve(o, host) {
         sayReady(o.readyFd, 'failed no hook table\n');
         return 1;
     }
+    for (const flag of SMALL_V8)
+        setFlagsFromString(flag);
     const index = residentIndex(project, () => readLayout(project));
     const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
+    // the pool never grows past its size: a burst of 16 events at once grew it to 20 to 22 workers, each about 10 MB the daemon kept (rss)
     const pool = startPool({
-        workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, preload: Math.min(PRELOAD, o.pool), spread: SPREAD, max: Math.max(32, o.pool),
+        workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, preload: Math.min(PRELOAD, o.pool), spread: SPREAD, max: o.pool,
         idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, log,
     });
     const failed = await pool.ready();
@@ -97,9 +114,15 @@ export async function serve(o, host) {
         pid: process.pid, key, project, hooks: o.hooks, node: host.node, lockHash: lockHash(lock), started, lastEvent: counts.last, events: counts.events, workers: pool.size(), rss: process.memoryUsage.rss(), heap: process.memoryUsage().heapUsed,
         usage: usage.all(), flags: sampling?.flags() ?? [], ...(sampling?.pid() ? { sampler: sampling.pid() ?? 0 } : {}),
     });
-    const served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`) };
+    // the status line's facts, kept as events arrive and as the sampler reports (W8.6)
+    const status = new StatusKeeper({ project, env: host.env, log, ...(o.npm ? {} : { askNpm: () => Promise.resolve(null) }), load: () => import(__rewriteRelativeImportExtension(new URL(`../tools/statusline-live${EXT}`, import.meta.url).href)) });
+    const served = { project, table, pool, index, counts, log, runner: join(o.hooks, `run-hooks${EXT}`), status };
     const listening = await listen(files.socket, (incoming) => {
         // the status line's ask: the daemon's state, no event (counts.last is the idle clock and is left alone, review-2-go 7.1)
+        if (incoming.request.status === true && incoming.request.render === true) { // `hook-proxy status`: the line, drawn from what the daemon holds
+            status.render(incoming.stdin.toString('utf8'), incoming.request.env).then((text) => incoming.reply({ code: 0, stdout: text, stderr: '' }), () => incoming.reply({ code: 0, stdout: '', stderr: '', fallback: 'ts' }));
+            return;
+        }
         if (incoming.request.status === true) {
             incoming.reply({ code: 0, stdout: toJson(snapshot()), stderr: '' });
             return;
@@ -118,6 +141,7 @@ export async function serve(o, host) {
             ending = true;
             log(`stopping: ${reason}`);
             sampling?.stop();
+            clearInterval(ticker);
             void listening.close().then(() => pool.close()).then(() => {
                 state.remove();
                 releaseStartLock(files.lock);
@@ -126,6 +150,9 @@ export async function serve(o, host) {
                 done(0);
             });
         };
+        const ticker = setInterval(() => status.tick(Date.now()), o.sampleMs);
+        ticker.unref();
+        void status.refreshNewest(Date.now());
         process.on('uncaughtException', (e) => log(`uncaught exception: ${e.stack ?? e.message}`));
         process.on('unhandledRejection', (e) => log(`unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`));
         for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP'])
