@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w11-graph (work/2.0.0-ts-w11-graph), started 2026-11-12: W11 item 4, the README's performance graph.
+  making: scripts/counts-graph.mts (numbers.json to two SVGs and a table), their GENERATED files and the README's performance block; concepts: none (design/shape.json declares none); reuse: between/renderAll (scripts/counts-render.mts), readJson (hooks lib json.mts).
+
 - 2.0.0 session 2 kwb208-210 (work/2.0.0-ts-kwb208-210), started 2026-11-12: KWB-208 and KWB-210 fixed, selftest cases red first.
   making: kit-fresh's newer-work list leaves out a later-version branch stacked on this checkout's branch; no-polling passes a wait on a process (`tail --pid=N -f /dev/null`); concepts: none (design/shape.json declares none); reuse: kitVerdict (lib/kit-fresh-look.mts), pollingIn (lib/polling.mts), kitRepo in the selftest.
 

@@ -8,6 +8,23 @@ You install once. From then on Claude Code reads the rules and meets the hooks i
 
 It works on a project in any language. The machine needs Node 22, because the hooks are Node scripts, and the project itself can be Rust, Python, Go, C++ or anything else.
 
+<!-- generated:performance:start -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/perf-dark.svg">
+  <img src="docs/perf-light.svg" alt="Bar pairs, 1.9 against 2.0, for the wait per turn, Stop at p95, a release, a one-hook gate, a Bash call's hooks, doctor and update" width="760">
+</picture>
+
+| Measure | 1.9 | 2.0 | Faster by |
+|---|---|---|---|
+| Hook wait per turn (Stop p50 + prompt p50) | 326 ms | 111 ms | 2.9x |
+| Stop at p95 (replay) | 6,067 ms | 90 ms | 67x |
+| Release, commit to npm (one-hook change) | 937 s | 22.8 s | 41x |
+| Gate for a one-hook change | 188.3 s | 14 s | 13x |
+| A Bash call's hooks, live (Pre p50) | 105 ms | 6 ms | 18x |
+| doctor, cached | 4.5 s | 0.85 s | 5.3x |
+| update, warm | 4.6 s | 1.1 s | 4.2x |
+<!-- generated:performance:end -->
+
 ## Getting started
 
 Claude Code on its own is fast, and it forgets. Each session starts cold, the same mistakes come back, code gets written twice, and "done" means it says it's done. The kit gives a project what a good team has:

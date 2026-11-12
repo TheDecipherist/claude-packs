@@ -1,0 +1,67 @@
+{
+  "measures": [
+    {
+      "id": "turn-wait",
+      "label": "Hook wait per turn (Stop p50 + prompt p50)",
+      "unit": "ms",
+      "before": 326,
+      "after": 111,
+      "evidence": "build/evidence/W0/replay-g.md (Stop 279 + UserPromptSubmit 47); after: build/evidence/W8/summary.md (Stop p50 64) + the prompt's 47 carried, not yet remeasured",
+      "provisional": true
+    },
+    {
+      "id": "stop-p95",
+      "label": "Stop at p95 (replay)",
+      "unit": "ms",
+      "before": 6067,
+      "after": 90,
+      "evidence": "build/evidence/W0/replay-g.md; after: build/evidence/W8/summary.md (replay p95 90 ms)",
+      "provisional": true
+    },
+    {
+      "id": "release",
+      "label": "Release, commit to npm (one-hook change)",
+      "unit": "s",
+      "before": 937,
+      "after": 22.8,
+      "evidence": "build/evidence/W0/baseline.md (d); after: docs/workorders/typescript/progress.md, W9 line (verdaccio, a one-hook release 22.8 s)",
+      "provisional": true
+    },
+    {
+      "id": "gate",
+      "label": "Gate for a one-hook change",
+      "unit": "s",
+      "before": 188.3,
+      "after": 14,
+      "evidence": "build/evidence/W0/baseline.md (b1, no-find); after: docs/workorders/typescript/progress.md, W9 line (one-hook gates 8 to 14 s, the top of the range)",
+      "provisional": true
+    },
+    {
+      "id": "bash-hooks",
+      "label": "A Bash call's hooks, live (Pre p50)",
+      "unit": "ms",
+      "before": 105,
+      "after": 6,
+      "evidence": "build/evidence/W0/replay-g.md; after: build/session2/doctor2.txt (Pre Bash 6/313 ms, last 26 live calls)",
+      "provisional": true
+    },
+    {
+      "id": "doctor-cached",
+      "label": "doctor, cached",
+      "unit": "s",
+      "before": 4.5,
+      "after": 0.85,
+      "evidence": "build/evidence/W0/baseline.md (e, doctor with a warm cache); after: build/evidence/W8/summary.md (0.85 s)",
+      "provisional": true
+    },
+    {
+      "id": "update-warm",
+      "label": "update, warm",
+      "unit": "s",
+      "before": 4.6,
+      "after": 1.1,
+      "evidence": "build/evidence/W0/baseline.md (f); after: build/evidence/W8/summary.md (1.1 s warm)",
+      "provisional": true
+    }
+  ]
+}

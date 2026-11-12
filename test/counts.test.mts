@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { commandsOf, whenOf } from '../scripts/counts-tables.mts';
 import { documentsOf, standing } from '../scripts/counts.mts';
 import { totals } from '../scripts/counts-facts.mts';
+import { measuresOf } from '../scripts/counts-graph.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -66,4 +67,25 @@ test('the commands come from the help text: usage, the first lines of what it do
 test('a hook says where it runs in the words of the table', () => {
   assert.equal(whenOf({ name: 'x', runs: [{ event: 'PreToolUse', matcher: 'Write|Edit|Bash' }, { event: 'Stop', matcher: undefined }] }), 'Write, Bash, Stop');
   assert.equal(whenOf({ name: 'x', runs: [{ event: 'PreToolUse', matcher: undefined }, { event: 'PostToolUse', matcher: undefined }] }), 'Every call');
+});
+
+test('a changed number in numbers.json turns the README graph, its table and both SVGs red until they are generated again (W11 item 4)', () => {
+  const stand = standing(KIT);
+  assert.deepEqual(documentsOf(KIT, stand).stale, []);
+  const planted = measuresOf(KIT).map((m, i) => (i === 0 ? { ...m, after: m.after + 1 } : m));
+  assert.deepEqual(documentsOf(KIT, stand, planted).stale.sort(), ['README.md', 'docs/perf-dark.svg', 'docs/perf-light.svg']);
+  // the table edited by hand, or a picture element lost, is red as well
+  const table = stand['README.md'].replace(/^(\| Stop at p95 .*? \| )[^|]*\|/m, '$1 1 ms |');
+  assert.deepEqual(documentsOf(KIT, { ...stand, 'README.md': table }).stale, ['README.md']);
+  const svg = stand['docs/perf-dark.svg'].replace(/<rect x="24" y="\d+" width="(\d+)"/, '<rect x="24" y="0" width="9"');
+  assert.deepEqual(documentsOf(KIT, { ...stand, 'docs/perf-dark.svg': svg }).stale, ['docs/perf-dark.svg']);
+});
+
+test('every measure has a before, an after, a unit and an evidence path; a provisional after is marked', () => {
+  const measures = measuresOf(KIT);
+  assert.equal(measures.length, 7);
+  for (const m of measures) {
+    assert.ok(m.before > m.after && m.after > 0 && m.evidence.length > 0 && ['ms', 's'].includes(m.unit), m.id);
+    assert.ok(m.provisional === true || m.provisional === undefined, m.id);
+  }
 });
