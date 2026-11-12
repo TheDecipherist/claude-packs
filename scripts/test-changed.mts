@@ -108,7 +108,10 @@ export async function main(argv: readonly string[], env: Env, log: (line: string
   if ((!chosen.size && !proofs.length) || o.dry) { log(GATE); return 0; }
   // KWB-111: node runs test files at one less than the core count by default (17 here), and each file installs the kit and
   // runs its selftests: the gate timed out on load. It takes the machine's core budget instead.
-  const concurrency = coreBudget(env, projectLayout(o.root));
+  // tests have their own cap: BUILDQ_CORES is the build queue's, and a session that set it to 16 for builds ran every test
+  // file of a gate at once (load 20 to 25 on 18 cores, 2026-11-11); CLAUDE_PACKS_TEST_CORES raises it on purpose
+  const testCap = Number(env.CLAUDE_PACKS_TEST_CORES) >= 1 ? Math.floor(Number(env.CLAUDE_PACKS_TEST_CORES)) : coreBudget({}, {});
+  const concurrency = Math.min(coreBudget(env, projectLayout(o.root)), testCap);
   // the changed hooks prove themselves first, in seconds; a red one stops the gate before the tests (the first error first)
   const proved = await proveHooks(o.root, proofs, concurrency, { ...env });
   for (const r of proved) log(`  ${r.code === 0 ? 'ok  ' : 'FAIL'} ${basename(r.hook)}: ${r.out.split('\n').pop() ?? ''}`);
