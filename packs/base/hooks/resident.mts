@@ -29,6 +29,7 @@ import { answers, listen, prepareFolder, type Incoming, type Listening } from '.
 import { SAMPLE_MS, startSampling, type Sampling } from './resident/sampling.mts';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mts';
 import { StatusKeeper, type Bar } from './resident/status.mts';
+import { loadWords, serveLoad } from './resident/load-ask.mts';
 import { closeInOrder } from './resident/shutdown.mts';
 import { UsageStore } from './resident/usage.mts';
 import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mts';
@@ -147,6 +148,8 @@ export async function serve(o: ServeOptions, host: Host, usage = new UsageStore(
       return;
     }
     if (incoming.request.status === true) { incoming.reply({ code: 0, stdout: toJson(snapshot()), stderr: '' }); return; }
+    const words = loadWords(incoming.request);   // `hook-proxy load ...`: the governor's answer, no event (W8.8)
+    if (words !== null) { serveLoad(incoming, words, new URL(`../tools/load${EXT}`, import.meta.url)); return; }
     counts.inflight += 1;
     serveEvent(served, incoming.request, incoming.stdin, incoming.arrival).then(incoming.reply, (e: unknown) => {
       log(`event failed: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);

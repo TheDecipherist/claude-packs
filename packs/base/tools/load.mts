@@ -76,49 +76,65 @@ export function sessionAbove(ppid: number): number {
   return ppid;
 }
 
-const say = (json: boolean, line: string, value: unknown): void => { console.log(json ? JSON.stringify(value) : line); };
+/** Where a verb's lines go: printed by the command, kept by the daemon that answers `hook-proxy load` (W8.8). */
+export interface Out { out: (line: string) => void; err: (line: string) => void }
 
-/** What one verb sees: the parsed words, the caller, the machine and the project the job runs for. */
-interface Run { p: Parsed; caller: Caller; host: GovernorHost; project: string }
+/** What one verb sees: the parsed words, the caller, the machine, the project the job runs for, and where its lines go. */
+interface Run { p: Parsed; caller: Caller; host: GovernorHost; project: string; o: Out }
+
+const say = (o: Out, json: boolean, line: string, value: unknown): void => o.out(json ? JSON.stringify(value) : line);
 
 /** Each verb: its exit code (0 go, granted or freed; 1 wait, refused or none; 2 a wrong word). */
 const VERBS = {
-  ask: ({ p, host, project }: Run): number => {
+  ask: ({ p, host, project, o }: Run): number => {
     const answer = ask(host, { kind: p.kind, want: p.want, priority: p.priority, project });
-    say(p.json, answer.line, answer);
+    say(o, p.json, answer.line, answer);
     return answer.go ? 0 : 1;
   },
-  take: ({ p, caller, host, project }: Run): number => {
+  take: ({ p, caller, host, project, o }: Run): number => {
     const want = p.want ?? (p.words[0] === undefined ? undefined : Number(p.words[0]));
-    if (want !== undefined && !(want >= 1)) { console.error(`load: take wants a number of cores (got "${p.words[0] ?? ''}")\n${USAGE}`); return 2; }
+    if (want !== undefined && !(want >= 1)) { o.err(`load: take wants a number of cores (got "${p.words[0] ?? ''}")\n${USAGE}`); return 2; }
     const pid = p.pid ?? (caller.holder ?? sessionAbove)(caller.ppid);
     const r = take(host, { kind: p.kind ?? 'other', want, priority: p.priority, project, pid });
-    if (r.ok) say(p.json, r.grant.line, r.grant); else say(p.json, r.answer.line, r.answer);
+    if (r.ok) say(o, p.json, r.grant.line, r.grant); else say(o, p.json, r.answer.line, r.answer);
     return r.ok ? 0 : 1;
   },
-  free: ({ p, host }: Run): number => {
+  free: ({ p, host, o }: Run): number => {
     const id = p.words[0];
-    if (id === undefined) { console.error(USAGE); return 2; }
+    if (id === undefined) { o.err(USAGE); return 2; }
     const freed = free(host, id);
-    say(p.json, freed ? `freed ${id}` : `no grant ${id} (already freed, or its holder ended)`, { id, freed });
+    say(o, p.json, freed ? `freed ${id}` : `no grant ${id} (already freed, or its holder ended)`, { id, freed });
     return freed ? 0 : 1;
   },
-  jobs: ({ p, host }: Run): number => {
+  jobs: ({ p, host, o }: Run): number => {
     const state = inFlight(host);
     const rows = state.jobs.map((j) => `${j.id} ${j.kind} ${j.slots} slots priority ${j.priority} pid ${j.pid}${j.pausedAt === null ? '' : ' paused'} ${j.project}`);
     const lines = [...rows, ...state.waiting.map((w) => `${w.id} ${w.kind} waiting for ${w.want} priority ${w.priority} pid ${w.pid} ${w.project}`)];
-    say(p.json, lines.length ? lines.join('\n') : 'no jobs', state);
+    say(o, p.json, lines.length ? lines.join('\n') : 'no jobs', state);
     return 0;
   },
 } satisfies Record<string, (run: Run) => number>;
 const isVerb = (word: string): word is keyof typeof VERBS => Object.hasOwn(VERBS, word);
 
-/** The command; `host` is the governor's view of the machine (a test plants it). */
-export function main(args: readonly string[], caller: Caller, host: GovernorHost = machineHost(caller.env)): number {
+/** The command's verbs on `o`; `host` is the governor's view of the machine (a test plants it). */
+export function runLoad(args: readonly string[], caller: Caller, host: GovernorHost, o: Out): number {
   const p = parse(args, caller.env);
-  if (typeof p === 'string') { console.error(`load: ${p}\n${USAGE}`); return 2; }
-  if (!isVerb(p.verb)) { console.error(USAGE); return 2; }
-  return VERBS[p.verb]({ p, caller, host, project: caller.env['CLAUDE_PROJECT_DIR'] || caller.cwd });
+  if (typeof p === 'string') { o.err(`load: ${p}\n${USAGE}`); return 2; }
+  if (!isVerb(p.verb)) { o.err(USAGE); return 2; }
+  return VERBS[p.verb]({ p, caller, host, project: caller.env['CLAUDE_PROJECT_DIR'] || caller.cwd, o });
+}
+
+/** The answer as the daemon replies it: the exit code and the text of each stream (`hook-proxy load ...` prints it). */
+export function answerLoad(args: readonly string[], caller: Caller, host: GovernorHost = machineHost(caller.env)): { code: number; stdout: string; stderr: string } {
+  const out: string[] = [];
+  const err: string[] = [];
+  const code = runLoad(args, caller, host, { out: (l) => out.push(`${l}\n`), err: (l) => err.push(`${l}\n`) });
+  return { code, stdout: out.join(''), stderr: err.join('') };
+}
+
+/** The command, printed; `host` is the governor's view of the machine (a test plants it). */
+export function main(args: readonly string[], caller: Caller, host: GovernorHost = machineHost(caller.env)): number {
+  return runLoad(args, caller, host, { out: (l) => console.log(l), err: (l) => console.error(l) });
 }
 
 if (isMain(import.meta.url)) process.exit(main(process.argv.slice(2), { env: process.env, cwd: process.cwd(), ppid: process.ppid }));

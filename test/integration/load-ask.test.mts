@@ -1,6 +1,12 @@
 // `claude-packs load` (typescript order W8.8 item 0): the question every lead and agent asks before a heavy start, through the real
 // command line, on a governor folder of its own with 18 planted cores and a planted load.
-import { CLI, assert, fresh, spawnSync, test } from '../kit-cli.mts';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { CLI, KIT, assert, fresh, spawnSync, test } from '../kit-cli.mts';
+import { percentile } from '../../lib/hook-budget.mts';
+import { hostTarget, shippedBinary } from '../../lib/proxy-binary.mts';
+import { stopDaemon, until } from '../fixtures/proxy-rig.mts';
+import { fire, pidOf, proxyRig } from './proxy-fire-rig.mts';
 import type { Spawned } from '../kit-cli.mts';
 import { main } from '../../packs/base/tools/load.mts';
 import { machineHost } from '../../packs/base/hooks/lib/governor.mts';
@@ -97,4 +103,47 @@ test('a --priority 0.3 take on a 10-core budget is granted 3 cores, and CLAUDE_P
 test('a wrong word says how to use it and exits 2', () => {
   assert.equal(load(fresh('load-usage-'), '0', 'ask', '--for', 'lunch').status, 2);
   assert.match(load(fresh('load-usage-'), '0', 'grab').stderr, /^usage: load ask/);
+});
+
+/** Asks end to end through the Go client: the picker, the binary, the daemon's socket, the tool's answer, as an agent asks. */
+const ASKS_END_TO_END = 100;
+const proxySkip = hostTarget() !== null && existsSync(shippedBinary(KIT, hostTarget() ?? '')) ? false : 'no proxy binary is built here (Go is not on PATH)';
+
+test('hook-proxy load ask answers in under 50 ms end to end, p50 of 100 asks through the picker and the daemon', { skip: proxySkip, timeout: 300_000 }, async () => {
+  const r = proxyRig('load-proxy-');
+  const governor = fresh('load-proxy-gov-');
+  const env = { ...r.env, CLAUDE_PACKS_GOVERNOR_DIR: governor, CLAUDE_PACKS_GOVERNOR_CORES: '18', CLAUDE_PACKS_GOVERNOR_LOAD: '9.2' };
+  const picker = join(r.project, '.claude', 'hooks', 'bin', 'hook-proxy');
+  try {
+    fire(r, JSON.stringify({ session_id: 's', cwd: r.project, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'ls' } }));
+    await until('a daemon is listening', () => pidOf(r) > 0);
+    const times: number[] = [];
+    let last: Spawned | null = null;
+    for (let i = 0; i < ASKS_END_TO_END; i += 1) {
+      const began = performance.now();
+      last = spawnSync('sh', [picker, 'load', 'ask', '--for', 'test'], { env, cwd: r.project, encoding: 'utf8' });
+      times.push(performance.now() - began);
+    }
+    assert.equal(last?.status, 0, last?.stderr);
+    assert.match(last?.stdout ?? '', /^you may use 3 cores now \(tests: CLAUDE_PACKS_TEST_CORES=3; .*load 9\.2 of 18, ceiling 13/);
+    const line = `load ask end to end: p50 ${percentile(times, 50).toFixed(1)} p95 ${percentile(times, 95).toFixed(1)} max ${Math.max(...times).toFixed(1)} ms over ${ASKS_END_TO_END}`;
+    console.log(line);
+    assert.ok(percentile(times, 50) < ANSWER_MS, line);
+    const wait = spawnSync('sh', [picker, 'load', 'ask', '--for', 'test'], { env: { ...env, CLAUDE_PACKS_GOVERNOR_LOAD: '14.1' }, cwd: r.project, encoding: 'utf8' });
+    assert.equal(wait.status, 1, 'wait under a planted load over the ceiling exits 1 through the client too');
+    assert.match(wait.stdout, /^wait: load 14\.1 over the ceiling 13/);
+  } finally { stopDaemon(r); }
+});
+
+test('hook-proxy load ask with no daemon answers through the TypeScript tool, the same answer', { skip: proxySkip }, () => {
+  const r = proxyRig('load-nodaemon-');
+  const env = { ...r.env, CLAUDE_PACKS_GOVERNOR_DIR: fresh('load-nod-gov-'), CLAUDE_PACKS_GOVERNOR_CORES: '18', CLAUDE_PACKS_GOVERNOR_LOAD: '9.2', CLAUDE_PACKS_DAEMON: 'off' };
+  const asked = spawnSync('sh', [join(r.project, '.claude', 'hooks', 'bin', 'hook-proxy'), 'load', 'ask', '--json'], { env, cwd: r.project, encoding: 'utf8' });
+  assert.equal(asked.status, 0, asked.stderr);
+  assert.equal((JSON.parse(asked.stdout) as { load: number }).load, 9.2);
+  // no binary for this machine: the picker gives every word to the TypeScript tool itself
+  const bare = spawnSync('sh', [join(r.project, '.claude', 'hooks', 'bin', 'hook-proxy'), 'load', 'ask', '--json'],
+    { env: { ...env, CLAUDE_PACKS_CACHE: fresh('load-nobin-') }, cwd: r.project, encoding: 'utf8' });
+  assert.equal(bare.status, 0, bare.stderr);
+  assert.equal((JSON.parse(bare.stdout) as { load: number }).load, 9.2);
 });

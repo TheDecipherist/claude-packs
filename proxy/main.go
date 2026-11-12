@@ -1,4 +1,5 @@
-// hook-proxy: `hook-proxy [<timeout seconds>]` judges the hook event on stdin (client.go); `hook-proxy --selftest` runs its plants
+// hook-proxy: `hook-proxy [<timeout seconds>]` judges the hook event on stdin (client.go); `hook-proxy status` and `hook-proxy load ...`
+// ask the daemon for the status line (status.go) and the load governor's answer (load.go); `hook-proxy --selftest` runs its plants
 // against fake daemons it starts in-process (selftest.go) and exits 0 when each was caught.
 package main
 
@@ -24,6 +25,11 @@ func main() {
 			cwd, _ := os.Getwd()
 			p := &proc{env: os.Environ(), cwd: cwd, ppid: os.Getppid(), uid: os.Getuid(), goos: runtime.GOOS, stdin: stdinText(), stdout: os.Stdout, stderr: os.Stderr, start: start}
 			os.Exit(p.runStatus())
+		}
+		if os.Args[1] == "load" {
+			cwd, _ := os.Getwd()
+			p := &proc{env: os.Environ(), cwd: cwd, ppid: os.Getppid(), uid: os.Getuid(), goos: runtime.GOOS, stdout: os.Stdout, stderr: os.Stderr, start: start}
+			os.Exit(p.runLoad(os.Args[2:]))
 		}
 		if os.Args[1] == "sample" {
 			os.Exit(runSample(os.Args[2:], os.Stdout))
