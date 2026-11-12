@@ -88,3 +88,39 @@ marked done, at its first unticked item.
 - 2026-11-12 session 2 start: npm ci and build OK (build/session2/ci-build.txt); the kit's own install was on hooks from before KWB-201's merge, updated (4e6dd01): live Bash event p50 1 to 2 ms, proxy 3 ms (hooks.log event lines, build/session2/update2.txt); KWB-204, 205, 206 logged first (cc540c1)
 - 2026-11-12 wave 1 (4 agents at load 3.4, 94 % memory free): w86-status (W8.6: the daemon keeps the status board, hook-proxy status p50 6.7 ms over 100 renders on a quiet minute, 41 to 43 ms under the wave's load, the TypeScript render 79.5 ms; clock, quiet 2m, abandonment with usageOf, SessionStart clear, red dot, refreshInterval 1 migrated; agents/w86-status-report.md), rss (daemon 731 to 320 MB on a copy of the kit's install after 1,000 events with 16 workers, 993 to 326 MB in the test rig; floor about 270 MB: 16 workers with the hook lib 200 MB plus indexes 67; agents/rss-report.md), kwb205 (lib/child-group.mts, abandon at the deadline, 3 tests red first, 0 spinners left; agents/kwb205-report.md), kwb204 (base hook no-polling with lib/polling.mts, build-guard keeps no copy, 12 selftest cases; agents/kwb204-report.md); merged; the lead: no-polling's README cell, enabled in the kit's install, the manifest and noop pin generated again (66 differences, all the merges' files) (affd593); worktrees removed with their evidence in build/evidence/agents/
 - 2026-11-12 KWB-199 measured: a child claude -p (build/evidence/KWB-199/summary.md): a foreground agent in a later message runs beside a background one; a background agent lives while the turn is open; its notification arrives at the next tool-call boundary, never during a foreground agent
+- 2026-11-12 W10 ledger (the lead, from review/w10-code.md, w10-rows.md, w10-tests.md, w10-types-proposal.md and the fix reports; 16 code findings, 7 test findings, 11 CARRY rows, 14 other open rows):
+  - W10 code#1 one alive(pid), EPERM alive -> fixed in ff5075b (w10-codefix2; daemon-find.mts `alive`, its EPERM case in the daemon-find tests)
+  - W10 code#2 the plain-object guard 36 times -> fixed in ff5075b (`isRecord`/`asRecord` in json.mts, test/unit/hooks-lib/json-record.test.mts)
+  - W10 code#3 Layout.guards and paramIds untyped, ten casts -> fixed in part: `LayoutGuards` and `ParamIdSettings` declared (ff9959b, npm run check 0); stays: [deferred] the ten readers keep their narrowing casts and `readJson<T>` keeps its name (the lead, session 2: each reader validates untrusted project JSON, so removing a cast is a behaviour change per hook; 2.0.x)
+  - W10 code#4 casts restating a type -> fixed in part (sync.mts `leaveOut`, e8e8d7b; install-block via asRecord, ff5075b); stays: [deferred] preambleOf's re-validation is deliberate (custom packs' JSON is user-written), ts-project and coverage casts wait on #3's readers
+  - W10 code#5 cache and home folders in nine places -> stays: [deferred] the lead: choosing the precedence moves where existing users' fresh-look and runs files live; a 2.0.x step with its own migration
+  - W10 code#6 sha256 and keyed temp files -> fixed in ff5075b (`sha256`, `tmpKeyed` in hash.mts, test/unit/hooks-lib/hash.test.mts)
+  - W10 code#7 slash normalisation 20 times -> fixed in ff5075b (`slash` in files.mts, test in files.test.mts; four hooks call `relInCheckout`); stays: the copies inside resident/ [deferred] (the daemon was being changed by KWB-201 at the time)
+  - W10 code#8 four directory walks -> stays: [deferred] a `sourceFiles` design changes which files two hooks see; needs a behaviour test first (2.0.x)
+  - W10 code#9 stamp, isMain, writeVerdict twice -> fixed in ff5075b (isMain in project.mts, `readStdinText` and `writeVerdict` in hook-log.mts)
+  - W10 code#10 seven files at or past 250 lines -> stays: [deferred] none is over 300 (repo-lint holds 300); each split is a move larger than a review fix
+  - W10 code#11 functions over 50 lines -> stays: [deferred] lexers and state machines need tests before a split; startPool was in the daemon's live change
+  - W10 code#12 raw JSON calls -> fixed in ff5075b (toJson in logs, hook-fold, configs, switches, git-guard, tone-report; global-hook's parse is by design, commented)
+  - W10 code#13 dead and over-exported code -> fixed in e8e8d7b (templateText removed, eight exports dropped); stays: [deferred] about 30 exported types with no importer, harmless
+  - W10 code#14 magic numbers -> fixed in part (`GIT_STEP_PATIENCE_MS`, e8e8d7b); stays: [deferred] one MAX_SOURCE_BYTES goes with #8
+  - W10 code#15 Go proxy drops errors silently -> fixed in e8e8d7b (daemon.go names a closed pipe; each dropped error commented)
+  - W10 code#16 shell-writes is a lib and a program -> stays: [deferred] a new installed entry file; with #10
+  - W10 tests#1 two Pre Bash hooks re-read the transcript -> fixed by KWB-201 (242d83b; last-prompt.test.mts, live-event-speed.test.mts)
+  - W10 tests#2 once-only and template-law rewrite the index per write -> fixed by KWB-201 (242d83b; index-cost.test.mts)
+  - W10 tests#3 git-guard's 536 ms worst at Pre Bash -> in session 2's wave 2 (agent budgets: no network on the event)
+  - W10 tests#4 the pack-content ratchet -> fixed in part in bb25ee2 (C2, C6, C7, R6 mechanical fixes; the ratchet lowered); stays: [deferred] files that also fail C5, R1 or R7 need a person (listed in agents/w10-testfix-report.md)
+  - W10 tests#5 the daemon's memory -> fixed in part by session 2's rss agent (731 to 320 MB on the kit's copy); the rest d-31
+  - W10 tests#6 noop's oracle not independent -> fixed in bb25ee2 (test/fixtures/noop/pinned-manifest.json, scripts/noop-pin.mts)
+  - W10 tests#7 smaller test losses -> fixed in bb25ee2 (base-neutral by rule, the release's remote head, layout-owned, README plants)
+  - CARRY KWB-153: touched by W4 (quiet-test.mts, buildq.mts, converted only); no test: [deferred] a limit for test runs is a feature, outside the conversion; W8.7's watchdog now flags a test run over the cap (resident-sampling.test.mts)
+  - CARRY KWB-152: touched by W3 (core-budget, run-discovery), W7 (cpp rules), W8.4 (doctor); held in part by the planted-platform tests of core-budget and run-discovery; no proof on Linux or Windows hardware [deferred]
+  - CARRY KWB-151: touched by W4 (cpp hooks), W7 (cpp rules); no test: [deferred] a second compiler pass is a feature
+  - CARRY KWB-137: touched by W3, W4 (inside-the-project.mts); in wave 2 (agent w10-rows2)
+  - CARRY KWB-135: touched by W4 (idle-wake, user-asks, switches); in wave 2 (agent w10-rows2)
+  - CARRY KWB-134: touched by W4, W8.1, W8.4 (doctor, hook-proof); held by doctor's hooks.json row check (a gone row's file named) since W8.1
+  - CARRY KWB-133: touched by W3, W4, W8.3 (git-guard); fixed in d340f39, held by test/hooks/base/git-guard.test.mts "KWB-133"
+  - CARRY KWB-123: touched by W4 (test-verdict.mts); fixed, held by test/unit/tools/test-verdict.test.mts
+  - CARRY KWB-115: touched by W4 (protect-vendor.mts); in wave 2 (agent w10-rows2)
+  - CARRY KWB-113: touched by W4, W8.3 (time-guard); no test: [deferred] an expected time per job is a feature
+  - CARRY KWB-86: touched by W4 (making-check split), W8.1 and W8.2 (no node start per call); the old install's last 100 calls had making-check at 277 ms (build/session2/update.txt); it runs at Stop, and no Stop has passed on the new install yet, so the live number is W11's (the replay's Stop p50 64 ms, W8.3, includes it); held by doctor's per-hook budget
+  - other rows: 174, 177, 187, 194, 186, 178 fixed in d340f39 each with its test (agents/w10-rowfix-report.md); 182 fixed by KWB-201 (template-law selftest rows); 199 text in d340f39, the rest in wave 2 (kwb199); 157, 146, 131 fixed before and to be closed in workflow-bugs.md; 189 [deferred] (a guard cannot know a variable's value); 129 [deferred] (the kit's own hook, not a pack's)
