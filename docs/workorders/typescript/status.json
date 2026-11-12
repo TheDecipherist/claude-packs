@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T18:59:53Z",
+  "updated": "2026-11-12T19:01:11Z",
   "steps": [
     {
       "id": "W0",
@@ -77,6 +77,13 @@
       "id": "W10",
       "title": "Before calling it finished",
       "items": 2,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W10b",
+      "title": "Resident runner and Go proxy under stress",
+      "items": 5,
       "done": 0,
       "agent": null
     },

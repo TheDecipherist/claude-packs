@@ -673,6 +673,36 @@ the test that holds its behaviour.
 **Done when:** every finding is written in `progress.md` with its fix or why it stays, 0 left blank; each CARRY row names the step that
 touched its files and the test that holds the behaviour it describes.
 
+## W10b. The resident runner and the Go proxy under stress (the user, 2026-11-12: "we gotta really really stress/press/test the resident runner and go proxy for DRY, best practices and memory leaks especially")
+
+After KWB-201 and W8.6 and W8.7 are closed, before W11 measures anything. Runs one at a time, on the cap, with the load recorded.
+
+1. A soak: a planted project with the synth-creator pack set, 8 concurrent clients replaying `test/fixtures/replay/bandwarp-hooks.jsonl`
+   at its real mix, for 60 minutes (over 200,000 events), with a kit update (a new lock) at minute 20, a `kill -9` of the daemon
+   at minute 30, a worker killed at minute 40 and the sampler killed at minute 50; sampled every 30 s into `build/evidence/W10b/`:
+   the daemon's RSS and V8 heap used (after a forced GC), its open file descriptors, its worker count, its child processes, the
+   sampler's RSS and Go heap (`runtime.MemStats`), the socket files and pid files in the cache folder, and every event's verdict
+   compared with the TypeScript runner's on the same event.
+2. Leak checks, each with a planted leak seen red first: the heap's slope over the last 40 minutes under 1 MB per 10 minutes (a
+   planted array that grows per event); file descriptors and child processes back to their start after each kill (a planted
+   unclosed file); no worker, socket file, pid file or timer left behind after the daemon exits (a planted interval); the old
+   daemon gone within its idle window after the kit update; heap snapshots at minute 15 and 55 diffed, the top 10 growing
+   constructors listed in the evidence with what each is.
+3. The protocol under abuse: Go's native fuzzing of the client's frame reader and the TypeScript fuzzing of `proxy-wire`'s
+   parser (truncated frames, a length over the cap, bad JSON, a zero length, 1 MB of garbage), 10 minutes each, 0 crashes and 0
+   hangs, every input answered by the TypeScript path or a refusal, never exit 0 unjudged; `go test -race` over the client and the
+   sampler; `go vet` and `staticcheck` (its version pinned with its row) clean.
+4. DRY and best practices, read by an agent that did not write the code, briefed with the code and not with this order's
+   conclusions: one owner for each of framing, the socket name, the cache folder, the lock hash, the deadline and the process-group
+   kill across `resident/`, `proxy-wire.mts`, `proxy/*.go` and the sampler (a constant shared by Go and TypeScript generated from one
+   table, never written twice); every error path closed (sockets, workers, children, files); no global state outside the main
+   thread's owners; each finding fixed or recorded with why it stays.
+
+**Done when:** the soak's evidence holds the 120 samples and the verdict comparison with 0 differences; each leak check's numbers
+meet the line above and each plant was seen red; the fuzzers ran their 10 minutes each with 0 crashes and 0 hangs; `go test
+-race`, `go vet` and `staticcheck` are clean; the review's findings are each fixed or written with why, and every shared constant
+has one source (a check, red on a planted second copy); the daemon's RSS meets its budget at the end of the soak.
+
 ## W11. The report, with the comparison
 
 1. The "after": every measurement of W0.5 (a) to (l) taken again on the finished kit, by the same command on the same machine, into
