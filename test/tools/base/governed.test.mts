@@ -63,6 +63,7 @@ test('a job granted 3 slots runs with CLAUDE_PACKS_TEST_CORES=3 and -j3', () => 
   const fuzz = { id: 'g2', kind: 'fuzz' as const, slots: 3, settings: settingsFor('fuzz', 3) };
   assert.deepEqual(withFlags(['go', 'test', '-fuzz=F', '-parallel', '8', './p'], fuzz), ['go', 'test', '-fuzz=F', './p', '-parallel=2']);
   assert.deepEqual(withFlags(['node', '--test', 'a.test.mts'], { ...grant, kind: 'test' }), ['node', '--test-concurrency=3', '--test', 'a.test.mts']);
+  assert.deepEqual(withFlags(['node', '--test', '--test-concurrency=6', 'a.test.mts'], { ...grant, kind: 'test' }), ['node', '--test', '--test-concurrency=3', 'a.test.mts'], 'a higher concurrency asked for is cut to the grant');
   assert.equal(grantedEnv({ CLAUDE_PACKS_TEST_CORES: '2' }, grant)['CLAUDE_PACKS_TEST_CORES'], '2', 'a lower count the caller set is kept');
   assert.deepEqual(lowPriority(['make'], 'darwin'), ['taskpolicy', '-b', 'make']);
   assert.deepEqual(lowPriority(['make'], 'linux'), ['nice', '-n', '15', 'make']);

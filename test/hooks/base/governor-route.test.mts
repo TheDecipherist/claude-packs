@@ -1,7 +1,7 @@
 // governor-route (typescript order W8.8 item 4): a heavy Bash command is rewritten through `governed` by updatedInput, and an agent's
 // start holds a governor slot. The hook's contract in a base install, then the order's Done when: a planted `npm test`, `cmake --build`
 // and `go test -fuzz` are each rewritten, `ls`, a governed command and a pipe whose heavy part is not first are not; an agent start past
-// the budget waits. Every run has its own governor folder (test/fresh-tmp.mts) and plants its cores and load.
+// the budget waits. Every run has its own governor folder (the test preload's) and plants its cores and load.
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';

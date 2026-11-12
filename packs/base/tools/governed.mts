@@ -77,8 +77,11 @@ export function withFlags(command: readonly string[], grant: Pick<Grant, 'slots'
     }
     return [program, ...kept, grant.kind === 'fuzz' ? (grant.settings.flags[0] ?? `-parallel=${n}`) : `-parallel=${n}`];
   }
-  if (name === 'node' && rest.some((a) => a === '--test') && !rest.some((a) => a.startsWith('--test-concurrency'))) return [program, `--test-concurrency=${n}`, ...rest];
-  return [...command];
+  if (name !== 'node' || !rest.includes('--test')) return [...command];
+  // a concurrency the command asked for is cut to the grant; none asked for gets the grant
+  const asked = rest.find((a) => a.startsWith('--test-concurrency='));
+  if (asked === undefined) return [program, `--test-concurrency=${n}`, ...rest];
+  return [program, ...rest.map((a) => (a === asked ? `--test-concurrency=${Math.min(n, Number(a.split('=')[1]) || n)}` : a))];
 }
 
 /** The environment a granted job starts with: the grant's settings, but a lower count the caller already set is kept. */

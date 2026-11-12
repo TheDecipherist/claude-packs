@@ -33,3 +33,8 @@ test('selftests are the gate\'s, the memory of proved hooks is the run\'s, and n
   assert.equal(process.env['CLAUDE_PID'], undefined, 'kit-lock never reads this process as a session (KWB-40)');
   assert.ok(process.env['CLAUDE_PACKS_FIXTURES'], 'the installs the tests copy are built under one folder of the run (test/fixtures/installs.mts)');
 });
+
+test('a run started inside governed hands its tests no grant and no priority: a test\'s own governed job takes its own (W8.8)', () => {
+  assert.equal(process.env['CLAUDE_PACKS_GOVERNED'], undefined);
+  assert.equal(process.env['CLAUDE_PACKS_PRIORITY'], undefined);
+});

@@ -63,3 +63,7 @@ process.env.CLAUDE_PACKS_SELFTESTS ??= 'gate';
 // itself plants its own cores, load and folder.
 process.env.CLAUDE_PACKS_GOVERNOR_DIR ??= join(dir, 'governor');
 process.env.CLAUDE_PACKS_GOVERNOR_LOAD ??= '0';
+// A run started through `governed` (W8.8 item 3, and every routed `npm test`) hands its children the grant's id and its caller's
+// priority: a test's own governed job, buildq or load ask takes its own grant at the default priority, as with no governed parent
+delete process.env.CLAUDE_PACKS_GOVERNED;
+delete process.env.CLAUDE_PACKS_PRIORITY;
