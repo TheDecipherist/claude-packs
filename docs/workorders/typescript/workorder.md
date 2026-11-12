@@ -677,7 +677,7 @@ touched its files and the test that holds the behaviour it describes.
 
 After KWB-201 and W8.6 and W8.7 are closed, before W11 measures anything. Runs one at a time, on the cap, with the load recorded.
 
-1. A soak: a planted project with the synth-creator pack set, 8 concurrent clients replaying `test/fixtures/replay/bandwarp-hooks.jsonl`
+1. A soak, run alone with no agent or test run beside it: a planted project with the synth-creator pack set, 4 concurrent clients replaying `test/fixtures/replay/bandwarp-hooks.jsonl`
    at its real mix, for 60 minutes (over 200,000 events), with a kit update (a new lock) at minute 20, a `kill -9` of the daemon
    at minute 30, a worker killed at minute 40 and the sampler killed at minute 50; sampled every 30 s into `build/evidence/W10b/`:
    the daemon's RSS and V8 heap used (after a forced GC), its open file descriptors, its worker count, its child processes, the
