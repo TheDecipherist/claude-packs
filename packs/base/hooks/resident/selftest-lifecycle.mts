@@ -4,7 +4,7 @@
 import { chmodSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { put, readText } from '../lib/files.mts';
-import { readHookLog } from '../lib/hook-log.mts';
+import { DAEMON_START, readHookLog } from '../lib/hook-log.mts';
 import { toJson } from '../lib/json.mts';
 import { judgesThatWrite } from './judge-check.mts';
 import { PLANTS, MSG, WRITER } from './selftest-plants.mts';
@@ -73,7 +73,7 @@ async function rotationCase(cases: VerdictRow[]): Promise<void> {
     const done: number[] = [];
     for (let batch = 0; batch < 100; batch += 1) done.push(...(await Promise.all(Array.from({ length: 10 }, () => client(rig, eventText(rig, 'Fast')).then((j) => j.reply.code)))));
     await waitFor(() => readText(filesOf(rig).pid) !== null);
-    const rows = readHookLog(rig.dir, { rotated: true });
+    const rows = readHookLog(rig.dir, { rotated: true }).filter((r) => r.hook !== DAEMON_START);   // the start line is not a call
     cases.push(['1,000 events across a forced rotation: the hook lines equal the hooks run (two a call)', [done.length, rows.filter((r) => r.hook !== 'event').length, rows.filter((r) => r.hook === 'event').length].join(), '1000,2000,1000']);
     cases.push(['and the log really rotated', readdirSync(join(rig.dir, '.claude', 'logs')).filter((f) => f.startsWith('hooks-')).length > 0, true]);
     cases.push(['every event line says the daemon served it', rows.filter((r) => r.hook === 'event').every((r) => r.source === 'daemon'), true]);

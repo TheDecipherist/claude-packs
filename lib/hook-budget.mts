@@ -5,10 +5,11 @@
 // that event is blamed for time it spent waiting. Fewer than MIN_CALLS calls are printed, not judged (one call is not a p95).
 import { statSync } from 'node:fs';
 import { join } from 'node:path';
-import { readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
+import { DAEMON_START, readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
+import { SPREAD } from '../packs/base/hooks/resident/options.mts';
 import { median } from './hook-timing.mts';
 
 export const EVENT_CLASSES = ['Pre Bash', 'Pre Write', 'Post', 'Prompt', 'SessionStart', 'Stop'] as const;
@@ -29,6 +30,30 @@ export const STOP_WORST_MS = 1500;
 export const POOL_QUEUE_MS = 20;
 export const LAST = 100;
 export const MIN_CALLS = 5;
+
+/** After a daemon starts, each worker pays a hook's first call (its module-level state, the project's files read the first time): up to SPREAD workers
+ *  hold one hook, so its first SPREAD calls are a cold start, and so is the first event of each class (the client waited for the start). Doctor judges
+ *  warm calls only, and a series needs MIN_CALLS of them. A log with no daemon-start line (the process-per-hook runner) has no cold calls. */
+export const COLD_HOOK_CALLS = SPREAD;
+export const COLD_EVENT_CALLS = 1;
+
+/** The entries without the cold calls of each daemon start (the start line itself goes too). */
+export function warmCalls(entries: readonly HookLogEntry[]): HookLogEntry[] {
+  const seen = new Map<string, number>();
+  let started = false;
+  const warm: HookLogEntry[] = [];
+  for (const e of entries) {
+    if (e.hook === DAEMON_START) { seen.clear(); started = true; continue; }
+    if (started) {
+      const key = `${classOf(e.event, e.tool) ?? e.event}/${e.hook}`;
+      const n = seen.get(key) ?? 0;
+      seen.set(key, n + 1);
+      if (n < (NOT_HOOKS.has(e.hook) ? COLD_EVENT_CALLS : COLD_HOOK_CALLS)) continue;
+    }
+    warm.push(e);
+  }
+  return warm;
+}
 
 const WRITES = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 const NOT_HOOKS = new Set(['event', 'proxy', 'run-hooks']);
@@ -122,7 +147,7 @@ export function budgetProblems(projectDir: string, log: Logger = console.log): s
   // the calls since the current install only: an update changes the hooks, and the calls before it were another install's (KWB-196)
   const since = installedAt(projectDir);
   const current = readHookLog(projectDir).filter((e) => Date.parse(e.time) >= since);
-  const times = classTimes(current.filter((e) => named === null || NOT_HOOKS.has(e.hook) || named.has(e.hook)));
+  const times = classTimes(warmCalls(current).filter((e) => named === null || NOT_HOOKS.has(e.hook) || named.has(e.hook)));
   if (times.size === 0) return [];
   log(`  event budgets (wall p50/p95 ms, last ${LAST} calls): ${EVENT_CLASSES.filter((c) => times.has(c)).map((c) => {
     const t = times.get(c);

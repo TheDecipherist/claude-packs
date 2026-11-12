@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 commit-cost (work/2.0.0-ts-commit-cost), started 2026-11-12: git-guard's and kit-fresh's commit/push/merge calls without a process.
+  making: lib/git-config.mts (remote URLs and branch upstreams read from the config files, no process), git-guard and kit-fresh read HEAD, refs and the common dir from the git dir's files; concepts: none (design/shape.json declares none); reuse: gitDirsOf/currentHead/refSha (lib/git-files.mts), refsFingerprint.
+
 - 2.0.0 w11-graph (work/2.0.0-ts-w11-graph), started 2026-11-12: W11 item 4, the README's performance graph.
   making: scripts/counts-graph.mts (numbers.json to two SVGs and a table), their GENERATED files and the README's performance block; concepts: none (design/shape.json declares none); reuse: between/renderAll (scripts/counts-render.mts), readJson (hooks lib json.mts).
 

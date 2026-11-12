@@ -5,8 +5,8 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { toJson } from '../../../packs/base/hooks/lib/json.mts';
-import { logHook, type HookLogCall } from '../../../packs/base/hooks/lib/hook-log.mts';
-import { EVENT_BUDGET, POOL_QUEUE_MS, budgetProblems, classOf, percentile } from '../../../lib/hook-budget.mts';
+import { DAEMON_START, logHook, type HookLogCall } from '../../../packs/base/hooks/lib/hook-log.mts';
+import { COLD_EVENT_CALLS, COLD_HOOK_CALLS, EVENT_BUDGET, POOL_QUEUE_MS, budgetProblems, classOf, percentile } from '../../../lib/hook-budget.mts';
 
 const project = (): string => { const dir = scratchDir('hook-budget-'); ensureDir(join(dir, '.claude')); return dir; };
 const lines = (dir: string, n: number, call: HookLogCall): void => { for (let i = 0; i < n; i += 1) logHook(dir, call); };
@@ -86,4 +86,39 @@ test('the table: the classes, the percentile, the tools no budget names', () => 
   assert.equal(classOf('SessionEnd', '-'), null);
   assert.equal(percentile([1, 2, 3, 4, 100], 95), 100);
   assert.equal(percentile([], 95), 0);
+});
+
+const START: HookLogCall = { event: 'DaemonStart', hook: DAEMON_START, ms: 0, code: 0, source: 'daemon' };
+
+test('the cold calls after a daemon start are not judged; warm slow calls still are', () => {
+  const dir = project();
+  logHook(dir, START);
+  lines(dir, COLD_HOOK_CALLS, { ...BASH, hook: 'cold-fake', ms: 900, code: 0 });   // one call per worker that first runs the hook
+  lines(dir, 8, { ...BASH, hook: 'cold-fake', ms: 3, code: 0 });
+  lines(dir, COLD_EVENT_CALLS, { ...BASH, hook: 'proxy', ms: 1100, code: 0, queue: 0, source: 'proxy' });
+  lines(dir, 8, { ...BASH, hook: 'proxy', ms: 20, code: 0, queue: 0, source: 'proxy' });
+  assert.deepEqual(said(dir).problems, []);
+  lines(dir, COLD_HOOK_CALLS + 8, { ...BASH, hook: 'slow-fake', ms: 300, code: 0 });   // not cold: the first calls are dropped, the rest are judged
+  assert.match(said(dir).problems.join('\n'), /^slow-fake at Pre Bash/);
+});
+
+test('a start judges nothing below five warm calls, and a second start is cold again', () => {
+  const dir = project();
+  logHook(dir, START);
+  lines(dir, COLD_HOOK_CALLS + 4, { ...BASH, hook: 'few', ms: 900, code: 0 });   // four warm calls: printed, not judged
+  assert.deepEqual(said(dir).problems, []);
+  const again = project();
+  logHook(again, START);
+  lines(again, COLD_HOOK_CALLS, { ...BASH, hook: 'few', ms: 900, code: 0 });
+  lines(again, 8, { ...BASH, hook: 'few', ms: 3, code: 0 });
+  logHook(again, START);
+  lines(again, COLD_HOOK_CALLS, { ...BASH, hook: 'few', ms: 900, code: 0 });   // the second start's cold calls
+  lines(again, 8, { ...BASH, hook: 'few', ms: 3, code: 0 });
+  assert.deepEqual(said(again).problems, []);
+});
+
+test('without a daemon-start line no call is cold: the process-per-hook runner pays its own load every call', () => {
+  const dir = project();
+  lines(dir, 8, { ...BASH, hook: 'plain', ms: 900, code: 0 });
+  assert.equal(said(dir).problems.length, 1);
 });
