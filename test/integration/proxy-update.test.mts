@@ -3,7 +3,6 @@
 // starts a daemon, and the next calls are the daemon's. A burst of overlapping events (agents working at once) grows the pool, and the
 // daemon must outlive it: one that ends at "400 MB resident" and starts again leaves each call to the fallback (157 ms) or to a cold
 // daemon. Each case has a cache folder of its own and stops the daemon it started.
-import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, chmodSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { scratchDir } from '../../packs/base/hooks/lib/files.mts';
@@ -14,7 +13,8 @@ import { hostTarget, shippedBinary } from '../../lib/proxy-binary.mts';
 import { installBinary } from '../../lib/proxy-install.mts';
 import { fixture } from '../fixtures/installs.mts';
 import { type ProxyRig, stopDaemon, until } from '../fixtures/proxy-rig.mts';
-import { CLI, assert, test } from '../kit-cli.mts';
+import { fire, fireAsync, pidOf } from './proxy-fire-rig.mts';
+import { assert, test } from '../kit-cli.mts';
 
 const target = hostTarget();
 const KIT = join(PACKS_DIR, '..');
@@ -33,15 +33,6 @@ const event = (r: ProxyRig, tool: 'Bash' | 'Write', n: number): string => toJson
   session_id: 's', cwd: r.project, hook_event_name: 'PreToolUse', tool_name: tool,
   tool_input: tool === 'Bash' ? { command: `ls ${n}` } : { file_path: join(r.project, `src-${n}.txt`), content: `line ${n}\n` },
 });
-const picker = (r: ProxyRig): string[] => [join(r.project, '.claude', 'hooks', 'bin', 'hook-proxy'), '60'];
-const fire = (r: ProxyRig, input: string): number | null => spawnSync('sh', picker(r), { input, encoding: 'utf8', env: r.env, cwd: r.project }).status;
-const fireAsync = (r: ProxyRig, input: string): Promise<void> => new Promise((done) => {
-  const child = spawn('sh', picker(r), { env: r.env, cwd: r.project, stdio: ['pipe', 'ignore', 'ignore'] });
-  child.on('close', () => done());
-  child.stdin.end(input);
-});
-/** The pid of the daemon the project's current lock names (0 when none runs): what `daemon status` says. */
-const pidOf = (r: ProxyRig): number => Number(/running\s+pid (\d+)/.exec(spawnSync('node', [CLI, 'daemon', 'status', '--dir', r.project], { env: r.env, encoding: 'utf8' }).stdout)?.[1] ?? 0);
 const sources = (r: ProxyRig): string[] => readHookLog(r.project).filter((l) => l.hook === 'event').map((l) => l.source ?? '-');
 
 test('after the lock changes (an update) one call is judged by the runner and the next calls are the new daemon\'s', { skip, timeout: 90_000 }, async () => {
