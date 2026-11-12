@@ -601,6 +601,18 @@ Sequential: (1), then (2), then (3), then (4), then (5).
    declaration; an existing project takes it through `enable`; the kit's own repo refuses a new `.mjs` source at write time through the
    same check.
 
+6. The status line served by the daemon (the user, 2026-11-12: "It should be the go proxy that maintains and updates the
+   statusbar ... more frequent updates so it never seems like any of the lines are stuck ... next to the claude-packs version
+   number there should be a red dot if it is out of date"), after KWB-201's fix: the daemon keeps the status as events arrive
+   (each session's and agent's start, last tool and its start time, last commit, stop; the order's progress; the kit version),
+   never rebuilt per render from files, worktrees, transcripts or `ps`; `hook-proxy status` (the Go client) asks the socket with a
+   50 ms deadline and prints the answer, and with no daemon prints the TypeScript status line's own render marked `slow path`;
+   `refreshInterval` 1, migrated by `update`; every live line carries a ticking clock (its tool and how long it has run, `Bash
+   0:42`) so it changes every render, and a line with no event for 2 minutes turns yellow and says `quiet 2m`, a stopped one leaves
+   the list; a red dot beside the version when npm's latest is newer than the project's own `package.json` version, read from
+   kit-fresh's cached look that the daemon refreshes at most hourly (no render waits on the network; a `work/` version ahead of
+   npm shows no dot).
+
 **Done when:** a Bash call waits on 2 proxy processes (from 7 node runners) and a Write on 2 (from 4), counted in a fresh install's
 settings and seen in its log, each proxy call under 20 ms on this Mac by the `proxy` line's wall (from 85 ms); a Write event's wall
 under 110 ms p50 and a Bash event's under 20 ms, against W0's (g) measured wall for the same events (wall to wall, never a sum); the
@@ -612,7 +624,10 @@ and no hook over its budget; `doctor` red on the sleeping plant and naming the p
 synth-creator cpp audio-core` plus `doctor` under 40 s uncached and 10 s cached, and `update` under 30 s, on this Mac; the status line
 renders in under 80 ms with the marker when no daemon runs, and `workIn` counts 0 processes for a running daemon; a `node` project from
 `init` holds `typescript` and the declaration, a planted `.mjs` write in it is refused, and `doctor` is red when `typescript` is removed
-from it.
+from it; `hook-proxy status` renders in under 15 ms p50 over 100 renders on this Mac, the TypeScript render's time stated beside it;
+a planted agent shows its tool with a clock that differs between two renders a second apart, turns `quiet 2m` after a planted
+2-minute silence and leaves the list on its stop; the red dot shows on a planted older install and not on the kit's own `work/`
+version; a planted network outage leaves the render under 15 ms.
 
 ## W9. The release in five minutes (measured without publishing)
 
