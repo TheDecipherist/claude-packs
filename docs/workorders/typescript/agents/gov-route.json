@@ -1,1 +1,1 @@
-{ "name": "gov-route", "step": "W8.8", "items": ["3", "4", "5", "load ask under 50 ms", "measured wave"], "done": [], "now": "reading", "updated": "2026-11-12" }
+{ "name": "gov-route", "step": "W8.8", "items": ["3", "4", "5", "load ask under 50 ms", "measured wave"], "done": ["3", "4", "5", "load ask under 50 ms"], "now": "gate, then the measured wave", "updated": "2026-11-12" }

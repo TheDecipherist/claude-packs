@@ -107,7 +107,8 @@ test('a wrong word says how to use it and exits 2', () => {
 
 /** Asks end to end through the Go client: the picker, the binary, the daemon's socket, the tool's answer, as an agent asks. */
 const ASKS_END_TO_END = 100;
-const proxySkip = hostTarget() !== null && existsSync(shippedBinary(KIT, hostTarget() ?? '')) ? false : 'no proxy binary is built here (Go is not on PATH)';
+const target = hostTarget();
+const proxySkip = target !== null && existsSync(shippedBinary(KIT, target)) ? false : 'no proxy binary is built here (Go is not on PATH)';
 
 test('hook-proxy load ask answers in under 50 ms end to end, p50 of 100 asks through the picker and the daemon', { skip: proxySkip, timeout: 300_000 }, async () => {
   const r = proxyRig('load-proxy-');

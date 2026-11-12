@@ -419,7 +419,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 52 | 12 | 3 | 8 |
-| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 28 | 8 | 29 | 16 |
+| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 28 | 8 | 30 | 16 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 10 | 14 | 1 | 2 |
@@ -565,6 +565,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `dispatch-once` | Write, Bash | Refuses a `switch` on a kind already switched on in another file. In Rust, a second lookup table on an enum, outside the enum |
 | `template-law` | Write, Bash | Refuses a copy, a near copy or a function made again |
 | `code-shape` | Write, Bash | Refuses wide lines, packed lines, long functions, long parameter lists |
+| `governor-route` | Agent, Bash, Every call | Puts a heavy command (a build, a test run, a fuzzer, an install, the soak) through `governed`, which waits for the load governor's grant and runs it with the cores it was granted; holds a governor slot for each agent started |
 | `git-guard` | Bash, Stop | Refuses a token in git config, and the git laws: stage by name, no rebase or force, branches from the fetched trunk. A new install has them; an older project adds `"enable": ["guards/git-house"]` |
 | `kit-fresh` | Bash, Session start | Says when the project runs a kit older than npm's, with the update command, and holds a run with nobody there until it is updated; in the kit's own repo, names newer work and refuses a commit until it is merged; offline, says what it could not check |
 | `suite-once` | Bash | Refuses the whole test suite unless the user's prompt asks for a full run |
