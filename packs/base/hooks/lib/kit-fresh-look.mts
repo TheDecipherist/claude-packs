@@ -100,6 +100,15 @@ export const kitGit = (root: string, env: Env): KitGit => (...args) => {
 
 const workVersion = (ref: string): string | null => WORK_BRANCH.exec(ref)?.[1] ?? null;
 
+/** the refs under origin/main and origin/work that HEAD does not contain, in one call (a merge-base each took 100 to 800 ms on a commit in a worktree-heavy kit repo) */
+const askMissing = (git: KitGit): string[] => git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
+
+/** Takes the kept list of `missing` refs for the checkout as it is now, so the next commit's check reads it kept: the detached refresh after a
+ *  commit or push calls this (commit-cost: the first commit after each ref change walked history on the event). Does nothing outside the kit's repo. */
+export function keepKitRefs(root: string, env: Env): void {
+  if (isKitRepo(root)) refsOf(root)?.missing(() => askMissing(kitGit(root, env)));
+}
+
 /** the kit's own checkout against origin/main and every origin/work/<version>-* newer than the checkout's own version */
 export function kitVerdict(root: string, { git, fetch, refs = null }: { git: KitGit; fetch: boolean; refs?: RepoRefs | null }): KitVerdict | null {
   const notes: string[] = [];
@@ -110,9 +119,7 @@ export function kitVerdict(root: string, { git, fetch, refs = null }: { git: Kit
   const branch = refs?.branch ?? git('rev-parse', '--abbrev-ref', 'HEAD').out;
   const own = [readJson<{ version?: unknown }>(join(root, 'package.json'))?.version, /^work\/(\d+\.\d+\.\d+)-/.exec(branch)?.[1]]
     .filter((v): v is string => parseVersion(v) !== null).sort(compareVersions).at(-1);
-  // the refs HEAD does not contain, in one call (a merge-base each took 100 to 800 ms on a commit in a worktree-heavy kit repo)
-  const askMissing = (): string[] => git('for-each-ref', '--no-merged', 'HEAD', '--format=%(refname:short)', 'refs/remotes/origin/main', 'refs/remotes/origin/work').out.split('\n').filter(Boolean);
-  const missing = refs ? refs.missing(askMissing) : askMissing();
+  const missing = refs ? refs.missing(() => askMissing(git)) : askMissing(git);
   // a later version made from this checkout's branch (its fork point is a commit main lacks) is the next work, landed after this (KWB-208)
   const mainKnown = refs?.mainKnown ?? git('rev-parse', '--verify', '-q', 'origin/main').ok;
   const stackedOnHere = (ref: string): boolean => {
