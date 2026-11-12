@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 KWB-204 (work/2.0.0-ts-kwb204), started 2026-11-12: polling in a sleep loop refused in every project.
+  making: packs/base/hooks/no-polling.mts and its shared function, build-guard without its polling part, the pack row, the worktree case, the test; concepts: none (design/shape.json declares none); reuse: blankQuotes/dropHeredocs (lib/shell-lex.mts), judgeVerdict (lib/writes.mts), the no-find hook's shape, the build-guard polling plants.
+
 - 2.0.0 session 2 (work/2.0.0-typescript; agents work/2.0.0-ts-{w86-status,rss,kwb205,kwb204}), started 2026-11-12: W8 reopened closed on live numbers, W8.6, KWB-199/204/205/206, W10's findings, W11, W12.
   making: briefs/S2-wave1.md, the merges, progress.md lines, the KWB-199 probe (build/evidence/KWB-199), W11's report and showcase; concepts: none (design/shape.json declares none); reuse: the order's existing scripts (scripts/release.mts, scripts/counts.mts, scripts/test-changed.mts).
 

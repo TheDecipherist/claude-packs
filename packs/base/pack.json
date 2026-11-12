@@ -109,7 +109,9 @@
     "hooks/making-check-count.mts": ["test/hooks/base/making-check-count.test.mts"],
     "hooks/making-check.mts": ["test/hooks/base/making-check-count.test.mts", "test/hooks/base/making-check.test.mts"],
     "hooks/making.mts": ["test/hooks/base/making-check-count.test.mts", "test/hooks/base/making-check.test.mts", "test/hooks/base/making.test.mts"],
+    "hooks/lib/polling.mts": ["test/hooks/base/no-polling.test.mts"],
     "hooks/no-find.mts": ["test/hooks/base/no-find.test.mts"],
+    "hooks/no-polling.mts": ["test/hooks/base/no-polling.test.mts"],
     "hooks/once-only-index.mts": ["test/hooks/base/once-only-index.test.mts"],
     "hooks/once-only.mts": ["test/hooks/base/once-only-index.test.mts", "test/hooks/base/once-only.test.mts"],
     "hooks/placement-law.mts": ["test/hooks/base/placement-law.test.mts"],
@@ -400,6 +402,13 @@
           },
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-polling.mjs\"",
+            "role": "judge",
+            "order": 65,
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/repo-litter.mjs\"",
             "role": "judge",
             "order": 70,
@@ -538,7 +547,8 @@
     "hooks/run-hooks.mjs",
     "hooks/resident.mjs",
     "hooks/heartbeat.mjs",
-    "hooks/no-find.mjs"
+    "hooks/no-find.mjs",
+    "hooks/no-polling.mjs"
   ],
   "optIn": []
 }

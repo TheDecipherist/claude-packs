@@ -7,7 +7,6 @@ import type { VerdictRow } from './types.d.mts';
 /** The laws of build-guard.mts, as its selftest plants them. */
 export interface BuildLaws {
   offending: (cmd: string) => string | null;
-  polling: (cmd: string) => string | null;
   launchesApp: (cmd: string) => boolean;
   tooWide: (cmd: string, cwd: string, countTests: (dir: string, pat: string) => number) => string | null;
 }
@@ -31,12 +30,6 @@ const OFFENDING: readonly Plant[] = [
   ['for f in $(git diff --name-only a b) build/evidence/M17/differences.txt; do [ -f "$f" ] && grep -l x "$f"; done', false], // KWB-89: a list's word
   ['ls $(pwd)/x build/notes.txt', false], ['for i in 1 2; do ./build/A_artefacts/Release/AProbe --x; done', true], // a command after do
   ['if true; then make -j8; fi', true], ['while read x; do ninja -C out; done < l', true], ['true || { ctest --test-dir b; }', true],
-];
-const POLLING: readonly Plant[] = [
-  ["until grep -qE 'done' log; do sleep 10; done", true], ['for i in $(seq 1 55); do grep -q x f && break; sleep 20; done', true],
-  ['while true; do\n  sleep 15\ndone', true], ['sleep 180', true], ['sleep 2 && ls', false], ['echo sleep 60', false],
-  ["cat > f.sh <<'EOF'\nwhile true; do sleep 9; done\nEOF", false], ["grep -n 'sleep 30' x.sh", false],
-  ['timeout 585 tail -f /tmp/x.log', true], ['tail -F build.log', true], ['tail -20 build.log', false], ['tail -n 5 f', false],
 ];
 const LAUNCHES: readonly Plant[] = [
   ['open build/Synth_artefacts/RelWithDebInfo/Standalone/Synth.app', true], ['open -a Synth', true],
@@ -68,7 +61,6 @@ export function selftest(hookFile: string, laws: BuildLaws): number {
   const sh = (command: string): number | null => runHook(hookFile, dir, bashOf(command, dir)).status;
   return verdicts('build-guard', [
     ...plantedRows('offending', laws.offending, OFFENDING),
-    ...plantedRows('polling', laws.polling, POLLING),
     ...plantedRows('launchesApp', laws.launchesApp, LAUNCHES),
     ...plantedRows('tooWide', (cmd) => laws.tooWide(cmd, dir, (_dir, pat) => (pat === 'record' ? 4 : 99)), WIDE),
     ['a build outside the queue is refused through the runner', sh('cmake --build build --target X -j8'), 2],
