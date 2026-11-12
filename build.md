@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 W9 (work/2.0.0-ts-w9-release), started 2026-11-11: the release in one command, measured on a local registry.
+  making: scripts/release.mts and its parts (release-version, release-state, release-steps), their tests, the measuring script scripts/measure-release.mts; concepts: none (design/shape.json declares none); reuse: gitRun/gitOut/gitLines (packs/base/hooks/lib/git-run.mts), readText/put/scratchDir (files.mts), parseJson/readJson/writeJson (json.mts), buildProxy/releaseCheck (scripts/build-proxy.mts), the test picker (scripts/test-changed.mts).
+
 - 2.0.0 W8.5 (work/2.0.0-ts-w8-ts), started 2026-11-11: TypeScript enforced in projects (d-5).
   making: lib/ts-project.mts (devDependency, strict tsconfig, LSP declaration, doctor's problems), packs/js-ts/checks/typescript-only.json and its rule, the sync and doctor calls, tests; concepts: none (design/shape.json declares none); reuse: readJson/writeJson/toJson (packs/base/hooks/lib/json.mts), readSettings (lib/settings.mts), switches (lib/switches.mts), the pack-template check gate.
 
