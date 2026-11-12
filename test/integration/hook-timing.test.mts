@@ -68,6 +68,9 @@ test('every installed hook writes one timing line per call: time, event, hook, m
   for (const [payload, target] of cases) {
     const before = logged(dir).length;
     fireEvent(dir, payload);
+    // A PostToolUse call is answered before its recorders run (the daemon's late hooks, KWB-208 wave 2): their lines land just after.
+    const want = expected(dir, payload.hook_event_name, target);
+    for (let waited = 0; waited < 10000 && !want.every((h) => logged(dir).slice(before).some((r) => r[2] === h)); waited += 100) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100);
     const rows = logged(dir).slice(before);
     for (const r of rows) {
       assert.equal(r.length >= 5, true, `a line has time, event, hook, ms, exit: ${r.join(' | ')}`);
@@ -77,7 +80,7 @@ test('every installed hook writes one timing line per call: time, event, hook, m
       assert.match(r[4] ?? '', /^-?\d+$/);
     }
     const names = new Set(rows.map((r) => r[2]));
-    for (const h of expected(dir, payload.hook_event_name, target)) assert.ok(names.has(h), `${h} wrote no timing line on ${payload.hook_event_name} ${target}`);
+    for (const h of want) assert.ok(names.has(h), `${h} wrote no timing line on ${payload.hook_event_name} ${target}`);
   }
 });
 
