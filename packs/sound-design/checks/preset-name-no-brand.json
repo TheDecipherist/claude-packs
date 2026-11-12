@@ -1,8 +1,7 @@
 {
   "id": "preset-name-no-brand",
-  "why": "A preset name ships with the product: a machine, brand or artist name in it is a claim the product cannot make, and the gate's rule 8 names the sound, never its source. Measured on the house banks: 1 hit in 2,086 Tabula presets (a recipe named for an electric piano brand), 0 in 167 presets of the shipped bank.",
+  "why": "A preset name ships with the product: a machine, brand or artist name in it is a claim the product cannot make, and the gate's rule 8 names the sound, never its source. Measured on the house banks: 1 hit in 2,086 Tabula presets (a recipe named for an electric piano brand), 0 in 167 Stellix presets.",
   "rule": ".claude/rules/presets-are-named-and-neutral.md",
-  "code": false,
   "globs": [
     "**/*.tabula",
     "**/bank/**/*.json",

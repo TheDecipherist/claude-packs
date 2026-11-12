@@ -28,6 +28,3 @@ Never do:
 - Write the resolved tempo into the unit's own BPM field. It makes external sync look perfect and quietly turns internal into the host's tempo.
 - Place every clock byte at sample zero of a block.
 </constraints>
-
-## Check
-Lesson checks for this rule: `clock-not-at-sample-zero`, `no-tempo-writeback`, `position-not-integrated`, `stub-playhead-advances`.

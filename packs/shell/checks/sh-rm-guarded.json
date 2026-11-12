@@ -2,7 +2,6 @@
   "id": "sh-rm-guarded",
   "why": "An empty variable turns `rm -rf \"$dir/\"` into a delete from the root. `${dir:?}` stops the script instead.",
   "rule": ".claude/rules/shell-strict-and-quoted.md",
-  "code": false,
   "concepts": [
     "shell"
   ],

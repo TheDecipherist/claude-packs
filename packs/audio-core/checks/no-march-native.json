@@ -3,6 +3,7 @@
   "why": "-march=native/-mcpu=native tunes for the build machine; the shipped plugin can crash with illegal instructions on users' CPUs.",
   "rule": ".claude/rules/per-sample-code-inlinable.md",
   "exclude": [],
+  "code": false,
   "globs": [
     "**/CMakeLists.txt",
     "**/*.cmake",

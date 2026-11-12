@@ -26,4 +26,3 @@ Never do:
 ## Check
 - `.claude/checks/world-no-libm.json` and `world-no-unordered.json` block libm calls and unordered containers in world code.
 - Cross-platform gate: render N seconds from a saved state on both CI platforms. The world event log (event, sample index, payload hash) must be byte-identical between Mac and Windows; the audio hash must be identical between runs on each platform.
-Lesson checks for this rule: `world-no-libm`, `world-no-unordered`.

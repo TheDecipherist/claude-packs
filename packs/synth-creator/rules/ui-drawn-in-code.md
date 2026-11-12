@@ -21,6 +21,3 @@ Never do:
 - Ship an image, a sprite or an embedded asset for any part of the UI.
 - Prototype the panel as an HTML page: it becomes a second design that nothing holds to the first.
 </constraints>
-
-## Check
-Lesson checks for this rule: `no-html-prototype`, `ui-drawn-in-code`.

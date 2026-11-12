@@ -16,6 +16,3 @@ Never do:
 - Let a sourced fact launder a guess in the same formula.
 - Tag a block you wrote yourself as firmware-exact. Say what it is: the right kind of effect, not a clone.
 </constraints>
-
-## Check
-Lesson check for this rule: `ear-constant-tagged`.

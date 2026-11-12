@@ -20,6 +20,3 @@ Never do:
 - Disable submit to show the form is invalid: the person cannot find out why.
 - Explain how to work a control in a sentence: redesign the control.
 </constraints>
-
-## Check
-Lesson checks for this rule: `ui-input-needs-autocomplete`, `ui-no-paste-block`.

@@ -23,6 +23,3 @@ Never do:
 - Insert or retype a field: every saved session once loaded as defaults.
 - Write a raw struct to a blob.
 </constraints>
-
-## Check
-Lesson check for this rule: `no-raw-struct-blob`.

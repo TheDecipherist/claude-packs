@@ -3,6 +3,7 @@
   "why": "Fast-math and FMA contraction let the compiler assume no NaN/Inf and reorder or fuse operations: isfinite guards vanish and results differ between Mac and Windows.",
   "rule": ".claude/rules/build-flags-safe.md",
   "exclude": [],
+  "code": false,
   "globs": [
     "**/CMakeLists.txt",
     "**/*.cmake",

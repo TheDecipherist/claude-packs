@@ -28,4 +28,3 @@ Never do:
 ## Check
 - CPU gate: time the CPU side of a frame. It goes red if it exceeds the snapshot upload by more than a small fixed margin.
 - Frame bench counters: draw calls and uploaded bytes per frame (house choice: ≤ 50 draw calls in the reference scene).
-Lesson checks for this rule: `no-opengl-link`, `no-opengl`.

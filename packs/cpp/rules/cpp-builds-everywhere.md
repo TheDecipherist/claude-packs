@@ -24,6 +24,3 @@ Never do:
 - Hard-code a path that exists on one machine, with no fallback.
 - Rely on a compiler extension.
 </constraints>
-
-## Check
-Lesson checks for this rule: `cpp-m-pi-not-standard`, `cpp-no-zero-size-array`.

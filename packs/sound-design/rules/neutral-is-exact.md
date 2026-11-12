@@ -24,6 +24,3 @@ Never do:
 - Leave a default that colours every preset: this is how a bank ends up "all sounding the same".
 - Hash a value into the signal path to make voices differ.
 </constraints>
-
-## Check
-Lesson checks for this rule: `mix-is-a-crossfade`, `no-hash-in-the-signal`.

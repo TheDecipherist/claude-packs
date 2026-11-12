@@ -27,6 +27,3 @@ Never do:
 - Parse only the first message of a program: every effects knob sat at its default for weeks.
 - Assume `F0` to `F7` runs uninterrupted.
 </constraints>
-
-## Check
-Lesson checks for this rule: `sysex-length-literal`, `sysex-not-on-audio`.

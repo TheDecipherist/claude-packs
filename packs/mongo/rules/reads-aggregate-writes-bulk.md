@@ -23,6 +23,3 @@ Never do:
 - `$skip` for pagination; an unanchored `$regex` (it forces a collection scan; anchor with `^`).
 - `findOne` then `insertOne` as a uniqueness check.
 </constraints>
-
-## Check
-Lesson checks for this rule: `bulk-over-many`, `no-find-reads`.

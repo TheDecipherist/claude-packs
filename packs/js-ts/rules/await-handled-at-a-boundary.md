@@ -64,4 +64,3 @@ catch (err: unknown) {
 - `async-callback-unguarded`: an `async` function passed to a timer, an event handler or `forEach`.
 - `no-swallowed-errors`: an empty `catch`, `.catch(() => {})`, `.catch(() => null | undefined)`.
 - `no-floating-promises` (type-aware ESLint) catches the rest, which a regex can't see. Wire it into the edit hook where the project has ESLint.
-Lesson checks for this rule: `child-process-error-handler`, `no-shell-string-interpolation`, `void-needs-catch`.

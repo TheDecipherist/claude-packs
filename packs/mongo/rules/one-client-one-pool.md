@@ -30,6 +30,3 @@ Never do:
 - `client.close()` after a query, in a route, or in a `finally` of request code.
 - `connect()` lazily inside a request handler: connect at startup so the first request is not the one that discovers a bad URI.
 </constraints>
-
-## Check
-Lesson checks for this rule: `mongoclient-cached-and-named`, `mongoclient-outside-gateway`.

@@ -25,6 +25,3 @@ Never do:
 - Believe a factor of two: filter resonance puts two level peaks in every LFO cycle.
 - Leave a meter bug in place because it flatters the score.
 </constraints>
-
-## Check
-Lesson check for this rule: `audio-seed-fixed`.

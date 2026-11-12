@@ -14,6 +14,3 @@ Never do:
 - Read the play head, count MIDI clock bytes or work out a tempo in a unit. `timing-from-synthcore` refuses it.
 - Copy `synthcore`'s code into a unit, or write a second clock because one thing needs it.
 </constraints>
-
-## Check
-Lesson check for this rule: `timing-from-synthcore`.

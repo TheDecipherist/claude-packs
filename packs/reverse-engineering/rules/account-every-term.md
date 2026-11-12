@@ -18,6 +18,3 @@ Never do:
 - Hide a missing term behind a fudge factor: fix the term, then re-anchor.
 - Let a value the loader distrusts fall back to a default in silence. Hundreds of presets sounded fine while being the wrong sound.
 </constraints>
-
-## Check
-Lesson checks for this rule: `no-default-on-distrust`, `prose-never-decides`.

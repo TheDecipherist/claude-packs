@@ -26,4 +26,3 @@ Never do:
 
 ## Check
 `pg-no-volatile-default`, `pg-no-required-column`, `pg-concurrently-in-txn`, and the hook `db-wipe-guard`. On a project with large live tables, name these in `"enable"`: `checks/pg-index-concurrently.json`, `checks/pg-fk-not-valid.json`. A line that is right anyway says so at its end: `-- pg: allow <reason>`.
-Lesson checks for this rule: `pg-fk-not-valid`, `pg-index-concurrently`.

@@ -2,7 +2,6 @@
   "id": "rust-wildcard-dependency",
   "why": "A * version takes whatever is newest, and crates.io refuses it.",
   "rule": ".claude/rules/rust-lints-are-the-gate.md",
-  "code": false,
   "globs": [
     "**/Cargo.toml"
   ],
