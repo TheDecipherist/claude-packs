@@ -3,7 +3,7 @@
 // once-only and template-law read, stat and write back the whole repetition index on every Pre Write call. This installs a scratch project
 // (base and js-ts) with a 25 MB transcript and a few hundred source files, starts its daemon through the picker and drives 100 Bash and 100
 // Write PreToolUse events through it as Claude Code does (stdin JSON, CLAUDE_PROJECT_DIR), then holds the proxy line's p50 per event class.
-// It stops the daemon it started. The RSS case: 16 workers after 1,024 events (Bash, Write and Stop) stay under RSS_BUDGET_MB. Run alone: `npm run test:changed` with this file changed.
+// It stops the daemon it started. The RSS case: a pool grown to 8 after 1,024 events (Bash, Write and Stop) stay under RSS_BUDGET_MB. Run alone: `npm run test:changed` with this file changed.
 import { spawnSync } from 'node:child_process';
 import { closeSync, existsSync, mkdirSync, openSync, writeFileSync, writeSync } from 'node:fs';
 import { join } from 'node:path';
@@ -23,12 +23,13 @@ const KIT = join(PACKS_DIR, '..');
 const skip = target !== null && existsSync(shippedBinary(KIT, target)) ? false : 'no proxy binary is built here (Go is not on PATH)';
 const MB = 1024 * 1024;
 const SETTLE_MS = 2000;
-const POOL = 16;   // the daemon's warm workers, and so the events at once that keep every one of them busy
-const ROUNDS = 64;
-const IDLE_BUDGET_MB = 250;   // the order's budget, held by a daemon with its 16 workers warm (measured 176 MB)
-// 16 workers all busy with Bash, Write and Stop events. Measured 315 to 326 MB (993 MB on the code before) with the turn read by bytes, the duplicate windows in typed arrays,
-// the size-over-speed V8 flags and the pool held at 16 (before them: see agents/rss-report.md). The order's 250 MB is not reached: that report says why.
-const RSS_BUDGET_MB = 380;
+const POOL = 8;   // the most workers the daemon grows to, and so the events at once that keep every one of them busy
+const ROUNDS = 128;
+const IDLE_BUDGET_MB = 100;   // the order's budget (W8 Done when, 2026-11-12), held by a daemon idle with its 2 warm workers
+// Up to 8 workers busy with Bash, Write and Stop events (before the pool was cut to 8: 315 to 326 MB with 16, see agents/rss-report.md).
+// The order's line is 150 MB and is NOT reached: measured 226 MB by ps (175 MB by the daemon's own count) with the pool grown to 8, 128 MB with the pool held at 2,
+// about 15 MB for each grown worker (agents/pool-report.md). This bound holds what is measured until the memory work brings a worker down.
+const RSS_BUDGET_MB = 250;
 const STOP_EVERY = 8;
 const RESULT = 'x'.repeat(200 * 1024);
 

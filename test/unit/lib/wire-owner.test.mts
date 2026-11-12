@@ -89,6 +89,18 @@ test('a re-exec keeps every flag the daemon was given, and never the ready pipe'
   assert.equal(o.testMs, 90);
 });
 
+test('the daemon\'s pool by default: 2 warm workers, at most 8, retired after 2 idle minutes; --pool is the most, --warm the start, both kept by a re-exec', () => {
+  const host: Host = { env: {}, uid: 1, home: '/h', platform: 'linux', node: 'node', script: '/k/resident.mjs' };
+  const o = serveOptions(['--serve', '/p'], host);
+  assert.ok(o);
+  assert.deepEqual([o.warm, o.pool, o.poolIdleMs], [2, 8, 120_000]);
+  const small = serveOptions(['--serve', '/p', '--pool', '1'], host);
+  assert.deepEqual([small?.warm, small?.pool], [1, 1], 'the start never passes the most');
+  const tuned = serveOptions(['--serve', '/p', '--pool', '5', '--warm', '3'], host);
+  assert.deepEqual([tuned?.warm, tuned?.pool], [3, 5]);
+  assert.deepEqual(tuned && serveOptions(tuned.again.slice(1), host)?.warm, 3);
+});
+
 test('the Go client reads the same table: go vet is clean over the generated constants', { skip: spawnSync('go', ['version']).status !== 0 }, () => {
   const r = spawnSync('go', ['vet', '.'], { cwd: join(KIT, 'proxy'), encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);

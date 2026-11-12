@@ -2,13 +2,13 @@
 // agent there, serves the hook events the Go proxy sends over a unix socket: the table is loaded once, the hooks sit on a pool of
 // worker threads, and an event is answered in the time its hooks take, not the time node takes to start. It is not a hook: no
 // settings entry runs it. The client starts it, detached:
-//   node .claude/hooks/resident.mjs --serve <project> [--hooks <dir>] [--pool <n>] [--ready-fd <n>] [--idle-minutes <n>]
+//   node .claude/hooks/resident.mjs --serve <project> [--hooks <dir>] [--pool <n>] [--warm <n>] [--ready-fd <n>] [--idle-minutes <n>]
 //   node .claude/hooks/resident.mjs --selftest
 // Its files (folder at mode 700, name = 16 hex of the user, project, lock hash and node, lib/proxy-wire.mts daemonFiles): KEY.sock,
 // KEY.pid (what `claude-packs daemon status|stop` reads), KEY.lock (the start lock) and daemon-KEY.log. The job of each part lives in
 // resident/: socket, pool and worker, event, index, state, lifecycle. The main thread does only socket I/O, framing, the table, the
 // repetition index and every state and timing write; hooks run on the workers (review-2-go 2.2).
-import { availableParallelism, homedir } from 'node:os';
+import { homedir } from 'node:os';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setFlagsFromString } from 'node:v8';
@@ -42,6 +42,10 @@ const FORCE_EXIT_MS = 15_000;
 /** Uncaught exceptions and rejections the daemon logs and carries on after, before it restarts itself. */
 const MAX_FAULTS = 5;
 const PRELOAD = 1;
+/** The pool (W8 item 2, 2026-11-12): 2 warm workers, grown on demand to 8, the grown ones retired after 2 idle minutes. */
+const WARM = 2;
+const POOL_MAX = 8;
+const POOL_IDLE_MS = 2 * 60_000;
 /** V8 flags the daemon sets before its workers start, for every isolate after (rss: 16 workers that each ran every hook held 389 MB
  *  with V8's defaults and 264 MB with these, build/evidence/rss): no optimizing or baseline compiler, and V8's size-over-speed choices.
  *  A hook runs a few milliseconds of code per event, its time in I/O and regular expressions, which these leave alone. */
@@ -55,7 +59,9 @@ export interface Host { env: Readonly<Record<string, string | undefined>>; uid: 
 export interface ServeOptions {
   project: string;
   hooks: string;
+  /** The most workers the pool grows to (`--pool`, default 8), and how many start warm (`--warm`, default 2, never past the most). */
   pool: number;
+  warm: number;
   idleMs: number;
   readyFd: number | null;
   /** `--exit-with <pid>`: the daemon ends when that process does. A selftest's daemons carry it, so none outlives the selftest (KWB-195). */
@@ -88,10 +94,11 @@ export function serveOptions(argv: readonly string[], host: Host): ServeOptions 
   const n = (flag: string, otherwise: number): number => numberOf(given, flag, otherwise);
   const fd = textOf(given, WIRE.flag.readyFd);
   const exitWith = n('--exit-with', 0);
+  const pool = Math.floor(n('--pool', POOL_MAX));
   return {
-    project, hooks: textOf(given, WIRE.flag.hooks) ?? HERE, pool: Math.floor(n('--pool', Math.min(16, availableParallelism()))), idleMs: n('--idle-minutes', IDLE_MS / 60_000) * 60_000,
+    project, hooks: textOf(given, WIRE.flag.hooks) ?? HERE, pool, warm: Math.min(pool, Math.floor(n('--warm', WARM))), idleMs: n('--idle-minutes', IDLE_MS / 60_000) * 60_000,
     readyFd: fd === undefined ? null : Number(fd), exitWith: exitWith > 0 ? exitWith : null, maxRss: n('--max-rss-mb', MAX_RSS / 1048576) * 1048576, maxAgeMs: MAX_AGE_MS, tickMs: 1000,
-    recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: 10 * 60_000, stateMs: n('--state-ms', STATE_EVERY_MS),
+    recycleAfter: Math.floor(n('--recycle-after', 500)), poolIdleMs: POOL_IDLE_MS, stateMs: n('--state-ms', STATE_EVERY_MS),
     proxy: textOf(given, WIRE.flag.proxy) ?? null, sampleMs: n('--sample-ms', SAMPLE_MS), orphanMs: n('--watchdog-ms', ORPHAN_MS), testMs: n('--test-ms', TEST_MS), npm: !given.has('--no-npm'),
     again: againOf(host.script, project, given),
   };
@@ -117,7 +124,7 @@ export async function serve(o: ServeOptions, host: Host, usage = new UsageStore(
   const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
   // the pool never grows past its size: a burst of 16 events at once grew it to 20 to 22 workers, each about 10 MB the daemon kept (rss)
   const pool = startPool({
-    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.pool, preload: Math.min(PRELOAD, o.pool), spread: SPREAD, max: o.pool,
+    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.warm, preload: Math.min(PRELOAD, o.warm), spread: SPREAD, max: o.pool,
     idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, warming: index.warming, log,
   });
   const failed = await pool.ready();
@@ -196,7 +203,7 @@ export async function serve(o: ServeOptions, host: Host, usage = new UsageStore(
     if (o.proxy !== null) sampling = startSampling({ proxy: o.proxy, project, intervalMs: o.sampleMs, orphanMs: o.orphanMs, testMs: o.testMs, log, env: host.env, store: usage });
     state.save(snapshot(), true);
     releaseStartLock(files.lock);
-    log(`started pid ${process.pid}, ${o.pool} workers, ${hooks.length} hooks${failed.length > 0 ? `, failed to load: ${failed.join(', ')}` : ''}, key ${key}`);
+    log(`started pid ${process.pid}, ${o.warm} workers (at most ${o.pool}), ${hooks.length} hooks${failed.length > 0 ? `, failed to load: ${failed.join(', ')}` : ''}, key ${key}`);
     sayReady(o.readyFd, `ready ${process.pid}\n`);
   });
 }

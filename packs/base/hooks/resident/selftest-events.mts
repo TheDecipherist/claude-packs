@@ -23,7 +23,7 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
   const near = new URL('../lib/near-copies.mjs', import.meta.url).href;
   const rig = makeRig([...PLANTS, asks(near)]);
   const logs = (name: string): Record<string, unknown>[] => lines(join(rig.dir, '.claude', 'logs', name));
-  const up = await start(rig, ['--pool', '4', '--state-ms', '20']);
+  const up = await start(rig, ['--pool', '4', '--warm', '4', '--state-ms', '20']);
   cases.push(['the daemon starts and says ready', up.kind, 'ready']);
   try {
     const thrown = await ask(rig, eventText(rig, 'Throw'));
@@ -96,7 +96,7 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
 
     const state = readState(filesOf(rig).pid);
     cases.push(['the pid file says which daemon, how many events and how many workers', up.kind === 'ready' && state?.pid === up.pid && (state?.events ?? 0) > 30 && state?.workers === 4, true]);
-    cases.push(['the daemon\'s log says how it started', /started pid \d+, 4 workers/.test(readFileSync(filesOf(rig).log, 'utf8')), true]);
+    cases.push(['the daemon\'s log says how it started', /started pid \d+, 4 workers \(at most 4\)/.test(readFileSync(filesOf(rig).log, 'utf8')), true]);
   } finally {
     await stopAll(rig);
   }

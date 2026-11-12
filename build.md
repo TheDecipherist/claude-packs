@@ -13,6 +13,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 - 2.0.0 gov-core (work/2.0.0-ts-gov-core), started 2026-11-12: W8.8 items 0, 1, 2 and 6, the load governor's owner, `load ask|take|free`, the build queue folded in, the status line's field.
   making: packs/base/hooks/lib/governor.mts (budget, ask, take, free, jobs, settingsFor) and its CLI (lib/load-cli.mts), buildq on it, the status line's governor segment, the `load` skill; concepts: none (design/shape.json declares none); reuse: alive (hooks lib daemon-find.mts), capJobs/budgetEnv (hooks lib core-budget.mts), readJson/isRecord (hooks lib json.mts).
+- 2.0.0 pool (work/2.0.0-ts-pool), started 2026-11-12: the daemon's pool at 2 warm, grown to 8, idle 2 minutes.
+  making: resident/pool.mts (clock and growth step as options), resident.mts + options.mts (--pool is the maximum, --warm the start), tests in resident-parts, live-event-speed bounds; concepts: none (design/shape.json declares none); reuse: startPool (resident/pool.mts), the FLAGS table (resident/options.mts).
 
 - 2.0.0 commit-cost (work/2.0.0-ts-commit-cost), started 2026-11-12: git-guard's and kit-fresh's commit/push/merge calls without a process.
   making: lib/git-config.mts (remote URLs and branch upstreams read from the config files, no process), git-guard and kit-fresh read HEAD, refs and the common dir from the git dir's files; concepts: none (design/shape.json declares none); reuse: gitDirsOf/currentHead/refSha (lib/git-files.mts), refsFingerprint.

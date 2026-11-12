@@ -132,7 +132,7 @@ const SAMPLER_COST_MB = 30;
 async function loaded(withSampler: boolean): Promise<{ daemon: number; sampled: number; workers: number }> {
   let out = { daemon: 0, sampled: 0, workers: 0 };
   await inRig({}, async (rig) => {
-    assert.equal((await start(rig, ['--pool', String(POOL), '--state-ms', '1', ...(withSampler ? ['--proxy', BINARY, '--sample-ms', '2000'] : [])])).kind, 'ready');
+    assert.equal((await start(rig, ['--pool', String(POOL), '--warm', String(POOL), '--state-ms', '1', ...(withSampler ? ['--proxy', BINARY, '--sample-ms', '2000'] : [])])).kind, 'ready');
     // sixteen at a time, so every worker serves: a burst the pool is as wide as keeps it from growing past 16
     for (let done = 0; done < EVENTS; done += POOL) {
       const batch = await Promise.all(Array.from({ length: Math.min(POOL, EVENTS - done) }, () => client(rig, eventText(rig, 'Fast'))));
