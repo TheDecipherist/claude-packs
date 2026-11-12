@@ -20,11 +20,11 @@ export interface LookAsk { cfg: TimeCfg; sessionPid: number; worktrees: string[]
 
 /** What a look found; `at` is when, in seconds since the epoch. `unsaved` and `commit` are the times (seconds since the epoch) of a
  *  worktree's oldest uncommitted change and last commit, null when it has none: a look of one agent keeps what another's found. */
-export interface Look { at: number; findings: Finding[]; unsaved: Record<string, number | null>; commit: Record<string, number | null> }
+export interface MachineSnapshot { at: number; findings: Finding[]; unsaved: Record<string, number | null>; commit: Record<string, number | null> }
 
 const lookFile = (place: Place): string => join(place.stateDir, 'look.json');
 
-export const readLook = (place: Place): Look | null => readJson<Look>(lookFile(place));
+export const readLook = (place: Place): MachineSnapshot | null => readJson<MachineSnapshot>(lookFile(place));
 
 /** A look's time of a worktree as minutes ago, at `now`; null when it has none. */
 export const minutesSince = (time: number | null | undefined, now: number): number | null => (time === null || time === undefined ? null : (now - time) / 60);
@@ -35,13 +35,13 @@ export function takeLook(place: Place, ask: LookAsk, now: number): number {
   const table = processTable();
   const findings = machineFindings(table.map((r): Row => [r.pid, r.age, r.cmd]), ownProcesses(table, ask.sessionPid), ask.cfg);
   const before = readLook(place);
-  const unsaved: Look['unsaved'] = { ...before?.unsaved };
-  const commit: Look['commit'] = { ...before?.commit };
+  const unsaved: MachineSnapshot['unsaved'] = { ...before?.unsaved };
+  const commit: MachineSnapshot['commit'] = { ...before?.commit };
   for (const wt of ask.worktrees) {
     unsaved[wt] = asTime(unsavedMin(wt, now, place.env), now);
     commit[wt] = asTime(lastCommitMin(wt, now, place.env), now);
   }
-  try { mkdirSync(place.stateDir, { recursive: true }); writeJson(lookFile(place), { at: now, findings, unsaved, commit } satisfies Look); } catch { /* next time */ }
+  try { mkdirSync(place.stateDir, { recursive: true }); writeJson(lookFile(place), { at: now, findings, unsaved, commit } satisfies MachineSnapshot); } catch { /* next time */ }
   return 0;
 }
 

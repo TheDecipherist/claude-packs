@@ -7,9 +7,7 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchesAny } from './lib/glob.mts';
-import { currentHead, gitDirsOf } from './lib/git-files.mts';
-import { headFiles, stateFileOf } from './lib/git-state.mts';
-import { writeJson } from './lib/json.mts';
+import { headFiles } from './lib/git-state.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { codeFolders, readLayout } from './lib/layout.mts';
 import { checkoutRoot, claudeRoot, insideProject, relInCheckout } from './lib/project.mts';
@@ -71,7 +69,8 @@ export const worktreeCase: WorktreeCase = {
   ],
 };
 
-export function selftest(): number {
+export async function selftest(): Promise<number> {
+  const { headOf, plantFacts } = await import('./lib/git-state-selftest.mts'); // loads only under --selftest
   const me = fileURLToPath(import.meta.url);
   const layout = { folders: { docs: { path: 'docs' }, src: { path: 'src' }, tests: { path: 'tests' } }, concepts: {} };
   const dir = scratchProject({ 'README.md': 'x\n' }, layout);
@@ -99,11 +98,9 @@ export function selftest(): number {
   put(join(dir, '.claude/layout.json'), JSON.stringify({ ...layout, chart: 'design/*.mmd' }));
   cases.push(['layout.json "chart" names another place', w('src/ui/Panel.cpp'), 2]);
   // W8.3: the runner's kept list of HEAD's files is read while HEAD is the commit it was taken at, and git answers after
-  const dirs = gitDirsOf(dir);
-  const head = dirs ? currentHead(dirs).sha : null;
-  writeJson(stateFileOf(dir, process.env), { head, stamp: '', at: Date.now(), dirty: [], tree: [['design/planted.mmd', 9]] });
+  plantFacts(dir, headOf(dir), [['design/planted.mmd', 9]]);
   cases.push(['the kept list names a chart git does not hold: it is the one read (the plant)', w('src/ui/Panel.cpp'), 0]);
-  writeJson(stateFileOf(dir, process.env), { head: 'not-this-commit', stamp: '', at: Date.now(), dirty: [], tree: [['design/planted.mmd', 9]] });
+  plantFacts(dir, 'not-this-commit', [['design/planted.mmd', 9]]);
   cases.push(['the kept list was taken at another commit: git answers, no chart', w('src/ui/Panel.cpp'), 2]);
   return verdicts('chart-first', [...cases, ['a judge writes no file (the write trap)', trap, '']]);
 }
