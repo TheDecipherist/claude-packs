@@ -10,7 +10,7 @@ import { localBranches } from './branches-ahead.mts';
 import { put, readText } from './files.mts';
 import type { BranchOff } from './branches-ahead.mts';
 import { gitDirsOf, refsFingerprint } from './git-files.mts';
-import { failed } from './remote-heads.mts';
+import { failed, pushSeen, remoteHeads } from './remote-heads.mts';
 import type { GitEnv, GitGuards } from './remote-heads.mts';
 import { blankQuotes, dropHeredocs } from './shell-lex.mts';
 import { forget, hitFor, keep, slotOf } from './stop-cache.mts';
@@ -89,12 +89,13 @@ const PUSH_WAIT_MS = 5_000;
 export function landedLater(self: string, command: string, root: string, env: GitEnv): void {
   const did = /\bgit\b[^|;&\n]*?\b(push|commit)\b/.exec(blankQuotes(dropHeredocs(command)))?.[1];
   if (!did) return;
-  if (did === 'push') forget(root);
+  if (did === 'push') { forget(root); pushSeen(root, env); }
   refreshLater(self, root, env, did === 'push' ? PUSH_WAIT_MS : COMMIT_WAIT_MS, did === 'push');
 }
 
 export async function refreshStop(root: string, env: GitEnv, cfg: GitGuards, lag: LagLook, waitMs: number): Promise<StopLook> {
   await untilChanged(root, waitMs);
+  remoteHeads(root, env, 'origin', { ...cfg, live: true }); // keeps the heads the Pre Bash law reads offline up to date
   const slot = slotOf(root, cfg); // the key before the look: a ref that moves during it makes the next Stop look again
   const look = lookNow(root, env, cfg, lag, undefined);
   keep(slot, cfg, look, Date.now());

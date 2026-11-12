@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 session 2 budgets (work/2.0.0-ts-budgets), started 2026-11-12: doctor --strict green on the live install's event budgets.
+  making: git-guard's law 9 off the network, kit-fresh and repo-litter kept answers, the daemon's indexes built at start, once-only-index's Post cost in a worktree; concepts: none (design/shape.json declares none); reuse: refreshLater (lib/stop-look.mts), remoteHeads (lib/remote-heads.mts), the proxy fire rig (test/integration/proxy-fire-rig.mts).
+
 - 2.0.0 KWB-204 (work/2.0.0-ts-kwb204), started 2026-11-12: polling in a sleep loop refused in every project.
   making: packs/base/hooks/no-polling.mts and its shared function, build-guard without its polling part, the pack row, the worktree case, the test; concepts: none (design/shape.json declares none); reuse: blankQuotes/dropHeredocs (lib/shell-lex.mts), judgeVerdict (lib/writes.mts), the no-find hook's shape, the build-guard polling plants.
 - 2.0.0 session 2 rss (work/2.0.0-ts-rss), started 2026-11-12: the daemon's RSS with 16 workers after 1,000 events, measured and brought down.
