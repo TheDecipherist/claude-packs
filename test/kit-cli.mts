@@ -2,6 +2,7 @@
 // (throws on a non-zero exit, returns stdout), cli (returns the spawn result), a fresh folder, a hook fired as Claude Code fires it.
 import { execFileSync, spawnSync } from 'node:child_process';
 import type { SpawnSyncReturns } from 'node:child_process';
+import type { LayoutGuards } from '../packs/base/hooks/lib/types.d.mts';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readdirSync as hookFiles, rmSync as dropHook } from 'node:fs';
 import { test } from 'node:test';
@@ -124,3 +125,7 @@ export function registeredHooks(dir: string): string[] {
   const rows = (readHookTable(join(dir, '.claude/hooks')) ?? []).map((r) => r.hook);
   return [...new Set([...named, ...rows])];
 }
+
+/** A `guards` block as a hand-written layout.json may hold it, wrong shapes included: nothing validates a project's layout, so the
+ *  readers must cope, and a test plants the wrong shape through here (the one cast, W10 finding 3). */
+export const plantedGuards = (guards: unknown): LayoutGuards => guards as LayoutGuards;

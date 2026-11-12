@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { buildQueueProblems } from '../../../lib/build-queue.mjs';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
+import { plantedGuards } from '../../kit-cli.mts';
 
 const withGuard = (): string => {
   const dir = scratchDir('buildq-');
@@ -33,5 +34,5 @@ test('a wrapper that calls buildq passes, and one that declares "none: <reason>"
   put(join(dir, 'build.sh'), 'make');
   assert.equal(buildQueueProblems(dir, layout).length, 1);
   assert.deepEqual(buildQueueProblems(dir, { ...layout, guards: { build: { queue: 'none: it queues itself' } } }), []);
-  assert.equal(buildQueueProblems(dir, { ...layout, guards: { build: { queue: 7 } } }).length, 1, 'a queue that is no text is not a declaration');
+  assert.equal(buildQueueProblems(dir, { ...layout, guards: plantedGuards({ build: { queue: 7 } }) }).length, 1, 'a queue that is no text is not a declaration');
 });

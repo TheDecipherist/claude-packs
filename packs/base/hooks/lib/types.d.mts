@@ -120,6 +120,27 @@ export interface LayoutFolder { path: string; purpose?: string; kind?: string; p
 export interface LayoutKind { what?: string; in?: string; concepts?: readonly string[]; content?: boolean | string; files?: readonly string[]; extensions?: readonly string[] }
 export interface Look { name: string; reference: string; code?: readonly string[]; report?: string }
 
+/** `layout.json` `paramIds`: where param-id-lock reads parameter ids (its default is JUCE ParameterID literals). */
+export interface ParamIdSettings { extensions?: string; patterns?: readonly string[] }
+
+/** `layout.json` `guards`: each guard's own settings, every field optional (W10 review, finding 3; a key the kit does not name is
+ *  the project's own). git's fields are git-guard's `GitGuards` (lib/remote-heads.mts), which stays its own for now. */
+export interface LayoutGuards {
+  git?: Readonly<Record<string, unknown>>;
+  build?: { queue?: string };
+  buildq?: { cores?: number };
+  /** audio-core's smoothing law: the module (one glob or several), its namespace, the judged scope; `off` gives the reason there is none. */
+  smoothing?: { module?: string | readonly string[]; scope?: string | readonly string[]; namespace?: string; off?: string };
+  codeShape?: { exclude?: readonly string[]; [limit: string]: unknown };
+  /** Globs of published-text folders (content.mts `isContent`). */
+  content?: readonly string[];
+  logs?: { maxKb?: number };
+  time?: { probePattern?: string; saveCommand?: string };
+  images?: { guarded?: readonly string[]; allowed?: readonly string[] };
+  watchdog?: { stop?: boolean };
+  [guard: string]: unknown;
+}
+
 /** `.claude/layout.json`: the project's one source of truth for where things go. Keys the kit does not know are kept. */
 export interface Layout {
   configuration?: string;
@@ -137,8 +158,8 @@ export interface Layout {
   maxFileLines?: number;
   sourceFiles?: string;
   looks?: readonly Look[];
-  paramIds?: unknown;
-  guards?: Record<string, unknown>;
+  paramIds?: ParamIdSettings;
+  guards?: LayoutGuards;
   [key: string]: unknown;
 }
 
