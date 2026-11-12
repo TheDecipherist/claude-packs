@@ -20,6 +20,7 @@ import { resolve } from 'node:path';
 import { mayHaveWritten, type ResidentIndex } from './index.mts';
 import type { Done, Job } from './messages.mts';
 import type { Pool } from './pool.mts';
+import type { StatusKeeper } from './status.mts';
 import type { HookEvent, HookTableRow } from '../lib/types.d.mts';
 
 /** After the first refusal, how long the other judges get to answer before the reply goes (review-2-go 2.9). */
@@ -36,6 +37,8 @@ export interface Served {
   log: (line: string) => void;
   /** The TypeScript runner's file: started as `runner --git-state <checkout>` to keep the git facts (lib/git-state.mts). */
   runner: string;
+  /** The status line's facts: every event is noted, so the status line is drawn from memory (W8.6). */
+  status: StatusKeeper;
 }
 
 const fallback: Reply = { code: 0, stdout: '', stderr: '', fallback: 'ts' };
@@ -95,6 +98,7 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
   const job = (hook: string): Job => ({ hook, event: ev, ctx: base });
   d.counts.events += 1;
   d.counts.last = Date.now();
+  d.status.note(ev, request.ppid, d.counts.last);
 
   const judges = rows.filter((r) => r.role === 'judge');
   const phase = await judgeAll(d, judges, job, request.deadline, (hook, done) => lateLine(root, ev, hook, done));

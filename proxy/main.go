@@ -20,6 +20,11 @@ func main() {
 		if os.Args[1] == "--selftest" {
 			os.Exit(selftest(os.Stdout))
 		}
+		if os.Args[1] == "status" {
+			cwd, _ := os.Getwd()
+			p := &proc{env: os.Environ(), cwd: cwd, ppid: os.Getppid(), uid: os.Getuid(), goos: runtime.GOOS, stdin: stdinText(), stdout: os.Stdout, stderr: os.Stderr, start: start}
+			os.Exit(p.runStatus())
+		}
 		if os.Args[1] == "sample" {
 			os.Exit(runSample(os.Args[2:], os.Stdout))
 		}

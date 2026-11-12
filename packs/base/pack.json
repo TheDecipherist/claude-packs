@@ -99,6 +99,7 @@
     "hooks/lib/skill-first-selftest.mts": ["test/hooks/base/skill-first.test.mts"],
     "hooks/lib/source-exts.mts": ["test/unit/hooks-lib/source-exts.test.mts"],
     "hooks/lib/stop-verdict.mts": ["test/unit/hooks-lib/stop-verdict.test.mts"],
+    "hooks/lib/tool-target.mts": ["test/tools/base/statusline.test.mts", "test/unit/hooks-lib/agent-board.test.mts"],
     "hooks/lib/trunk-lag-selftest.mts": ["test/hooks/base/git-guard.test.mts", "test/unit/hooks-lib/trunk-lag.test.mts"],
     "hooks/lib/trunk-lag.mts": ["test/unit/hooks-lib/trunk-lag.test.mts"],
     "hooks/lib/turn.mts": ["test/unit/hooks-lib/turn.test.mts"],
@@ -118,6 +119,7 @@
     "hooks/placement-law.mts": ["test/hooks/base/placement-law.test.mts"],
     "hooks/repo-litter.mts": ["test/hooks/base/repo-litter.test.mts"],
     "hooks/resident.mts": ["test/hooks/base/resident-parts.test.mts", "test/hooks/base/resident.test.mts"],
+    "hooks/resident/agent-board.mts": ["test/unit/hooks-lib/agent-board.test.mts"],
     "hooks/resident/event.mts": ["test/hooks/base/resident.test.mts"],
     "hooks/resident/index.mts": ["test/hooks/base/resident-parts.test.mts"],
     "hooks/resident/judge-check.mts": ["test/hooks/base/resident.test.mts"],
@@ -132,6 +134,7 @@
     "hooks/resident/selftest.mts": ["test/hooks/base/resident.test.mts"],
     "hooks/resident/socket.mts": ["test/hooks/base/resident-parts.test.mts"],
     "hooks/resident/state.mts": ["test/hooks/base/resident-parts.test.mts", "test/unit/lib/daemon-cli.test.mts"],
+    "hooks/resident/status.mts": ["test/integration/status-served.test.mts", "test/unit/hooks-lib/status-keeper.test.mts"],
     "hooks/resident/worker.mts": ["test/hooks/base/hook-children.test.mts", "test/hooks/base/resident-parts.test.mts"],
     "hooks/reuse-hint.mts": ["test/hooks/base/reuse-hint.test.mts"],
     "hooks/run-hooks.mts": ["test/hooks/base/run-hooks-crashes.test.mts", "test/hooks/base/run-hooks.test.mts"],
@@ -145,9 +148,12 @@
     "tools/shape-symmetry-selftest.mts": ["test/tools/base/shape-symmetry.test.mts"],
     "tools/shape-symmetry.mts": ["test/tools/base/shape-symmetry.test.mts"],
     "tools/statusline-daemon.mts": ["test/tools/base/statusline-daemon.test.mts"],
+    "tools/statusline-live.mts": ["test/unit/hooks-lib/status-keeper.test.mts"],
+    "tools/statusline-agents.mts": ["test/unit/hooks-lib/agent-board.test.mts"],
     "tools/statusline-paint.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline-runs.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline-session.mts": ["test/tools/base/statusline.test.mts"],
+    "tools/statusline-version.mts": ["test/unit/hooks-lib/status-keeper.test.mts"],
     "tools/statusline-work.mts": ["test/tools/base/statusline.test.mts"],
     "tools/statusline.mts": ["test/tools/base/statusline.test.mts"],
     "tools/test-verdict.mts": ["test/tools/base/test-verdict.test.mts"]
@@ -225,7 +231,7 @@
     "type": "command",
     "command": "node \"$CLAUDE_PROJECT_DIR/.claude/tools/statusline.mjs\"",
     "padding": 0,
-    "refreshInterval": 5
+    "refreshInterval": 1
   },
   "hooks": {
     "PreToolUse": [
