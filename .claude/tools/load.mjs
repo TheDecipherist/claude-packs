@@ -68,59 +68,70 @@ export function sessionAbove(ppid) {
     }
     return ppid;
 }
-const say = (json, line, value) => { console.log(json ? JSON.stringify(value) : line); };
+const say = (o, json, line, value) => o.out(json ? JSON.stringify(value) : line);
 /** Each verb: its exit code (0 go, granted or freed; 1 wait, refused or none; 2 a wrong word). */
 const VERBS = {
-    ask: ({ p, host, project }) => {
+    ask: ({ p, host, project, o }) => {
         const answer = ask(host, { kind: p.kind, want: p.want, priority: p.priority, project });
-        say(p.json, answer.line, answer);
+        say(o, p.json, answer.line, answer);
         return answer.go ? 0 : 1;
     },
-    take: ({ p, caller, host, project }) => {
+    take: ({ p, caller, host, project, o }) => {
         const want = p.want ?? (p.words[0] === undefined ? undefined : Number(p.words[0]));
         if (want !== undefined && !(want >= 1)) {
-            console.error(`load: take wants a number of cores (got "${p.words[0] ?? ''}")\n${USAGE}`);
+            o.err(`load: take wants a number of cores (got "${p.words[0] ?? ''}")\n${USAGE}`);
             return 2;
         }
         const pid = p.pid ?? (caller.holder ?? sessionAbove)(caller.ppid);
         const r = take(host, { kind: p.kind ?? 'other', want, priority: p.priority, project, pid });
         if (r.ok)
-            say(p.json, r.grant.line, r.grant);
+            say(o, p.json, r.grant.line, r.grant);
         else
-            say(p.json, r.answer.line, r.answer);
+            say(o, p.json, r.answer.line, r.answer);
         return r.ok ? 0 : 1;
     },
-    free: ({ p, host }) => {
+    free: ({ p, host, o }) => {
         const id = p.words[0];
         if (id === undefined) {
-            console.error(USAGE);
+            o.err(USAGE);
             return 2;
         }
         const freed = free(host, id);
-        say(p.json, freed ? `freed ${id}` : `no grant ${id} (already freed, or its holder ended)`, { id, freed });
+        say(o, p.json, freed ? `freed ${id}` : `no grant ${id} (already freed, or its holder ended)`, { id, freed });
         return freed ? 0 : 1;
     },
-    jobs: ({ p, host }) => {
+    jobs: ({ p, host, o }) => {
         const state = inFlight(host);
         const rows = state.jobs.map((j) => `${j.id} ${j.kind} ${j.slots} slots priority ${j.priority} pid ${j.pid}${j.pausedAt === null ? '' : ' paused'} ${j.project}`);
         const lines = [...rows, ...state.waiting.map((w) => `${w.id} ${w.kind} waiting for ${w.want} priority ${w.priority} pid ${w.pid} ${w.project}`)];
-        say(p.json, lines.length ? lines.join('\n') : 'no jobs', state);
+        say(o, p.json, lines.length ? lines.join('\n') : 'no jobs', state);
         return 0;
     },
 };
 const isVerb = (word) => Object.hasOwn(VERBS, word);
-/** The command; `host` is the governor's view of the machine (a test plants it). */
-export function main(args, caller, host = machineHost(caller.env)) {
+/** The command's verbs on `o`; `host` is the governor's view of the machine (a test plants it). */
+export function runLoad(args, caller, host, o) {
     const p = parse(args, caller.env);
     if (typeof p === 'string') {
-        console.error(`load: ${p}\n${USAGE}`);
+        o.err(`load: ${p}\n${USAGE}`);
         return 2;
     }
     if (!isVerb(p.verb)) {
-        console.error(USAGE);
+        o.err(USAGE);
         return 2;
     }
-    return VERBS[p.verb]({ p, caller, host, project: caller.env['CLAUDE_PROJECT_DIR'] || caller.cwd });
+    return VERBS[p.verb]({ p, caller, host, project: caller.env['CLAUDE_PROJECT_DIR'] || caller.cwd, o });
+}
+/** The answer as the daemon replies it: the exit code and the text of each stream (`hook-proxy load ...` prints it). */
+export function answerLoad(args, caller, host = machineHost(caller.env)) {
+    const out = [];
+    const err = [];
+    const code = runLoad(args, caller, host, { out: (l) => out.push(`${l}\n`), err: (l) => err.push(`${l}\n`) });
+    return { code, stdout: out.join(''), stderr: err.join('') };
+}
+/** The command, printed; `host` is the governor's view of the machine (a test plants it). */
+export function main(args, caller, host = machineHost(caller.env)) {
+    return runLoad(args, caller, host, { out: (l) => console.log(l), err: (l) => console.error(l) });
 }
 if (isMain(import.meta.url))
     process.exit(main(process.argv.slice(2), { env: process.env, cwd: process.cwd(), ppid: process.ppid }));

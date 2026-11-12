@@ -37,6 +37,7 @@ import { answers, listen, prepareFolder } from './resident/socket.mjs';
 import { SAMPLE_MS, startSampling } from './resident/sampling.mjs';
 import { STATE_EVERY_MS, stateFile } from './resident/state.mjs';
 import { StatusKeeper } from './resident/status.mjs';
+import { loadWords, serveLoad } from './resident/load-ask.mjs';
 import { closeInOrder } from './resident/shutdown.mjs';
 import { UsageStore } from './resident/usage.mjs';
 import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mjs';
@@ -135,6 +136,11 @@ export async function serve(o, host, usage = new UsageStore()) {
         }
         if (incoming.request.status === true) {
             incoming.reply({ code: 0, stdout: toJson(snapshot()), stderr: '' });
+            return;
+        }
+        const words = loadWords(incoming.request); // `hook-proxy load ...`: the governor's answer, no event (W8.8)
+        if (words !== null) {
+            serveLoad(incoming, words, new URL(`../tools/load${EXT}`, import.meta.url));
             return;
         }
         counts.inflight += 1;

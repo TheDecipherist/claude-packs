@@ -9,10 +9,13 @@
 //   free(host, id) -> bool                   inFlight(host) -> { jobs, waiting }
 //   queueUp(host, request) -> waiter id      leaveQueue(host, id)          setPaused(host, id, at | null)
 //   pauseOrder(jobs) -> the running jobs, the first to pause first         resumeOrder(jobs) -> the paused, the first to resume first
+//   adopt(host, id, pgid): the process group a granted job runs in
+//   grantWhenFree(host, request, onWait) -> the grant, once the queue reaches it (buildq and governed wait this way)
+//   grantWithin(host, request, giveUpMs, onWait) -> the grant, or null when it did not come in time (an agent's start)
 import { randomBytes } from 'node:crypto';
 import { DEFAULT_WANT } from './governor-budget.mjs';
 import { answerOn, priorityOf } from './governor-policy.mjs';
-import { changeState, governorDir, liveState } from './governor-store.mjs';
+import { changeState, governorDir, liveState, napSync } from './governor-store.mjs';
 import { settingsFor } from './governor-settings.mjs';
 export { BUDGET_SHARE, CEILING_SHARE, DEFAULT_WANT, HARD_SHARE, budgetOf, coresOf, governorConfig, machineHost } from './governor-budget.mjs';
 export { AGING_EVERY_MS, AGING_STEP, agedPriority, pauseOrder, priorityCap, resumeOrder } from './governor-policy.mjs';
@@ -71,4 +74,43 @@ export function setPaused(host, id, at) {
         job.pausedAt = at;
         return true;
     });
+}
+/** Records the process group a granted job was started in (`governed` starts it after the take), so the watchdog can pause it;
+ *  false when no such job is held. */
+export function adopt(host, id, pgid) {
+    return changeState(dirOf(host), host.alive, (state) => {
+        const job = state.jobs.find((j) => j.id === id);
+        if (job === undefined)
+            return false;
+        job.pgid = pgid;
+        return true;
+    });
+}
+/** How often a waiting job asks again. */
+export const ASK_AGAIN_MS = 500;
+/** Takes, and when refused waits in the queue (one ticket, so the status line counts it and its priority ages) asking again every
+ *  ASK_AGAIN_MS until granted or `giveUpMs` has passed (then it leaves the queue: null). `onWait` hears each refusal with how long the
+ *  job has waited. The waiter is the request's pid: a waiter killed while it waits leaves a ticket the next read drops. */
+export function grantWithin(host, request, giveUpMs, onWait = () => undefined) {
+    const began = host.now();
+    let ticket = null;
+    for (let r = take(host, request);; r = take(host, { ...request, ticket })) {
+        if (r.ok)
+            return r.grant;
+        ticket ??= queueUp(host, request);
+        const waited = host.now() - began;
+        if (waited >= giveUpMs) {
+            leaveQueue(host, ticket);
+            return null;
+        }
+        onWait(r.answer, waited);
+        napSync(Math.min(ASK_AGAIN_MS, Math.max(1, giveUpMs - waited)));
+    }
+}
+/** The same, waiting as long as it takes (buildq and governed). */
+export function grantWhenFree(host, request, onWait) {
+    const grant = grantWithin(host, request, Infinity, onWait);
+    if (grant === null)
+        throw new Error('governor: a wait with no end gave up');
+    return grant;
 }

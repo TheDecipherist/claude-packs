@@ -171,6 +171,16 @@
     "role": "recorder"
   },
   {
+    "hook": "governor-route",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Agent|Task",
+    "timeout": 60,
+    "order": 40,
+    "role": "judge"
+  },
+  {
     "hook": "git-guard",
     "events": [
       "PreToolUse"
@@ -238,6 +248,16 @@
     "matcher": "Bash",
     "timeout": 20,
     "order": 80,
+    "role": "judge"
+  },
+  {
+    "hook": "governor-route",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 90,
     "role": "judge"
   },
   {
@@ -332,5 +352,14 @@
     "timeout": 10,
     "order": 20,
     "role": "judge"
+  },
+  {
+    "hook": "governor-route",
+    "events": [
+      "SubagentStop"
+    ],
+    "timeout": 10,
+    "order": 10,
+    "role": "recorder"
   }
 ]

@@ -256,7 +256,8 @@
     "hooks/no-find.mjs",
     "hooks/heartbeat.mjs",
     "hooks/kit-fresh.mjs",
-    "hooks/no-polling.mjs"
+    "hooks/no-polling.mjs",
+    "hooks/governor-route.mjs"
   ],
   "commands": {
     "test": "npm test",

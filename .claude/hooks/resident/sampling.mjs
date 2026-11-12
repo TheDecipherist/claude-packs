@@ -11,6 +11,8 @@ import { keepEnv } from '../lib/proxy-wire.mjs';
 import { WIRE } from '../lib/proxy-wire-table.mjs';
 import { parseSnapshot } from './usage.mjs';
 import { Watchdog } from './watchdog.mjs';
+import { Pauser } from './governor-pause.mjs';
+import { machineHost } from '../lib/governor.mjs';
 export const SAMPLE_MS = 2000;
 const MAX_RESTARTS = 3;
 const RESTART_DELAY_MS = 5000; // the default of SamplingOptions.restartMs
@@ -30,7 +32,13 @@ export function startSampling(o) {
         }
         catch { /* gone already */ } },
     });
-    const onSnapshot = (snap) => { store.record(snap, o.project); watchdog.observe(snap); };
+    // W8.8 item 5: the governor's ceiling held by pausing governed jobs, looked at on each snapshot
+    const pauser = new Pauser({ host: machineHost(o.env), self: process.pid, log: o.log,
+        signal: (pgid, signal) => { try {
+            process.kill(-pgid, signal);
+        }
+        catch { /* the group is gone */ } } });
+    const onSnapshot = (snap) => { store.record(snap, o.project); watchdog.observe(snap); pauser.observe(); };
     let child = null;
     let ending = false;
     let restarts = 0;
@@ -61,6 +69,6 @@ export function startSampling(o) {
     return {
         flags: () => watchdog.flags(),
         pid: () => child?.pid ?? null,
-        stop: () => { ending = true; store.clear(); child?.kill('SIGTERM'); },
+        stop: () => { ending = true; store.clear(); pauser.release(); child?.kill('SIGTERM'); },
     };
 }
