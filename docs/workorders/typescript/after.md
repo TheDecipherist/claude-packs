@@ -14,7 +14,7 @@ form could not be used. Say so wherever a 1.9 number is quoted.
 
 ## Row (a): the whole suite
 
-Left open: the lead's (d-32). Not run here.
+Run by the lead (d-32), third run, alone on the machine at load 4: 1,650 tests, 868.6 s, 9 reds (four stale tests fixed, five load-bound tests that pass alone; d-37). Evidence: `build/session4/suite3.txt`.
 
 ## Rows (b), (c): gates (`node docs/workorders/typescript/probes/baseline.mjs build/evidence/W11`; `baseline-measured-run1.md`, `gate-b*.log`, `gate-c.log`)
 

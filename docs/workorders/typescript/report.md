@@ -18,7 +18,7 @@ before (written "slower" or "bigger") for one that rose.
 
 | id | measurement | before (W0) | after (W11) | ratio | evidence |
 |---|---|---|---|---|---|
-| T-a | (a) the whole suite, once | 637 tests, 630 pass, 7 fail, 753 s | see the line under the table | the lead's | `build/evidence/W0/baseline.md`, `build/evidence/W11/suite-runs.txt` |
+| T-a | (a) the whole suite, once | 637 tests, 630 pass, 7 fail, 753 s | 1,650 tests, 1,641 pass, 9 fail, 868.6 s (1.15x the wall for 2.6x the tests; the 180 s line is missed, d-27, d-37) | 2.6x the tests in 1.15x the time | `build/evidence/W0/baseline.md`, `build/evidence/W11/suite-runs.txt`, `build/session4/suite3.txt` |
 | T-b | (b) gate for a one-hook change (no-find) | 188.3 s, 5 of 87 test files | 12.9 s, 2 of 372 | 14.6x faster | `build/evidence/W0/gate-b1.log`, `build/evidence/W11/gate-b1.log` |
 | T-b2 | (b) gate for a git-guard change | 326.6 s, 10 of 87 | 57.2 s, 2 of 372 | 5.7x faster | `build/evidence/W0/gate-b2.log`, `build/evidence/W11/gate-b2.log` |
 | T-c | (c) gate for a one-lib change (`lib/layout`) | 19.0 s, 2 of 87 | 59.6 s, 13 of 372 | 3.1x slower (a miss) | `build/evidence/W0/gate-c.log`, `build/evidence/W11/gate-c.log` |
@@ -38,7 +38,7 @@ before (written "slower" or "bigger") for one that rose.
 | T-k | (k) npm pack | 0.84 MB, 1,021 files | 6.95 MB, 1,150 files | 8.3x bigger (a miss, the binaries) | `build/evidence/W0/baseline-measured.md`, `build/evidence/W11/pack-parts.txt` |
 | T-l | (l) doctor --fresh | 29.8 s | 38.5 s | 1.3x slower (a miss) | `build/evidence/W0/baseline-measured.md`, `build/evidence/W11/retake/baseline-measured.md` |
 
-row (a): measured by the lead, build/evidence/W11/suite-runs.txt
+row (a): run 3, alone on the machine at load 4 (build/session4/suite3.txt): 1,650 tests, 868.6 s. The 9 reds: four tests stale against merged work or against the files' own lists (fixed in 38e8e01 and 497b363, KWB-218), and five that fail only inside the suite's load (live Pre Write p50 583 ms against 21 ms alone, `load ask` 72 ms against 38, the pool 101 MB against 100, the kit's own doctor on a log with cold calls, the KWB-96 worktree case); each passes alone (d-37). Runs 1 and 2 (build/evidence/W11/suite-runs.txt) exited 1 with 8 reds each.
 
 Rows (b) and (c) are the same command as W0: touch one file, run the picker's tests through `quiet-test`. Row (g) before is the log as
 bandwarp's 1.9 recorded it under its own load; the second line replays the 1.9.0 tree (`git archive 905e6be`, not on npm) by the same method as
@@ -406,7 +406,7 @@ From `node bin/claude-packs.mjs logs` in the main checkout (read only) at the en
 6. The same briefs on the new kit: four of five tasks lost no gate (W11.0 above). The fifth did not hold.
 
 ## N. What is not done
-1. The whole-suite row (a) of the comparison is the lead's and is not in this report's numbers until filled. Evidence: `build/evidence/W11/suite-runs.txt`.
+1. The whole suite does not exit 0 inside its own load: five timing tests pass alone and fail beside the suite's other files (d-37), and the 180 s line is missed. Evidence: `build/session4/suite3.txt`.
 2. Not proved: Windows natively (the kit runs on Windows through WSL only), the proxy under WSL, on a shared Linux box and on a macOS older than Go's
    minimum; Node 22.0 to 22.17 (none installed); npm's one-time-password prompt, a person's step outside every timed release. Evidence: `docs/workorders/typescript/workorder.md`.
 3. Language servers other than TypeScript's; the CARRY rows marked deferred in W10 (KWB-153, 152, 151, 113); code findings 5, 8, 10, 11, 16. Evidence: `progress.md`.

@@ -176,6 +176,19 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-37 Row (a): the whole suite is run at low load, and the timing tests that fail only inside it are carried {#d-37}
+- Question: three whole-suite runs exit 1. Run 3 (build/session4/suite3.txt, 1,650 tests, load 4 at the start) had 9 reds: four tests
+  stale against merged work (fixed, KWB-218), a doctor run on the kit's own live log, and four timing tests (live Pre Write p50 583 ms
+  against 21 ms alone, `load ask` 72 ms against 38 ms alone, the pool 101 MB against 100, the KWB-96 worktree case, which
+  pass alone). Fix the machine's load during the suite, or carry the timing tests?
+- Options: run the suite with fewer files at once (the governor already did: 3 to 5 cores); raise each budget inside the suite; carry
+  the numbers with both figures, and hold the budgets in the tests that run alone (`test:changed` runs them with 2 to 3 files).
+- Chosen: carry. The budgets stay as they are, because they are the W8 lines the order set; the report states both numbers. The
+  suite's wall (about 20 minutes at 3 to 5 cores) is recorded in row (a) and the 180 s line stays missed (d-27, d-36).
+- Why: a budget loosened to pass the suite is a weaker test; an unloaded run passes them. Overturn by editing W8's Done when.
+- Also: `reuse-hint` costs 50 to 70 ms per prompt in this repo (budget 10/50): measured, `matches` is 0.3 ms and the index refresh 20 ms warm
+  (a stat of 386 files), the rest is the hook's own start; not changed. [deferred] by this run, to a daemon-held index for the prompt hook.
+
 ## d-36 W11's missed targets are carried with their numbers, not tuned at the end {#d-36}
 - Question: W11.1 measured live Bash p50 28.9 ms wall (the proxy's own line 7 ms; about 9 ms is starting an `sh`), the status line
   26.6 ms (line 15), the daemon's RSS 180 MB after 1,000 events at 8 workers (line 150; idle 89 MB and 16 clients 180 MB hold), the
