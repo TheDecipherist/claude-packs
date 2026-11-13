@@ -42,6 +42,16 @@ test('hooks are held per event, never pooled: 50 quick calls at one event do not
   assert.deepEqual(problems.map((p) => p.split(':')[0]), ['reuse-hint at Stop']);
 });
 
+test('a hook with its own row (reuse-hint, once per prompt) is held to it at 80/200 ms: 70 ms passes, 300 ms is named with the row\'s numbers; an unnamed hook at 70 ms is named (d-38)', () => {
+  const dir = project();
+  const prompt = { event: 'UserPromptSubmit', tool: '-' };
+  lines(dir, 8, { ...prompt, hook: 'reuse-hint', ms: 70, code: 0 });
+  lines(dir, 8, { ...prompt, hook: 'another-fake', ms: 70, code: 0 });
+  assert.deepEqual(said(dir).problems.map((p) => p.split(':')[0]), ['another-fake at Prompt']);
+  lines(dir, 8, { ...prompt, hook: 'reuse-hint', ms: 300, code: 0 });
+  assert.match(said(dir).problems.join('\n'), /reuse-hint at Prompt: .* over its budget of 80\/200 ms/);
+});
+
 test('fewer than five calls are printed, not judged; Stop alone may take its git look (worst 1,500)', () => {
   const dir = project();
   lines(dir, 4, { ...BASH, hook: 'once', ms: 900, code: 0 });

@@ -8,7 +8,9 @@
 //   runTests(files, concurrency, root, env) -> the exit code: 0 only when both phases are green
 //   node scripts/run-tests.mjs [file ...]            the whole suite when no file is named
 import { globSync, readFileSync } from 'node:fs';
+import { loadavg } from 'node:os';
 import { dirname, resolve } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { isMain } from '../packs/base/hooks/lib/hook-log.mts';
 import type { Env } from '../packs/base/hooks/lib/types.d.mts';
@@ -17,6 +19,9 @@ import { runHeld } from './run-held.mts';
 const MARK = /^\/\/ runs alone: \S/;
 const MARK_LINES = 6;   // the mark sits in the header comment
 const DEFAULT_CONCURRENCY = 6;
+const SETTLE_LOAD = 5;   // the 1-minute load the machine falls to before the alone files start: the first phase leaves daemons and git work behind
+const SETTLE_POLL_MS = 5_000;
+const SETTLE_MAX_MS = 180_000;
 const SUITE = ['test/*.test.mjs', 'test/**/*.test.mts'];
 
 export function splitAlone(files: readonly string[], root: string): { together: string[]; alone: string[] } {
@@ -33,9 +38,15 @@ const phase = (files: readonly string[], concurrency: number, root: string, env:
   return runHeld(process.execPath, args, { cwd: root, env: nested });
 };
 
+/** Waits for the machine to quiet after the shared phase, so an alone file measures itself (a 25-times slower Write was read on a machine still busy). */
+async function settle(): Promise<void> {
+  for (let waited = 0; waited < SETTLE_MAX_MS && (loadavg()[0] ?? 0) > SETTLE_LOAD; waited += SETTLE_POLL_MS) await delay(SETTLE_POLL_MS);
+}
+
 export async function runTests(files: readonly string[], concurrency: number, root: string, env: Env): Promise<number> {
   const { together, alone } = splitAlone(files, root);
   const first = await phase(together, concurrency, root, env);
+  if (alone.length > 0) await settle();
   if (alone.length > 0) console.log(`\nrunning alone, one file at a time (${alone.length}): ${alone.join(' ')}`);
   const second = await phase(alone, 1, root, env);
   return first === 0 && second === 0 ? 0 : first || second;
