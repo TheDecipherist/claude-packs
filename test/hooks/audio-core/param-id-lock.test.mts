@@ -1,4 +1,4 @@
-// param-id-lock: a parameter id once seen is never lost (PostToolUse). The contract, then the refusals of the old root files.
+// param-id-lock: a parameter id held by a release is never lost (PostToolUse). The contract, then the refusals of the old root files.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -26,16 +26,13 @@ function withLock(): string {
 async function worktreeCase(checkouts: Checkouts): Promise<void> {
   await installedWorktreeCase(checkouts, 'param-id-lock.mjs');
   const { here, wt } = checkouts;
-  // PostToolUse: the edit is already on disk. A worktree that drops an id is refused even though main still has it; a worktree's
-  // new id goes into the worktree's lock, never main's.
+  // PostToolUse: the edit is already on disk. A worktree that drops an id is refused even though main still has it; a new id
+  // is not locked until the next release.
   const post = (file: string): number | null => fireAs(here, 'param-id-lock.mjs', write(file)).status;
   put(join(wt, PARAMS_H), PARAMS('cutoff'));
   assert.equal(post(join(wt, PARAMS_H)), 2);
   put(join(wt, PARAMS_H), PARAMS('cutoff', 'res', 'drive'));
   assert.equal(post(join(wt, PARAMS_H)), 0);
-  const lockOf = (root: string): string[] => parseJson<string[]>(readFileSync(join(root, '.claude/param-ids.lock.json'), 'utf8')) ?? [];
-  assert.ok(lockOf(wt).includes('drive'));
-  assert.ok(!lockOf(here).includes('drive'));
   // Main drops an id the worktree still has: the worktree's copy must not hide it.
   put(join(here, PARAMS_H), PARAMS('cutoff'));
   assert.equal(post(join(here, PARAMS_H)), 2);
@@ -82,11 +79,14 @@ const paramWrite = (dir: string, rel: string, id: string) => {
 };
 const lockIds = (dir: string): unknown => readJson(join(dir, '.claude/param-ids.lock.json'));
 
-test('KF-15: param-id-lock protects from the first id it sees, with no --init', () => {
+test('param-id-lock starts at the first release, not the first sighting', () => {
   const dir = workProject('audio-core');
   assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'cutoff')).status, 0);
-  assert.deepEqual(lockIds(dir), ['cutoff']);
-  assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'renamed')).status, 2);
+  assert.equal(lockIds(dir), null, 'a first sighting starts no lock');
+  assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'renamed')).status, 0, 'an id renamed before any release passes');
+  spawnSync('node', [join(dir, '.claude/hooks/param-id-lock.mjs'), '--init'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, stdio: 'ignore' });
+  assert.deepEqual(lockIds(dir), ['renamed']);
+  assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'cutoff')).status, 2);
 });
 
 test('KF-15: ids under the build output are not the unit\'s, whatever the folder is called', () => {
@@ -94,12 +94,15 @@ test('KF-15: ids under the build output are not the unit\'s, whatever the folder
   withLayout(dir, { buildOutput: ['elsewhere/**'] });
   for (const rel of ['elsewhere/_deps/juce/Param.h', 'out/_deps/juce/Param.h']) put(join(dir, rel), juceParam('juceProgramParameter'));
   assert.equal(hookRun(dir, 'param-id-lock.mjs', paramWrite(dir, 'src/params/Ids.h', 'cutoff')).status, 0);
+  spawnSync('node', [join(dir, '.claude/hooks/param-id-lock.mjs'), '--init'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, stdio: 'ignore' });
   assert.deepEqual(lockIds(dir), ['cutoff']);
 });
 
-test('KF-15: doctor is red for a unit with parameters the lock cannot see', () => {
+test('KF-15: doctor is red for a released unit whose lock cannot see its parameters', () => {
   const dir = workProject('audio-core');
   put(join(dir, 'src/params/Table.cpp'), 'for (auto& row : rows) layout.add (std::make_unique<juce::AudioParameterFloat> (row.id, row.name, row.range, row.init));\n');
+  assert.doesNotMatch(cli(dir, 'doctor').stdout, /param-id-lock.*no ids/s, 'before any release there is nothing to say');
+  put(join(dir, '.claude/param-ids.lock.json'), '[]\n');
   assert.match(cli(dir, 'doctor').stdout, /param-id-lock.*no ids/s);
   put(join(dir, '.claude/param-ids.lock.json'), '["cutoff"]\n');
   assert.doesNotMatch(cli(dir, 'doctor').stdout, /param-id-lock.*no ids/s);

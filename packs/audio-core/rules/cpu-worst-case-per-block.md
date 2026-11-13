@@ -11,6 +11,7 @@ Always do:
 - Gate on p99, p99.9 and maximum block time, plus the count of blocks over their deadline (`numSamples / sampleRate`), at 1, 8, 32 and 96 voices, with the heaviest patch and every row of the matrix moving.
 - Include a program load (or any preset change) as its own case, at every sample rate: clearing delay memory on the audio thread overran every load at 96 kHz, and no steady-state block showed it.
 - On a shared machine, separate the code from the scheduler. A wall clock counts what the host and hypervisor take, and thread CPU time hides it. A deterministic engine repeats its own cost on the same block, so take the least time per block over a few passes. Run a control with no engine through the same clock, and read the engine's figure against it.
+- Include the note-on block (voice start, envelope and filter init) and a held chord of idle voices as their own cases: a note-on costs more than a steady block, and idle voices cost what they run.
 - Include digital silence and "identical left and right" as their own cases. Silence can cost more than signal (denormals, gates).
 - Label every CPU figure with what it measures (callback duty, one core, or process CPU), sample rate, block size, and whether the editor was open.
 - Attribute cost before optimising: compare editor closed vs open, bypassed vs active, silence vs signal.

@@ -15,6 +15,8 @@ Always do:
 
 - Run every continuous control through the project's one smoothing module: a folder named `smooth` (`src/dsp/smooth/`, namespace `smooth::`), or the path and namespace `.claude/layout.json` `guards.smoothing` names, so a search for the namespace shows what is smoothed and what is not. A control that does not run through it is a fault. Smoothing is never optional: there is no setting that switches it off.
 - Crossfade every switch that changes what is heard, over a few milliseconds, through one helper in the same module: bypass, an on/off, a mode, a type, a routing, an oversampling rate, a source choice. A bypass done in one sample clicks.
+- Slew a synced or base delay time per sample (about 60 ms), the recirculating path first, so a tempo or time change glides; snap it after a reset, so a loaded patch does not sweep.
+- Remove a meter reconfiguration click by subtraction: the settled value minus the value that has arrived, applied mid-leg, never a restart.
 - Keep a census: every continuous control with the smoother it runs through, generated from the parameter table, with a control that has none red.
 
 Never do:

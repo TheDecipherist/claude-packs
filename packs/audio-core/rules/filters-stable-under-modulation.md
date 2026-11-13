@@ -13,7 +13,7 @@ Always do:
 - Recompute coefficients per sample when the cutoff is modulated (a fast `tan` approximation is fine if its error is ≤ 0.1% up to 0.45 · fs).
 - Clamp resonance to its documented self-oscillation range. Give any zero-delay-feedback solver a fixed maximum iteration count and a fallback to the last estimate.
 
-- Count anything a push, comet, note or thread can move as modulated. That includes Stellix's floor EQ handles (spec 7.2), which comets and notes bend by formula, so the EQ needs a modulation-safe structure (e.g. Cytomic SVF bell and shelf responses), not static biquads.
+- Count anything a push, comet, note or thread can move as modulated. That includes a floor EQ's handles that comets and notes bend by formula, so the EQ needs a modulation-safe structure (e.g. Cytomic SVF bell and shelf responses), not static biquads.
 
 Never do:
 - Use direct-form biquads for modulated filters. They're fine for static EQ only.
@@ -24,6 +24,7 @@ Never do:
 Cytomic's trapezoidal SVF stays stable and smooth when cutoff, Q and mix move at audio rate. In float32 its error on a 20 Hz bell is about −111 dB, against about −59 dB for a direct-form biquad (Cytomic, "SVF vs DF1"). Direct-form coefficients are most sensitive at low cutoff, where the poles crowd near z = 1.
 
 ## Check
+- Sweep the whole control grid, not one cutoff line: every cutoff step against every resonance step, with the matrix routes moving. Pass: every cell finite.
 - Sweep the cutoff 20 Hz ↔ 18 kHz with a 2 kHz sine LFO at maximum resonance for 10 s. Pass: every sample finite, peak ≤ +24 dBFS (house choice).
 - Set fc = 0.4 · fs and measure the peak or −3 dB frequency. Pass: within ±1%. Passing fc = fs/2 and fc = 2 · fs gives finite coefficients.
-- If an existing proven filter (such as Solera's) passes these, it stays as it is. The tests are the law, not a particular structure.
+- If an existing proven filter (one already in the project) passes these, it stays as it is. The tests are the law, not a particular structure.

@@ -1,112 +1,34 @@
-// Locks parameter IDs: once seen, an ID may never disappear from the source. The lock starts itself at the first id it sees (KF-15).
-//   node param-id-lock.mjs --init   create .claude/param-ids.lock.json from the current repo
-//   node param-id-lock.mjs --status exit 1, saying why, when the unit has parameters and the lock holds no ids (doctor runs it)
-//   (as PostToolUse hook)           fail (exit 2) if a locked ID is gone; add new IDs to the lock. Every route that
+// Locks parameter IDs: once a release holds an ID, it may never disappear from the source. The lock starts at the first release, never
+// at the first sighting: before it an id may be renamed or dropped freely (DECIDED "E57 replaced").
+//   node param-id-lock.mjs --init   the release step for ids: write .claude/param-ids.lock.json (a later release adds the new ids)
+//   node param-id-lock.mjs --status exit 1, saying why, when a lock exists, holds no ids and the unit has parameters (doctor runs it)
+//   (as PostToolUse hook)           fail (exit 2) if a locked ID is gone; with no lock, nothing is judged. Every route that
 //                                   writes is judged (Write, Edit, MultiEdit, NotebookEdit, and the shell's >, >>, tee,
 //                                   sed -i, cp, mv, rm, a heredoc; lib/writes.mjs): an id deleted by `sed -i` is gone too.
 //   node param-id-lock.mjs --selftest  proves it
-// Where IDs are read: .claude/param-ids.config.json, else layout.json "paramIds", else JUCE
-// ParameterID / AudioParameter* string literals. Both forms: { "extensions": "<regex>", "patterns": ["<regex with one group>"] }.
-// A pattern is a JavaScript regex, with ^ and $ matching at each line. One that cannot compile is reported by name, never a crash (KF-18).
-// The project's build output (layout.json "buildOutput") is never read: ids in a library's sources are not the unit's (KF-15).
-// A file is judged in its own checkout: an agent worktree is scanned, and keeps its lock, on its own.
-// It both refuses (an id gone) and records (the lock's new ids); splitting it into a judge and a recorder is the lead's to decide.
-import { existsSync, readdirSync } from 'node:fs';
+// Where IDs are read: lib/param-sources.mjs (shared with release-lock). A file is judged in its own checkout: an agent worktree is
+// scanned, and keeps its lock, on its own. The ids are one row of the release lock; release-lock judges the rest.
+import { existsSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mts';
-import { matchesAny } from './lib/glob.mts';
 import { contextOf, isMain, runAsHook, writeVerdict } from './lib/hook-log.mts';
-import { parseJson, readJson, writeJson } from './lib/json.mts';
-import { readLayout } from './lib/layout.mts';
-import { checkoutRoot, claudeRoot, insideProject } from './lib/project.mts';
+import { readJson } from './lib/json.mts';
+import { CONFIG, PARAMETER_WORDS, collectIds, lockFile, lockIds, loadConfig, lockedIds, sourcesOf } from './lib/param-sources.mts';
+import type { IdConfig } from './lib/param-sources.mts';
+import { judgeEachCheckout } from './lib/judge-checkouts.mts';
 import { put, runHook, scratchProject, verdicts, writeOf } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook, Verdict } from './lib/types.d.mts';
-import { pass, refuse } from './lib/verdict.mts';
-import { writesOf } from './lib/writes.mts';
-
-// .claude is skipped so the worktrees under .claude/worktrees/ never stand in for this checkout's code.
-const SKIP_DIRS = /^out(\/|$)|(^|\/)(build|Builds|_deps|JuceLibraryCode|JUCE|node_modules|\.git|\.claude|cmake-build[^/]*)(\/|$)/;
-const PARAMETER_WORDS = /\b(?:ParameterID|AudioParameter(?:Float|Int|Bool|Choice)|AudioProcessorValueTreeState|addParameter)\b/;
-const CONFIG = join('.claude', 'param-ids.config.json');
-
-const DEFAULT_PATTERNS = [
-  'ParameterID\\s*(?:[A-Za-z_]\\w*\\s*)?[({]\\s*"([^"]+)"',
-  'AudioParameter(?:Float|Int|Bool|Choice)\\s*>?\\s*\\(\\s*"([^"]+)"',
-];
-
-/** Where ids are read: the files they are in, and the patterns that find them. */
-export interface IdConfig { extensions: RegExp; patterns: RegExp[] }
-
-/** What a settings file or layout.json "paramIds" says: each key only when it is the right kind. */
-function idSettings(value: unknown): { extensions?: string; patterns?: string[] } {
-  if (value === null || typeof value !== 'object') return {};
-  const { extensions, patterns } = value as Record<string, unknown>;
-  const found: { extensions?: string; patterns?: string[] } = {};
-  if (typeof extensions === 'string') found.extensions = extensions;
-  if (Array.isArray(patterns)) found.patterns = patterns.map(String);
-  return found;
-}
-
-// The settings, or { error } saying what cannot be read and where.
-function loadConfig(root: string): IdConfig | { error: string } {
-  const file = join(root, CONFIG);
-  try {
-    let cfg: unknown = readLayout(root).paramIds ?? {};
-    if (existsSync(file)) {
-      const parsed = parseJson<unknown>(readText(file));
-      if (parsed === null) throw new Error(`${CONFIG} is not JSON`);
-      cfg = parsed;
-    }
-    const { extensions, patterns } = idSettings(cfg);
-    return {
-      extensions: new RegExp(extensions ?? '\\.(cpp|h|hpp|cc|mm)$'),
-      patterns: (patterns ?? DEFAULT_PATTERNS).map((p) => new RegExp(p, 'gm')),
-    };
-  } catch (e) {
-    const why = e instanceof Error ? e.message : String(e);
-    return { error: `param-id-lock could not read its settings (${CONFIG}, or layout.json "paramIds"), so no parameter id was checked: ${why}\n` };
-  }
-}
-
-function* sourcesOf(root: string, extensions: RegExp): Generator<string> {
-  const output = readLayout(root).buildOutput;
-  const skipped = Array.isArray(output) ? output.map(String) : [];
-  for (const entry of readdirSync(root, { recursive: true })) {
-    const rel = String(entry);
-    if (!SKIP_DIRS.test(rel) && extensions.test(rel) && !matchesAny(rel, skipped)) yield join(root, rel);
-  }
-}
-
-function collectIds(root: string, { extensions, patterns }: IdConfig): Set<string> {
-  const ids = new Set<string>();
-  for (const file of sourcesOf(root, extensions)) {
-    const text = readText(file) ?? '';
-    for (const re of patterns) {
-      re.lastIndex = 0;
-      let m: RegExpExecArray | null;
-      while ((m = re.exec(text)) !== null) ids.add(m[1] ?? '');
-    }
-  }
-  return ids;
-}
-
-const lockFile = (root: string): string => join(root, '.claude', 'param-ids.lock.json');
-const save = (root: string, ids: Iterable<string>): void => { writeJson(lockFile(root), [...ids].sort(), { pretty: true }); };
-// The locked ids; a lock that is no list of ids is a fault, never an empty lock (it would be written over and every id forgotten).
-function lockedIds(root: string): string[] {
-  if (!existsSync(lockFile(root))) return [];
-  const ids = readJson<unknown>(lockFile(root));
-  if (!Array.isArray(ids)) throw new Error(`${lockFile(root)} is not a list of parameter ids`);
-  return ids.map(String);
-}
+import { pass } from './lib/verdict.mts';
 
 // KF-15: ids built from a table or a generator are invisible to the default patterns, and a lock with nothing in it protects nothing.
+// No lock yet is no release yet: nothing to say.
 export function status(root: string): Verdict {
+  if (!existsSync(lockFile(root))) return pass;
   const config = loadConfig(root);
   if ('error' in config) return { code: 1, stdout: config.error, stderr: '' };
-  if (lockedIds(root).length || collectIds(root, config).size) return pass;
+  if (lockedIds(root).length) return pass;
   for (const file of sourcesOf(root, config.extensions)) {
     if (!PARAMETER_WORDS.test(readText(file) ?? '')) continue;
     return {
@@ -119,54 +41,32 @@ export function status(root: string): Verdict {
   return pass;
 }
 
-/** `--init`: the lock written from the project's sources; its words, and the exit code. */
+/** `--init`: the release step for ids; its words, and the exit code. */
 export function init(root: string): Verdict {
   const config = loadConfig(root);
   if ('error' in config) return { code: 2, stdout: '', stderr: config.error };
-  const ids = collectIds(root, config);
-  save(root, ids);
+  const ids = lockIds(root, config);
   return { code: 0, stdout: `Locked ${ids.size} parameter IDs in ${relative(root, lockFile(root))}\n`, stderr: '' };
 }
 
-// The checkout's own lock only: main's lock may hold ids a worktree branch never had.
+// The checkout's own lock only: main's lock may hold ids a worktree branch never had. No lock: no release yet, nothing judged.
 function judge(root: string, config: IdConfig): string | null {
+  if (!existsSync(lockFile(root))) return null;
   const current = collectIds(root, config);
-  if (!existsSync(lockFile(root))) {
-    if (current.size) save(root, current);
-    return null;
-  }
-
-  const locked = new Set(lockedIds(root));
-  const missing = [...locked].filter((id) => !current.has(id));
-  if (missing.length > 0) {
-    return `Parameter IDs removed or renamed: ${missing.join(', ')}\n` +
-      'IDs never change once assigned (saved patches and host automation use them). ' +
-      'Restore them; if a control changed meaning, add a NEW ID and migrate old patches in setStateInformation. ' +
-      'See .claude/rules/parameter-ids-never-change.md\n';
-  }
-
-  const added = [...current].filter((id) => !locked.has(id));
-  if (added.length > 0) save(root, new Set([...locked, ...added]));
-  return null;
+  const missing = lockedIds(root).filter((id) => !current.has(id));
+  if (missing.length === 0) return null;
+  return `Parameter IDs removed or renamed since the release: ${missing.join(', ')}\n` +
+    'IDs never change once released (saved patches and host automation use them). ' +
+    'Restore them; if a control changed meaning, add a NEW ID and migrate old patches in setStateInformation. ' +
+    'See .claude/rules/parameter-ids-never-change.md\n';
 }
 
-export const hook: Hook = (event, ctx) => {
-  const main = ctx.projectDir;
-  // Run by hand (no tool): the main checkout. Otherwise every checkout a write of an id file landed in.
-  const files: (string | null)[] = event.tool_name ? writesOf(event, ctx.cwd, ctx.env).map((w) => w.path).filter((f) => insideProject(main, f, ctx.cwd)) : [null];
-  const seen = new Set<string>();
-  for (const file of files) {
-    const root = file ? checkoutRoot(main, file, ctx.cwd) : main;
-    if (seen.has(root)) continue;
-    const config = loadConfig(file ? claudeRoot(main, file, ctx.cwd) : main);
-    if ('error' in config) return refuse(config.error);
-    if (file && !config.extensions.test(file)) continue; // not a file ids are written in
-    seen.add(root);
-    const said = judge(root, config);
-    if (said) return refuse(said);
-  }
-  return pass;
-};
+export const hook: Hook = judgeEachCheckout((root, settingsRoot, file) => {
+  const config = loadConfig(settingsRoot);
+  if ('error' in config) return config.error;
+  if (file && !config.extensions.test(file)) return undefined; // not a file ids are written in
+  return judge(root, config);
+});
 
 const PARAMS = (...ids: string[]): string => ids.map((id) => `auto p_${id} = juce::ParameterID { "${id}", 1 };`).join('\n') + '\n';
 
@@ -182,19 +82,31 @@ export const worktreeCase: WorktreeCase = {
 export function selftest(): number {
   const hookFile = fileURLToPath(import.meta.url);
   const dir = scratchProject({ 'src/params/Params.h': PARAMS('cutoff', 'res') }, { folders: {}, concepts: {} });
-  const unlocked = scratchProject({ 'src/params/Params.h': PARAMS('cutoff') }, { folders: {}, concepts: {} });
+  const unreleased = scratchProject({ 'src/params/Params.h': PARAMS('cutoff') }, { folders: {}, concepts: {} });
   const file = join(dir, 'src/params/Params.h');
+  const free = join(unreleased, 'src/params/Params.h');
   const post = (text: string): number | null => (put(file, text), runHook(hookFile, dir, writeOf(file, text)).status);
-  const initStatus = runHook(hookFile, dir, null, ['--init']).status;
+  const before = (text: string): number | null => (put(free, text), runHook(hookFile, unreleased, writeOf(free, text)).status);
   const locked = (): string[] => readJson<string[]>(join(dir, '.claude/param-ids.lock.json'), []) ?? [];
+  const noLock = (): boolean => !existsSync(join(unreleased, '.claude/param-ids.lock.json'));
+  const renamedBefore = before(PARAMS('cutoff_hz'));
+  const droppedBefore = before(PARAMS());
+  const unlockedAfter = noLock();
+  const initStatus = runHook(hookFile, dir, null, ['--init']).status;
+  const lockedAtRelease = locked().join();
+  const removed = post(PARAMS('cutoff'));
+  const renamed = post(PARAMS('cutoff', 'resonance'));
+  const added = post(PARAMS('cutoff', 'res', 'drive'));
   return verdicts('param-id-lock', [
-    ['--init writes the lock', initStatus === 0 && locked().join() === 'cutoff,res', true],
-    ['an id removed', post(PARAMS('cutoff')), 2],
-    ['an id renamed', post(PARAMS('cutoff', 'resonance')), 2],
-    ['an id added', post(PARAMS('cutoff', 'res', 'drive')), 0],
-    ['the new id joins the lock', locked().includes('drive'), true],
-    ['a project with no lock', runHook(hookFile, unlocked, writeOf(join(unlocked, 'src/params/Params.h'))).status, 0],
-    ['the first id seen starts the lock', existsSync(join(unlocked, '.claude/param-ids.lock.json')), true],
+    ['an id renamed before any release', renamedBefore, 0],
+    ['an id dropped before any release', droppedBefore, 0],
+    ['no first sighting starts a lock', unlockedAfter, true],
+    ['--status before any release', runHook(hookFile, unreleased, null, ['--status']).status, 0],
+    ['--init (the release) writes the lock', initStatus === 0 && lockedAtRelease === 'cutoff,res', true],
+    ['an id removed after the release', removed, 2],
+    ['an id renamed after the release', renamed, 2],
+    ['an id added after the release', added, 0],
+    ['an added id is not locked until the next release', locked().includes('drive'), false],
     ['another project is not ours', runHook(hookFile, dir, writeOf(join(dirname(dir), 'elsewhere/Params.h'))).status, 0],
     ['--status: a lock with ids', runHook(hookFile, dir, null, ['--status']).status, 0],
   ]);

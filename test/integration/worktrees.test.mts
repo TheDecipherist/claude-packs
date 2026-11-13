@@ -90,15 +90,12 @@ const CASES: Record<string, (checkouts: Checkouts) => void | Promise<void>> = {
   },
   'param-id-lock.mjs': ({ here, wt }) => {
     // PostToolUse: the edit is already on disk. A worktree that drops an id is refused even though
-    // main still has it; a worktree's new id goes into the worktree's lock, never main's.
+    // main still has it; a new id is not locked until the next release.
     const post = (file: string): number | null => fireAs(here, 'param-id-lock.mjs', { tool_name: 'Write', tool_input: { file_path: file } }).status;
-    const lockOf = (root: string): string[] => JSON.parse(readFileSync(join(root, '.claude/param-ids.lock.json'), 'utf8')) as string[];
     put(join(wt, 'src/params/Params.h'), PARAMS('cutoff'));
     assert.equal(post(join(wt, 'src/params/Params.h')), 2);
     put(join(wt, 'src/params/Params.h'), PARAMS('cutoff', 'res', 'drive'));
     assert.equal(post(join(wt, 'src/params/Params.h')), 0);
-    assert.ok(lockOf(wt).includes('drive'));
-    assert.ok(!lockOf(here).includes('drive'));
     // Main drops an id the worktree still has: the worktree's copy must not hide it.
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff'));
     assert.equal(post(join(here, 'src/params/Params.h')), 2);

@@ -1,5 +1,7 @@
 ---
 # concepts: ui, painter, panel-spec
+paths:
+  - "placeholder"
 ---
 
 # A knob shows its name, its value and its range, and a hub carries its satellites
@@ -12,6 +14,8 @@ Always do:
 - Make the knob a user reaches for first the hub, and the knobs that shape it its satellites: at the diagonals, at 9 and 3, or on its shoulder, each joined to the hub by a straight stem (`tieTo` the hub's id).
 - Keep a satellite small: a small name, no scale text, no end ticks, no value (the primary display shows it). Satellites are always cream; only hubs are coloured.
 - Put one hub, or two side by side, in a sub-section. A knob between two hubs belongs to the pair and has no stem.
+
+- Move a control's attached geometry (needle, ticks, legend, satellites) with every transform of the control, and keep the legends within a control's height.
 
 Never do:
 - Put a satellite above or below its hub.
