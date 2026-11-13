@@ -1,14 +1,7 @@
 ---
+# concepts: cpp, js, python, tooling
 paths:
-  - "**/*.cpp"
-  - "**/*.cc"
-  - "**/*.h"
-  - "**/*.hpp"
-  - "**/*.mm"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.js"
-  - "**/*.mjs"
+  - "placeholder"
 ---
 
 # Render the widest and narrowest machine, at opening size
@@ -19,6 +12,8 @@ Always do:
 - Give each parameter exactly one page.
 - Build a reproduction with its own sections, fractional positions, control types and labels, drawn your own way, unless `"guards": { "instrument": { "artwork": "verbatim" } }` says the brief asks for the machine's own look.
 - Use pages only on machines designed with them.
+- Render the page-select and hit regions from the first frame: a page select carries an off-default mark, and every hit region is live at once.
+- Walk the overflow check over every row container, and render art at 75 and 200 per cent.
 
 Never do:
 - Copy the artwork without that setting.

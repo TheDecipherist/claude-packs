@@ -15,6 +15,8 @@ Always do:
 6. Audit for dead bindings, and for fields decoded but never read.
 7. Test the gate itself, against a known-good unit and a known-bad one.
 8. Name in a verdict which half of an AND failed.
+9. Build the per-program RMS probe and the patch inspector (`patch-inspector`) before the first listening session.
+10. Name where the skeleton comes from. The kit ships none and generates none: say which project or template the new unit starts from.
 
 Never do:
 - Add gates after the bugs: nine units shipped deaf that way.

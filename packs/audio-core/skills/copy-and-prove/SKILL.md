@@ -57,6 +57,8 @@ baseline. Build it before theorising about anything.
 
 Render at a real velocity and level, never at the default of 1.0 or full scale, and render the source's built plugin as well as its code, since a build can differ from what the code says.
 
+Build both sides of an A/B render at the same moment, from the same state of the world: the baseline in its own worktree under `.claude/worktrees/` (never beside the project), the copy in the project. A baseline built days earlier is compared with a copy built today.
+
 First assertion: render the source twice. If the two differ, find the un-reset state (grep for `static`, seeds, phases)
 before going on. Nothing can be compared with a source that does not match itself.
 
