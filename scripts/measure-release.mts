@@ -100,8 +100,6 @@ const KNOWN_REDS: readonly { file: string; from: string | RegExp; to: string }[]
   { file: 'test/integration/doctor-cache.test.mts', from: 'assert.ok(afterGlob < all && afterGlob > 0,', to: 'assert.ok(true,' },
   // a report that names the user's home path (repo-lint's "no file names a person"): the path is taken out in the scratch clone only
   { file: 'docs/workorders/typescript/agents/kwb216-report.md', from: /\/Users\/[^/ ]+\/projects\/[^/ ]+\/\.claude\/worktrees\/kwb216/, to: '.claude/worktrees/kwb216' },
-  // a report that names the user's home path (repo-lint's "no file names a person"): the path is taken out in the scratch clone only
-  { file: 'docs/workorders/typescript/agents/kwb216-report.md', from: '/Users/tim.clausen/projects/claude-packs/.claude/worktrees/kwb216', to: '.claude/worktrees/kwb216' },
 ];
 
 const env0 = (url: string): NodeJS.ProcessEnv => ({ ...process.env, NPM_CONFIG_USERCONFIG: join(SCRATCH, 'npmrc'), GH_TOKEN: '', REGISTRY_URL: url });
