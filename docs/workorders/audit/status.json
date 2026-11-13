@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T22:29:00.517Z",
+  "updated": "2026-11-13T22:37:57.931Z",
   "steps": [
     {
       "id": "W0",
@@ -20,21 +20,21 @@
       "title": "base",
       "items": 4,
       "done": 0,
-      "agent": "base-a"
+      "agent": null
     },
     {
       "id": "W3",
       "title": "synth-creator",
       "items": 3,
       "done": 0,
-      "agent": null
+      "agent": "sc-a"
     },
     {
       "id": "W4",
       "title": "sound-design and midi",
       "items": 3,
       "done": 0,
-      "agent": null
+      "agent": "midi"
     },
     {
       "id": "W5",
@@ -55,7 +55,7 @@
       "title": "work-order templates",
       "items": 2,
       "done": 0,
-      "agent": null
+      "agent": "tpl"
     },
     {
       "id": "W8",
@@ -81,28 +81,28 @@
   ],
   "agents": [
     {
-      "name": "base-a",
-      "worktree": ".claude/worktrees/base-a",
-      "step": "W2",
-      "started": "2026-11-13T22:22:45.707Z"
+      "name": "sc-a",
+      "worktree": ".claude/worktrees/sc-a",
+      "step": "W3",
+      "started": "2026-11-13T22:37:57.930Z"
     },
     {
-      "name": "base-b",
-      "worktree": ".claude/worktrees/base-b",
-      "step": "W2",
-      "started": "2026-11-13T22:22:45.708Z"
+      "name": "sc-b",
+      "worktree": ".claude/worktrees/sc-b",
+      "step": "W3",
+      "started": "2026-11-13T22:37:57.931Z"
     },
     {
-      "name": "base-c",
-      "worktree": ".claude/worktrees/base-c",
-      "step": "W2",
-      "started": "2026-11-13T22:22:45.708Z"
+      "name": "tpl",
+      "worktree": ".claude/worktrees/tpl",
+      "step": "W7",
+      "started": "2026-11-13T22:37:57.931Z"
     },
     {
-      "name": "base-d",
-      "worktree": ".claude/worktrees/base-d",
-      "step": "W2",
-      "started": "2026-11-13T22:22:45.708Z"
+      "name": "midi",
+      "worktree": ".claude/worktrees/midi",
+      "step": "W4",
+      "started": "2026-11-13T22:37:57.931Z"
     }
   ]
 }

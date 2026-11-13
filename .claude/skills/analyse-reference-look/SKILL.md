@@ -7,7 +7,9 @@ description: Use when a page, a screen, an editor or a layer is to be built or r
 
 Where the project has the rule `straight-on-and-aligned` (an editor drawn from a photograph of hardware), read it first. Write one analysis file per reference, in the design reference folder, or in `design/analysis/` if that folder is git-ignored. Measure by script, never by eye.
 
-First, separate the object from the photograph. You are learning a design, to draw it straight on. A mock-up is usually drawn that way already; a photograph never is. List what belongs to the picture: the camera's angle, the lens, the lighting, bends, wear, missing parts, compression, and note the source. Start from what is known of the object, its true proportions from a specification if one exists, and rectify before measuring:
+First, separate the object from the photograph. You are learning a design, to draw it straight on. A mock-up is usually drawn that way already; a photograph never is. List what belongs to the picture: the camera's angle, the lens, the lighting, bends, wear, missing parts, compression, and note the source. Grade the reference before anything else, with `grade-the-reference.md` (beside this file): front-on, clean, sample-able, and of the exact model. Where the reference is a photo of a unit of hardware and the exact model is not held, with nobody there to ask, record it as a gap in the analysis and go on with the best graded source: never stop and wait. Where controls sit in artwork, read `controls-in-artwork.md`.
+
+Start from what is known of the object, its true proportions from a specification if one exists, and rectify before measuring:
 
 - **Rectify against a known anchor:** something placed by a standard, not an edge that may be worn: a device frame's known size, a design system's grid, rack slots where EIA-310 puts them. One such anchor took out a bias of 4 units that the object's own edges left in.
 - **When sources disagree:** rank them, and record each one's reading. A flat, frontal picture of the real thing outranks a drawing for places, since a drawing can be wrong about layout while it looks authoritative. A specification outranks both for proportions. A drawing is good for what is even by design: pitch, and the ratio of parts. Where two independent sources agree against a third, the third is the outlier. Two pictures from one shoot are one source.
@@ -25,6 +27,7 @@ Always do:
    - **bevel:** the width of the light edge and of the dark edge, and each one's contrast against the face;
    - **edge light:** the lit edge's brightness against the face, and its width.
    An element with none of them says so, measured: a flat reference is a result too. A flat render beside a raised reference fails here, whatever its colours and glow score.
+   Read `depth-measure.md` (beside this file) now: each side first, then per side or pooled for each kind and theme, decided from the reference and written down before anything is fitted; a reading no token can make held out by name; dark surfaces sampled at named spots.
 6. **Surfaces:** gradients across a face, textures, and how the light falls over the whole.
 7. **Type:** font, size, weight and letter spacing of every text style, and how they relate. The typeface is a stated item and a scored choice: render each candidate in the reference's own words, score it against them, and record the scores and the licence. When the real face is not to be had, say so.
 8. **Components:** each kind's parts (for a dial: track, value arc, pointer, ticks, cap; for a field: border, label, value, hint), where its label and value sit, and any shape's real ends: a band's end may be slanted or square, and the eye gets it wrong.

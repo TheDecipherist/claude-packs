@@ -181,6 +181,16 @@
     "role": "judge"
   },
   {
+    "hook": "agent-ledger",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Agent|Task",
+    "timeout": 10,
+    "order": 50,
+    "role": "recorder"
+  },
+  {
     "hook": "git-guard",
     "events": [
       "PreToolUse"
@@ -271,6 +281,26 @@
     "role": "judge"
   },
   {
+    "hook": "agent-ledger",
+    "events": [
+      "PostToolUse"
+    ],
+    "matcher": "Agent|Task",
+    "timeout": 10,
+    "order": 20,
+    "role": "recorder"
+  },
+  {
+    "hook": "skill-log",
+    "events": [
+      "PostToolUse"
+    ],
+    "matcher": "Skill",
+    "timeout": 5,
+    "order": 30,
+    "role": "recorder"
+  },
+  {
     "hook": "look-gate",
     "events": [
       "PostToolUse"
@@ -336,6 +366,15 @@
     "role": "judge"
   },
   {
+    "hook": "agent-ledger",
+    "events": [
+      "SubagentStop"
+    ],
+    "timeout": 10,
+    "order": 5,
+    "role": "recorder"
+  },
+  {
     "hook": "governor-route",
     "events": [
       "SubagentStop"
@@ -361,5 +400,23 @@
     "timeout": 10,
     "order": 20,
     "role": "judge"
+  },
+  {
+    "hook": "skill-log",
+    "events": [
+      "UserPromptSubmit"
+    ],
+    "timeout": 5,
+    "order": 30,
+    "role": "recorder"
+  },
+  {
+    "hook": "rule-log",
+    "events": [
+      "InstructionsLoaded"
+    ],
+    "timeout": 5,
+    "order": 10,
+    "role": "recorder"
   }
 ]

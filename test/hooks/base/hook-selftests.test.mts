@@ -12,8 +12,9 @@ test('WB-4: every hook in every pack has a passing --selftest, and doctor runs t
   // (user-asks, idle-wake) install only when enabled, so this install enables them. The selftests run through doctor (one that
   // passed on the same bytes earlier in this run is kept, not run again: lib/selftest-cache.mts).
   const dir = extraFixture('wb4', ['audio-core', 'gpu-painter', 'stellix']);
-  const optIn = readJson<{ optIn: string[] }>(join(KIT, 'packs/synth-creator/pack.json'))?.optIn ?? [];
-  assert.ok(optIn.length > 0, 'the synth-creator pack names its opt-in hooks');
+  const optInOf = (pack: string): string[] => readJson<{ optIn?: string[] }>(join(KIT, 'packs', pack, 'pack.json'))?.optIn ?? [];
+  const optIn = [...optInOf('synth-creator'), ...optInOf('base')];
+  assert.ok(optInOf('synth-creator').length > 0, 'the synth-creator pack names its opt-in hooks');
   enable(dir, ...optIn);
   const shipped = ['packs/base', 'packs/synth-creator', 'packs/audio-core', 'packs/gpu-painter', 'packs/stellix']
     .flatMap((p) => { try { return readdirSync(join(KIT, p, 'hooks')).filter((f) => f.endsWith('.mts') && !f.endsWith('.d.mts')).map((f) => f.replace(/\.mts$/, '.mjs')); } catch { return []; } }).sort();

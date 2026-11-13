@@ -92,7 +92,7 @@ export function grantedEnv(env, grant) {
     return out;
 }
 /** The command at a low priority, nice on every platform but Windows: macOS's background QoS (`taskpolicy -b`) held work to the
- *  efficiency cores (KWB-149; the user, 2026-11-12: "it doesnt seem like we use the fast cores"), and the governor's budget and
+ *  lower, slower core tier at a low clock (an M5 Max has 6 Super and 12 Performance cores and no efficiency cores; KWB-149; the user, 2026-11-12: "it doesnt seem like we use the fast cores"), and the governor's budget and
  *  ceiling already keep the last 20 % free, so a job may use every core at a lower priority. */
 export const lowPriority = (command, platform) => platform === 'win32' ? [...command] : ['nice', '-n', NICE, ...command];
 /** Runs the command in its own process group and resolves with its exit code; a signal to this process goes to the whole group. */

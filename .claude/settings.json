@@ -34,22 +34,22 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Agent|Task|Skill|Bash|Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 55",
+            "timeout": 55
+          }
+        ]
+      },
+      {
         "hooks": [
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
             "async": true,
             "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 40",
-            "timeout": 40
           }
         ]
       }
@@ -81,8 +81,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 10",
-            "timeout": 10
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 20",
+            "timeout": 20
           }
         ]
       }
@@ -92,8 +92,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 20",
-            "timeout": 20
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 25",
+            "timeout": 25
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 5",
+            "timeout": 5
           }
         ]
       }

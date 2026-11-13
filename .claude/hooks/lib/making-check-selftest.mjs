@@ -77,11 +77,11 @@ export function selftest(hookUrl, recorderUrl) {
     } };
     const copy = `#include "filter.h"\n\n${FN('slotFilterB', '1.5f')}`;
     // the tracked filter as the turn leaves it, then as it was: one place for the put-back every in-place case needs
-    const filtered = (during, edits) => {
+    const filtered = (during, edits, making) => {
         const before = readFileSync(at('src/slot/filter.cpp'), 'utf8');
         try {
             put(at('src/slot/filter.cpp'), during(before));
-            return turn(edits);
+            return turn(edits, making === undefined ? {} : { making });
         }
         finally {
             put(at('src/slot/filter.cpp'), before);
@@ -98,6 +98,11 @@ export function selftest(hookUrl, recorderUrl) {
         }
     };
     const editOf = (oldText, newText) => use('Edit', { file_path: at('src/slot/filter.cpp'), old_string: oldText, new_string: newText });
+    // KWB-215: the tracked filter written whole again with one function added
+    const rewritten = (making) => {
+        const whole = `${readFileSync(at('src/slot/filter.cpp'), 'utf8')}${mixerCode}`;
+        return filtered(() => whole, [W('src/slot/filter.cpp', whole)], making);
+    };
     const cases = [
         ['slot code with a making line that names slot', slotTurn(), 0],
         ['slot code, no making line', slotTurn({ making: '' }), 2],
@@ -156,7 +161,12 @@ export function selftest(hookUrl, recorderUrl) {
         ['a write after the landing is judged (KF-34)', turn([use('Bash', { command: 'git merge --ff-only work/s1' }), W('src/mix/level.cpp', mixerCode)]), 2],
         // KWB-122: one edit put "mixer" in, a later edit of the same turn took it out: the file holds no mixer, so none is written
         ['a concept word the turn put in and took out again is not written (KWB-122)', filtered((before) => before, [editOf('x', '// the mixer\n'), editOf('// the mixer', '// the sum')]), 0],
-        ['a concept word the turn put in and kept is written (KWB-122)', filtered((before) => `${before}// the mixer\n`, [editOf('x', '// the mixer\n')]), 2],
+        ['a concept word the turn put in and kept is written (KWB-122)', filtered((before) => `${before}${mixerCode}`, [editOf('x', mixerCode)]), 2],
+        // KWB-215: only the lines a turn added are judged, comments blanked, and a making line's prose is no concept
+        ['a many concept named only in a comment is not named this turn (KWB-215)', turn([W('src/mix/level.cpp', '// shares the mixer\nfloat level() { return 1.0f; }\n')]), 0],
+        ['a file written whole with one function added: the old lines are not written this turn (KWB-215)', rewritten('making: the mixer level; concepts: mixer (one); reuse: none'), 0],
+        ['the same, the making line naming only slot: the added mixer is still found (KWB-215)', rewritten(), 2],
+        ['the word "never" in a making line is no concept (KWB-215)', slotTurn({ making: `${good.replace('; reuse', '; never a bare literal; reuse')}` }), 0],
         ['the shape word the rule asks for is no concept (KF-24)', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: x; concepts: slot, many; mixer, one; reuse: none' }), 0],
     ];
     cases.push(['a judge writes no file (the write trap)', trapped.join(','), '']);

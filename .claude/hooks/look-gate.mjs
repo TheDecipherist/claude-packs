@@ -29,6 +29,25 @@ import { pass, refuse, say } from './lib/verdict.mjs';
 const TRUNKS = ['main', 'master'];
 const BUILD = /\b(?:buildq|cmake\s+--build|ninja|make|npm\s+run\s+build|cargo\s+build|vite\s+build)\b/;
 const MERGE = /(?:^|[;&|\n]\s*)git\s+(?:-C\s+(\S+)\s+)?merge\s+((?:-\S+\s+)*)([\w./-]+)\s*(?=$|[;&|\n])/g;
+/** How many rows a passing report may hold out, unless the look's own `heldOutMax` says otherwise (KWB-217: a run held out 14). */
+export const HELD_OUT_MAX = 2;
+const num = (v) => typeof v === 'number' && Number.isFinite(v);
+/** Why a report's held-out rows do not let it pass, or null. A row is held out only when no token can draw it: it names the
+ *  reference's reading, the render's reading with the token at the end of its range (`limit`) and why; a fit's best is no limit.
+ *  More rows than the look allows is a missing token (a moat, a lit rim), not a reading out of reach. */
+export function heldOutFault(held, max) {
+    if (held === undefined)
+        return null;
+    if (held === null || typeof held !== 'object' || Array.isArray(held))
+        return 'its held_out is not an object of named rows';
+    const rows = Object.entries(held);
+    const bare = rows.filter(([, r]) => { const o = (r ?? {}); return !num(o.reference) || !num(o.limit) || typeof o.reason !== 'string' || !o.reason; });
+    if (bare.length)
+        return `held_out row${bare.length > 1 ? 's' : ''} ${bare.map(([k]) => `"${k}"`).join(', ')} without reference, limit (the render with the token at the end of its range) and reason`;
+    if (rows.length > max)
+        return `${rows.length} rows held out, more than ${max}: that many is a token the theme lacks (a moat, a lit rim), not a reading no token can make; add the token, fit it and gate again`;
+    return null;
+}
 const git = (root, env, ...args) => gitOut(args, { cwd: root, env });
 const pathspecs = (globs) => globs.map((g) => `:(glob)${g}`);
 const looksOf = (root, ctx) => (readLayout(claudeRoot(ctx.projectDir, join(root, 'x'), ctx.cwd)).looks ?? []).map((l) => ({ ...l, report: l.report ?? `build/evidence/looks/${l.name}.json` }));
@@ -50,6 +69,9 @@ function verdictOf(root, env, look, ref) {
         return `${look.report} is not JSON`;
     if (report.verdict !== 'pass')
         return `${look.report} says "${String(report.verdict)}"`;
+    const held = heldOutFault(report.held_out, look.heldOutMax ?? HELD_OUT_MAX);
+    if (held)
+        return `${look.report} passes only by holding rows out: ${held}`;
     if (report.code !== undefined) {
         const key = codeKey(root, env, look, ref);
         return report.code === key ? null : `${look.report} judged code ${String(report.code).slice(0, 8)}, but the look's code on ${ref} is ${key.slice(0, 8)}`;

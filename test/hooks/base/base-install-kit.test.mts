@@ -36,11 +36,12 @@ test('the kit repo has its own base pack installed: kit-lock and every base hook
   // a hook is registered by a settings entry, or by a row of the table the runner reads (W8.1)
   const rows = (readJson<{ hook: string }[]>(join(KIT, '.claude/hooks/hooks.json')) ?? []).map((r) => `.claude/hooks/${r.hook}.mjs`);
   const all = [...Object.values(settings.hooks).flat().flatMap((g) => g.hooks).map((h) => h.command), ...rows].join('\n');
-  const base = readJson<{ hooks: Record<string, { hooks: { command: string }[] }[]> }>(join(KIT, 'packs/base/pack.json'));
+  const base = readJson<{ hooks: Record<string, { hooks: { command: string }[] }[]>; optIn?: string[] }>(join(KIT, 'packs/base/pack.json'));
+  const optIn = new Set(['build-sweep.mjs', 'idle-wake.mjs', 'user-asks.mjs', ...(base?.optIn ?? []).map((f) => f.replace(/^hooks\//, ''))]);
   for (const g of Object.values(base?.hooks ?? {}).flat()) {
     for (const h of g.hooks) {
       const name = /hooks\/([\w-]+\.mjs)/.exec(h.command)?.[1] ?? '';
-      if (['build-sweep.mjs', 'idle-wake.mjs', 'user-asks.mjs'].includes(name)) continue; // opt-in
+      if (optIn.has(name)) continue; // opt-in: the pack's own optIn list, and the three that were opt-in before it was read
       assert.match(all, new RegExp(`\\.claude/hooks/${name.replace('.', '\\.')}`), name);
     }
   }

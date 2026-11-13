@@ -695,7 +695,7 @@
     "hooks/resident.mjs",
     "hooks/heartbeat.mjs",
     "hooks/skill-log.mjs",
-    "hooks/rule-log.mjs",
+    "hooks/rule-log.mjs", "hooks/agent-ledger.mjs",
     "hooks/no-find.mjs",
     "hooks/no-polling.mjs"
   ],

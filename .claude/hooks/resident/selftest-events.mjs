@@ -65,10 +65,11 @@ export async function eventCases(cases) {
         cases.push(['and the daemon is alive and serving', (await ask(rig, eventText(rig, 'Fast'))).code, 0]);
         const t2 = Date.now();
         const over = await ask(rig, eventText(rig, 'Over'), { deadline: Date.now() + 300 });
-        cases.push(['an event past the client\'s deadline is answered by it, with the "over time" line', Date.now() - t2 < 900 && over.stdout.includes('not judged by sleepy (over time)'), true]);
-        cases.push(['and the crash log records it', logs('crashes.jsonl').some((r) => r.hook === 'sleepy' && String(r.reason).includes('over time')), true]);
-        await waitFor(() => logs('refusals.jsonl').some((r) => r.hook === 'sleepy'), 4000);
-        cases.push(['the hook that finishes after the reply is logged `late`, its exit 2 kept as a refusal', logs('refusals.jsonl').some((r) => r.hook === 'sleepy' && r.late === true), true]);
+        cases.push(['an event past the client\'s deadline is handed whole to the TypeScript path, never answered by the judges that were in time (KWB-216)', Date.now() - t2 < 900 && over.fallback === 'ts' && over.code === 0 && over.stdout === '', true]);
+        cases.push(['a slow secrets-guard beside a judge that was in time: the quick judge\'s pass is not the verdict, and no "over time" note leaves the daemon', over.fallback === 'ts' && !over.stdout.includes('not judged'), true]);
+        cases.push(['and the crash log records it', logs('crashes.jsonl').some((r) => r.hook === 'secrets-guard' && String(r.reason).includes('over time')), true]);
+        await waitFor(() => logs('refusals.jsonl').some((r) => r.hook === 'secrets-guard'), 4000);
+        cases.push(['the hook that finishes after the reply is logged `late`, its exit 2 kept as a refusal', logs('refusals.jsonl').some((r) => r.hook === 'secrets-guard' && r.late === true), true]);
         const other = makeRig([{ name: 'intruder', source: INTRUDER, row: { events: ['PreToolUse'], matcher: 'Fast', role: 'judge' } }], {}, 'resident-other-');
         const foreign = await ask(rig, eventText(rig, 'Fast'), { env: { CLAUDE_PROJECT_DIR: other.dir } });
         cases.push(['a request naming another project\'s folder is not judged by it: the TypeScript path\'s', foreign.fallback === 'ts' && foreign.code === 0, true]);

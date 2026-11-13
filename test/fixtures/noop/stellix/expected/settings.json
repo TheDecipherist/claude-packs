@@ -35,9 +35,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
-            "async": true,
-            "timeout": 5
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 60",
+            "timeout": 60
           }
         ]
       },
@@ -45,8 +44,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 55",
-            "timeout": 55
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/heartbeat.mjs\"",
+            "async": true,
+            "timeout": 5
           }
         ]
       }
@@ -88,8 +88,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 15",
-            "timeout": 15
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 25",
+            "timeout": 25
           }
         ]
       }
@@ -99,8 +99,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 10",
-            "timeout": 10
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 15",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/bin/hook-proxy\" 5",
+            "timeout": 5
           }
         ]
       }

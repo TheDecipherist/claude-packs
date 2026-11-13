@@ -134,8 +134,9 @@ export async function serve(o, host, usage = new UsageStore()) {
             status.render(incoming.stdin.toString('utf8'), incoming.request.env).then((text) => incoming.reply({ code: 0, stdout: text, stderr: '' }), () => incoming.reply({ code: 0, stdout: '', stderr: '', fallback: 'ts' }));
             return;
         }
+        // `hook-proxy top`: the same state with the agent board beside it (who, owner, last tool, how long silent)
         if (incoming.request.status === true) {
-            incoming.reply({ code: 0, stdout: toJson(snapshot()), stderr: '' });
+            incoming.reply({ code: 0, stdout: toJson({ ...snapshot(), board: status.board.rows(Date.now(), (owner) => usage.usageOf(owner)) }), stderr: '' });
             return;
         }
         const words = loadWords(incoming.request); // `hook-proxy load ...`: the governor's answer, no event (W8.8)

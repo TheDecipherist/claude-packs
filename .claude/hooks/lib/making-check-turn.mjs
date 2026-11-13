@@ -9,7 +9,7 @@ import { judgeCopyWrites } from './dup-index.mjs';
 import { gitLines, gitRun } from './git-run.mjs';
 import { matchesAny } from './glob.mjs';
 import { readLayout } from './layout.mjs';
-import { conceptsIn, makingLines, unknownConcepts } from './making-concepts.mjs';
+import { addedCode, conceptsIn, makingLines, unknownConcepts } from './making-concepts.mjs';
 import { checkoutRoot, claudeRoot, insideProject, relInCheckout } from './project.mjs';
 import { readShape } from './shape.mjs';
 import { emittedFrom } from './source-exts.mjs';
@@ -76,6 +76,11 @@ function addedRanges(root, files, env) {
 }
 /** The manifest as the duplicate finder reads it: only its exclude list. */
 const excludesOf = (sh) => (sh ? { concepts: {}, exclude: sh.exclude } : null);
+// the file's text at HEAD, null when it is new or there is no git: what a rewrite kept is not what the turn added (KWB-215)
+function headText(root, relPath, env) {
+    const r = gitRun(['show', `HEAD:${relPath}`], { cwd: root, env });
+    return r.status === 0 ? r.stdout : null;
+}
 /** Problems 1: the concepts the turn's writes touch, against the making line and the manifest, in one checkout. */
 function writtenConceptProblems(root, writes, at, rel) {
     const problems = [];
@@ -108,7 +113,7 @@ function writtenConceptProblems(root, writes, at, rel) {
     for (const w of mine) {
         if (!isCode(rel(w.path), lay))
             continue;
-        for (const c of conceptsIn(w.text ?? '', sh))
+        for (const c of conceptsIn(addedCode(w.path, w.text ?? '', headText(root, rel(w.path), at.env)), sh))
             if (!written.has(c) && (holds(w.path)?.has(c) ?? true))
                 written.set(c, rel(w.path));
     }

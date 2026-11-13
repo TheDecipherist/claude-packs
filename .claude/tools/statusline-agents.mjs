@@ -1,3 +1,4 @@
+const LEAD = 'lead'; // what the board calls a session's own entry (agent-board.mts)
 /** m:ss, minutes unbounded (`12:03`). */
 export function clock(ms) {
     const s = Math.max(0, Math.floor(ms / 1000));
@@ -6,7 +7,7 @@ export function clock(ms) {
 const shortTarget = (t) => { const parts = t.split('/').filter(Boolean); return parts.length <= 3 ? t : `…/${parts.slice(-3).join('/')}`; };
 /** A row's text: the agent, then `Tool m:ss` for a running tool or `idle m:ss`, then its target; quiet rows end `quiet Nm`. */
 export function agentSegments(rows, paint, c, lastCommit, now = 0) {
-    const out = rows.map((r) => {
+    const out = rows.filter((r) => r.who === LEAD).map((r) => {
         const hue = r.quiet ? c.amber : c.green;
         const what = r.running ? `${r.tool} ${clock(r.clockMs)}` : `idle ${clock(r.clockMs)}`;
         const target = r.target !== '' ? ` ${paint(shortTarget(r.target).slice(0, 50), c.dim)}` : '';
