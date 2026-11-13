@@ -13,6 +13,8 @@ import { readLayout } from '../../packs/base/hooks/lib/layout.mts';
 import { COMMAND_CASES } from '../worktree-cases-commands.mts';
 import { PACK_CASES } from '../worktree-cases-packs.mts';
 import { RESIDENT_CASE } from '../worktree-cases-resident.mts';
+import { worktreeCase as AGENT_LEDGER } from '../../packs/base/hooks/agent-ledger.mts';
+import { worktreeCase as AGENT_MODEL } from '../../packs/base/hooks/agent-model.mts';
 import { worktreeCase as CODE_SHAPE } from '../../packs/base/hooks/code-shape.mts';
 import { worktreeCase as DISPATCH_ONCE } from '../../packs/base/hooks/dispatch-once.mts';
 import { worktreeCase as FILE_SIZE_GUARD } from '../../packs/base/hooks/file-size-guard.mts';
@@ -97,6 +99,8 @@ const CASES: Record<string, (checkouts: Checkouts) => void | Promise<void>> = {
     assert.equal(post(join(here, 'src/params/Params.h')), 2);
     put(join(here, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
   },
+  'agent-ledger.mjs': caseFrom('agent-ledger.mjs', AGENT_LEDGER),
+  'agent-model.mjs': caseFrom('agent-model.mjs', AGENT_MODEL),
   'dispatch-once.mjs': caseFrom('dispatch-once.mjs', DISPATCH_ONCE),
   'once-only.mjs': caseFrom('once-only.mjs', ONCE_ONLY),
   'once-only-index.mjs': caseFrom('once-only-index.mjs', ONCE_ONLY_INDEX),
@@ -122,7 +126,7 @@ test('every hook judges a worktree file against the worktree, inside a real git 
     const layout = readLayout(dir);
     layout.folders.engines_copy = { path: 'src/engines/copied', kind: 'copy', purpose: 'a copy tree' };
     layout.guards = { copy: { tools: ['tools/copy_in.py'] }, git: { refuseTrunk: true } };
-    layout.enable = ['hooks/user-asks.mjs', 'hooks/idle-wake.mjs']; // the opt-in hooks too, so every hook is tried
+    layout.enable = ['hooks/agent-model.mjs', 'hooks/user-asks.mjs', 'hooks/idle-wake.mjs']; // the opt-in hooks too, so every hook is tried
     writeFileSync(lf, JSON.stringify(layout, null, 2));
     execFileSync('node', [CLI, 'update', '--dir', dir], { stdio: 'ignore' });
     put(join(dir, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
