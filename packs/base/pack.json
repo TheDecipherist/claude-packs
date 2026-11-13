@@ -34,6 +34,8 @@
     "hooks/resident/shutdown.mts": ["test/hooks/base/frame-gather.test.mts"],
     "hooks/resident/usage.mts": ["test/unit/hooks-lib/resident-sampling.test.mts", "test/unit/hooks-lib/status-keeper.test.mts"],
     "hooks/resident/watchdog.mts": ["test/unit/hooks-lib/resident-sampling.test.mts"],
+    "hooks/agent-ledger.mts": ["test/hooks/base/agent-ledger.test.mts"],
+    "hooks/agent-model.mts": ["test/hooks/base/agent-model.test.mts"],
     "hooks/agents-held.mts": ["test/hooks/base/agents-held.test.mts"],
     "hooks/brief-guard-count.mts": ["test/hooks/base/brief-guard-count.test.mts"],
     "hooks/brief-guard.mts": ["test/hooks/base/brief-guard-count.test.mts", "test/hooks/base/brief-guard.test.mts"],
@@ -351,6 +353,20 @@
           },
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-model.mjs\"",
+            "role": "judge",
+            "order": 20,
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-ledger.mjs\"",
+            "role": "recorder",
+            "order": 50,
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/once-only.mjs\"",
             "role": "judge",
             "order": 120,
@@ -549,6 +565,18 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-ledger.mjs\"",
+            "role": "recorder",
+            "order": 20,
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "hooks": [
           {
             "type": "command",
@@ -603,6 +631,13 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-ledger.mjs\"",
+            "role": "recorder",
+            "order": 5,
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/governor-route.mjs\"",
             "role": "recorder",
             "order": 10,
@@ -627,5 +662,5 @@
     "hooks/no-find.mjs",
     "hooks/no-polling.mjs"
   ],
-  "optIn": []
+  "optIn": ["hooks/agent-model.mjs"]
 }
