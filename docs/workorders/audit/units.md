@@ -6,9 +6,9 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 
 | id | kind | pack and file | one thing | proof | commit | status |
 |---|---|---|---|---|---|---|
-| R1 | | | | | | |
-| C1 | | | | | | |
-| C2 | | | | | | |
+| R1 | new | packs/audio-core/hooks/release-lock.mts + lib/release-facts.mts + rules/release-lock.md | what a saved patch or song depends on is locked at the first release; only additions pass after | test/hooks/audio-core/release-lock.test.mts: a range, a skew, a mid-list choice, a renumbered program refused after release; appended parameter and choice pass; a range change before release passes (build/evidence/W5/lock-tests.log) | 81af574 | done |
+| C1 | split | packs/audio-core/rules/panel-surfaces.md, column-names.md, section-header-and-lamp.md, panel-tabs.md, instance-grid.md (panel-surface-and-sections retired) | five one-thing rules; the glow and shadow line gone; depth-is-designed governs | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| C2 | split + new | packs/audio-core/rules/knob-gestures.md, host-parameter-names.md, display-echo.md, modulation-by-drag-and-drop.md, modulation-overview-page.md (panel-gestures retired) | four one-thing rules and the modulation overview page; the no-matrix-page line gone | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | C3 | | | | | | |
 | C4 | new + extend | packs/reverse-engineering/skills/prove-a-disassembler; rules/house-tools-live-in-the-library.md | a house disassembler is proved opcode for opcode against unidasm run as a program; nothing ported | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | 3c7f57c | done |
 | C5 | | | | | | |
@@ -21,7 +21,7 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | C11 | new + extend | packs/reverse-engineering/rules/layout-closes-on-itself.md; rules/two-sources-before-naming.md (E2.8) | a closure the layout was not tuned to is an independent proof | paths: build/evidence/W1/rule-paths.md | 3c7f57c | done |
 | C12 | extend | prompts/workorder/templates/rebuild.md W8 (T6) | a machine's arp remade exactly, unless the user says otherwise | build/evidence/W7/templates.log | 92ae1e4 | done |
 | C13 | new | packs/reverse-engineering/skills/find-the-base | base scored on a linear read only, and why | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | 3c7f57c | done |
-| C14 | | | | | | |
+| C14 | extend | packs/audio-core/rules/host-parameter-names.md | a rebuild uses the machine's display strings; ours Column . Section . Name | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | C15 | extend | packs/base/skills/pdf-to-md | a slot from the governor (governed.mjs) in place of the polling loop | text in place | 92ae1e4 | done |
 | C16 | new | packs/base/skills/workflow-bugs | the skill hooks-and-gates names, shipped | pressure test: build/evidence/W3/pressure (3/3 fire, 3/3 silent; followed) | 92ae1e4 | done |
 | C17 | extend | packs/reverse-engineering/skills/bank-census (E11.3) | a flat column is a wrong decode or fixed structure; decide by the code | text in place | 3c7f57c | done |
@@ -56,34 +56,34 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | U29 | new | packs/synth-creator/skills/generate-the-machine-docs | the machine's documents generated from engine source by one command | pressure test: build/evidence/W3/pressure (3/3 fire, 3/3 silent; followed) | 92ae1e4 | done |
 | U30 | new | packs/synth-creator/tools/docs-current.mts + rules/docs-are-current.md | the build fails when generated documents are stale or the generator is not byte-deterministic | test/tools/synth-creator/docs-current.test.mts (run-twice test; planted non-determinism and stale doc red) | 92ae1e4 | done |
 | U31 | dropped | - | regenerate docs on commit | none | - | dropped (SORTED.md section 3: "Drop. U30 already catches stale docs") |
-| U32 | | | | | | |
-| U33 | | | | | | |
-| U34 | | | | | | |
-| U35 | | | | | | |
-| U36 | | | | | | |
-| U37 | | | | | | |
-| U38 | | | | | | |
-| U39 | | | | | | |
-| U40 | | | | | | |
-| U41 | | | | | | |
-| U42 | | | | | | |
-| U43 | | | | | | |
-| U44 | | | | | | |
-| U45 | | | | | | |
-| U46 | | | | | | |
+| U32 | new | packs/sound-design/skills/measure-a-filter | measure a filter's corner, slope and resonance from renders | pressure test: build/evidence/W4/pressure (3/3 fire, 3/3 silent; followed) | 81af574 | done |
+| U33 | new | packs/sound-design/skills/measure-an-envelope | measure an envelope's stages and an onset from renders | pressure test: build/evidence/W4/pressure (3/3 fire, 3/3 silent; followed) | 81af574 | done |
+| U34 | new | packs/sound-design/skills/identify-a-parameter | identify an unknown stored byte by its audible signature | pressure test: build/evidence/W4/pressure (3/3 fire, 3/3 silent; followed) | 81af574 | done |
+| U35 | new | packs/sound-design/skills/prove-choices-differ | a choice control's options proved different from each other | pressure test: build/evidence/W4/pressure (3/3 fire, 3/3 silent; followed) | 81af574 | done |
+| U36 | new, split | packs/sound-design/skills/bank-coverage + tools/bank-coverage.mts; loader line to midi imports-count-every-loss; middle-C line to spread-probe | every control varied across the bank or exempt with a reason | pressure test: build/evidence/W4/pressure (3/3 fire, 3/3 silent; followed); test/tools/sound-design/bank-coverage.test.mts (planted flat control red) (build/evidence/W5/lock-tests.log) | 81af574 | done |
+| U37 | new | packs/sound-design/rules/full-matrix-first.md (+ U41's per-voice-or-bank line) | the engine carries the whole modulation matrix the day its offsets land | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U38 | new | packs/sound-design/rules/reset-before-apply.md + checks/reset-before-apply.json | the engine resets exactly as find-the-reset's map says, before every patch and at startup | paths: build/evidence/W5/rule-paths.md; the check's bad caught and good passed (build/evidence/W4/reset-before-apply-check.txt); measured on solera: 2 hits read (one inline reset loop, one file loader) | 81af574 | done |
+| U39 | folded | packs/audio-core/hooks/release-lock.mts (the program-number row) | program numbers never move after a release | test/hooks/audio-core/release-lock.test.mts (a renumbered program refused, an appended one passes) | 81af574 | done (folded into R1, DECIDED.md "E57 replaced") |
+| U40 | new | packs/sound-design/rules/reference-presets-are-statistics-only.md | other makers' presets read for aggregates only; nothing committed or shipped | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U41 | new, trimmed | packs/sound-design/rules/model-the-mechanism.md | model the machine's own mechanism; per-voice line to U37, mode-tap line dropped (repeats filters-stable-under-modulation) | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U42 | new | packs/sound-design/rules/counter-oscillators-quantise.md | a counter-clocked oscillator's integer divisor is modelled | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U43 | new | packs/sound-design/rules/gate-both-faults.md | a detector fix gated against the opposite fault | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U44 | new | packs/sound-design/skills/categorise-a-factory-bank | put each decoded factory program in a category | pressure test: build/evidence/W4/pressure (3/3 fire, 3/3 silent; followed) | 81af574 | done |
+| U45 | new | packs/sound-design/skills/generate-a-recipe | a new synth-neutral recipe from real patch statistics (method only; D3) | pressure test: build/evidence/W4/pressure (3/3 fire, 3/3 silent; followed) | 81af574 | done |
+| U46 | new | packs/sound-design/rules/seeds-are-hashed.md | every item's seed is a hash of (run seed, index); generator seeds, never the signal | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | U47 | new | packs/midi/rules/nrpn-and-packed-values.md | NRPN numbers and packed values decoded and written back exactly | paths: build/evidence/W2/rule-paths.md | 92ae1e4 | done |
 | U48 | new | packs/midi/skills/vendor-sysex | recognise a vendor's sysex frame and record conventions | pressure test: build/evidence/W3/pressure (3/3 fire, 3/3 silent; followed) | 92ae1e4 | done |
 | U49 | new | packs/midi/skills/midi-from-firmware | read what MIDI a machine honours from its receive handler | pressure test: build/evidence/W3/pressure (3/3 fire, 3/3 silent; followed) | 92ae1e4 | done |
 | U50 | new | packs/midi/skills/find-the-division-table | find the division table and read it in order | pressure test: build/evidence/W3/pressure (3/3 fire, 3/3 silent; followed) | 92ae1e4 | done |
-| U51 | | | | | | |
-| U52 | | | | | | |
-| U53 | | | | | | |
-| U54 | | | | | | |
-| U55 | | | | | | |
-| U56 | | | | | | |
-| U57 | | | | | | |
-| U58 | | | | | | |
-| U59 | | | | | | |
+| U51 | new, reworded | packs/audio-core/rules/keys-belong-to-the-keyboard.md | the keyboard plays notes; nothing else takes it, outside a text field the user opened | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U52 | new (C1) | packs/audio-core/rules/panel-surfaces.md, column-names.md, section-header-and-lamp.md, panel-tabs.md, instance-grid.md | one thing each, from panel-surface-and-sections | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U53 | new (C1) | packs/audio-core/rules/panel-surfaces.md, column-names.md, section-header-and-lamp.md, panel-tabs.md, instance-grid.md | one thing each, from panel-surface-and-sections | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U54 | new (C1) | packs/audio-core/rules/panel-surfaces.md, column-names.md, section-header-and-lamp.md, panel-tabs.md, instance-grid.md | one thing each, from panel-surface-and-sections | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U55 | new (C1) | packs/audio-core/rules/panel-surfaces.md, column-names.md, section-header-and-lamp.md, panel-tabs.md, instance-grid.md | one thing each, from panel-surface-and-sections | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U56 | new (C1) | packs/audio-core/rules/panel-surfaces.md, column-names.md, section-header-and-lamp.md, panel-tabs.md, instance-grid.md | one thing each, from panel-surface-and-sections | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U57 | new, reworded | packs/audio-core/rules/pan-and-mix-equal-power.md | equal-power pan and mix, on an original | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U58 | new, reworded | packs/audio-core/rules/panel-colour-safe.md | no state by colour alone, on an original (the brightened cap a shape change) | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
+| U59 | new, reworded | packs/audio-core/rules/signal-reads-left-to-right.md | the layout follows the signal, on an original | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | U60 | | | | | | |
 | U62 | | | | | | |
 | U63 | | | | | | |
@@ -225,54 +225,54 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | E34 | extend | packs/synth-creator/skills/build-step | check a handoff's paths exist; say what of a shared surface is unbuilt | text in place | 92ae1e4 | done |
 | E35 | extend | packs/synth-creator/rules/chart-first.md | blast radius from the chart; as-built against the design chart | text in place | 92ae1e4 | done |
 | E36 | extend | packs/synth-creator/rules/long-work-in-the-background.md | a deadline on every browser or renderer shell-out | text in place | 92ae1e4 | done |
-| E37.1 | | | | | | |
-| E37.2 | | | | | | |
-| E37.3 | | | | | | |
-| E37.4 | | | | | | |
-| E37.5 | | | | | | |
-| E37.6 | | | | | | |
-| E37.7 | | | | | | |
-| E37.8 | | | | | | |
-| E37.9 | | | | | | |
-| E38.1 | | | | | | |
-| E38.2 | | | | | | |
-| E38.3 | | | | | | |
-| E38.4 | | | | | | |
-| E38.5 | | | | | | |
-| E38.6 | | | | | | |
-| E38.7 | | | | | | |
-| E39.1 | | | | | | |
-| E39.2 | | | | | | |
-| E39.3 | | | | | | |
-| E39.4 | | | | | | |
-| E39.5 | | | | | | |
-| E39.6 | | | | | | |
-| E40.1 | | | | | | |
-| E40.2 | | | | | | |
-| E40.3 | | | | | | |
-| E40.4 | | | | | | |
-| E40.5 | | | | | | |
-| E41.1 | | | | | | |
-| E41.2 | | | | | | |
-| E42.1 | | | | | | |
-| E42.2 | | | | | | |
-| E42.3 | | | | | | |
-| E42.4 | | | | | | |
-| E42.5 | | | | | | |
-| E43 | | | | | | |
-| E44.1 | | | | | | |
-| E44.2 | | | | | | |
-| E45 | | | | | | |
-| E46.1 | | | | | | |
-| E46.2 | | | | | | |
-| E46.3 | | | | | | |
-| E46.4 | | | | | | |
-| E47.1 | | | | | | |
-| E47.2 | | | | | | |
-| E47.3 | | | | | | |
-| E48 | | | | | | |
-| E49.1 | | | | | | |
-| E49.2 | | | | | | |
+| E37.1 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.2 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.3 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.4 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.5 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.6 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.7 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.8 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E37.9 | extend | packs/sound-design/skills/measure-a-law | a second quantity; model-free beside a fit; ratio in one render; prediction first; broad peak; isolation set; neutrals from the map; the part alone; 440 and 442 | text in place | 81af574 | done |
+| E38.1 | extend | packs/sound-design/skills/bounce-a-plugin | prove which binary loaded | text in place | 81af574 | done |
+| E38.2 | extend, part | packs/sound-design/skills/bounce-a-plugin | prove the source before the sink (no microphone) | text in place | 81af574 | done |
+| E38.3 | extend | packs/sound-design/skills/bounce-a-plugin | a state load took; reset probed offsets; headless enumeration; one value per note | text in place | 81af574 | done |
+| E38.4 | extend | packs/sound-design/skills/bounce-a-plugin | a state load took; reset probed offsets; headless enumeration; one value per note | text in place | 81af574 | done |
+| E38.5 | extend | packs/sound-design/skills/bounce-a-plugin | a state load took; reset probed offsets; headless enumeration; one value per note | text in place | 81af574 | done |
+| E38.6 | extend | packs/sound-design/skills/bounce-a-plugin | a state load took; reset probed offsets; headless enumeration; one value per note | text in place | 81af574 | done |
+| E38.7 | extend, reworded | packs/sound-design/skills/bounce-a-plugin | an interactive host once when the offline renderer cannot load a plugin | text in place | 81af574 | done |
+| E39.1 | extend | packs/sound-design/skills/compare-to-the-machine | one-knob capture; mismatched pair; demo validates; within-note ratio; recording checklist; gates by shape | text in place | 81af574 | done |
+| E39.2 | extend | packs/sound-design/skills/compare-to-the-machine | one-knob capture; mismatched pair; demo validates; within-note ratio; recording checklist; gates by shape | text in place | 81af574 | done |
+| E39.3 | extend | packs/sound-design/skills/compare-to-the-machine | one-knob capture; mismatched pair; demo validates; within-note ratio; recording checklist; gates by shape | text in place | 81af574 | done |
+| E39.4 | extend | packs/sound-design/skills/compare-to-the-machine | one-knob capture; mismatched pair; demo validates; within-note ratio; recording checklist; gates by shape | text in place | 81af574 | done |
+| E39.5 | extend | packs/sound-design/skills/compare-to-the-machine | one-knob capture; mismatched pair; demo validates; within-note ratio; recording checklist; gates by shape | text in place | 81af574 | done |
+| E39.6 | extend | packs/sound-design/skills/compare-to-the-machine | one-knob capture; mismatched pair; demo validates; within-note ratio; recording checklist; gates by shape | text in place | 81af574 | done |
+| E40.1 | extend | packs/sound-design/skills/measure-reverb | echo density and comb peak; unusable fit; listen-list; topology first; window where it lives | text in place | 81af574 | done |
+| E40.2 | extend | packs/sound-design/skills/measure-reverb | echo density and comb peak; unusable fit; listen-list; topology first; window where it lives | text in place | 81af574 | done |
+| E40.3 | extend | packs/sound-design/skills/measure-reverb | echo density and comb peak; unusable fit; listen-list; topology first; window where it lives | text in place | 81af574 | done |
+| E40.4 | extend | packs/sound-design/skills/measure-reverb | echo density and comb peak; unusable fit; listen-list; topology first; window where it lives | text in place | 81af574 | done |
+| E40.5 | extend | packs/sound-design/skills/measure-reverb | echo density and comb peak; unusable fit; listen-list; topology first; window where it lives | text in place | 81af574 | done |
+| E41.1 | extend | packs/sound-design/skills/spread-probe | render twice, sections, C2 C4 C6, collapse self-test; instrument excitations, inert terms | text in place | 81af574 | done |
+| E41.2 | extend | packs/sound-design/skills/spread-probe | render twice, sections, C2 C4 C6, collapse self-test; instrument excitations, inert terms | text in place | 81af574 | done |
+| E42.1 | extend | packs/sound-design/skills/choose-observable | two axes by two measurements; another quantity; local gradient; after a transition; a ratio | text in place | 81af574 | done |
+| E42.2 | extend | packs/sound-design/skills/choose-observable | two axes by two measurements; another quantity; local gradient; after a transition; a ratio | text in place | 81af574 | done |
+| E42.3 | extend | packs/sound-design/skills/choose-observable | two axes by two measurements; another quantity; local gradient; after a transition; a ratio | text in place | 81af574 | done |
+| E42.4 | extend | packs/sound-design/skills/choose-observable | two axes by two measurements; another quantity; local gradient; after a transition; a ratio | text in place | 81af574 | done |
+| E42.5 | extend | packs/sound-design/skills/choose-observable | two axes by two measurements; another quantity; local gradient; after a transition; a ratio | text in place | 81af574 | done |
+| E43 | extend | packs/sound-design/rules/test-off-the-easy-point.md | every velocity layer; the block's invariant; sums by power | text in place | 81af574 | done |
+| E44.1 | extend | packs/sound-design/rules/meter-before-engine.md | autocorrelation period fixes; re-fit after a meter fault | text in place | 81af574 | done |
+| E44.2 | extend | packs/sound-design/rules/meter-before-engine.md | autocorrelation period fixes; re-fit after a meter fault | text in place | 81af574 | done |
+| E45 | extend | packs/sound-design/rules/neutral-is-exact.md | a stated default may be the displayed value; one source's switch leaves the others' level | text in place | 81af574 | done |
+| E46.1 | extend | packs/sound-design/rules/algorithms-are-data.md | kinds table; level fall between repeats; an edit-matrix row is a flow claim | text in place | 81af574 | done |
+| E46.2 | extend | packs/sound-design/rules/algorithms-are-data.md | kinds table; level fall between repeats; an edit-matrix row is a flow claim | text in place | 81af574 | done |
+| E46.3 | extend | packs/sound-design/rules/algorithms-are-data.md | kinds table; level fall between repeats; an edit-matrix row is a flow claim | text in place | 81af574 | done |
+| E46.4 | extend | packs/sound-design/rules/algorithms-are-data.md | a delay replica needs lengths, topology and coefficients; lengths alone are a third | text in place | 81af574 | done |
+| E47.1 | extend, reworded | packs/sound-design/rules/waveforms-and-octaves.md | a layer takes the original's filter and envelope arrangement | text in place | 81af574 | done |
+| E47.2 | extend | packs/sound-design/rules/waveforms-and-octaves.md | a wave entry records its generation and behaviour above Nyquist | text in place | 81af574 | done |
+| E47.3 | extend | packs/sound-design/rules/waveforms-and-octaves.md | a wave entry records its generation and behaviour above Nyquist | text in place | 81af574 | done |
+| E48 | extend | packs/sound-design/rules/presets-are-named-and-neutral.md | categories from the machine's bank, Other last and small | text in place | 81af574 | done |
+| E49.1 | extend | packs/sound-design/skills/design-a-preset/references/effects-and-banks.md | effects recipes; bank tiers and engine checklists | text in place | 81af574 | done |
+| E49.2 | extend | packs/sound-design/skills/design-a-preset/references/effects-and-banks.md | effects recipes; bank tiers and engine checklists | text in place | 81af574 | done |
 | E50.1 | extend | packs/midi/skills/does-it-sync | which clock; the note-value test; false positives; two facts; strings sweep; what it sends; one switch; per revision | text in place | 92ae1e4 | done |
 | E50.2 | extend | packs/midi/skills/does-it-sync | which clock; the note-value test; false positives; two facts; strings sweep; what it sends; one switch; per revision | text in place | 92ae1e4 | done |
 | E50.3 | extend | packs/midi/skills/does-it-sync | which clock; the note-value test; false positives; two facts; strings sweep; what it sends; one switch; per revision | text in place | 92ae1e4 | done |
@@ -299,36 +299,36 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | E55.1 | extend | packs/midi/rules/sysex-is-a-record.md | a field kept as stored; round-trip our own export | text in place | 92ae1e4 | done |
 | E55.2 | extend | packs/midi/rules/sysex-is-a-record.md | a field kept as stored; round-trip our own export | text in place | 92ae1e4 | done |
 | E56 | extend | packs/midi/rules/imports-count-every-loss.md | one report row shape; a name match is not a numbering match | text in place | 92ae1e4 | done |
-| E57 | | | | | | |
-| E58.1 | | | | | | |
-| E58.2 | | | | | | |
-| E58.3 | | | | | | |
-| E58.4 | | | | | | |
-| E58.5 | | | | | | |
-| E59 | | | | | | |
-| E60.1 | | | | | | |
-| E60.2 | | | | | | |
-| E61.1 | | | | | | |
-| E61.2 | | | | | | |
-| E62.1 | | | | | | |
-| E62.2a | | | | | | |
-| E62.2b | | | | | | |
-| E62.3 | | | | | | |
-| E63.1 | | | | | | |
-| E63.2 | | | | | | |
-| E63.3 | | | | | | |
-| E63.4 | | | | | | |
-| E64 | | | | | | |
-| E65.1 | | | | | | |
-| E65.2 | | | | | | |
-| E65.3 | | | | | | |
-| E66.1 | | | | | | |
-| E66.2 | | | | | | |
-| E66.3 | | | | | | |
-| E67 | | | | | | |
-| E68.1 | | | | | | |
-| E68.2 | | | | | | |
-| E69 | | | | | | |
+| E57 | extend, decided | packs/audio-core/rules/parameter-ids-never-change.md; hooks/param-id-lock.mts (starts at the first release) | what a host stored stays valid; the order line dropped; param-id-lock judges ids from the release | test/hooks/audio-core/param-id-lock.test.mts (its own cases, and an id renamed before any release passes) | 81af574 | done |
+| E58.1 | extend | packs/audio-core/rules/control-reaches-every-surface.md | wheels and matrix-only controls gated; save moves bytes; every parameter has a reader; drawn controls audible; defaults equal initialisers | text in place | 81af574 | done |
+| E58.2 | extend | packs/audio-core/rules/control-reaches-every-surface.md | wheels and matrix-only controls gated; save moves bytes; every parameter has a reader; drawn controls audible; defaults equal initialisers | text in place | 81af574 | done |
+| E58.3 | extend | packs/audio-core/rules/control-reaches-every-surface.md | wheels and matrix-only controls gated; save moves bytes; every parameter has a reader; drawn controls audible; defaults equal initialisers | text in place | 81af574 | done |
+| E58.4 | extend | packs/audio-core/rules/control-reaches-every-surface.md | wheels and matrix-only controls gated; save moves bytes; every parameter has a reader; drawn controls audible; defaults equal initialisers | text in place | 81af574 | done |
+| E58.5 | extend | packs/audio-core/rules/control-reaches-every-surface.md | wheels and matrix-only controls gated; save moves bytes; every parameter has a reader; drawn controls audible; defaults equal initialisers | text in place | 81af574 | done |
+| E59 | extend | packs/audio-core/rules/patch-excludes-performance-controls.md | selectors and focus are session state; routes are patch data | text in place | 81af574 | done |
+| E60.1 | extend | packs/audio-core/rules/smooth-continuous-parameters.md | delay time slews per sample; meter reconfiguration clicks | text in place | 81af574 | done |
+| E60.2 | extend | packs/audio-core/rules/smooth-continuous-parameters.md | delay time slews per sample; meter reconfiguration clicks | text in place | 81af574 | done |
+| E61.1 | extend, decided (C9) | packs/audio-core/rules/every-time-control-syncs.md | rhythm syncs, timbre never, FREE first, a rebuild offers what its hardware could follow; the plugin's master clock | text in place | 81af574 | done |
+| E61.2 | extend | packs/audio-core/rules/every-time-control-syncs.md | tempo extras: a fresh chord at once, swing never on a delay or LFO, bypass keeps the clock | text in place | 81af574 | done |
+| E62.1 | extend | packs/audio-core/rules/house-control-behaviours.md | the keyboards play the unit's note map | text in place | 81af574 | done |
+| E62.2a | extend | packs/audio-core/rules/house-control-behaviours.md | the pitch wheel springs, the mod wheel stays | text in place | 81af574 | done |
+| E62.2b | obsolete | - | transpose as a parameter, voice allocation in the keyboard band (shell) | none | - | obsolete (DECIDED.md: shell-only items) |
+| E62.3 | extend | packs/audio-core/rules/house-control-behaviours.md | each action's feedback; one lit cell; a click outside a menu only closes it | text in place | 81af574 | done |
+| E63.1 | extend | packs/audio-core/skills/new-panel-control | mode or value key; a source tag; lamps; switch kinds and readouts | text in place | 81af574 | done |
+| E63.2 | extend | packs/audio-core/skills/new-panel-control | mode or value key; a source tag; lamps; switch kinds and readouts | text in place | 81af574 | done |
+| E63.3 | extend | packs/audio-core/skills/new-panel-control | mode or value key; a source tag; lamps; switch kinds and readouts | text in place | 81af574 | done |
+| E63.4 | extend | packs/audio-core/skills/new-panel-control | mode or value key; a source tag; lamps; switch kinds and readouts | text in place | 81af574 | done |
+| E64 | extend | packs/audio-core/skills/trace-parameter | diff against the reference first; defaults from the running plugin; a wrong binding's neighbours | text in place | 81af574 | done |
+| E65.1 | extend | packs/audio-core/skills/copy-and-prove | real velocity and level; a compensation with a failing-on-fix test; moving into a shared component | text in place | 81af574 | done |
+| E65.2 | extend | packs/audio-core/skills/copy-and-prove | real velocity and level; a compensation with a failing-on-fix test; moving into a shared component | text in place | 81af574 | done |
+| E65.3 | extend | packs/audio-core/skills/copy-and-prove | real velocity and level; a compensation with a failing-on-fix test; moving into a shared component | text in place | 81af574 | done |
+| E66.1 | extend | packs/audio-core/rules/module-kill-switch.md | bypass passes input through | text in place | 81af574 | done |
+| E66.2 | extend | packs/audio-core/rules/module-kill-switch.md | a pinned parameter's stored value read and overridden, never overwritten | text in place | 81af574 | done |
+| E66.3 | extend | packs/audio-core/rules/module-kill-switch.md | the voice counter shows the multiplied figure | text in place | 81af574 | done |
+| E67 | extend | packs/audio-core/rules/settings-layer-owns-the-devices.md | 128-sample buffer on first run; no input bus; latency by onset probe | text in place | 81af574 | done |
+| E68.1 | extend | packs/audio-core/rules/panel-sizes-by-kind.md | wrap a long legend, never shrink it; LED list pitch | text in place | 81af574 | done |
+| E68.2 | dropped | - | a control below its width floor drops chrome | none | - | dropped (SORTED.md section 2: "Drop.") |
+| E69 | extend | 13 audio-core rules (filters-stable-under-modulation, recursive-state-nan-guard, double-where-precision-matters (text only; float-phase-or-rate untouched), cpu-worst-case-per-block, reverb-loop-gain-bounded, nonlinear-stages-antialiased, knob-anatomy, colour-by-role, editor-paints-what-changed, audio-ui-thread-handoff, ...) | the 13 one-liners | text in place | 81af574 | done |
 | E70.1 | | | | | | |
 | E70.2 | | | | | | |
 | E70.3 | | | | | | |

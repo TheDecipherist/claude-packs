@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T23:15:08.199Z",
+  "updated": "2026-11-13T23:43:45.630Z",
   "steps": [
     {
       "id": "W0",
@@ -33,22 +33,22 @@
       "id": "W4",
       "title": "sound-design and midi",
       "items": 3,
-      "done": 1,
-      "agent": "sd-a"
+      "done": 3,
+      "agent": null
     },
     {
       "id": "W5",
       "title": "audio-core and the release lock",
       "items": 5,
-      "done": 0,
-      "agent": "ac-a"
+      "done": 5,
+      "agent": null
     },
     {
       "id": "W6",
       "title": "instrument-shell, cpp, shell, catalog, shell text",
       "items": 4,
       "done": 0,
-      "agent": null
+      "agent": "is-a"
     },
     {
       "id": "W7",
@@ -81,28 +81,28 @@
   ],
   "agents": [
     {
-      "name": "sd-a",
-      "worktree": ".claude/worktrees/sd-a",
-      "step": "W4",
-      "started": "2026-11-13T23:15:08.198Z"
+      "name": "is-a",
+      "worktree": ".claude/worktrees/is-a",
+      "step": "W6",
+      "started": "2026-11-13T23:29:40.493Z"
     },
     {
-      "name": "sd-b",
-      "worktree": ".claude/worktrees/sd-b",
-      "step": "W4",
-      "started": "2026-11-13T23:15:08.199Z"
+      "name": "cpp-web",
+      "worktree": ".claude/worktrees/cpp-web",
+      "step": "W6",
+      "started": "2026-11-13T23:29:40.494Z"
     },
     {
-      "name": "ac-a",
-      "worktree": ".claude/worktrees/ac-a",
-      "step": "W5",
-      "started": "2026-11-13T23:15:08.199Z"
+      "name": "cat",
+      "worktree": ".claude/worktrees/cat",
+      "step": "W6",
+      "started": "2026-11-13T23:29:40.494Z"
     },
     {
-      "name": "ac-b",
-      "worktree": ".claude/worktrees/ac-b",
-      "step": "W5",
-      "started": "2026-11-13T23:15:08.199Z"
+      "name": "shtext",
+      "worktree": ".claude/worktrees/shtext",
+      "step": "W6",
+      "started": "2026-11-13T23:29:40.494Z"
     }
   ]
 }

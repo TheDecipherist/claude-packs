@@ -20,6 +20,12 @@ Session 1 started 2026-11-13. `workorder check audit`: OK.
 - 2026-11-13 W4.2 (midi): U47-U50, E50-E56 with C6, C9, C9a, clock-law.md restored (E51.2a and E51.2c dropped, E51.3 reworded), the open-default probe tool and test (agent midi; f05de62); concepts per d-7.
 - 2026-11-13 W7.1: T1-T10 (T1, T3, T9 reworded; T11 dropped), C8 and C12 lines, the processors line driving re-toolchain; 13 rebuild and 5 generic Done whens given a count and a test path (agent tpl; f05de62).
 - 2026-11-13 W7 done when: three fresh orders (generic, plugin, rebuild) through workorder check: 0 Done-when refusals each (build/evidence/W7/summary.md, templates.log); workorder tests 30 pass 0 fail; test:changed in the W3 run above.
+- 2026-11-13 W4.1 (sound-design): U32-U38, U40-U46 (U36 split, U41 trimmed, U38 rule + check from find-the-reset's map), E37-E49 (E38.2 part, E38.7 and E47.1 reworded) (agents sd-a, sd-b; 81af574).
+- 2026-11-13 W4 done when: units.md W4 rows filled; reset-before-apply's bad caught and good passed (build/evidence/W4/reset-before-apply-check.txt), measured on solera; open-default-probe.test checks the default at open untouched at 120 and 90 BPM, a plugin delay opening free and an LFO opening synced refused (W4 midi); pressure tests build/evidence/W4/pressure (7 of 7) and W3/pressure for midi (3 of 3); test:changed on the merge 1367 pass 0 fail (build/evidence/W5/test-changed.log); counts --check exit 0.
+- 2026-11-13 W5.1-W5.2: C1 split into U52-U56, C2 split into four rules plus modulation-overview-page, C14 in host-parameter-names, U51 reworded, U57-U59 on an original only; panel-surface-and-sections and panel-gestures retired (agent ac-a).
+- 2026-11-13 W5.3: the release lock (R1: hook, rule, release-facts lib), param-id-lock starts at the first release, U39 folded in as the program-number row (agent ac-b).
+- 2026-11-13 W5.4: E57 (order line dropped), E58-E69 (E62.2b obsolete, E68.2 dropped; float-phase-or-rate untouched) (agent ac-b; merged cf39312, 81af574).
+- 2026-11-13 W5 done when: release-lock test refuses a range, a skew, a mid-list choice and a renumbered program after a release, passes an appended parameter and choice and a range change before any release; param-id-lock passes its own cases and an id renamed before any release (build/evidence/W5/lock-tests.log, 18 pass 0 fail); rule paths 22 of 22 (build/evidence/W5/rule-paths.md); test:changed 1367 pass 0 fail; counts --check exit 0.
 
 ## FOR THE USER
 
