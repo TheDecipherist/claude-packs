@@ -13,7 +13,17 @@ const COMPARE_EVERY = 20;
 const REFUSE_EVERY = 5;
 const REPORT_MS = 5000;
 const EVENT_TIMEOUT_MS = 60_000;
-const NOT_JUDGED = /^\{"systemMessage":"not judged by [^"]*\(over time\)"\}$/;
+const NOT_JUDGED = 'not judged by';
+const OVER_TIME_MESSAGE = /,?"systemMessage":"not judged by [^"]*\(over time\)"/g;
+const GOVERNOR_FIGURES = /\d+(\.\d+)?/g;
+
+/** The answer without what only the daemon adds when a judge ran out of time, and (for the governor's refusals, which print the machine's load
+ *  and slot counts at that moment) without its figures: what is left is the exit code, the hooks that spoke and what they said. */
+const verdictOf = (a: Answer): { code: number | null; out: string; err: string } => {
+  const out = a.out.replace(OVER_TIME_MESSAGE, '').replace(/^\{\}$/, '').trim();
+  return { code: a.code, out, err: a.err.includes('governor-route') ? a.err.replace(GOVERNOR_FIGURES, '#') : a.err };
+};
+const sameVerdict = (a: Answer, b: Answer): boolean => toJson(verdictOf(a)) === toJson(verdictOf(b));
 
 interface Setup { dir: string; cache: string; index: number; clients: number; ratePerSec: number; differences: string }
 export interface Counters { done: number; compared: number; refusalsCompared: number; refusalsSeen: number; overTime: number; differences: number; failed: number; wallMs: number }
@@ -56,10 +66,10 @@ async function compare(event: string, tool: string, command: string, input: stri
   counters.compared += 1;
   if (planted) counters.refusalsCompared += 1;
   if (viaTs.code === 2) counters.refusalsSeen += 1;
-  // a judge the daemon cut at its time limit says so on stdout; that line is counted, and the verdict (exit code and refusal text) is compared
-  const overTime = NOT_JUDGED.test(viaDaemon.out.trim());
+  // a judge the daemon cut at its time limit adds a "not judged by X (over time)" message to stdout; it is counted, and the verdict is compared without it
+  const overTime = viaDaemon.out.includes(NOT_JUDGED);
   if (overTime) counters.overTime += 1;
-  if (viaDaemon.code !== viaTs.code || (!overTime && viaDaemon.out !== viaTs.out) || viaDaemon.err !== viaTs.err) {
+  if (!sameVerdict(viaDaemon, viaTs)) {
     counters.differences += 1;
     appendFileSync(setup.differences, `${toJson({ client: setup.index, k, event, tool, planted, daemon: viaDaemon, ts: viaTs })}\n`);
   }

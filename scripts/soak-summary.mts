@@ -4,7 +4,7 @@ import type { Row } from './soak-probe.mts';
 import { slopePer10Min } from './soak-probe.mts';
 
 export const SLOPE_LINE_MB_PER_10MIN = 1;
-export const RSS_LINE_MB = 250;
+export const RSS_LINE_MB = 150;   // W8 Done when, the pool of 2 grown to 8, after 1,000 events (idle: 100)
 export const WARMUP_S = 300;
 /** How far a count after a restart may differ from the count at the start and still be "back to the start". */
 const BACK_TO_START = 2;
@@ -63,10 +63,10 @@ export function verdicts(f: Facts): LeakVerdict[] {
     out.push(v('file descriptors after kill -9 (the new daemon)', `${f.afterKill.fds} against ${f.startFds} at the start`, `back to the start (within ${BACK_TO_START})`, near(f.afterKill.fds, f.startFds)));
     out.push(v('child processes after kill -9 (without the sampler)', `${f.afterKill.children} against ${f.startChildren} at the start`, `back to the start (within ${BACK_TO_START})`, near(f.afterKill.children, f.startChildren)));
   }
-  if (f.afterWorker !== null) out.push(v('workers after one was ended', `${f.afterWorker.workers} against ${f.startWorkers}`, 'back to the start', f.afterWorker.workers === f.startWorkers));
+  if (f.afterWorker !== null) out.push(v('workers after one was ended', `${f.afterWorker.workers} against ${f.startWorkers} before`, 'back to the count before', f.afterWorker.workers === f.startWorkers));
   out.push(v('old daemon gone after the kit update', f.oldGoneS === null ? 'still running' : `${f.oldGoneS} s`, `within its idle window (${f.idleWindowS / 60} min)`, f.oldGoneS !== null && f.oldGoneS <= f.idleWindowS));
   out.push(v('left behind after the daemon was stopped', f.left.length === 0 ? 'nothing' : f.left.join('; '), 'no process, worker, socket file, pid file or lock file', f.left.length === 0));
-  out.push(v('daemon RSS at the end (fresh install)', f.endRssMb === null ? 'unread' : `${f.endRssMb} MB`, `under ${RSS_LINE_MB} MB (d-31)`, f.endRssMb !== null && f.endRssMb < RSS_LINE_MB));
+  out.push(v('daemon RSS at the end (fresh install)', f.endRssMb === null ? 'unread' : `${f.endRssMb} MB`, `under ${RSS_LINE_MB} MB (W8, 8 workers; d-31 had 250)`, f.endRssMb !== null && f.endRssMb < RSS_LINE_MB));
   return out;
 }
 
