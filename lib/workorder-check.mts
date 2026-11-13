@@ -9,6 +9,8 @@ import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { doctor } from './doctor.mts';
 import type { DoctorOptions } from './doctor.mts';
 import { readLock } from './manifest.mts';
+import { ghidraRefusals } from './ghidra-check.mts';
+import { installBlockOf } from './install-block.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
 const FENCE = /^\s*(```|~~~)/;
@@ -104,7 +106,9 @@ export async function checkWorkorder(dir: string, name: string, { withDoctor = t
   const text = readText(join(dir, 'docs', 'workorders', name, 'workorder.md'));
   if (text === null) throw new Error(`no work order at docs/workorders/${name}/workorder.md`);
   const lines = orderLines(text);
-  const refusals = [...placeholders(lines), ...doneWhens(lines), ...missingSkills(dir, lines)];
+  // what the install block asks of the tools is checked before the run; a broken block is init's to refuse, not this check's
+  const wanted = (() => { try { return installBlockOf(text).ghidra; } catch { return []; } })();
+  const refusals = [...placeholders(lines), ...doneWhens(lines), ...missingSkills(dir, lines), ...ghidraRefusals(wanted, env ?? process.env)];
   if (withDoctor) {
     const said: string[] = [];
     if (await doctor(dir, (l) => said.push(String(l)), { strict: true, ...(env ? { env } : {}) }) !== 0) {
