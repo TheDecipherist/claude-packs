@@ -90,6 +90,24 @@ packs: base
 
 **Done when:** `doctor --strict` exits 0 in the kit; the branch is pushed; `.claude/layout.json` names the new folders.
 
+## W0b. Every agent's model, effort and tokens, recorded by the kit (the user, 2026-11-12: "agents should log its total token usage and what model they used and what effort as well")
+
+1. A `PreToolUse` hook on the `Agent` tool records what each agent is started with (its name or description, `model`, effort,
+   whether it runs in the foreground) into `.claude/logs/agents.jsonl`, keyed by the call's id.
+2. When the agent ends (`SubagentStop`, and the lead's own session at `Stop` and `SessionEnd`), the kit reads its transcript and
+   adds to the same record: the model each message was answered by (a change of model counted), the effort, the tokens by kind
+   summed over every message (input, output, cache read, cache write, from the transcript's usage), the turns (assistant messages
+   with a tool call), the wall time from its first to its last message, and its outcome (finished, stopped, failed); a missing
+   usage field is written as unknown, never guessed.
+3. The same numbers land in the agent's status file and its report (the brief template's report gains the section, filled by the
+   kit, not typed by the agent), and the status line shows each live agent's model and its tokens so far.
+4. `claude-packs logs agents` prints the records as a table, and per order: tokens and turns by agent, by model and by effort.
+
+**Done when:** `test/hooks/base/agent-ledger.test.mts` is green with 0 failures, each case seen red on its plant: a planted
+transcript's token sums equal a hand count by kind; a model change mid-agent is counted; a missing usage field is written as
+unknown; a planted `Agent` call's model and effort are recorded; the status line shows a planted agent's model and tokens; and on
+this order's own first agent its record matches its transcript (the numbers in `build/evidence/W0b/`).
+
 ## W1. The study: what Claude reads
 
 1. `scripts/read-study.mts` reads transcripts (main sessions and subagents) and writes one row per tool result into
