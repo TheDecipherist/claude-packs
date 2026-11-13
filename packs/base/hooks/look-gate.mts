@@ -36,7 +36,24 @@ const MERGE = /(?:^|[;&|\n]\s*)git\s+(?:-C\s+(\S+)\s+)?merge\s+((?:-\S+\s+)*)([\
 /** A look with its report path settled. */
 export type DeclaredLook = Look & { report: string };
 /** What a look report holds that the gate reads. */
-interface Report { verdict?: unknown; code?: unknown; commit?: unknown }
+interface Report { verdict?: unknown; code?: unknown; commit?: unknown; held_out?: unknown }
+
+/** How many rows a passing report may hold out, unless the look's own `heldOutMax` says otherwise (KWB-217: a run held out 14). */
+export const HELD_OUT_MAX = 2;
+const num = (v: unknown): boolean => typeof v === 'number' && Number.isFinite(v);
+
+/** Why a report's held-out rows do not let it pass, or null. A row is held out only when no token can draw it: it names the
+ *  reference's reading, the render's reading with the token at the end of its range (`limit`) and why; a fit's best is no limit.
+ *  More rows than the look allows is a missing token (a moat, a lit rim), not a reading out of reach. */
+export function heldOutFault(held: unknown, max: number): string | null {
+  if (held === undefined) return null;
+  if (held === null || typeof held !== 'object' || Array.isArray(held)) return 'its held_out is not an object of named rows';
+  const rows = Object.entries(held as Record<string, unknown>);
+  const bare = rows.filter(([, r]) => { const o = (r ?? {}) as Record<string, unknown>; return !num(o.reference) || !num(o.limit) || typeof o.reason !== 'string' || !o.reason; });
+  if (bare.length) return `held_out row${bare.length > 1 ? 's' : ''} ${bare.map(([k]) => `"${k}"`).join(', ')} without reference, limit (the render with the token at the end of its range) and reason`;
+  if (rows.length > max) return `${rows.length} rows held out, more than ${max}: that many is a token the theme lacks (a moat, a lit rim), not a reading no token can make; add the token, fit it and gate again`;
+  return null;
+}
 
 /** What a git question needs of the caller: the folder to ask in is each call's own, the environment the event's. */
 import type { Env } from './lib/types.d.mts';
@@ -64,6 +81,8 @@ function verdictOf(root: string, env: Env, look: DeclaredLook, ref: string): str
   const report = parseJson<Report>(text);
   if (report === null || typeof report !== 'object') return `${look.report} is not JSON`;
   if (report.verdict !== 'pass') return `${look.report} says "${String(report.verdict)}"`;
+  const held = heldOutFault(report.held_out, look.heldOutMax ?? HELD_OUT_MAX);
+  if (held) return `${look.report} passes only by holding rows out: ${held}`;
   if (report.code !== undefined) {
     const key = codeKey(root, env, look, ref);
     return report.code === key ? null : `${look.report} judged code ${String(report.code).slice(0, 8)}, but the look's code on ${ref} is ${key.slice(0, 8)}`;
