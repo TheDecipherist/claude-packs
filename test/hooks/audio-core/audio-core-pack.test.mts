@@ -59,3 +59,12 @@ test('ui-matches-reference-look: a look gate checks geometry exactly, and a whol
   assert.match(text, /whole-picture score/);
   assert.match(text, /unplanted/);
 });
+
+// the user, 2026-11-13: when a control's kind is decided, ask whether it shows its state and how (the Supernova II's buttons light red in the centre)
+test('new-panel-control decides a control\'s state indicator with its kind, and says what drives each state', () => {
+  const skill = pack('audio-core/skills/new-panel-control/SKILL.md');
+  assert.ok(skill.length < 8000);
+  const step = skill.indexOf('Its state indicator, decided with its kind');
+  assert.ok(step > 0 && step < skill.indexOf('**Parameter.**'), 'decided right after the kind, before the parameter');
+  for (const law of [/an LED in it or beside it/, /a ring or arc of LEDs/, /a lit legend/, /look for one with the light on/, /ask the user/, /mark it unconfirmed/, /`indicator`/, /off, on, flashing, dimmed/, /the firmware's LED map/, /proves the light follows the state/]) assert.match(skill, law);
+});

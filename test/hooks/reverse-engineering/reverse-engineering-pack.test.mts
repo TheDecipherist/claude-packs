@@ -21,5 +21,5 @@ test('a circuit diagram is read tile by tile, one report an image, and set again
   const boards = readFileSync(join(KIT, 'packs/reverse-engineering/skills/boards-from-photos/SKILL.md'), 'utf8');
   assert.ok(boards.length < 8000);
   assert.match(boards, /^description: Use when a machine has no public service manual/m);
-  for (const law of [/Prove the absence first/, /What the sheets would have given/, /FCC ID/, /installation guides/, /two independent photos agree on/, /\[PHOTO\?\]/, /\[DS-REF\]/, /firmware's clock set-up/, /How the search went/, /Commit a photo/, /\[\?\]` for the rest/]) assert.match(boards, law);
+  for (const law of [/Prove the absence first/, /What the sheets would have given/, /FCC ID/, /installation guides/, /two independent photos agree on/, /\[PHOTO\?\]/, /\[DS-REF\]/, /firmware's clock set-up/, /How the search went/, /Commit a photo/, /Chips in Synthesizers/, /spare-parts sellers who sell a part by the machine's name/, /\[\?\]` for the rest/]) assert.match(boards, law);
 });
