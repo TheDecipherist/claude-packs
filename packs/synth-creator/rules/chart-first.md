@@ -9,6 +9,8 @@ A synth is a set of modules and the routes between them. Drawn first, the chart 
 Always do:
 - Commit a Mermaid chart (`docs/**/*.mmd`, or where `layout.json` `"chart"` says) of every module and every route before any UI or engine code.
 - Change the chart first when a change touches a route: the chart's commit comes before the code's.
+- Before a change bigger than one control, write its blast radius from the chart: the modules and routes it touches.
+- Compare the generated as-built chart with the committed design chart, and log each difference.
 - Keep the chart whole: every module the code has, every route between them, and the controls that steer each route.
 
 Never do:

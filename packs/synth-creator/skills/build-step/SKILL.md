@@ -1,9 +1,9 @@
 ---
 name: build-step
-description: Use when work begins on a step of a synth's build.md, when a step's "done when" may be met, when a session starts or ends in a repo with a build.md, or when someone asks where the build is. Also /build-step.
+description: Use when work begins on a step of a synth's build.md, when a step's "done when" may be met, when a session starts or ends in a repo with a build.md, or when asked where the build is.
 ---
 
-# One build step: its own branch, from start to merge
+# One build step: its own branch, from start to merge (one job: no step is lost or called done unmeasured)
 
 The canonical text is the repo's own `build.md` ("Rules for this file") and its `CLAUDE.md`. This file is the operating
 summary. Where they disagree, the repo wins. The step tool is the project's (the `step` command in `.claude/layout.json`,
@@ -11,7 +11,7 @@ usually `python3 tools/step.py`); if the repo has none, copy `tools/step.py` and
 has them before doing any of this by hand.
 
 The house rule: **every build task is built in a new branch. Once completed it is merged into the
-trunk. We must not be able to lose any work.** MegaSynth lost two days of panel work to one checkout, more to work nobody
+trunk. No work may be lost.** One synth lost two days of panel work to one checkout, more to work nobody
 had written down as started, and more to steps called done because the code compiled. A step is a promise with a
 measurement on the end, and a pushed branch is what a dead session leaves behind.
 
@@ -21,6 +21,7 @@ measurement on the end, and a pushed branch is what a dead session leaves behind
   edition, check the file shows it. Older, or no line: **stop and say so**, naming both editions.
 - Every file a paste names must be there. One missing or older: **stop and tell the user**, naming the file and what was found;
   do not carry on with the parts that do not depend on it.
+- A handoff names paths, builds and addresses: check at session start that each exists, and say which parts of a shared surface are not built yet.
 
 ## 1. At the start of a session
 
@@ -28,11 +29,11 @@ measurement on the end, and a pushed branch is what a dead session leaves behind
 python3 tools/step.py status
 ```
 
-It prints the count, the current step, the branch you are on, uncommitted changes and every branch not yet merged, with
+It prints the count, the current step, the branch the checkout is on, uncommitted changes and every branch not yet merged, with
 its last commit. An unmerged branch is unfinished work: read its last commit message and its In-progress row before
 starting anything else. Read `bugs.md`'s Open table too.
 
-**If the work in front of you is not a step in build.md, stop and ask the user whether the plan has changed.** A bug fix or a
+**If the work ahead is not a step in build.md, stop and ask the user whether the plan has changed.** A bug fix or a
 change of plan the user has agreed goes on `start --work <name> "task"` and is merged with `land`.
 
 ## 2. Start: the branch comes first
@@ -116,6 +117,11 @@ Never claim a step works that has not been built, opened and measured.
 
 ## Never
 
+<constraints>
+Always do:
+- Walk sections 0 to 6 in order, and save before any risky command.
+
+Never do:
 - Delete a branch, here or on GitHub. Rebase, amend, squash or force-push. `git add -A`.
 - `checkout`, `restore`, `stash` or `reset --hard` over uncommitted work. `save` first.
 - Commit straight onto the trunk. Pass `--no-verify`.
@@ -123,3 +129,4 @@ Never claim a step works that has not been built, opened and measured.
   REOPENED.
 - Tick from memory of an earlier session. Measure again.
 - Soften a red test in a commit message.
+</constraints>

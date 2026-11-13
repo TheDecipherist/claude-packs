@@ -9,6 +9,7 @@
     "hooks/build-guard.mts": ["test/hooks/synth-creator/build-guard.test.mts"],
     "hooks/build-sweep.mts": ["test/hooks/synth-creator/build-sweep.test.mts"],
     "hooks/chart-first.mts": ["test/hooks/synth-creator/chart-first.test.mts"],
+    "hooks/fault-logged.mts": ["test/hooks/synth-creator/fault-logged.test.mts"],
     "hooks/frozen-files.mts": ["test/hooks/synth-creator/frozen-files.test.mts"],
     "hooks/idle-wake.mts": ["test/hooks/synth-creator/idle-wake.test.mts"],
     "hooks/lib/build-guard-selftest.mts": ["test/hooks/synth-creator/build-guard.test.mts"],
@@ -134,6 +135,13 @@
             "order": 10,
             "asyncRewake": true,
             "timeout": 1000
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/fault-logged.mjs\"",
+            "role": "judge",
+            "order": 20,
+            "timeout": 2000
           }
         ]
       }
@@ -179,6 +187,7 @@
   },
   "optIn": [
     "hooks/user-asks.mjs",
+    "hooks/fault-logged.mjs",
     "hooks/idle-wake.mjs",
     "hooks/build-sweep.mjs"
   ]

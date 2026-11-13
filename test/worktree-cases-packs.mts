@@ -28,6 +28,7 @@ export const PACK_CASES: Record<string, PackCase> = {
   'build-guard.mjs': installedCase('build-guard.mjs'),
   'time-guard.mjs': installedCase('time-guard.mjs'),
   'user-asks.mjs': installedCase('user-asks.mjs'),
+  'fault-logged.mjs': installedCase('fault-logged.mjs'),
   // the wake is timed, so its case needs the environment and stays a function (slice 6 rebuilds it)
   'idle-wake.mjs': async (checkouts) => {
     const { here, wt } = checkouts;
