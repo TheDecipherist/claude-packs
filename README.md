@@ -16,13 +16,13 @@ It works on a project in any language. The machine needs Node 22, because the ho
 
 | Measure | 1.9 | 2.0 | Faster by |
 |---|---|---|---|
-| Hook wait per turn (Stop p50 + prompt p50) | 326 ms | 111 ms | 2.9x |
-| Stop at p95 (replay) | 6,067 ms | 90 ms | 67x |
-| Release, commit to npm (one-hook change) | 937 s | 22.8 s | 41x |
-| Gate for a one-hook change | 188.3 s | 14 s | 13x |
-| A Bash call's hooks, live (Pre p50) | 105 ms | 6 ms | 18x |
+| Hook wait per turn (Stop p50 + prompt p50) | 326 ms | 131 ms | 2.5x |
+| Stop at p95 (replay) | 6,067 ms | 77 ms | 79x |
+| Release, commit to npm (one-hook change) | 937 s | 29.5 s | 32x |
+| Gate for a one-hook change | 188.3 s | 12.9 s | 15x |
+| A Bash call's hooks, live (Pre p50, wall to wall) | 105 ms | 29 ms | 3.6x |
 | doctor, cached | 4.5 s | 0.85 s | 5.3x |
-| update, warm | 4.6 s | 1.1 s | 4.2x |
+| update, warm | 4.6 s | 1.14 s | 4.0x |
 <!-- generated:performance:end -->
 
 ## What changed in 2.0

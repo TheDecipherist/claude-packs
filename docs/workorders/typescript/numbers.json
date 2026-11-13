@@ -5,45 +5,40 @@
       "label": "Hook wait per turn (Stop p50 + prompt p50)",
       "unit": "ms",
       "before": 326,
-      "after": 111,
-      "evidence": "build/evidence/W0/replay-g.md (Stop 279 + UserPromptSubmit 47); after: build/evidence/W8/summary.md (Stop p50 64) + the prompt's 47 carried, not yet remeasured",
-      "provisional": true
+      "after": 131,
+      "evidence": "before: build/evidence/W0/replay-g.md (Stop 279 + prompt 47, bandwarp's log); after: build/evidence/W11/replay-proxy.md (full replay, proxy and daemon: Stop p50 54.2 + UserPromptSubmit p50 77.2); Stop fell, the prompt rose (reuse-hint's own 46 ms); same method on the 1.9.0 tree: Stop 2,250 + prompt 128 ms (replay-v19.md); copy: docs/workorders/typescript/after.md"
     },
     {
       "id": "stop-p95",
       "label": "Stop at p95 (replay)",
       "unit": "ms",
       "before": 6067,
-      "after": 90,
-      "evidence": "build/evidence/W0/replay-g.md; after: build/evidence/W8/summary.md (replay p95 90 ms)",
-      "provisional": true
+      "after": 77,
+      "evidence": "before: build/evidence/W0/replay-g.md; after: build/evidence/W11/replay-proxy.md (all 124 Stops, p95 76.9 ms; 1.9.0 tree on the same replay 3,032 ms, replay-v19.md); copy: docs/workorders/typescript/after.md"
     },
     {
       "id": "release",
       "label": "Release, commit to npm (one-hook change)",
       "unit": "s",
       "before": 937,
-      "after": 22.8,
-      "evidence": "build/evidence/W0/baseline.md (d); after: docs/workorders/typescript/progress.md, W9 line (verdaccio, a one-hook release 22.8 s)",
-      "provisional": true
+      "after": 29.5,
+      "evidence": "before: build/evidence/W0/baseline.md (d); after: build/evidence/W11/release-measure-hook.txt and measured-hook.json (scripts/measure-release.mts on a local registry, gate 20.3 s inside it); copy: docs/workorders/typescript/after.md"
     },
     {
       "id": "gate",
       "label": "Gate for a one-hook change",
       "unit": "s",
       "before": 188.3,
-      "after": 14,
-      "evidence": "build/evidence/W0/baseline.md (b1, no-find); after: docs/workorders/typescript/progress.md, W9 line (one-hook gates 8 to 14 s, the top of the range)",
-      "provisional": true
+      "after": 12.9,
+      "evidence": "before: build/evidence/W0/baseline.md (b1, no-find); after: build/evidence/W11/baseline-measured-run1.md (b1, 12.9 s, picked 2 of 372 test files; git-guard b2 57.2 s, lib/layout c 59.6 s); copy: docs/workorders/typescript/after.md"
     },
     {
       "id": "bash-hooks",
-      "label": "A Bash call's hooks, live (Pre p50)",
+      "label": "A Bash call's hooks, live (Pre p50, wall to wall)",
       "unit": "ms",
       "before": 105,
-      "after": 6,
-      "evidence": "build/evidence/W0/replay-g.md; after: build/session2/doctor2.txt (Pre Bash 6/313 ms, last 26 live calls)",
-      "provisional": true
+      "after": 29,
+      "evidence": "before: build/evidence/W0/replay-g.md (Pre Bash wall p50); after: build/evidence/W11/live-main-install.txt (60 live calls through the kit's own install, sh picker to Go client to daemon, p50 28.9 ms; 9 ms of it is the cost of starting any sh; the proxy line in hooks.log is 7 ms p50); the replay's scratch gives 33.9 ms (replay-proxy.md); copy: docs/workorders/typescript/after.md"
     },
     {
       "id": "doctor-cached",
@@ -51,17 +46,15 @@
       "unit": "s",
       "before": 4.5,
       "after": 0.85,
-      "evidence": "build/evidence/W0/baseline.md (e, doctor with a warm cache); after: build/evidence/W8/summary.md (0.85 s)",
-      "provisional": true
+      "evidence": "before: build/evidence/W0/baseline.md (e, doctor with a warm cache); after: build/evidence/W11/retake/baseline-measured.md (e, doctor 850 ms); copy: docs/workorders/typescript/after.md"
     },
     {
       "id": "update-warm",
       "label": "update, warm",
       "unit": "s",
       "before": 4.6,
-      "after": 1.1,
-      "evidence": "build/evidence/W0/baseline.md (f); after: build/evidence/W8/summary.md (1.1 s warm)",
-      "provisional": true
+      "after": 1.14,
+      "evidence": "before: build/evidence/W0/baseline.md (f); after: build/evidence/W11/retake/baseline-measured.md (f, 1,138 ms median of 1,119 and 1,157); copy: docs/workorders/typescript/after.md"
     }
   ]
 }
