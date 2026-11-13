@@ -28,6 +28,7 @@ Finished looks like: every parameter, page and gesture in the manual present; <t
 - **Factory content:** <patches, waves, banks>. None of it is committed. It loads at build or run time from `<MACHINE>_FIRMWARE` (or the bank's path), and the plugin builds and runs without it, saying so.
 - **[if a real unit is owned]** **The unit:** what the user can record from it, and how (W10).
 - **Missing** [gap]: <what was searched for and not found>. W1 records each search and its date.
+- **[if no service manual or schematic exists]** **The boards from photos:** by `boards-from-photos`, W1 says what the sheets would have given (for a digital machine: the analogue input and output stages and the clocks) and reads the chips, crystals and converters off photos of the boards. The search for photos is listed for the user's yes before the run, never skipped in silence.
 
 **The foundation.** <The house's shared code, linked and never copied: time, MIDI clock, transport, sync, keys and focus.> The kit holds every law: its skills `gather-sources`, `pdf-to-md`, `read-a-circuit-diagram`, `read-a-screen-image`, `names-first`, `menu-map`, `bank-census`, `analyse-reference-look`, `make-it-a-template`, `prove-instances-identical`, `prove-control`, `pick-tests` and `land-branch`; its tool `names-sweep`; and its rules `addresses-name-their-space` and `presses-held-for-the-firmware`. A skill this order names that the installed kit lacks is a kit gap: log it, update the kit, and go on.
 
