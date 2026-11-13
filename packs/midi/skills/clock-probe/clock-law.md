@@ -10,6 +10,30 @@ firmware with an address, `[SCH]` a schematic sheet, `[MAN]` a manual page,
 
 ---
 
+## 0. Two clocks, and what a machine does with them
+
+**There are two clocks, and nearly every "Clock" in a manual is the wrong one.**
+The AUDIO clock (44.1 kHz, Word Clock, AES) times samples. The TEMPO clock
+(`0xF8`, DIN sync, tap) times music. Never search a manual for "clock": search
+the MIDI chart's real-time row and `tempo|bpm|sync|midi clk`. A box with tempo
+sync has at least one parameter in note values or a named tempo source. A
+reverb that "keeps time" is not a sync, and a `Sync` modulation type is not a
+clock source.
+
+**Two questions, answered separately and each with its evidence.** What the
+HARDWARE did (the chart row, the firmware strings, the panel), and what OUR unit
+slaves (the law: every unit follows an external clock, section 6). A hardware
+answer nobody recorded is "assumed, not checked".
+
+**A stopped host sends no clock.** A probe run with the transport stopped
+measures the fallback, not the sync. Run it playing, and write down what the
+machine does when sync is on and no clock arrives (one machine ran as though
+the tempo were 20, and did not fall back to its knob).
+
+**One switch or one per destination.** Some machines have a single sync flag
+read by every path, with a per-destination setting that picks only the DIVISION;
+others carry a flag per parameter. Record which.
+
 ## 1. What MIDI actually sends
 
 **There is no tempo message.** None. No byte anywhere says "120 BPM". The
@@ -101,7 +125,8 @@ Ten divisions is not enough for any real machine. A survey of eighteen found
 every one of them needed more, and mostly LONGER: bars and measures, not finer
 subdivisions. The JP-8000 counts in MEASURES up to 8; the Nord Lead 3 goes to
 32 bars. Make the list append-only, since a unit stores the index, and sort it
-separately for a menu.
+separately for a menu. Keep division indexes append-only: a patch stores the
+index as its value, so inserting a rung moves every stored patch.
 
 Machines name these differently and a user follows their manual, not ours. The
 Virus writes a dotted eighth as 3/16 and a triplet as 1/6; the H3000 counts in
@@ -214,6 +239,14 @@ following. Never `setSyncMode (syncOff)` on an effect, and never
 transport happens to be playing at that instant - h3500's section 3 passed and
 section 2 failed on nothing but the order they ran in.
 
+**Clock OUT is a setting of its own, beside the three receiving states.** A
+machine can SEND a clock as well as follow one: an output jack, a DLY/CLK switch,
+a metronome, the Virus's "Send" (Disable / Auto / Send folds it into the same
+parameter). Ask of every machine what it SENDS, not only what it listens to;
+a MIDI-chart grep finds nothing on a pre-MIDI pulse output, which is a false
+negative. The unit records it as a separate setting, and it never changes which
+of OFF, INT or EXT the unit is receiving.
+
 Per-destination OFF is not a workaround for the missing state, it IS the
 hardware's off: Lexicon carries an Absolute-or-Tempo bit per PARAMETER `[MAN]`.
 One call that turns every division off works on both shapes, so a probe need
@@ -243,10 +276,27 @@ and to its own clock otherwise. The Virus ships exactly that as a real setting
 (Disable / Auto / Send) `[MAN]`, so it is hardware precedent rather than an
 invention.
 
-**What stays off by default is each DESTINATION's division.** A division
-OVERRIDES the stored value, and a Lexicon preset's 247 ms delay must not
-silently become 500 ms because the project is at 120 BPM. Slaved and ready,
-overriding nothing until asked.
+**The default at open depends on where the unit runs and what the time
+drives.** Standalone, it opens as the hardware did (sync off) until the user
+turns sync on. As a plugin in a DAW the master clock always follows the host;
+delays are synced by default, LFOs and envelopes start free and can be synced,
+and each time destination declares its default by what it is. TIMBRE times
+(chorus or doubler pre-delay, diffuser, comb, short slapback) never follow
+tempo; every RHYTHM time has sync. A patch that stores its sync state loads as
+stored: a Lexicon preset's 247 ms delay never becomes 500 ms because the
+project is at 120 BPM. The defaults are for a new or INIT patch.
+
+**Median-filter the pulse gaps, and release the lock on silence.** One late
+`0xF8` must not move the tempo, and when pulses stop the unit lets go of the
+clock instead of holding the last tempo for ever.
+
+**A machine's stored tempo knob IS its internal tempo field.** The knob in a
+preset and the unit's own BPM are one value with two faces, never two copies.
+
+**`phase()` reports the block's START.** Anchor a rate destination to it, not to
+a raw position, or the modulator sits about 10 ms past the beat. Sync may
+restart the phase rather than lock the rate, and a dynamic destination is
+queried live. Never hand-roll a division table.
 
 ## 7. What belongs where
 
@@ -258,7 +308,7 @@ The hardware splits this and so do we.
   keeps LFO Clock in the patch; Lexicon keeps the rhythmic value in the preset.
   `[MAN]`
 
-And the divisions belong on the UNIT's panel, never on the transport bar. A
+And the divisions belong on the UNIT's panel, never on the plugin's master clock. A
 master clock sends pulses; it has no business choosing what a slave does with
 them, any more than a DAW's transport picks your delay's note value. The PCM 91
 is the clearest case: it chooses which parameters follow tempo PER PARAMETER,
@@ -298,13 +348,14 @@ machine's manual.
 | SOURCE | the parameter's name rather than its values |
 | Disable / Auto / Send | Virus, which folds clock OUT into the same parameter |
 | HOST | plugins, for a DAW transport |
+| MIDI (no EXT anywhere) | a two-state switch where OFF means INT; the JP-8000 has no EXT in its image, so the machine names the source after the wire. Search the whole row of names, not only EXT |
 
 **"MASTER" appears on BOTH sides of this.** Some panels label the source they
 follow as the master ("sync to master"); others label the machine's own role.
 Read which one a manual means before copying the word, or a unit ends up
 printing MASTER while it is the slave.
 
-**Our transport bar is ALWAYS the master.** It may itself be following a DAW or
+**The plugin's master clock is ALWAYS the master.** It may itself be following a DAW or
 a cable, but the unit is never our master.
 
 ## 9. How to verify, and every trap we hit

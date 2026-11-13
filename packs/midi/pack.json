@@ -5,7 +5,11 @@
   "type": "stock",
   "fits": ["cpp", "synth-creator"],
   "requires": [],
-  "tests": {},
+  "tests": {
+    "tools/open-default-probe.mts": [
+      "test/tools/midi/open-default-probe.test.mts"
+    ]
+  },
   "concepts": {},
   "folders": {},
   "hooks": {},
