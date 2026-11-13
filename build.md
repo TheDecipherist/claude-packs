@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w11-report (work/2.0.0-ts-w11-report), started 2026-11-13: W11 items 2 and 3, report.md finished, showcase.md, whats-new-in-2.0.md and the test that holds their rows.
+  making: report.md rows with ids, showcase and whats-new lines tied to rows, a test that reads the three; concepts: none (design/shape.json declares none); reuse: readText and scratchDir (packs/base/hooks/lib/files.mts).
+
 - 2.0.0 w11-measure (work/2.0.0-ts-w11-measure), started 2026-11-13: W11 item 1, the after-measurements into build/evidence/W11/after.md and numbers.json.
   making: probes that replay the fixture with totals, count node starts, time a scripted feature task, read the daemon's RSS; concepts: none (design/shape.json declares none); reuse: makeScratch, settingsCommandOf, payloadOf (scripts/replay-lib.mts).
 
