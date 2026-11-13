@@ -30,7 +30,7 @@ refused() { tail -n 1 "$1" | grep -q '"api_error":"usage_limit_reached"'; }
 
 # the pre-flight: a run never starts on an order that cannot finish (a placeholder left, a step with no measured Done when, a skill
 # not installed, a red doctor). The order is fixed first, by the person, never by the run. A run already started (progress.md) goes on.
-if [[ ! -f "$order/progress.md" ]] && ! npx @thedecipherist/claude-packs workorder check audit --dir "$root"; then
+if [[ ! -f "$order/progress.md" ]] && ! node "$root/bin/claude-packs.mjs" workorder check audit --dir "$root"; then
   echo "$(date +%Y-%m-%dT%H:%M:%S%z) workorder check refused the order: fix what it names, then start again" | tee -a "$logs/runner.log"
   exit 5
 fi
