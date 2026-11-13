@@ -128,7 +128,7 @@ test('every hook judges a worktree file against the worktree, inside a real git 
     const layout = readLayout(dir);
     layout.folders.engines_copy = { path: 'src/engines/copied', kind: 'copy', purpose: 'a copy tree' };
     layout.guards = { copy: { tools: ['tools/copy_in.py'] }, git: { refuseTrunk: true } };
-    layout.enable = ['hooks/agent-model.mjs', 'hooks/user-asks.mjs', 'hooks/idle-wake.mjs', 'hooks/fault-logged.mjs']; // the opt-in hooks too, so every hook is tried
+    layout.enable = ['hooks/agent-model.mjs', 'hooks/user-asks.mjs', 'hooks/idle-wake.mjs', 'hooks/fault-logged.mjs', 'hooks/catalog-entry-exists.mjs']; // the opt-in hooks too, so every hook is tried
     writeFileSync(lf, JSON.stringify(layout, null, 2));
     execFileSync('node', [CLI, 'update', '--dir', dir], { stdio: 'ignore' });
     put(join(dir, 'src/params/Params.h'), PARAMS('cutoff', 'res'));
