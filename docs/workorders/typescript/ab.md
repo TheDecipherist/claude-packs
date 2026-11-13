@@ -1,6 +1,6 @@
 # W11.0: five bandwarp tasks, done again on the 2.0 kit
 
-The order (workorder W11 item 0): take real tasks the project's agents did on kit 1.9, hand the same briefs word for word to an agent working with the 2.0 kit, and compare. Five tasks were run, one after another, alone, started through the load governor at priority 0.3 on the efficiency cores. Seed 20261112 (`build/evidence/W11/ab-pick.md`); the clones and the original runs' records are described in `build/evidence/W11/ab-prep.md`. This file is the result.
+The order (workorder W11 item 0): take real tasks the project's agents did on kit 1.9, hand the same briefs word for word to an agent working with the 2.0 kit, and compare. Five tasks were run (looks twice, the second time on the kit with KWB-215 and KWB-216 fixed), one after another, alone, started through the load governor at priority 0.3 on the efficiency cores. Seed 20261112 (`build/evidence/W11/ab-pick.md`); the clones and the original runs' records are described in `build/evidence/W11/ab-prep.md`. This file is the result.
 
 ## How it was run, and what to keep in mind before reading the rows
 
@@ -130,7 +130,79 @@ Diff against the original, read file by file:
 - `build/evidence/looks/*.json`, `design/reference/*/panel.depth.analysis.md`: the original committed the three dark themes' reports and analyses; the new run committed WARM's report only. Worse.
 - `bugs.md`, `build.md`, decisions, progress, `workflow-bugs.md`: notes; the new run's `build.md` reformats four earlier steps' making lines to get past a making-check false match (its WB-160), a change outside its area. Equal on content, worse on scope.
 
-Verdict: worse on gates (3 dark-theme gates red that the original passed) and worse on the diff (dark themes, layout declaration, reports). This task needs a second run before anything is concluded. No kit fault is shown to have caused the shortfall: 4 making-check send-backs cost 25 turns (KWB-215) out of 106, and 3 hooks went "not judged (over time)" (KWB-216), but the run stopped on a measurement it judged unreachable, not on a refusal. The second run should say whether it is Sonnet's sampling or the missing resume brief.
+Verdict: worse on gates (3 dark-theme gates red that the original passed) and worse on the diff (dark themes, layout declaration, reports). This task needed a second run before anything was concluded; it follows below. No kit fault is shown to have caused the shortfall: 4 making-check send-backs cost 25 turns (KWB-215) out of 106, and 3 hooks went "not judged (over time)" (KWB-216), but the run stopped on a measurement it judged unreachable, not on a refusal. The second run should say whether it is Sonnet's sampling or the missing resume brief.
+
+### looks, second run
+
+model: claude-sonnet-5-5 (original), claude-sonnet-5-5 (new)
+
+| gate | original | new run |
+| --- | --- | --- |
+| look_panel | pass | pass (twin pass) |
+| look_panel_graphite | pass | fail (twin pass): depth rows only, geometry and colour ok |
+| look_panel_deep | pass | fail (twin pass): depth rows only, geometry and colour ok |
+| look_panel_night | pass | fail (twin pass): depth rows only, geometry and colour ok |
+| panel_themes | pass | pass (twin pass) |
+| theme_table | not in the original | pass (twin pass) |
+
+| measure | original | new run |
+| --- | --- | --- |
+| files changed | 29 | 22 |
+| turns | 202 | 123 |
+| tokens in | 416 | 262 |
+| tokens out | 87847 | 79018 |
+| tokens cached read | 23328070 | 23266488 |
+| tokens cached write | 721805 | 488698 |
+| wall (s) | 2347 | 1230 |
+| hook waiting (s) | 23 | 1 |
+| refusals | 4 | 5 |
+| retries | 4 | 5 |
+
+- same as the original's: none
+- differs from the original's: .claude/layout.json (+8 -0), bugs.md (+2 -6), build.md (+1 -4), build/evidence/looks/deep-panel.json (+84 -24), build/evidence/looks/graphite-panel.json (+78 -23), build/evidence/looks/night-panel.json (+81 -23), build/evidence/looks/warm-panel.json (+23 -24), docs/workorders/bandwarp/agents/looks.json (+1 -1), docs/workorders/bandwarp/decisions.md (+2 -8), docs/workorders/bandwarp/progress.md (+2 -7), panel/themes.json (+24 -20), src/ui/CardPainter.cpp (+8 -5), src/ui/CardPainter.h (+2 -2), src/ui/SlideSwitch.cpp (+10 -11), src/ui/generated/Theme.h (+7 -7), tests/gates.cmake (+10 -24), tests/look_gate.py (+35 -61), tests/look_render.cpp (+2 -5) (each to be read and judged better, equal or worse)
+- only in the original: build/evidence/W8/looks-b33-panel-1.txt, build/evidence/W8/looks-themes-gates-1.txt, build/evidence/W8/looks-themes-gates-2.txt, build/evidence/W8/looks-themes-plants-1.txt, build/evidence/W8/looks-themes-table-gates-1.txt, build/evidence/W8/looks-warm-plants-1.txt, design/reference/deep/panel.depth.analysis.md, design/reference/graphite/panel.depth.analysis.md, design/reference/night/panel.depth.analysis.md, tools/look/measure_depth.py, tools/look/theme_tokens.py
+- only in the new run: BRIEF.md, design/shape.json, tools/look/fit_depth.py, tools/look/measure_look.py
+
+
+Kit-side measures (the clone's `.claude/logs`, new run only; the original has no such log on this machine):
+
+| measure | new run |
+| --- | --- |
+| refusals in the kit's refusal log | 6 (skill-first 1, protect-vendor 1, code-shape 3, making-check 1) |
+| making-check end-of-turn send-backs (KWB-215) | 1 |
+| hooks "not judged (over time)" (KWB-216) | 5 |
+| time inside hooks, from the event log (s) | 14 over 539 events |
+| wall from the start and end files (s) | 1231 |
+
+Gates run here (output `build/evidence/W11/gates/looks2.txt`; the licence gates were not run): 12 tests, 9 passed. `look_panel`, `panel_themes` and `theme_table` pass with their twins. `look_panel_graphite`, `look_panel_deep` and `look_panel_night` fail, as in the first run, and the original passed all three. What changed from the first run: on all three dark themes the geometry and the colour rows are now ok (the first run missed the surface colour on DEEP and NIGHT), only the depth rows are red, and every twin now passes, so every planted fault is seen (the first run had 4 "NOT SEEN" lines and 3 red twins). The agent's own count of depth rows still outside 0.05 after its fit: GRAPHITE 3, DEEP 10, NIGHT 6 (first run 6, 10, 10 at zero amounts).
+
+Against the original and the first run:
+
+| measure | original | first run | second run |
+| --- | --- | --- | --- |
+| brief gates passing (5) | 5 | 2 | 2 |
+| turns | 202 | 106 | 123 |
+| tokens in / out | 416 / 87,847 | 224 / 63,217 | 262 / 79,018 |
+| tokens cached read / write | 23,328,070 / 721,805 | 18,382,250 / 501,401 | 23,266,488 / 488,698 |
+| wall (s) | 2,347 | 1,549 | 1,231 |
+| hook waiting (s) | 23 | 3 | 1 |
+| refusals / retries (reader) | 4 / 4 | 5 / 5 | 5 / 5 |
+| making-check send-backs (repair turns) | not logged | 4 (25) | 1 (3) |
+| hooks not judged over time | not logged | 3 | 5 |
+
+Setup: Sonnet, one session, on the kit with the KWB-215 and KWB-216 fixes in (the clone's install commit says so), alone at governor priority 0.3, from the same brief.
+
+Diff against the original and against the first run, read from the gate source and the changed files:
+- `tests/look_gate.py`: like the first run it keeps the per-side depth rows (no pooling, no held-out row) and does not use the original's card-surface sampler; it reads a dark theme's card face level as its own new row (tolerance 0.03) and gives each theme an accent hue range (DEEP's is teal, the others orange). So the surface-colour row of the first run is replaced by a face-level row that passes. A defensible measure, different from the original's, and it does not rescue the depth rows. Equal in kind, worse on result.
+- `panel/themes.json`: the dark themes' depth amounts are fitted and non-zero (the first run left them at zero), and a `switchShadow` token is added; the WARM switch slot is fixed the same way as in the other runs (no lit edge, the shadow's room, a rim held to the middle). Better than the first run; WARM is equal to the original.
+- `.claude/layout.json`: the three dark looks are declared, as in the original, so `look-gate` refuses a landing of those pages (the first run did not declare them). Equal to the original, better than the first run.
+- `build/evidence/looks/*.json`: all four reports are committed, with the three dark ones saying fail. Equal in presence, worse in verdict.
+- `design/shape.json` (rows for theme, knob and card), `tools/look/fit_depth.py`, `tools/look/measure_look.py` (a hue argument): new in this run. Equal.
+- `design/reference/*/panel.depth.analysis.md`: only in the original; not written here.
+
+Verdict: still worse than the original on gates (the same three dark-theme gates red that the original passed) and on the diff (no pooled measure, no analysis files), better than the first run on both counts (geometry and colour clean, every plant seen, looks declared, reports committed). Both runs on Sonnet made the same choice, to keep the per-side measure and leave the depth rows red, which points to the brief and the measure and away from the two kit faults (still two runs, not a proof): this second run had the fixes (one making-check send-back, 3 repair turns, and 5 events logged "not judged (over time)"). Its one send-back was right (its making line named `theme` and `knob`, which had no rows in `design/shape.json`; the agent added them). The five "over time" entries (once-only 3, template-law 2) show KWB-216's fix leaves the log entry in place; whether the event went to the TypeScript path is not shown by the log. The difference from the original is the measure the dark gates use, set by the original's d-112 to d-114 inside its own runs, which the brief does not give.
+
+Proposed row: "KWB-217 [gap; found by W11.0's looks A/B, run twice] the brief for the looks task leaves the dark themes' look gate as red unless the agent pools the four sides of a card and holds out a named row (the original agent's d-112 and d-113); two 2.0 runs kept the per-side measure and ended with 3 red gates, the original passed. Not a hook fault: no refusal blocked the pooling. To do: decide whether the pooling is the project's rule (write it into the brief or the look rule) or a loosening the kit should refuse; if the rule, put it in the project's look-gate documentation so a run from the brief reaches it." Nothing in the kit caused the shortfall, so no kit fix is proposed; the lead decides whether the row is a kit row or a bandwarp one.
 
 ### settings
 
@@ -329,41 +401,42 @@ Refusals in the kit's log: macdsp 8, looks 9, settings 33, presets 20, developer
 
 ## Proposed workflow-bugs rows (the lead writes `workflow-bugs.md`)
 
-- looks: no kit fault is shown to have caused the three red dark-theme gates. KWB-215 cost 4 send-backs and 25 turns of 106; the agent stopped because it judged the dark pictures not fittable with eight uniform depth amounts (its B-111), after fitting them, and left the gates red on purpose. The cause is a different choice from the original's (the original pooled the four sides and held one row out, d-112 and d-113), not a hook. No row proposed; a second run is the way to learn whether the choice is stable.
+- looks (first run): no kit fault is shown to have caused the three red dark-theme gates. KWB-215 cost 4 send-backs and 25 turns of 106; the agent stopped because it judged the dark pictures not fittable with eight uniform depth amounts (its B-111), after fitting them, and left the gates red on purpose. The cause is a different choice from the original's (the original pooled the four sides and held one row out, d-112 and d-113), not a hook. No row proposed; a second run is the way to learn whether the choice is stable.
 - Candidate row, shape-law: "[false refusal] shape-law reads a number with a unit (`20 dB`) and a step of one as an instance index of a many concept, and a plain queue type as an instance container: 11 refusals in the presets and developer A/B runs (WB-190, WB-191, WB-180 of those runs), each marked wrong by the agent; seen in `build/evidence/W11/ab/{presets,developer}/transcript.jsonl` and the clones' `.claude/logs/refusals.jsonl`. To do: read a concept's instance only from its declared selector or word, never from a bare number." Check against 1.9 first.
 - Candidate row, template-law and the C++ lesson check: "template-law reads same-named functions in different files as a copy (8 refusals in the settings run, WB-170); `cpp-no-mutable-global` reads a typedef'd function declaration as a variable (WB-171)". Check against 1.9 first.
 - Add to KWB-216: "seen 49 times in W11.0's four governed runs (before the fix): once-only 20, template-law 11, lesson-checks 6, shape-law 5, code-shape 3, git-guard 2, secrets-guard 1, repo-litter 1, at governor priority 0.3 on the efficiency cores".
-- Add to KWB-215: "W11.0 totals: 14 send-backs, 57 repair turns in five runs; the runs were made on the kit before the fix".
+- Add to KWB-215: "W11.0 totals: 14 send-backs, 57 repair turns in the first five runs, made on the kit before the fix; the second looks run on the fixed kit had 1 send-back (right) and 3 repair turns".
+- Looks, second run: proposed row KWB-217 in the "looks, second run" section above.
 
 ## Five-task totals
 
-Original agents (all sessions of a task added) against the new runs (one session each). Models: macdsp Opus both, the rest Sonnet both; the sums mix them and are for scale only.
+Original agents (all sessions of a task added) against the new runs (one session each). Looks was run twice: the **table counts the second looks run** (on the kit with KWB-215 and KWB-216 fixed); the first looks run's totals are kept beside it. Models: macdsp Opus both, the rest Sonnet both; the sums mix them and are for scale only.
 
-| measure | original agents | new runs | new over original |
-| --- | --- | --- | --- |
-| tasks with the same gates passing (brief gates the original passed) | a measured pass in 4 of the 5 tasks | macdsp 7 of 7, presets 2 of 2 runnable, developer 4 of 4 (2 as renamed parts), looks 2 of 5, settings none to compare | looks is worse |
-| turns | 987 | 860 | 0.87 |
-| tokens in | 2,039 | 1,777 | 0.87 |
-| tokens out | 691,571 | 691,478 | 1.00 |
-| tokens cached read | 121,193,982 | 228,842,040 | 1.89 |
-| tokens cached write | 4,045,010 | 2,452,585 | 0.61 |
-| wall (s) | 10,043 | 10,296 | 1.03 |
-| hook waiting (s, the transcript's measure) | 98 | 19 | 0.19 |
-| refusals (transcript reader) | 53 | 57 | 1.08 |
-| retries | 50 | 57 | 1.14 |
+| measure | original agents | new, with the second looks run (counted) | new, with the first looks run (kept) | counted over original |
+| --- | --- | --- | --- | --- |
+| brief gates the original passed, passing in the new run | macdsp 7, looks 5, presets 2 runnable, developer 4 (a measured pass in 4 of the 5 tasks) | macdsp 7 of 7, looks 2 of 5, presets 2 of 2, developer 4 of 4 (2 as renamed parts), settings none to compare | the same, looks 2 of 5 | looks is worse in both runs |
+| turns | 987 | 877 | 860 | 0.89 |
+| tokens in | 2,039 | 1,815 | 1,777 | 0.89 |
+| tokens out | 691,571 | 707,279 | 691,478 | 1.02 |
+| tokens cached read | 121,193,982 | 233,726,278 | 228,842,040 | 1.93 |
+| tokens cached write | 4,045,010 | 2,439,882 | 2,452,585 | 0.60 |
+| wall (s) | 10,043 | 9,978 | 10,296 | 0.99 |
+| hook waiting (s, the transcript's measure) | 98 | 17 | 19 | 0.17 |
+| refusals (transcript reader) | 53 | 57 | 57 | 1.08 |
+| retries | 50 | 57 | 57 | 1.14 |
 
-The new runs' own kit logs add: 88 refusals in the kit's refusal log, 14 end-of-turn send-backs, 49 hooks not judged over time, 265 s inside hooks by the event log, and about 52 dollars by the CLI's own cost estimate (macdsp 25.3, looks 4.5, settings 9.6, presets 6.5, developer 6.4). The original agents' dollar cost is not on this machine.
+The new runs' own kit logs add (second looks run counted; first in brackets): 85 (88) refusals in the kit's refusal log, 11 (14) end-of-turn send-backs, 51 (49) hooks not judged over time, 252 s (265 s) inside hooks by the event log, and about 53 (52) dollars by the CLI's own cost estimate (macdsp 25.3, looks 5.1 second run and 4.5 first, settings 9.6, presets 6.5, developer 6.4). The original agents' dollar cost is not on this machine.
 
 Reading it plainly:
-- Gates: 4 of the 5 tasks show no gate lost against the original. Looks lost three (the dark-theme look gates, with their twins), so the order's "0 tasks where 2.0 failed a gate the original passed" is not met: looks needs the second run, and none is made in this step. No kit fault is shown to be its cause.
-- Diff: equal or better in macdsp, presets and developer (with developer's one worse point, the unconditional compile of the sample code); mixed in settings (measured gates, narrower scope); worse in looks.
-- Cost: fewer turns (13 percent) and fewer tokens in, the same output, a little more wall time (3 percent), nearly twice the cached reads (the macdsp run alone is 94 of the 229 million and the long contexts of settings 55 million). Hook waiting is a fifth of the original's by the same measure.
-- The 2.0 kit lost 57 repair turns to KWB-215 in these runs and left 49 events unjudged to KWB-216; both are fixed on this branch's base and were not in the tarball these runs used.
+- Gates: 4 of the 5 tasks show no gate lost against the original. Looks lost the same three (the dark-theme look gates) in both runs, so the order's "0 tasks where 2.0 failed a gate the original passed" is not met. The second run, on the fixed kit, has geometry and colour clean on every dark theme and every plant seen, but the depth rows stay red. No kit fault is shown to be the cause; see the proposed row under the second looks run.
+- Diff: equal or better in macdsp, presets and developer (with developer's one worse point); mixed in settings; worse in looks, less so in the second run.
+- Cost: fewer turns (11 percent) and fewer tokens in, the same output, the same wall time, nearly twice the cached reads (macdsp alone is 94 of the 234 million, and settings 55 million). Hook waiting is under a fifth of the original's by the same measure.
+- KWB-215 cost the first runs 53 repair turns (macdsp 19, looks 25, settings 9); the second looks run, on the fixed kit, had one send-back and 3 repair turns, and that one was right. KWB-216's "not judged" entries are still logged on the fixed kit (5 in the second looks run).
 
 ## Second runs
 
-- looks: required (worse on gates and diff). Run it on the kit as it now stands (215 and 216 fixed), and state in its brief that the original had a resume brief pointing at the measured WARM gate; compare the dark-theme gates first.
+- looks: done twice; still worse on gates and diff in the second run, on the fixed kit. A third run would repeat the brief; what is missing is the project's rule on how the dark themes' depth is measured (see the proposed row under the second looks run).
 - settings: advisable (mixed). The original is an unmeasured pause, so a second run is more use for a view of the spread than for a verdict.
 - macdsp, presets, developer: not required by the rule.
 
-One run per task is a sample, not a proof. Five tasks, one run each, on a kit that has since been fixed in two places, from original runs that were resumed and run beside other agents, cannot show that 2.0 is better or worse than 1.9; they show the new kit did the same work in the same size of effort on four of five tasks, and that on the fifth the result differed and has to be run again.
+One run per task is a sample, not a proof. Five tasks, one run each (looks twice), on a kit that was fixed in two places partway through, from original runs that were resumed and run beside other agents, cannot show that 2.0 is better or worse than 1.9; they show the new kit did the same work in the same size of effort on four of five tasks, and that on the fifth (looks) the result differed in both runs, which the next decision about the dark themes' measure has to settle.
