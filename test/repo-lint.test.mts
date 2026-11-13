@@ -209,6 +209,8 @@ test('no file names a person', () => {
   assert.deepEqual(personalNames(KIT), []);
   const dir = planted({ 'docs/a.md': 'thanks to ' + ['T', 'im'].join('') + '\n' });
   assert.equal(personalNames(dir, ['docs/a.md']).length, 1);
+  const order = planted({ 'docs/workorders/x/sources/DECIDED.md': 'thanks to ' + ['T', 'im'].join('') + '\n', 'docs/workorders/x/notes.md': 'thanks to ' + ['T', 'im'].join('') + '\n' });
+  assert.deepEqual(personalNames(order, ['docs/workorders/x/sources/DECIDED.md', 'docs/workorders/x/notes.md']).map((h) => h.split(':')[0]), ['docs/workorders/x/notes.md']);
 });
 test('nothing in the kit names the bare `npx claude-packs` (it resolves to someone else\'s package)', () => {
   assert.deepEqual(bareNpx(KIT), [], 'use `npx --no-install @thedecipherist/claude-packs ...` or the installed path');
