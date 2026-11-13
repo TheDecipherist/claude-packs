@@ -771,8 +771,10 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
 
 ## W11. The report, with the comparison
 
-0. Four real bandwarp tasks done again on 2.0 (cut from five for usage by the user, 2026-11-12: macdsp, looks, settings and
-   presets, the fifth not run; first asked as "take 5 random features/tasks that were build in bandwarp and
+0. Five real bandwarp tasks done again on 2.0 (cut to four for usage, then restored to five by the user, 2026-11-12: "we should do that
+   test because its the only way to know if the new kit works and performs as good or better and is really the only way we will
+   catch a bug"; macdsp, looks, settings and
+   presets done or running, the fifth drawn by the same seeded script and run on Sonnet; first asked as "take 5 random features/tasks that were build in bandwarp and
    hand the same orders to the agents using the new kit and see if the results are the same or better"), before the rest of W11:
    - The pick: `scripts/ab-pick.mts` lists bandwarp's agent tasks that were measured and merged (an agent id with a brief in
      `docs/workorders/bandwarp/briefs/`, a merge commit and a gate named in its progress line), and draws five with a seed written
@@ -813,7 +815,7 @@ has one source (a check, red on a planted second copy); the daemon's RSS meets i
    binary that lands in the user's cache and the PC's own `update` under WSL), and what the kit did well and badly with counts from
    `logs`.
 
-**Done when:** `build/evidence/W11/ab.md` holds the four tasks (macdsp, looks, settings, presets), each with both runs' gates by name, the diff verdict with its reason, turns, tokens, wall time, hook waiting and refusals, 0 tasks where 2.0 failed a gate the original passed (or the second run and the KWB for it), and the report states the four-task totals and that the fifth was not run, by the user's choice; the comparison table has all twelve rows with a before, an after and a ratio, each after measured in this step (its
+**Done when:** `build/evidence/W11/ab.md` holds the five tasks (macdsp, looks, settings, presets and the fifth drawn), each with both runs' gates by name, the diff verdict with its reason, turns, tokens, wall time, hook waiting and refusals, 0 tasks where 2.0 failed a gate the original passed (or the second run and the KWB for it), and the report states the five-task totals; a task is counted only with its original agent's numbers beside it (gates, diff verdict, turns, tokens, wall time), never its finish alone; the comparison table has all twelve rows with a before, an after and a ratio, each after measured in this step (its
 evidence file named); every step W0 to W10 has its before-and-after section with at least three numbered rows, each citing its
 evidence file (a check: 0 rows without a file that exists); `showcase.md` holds ten wins, each traced to a row of the report; each of the report's 9 sections holds at least one number or a stated reason there is none (0 blank); `npm run
 check` exits 0 and `test/repo-lint.test.mts` is green on the final tree; the report is pushed.

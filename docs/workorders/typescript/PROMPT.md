@@ -43,7 +43,8 @@ Always do:
 - From 2026-11-12 16:06 (the user: "you are completely overloading the machine"; load 47 in bursts while the W10b soak ran beside two agents' test runs): at most 2 agents at once for the rest of this order; the W10b soak and the fuzzers each run alone, with no agent and no test run beside them, the soak at 4 clients (not 8) and the fuzzers at `-parallel=2`; every test run at `CLAUDE_PACKS_TEST_CORES=3`; every agent and every heavy job started under `taskpolicy -b` (the efficiency cores), which is slower and is the user's choice. Write each wave's agent count and the load seen in `progress.md`.
 - Sonnet for the rest of this order (the user, 2026-11-12, for usage: "change to sonnet for the rest"): run.sh starts the lead
   with `--model claude-sonnet-5-5`, and every agent the lead starts is given `model: "sonnet"`, with no exception for this order;
-  W11.0 is four tasks (macdsp, looks, settings, presets), the fifth not run, said so in the report.
+  W11.0 is five tasks again (the user restored the fifth: "the only way we will catch a bug"), the fifth on Sonnet; each compared
+  side by side with its original agent, the KWB-215 turns counted.
 - Write into this repository only. bandwarp's hook log is read once at W0 into a fixture; no file of bandwarp or any other project is changed.
 
 ## The user's yes for W12
