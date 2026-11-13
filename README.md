@@ -452,7 +452,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `postgres` | PostgreSQL: migrations that never stop traffic, values always bound, types that say what they hold, and no database wiped by mistake. | 5 | 10 | 1 | 1 |
 | `python` | Python projects: what is repeated becomes a template in the forms Python has for it, errors are handled where they can be, resources are closed, subprocess and network calls are safe. | 1 | 11 | 0 | 1 |
 | `react` | React: a failed request says so, a slow response never overwrites a newer one, effects are not used for derived state, and controls have names. | 2 | 6 | 0 | 0 |
-| `reverse-engineering` | Rebuilding a machine from its firmware, manuals and sound banks: two sources before naming anything, every law carries its source, a negative names what was scanned, every term of a sum is accounted for, and firmware stays out of git. | 11 | 5 | 1 | 11 |
+| `reverse-engineering` | Rebuilding a machine from its firmware, manuals and sound banks: two sources before naming anything, every law carries its source, a negative names what was scanned, every term of a sum is accounted for, and firmware stays out of git. | 14 | 5 | 1 | 32 |
 | `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate. | 5 | 9 | 0 | 3 |
 | `shell` | Shell scripts: strict mode, quoted arguments, shared functions in one sourced file, tables and loops, and programs kept out of heredocs. | 1 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code: portable, anchored, quoted, one prelude, JSON by a tool. | 1 | 4 | 0 | 0 |

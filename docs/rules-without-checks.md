@@ -19,7 +19,7 @@ the rule saying so. A rule here is a candidate only if someone finds a pattern t
 - **js-ts:** `files-under-300-lines`, `guard-clauses-over-nesting`, `named-constants-not-magic-numbers`, `no-floating-promises`, `no-param-mutation`, `one-logger`, `parallel-independent-awaits`, `small-functions`, `typed-exports`, `zod-at-route-boundaries`
 - **midi:** `imports-count-every-loss`, `sync-is-a-mode`
 - **postgres:** `postgres-one-pool-per-process`
-- **reverse-engineering:** `a-negative-names-what-was-scanned`, `addresses-name-their-space`, `findings-are-withdrawn-in-place`, `names-before-code`, `reproduction-or-original`, `two-sources-before-naming`
+- **reverse-engineering:** `a-field-may-be-an-index`, `a-negative-names-what-was-scanned`, `addresses-name-their-space`, `decode-from-a-proven-boundary`, `findings-are-withdrawn-in-place`, `layout-closes-on-itself`, `names-before-code`, `reproduction-or-original`, `two-sources-before-naming`
 - **rust:** `rust-borrow-before-you-clone`
 - **sound-design:** `algorithms-are-data`, `unreachable-is-said`, `waveforms-and-octaves`
 - **stellix:** `stellix-reset-generated`, `world-continuous-collision`

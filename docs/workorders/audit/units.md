@@ -10,42 +10,42 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | C1 | | | | | | |
 | C2 | | | | | | |
 | C3 | | | | | | |
-| C4 | | | | | | |
+| C4 | new + extend | packs/reverse-engineering/skills/prove-a-disassembler; rules/house-tools-live-in-the-library.md | a house disassembler is proved opcode for opcode against unidasm run as a program; nothing ported | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
 | C5 | | | | | | |
 | C6 | | | | | | |
 | C7 | | | | | | |
 | C8 | | | | | | |
 | C9 | | | | | | |
 | C9a | | | | | | |
-| C10 | | | | | | |
-| C11 | | | | | | |
+| C10 | extend | packs/reverse-engineering/skills/names-first (Never reworded, E8.11) | a panel table's columns are read, not assumed to hold or lack offsets | text in place | COMMIT_W1 | done |
+| C11 | new + extend | packs/reverse-engineering/rules/layout-closes-on-itself.md; rules/two-sources-before-naming.md (E2.8) | a closure the layout was not tuned to is an independent proof | paths: build/evidence/W1/rule-paths.md | COMMIT_W1 | done |
 | C12 | | | | | | |
-| C13 | | | | | | |
+| C13 | new | packs/reverse-engineering/skills/find-the-base | base scored on a linear read only, and why | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
 | C14 | | | | | | |
 | C15 | | | | | | |
 | C16 | | | | | | |
-| C17 | | | | | | |
-| U1 | | | | | | |
-| U2 | | | | | | |
-| U3 | | | | | | |
-| U4 | | | | | | |
-| U5 | | | | | | |
-| U6 | | | | | | |
-| U7 | | | | | | |
-| U8 | | | | | | |
-| U9 | | | | | | |
-| U10 | | | | | | |
-| U11 | | | | | | |
-| U12 | | | | | | |
-| U13 | | | | | | |
-| U14 | | | | | | |
-| U15 | | | | | | |
-| U16 | | | | | | |
-| U17 | | | | | | |
-| U18 | | | | | | |
-| U19 | | | | | | |
-| U20 | | | | | | |
-| U21 | | | | | | |
+| C17 | extend | packs/reverse-engineering/skills/bank-census (E11.3) | a flat column is a wrong decode or fixed structure; decide by the code | text in place | COMMIT_W1 | done |
+| U1 | new | packs/reverse-engineering/skills/triage-the-dump + tools/dump-triage.mts | say what each image is and whether it is whole, before anything is read from it | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed); test/tools/reverse-engineering/dump-triage.test.mts (stuck line red without the plant) | COMMIT_W1 | done |
+| U2 | new | packs/reverse-engineering/skills/identify-the-cpu | name each processor from the image itself, proved three ways, before a disassembler is chosen | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U3 | new | packs/reverse-engineering/rules/decode-from-a-proven-boundary.md | a listing counts only from an address reached from a vector or a call target | paths: build/evidence/W1/rule-paths.md | COMMIT_W1 | done |
+| U4 | new | packs/reverse-engineering/skills/find-the-base | prove where an image is loaded by a score with a stated margin, on a linear read only (C13) | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U5 | new | packs/reverse-engineering/skills/trace-the-builders (+ c-idioms.md) | read every routine that turns a record field into an engine coefficient | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U6 | new | packs/reverse-engineering/skills/attribute-the-record | map every stored byte of a patch to the running record through the code | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U7 | new | packs/reverse-engineering/skills/read-the-dsp-program | recover a downloaded DSP program from the host's loader | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U8 | new | packs/reverse-engineering/skills/find-the-timer | derive the time base from the crystal and the timer before any time law | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U9 | new | packs/reverse-engineering/skills/absolute-scale-from-firmware | take absolute frequency and time units from firmware anchors, with no ear | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U10 | new | packs/reverse-engineering/rules/layout-closes-on-itself.md | an exact closure the layout was not tuned to is an independent proof (C11) | paths: build/evidence/W1/rule-paths.md | COMMIT_W1 | done |
+| U11 | new | packs/reverse-engineering/skills/profile-the-bank + tools/byte-profile.mts | the per-offset profile of a bank every attribution must agree with | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed); test/tools/reverse-engineering/byte-profile.test.mts (red with the planted profile changed) | COMMIT_W1 | done |
+| U12 | new | packs/reverse-engineering/skills/find-a-table (+ table-shapes.md) | locate a table by known values or its shape, then confirm it in code | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U13 | new | packs/reverse-engineering/rules/a-field-may-be-an-index.md | before reading a field as a value, test whether it is an index and from which base | paths: build/evidence/W1/rule-paths.md | COMMIT_W1 | done |
+| U14 | new | packs/reverse-engineering/skills/place-a-bit-field | place a field the documents do not settle by statistics a wrong place fails | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U15 | new | packs/reverse-engineering/skills/diff-the-revisions | compare builds of one machine structurally (tool on the library shelf) | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U16 | new | packs/reverse-engineering/skills/read-the-formatter | take each parameter's unit and curve from the routine that prints it | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U17 | new | packs/reverse-engineering/skills/manual-is-fully-covered | the closing check: every parameter, page and message the manual names is accounted for (names-first unchanged, still first) | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U18 | new | packs/reverse-engineering/skills/map-the-io | name each I/O address from the register map and what the code writes there | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U19 | new | packs/reverse-engineering/skills/find-a-sequence | find stored music by its signature and prove it by arithmetic | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U20 | new | packs/reverse-engineering/skills/sample-roms | assemble and decode sample ROMs | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| U21 | new | packs/reverse-engineering/skills/byte-reach | the deaf count of stored bytes as the progress number of a decode | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
 | U22 | | | | | | |
 | U23 | | | | | | |
 | U24 | | | | | | |
@@ -97,87 +97,87 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | U71 | | | | | | |
 | U73 | | | | | | |
 | U74 | | | | | | |
-| N1 | | | | | | |
-| N2 | | | | | | |
+| N1 | new | packs/reverse-engineering/skills/find-the-reset | map exactly what the machine sets before a patch loads, and in what order | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
+| N2 | new | packs/reverse-engineering/skills/find-the-init-patch | the machine's own INIT record, and the keys that load it | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | COMMIT_W1 | done |
 | N3 | | | | | | |
 | N4 | | | | | | |
-| E1.1 | | | | | | |
-| E1.2 | | | | | | |
-| E1.3 | | | | | | |
-| E1.4 | | | | | | |
-| E1.5 | | | | | | |
-| E1.6 | | | | | | |
-| E2.1 | | | | | | |
-| E2.2 | | | | | | |
-| E2.3 | | | | | | |
-| E2.4 | | | | | | |
-| E2.5 | | | | | | |
-| E2.6 | | | | | | |
-| E2.7 | | | | | | |
-| E2.8 | | | | | | |
-| E3.1 | | | | | | |
-| E3.2 | | | | | | |
-| E3.3 | | | | | | |
-| E3.4 | | | | | | |
-| E4.1 | | | | | | |
-| E4.2 | | | | | | |
-| E4.3 | | | | | | |
-| E5.1 | | | | | | |
-| E5.2 | | | | | | |
-| E6.1 | | | | | | |
-| E6.2 | | | | | | |
-| E6.3 | | | | | | |
-| E6.4 | | | | | | |
-| E7.1 | | | | | | |
-| E7.2 | | | | | | |
-| E7.3 | | | | | | |
-| E8.1 | | | | | | |
-| E8.2 | | | | | | |
-| E8.3 | | | | | | |
-| E8.4 | | | | | | |
-| E8.5 | | | | | | |
-| E8.6 | | | | | | |
-| E8.7 | | | | | | |
-| E8.8 | | | | | | |
-| E8.9 | | | | | | |
-| E8.10 | | | | | | |
-| E8.11 | | | | | | |
-| E9.1 | | | | | | |
-| E9.2 | | | | | | |
-| E9.3 | | | | | | |
-| E9.4 | | | | | | |
-| E9.5 | | | | | | |
-| E9.6 | | | | | | |
-| E9.7 | | | | | | |
-| E9.8 | | | | | | |
-| E9.9 | | | | | | |
-| E9.10 | | | | | | |
-| E9.11 | | | | | | |
-| E9.12 | | | | | | |
-| E9.13 | | | | | | |
-| E9.14 | | | | | | |
-| E10.1 | | | | | | |
-| E10.2 | | | | | | |
-| E10.3 | | | | | | |
-| E11.1 | | | | | | |
-| E11.2 | | | | | | |
-| E11.3 | | | | | | |
-| E11.4 | | | | | | |
-| E12.1 | | | | | | |
-| E12.2 | | | | | | |
-| E12.3 | | | | | | |
-| E12.4 | | | | | | |
-| E13.1 | | | | | | |
-| E13.2 | | | | | | |
-| E14.1 | | | | | | |
-| E14.2 | | | | | | |
-| E14.3 | | | | | | |
-| E14.4 | | | | | | |
-| E14.5 | | | | | | |
-| E15 | | | | | | |
-| E16 | | | | | | |
-| E17 | | | | | | |
-| E18 | | | | | | |
+| E1.1 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | COMMIT_W1 | done |
+| E1.2 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | COMMIT_W1 | done |
+| E1.3 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | COMMIT_W1 | done |
+| E1.4 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | COMMIT_W1 | done |
+| E1.5 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | COMMIT_W1 | done |
+| E1.6 | dropped | packs/reverse-engineering/checks/ear-constant-tagged.json untouched | the check reading the full tag list | none | - | dropped (SORTED.md section 3: "Drop. The check does its one job now.") |
+| E2.1 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E2.2 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E2.3 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E2.4 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E2.5 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E2.6 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E2.7 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E2.8 | extend | packs/reverse-engineering/rules/two-sources-before-naming.md | a test is a source; scope; translation; trimmer pair; firmware first; sibling enums; arithmetic arbiter; C11 closure | text in place | COMMIT_W1 | done |
+| E3.1 | extend | packs/reverse-engineering/rules/a-negative-names-what-was-scanned.md | every encoding and stride; change the question after three; tool layout printed; analogy checked | text in place | COMMIT_W1 | done |
+| E3.2 | extend | packs/reverse-engineering/rules/a-negative-names-what-was-scanned.md | every encoding and stride; change the question after three; tool layout printed; analogy checked | text in place | COMMIT_W1 | done |
+| E3.3 | extend | packs/reverse-engineering/rules/a-negative-names-what-was-scanned.md | every encoding and stride; change the question after three; tool layout printed; analogy checked | text in place | COMMIT_W1 | done |
+| E3.4 | extend | packs/reverse-engineering/rules/a-negative-names-what-was-scanned.md | every encoding and stride; change the question after three; tool layout printed; analogy checked | text in place | COMMIT_W1 | done |
+| E4.1 | extend | packs/reverse-engineering/rules/addresses-name-their-space.md | image name, version, md5; grid filter; decompressed offsets | text in place | COMMIT_W1 | done |
+| E4.2 | extend | packs/reverse-engineering/rules/addresses-name-their-space.md | image name, version, md5; grid filter; decompressed offsets | text in place | COMMIT_W1 | done |
+| E4.3 | extend | packs/reverse-engineering/rules/addresses-name-their-space.md | image name, version, md5; grid filter; decompressed offsets | text in place | COMMIT_W1 | done |
+| E5.1 | extend | packs/reverse-engineering/rules/findings-are-withdrawn-in-place.md | a comment is no evidence; a correction asserted in the tool | text in place | COMMIT_W1 | done |
+| E5.2 | extend | packs/reverse-engineering/rules/findings-are-withdrawn-in-place.md | a comment is no evidence; a correction asserted in the tool | text in place | COMMIT_W1 | done |
+| E6.1 | extend, reworded | packs/reverse-engineering/rules/reproduction-or-original.md | the anomaly kept as the machine has it, footnoted, tested; no switch | text in place | COMMIT_W1 | done |
+| E6.2 | extend, reworded | packs/reverse-engineering/rules/reproduction-or-original.md | extra faceplate controls go to our edit layer, labelled ours | text in place | COMMIT_W1 | done |
+| E6.3 | extend | packs/reverse-engineering/rules/reproduction-or-original.md | no patch memory: the record is ours; variants as one engine and a range table | text in place | COMMIT_W1 | done |
+| E6.4 | extend | packs/reverse-engineering/rules/reproduction-or-original.md | no patch memory: the record is ours; variants as one engine and a range table | text in place | COMMIT_W1 | done |
+| E7.1 | extend | packs/reverse-engineering/rules/account-every-term.md | named term fields; the firmware's domain; the two-input VCA route | text in place | COMMIT_W1 | done |
+| E7.2 | extend | packs/reverse-engineering/rules/account-every-term.md | named term fields; the firmware's domain; the two-input VCA route | text in place | COMMIT_W1 | done |
+| E7.3 | extend | packs/reverse-engineering/rules/account-every-term.md | named term fields; the firmware's domain; the two-input VCA route | text in place | COMMIT_W1 | done |
+| E8.1 | extend | packs/reverse-engineering/skills/names-first + tools/lib/names-runs.mts (--run) | width-prefixed tables count themselves | test/tools/reverse-engineering/names-modes.test.mts | COMMIT_W1 | done |
+| E8.2 | extend | packs/reverse-engineering/skills/names-first/sweeps.md | keyword and units net; the word stream | text in place; names-modes.test.mts (24-bit) | COMMIT_W1 | done |
+| E8.3 | extend | packs/reverse-engineering/skills/names-first/sweeps.md | keyword and units net; the word stream | text in place; names-modes.test.mts (24-bit) | COMMIT_W1 | done |
+| E8.4 | extend | packs/reverse-engineering/skills/names-first + tools/lib/names-index.mts (--index) | name-to-index scored against shifted, strided and shuffled controls | test/tools/reverse-engineering/names-modes.test.mts | COMMIT_W1 | done |
+| E8.5 | extend | packs/reverse-engineering/skills/names-first step 16 | a missing string read against the panel | text in place | COMMIT_W1 | done |
+| E8.6 | extend | packs/reverse-engineering/skills/names-first/sweeps.md | suffix lists | text in place | COMMIT_W1 | done |
+| E8.7 | extend | packs/reverse-engineering/skills/names-first step 16 | generated name fields | text in place | COMMIT_W1 | done |
+| E8.8 | extend | packs/reverse-engineering/skills/names-first/sweeps.md | loader messages; character table; the effect's vocabulary | text in place | COMMIT_W1 | done |
+| E8.9 | extend | packs/reverse-engineering/skills/names-first/sweeps.md | loader messages; character table; the effect's vocabulary | text in place | COMMIT_W1 | done |
+| E8.10 | extend | packs/reverse-engineering/skills/names-first/sweeps.md | loader messages; character table; the effect's vocabulary | text in place | COMMIT_W1 | done |
+| E8.11 | extend, decided (C10) | packs/reverse-engineering/skills/names-first Never | a panel table's columns read, not assumed | text in place | COMMIT_W1 | done |
+| E9.1 | extend | packs/reverse-engineering/skills/gather-sources step 1 + tools/source-ledger.mts (--hash) | hash pass against held and sibling folders; part number first | test/tools/reverse-engineering/source-ledger.test.mts | COMMIT_W1 | done |
+| E9.2 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | updater; factory sounds' homes; boot media | text in place | COMMIT_W1 | done |
+| E9.3 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | updater; factory sounds' homes; boot media | text in place | COMMIT_W1 | done |
+| E9.4 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | updater; factory sounds' homes; boot media | text in place | COMMIT_W1 | done |
+| E9.5 | extend, reworded | packs/reverse-engineering/skills/gather-sources step 4 | in the service manual, read the parts list first | text in place | COMMIT_W1 | done |
+| E9.6 | extend | packs/reverse-engineering/skills/gather-sources step 13 | the OS version of every manual and image | text in place | COMMIT_W1 | done |
+| E9.7 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | editor templates; patents and designers; supplier spec; artwork; site list | text in place | COMMIT_W1 | done |
+| E9.8 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | editor templates; patents and designers; supplier spec; artwork; site list | text in place | COMMIT_W1 | done |
+| E9.9 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | editor templates; patents and designers; supplier spec; artwork; site list | text in place | COMMIT_W1 | done |
+| E9.10 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | editor templates; patents and designers; supplier spec; artwork; site list | text in place | COMMIT_W1 | done |
+| E9.11 | extend | packs/reverse-engineering/skills/gather-sources/source-kinds.md | editor templates; patents and designers; supplier spec; artwork; site list | text in place | COMMIT_W1 | done |
+| E9.12 | extend | packs/reverse-engineering/skills/gather-sources step 14 | write back to the archive | text in place | COMMIT_W1 | done |
+| E9.13 | extend, reworded | packs/reverse-engineering/skills/gather-sources step 9 | a graticule photo may give a time; a redrawn trace ratios only | text in place | COMMIT_W1 | done |
+| E9.14 | extend, reworded | packs/reverse-engineering/skills/gather-sources step 11 | no dump: say so, stop looking, go on | text in place | COMMIT_W1 | done |
+| E10.1 | extend | packs/reverse-engineering/skills/re-deliverables | histogram, repro commands, confidence column; day-one list; predictions | text in place | COMMIT_W1 | done |
+| E10.2 | extend | packs/reverse-engineering/skills/re-deliverables | histogram, repro commands, confidence column; day-one list; predictions | text in place | COMMIT_W1 | done |
+| E10.3 | extend | packs/reverse-engineering/skills/re-deliverables | histogram, repro commands, confidence column; day-one list; predictions | text in place | COMMIT_W1 | done |
+| E11.1 | extend | packs/reverse-engineering/skills/bank-census | count per filter mode; rerun after an EAR constant | text in place | COMMIT_W1 | done |
+| E11.2 | extend | packs/reverse-engineering/skills/bank-census | count per filter mode; rerun after an EAR constant | text in place | COMMIT_W1 | done |
+| E11.3 | extend, decided (C17) | packs/reverse-engineering/skills/bank-census | a flat column: wrong decode or fixed structure | text in place | COMMIT_W1 | done |
+| E11.4 | extend | packs/reverse-engineering/skills/bank-census | per-feature corpus counts as regression tests | text in place | COMMIT_W1 | done |
+| E12.1 | extend | packs/reverse-engineering/skills/re-toolchain + family-traps.md, install-recipes.md | trap list per tool; seeded descent; install recipes; the interpreter in the library | text in place | COMMIT_W1 | done |
+| E12.2 | extend | packs/reverse-engineering/skills/re-toolchain + family-traps.md, install-recipes.md | trap list per tool; seeded descent; install recipes; the interpreter in the library | text in place | COMMIT_W1 | done |
+| E12.3 | extend | packs/reverse-engineering/skills/re-toolchain + family-traps.md, install-recipes.md | trap list per tool; seeded descent; install recipes; the interpreter in the library | text in place | COMMIT_W1 | done |
+| E12.4 | extend | packs/reverse-engineering/skills/re-toolchain + family-traps.md, install-recipes.md | trap list per tool; seeded descent; install recipes; the interpreter in the library | text in place | COMMIT_W1 | done |
+| E13.1 | extend, decided (C4) | packs/reverse-engineering/rules/house-tools-live-in-the-library.md | nothing ported; unidasm a black box | text in place | COMMIT_W1 | done |
+| E13.2 | extend | packs/reverse-engineering/rules/house-tools-live-in-the-library.md | measure a tool the second time; refuse loudly | text in place | COMMIT_W1 | done |
+| E14.1 | extend | packs/reverse-engineering/skills/read-a-circuit-diagram step 9 | parts list beats the diagram; revision diff; topology predicts; tolerance as intent; CV tap | text in place | COMMIT_W1 | done |
+| E14.2 | extend | packs/reverse-engineering/skills/read-a-circuit-diagram step 9 | parts list beats the diagram; revision diff; topology predicts; tolerance as intent; CV tap | text in place | COMMIT_W1 | done |
+| E14.3 | extend | packs/reverse-engineering/skills/read-a-circuit-diagram step 9 | parts list beats the diagram; revision diff; topology predicts; tolerance as intent; CV tap | text in place | COMMIT_W1 | done |
+| E14.4 | extend | packs/reverse-engineering/skills/read-a-circuit-diagram step 9 | parts list beats the diagram; revision diff; topology predicts; tolerance as intent; CV tap | text in place | COMMIT_W1 | done |
+| E14.5 | extend | packs/reverse-engineering/skills/read-a-circuit-diagram step 9 | parts list beats the diagram; revision diff; topology predicts; tolerance as intent; CV tap | text in place | COMMIT_W1 | done |
+| E15 | extend | packs/reverse-engineering/skills/gather-sources/datasheet-sources.md | per-chip function and table kind; the family manual | text in place | COMMIT_W1 | done |
+| E16 | extend | packs/reverse-engineering/skills/menu-map step 1 | the calibration menu before the tuning table | text in place | COMMIT_W1 | done |
+| E17 | extend | packs/reverse-engineering/skills/tripwire-the-law step 6 | the fix order | text in place | COMMIT_W1 | done |
+| E18 | extend | packs/reverse-engineering/tools/lib/unwrap.mts + unwrap-proofs.mts | new unwrap modes, existing modes untouched | test/tools/reverse-engineering/names-modes.test.mts (red with the SMF mode removed) | COMMIT_W1 | done |
 | E19.1 | | | | | | |
 | E19.2 | | | | | | |
 | E19.3 | | | | | | |
