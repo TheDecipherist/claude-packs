@@ -1,0 +1,107 @@
+=== generic
+Work order: docs/workorders/o-generic/ (template generic)
+  1. Write the steps in workorder.md, with Claude if you like: the write-a-workorder skill says how.
+  2. To watch it, type in Claude Code: Run docs/workorders/o-generic/PROMPT.md
+  3. To leave it running, read run.sh, then: bash docs/workorders/o-generic/run.sh
+  What is left to fill in, as `workorder check o-generic` will judge it before a run starts:
+  REFUSED: line 5: a placeholder is left: <One paragraph: what gets built, for whom, and what "finished" looks like.>
+  REFUSED: line 7: a placeholder is left: <What is known, what is not, and what cannot be proved. Say it plainly, so no document claims more than the work can show.>
+  REFUSED: line 9: a placeholder is left: <Every input, by path or URL: specs, data, designs, reference code. What each gives, and what is still missing. Nothing the run needs may live only in someone's head.>
+  REFUSED: line 11: a placeholder is left: <What is reused and must not be written again: libraries, shared code, earlier projects to read for their method.>
+  REFUSED: line 13: a placeholder is left: <Existing work to learn from, and which part of it. Say what not to take.>
+  REFUSED: line 18: a placeholder is left: <step>
+  REFUSED: line 20: a placeholder is left: <The laws of this project.>
+  REFUSED: line 23: a placeholder is left: <what must stay out of git: secrets, data, other people's files>
+  REFUSED: line 25: a placeholder is left: <What this project must not do, or claim.>
+  REFUSED: line 40: a placeholder is left: <The project's skeleton, and a build that runs.>
+  REFUSED: line 43: a placeholder is left: <A measurement: the build passes (exit 0), the first test runs, `doctor --strict` reports 0 problems.>
+  REFUSED: line 45: a placeholder is left: <The first real step: usually finding out, before building>
+  REFUSED: line 47: a placeholder is left: <What to do, in order. Say what to read and what to produce.>
+  REFUSED: line 49: a placeholder is left: <A number or a test (for example 0 failures in `tests/x.test`, 12 of 12 present), never "looks right".>
+  REFUSED: line 51: a placeholder is left: <The next step>
+  REFUSED: line 53: a placeholder is left: <Put what the rest depends on first, and prove it before building on it.>
+  REFUSED: line 55: a placeholder is left: <A number or a test (for example 0 failures in `tests/x.test`).>
+  REFUSED: not installed here: `write-a-workorder` (line 3), `write-the-readme` (line 59); `add base` brings them
+  REFUSED: not installed here: `humanize` (line 61); `add writing` brings it
+workorder check o-generic: 19 refusal(s); a run cannot start until each is fixed
+claude-packs: ENOENT: no such file or directory, scandir '/private/var/folders/8y/ww5f9x8x56b2sfrw5yzqwp1m0000gp/T/tmp.XlecGp5kKN/p/.claude/rules'
+exit 2
+=== plugin
+Work order: docs/workorders/o-plugin/ (template plugin)
+  1. Write the steps in workorder.md, with Claude if you like: the write-a-workorder skill says how.
+  2. To watch it, type in Claude Code: Run docs/workorders/o-plugin/PROMPT.md
+  3. To leave it running, read run.sh, then: bash docs/workorders/o-plugin/run.sh
+  What is left to fill in, as `workorder check o-plugin` will judge it before a run starts:
+  REFUSED: line 7: a placeholder is left: <One paragraph a stranger could act on: what it is, the sound parts per voice, the modes, the effects, the panel's sections, what ships with it.>
+  REFUSED: line 9: a placeholder is left: <count>
+  REFUSED: line 12: a placeholder is left: <What is decided: the voice, the modes, the sound parts, the look (the approved render).>
+  REFUSED: line 13: a placeholder is left: <What the build finds out: the measured cost unit, the exact voice count the budget allows.>
+  REFUSED: line 17: a placeholder is left: <screen>
+  REFUSED: line 17: a placeholder is left: <screen>
+  REFUSED: line 18: a placeholder is left: <recordings, manuals or plugins the sound is checked against, by path or URL, or "none">
+  REFUSED: line 21: a placeholder is left: <From `synth-cost`: units per voice for each sound part, the voice count, the total against the budget.>
+  REFUSED: not installed here: `write-a-workorder` (line 3), `analyse-reference-look` (line 32), `make-it-a-template` (line 32), `prove-instances-identical` (line 32), `pick-tests` (line 32), `land-branch` (line 32), `write-the-readme` (line 159); `add base` brings them
+  REFUSED: planner skills for claude.ai, which a run in Claude Code cannot use: `workorder-writer` (line 3)
+  REFUSED: not installed here: `synth-cost` (line 21), `new-panel-control` (line 32), `prove-control` (line 32), `trace-parameter` (line 32), `copy-and-prove` (line 32), `measure-tone` (line 32), `juce-realtime-audit` (line 32), `editor-frame-bench` (line 32); `add audio-core` brings them
+  REFUSED: not installed here: `gates-from-commit-one` (line 32), `hit-the-painted-control` (line 32); `add instrument-shell` brings them
+  REFUSED: not installed here: `build-step` (line 32); `add synth-creator` brings it
+  REFUSED: not installed here: `measure-reverb` (line 32), `design-a-preset` (line 32), `spread-probe` (line 32), `bounce-a-plugin` (line 32); `add sound-design` brings them
+  REFUSED: not installed here: `clock-probe` (line 32); `add midi` brings it
+  REFUSED: not installed here: `humanize` (line 161); `add writing` brings it
+workorder check o-plugin: 16 refusal(s); a run cannot start until each is fixed
+claude-packs: ENOENT: no such file or directory, scandir '/private/var/folders/8y/ww5f9x8x56b2sfrw5yzqwp1m0000gp/T/tmp.XlecGp5kKN/p/.claude/rules'
+exit 2
+=== rebuild
+Work order: docs/workorders/o-rebuild/ (template rebuild)
+  1. Write the steps in workorder.md, with Claude if you like: the write-a-workorder skill says how.
+  2. To watch it, type in Claude Code: Run docs/workorders/o-rebuild/PROMPT.md
+  3. To leave it running, read run.sh, then: bash docs/workorders/o-rebuild/run.sh
+  What is left to fill in, as `workorder check o-rebuild` will judge it before a run starts:
+  REFUSED: line 1: a placeholder is left: <maker>
+  REFUSED: line 1: a placeholder is left: <machine>
+  REFUSED: line 7: a placeholder is left: <maker>
+  REFUSED: line 7: a placeholder is left: <machine>
+  REFUSED: line 7: a placeholder is left: <year>
+  REFUSED: line 7: a placeholder is left: <version>
+  REFUSED: line 8: a placeholder is left: <the voice architecture: oscillators, filters, amplifiers, structures, per voice and per part>
+  REFUSED: line 9: a placeholder is left: <the modulation: envelopes, LFOs, matrix, controllers>
+  REFUSED: line 10: a placeholder is left: <the machine's own features: arpeggiator, sequencer, sampler, performance controllers>
+  REFUSED: line 11: a placeholder is left: <the effects>
+  REFUSED: line 12: a placeholder is left: <the panel and the display, with every page>
+  REFUSED: line 14: a placeholder is left: <the digital engine agreeing with the firmware's own routines, run as the oracle | the analogue voice following its schematics by measurement>
+  REFUSED: line 17: a placeholder is left: <What computes the sound: firmware (provable exactly, tagged `[FW]`), analogue circuits (provable against their schematics, `[SCH]`), or both, and where the line between them runs. What the service notes and manuals give.>
+  REFUSED: line 18: a placeholder is left: <The firmware's container, which processor runs what, the record formats, the machine's own features in code.>
+  REFUSED: line 19: a placeholder is left: <A match to a real unit's sound, unless a unit or reference recordings exist. Any custom chip with no data sheet. Anything the firmware image does not carry.>
+  REFUSED: line 21: a placeholder is left: <CPU>
+  REFUSED: line 28: a placeholder is left: <path, version, size, hash>
+  REFUSED: line 28: a placeholder is left: <Earlier or sibling models' firmware, for reference.>
+  REFUSED: line 29: a placeholder is left: <path>
+  REFUSED: line 29: a placeholder is left: <the block diagram, the board sheets, the test mode, the panel drawing, the parts list>
+  REFUSED: line 30: a placeholder is left: <owner's manual, supplements, MIDI implementation, sound list>
+  REFUSED: line 31: a placeholder is left: <a flat frontal photo of the real unit for where controls sit, their labels and layout; the drawing for the sizes it gives; a correctly lit photo for colour>
+  REFUSED: line 32: a placeholder is left: <patches, waves, banks>
+  REFUSED: line 32: a placeholder is left: <MACHINE>
+  REFUSED: line 34: a placeholder is left: <what was searched for and not found>
+  REFUSED: line 37: a placeholder is left: <The house's shared code, linked and never copied: time, MIDI clock, transport, sync, keys and focus.>
+  REFUSED: line 39: a placeholder is left: <Earlier rebuilds to learn from: their orders, their oracles, their parameter tables, their panels from a table, their gates, their handover notes of the faults they met. Take the method and the proofs, never their code.>
+  REFUSED: line 39: a placeholder is left: <Published projects on this machine: a source to check findings against, tagged `[PUB]`, never code to copy.>
+  REFUSED: line 44: a placeholder is left: <model>
+  REFUSED: line 56: a placeholder is left: <n>
+  REFUSED: line 65: a placeholder is left: <what the house's shared code owns: tempo, MIDI clock, transport, key handling>
+  REFUSED: line 140: a placeholder is left: <CPU>
+  REFUSED: line 151: a placeholder is left: <MACHINE>
+  REFUSED: line 173: a placeholder is left: <MACHINE>
+  REFUSED: line 189: a placeholder is left: <The machine's own feature>
+  REFUSED: line 191: a placeholder is left: <One step per feature no earlier step covers: a sample engine, a vocoder, a physical model, a sequencer. Say what it is in code from W3's findings, build it the same way (ported and checked against the oracle, or from its schematic), and list what cannot be built with the exact reason.>
+  REFUSED: line 210: a placeholder is left: <MACHINE>
+  REFUSED: not installed here: `write-a-workorder` (line 5), `pdf-to-md` (line 29), `analyse-reference-look` (line 31), `make-it-a-template` (line 37), `prove-instances-identical` (line 37), `pick-tests` (line 37), `land-branch` (line 37), `write-the-readme` (line 241); `add base` brings them
+  REFUSED: not installed here: `re-toolchain` (line 21), `boards-from-photos` (line 35), `gather-sources` (line 37), `read-a-circuit-diagram` (line 37), `read-a-screen-image` (line 37), `names-first` (line 37), `menu-map` (line 37), `bank-census` (line 37), `identify-the-cpu` (line 78); `add reverse-engineering` brings them
+  REFUSED: not installed here: `prove-control` (line 37); `add audio-core` brings it
+  REFUSED: not installed here: `humanize` (line 243); `add writing` brings it
+  REFUSED: ghidra: no processor module for <the processors W4 runs Ghidra on in ghidra_12.2_PUBLIC (it has: 6502, 68000, 8048, 8051, 8085, AARCH64, ARM, Atmel, BPF, CP1600, CR16, DATA, Dalvik, HCS08, HCS12, Hexagon, JVM, Loongarch, M16C, M8C, MC6800, MCS96, MIPS, NDS32, PA-RISC, PIC, PowerPC, RISCV, Sparc, SuperH, SuperH4, TI_MSP430, Toy, V850, Xtensa, Z80, eBPF, tricore, x86); take Ghidra out of the step that needs it, or install a module first
+  REFUSED: ghidra: no processor module for comma-separated in ghidra_12.2_PUBLIC (it has: 6502, 68000, 8048, 8051, 8085, AARCH64, ARM, Atmel, BPF, CP1600, CR16, DATA, Dalvik, HCS08, HCS12, Hexagon, JVM, Loongarch, M16C, M8C, MC6800, MCS96, MIPS, NDS32, PA-RISC, PIC, PowerPC, RISCV, Sparc, SuperH, SuperH4, TI_MSP430, Toy, V850, Xtensa, Z80, eBPF, tricore, x86); take Ghidra out of the step that needs it, or install a module first
+  REFUSED: ghidra: no processor module for or delete this line> in ghidra_12.2_PUBLIC (it has: 6502, 68000, 8048, 8051, 8085, AARCH64, ARM, Atmel, BPF, CP1600, CR16, DATA, Dalvik, HCS08, HCS12, Hexagon, JVM, Loongarch, M16C, M8C, MC6800, MCS96, MIPS, NDS32, PA-RISC, PIC, PowerPC, RISCV, Sparc, SuperH, SuperH4, TI_MSP430, Toy, V850, Xtensa, Z80, eBPF, tricore, x86); take Ghidra out of the step that needs it, or install a module first
+  REFUSED: toolchain: the order names processors (<every processor the firmware runs on, comma-separated, from the proved answer of `identify-the-cpu`>) and has no docs/workorders/o-rebuild/toolchain.md: run `claude-packs toolchain "<every processor the firmware runs on" "comma-separated" "from the proved answer of `identify-the-cpu`>" --out docs/workorders/o-rebuild/toolchain.md`, then the re-toolchain skill for what it reports missing
+workorder check o-rebuild: 45 refusal(s); a run cannot start until each is fixed
+claude-packs: ENOENT: no such file or directory, scandir '/private/var/folders/8y/ww5f9x8x56b2sfrw5yzqwp1m0000gp/T/tmp.XlecGp5kKN/p/.claude/rules'
+exit 2

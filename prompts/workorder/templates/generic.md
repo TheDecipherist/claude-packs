@@ -40,19 +40,19 @@ packs: base
 2. <The project's skeleton, and a build that runs.>
 3. Run `doctor --strict` and fix what it finds.
 
-**Done when:** <A measurement: the build passes, the first test runs, `doctor --strict` is OK.>
+**Done when:** <A measurement: the build passes (exit 0), the first test runs, `doctor --strict` reports 0 problems.>
 
 ## W1. <The first real step: usually finding out, before building>
 
 1. <What to do, in order. Say what to read and what to produce.>
 
-**Done when:** <A number or a test, never "looks right".>
+**Done when:** <A number or a test (for example 0 failures in `tests/x.test`, 12 of 12 present), never "looks right".>
 
 ## W2. <The next step>
 
 1. <Put what the rest depends on first, and prove it before building on it.>
 
-**Done when:** <A number or a test.>
+**Done when:** <A number or a test (for example 0 failures in `tests/x.test`).>
 
 ## W3. The README
 
@@ -64,10 +64,10 @@ Use `write-the-readme`. Written last, when the UI is finished: `README.md` at th
 
 Read the finished work as a senior engineer would. List what is left, what is unproved and what a person must judge.
 
-**Done when:** every open item is written down, with why.
+**Done when:** every open item is written down, with why, and the count of open items is stated (0 open items without a reason).
 
 ## W5. The report
 
-Write `docs/workorders/{{name}}/report.md`: what was built, what is proved and how, what is not, and what the kit did well and badly, with counts from `logs`.
+Before the final report, list each deliverable the user asked for and where it is. Write `docs/workorders/{{name}}/report.md`: what was built, what is proved and how, what is not, and what the kit did well and badly, with counts from `logs`.
 
-**Done when:** every section has counts, or a stated reason there are none.
+**Done when:** every section has counts, or a stated reason there are none, and each deliverable asked for is listed with its path (0 missing), and every section has counts.

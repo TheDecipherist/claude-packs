@@ -18,13 +18,17 @@ Finished looks like: every parameter, page and gesture in the manual present; <t
 - **Not known yet.** <The firmware's container, which processor runs what, the record formats, the machine's own features in code.>
 - **Cannot be proved here.** <A match to a real unit's sound, unless a unit or reference recordings exist. Any custom chip with no data sheet. Anything the firmware image does not carry.> No document may claim more.
 
-**The oracle.** **[if the firmware computes the sound or the control]** An interpreter of the <CPU> of our own, for tests only and never shipped, runs the real firmware routines, and the C++ must agree with them bit for bit, block for block. "It matches" means a gate says so. Ghidra's P-code emulator is the second oracle on a sample of cases, and the two must agree before either is trusted.
+**The oracle.** **[if the firmware computes the sound or the control]** An interpreter of the <CPU> of our own, for tests only and never shipped, runs the real firmware routines, and the C++ must agree with them bit for bit, block for block. "It matches" means a gate says so. Ghidra's P-code emulator is the second oracle on a sample of cases, and the two must agree before either is trusted. An external simulator may be a further check, run as a black box (`re-toolchain` step 4), never in place of our interpreter.
+
+**No firmware.** **[if no firmware image exists: an all-analogue machine, a fixed-program DSP]** `docs/laws.md`'s first paragraph says so and says which tags cannot exist (`[FW]`, and `[SCH]` or `[REF]` where the sheets or a reference are missing). The bank is ours, and the patch browser lists it as ours. The machine's own vocabulary names the categories. Every `[EAR]` debt goes in the ledger with the one bench session that closes it. The order replicates and marks the replica as ours; it never pretends to recover. A machine with no firmware is a finding, not a halt: say so, stop looking for a dump, and go on.
+
+**Shared OS.** **[if one OS serves a family of models]** Prove the shared parts once, record only each model's differences, and name the stand-in dump and manual in `docs/sources.md`.
 
 **The sources** (all in the archive, outside every repo; nothing is copied in):
 - **Firmware:** <path, version, size, hash>. <Earlier or sibling models' firmware, for reference.>
 - **Service notes:** <path>, converted by `pdf-to-md` with the image switch on and every page rendered at 300 dpi: <the block diagram, the board sheets, the test mode, the panel drawing, the parts list>.
 - **Manuals:** <owner's manual, supplements, MIDI implementation, sound list>. Every name, range and page is in them.
-- **The panel:** <the drawing for geometry; a photo for labels and layout; a correctly lit photo for colour>. Never take colour from a studio-lit photo.
+- **The panel:** <a flat frontal photo of the real unit for where controls sit, their labels and layout; the drawing for the sizes it gives; a correctly lit photo for colour>. A flat frontal photo of the real unit outranks a drawing for where controls sit (`analyse-reference-look`). Never take colour from a studio-lit photo.
 - **Factory content:** <patches, waves, banks>. None of it is committed. It loads at build or run time from `<MACHINE>_FIRMWARE` (or the bank's path), and the plugin builds and runs without it, saying so.
 - **[if a real unit is owned]** **The unit:** what the user can record from it, and how (W10).
 - **Missing** [gap]: <what was searched for and not found>. W1 records each search and its date.
@@ -71,11 +75,14 @@ The kit is installed from this block and nothing else. Change it here, before th
 ```claude-packs
 configuration: synth-creator
 packs: cpp, audio-core, instrument-shell, midi, sound-design, reverse-engineering
+processors: <every processor the firmware runs on, comma-separated, from the proved answer of `identify-the-cpu`>
 ghidra: <the processors W4 runs Ghidra on, comma-separated, or delete this line>
 commands:
   build: node .claude/tools/buildq.mjs cmake --build build --preset dev
   test: node .claude/tools/buildq.mjs ctest --preset dev
 ```
+
+The `processors:` line drives the `re-toolchain` skill of the reverse-engineering pack: its first step takes the processors from `identify-the-cpu`'s proved answer, and `workorder check` refuses a run whose line names a processor with no settled disassembler and emulator in `toolchain.md`.
 
 1. Install from the block: `{{kit}} init --from docs/workorders/{{name}}/workorder.md`. Check that every skill, tool and rule **The foundation** names exists. A gap is a kit fault: log it and update the kit.
 2. Start the unit: `CMakeLists.txt` and `CMakePresets.json` (`dev`, `asan-ubsan`, `tsan`), the plugin framework through CMake at a version looked up, never remembered.
@@ -83,7 +90,7 @@ commands:
 4. Prove the guards: `doctor --strict` OK; an exact copy of a source file refused by `once-only`; `git push --force` refused.
 5. Write `design/shape.json` before the code that needs it: every repeated concept with its count, taken from the manual. A count that differs between sources is a finding.
 
-**Done when:** the unit builds on the shared code, an empty plugin loads and passes MIDI to a test tone, the standalone opens, `doctor --strict` is OK, the copy and the force push are refused, and `shape.json` lists every concept with its count and source.
+**Done when:** the unit builds on the shared code, an empty plugin loads and passes MIDI to a test tone, the standalone opens, `doctor --strict` is OK with 0 problems, the copy and the force push are refused (2 of 2 refused, `tests/guards.test`), and `shape.json` lists every concept with its count and source.
 
 ## W1. The sources
 
@@ -92,17 +99,18 @@ commands:
 3. Read every circuit sheet by `read-a-circuit-diagram`: one report per sheet in `docs/circuits/`, with `chips/`, `netlists/` for every analogue stage, `README.md` and `change-order.md` for what the sheets correct in this order. Name every chip from the sheets, with two sources.
 4. Fetch and read the data sheet of every chip the sheets name, by `pdf-to-md`, into `docs/circuits/chips/`. A custom part with none: record what was searched.
 5. Search for what is missing, and record each search and its date.
+6. Grade the evidence and record the path in `decisions.md`: build it (a table of names and ranges), build it tagged (presets but no table: every value tagged with what it rests on), or, only when there are no names and no presets, create nothing and write the findings.
 
-**Done when:** `docs/sources.md` says what each source gave; every sheet has its report, with every part counted; every chip has its page; and `names.txt` parses clean.
+**Done when:** `docs/sources.md` says what each source gave; every sheet has its report, with every part counted; every chip has its page; `names.txt` parses clean with 0 errors (`tests/names.test`); and `decisions.md` records the path, 1 of the 3.
 
 ## W2. The screens, the panel and the gestures
 
 1. Read every screen in the manuals and every test-mode screen in the service notes by `read-a-screen-image`: one report each in `docs/screens/`, with the exact text, fonts, colours, layout and the gesture that reaches it. A page, a tab and an open pulldown each get their own report. A page the manuals never picture goes in the menu map as unpictured, with what the manual and the firmware's strings say it holds.
 2. Write `docs/menu-map.md` by `menu-map`: every page joined to the parameters it edits and the gesture that reaches it, with both mismatch lists.
 3. Write `docs/gestures.md`: every button combination in the manuals and the service notes, each with its mouse path and the press timing W3 measures.
-4. Run `analyse-reference-look` on the panel: geometry from the drawing, labels and layout from the photo, colour from a correctly lit photo. Write `design/analysis/design-grid.md`: rows and columns declared once, size by kind of control.
+4. Run `analyse-reference-look` on the panel: photo first (a flat frontal photo of the real unit for where controls sit, labels and layout), the drawing for the sizes it gives, colour from a correctly lit photo. Write `design/analysis/design-grid.md`: rows and columns declared once, size by kind of control.
 
-**Done when:** every screen, tab and pulldown has its report, with every string counted; the menu map lists every page, pictured or not, and has both lists; every gesture has a mouse path; and the design grid places every control on the drawing, with its kind.
+**Done when:** every screen, tab and pulldown has its report, with every string counted; the menu map lists every page, pictured or not, and has both lists; every gesture has a mouse path; and the design grid places every control on the photo, with its kind (control count in `tests/design-grid.test`).
 
 ## W3. The firmware map (our pass)
 
@@ -116,7 +124,7 @@ Use `names-first`, `menu-map` and `bank-census`. Follow `addresses-name-their-sp
 6. **[if a sibling model's firmware is mapped]** Diff each finding against it, and say what is shared and what this model added.
 7. Measure the panel's switch timing for `docs/gestures.md`: the scan period, how many scans a press must last, how long a held button must be down before the second counts.
 
-**Done when:** `docs/patch-map.csv` covers every byte or marks it unknown; `tools/` regenerates every number from the image; a test reads every factory patch and agrees with the map; the engine's routines are in `docs/firmware/` with their addresses; and every open question is stated with what was scanned.
+**Done when:** `docs/patch-map.csv` covers every byte or marks it unknown; `tools/` regenerates every number from the image; a test reads every factory patch and agrees with the map; the engine's routines are in `docs/firmware/` with their addresses; and every open question is stated with what was scanned (`tests/patch-map.test`: 0 bytes unaccounted).
 
 ## W4. The Ghidra second pass
 
@@ -131,11 +139,11 @@ Before the run, `workorder check` proves Ghidra can do it: installed, a JDK it a
 
 1. Write an interpreter of the <CPU> for tests only, under `tests/oracle/`, from its maker's software manual: the instruction set, the FPU if the routines use it, enough of the memory map for the routines, I/O as test doubles. Write it ourselves; read no other emulator's code.
 2. Prove it first: a checksum or self-test routine of the firmware runs in it and passes on the real image, and a planted one-byte change makes it fail.
-3. Cross-check it against Ghidra's P-code emulator on the same routines and inputs. A difference is a bug in one of them, settled and logged.
+3. Cross-check it against Ghidra's P-code emulator on the same routines and inputs. A difference is a bug in one of them, settled and logged. An external simulator may be a further check, run as a black box (`re-toolchain` step 4), never in place of our interpreter.
 4. Golden traces: run the engine's routines on fixed inputs and record their outputs (for a voice CPU: feed it a patch and a key as the main CPU would, tick it, record what it writes to its DACs).
 5. Say what cannot run, and why, rather than faking a result.
 
-**Done when:** the self-test passes in the interpreter and fails on the planted change, the two oracles agree on every shared case, and a golden trace exists for each routine the engine ports.
+**Done when:** the self-test passes in the interpreter and fails on the planted change, the two oracles agree on every shared case, and a golden trace exists for each routine the engine ports (count in `tests/oracle/traces.test`).
 
 ## W6. The parameter layer
 
@@ -144,19 +152,21 @@ Before the run, `workorder check` proves Ghidra can do it: installed, a JDK it a
 3. A byte-exact round trip of every factory patch and every other record. Unknown bytes are carried, never zeroed.
 4. System exclusive send and receive in the firmware's exact form, as the MIDI implementation and the firmware's parser agree.
 
-**Done when:** every factory patch round-trips byte for byte, every stored byte reaches the engine's copy, the IDs are locked, and a build without the firmware passes.
+**Done when:** every factory patch round-trips byte for byte, every stored byte reaches the engine's copy, the IDs are locked, and a build without the firmware passes (`tests/round-trip.test`: factory patches round-tripped, N of N).
 
 ## W7. The machine's behaviour, with no UI
 
 The machine as data: patch play, parts and key modes, the arpeggiator's or sequencer's state, controller assignments, SHIFT shortcuts, every page of the menu map as a state, write and system settings. Every string comes from the firmware's own tables.
 
-**Done when:** a test drives each behaviour with no UI and meets the manual's stated results, and every string shown is the machine's own.
+**Done when:** a test drives each behaviour with no UI and meets the manual's stated results, and every string shown is the machine's own (`tests/behaviour.test`: pages driven, N of N).
 
 ## W8. The engine: control and modulation, exact
 
 Envelopes, LFOs, the time and value converters, key assignment, velocity and controller scaling, the modulation matrix, tempo sync and the arpeggiator, at the firmware's own rate.
 
-**Done when:** a gate runs the same patch and key sequence through the C++ and the oracle and they agree bit for bit on every output, on every factory patch. A difference is a bug, or a stated, measured limit of the oracle. The gate is seen red on a planted fault in one envelope stage.
+The machine's arpeggiator is remade exactly as it is, unless the user says otherwise (a global arp module of their own, or a second arp in the newer interface's edit layer). Every unit (arp, LFO, delay, sequencer) answers in `docs/laws.md`: does it sync, can it be the clock. A no is a law, with where it was checked.
+
+**Done when:** a gate runs the same patch and key sequence through the C++ and the oracle and they agree bit for bit on every output, on every factory patch. A difference is a bug, or a stated, measured limit of the oracle. The gate is seen red on a planted fault in one envelope stage; `docs/laws.md` has the sync answer for every unit, 1 row each (`tests/laws.test`).
 
 ## W9. The engine: the sound
 
@@ -164,23 +174,23 @@ Envelopes, LFOs, the time and value converters, key assignment, velocity and con
 2. **[if analogue]** Every stage from its schematic: oscillators band-limited, every filter mode's response computed from the resistor and capacitor values in `docs/circuits/`, not from a table of curves, and measured against what those values compute. Every constant is `[SCH]` with its sheet, `[FW]` with its address, or `[EAR]` in the ledger with what would close it.
 3. The realtime rules hold, and the full polyphony fits the CPU budget written in `docs/laws.md`, measured per block.
 
-**Done when:** every type agrees with its oracle trace or measures as its schematic computes; every factory patch sounds, none silent and none clipping beyond a stated limit; the polyphony meets the budget; and the realtime audit is clean.
+**Done when:** every type agrees with its oracle trace or measures as its schematic computes; every factory patch sounds, none silent and none clipping beyond a stated limit; the polyphony meets the budget; and the realtime audit is clean with 0 findings (`tests/engine/oracle.test`).
 
 ## W10. The capture kit and the compare tool  **[if a real unit is owned]**
 
-1. Work out the smallest set of recordings that gives what the sources cannot: each wave with no filter, effects or modulation at the pitches it needs, and test tones for the filter, the envelopes and the effects.
+1. Work out the smallest set of recordings that gives what the sources cannot: each wave with no filter, effects or modulation at the pitches it needs, and test tones for the filter, the envelopes and the effects. Plan the session in advance: the absolute Hz to read for each knob, and one-knob-per-dump sysex diffs to attribute the bytes the firmware leaves open.
 2. Write a tool that builds a bulk sysex of plain test patches and MIDI files that play them, so the user sends one file and records.
 3. Write `docs/capture.md`: for someone with the unit and an audio interface, what to connect, the levels, what to play, how to name the files, how long it takes, in sittings.
 4. Write the tool that cuts the recordings into waves with loop points, read from a path outside the repo, and prove it on a synthetic recording.
 5. Write the compare tool: it renders a patch through our engine and sets it beside the recording by level, spectrum and envelope. Prove it on a synthetic pair and a planted difference. The verdict is the user's ear; the numbers show where to look.
 
-**Done when:** a stranger could follow `docs/capture.md`; the path from recording to playable wave is proved on a synthetic recording; and the compare tool shows a planted fault. The recordings themselves are listed open for the user.
+**Done when:** a stranger could follow `docs/capture.md`; the path from recording to playable wave is proved on a synthetic recording; and the compare tool shows a planted fault. The recordings themselves are listed open for the user, counted in `docs/capture.md` and by `tests/capture.test`.
 
 ## W11. <The machine's own feature>  **[if it has one]**
 
 <One step per feature no earlier step covers: a sample engine, a vocoder, a physical model, a sequencer. Say what it is in code from W3's findings, build it the same way (ported and checked against the oracle, or from its schematic), and list what cannot be built with the exact reason.>
 
-**Done when:** each of its types and settings in `names.txt` is built and checked, or listed with the exact reason it cannot be.
+**Done when:** each of its types and settings in `names.txt` is built and checked (N of N in `tests/feature.test`), or listed with the exact reason it cannot be.
 
 ## W12. The effects
 
@@ -189,7 +199,7 @@ Envelopes, LFOs, the time and value converters, key assignment, velocity and con
 3. Decide, in `decisions.md`, by that test: decode accepted, each effect is written as our own code from its decoded algorithm, `[FW]`; not accepted, each effect type is built from the manual's definition and the driver's ranges, every algorithmic choice `[EAR]` in the debt ledger.
 4. Either way, the driver's parameter handling is exact.
 
-**Done when:** every effect type in `names.txt` exists; the driver's parameter handling agrees with the oracle; the decision is recorded with its evidence; and no document calls an effect exact unless a gate proved it.
+**Done when:** every effect type in `names.txt` exists; the driver's parameter handling agrees with the oracle; the decision is recorded with its evidence; and no document calls an effect exact unless a gate proved it (`tests/effects.test`: effect types covered, N of N).
 
 ## W13. The panel and the display, in code
 
@@ -201,7 +211,7 @@ All of it is C++ drawing calls. Use `make-it-a-template` and `test-the-template-
 5. The look gate is a script: every control's position and size against the grid, every colour against the photo's samples, every screen against its report, element by element. Show it red on a moved control, a changed colour and a dropped string.
 6. No control takes keyboard focus, and no click or drop moves focus to a text field.
 
-**Done when:** a structural test proves every control comes from the template and the table; no image ships in the source; the renders are in `build/evidence/W13/`; the look gate passes on the panel and every screen; and a side-by-side with each screen report has every element matching or listed with its cause.
+**Done when:** a structural test proves every control comes from the template and the table; where the ROM has a factory test mode, the panel table holds as many switches, LEDs and pots as it counts (`tests/panel-count.test`); no image ships in the source; the renders are in `build/evidence/W13/`; the look gate passes on the panel and every screen; and a side-by-side with each screen report has every element matching or listed with its cause.
 
 ## W14. Everything wired
 
@@ -216,13 +226,15 @@ All of it is C++ drawing calls. Use `make-it-a-template` and `test-the-template-
 1. A report for every factory patch: distinct records, effective distinct sounds, twins, silent ones and clipping ones.
 2. **[if W10 ran and recordings exist]** Every recorded patch through the compare tool, its report beside it.
 
-**Done when:** every patch sounds, levels are within a stated range, and twins are explained.
+3. The browser and the display show the machine's own program numbers (A000..H127, 80..99), never list indexes.
+
+**Done when:** every patch sounds, levels are within a stated range, and twins are explained; 0 patches shown by list index (`tests/program-numbers.test`).
 
 ## W16. Gates and planted faults
 
 Every gate the house keeps applies; add one for each law this machine has. Show each red on a planted fault.
 
-**Done when:** the suite is green, every gate has been seen red, and the `asan-ubsan` and `tsan` builds pass.
+**Done when:** the suite is green (0 failures), every gate has been seen red (a planted fault per gate, `tests/gates-red.test`), and the `asan-ubsan` and `tsan` builds pass.
 
 ## W17. The README
 
@@ -234,7 +246,7 @@ Use `write-the-readme`. Written last, when the UI is finished: `README.md` at th
 
 Read the finished work as a senior engineer would, down the house's before-you-call-it-finished list line by line. An item that cannot be answered is listed open, never ticked. Where only a person can judge (how it sounds against a real unit), say so.
 
-**Done when:** every line has an answer or is listed open, and what it found is in `bugs.md`.
+**Done when:** every line has an answer or is listed open (0 lines unanswered), and what it found is in `bugs.md`.
 
 ## W19. The kit report
 
@@ -246,4 +258,4 @@ Write `docs/workorders/{{name}}/kit-report.md`, compared with the last rebuild's
 5. **The first-try question:** what was right first time, what had to be redone and why, and which of the last rebuild's faults came back.
 6. **Faults in the kit,** ranked, and everything `BLOCKED BY KIT`.
 
-**Done when:** every section has counts or a stated reason there are none, and the report is pushed.
+**Done when:** all 6 sections have counts or a stated reason there are none, and the report is pushed (`git ls-remote` shows its commit).
