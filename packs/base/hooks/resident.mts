@@ -147,7 +147,8 @@ export async function serve(o: ServeOptions, host: Host, usage = new UsageStore(
         () => incoming.reply({ code: 0, stdout: '', stderr: '', fallback: 'ts' }));
       return;
     }
-    if (incoming.request.status === true) { incoming.reply({ code: 0, stdout: toJson(snapshot()), stderr: '' }); return; }
+    // `hook-proxy top`: the same state with the agent board beside it (who, owner, last tool, how long silent)
+    if (incoming.request.status === true) { incoming.reply({ code: 0, stdout: toJson({ ...snapshot(), board: status.board.rows(Date.now(), (owner) => usage.usageOf(owner)) }), stderr: '' }); return; }
     const words = loadWords(incoming.request);   // `hook-proxy load ...`: the governor's answer, no event (W8.8)
     if (words !== null) { serveLoad(incoming, words, new URL(`../tools/load${EXT}`, import.meta.url)); return; }
     counts.inflight += 1;
