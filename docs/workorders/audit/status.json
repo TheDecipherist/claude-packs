@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T23:14:47.041Z",
+  "updated": "2026-11-13T23:15:08.199Z",
   "steps": [
     {
       "id": "W0",
@@ -34,14 +34,14 @@
       "title": "sound-design and midi",
       "items": 3,
       "done": 1,
-      "agent": null
+      "agent": "sd-a"
     },
     {
       "id": "W5",
       "title": "audio-core and the release lock",
       "items": 5,
       "done": 0,
-      "agent": null
+      "agent": "ac-a"
     },
     {
       "id": "W6",
@@ -79,5 +79,30 @@
       "agent": null
     }
   ],
-  "agents": []
+  "agents": [
+    {
+      "name": "sd-a",
+      "worktree": ".claude/worktrees/sd-a",
+      "step": "W4",
+      "started": "2026-11-13T23:15:08.198Z"
+    },
+    {
+      "name": "sd-b",
+      "worktree": ".claude/worktrees/sd-b",
+      "step": "W4",
+      "started": "2026-11-13T23:15:08.199Z"
+    },
+    {
+      "name": "ac-a",
+      "worktree": ".claude/worktrees/ac-a",
+      "step": "W5",
+      "started": "2026-11-13T23:15:08.199Z"
+    },
+    {
+      "name": "ac-b",
+      "worktree": ".claude/worktrees/ac-b",
+      "step": "W5",
+      "started": "2026-11-13T23:15:08.199Z"
+    }
+  ]
 }
