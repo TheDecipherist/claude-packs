@@ -26,6 +26,10 @@ Always do:
 11. Prove a table across images: the same blob byte-identical in other OS versions and sibling machines.
 12. Write each located table into the research record with its address and which space it is in, its stride, count and the names that proved it, then map the menus (`menu-map`).
 13. Before counting a named byte as done, find what reads it. A name in a patch map is not a consumer: one named byte nothing read was wrong on 48% of a bank.
+14. Let packed tables count themselves. A width-prefixed table is a width byte and N fields, then the next table's width byte, with no count: the distance divided by the width is the entry count, and the width is the display's field width. `names-sweep.mjs <image> --run` prints each run's offset, width, count and entries. One base pointer plus an offset table (`id * 2`, add the base) reaches them; a table it does not reach is a leftover, and a slot count is not the reachable count.
+15. Score a name-to-index claim against controls. `names-sweep.mjs <image> --names <file> --index AT,STRIDE,WIDTH` compares the table with the names index for index, and scores the table shifted one and two records, the stride off by one and two bytes, and the names shuffled. The table is located only when the true alignment beats every control.
+16. Read a missing string against the panel. A parameter is text in the ROM only if the display shows it: a legend printed beside an LED is on the plate, and values drawn as symbols are bitmaps. Names painted at transmit (`BNK b:nn`) are not stored; ask what a generated name field really is before writing a name parser.
+17. When the manual names nothing, or the sweep finds few runs, read `sweeps.md` beside this file: the keyword and units net, the word stream, a character table, a suffixed repeat, the vocabulary of the effect's kind, and the loader's own messages after unpacking.
 
 Never do:
 - Start disassembling while the names search has not run.
@@ -33,7 +37,7 @@ Never do:
 - Assign names by the order of the manual's prose. It put five right names in the wrong five slots and invented a sixth. Use the address table, the range and the item count.
 - Trust a table built by walking the manual's names: it inherits the manual's errors and has no row for a slot the manual never lists. Read the machine's own slot table too.
 - Name a reserved byte from its position. Unnamed stays unnamed.
-- Look for storage offsets in a panel or menu table. It holds names, control ids and range pointers, and two sessions went into proving that. Offsets come from the code that reads the record.
+- Assume what a panel or menu table's columns hold. It usually holds names, ids and range pointers: read what each column is before assuming it holds storage offsets, or that it does not. The DX7's panel table held the max and the offset of every stored byte.
 - Take a name as a law. It says what a value is called, never its unit or curve.
 - Trust a printed range over a firmware clamp. The corpus decides, and a range too small is data loss: a manual printed 0..19, the firmware clamps at 21, and real patches use 20 and 21.
 </constraints>

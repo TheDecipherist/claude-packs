@@ -13,10 +13,13 @@ Always do:
 - Look in the reference library's `toolchain/` shelf first (`claude-packs toolchain`, the `re-toolchain` skill), and use what is there.
 - Write a missing disassembler in `toolchain/disassemblers/FAMILY/`, with its row in that folder's README; write a missing emulator's CPU core in `toolchain/emulators/FAMILY/`, with a README whose first line names its families.
 - Keep in the project only what is the machine's own: its memory map, its peripherals, its test rig around the shared core.
+- Prove a new disassembler opcode for opcode against a reference disassembler run as a program, on the same bytes (`prove-a-disassembler`).
+- Measure a tool the second time it is needed, and make it refuse loudly, with a diagnostic, instead of returning nothing.
 
 Never do:
 - Write a disassembler in a project's `tools/`; `disassembler-in-the-library` refuses it.
 - Copy a third-party emulator's or disassembler's code into the library or a project: run it as a separate tool, and list it in `toolchain/third-party.md`.
+- Port one. Nothing is ported: MAME's `unidasm` runs only as a black-box reference program.
 </constraints>
 
 ## Check

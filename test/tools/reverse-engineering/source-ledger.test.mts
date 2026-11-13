@@ -61,3 +61,13 @@ test('the skill names the tool and its laws', () => {
   assert.match(skill, /^description: Use when/m);
   for (const law of [/node \.claude\/tools\/source-ledger\.mjs/, /A ticked row with no evidence is not done/, /Call the sound, a stage or a step finished while the tool exits 1/, /\| A schematic, a service sheet, a parts layout \| `read-a-circuit-diagram` \|/, /`chips\/<part>\.md`/, /`pdf-to-md`, figures exported/, /`bank-census`/, /`compare-to-the-machine`/]) assert.match(skill, law);
 });
+
+test('the hash pass lists files that are one image under two names, and passes when there are none', () => {
+  const dir = project();
+  const clean = spawnSync('node', [TOOL, '--hash', join(dir, 'sources/sheets')], { encoding: 'utf8' });
+  assert.equal(clean.status, 1, 'sheet-01 and sheet-02 hold the same bytes');
+  writeFileSync(join(dir, 'sources/sheets/sheet-02.png'), 'other');
+  const done = spawnSync('node', [TOOL, '--hash', join(dir, 'sources/sheets')], { encoding: 'utf8' });
+  assert.equal(done.status, 0, done.stdout);
+  assert.match(clean.stdout, /sheet-01\.png = .*sheet-02\.png|sheet-02\.png = .*sheet-01\.png/);
+});

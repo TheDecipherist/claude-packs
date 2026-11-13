@@ -16,7 +16,10 @@ Always do:
    - an emulator: search online (GitHub for the CPU's name with "emulator" or "simulator", MAME's CPU cores, the open-source projects that emulate the machines that used it) and write each find in the cell with its address and licence;
    - none anywhere: **ask the user** whether to build our own, in the library's `toolchain/emulators/FAMILY/` (the CPU core only: a machine's memory map and peripherals stay in its project's tests) (several house rebuilds did: the Matrix-12's 6809, the V-Synth GT's SH-4A), and write their answer in the cell: `build our own (the user, yes, DATE)`. With nobody there, the order cannot start: write what is missing in its `progress.md` and end, as the pre-flight would;
    - a Ghidra module and the manuals: as `workorder check` (the install block's `ghidra:` line) and `gather-sources` say.
+   Beside each tool row print the family's trap list (`family-traps.md`, beside this file): a disassembler that gets a family's traps wrong gives a silently wrong listing. Where a tool is missing and the trap list says how to install it, use `install-recipes.md`.
+   Seed recursive descent with every call target found by a linear scan, and print the coverage: low coverage is a gap in the opcode table, not a property of the firmware.
 4. **Use a third-party tool as a black box only:** run it, compare its outputs with ours, and never read, copy or link its code into the project (most emulators are GPL). Write in the order which tool checks which (the second reader of W4, the second emulator of W5).
+   A firmware routine that is a short run of a dozen instruction forms (an unpacker, a boot-time table builder) is run in a small interpreter of our own, not retyped: it gives the firmware's own answer. The interpreter lives in the library (`house-tools-live-in-the-library`).
 5. **Commit `toolchain.md` beside the order.** `workorder check` refuses a run whose `processors:` line names a processor without a settled disassembler and emulator in it.
 
 Never do:
