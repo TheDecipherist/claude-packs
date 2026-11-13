@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-12T22:51:00.383Z",
+  "updated": "2026-11-13T02:13:32.209Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/agents-held.md": "586ba41d9f5b6e0ba3d7ee33d023c761133b9175bb2e5cbde82eac1308e5474e",
@@ -65,7 +65,7 @@
     ".claude/hooks/lib/branches-ahead.mjs": "10361c8bdb4a59c5345a5724f9963fa51f73c0a7e76ee4955c3722b9827c55f7",
     ".claude/hooks/lib/brief-findings.mjs": "7fd053e20a75b628e9ab5fb0a8fcd958b50b96a66c75dd24a603015a1816a101",
     ".claude/hooks/lib/checks-compiled.mjs": "3cc7eded11b3ff6cdd784832fa4946fe4ba65948e3bfd871ff965d29b819c2bd",
-    ".claude/hooks/lib/child-group.mjs": "06fa432b5b68788007f8e5f37c8244f04777184a445ac042d98efcf1544f6808",
+    ".claude/hooks/lib/child-group.mjs": "30125d7807b1de676da874c3cedc81514cf917a0f24ce41bea7c6f7e027d5a29",
     ".claude/hooks/lib/code-shapes.mjs": "514d070fc1a258856296a153185add3197fd9ae0152bf10f45e0693a7e57b61b",
     ".claude/hooks/lib/command-prefix.mjs": "b472e13e31f4c32fddeeb9f42470ddbfb6b407818679b01c7784ba496e3f6ea6",
     ".claude/hooks/lib/compile-cache.mjs": "821f0714bf1dee1a79b6af72c91f800269aa0e69f13922a3b89c47cff2af0d76",
@@ -166,7 +166,7 @@
     ".claude/hooks/lib/source-exts.mjs": "dc2c58ddefb437755821a1e57f444dad598943b65449ac7defb1c9989b803a74",
     ".claude/hooks/lib/stop-cache-selftest.mjs": "d3b6549bb4f116c5bc5d2106f3edd377781bd91547c404d9713a096532e0814e",
     ".claude/hooks/lib/stop-cache.mjs": "2d7b9adeb9b4fe8a2d1eee4dd7f8e5b6b65f3c06b4b1bb47e2143b91cac5f658",
-    ".claude/hooks/lib/stop-look.mjs": "1d33c3a0bb418710868080888b2dcd6214cf2d75838543f30d02a522763b3169",
+    ".claude/hooks/lib/stop-look.mjs": "d75e1cc96573c67bde6e71d46a94b457145d93a7e296d6e7ad2ce48fdb3f7c38",
     ".claude/hooks/lib/stop-verdict.mjs": "ff104e59b6184287e7038e3af9003a7c33e45211f3a5e530ab239079e6d0e6d4",
     ".claude/hooks/lib/tool-target.mjs": "bd4e9e2c4129e61fb672a527d9ffad2f5e38fbcfbfa5961fa80c02c331a52c81",
     ".claude/hooks/lib/trunk-lag-selftest.mjs": "9cf06f391035dcdc36e625cce122cd338a9d3401f7756ea5c5c2089ad6b6fe30",
@@ -338,6 +338,6 @@
     ".claude/checks/void-needs-catch.json": "12b4b35a57eb7ef30a3caf58b05963598cf6707cb8675a322e3b770a4e555bed",
     ".claude/checks/zod-string-needs-max.json": "ab9f77c1e21580f1267428719b0559e88e249f5e556a6f21d6ff287651f5213a",
     ".claude/checks/zod-v4-formats.json": "f166bdec2daec4cb077ce26e790918069483245aad361ac11031bf1c2cb9894f",
-    ".claude/hooks/hooks.json": "56154f1aa0fb9e0fcb528a5b00544a5719384c5ae5b8bdd088353333fd8f553b"
+    ".claude/hooks/hooks.json": "9c8dc6b3b053ebf6a1367e820d316067e2445bdceb0bd8dafbc2ba69921da509"
   }
 }

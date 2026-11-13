@@ -336,6 +336,15 @@
     "role": "judge"
   },
   {
+    "hook": "governor-route",
+    "events": [
+      "SubagentStop"
+    ],
+    "timeout": 10,
+    "order": 10,
+    "role": "recorder"
+  },
+  {
     "hook": "making",
     "events": [
       "UserPromptSubmit"
@@ -352,14 +361,5 @@
     "timeout": 10,
     "order": 20,
     "role": "judge"
-  },
-  {
-    "hook": "governor-route",
-    "events": [
-      "SubagentStop"
-    ],
-    "timeout": 10,
-    "order": 10,
-    "role": "recorder"
   }
 ]
