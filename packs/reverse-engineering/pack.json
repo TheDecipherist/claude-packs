@@ -6,6 +6,7 @@
   "fits": ["base", "cpp", "synth-creator"],
   "requires": [],
   "tests": {
+    "hooks/catalog-entry-exists.mts": ["test/hooks/reverse-engineering/catalog-entry-exists.test.mts"],
     "hooks/firmware-out-of-git.mts": ["test/hooks/reverse-engineering/firmware-out-of-git.test.mts"],
     "tools/byte-profile.mts": ["test/tools/reverse-engineering/byte-profile.test.mts"],
     "tools/dump-triage.mts": ["test/tools/reverse-engineering/dump-triage.test.mts"],
@@ -38,8 +39,21 @@
   "engines": {
     "claude-packs": ">=0.28.0"
   },
+  "optIn": ["hooks/catalog-entry-exists.mjs"],
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/catalog-entry-exists.mjs\"",
+            "role": "judge",
+            "order": 110,
+            "timeout": 10
+          }
+        ]
+      },
       {
         "matcher": "Bash",
         "hooks": [

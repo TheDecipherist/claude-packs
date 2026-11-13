@@ -15,6 +15,8 @@ import type { Checkouts } from './worktree-rig.mts';
 // beside the base lib it imports: one scratch install, read here, as the cases of base's hooks read the source tree.
 const INSTALLED = fresh('worktree-cases-packs-');
 run(INSTALLED, 'init', '--config', 'synth-creator', 'cpp', 'audio-core', 'gpu-painter', 'reverse-engineering');
+withLayout(INSTALLED, { enable: ['hooks/catalog-entry-exists.mjs'] });   // opt-in: an update brings it
+run(INSTALLED, 'update');
 const caseOf = async (hook: string): Promise<(checkouts: Checkouts) => void> => {
   const module: unknown = await import(pathToFileURL(join(INSTALLED, '.claude/hooks', hook)).href);
   return caseFrom(hook, worktreeCaseOf(module, hook));
@@ -40,6 +42,7 @@ export const PACK_CASES: Record<string, PackCase> = {
   },
   'browser-guard.mjs': await caseOf('browser-guard.mjs'),
   'firmware-out-of-git.mjs': await caseOf('firmware-out-of-git.mjs'),
+  'catalog-entry-exists.mjs': await caseOf('catalog-entry-exists.mjs'),
   'release-lock.mjs': await caseOf('release-lock.mjs'),
   'chart-first.mjs': async (checkouts) => {
     const { here, wt } = checkouts;
