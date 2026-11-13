@@ -31,7 +31,7 @@ You are one agent of the audit work order (`docs/workorders/audit/workorder.md`)
 
 ## Before you commit
 
-- `npm run build`, `npm run check`, then `node scripts/counts.mts` (so the counts test passes locally), then `node .claude/tools/quiet-test.mjs npm run test:changed`. Fix what is red. The whole suite is never run.
+- `npm run build`, `npm run check`, then `node scripts/counts.mts` (so the counts test passes locally), then run the tests of the files you wrote or changed (`node .claude/tools/quiet-test.mjs node --import ./test/fresh-tmp.mts --test <files>`), plus `test/repo-lint.test.mts` and `test/counts.test.mts`. The lead runs `test:changed` on the merged step (decisions.md d-4). Fix what is red. The whole suite is never run.
 - Commit ONLY your unit files under `packs/`, their tests under `test/`, and your report. Do NOT commit what `counts.mts` regenerates (`README.md`, `site/`, `docs/rules-without-checks.md`, `docs/versions.md`, `packs/manifest-*.json`, planner files): the lead regenerates them after merging. Do NOT edit `build.md`, `units.md`, `progress.md`, `decisions.md`, `status.json` or `workflow-bugs.md`.
 - Stage by name: `git add <paths>`, then `git commit -m "..." -- <paths>`. Push your branch: `git push -u origin <branch>`. Never rebase, amend or force.
 
