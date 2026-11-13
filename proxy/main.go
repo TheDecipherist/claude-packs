@@ -31,6 +31,9 @@ func main() {
 			p := &proc{env: os.Environ(), cwd: cwd, ppid: os.Getppid(), uid: os.Getuid(), goos: runtime.GOOS, stdout: os.Stdout, stderr: os.Stderr, start: start}
 			os.Exit(p.runLoad(os.Args[2:]))
 		}
+		if os.Args[1] == "top" {
+			os.Exit(runTop(os.Args[2:], os.Stdout))
+		}
 		if os.Args[1] == "sample" {
 			os.Exit(runSample(os.Args[2:], os.Stdout))
 		}

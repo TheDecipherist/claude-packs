@@ -55,6 +55,10 @@ usage: npx --no-install @thedecipherist/claude-packs <command> [options]
                      logs crashes; logs clear <hook>|all fixed|superseded "<why>"
   daemon status|stop
                      the project's resident hook runner, from its pid file: pid, age, kit hash, events served, memory; stop ends it
+  top [--once] [project...]
+                     the terminal monitor: the governor's load and grants, every project with a live run, its lead and each agent
+                     (step, model, worktree, CPU, memory, processes, time since its last event, its last action); q quits,
+                     arrows move, enter opens a project or an agent (its last 20 actions), enter, q or escape goes back
   load ask|take|free|jobs [--for test|build|fuzz|agent|install] [--want N] [--priority P] [--json]
                      the machine's load governor, asked before every heavy job: how many cores it may use now and the
                      settings to start it with at that priority (0 to 1: the most of the budget it may hold), or wait

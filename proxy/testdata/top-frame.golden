@@ -1,0 +1,17 @@
+claude-packs top  2026-11-13 12:00:00Z   load 2.10 1.80 1.50   grants: 3 slots held by 2 jobs, 1 waiting
+  g1        agent  1 slots  shop        3m
+  g2        test   2 slots  shop        1m
+  g3        build  waits for 2 slots  quiet
+
+    NAME     STEP     MODEL   WORKTREE              CPU   MEM    PROC SINCE     LAST ACTION
+> quiet        ██░░░░░░░░  25%  3 items left · W0 Set up · 0 agents  0 proc · 0.0 cpu · 0M
+    lead     W0       -       .                     0%    0M     0p   2m ago    Grep find the loader
+  shop         █████░░░░░  59%  7 items left · W3b The import · 4 agents  20 proc · 5.7 cpu · 2.0G
+    lead     W3b      -       .                     35%   420M   3p   2s ago    Bash git status --short
+    a1       W3b      sonnet  .claude/worktrees/a1  142%  310M   5p   5s ago    Edit src/import.ts
+    a2       W3b      opus    .claude/worktrees/a2  380%  1.2G   9p   30s ago   Bash npm run test:changed -- --base or
+    a3       W3b      sonnet  .claude/worktrees/a3  0%    40M    1p   2m ago    Read README.md
+    a4       W3c      haiku   .claude/worktrees/a4  12%   95M    2p   1s ago    Write lib/new.ts
+  old          ████████░░  81%  3 items left · stale, last seen 27h ago
+
+q quit   up/down move   enter open
