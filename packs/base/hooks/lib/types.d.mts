@@ -118,7 +118,7 @@ export interface FileWrite {
 
 export interface LayoutFolder { path: string; purpose?: string; kind?: string; planned?: boolean }
 export interface LayoutKind { what?: string; in?: string; concepts?: readonly string[]; content?: boolean | string; files?: readonly string[]; extensions?: readonly string[] }
-export interface Look { name: string; reference: string; code?: readonly string[]; report?: string }
+export interface Look { name: string; reference: string; code?: readonly string[]; report?: string; heldOutMax?: number }
 
 /** `layout.json` `paramIds`: where param-id-lock reads parameter ids (its default is JUCE ParameterID literals). */
 export interface ParamIdSettings { extensions?: string; patterns?: readonly string[] }

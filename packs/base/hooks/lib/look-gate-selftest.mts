@@ -32,6 +32,14 @@ export function selftest(hook: string): number {
   commit('failing report', { 'build/evidence/looks/home.json': report('fail') });
   git(dir, 'switch', '-q', '-c', 'work/ui-pass', 'work/ui');
   commit('passing report', { 'build/evidence/looks/home.json': report('pass') });
+  const row = (limit: boolean) => ({ reference: -0.062, ...(limit ? { limit: 0.026 } : { best_fit: 0.03 }), reason: 'a shadow only darkens' });
+  const holding = (rows: Record<string, unknown>): string => toJson({ reference: 'design/reference/home.webp', code: key(), verdict: 'pass', held_out: rows });
+  git(dir, 'switch', '-q', '-c', 'work/ui-held-one', 'work/ui');
+  commit('one row held out, its limit shown', { 'build/evidence/looks/home.json': holding({ 'card bottom shadow': row(true) }) });
+  git(dir, 'switch', '-q', '-c', 'work/ui-held-fit', 'work/ui');
+  commit('one row held out on a fit, no limit', { 'build/evidence/looks/home.json': holding({ 'card bottom shadow': row(false) }) });
+  git(dir, 'switch', '-q', '-c', 'work/ui-held-many', 'work/ui');
+  commit('three rows held out', { 'build/evidence/looks/home.json': holding({ a: row(true), b: row(true), c: row(true) }) });
   git(dir, 'switch', '-q', '-c', 'work/ui-legacy', 'work/ui');
   commit('a report in the old form, with a commit', { 'build/evidence/looks/home.json': legacy('pass') });
   git(dir, 'switch', '-q', '-c', 'work/ui-stale', 'work/ui-pass');
@@ -46,6 +54,9 @@ export function selftest(hook: string): number {
     ['a stale report: its code key is not that of the current code', land('work/ui-stale'), 2],
     ['a fresh passing report', land('work/ui-pass'), 0],
     ['a report in the old form (a commit, no code) still counts', land('work/ui-legacy'), 0],
+    ['a passing report holding one row out, with its limit', land('work/ui-held-one'), 0],
+    ['a row held out on a fit\'s best, with no limit (KWB-217)', land('work/ui-held-fit'), 2],
+    ['more rows held out than the look allows (KWB-217: 14 on one theme)', land('work/ui-held-many'), 2],
     ['a branch that changed no look code', land('work/engine'), 0],
     ['merging the trunk itself is no landing', land('origin/main'), 0],
     ['after a build, the due look is named', /look-gate: this branch changed the code that draws home/.test(due) ? 1 : 0, 1],
