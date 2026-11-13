@@ -14,6 +14,8 @@ Always do:
 - Modulate tank delays slowly (around 1 Hz, quadrature LFOs) with small excursion. Dattorro's plate uses 16 samples at 29761 Hz, scaled to fs.
 - Make freeze/infinite mode exactly unity gain with the unitary check, never "slightly above 1".
 
+- Apply the same bound to any multi-path feedback (a delay network, a comb bank, a resonator pair): make the loop's total gain below 1 and report the scale used.
+
 Never do:
 - Tune a "bigger" hall by raising feedback toward or past 1. Lengthen the lines or change the damping.
 </constraints>

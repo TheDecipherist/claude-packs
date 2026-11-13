@@ -10,6 +10,7 @@ paths:
 Always do:
 - Keep the sample rate, phase accumulators, phase increments and tempo/clock positions in `double`.
 - Compute filter coefficients in `double`. Store them as `float` only after they're normalised.
+- Keep slew states (the value a slew limiter or glide moves toward its target) in `double`: a float state stalls short of its target.
 - Use a `double` accumulator (or pairwise summation) for RMS, energy, metering and any long running sum.
 
 Never do:

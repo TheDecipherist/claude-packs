@@ -14,6 +14,7 @@ Always do:
 - Make caption bars 22 high, chips 34 to 61 wide by 16 to 19 high, time windows 96 by 52.
 - Set type by its job: a column's foot name in the 28 class, bold; bar labels 13 to 15; plate labels 16; a knob's name about 13, its value about 12, a satellite's name 9. The floor is 9 for a satellite's name and 13 for everything else.
 - Use one condensed family: names in uppercase, a selector's values in mixed case, no italics.
+- Wrap a long legend onto a second line; its type keeps its size. A LED list's row pitch is its font size plus 1.
 - Keep 8 units between any two pieces of text, and 14 between a section's name and its lamp.
 - Keep every number a token in one place, read by name: change it there and every panel follows.
 - Hold each of these as a row of the look gate (`page-matches-reference-look`): radius by kind, the hub to satellite ratio, the type floors, the gap between texts and the needle's contrast, each with its tolerance.

@@ -13,6 +13,7 @@ Always do:
 - Oversample only the nonlinear "island", not the whole chain. Pick the smallest factor the measurement allows: host rate, then 2x, then 4x, then 8x only with evidence.
 - Use ADAA only on memoryless curves (tanh, soft clip, folder). Stages with memory (envelopes, feedback) need oversampling instead.
 - Count ADAA's half-sample delay in the latency of that path. Inside a filter feedback loop, absorb it structurally (Parker, Zavalishin & Le Bivic, DAFx-16 §6.1). Never drop ADAA into a loop as-is.
+- Align a parallel layer's latency with the dry path when a stage runs oversampled beside it, so the two sum in phase.
 - Treat bit reduction and sample-rate reduction (FireBloom's BITS, the BIT effect) as *intended* aliasing: run them at host rate without oversampling, feed them an already band-limited signal, and follow them with a DC blocker.
 
 Never do:

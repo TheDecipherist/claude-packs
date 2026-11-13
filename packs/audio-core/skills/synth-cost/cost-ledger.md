@@ -4,7 +4,7 @@ The interview adds one thing at a time: another oscillator, unison, a filter per
 
 ## How it is counted
 
-Everything is in **units per voice**, where 1 unit is one band-limited saw oscillator at 44.1 kHz (most DAW projects run at 44.1 kHz because most sample packs are 44.1; 48 kHz is the second figure, never the only one). The total is `units per voice x voices + global units`. The numbers below are planning estimates, not measurements: W0 of every order measures the real unit (one INIT voice, worst block, at 44.1 kHz and 128 samples, and again at 48 kHz) and the ledger is re-scaled to it before W1. The order states both the estimate and the measured figure.
+Everything is in **units per voice**, where 1 unit is one band-limited saw oscillator at 44.1 kHz (most DAW projects run at 44.1 kHz because most sample packs are 44.1; 48 kHz is the second figure, never the only one). The total is `units per voice x voices + global units`. The ledger names the program it was measured on (the patch, its voices and its settings), so a figure is read against that program. The numbers below are planning estimates, not measurements: W0 of every order measures the real unit (one INIT voice, worst block, at 44.1 kHz and 128 samples, and again at 48 kHz) and the ledger is re-scaled to it before W1. The order states both the estimate and the measured figure.
 
 | per voice | units | note |
 |---|---|---|

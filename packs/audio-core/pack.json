@@ -10,7 +10,11 @@
     "hooks/lib/settings-standard.mts": ["test/hooks/audio-core/settings-layer.test.mts"],
     "hooks/lib/smoothing-checks.mts": ["test/hooks/audio-core/realtime-guard.test.mts"],
     "hooks/param-id-lock.mts": ["test/hooks/audio-core/param-id-lock.test.mts"],
+    "hooks/lib/judge-checkouts.mts": ["test/hooks/audio-core/param-id-lock.test.mts", "test/hooks/audio-core/release-lock.test.mts"],
+    "hooks/lib/param-sources.mts": ["test/hooks/audio-core/param-id-lock.test.mts", "test/hooks/audio-core/release-lock.test.mts"],
+    "hooks/lib/release-facts.mts": ["test/hooks/audio-core/release-lock.test.mts"],
     "hooks/realtime-guard.mts": ["test/hooks/audio-core/realtime-guard.test.mts"],
+    "hooks/release-lock.mts": ["test/hooks/audio-core/release-lock.test.mts"],
     "hooks/settings-layer.mts": ["test/hooks/audio-core/settings-layer.test.mts"],
     "tools/lib/spectrum.mts": ["test/tools/audio-core/tone-report.test.mts"],
     "tools/lib/wav.mts": ["test/tools/audio-core/tone-report.test.mts"],
@@ -133,6 +137,13 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/param-id-lock.mjs\"",
             "role": "recorder",
             "order": 10,
+            "timeout": 20
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/release-lock.mjs\"",
+            "role": "judge",
+            "order": 11,
             "timeout": 20
           }
         ]

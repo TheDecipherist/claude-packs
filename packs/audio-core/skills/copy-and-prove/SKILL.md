@@ -1,9 +1,9 @@
 ---
 name: copy-and-prove
-description: Use when code is taken from another house synth (an engine, an effect, any part) into this one, when a fresh copy must be measured against its source, or when a ported part sounds different from where it came from. Also /copy-and-prove.
+description: Use when code is taken from another house synth into this one, a fresh copy must be measured against its source, or a ported part sounds different from where it came from. Also /copy-and-prove.
 ---
 
-# Copy a part, prove it, then make it yours
+# Copy a part, prove it, then make it yours (one job: a copied part measured identical before it changes)
 
 The canonical text is the target synth's `CLAUDE.md` (its sharing rule: which synth parts come from, and from which
 branch) and its `docs/licences.md`. This file is the operating summary; the repo wins.
@@ -13,8 +13,16 @@ in `synthkit/components`). Everything else that comes from another synth is COPI
 source synth is not touched and nothing is shared with it. A project that links no global component copies those too,
 with a licence row, like any other part.
 
-Why the proof comes first: on MegaSynth, regrouping one multiply in a copied engine moved all 907 programs. Nobody could
+Why the proof comes first: on one synth, regrouping one multiply in a copied engine moved all 907 programs. Nobody could
 say whether the copy or the tidy-up did it, because the copy had never been measured by itself.
+
+<constraints>
+Always do:
+- Follow the steps below in order, and measure the copy before changing it.
+
+Never do:
+- Rework a copy that has not matched its source.
+</constraints>
 
 ## 0. Is it a copy at all?
 
@@ -46,6 +54,8 @@ Build the SOURCE synth (its current trunk, read through git at a named commit) a
 probe: one fixed setting, a fresh processor, a fixed seed, at least two notes away from middle C, long enough to hold the
 whole tail of an effect. Keep the WAV, its hash and the exact settings in the target's evidence folder. This is the
 baseline. Build it before theorising about anything.
+
+Render at a real velocity and level, never at the default of 1.0 or full scale, and render the source's built plugin as well as its code, since a build can differ from what the code says.
 
 First assertion: render the source twice. If the two differ, find the un-reset state (grep for `static`, seeds, phases)
 before going on. Nothing can be compared with a source that does not match itself.
@@ -79,6 +89,10 @@ Show the gate can fail: change one coefficient in the copy, see `DIFFERENT`, put
 
 If it will not come out identical after an honest try, log it in `bugs.md` with both renders' numbers and ask. Do not
 start reworking a copy that has not matched.
+
+A local compensation (a fix made here for a fault upstream) carries a test that fails when upstream is fixed, so the compensation is removed then.
+
+Moving a part into a shared component: put a shim at the old name, let the host keep its own format, and give the local ids a prefix or a map. A block lists the hardware facts it assumed. A change to a shared block defaults to identity (off is unchanged). Prove equality over the whole domain, never a sample. List partial entries. Re-derive geometry and ranges on the new host.
 
 ## 5. Only now, change it
 
