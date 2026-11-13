@@ -103,11 +103,14 @@ const KNOWN_REDS: readonly { file: string; from: string; to: string }[] = [
 const env0 = (url: string): NodeJS.ProcessEnv => ({ ...process.env, NPM_CONFIG_USERCONFIG: join(SCRATCH, 'npmrc'), GH_TOKEN: '', REGISTRY_URL: url });
 
 function setAsideKnownReds(clone: string, env: NodeJS.ProcessEnv): void {
+  let set = 0;
   for (const { file, from, to } of KNOWN_REDS) {
     const text = readText(join(clone, file)) ?? '';
-    if (!text.includes(from)) throw new Error(`${file} no longer holds the known red's line: ${from}`);
+    if (!text.includes(from)) continue; // the red was fixed on the branch (W11: doctor-cache's), so nothing is set aside
     put(join(clone, file), text.replace(from, to));
+    set += 1;
   }
+  if (set === 0) return;
   run(clone, 'git', ['commit', '-q', '-a', '-m', 'scratch: the known reds set aside'], env);
   run(clone, 'git', ['push', '-q', 'origin', 'HEAD:refs/heads/main'], env);
 }

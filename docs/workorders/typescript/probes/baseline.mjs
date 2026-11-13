@@ -100,18 +100,22 @@ function update() {
 const settingsOf = (dir) => readJson(join(dir, '.claude', 'settings.json'), {});
 const bashEvent = (dir) => toJson({ session_id: 'baseline', transcript_path: '', cwd: dir, hook_event_name: 'PreToolUse',
   tool_name: 'Bash', tool_input: { command: 'ls', description: 'List files' } });
-// (h): one Bash event through a base install's runner entry for Bash alone (base's six Bash hooks), 10 starts.
+// (h): one Bash event through a base install's entry for Bash (the sh picker since W8: the Go client and the daemon when the cache holds the
+// binary, the TypeScript runner when it does not), 10 starts of each. Taken as W0 took it: a `ls` payload, the command from the settings.
 function runner() {
   const dir = scratch();
-  run('node', [cli, 'init', '--config', 'base', '--dir', dir]);
-  const settings = settingsOf(dir);
-  const entries = (settings.hooks.PreToolUse ?? []).filter((g) => g.matcher === 'Bash').flatMap((g) => g.hooks.map((h) => h.command));
-  const command = entries.find((c) => c.includes('run-hooks')) ?? entries[0];
-  const hooks = command.split('.mjs').length - 2;
-  const env = { CLAUDE_PROJECT_DIR: dir };
-  const times = Array.from({ length: 10 }, () => run('sh', ['-c', command], { cwd: dir, env, input: bashEvent(dir) }).ms).sort((a, b) => a - b);
-  say(`- (h) one Bash event through the runner and its ${hooks} hooks (a base install), 10 starts: **${times[5]} ms** median ` +
-    `(all: ${times.join(', ')}; load ${load()})\n  command: \`${command.replace(dir, '<install>')}\``);
+  const cache = mkdtempSync(join(tmpdir(), 'baseline-cache-'));
+  run('node', [cli, 'init', '--config', 'base', '--dir', dir], { env: { CLAUDE_PACKS_CACHE: cache } });
+  const entries = (settingsOf(dir).hooks.PreToolUse ?? []).filter((g) => g.matcher && new RegExp(`^(?:${g.matcher})$`).test('Bash')).flatMap((g) => g.hooks.filter((h) => !h.async).map((h) => h.command));
+  const command = entries[0];
+  for (const [mode, env] of [['TypeScript runner (no binary: HOME is a scratch)', { HOME: mkdtempSync(join(tmpdir(), 'baseline-home-')) }], ['Go client and daemon (warm)', { CLAUDE_PACKS_CACHE: cache }]]) {
+    const e = { CLAUDE_PROJECT_DIR: dir, ...env };
+    if (mode.startsWith('Go')) run('sh', ['-c', command], { cwd: dir, env: e, input: bashEvent(dir) });
+    const before = load();
+    const times = Array.from({ length: 10 }, () => run('sh', ['-c', command], { cwd: dir, env: e, input: bashEvent(dir) }).ms).sort((a, b) => a - b);
+    say(`- (h) one Bash event through the install's entry, ${mode}, 10 starts: **${times[5]} ms** median (all: ${times.join(', ')}; load ${before})\n  command: \`${command}\``);
+    if (mode.startsWith('Go')) run('node', [cli, 'daemon', 'stop', '--dir', dir], { env: e });
+  }
 }
 
 // (i): the status line, a render's wall (median of 10) and its CPU (user+sys) times the renders a minute at its refreshInterval.
@@ -141,8 +145,8 @@ function build() {
 
 // (k): the npm package, its size and file count.
 function pack() {
-  const r = run('npm', ['pack', '--dry-run', '--json']);
-  const [p] = parseJson(r.out.slice(r.out.indexOf('[')), [{}]);
+  const r = run('npm', ['pack', '--dry-run', '--json', '--ignore-scripts']);
+  const [p] = parseJson(r.out.slice(r.out.search(/^\[/m)), [{}]); // the prepare script prints its own lines first
   say(`- (k) npm pack: **${(p.size / 1048576).toFixed(2)} MB** packed, ${(p.unpackedSize / 1048576).toFixed(2)} MB unpacked, ` +
     `**${p.entryCount} files** (load ${load()})\n  command: \`npm pack --dry-run --json\``);
 }

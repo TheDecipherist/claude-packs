@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w11-measure (work/2.0.0-ts-w11-measure), started 2026-11-13: W11 item 1, the after-measurements into build/evidence/W11/after.md and numbers.json.
+  making: probes that replay the fixture with totals, count node starts, time a scripted feature task, read the daemon's RSS; concepts: none (design/shape.json declares none); reuse: makeScratch, settingsCommandOf, payloadOf (scripts/replay-lib.mts).
+
 - 2.0.0 w11-ab (work/2.0.0-ts-w11-ab), started 2026-11-13: W11 item 0, the five A/B tasks compared with the originals in docs/workorders/typescript/ab.md.
   making: ab.md assembled from scripts/ab-compare.mts rows, the clones' gate runs and logs; concepts: none (design/shape.json declares none); reuse: compareRow and summariseTranscript (scripts/ab-compare.mts, ab-transcript.mts).
 

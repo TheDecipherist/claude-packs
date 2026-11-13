@@ -7,7 +7,8 @@ import { join, resolve } from 'node:path';
 import { parseJson, readJson, toJson, writeJson } from '../packs/base/hooks/lib/json.mts';
 
 export const KIT = resolve(import.meta.dirname, '..');
-export const CLI = join(KIT, 'bin/claude-packs.mjs');
+/** The command line the scratch is installed with: this tree's, or another version's (REPLAY_CLI, a path to its `bin/claude-packs.mjs`) to measure it the same way. */
+export const CLI = process.env['REPLAY_CLI'] ?? join(KIT, 'bin/claude-packs.mjs');
 
 export const sh = (cmd: string, cwd: string, env: NodeJS.ProcessEnv = process.env): { status: number | null; out: string } => {
   const r = spawnSync('sh', ['-c', cmd], { cwd, env, encoding: 'utf8', maxBuffer: 1 << 26 });
@@ -67,13 +68,16 @@ export function makeScratch(root: string, lag: number, installEnv: NodeJS.Proces
 }
 
 interface Entry { matcher?: string; hooks: { command: string; async?: boolean }[] }
-/** The command the project's settings run for an event of a tool (null: none judges it). */
+/** The command the project's settings run for an event of a tool (null: none judges it). Where several blocking entries match, as in an
+ *  older install, they run at once on the one event, as Claude Code runs them: the command is the group, ending when the last one does. */
 export function settingsCommandOf(dir: string): (event: string, tool: string) => string | null {
   const settings = readJson<{ hooks: Record<string, Entry[]> }>(join(dir, '.claude/settings.json'), { hooks: {} }) ?? { hooks: {} };
   return (event, tool) => {
     const match = (x: Entry): boolean => x.matcher === undefined || x.matcher === '*' || new RegExp(`^(?:${x.matcher})$`).test(tool);
-    const entry = (settings.hooks[event] ?? []).find((x) => match(x) && x.hooks.some((h) => !h.async));
-    return entry?.hooks.find((h) => !h.async)?.command ?? null;
+    const commands = (settings.hooks[event] ?? []).filter(match).flatMap((x) => x.hooks.filter((h) => !h.async).map((h) => h.command));
+    if (commands.length === 0) return null;
+    if (commands.length === 1) return commands[0] ?? null;
+    return `f=$(mktemp); cat > "$f"; { ${commands.map((c) => `{ ${c}; } < "$f" &`).join(' ')} wait; }; rm -f "$f"`;
   };
 }
 
