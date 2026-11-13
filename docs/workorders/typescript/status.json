@@ -74,6 +74,14 @@
       "agent": null
     },
     {
+      "id": "W8.9",
+      "title": "One row per project, and a terminal monitor",
+      "items": 5,
+      "done": 3,
+      "agent": "w89-top",
+      "note": "items 1 to 3 done by the lead (1c9758c, e1a5a9b, aabc7dc); item 4, claude-packs top, with w89-top"
+    },
+    {
       "id": "W9",
       "title": "The release in five minutes",
       "items": 4,
