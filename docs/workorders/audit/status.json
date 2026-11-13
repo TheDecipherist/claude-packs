@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T21:57:24.890Z",
+  "updated": "2026-11-13T22:29:00.517Z",
   "steps": [
     {
       "id": "W0",
@@ -12,7 +12,7 @@
       "id": "W1",
       "title": "reverse-engineering: the firmware pass",
       "items": 4,
-      "done": 0,
+      "done": 4,
       "agent": null
     },
     {
@@ -20,7 +20,7 @@
       "title": "base",
       "items": 4,
       "done": 0,
-      "agent": null
+      "agent": "base-a"
     },
     {
       "id": "W3",
@@ -79,5 +79,30 @@
       "agent": null
     }
   ],
-  "agents": []
+  "agents": [
+    {
+      "name": "base-a",
+      "worktree": ".claude/worktrees/base-a",
+      "step": "W2",
+      "started": "2026-11-13T22:22:45.707Z"
+    },
+    {
+      "name": "base-b",
+      "worktree": ".claude/worktrees/base-b",
+      "step": "W2",
+      "started": "2026-11-13T22:22:45.708Z"
+    },
+    {
+      "name": "base-c",
+      "worktree": ".claude/worktrees/base-c",
+      "step": "W2",
+      "started": "2026-11-13T22:22:45.708Z"
+    },
+    {
+      "name": "base-d",
+      "worktree": ".claude/worktrees/base-d",
+      "step": "W2",
+      "started": "2026-11-13T22:22:45.708Z"
+    }
+  ]
 }
