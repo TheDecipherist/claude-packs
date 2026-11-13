@@ -16,6 +16,10 @@ Always do:
 5. Assert the beat alignment, not only the spacing.
 6. Check two renders are bit-identical apart from the thing under test.
 7. Plant the fault, see it red, and revert at once.
+8. Check the default at open: leave the unit untouched, measure each time destination at 120 and at 90 BPM, standalone and as a plugin, and judge it with `.claude/tools/open-default-probe.mjs`. A probe that sets up the thing it tests cannot see a bad default. When a feature does nothing, check its default before its wiring.
+9. Run the probe with the transport playing: a stopped host sends no clock. To isolate one tap, zero its division as well as its value, since a division overrides the stored time.
+10. For a unit with no time destination, gate the sound through an LFO-rate destination and measure it at three tempos.
+11. Probe a transport jump, a loop and a time-signature change.
 
 Never do:
 - Call a division test proof of a clock.
