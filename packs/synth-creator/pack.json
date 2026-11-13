@@ -22,6 +22,8 @@
     "hooks/stage-guard.mts": ["test/hooks/synth-creator/stage-guard.test.mts"],
     "hooks/time-guard.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
     "hooks/user-asks.mts": ["test/hooks/synth-creator/user-asks.test.mts"],
+    "tools/can-open.mts": ["test/tools/synth-creator/can-open.test.mts"],
+    "tools/docs-current.mts": ["test/tools/synth-creator/docs-current.test.mts"],
     "tools/buildq.mts": ["test/tools/synth-creator/buildq.test.mts"],
     "tools/freeze.mts": ["test/tools/synth-creator/freeze.test.mts"]
   },
