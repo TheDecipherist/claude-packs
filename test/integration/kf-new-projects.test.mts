@@ -127,5 +127,10 @@ test('KF-41: one cheap pass of every instance is asked for, kept apart from the 
 // the user, 2026-11-13, after putting the DSP56300 Family Manual in supernova2 by hand: "this is something the kit needs to be able to do on its own"
 test('gather-sources fetches every processor\'s manuals itself, into the archive and the library, never asking the user', () => {
   const text = pack('reverse-engineering/skills/gather-sources/SKILL.md');
-  for (const law of [/every processor the firmware runs on/, /never ask the user to find one/, /programming or family manual/, /the maker's site/, /outside every repo/, /bring the Markdown into the reference library/, /never from memory/]) assert.match(text, law);
+  for (const law of [/every processor the firmware runs on/, /never ask the user to find one/, /programming or family manual/, /datasheet-sources\.md/, /outside every repo/, /bring the Markdown into the reference library/, /never from memory/]) assert.match(text, law);
+  // the one list of where a data sheet is found, in order: alldatasheet the user's most successful archive (2026-11-13)
+  const sources = pack('reverse-engineering/skills/gather-sources/datasheet-sources.md');
+  for (const law of [/The reference library/, /The maker, or its successor/, /alldatasheet\.com\/view\.jsp\?Searchword=PART/, /datasheet-pdf\/download\/ID\/MAKER\/PART\.html/, /the user's most successful archive/, /a lead for the original/]) assert.match(sources, law);
+  assert.ok(sources.indexOf('The maker') < sources.indexOf('alldatasheet') && sources.indexOf('alldatasheet') < sources.indexOf('datasheetarchive'), 'in order: the maker, alldatasheet, the other archives');
+  assert.match(pack('reverse-engineering/skills/read-a-circuit-diagram/SKILL.md'), /datasheet-sources\.md/, 'a chip page looks in the same list');
 });
