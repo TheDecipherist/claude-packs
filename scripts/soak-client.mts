@@ -7,27 +7,15 @@ import { spawn } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { toJson } from '../packs/base/hooks/lib/json.mts';
+import { isPartial, sameVerdict, type Answer } from './soak-verdict.mts';
 import { fixtureEvents, payloadOf, settingsCommandOf } from './replay-lib.mts';
 
 const COMPARE_EVERY = 20;
 const REFUSE_EVERY = 5;
 const REPORT_MS = 5000;
 const EVENT_TIMEOUT_MS = 60_000;
-const NOT_JUDGED = 'not judged by';
-const OVER_TIME_MESSAGE = /,?"systemMessage":"not judged by [^"]*\(over time\)"/g;
-const GOVERNOR_FIGURES = /\d+(\.\d+)?/g;
-
-/** The answer without what only the daemon adds when a judge ran out of time, and (for the governor's refusals, which print the machine's load
- *  and slot counts at that moment) without its figures: what is left is the exit code, the hooks that spoke and what they said. */
-const verdictOf = (a: Answer): { code: number | null; out: string; err: string } => {
-  const out = a.out.replace(OVER_TIME_MESSAGE, '').replace(/^\{\}$/, '').trim();
-  return { code: a.code, out, err: a.err.includes('governor-route') ? a.err.replace(GOVERNOR_FIGURES, '#') : a.err };
-};
-const sameVerdict = (a: Answer, b: Answer): boolean => toJson(verdictOf(a)) === toJson(verdictOf(b));
-
 interface Setup { dir: string; cache: string; index: number; clients: number; ratePerSec: number; differences: string }
 export interface Counters { done: number; compared: number; refusalsCompared: number; refusalsSeen: number; overTime: number; differences: number; failed: number; wallMs: number }
-interface Answer { code: number | null; out: string; err: string; ms: number }
 
 const setup = JSON.parse(process.argv[2] ?? '{}') as Setup;   // the parent's own JSON
 const events = fixtureEvents();
@@ -66,9 +54,8 @@ async function compare(event: string, tool: string, command: string, input: stri
   counters.compared += 1;
   if (planted) counters.refusalsCompared += 1;
   if (viaTs.code === 2) counters.refusalsSeen += 1;
-  // a judge the daemon cut at its time limit adds a "not judged by X (over time)" message to stdout; it is counted, and the verdict is compared without it
-  const overTime = viaDaemon.out.includes(NOT_JUDGED);
-  if (overTime) counters.overTime += 1;
+  // KWB-216: a "not judged by X (over time)" answer is a partial verdict: counted, and a difference
+  if (isPartial(viaDaemon)) counters.overTime += 1;
   if (!sameVerdict(viaDaemon, viaTs)) {
     counters.differences += 1;
     appendFileSync(setup.differences, `${toJson({ client: setup.index, k, event, tool, planted, daemon: viaDaemon, ts: viaTs })}\n`);
