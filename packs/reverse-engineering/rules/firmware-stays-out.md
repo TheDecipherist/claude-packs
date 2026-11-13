@@ -1,5 +1,7 @@
 ---
 # concepts: cpp, js, notes, tooling
+paths:
+  - "placeholder"
 ---
 
 # Firmware stays out of git: ship facts, never bytes
@@ -16,3 +18,6 @@ Never do:
 - Paste table bytes into source, not even a 128-byte curve.
 - Commit a sound bank to make a test pass, unless it is a named fixture.
 </constraints>
+
+## Check
+`no-rom-table-literal` refuses a long numeric table pasted into source; the `firmware-out-of-git` hook refuses staging an image.

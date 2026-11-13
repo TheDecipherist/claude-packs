@@ -1,6 +1,6 @@
 ---
 name: read-the-dsp-program
-description: Use when a DSP program must be found, carved from an image or read, when a host-interface register block or a program-download loop appears in the firmware, or when a host word's unit or a reverb or effect structure is decided.
+description: Use when a DSP program must be found, carved or read, when a host-interface register block or program-download loop appears in the firmware, or when an effect structure is decided.
 ---
 
 # Read the DSP program (one job: find, carve and read a DSP program so its consumption fixes units and structure)

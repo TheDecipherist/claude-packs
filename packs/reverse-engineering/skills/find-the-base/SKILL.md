@@ -1,6 +1,6 @@
 ---
 name: find-the-base
-description: Use when the load address of an image, a bank or a blob is unknown, when jump targets and strings do not line up, when a bank is relocated, mirrored or banked, or before any address in a listing is given a meaning.
+description: Use when the load address of an image, bank or blob is unknown, when jump targets and strings do not line up, or when a bank is relocated, mirrored or banked.
 ---
 
 # Find the base of an image (one job: prove where it is loaded, by a score with a stated margin)

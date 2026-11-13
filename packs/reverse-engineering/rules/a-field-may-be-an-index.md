@@ -1,5 +1,7 @@
 ---
 # concepts: cpp, js, notes, tooling
+paths:
+  - "placeholder"
 ---
 
 # Before a field is read as a value, test whether it is an index, and from which base

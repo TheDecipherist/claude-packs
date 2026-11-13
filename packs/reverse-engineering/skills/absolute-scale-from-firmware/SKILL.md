@@ -1,6 +1,6 @@
 ---
 name: absolute-scale-from-firmware
-description: Use when register words or table entries must become Hz, seconds or dB with no ear to judge, when a firmware equate such as A4 = 440 or a printed range or delay maximum is found, or when a filter or time law is chosen.
+description: Use when register words or table entries must become Hz, seconds or dB with no ear to judge, or when a firmware equate (A4 = 440), a printed range or a delay maximum is found.
 ---
 
 # Take the absolute scale from firmware (one job: turn register words into Hz, seconds and dB with no ear)

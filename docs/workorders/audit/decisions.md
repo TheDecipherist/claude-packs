@@ -19,3 +19,8 @@
 - Question: each agent's `test:changed` reaches about 120 test files (a new tool reaches the hook rig) and waits on the load governor; W1's agents could not finish it.
 - Options: every agent runs test:changed; agents run the tests of the files they wrote plus the repo lint and counts tests, and the lead runs test:changed once on the merged step.
 - Chose: the second. The merged result is the one that lands, so the lead's run on it is the gate; an agent still proves its own tests red first.
+
+## d-5 Where E28 goes, and what a touched file must pass {#d-5}
+- Question: the conformance gate (test/pack-content.test.mts) holds every new or changed pack file to the whole set. `unattended-runs.md` has no frontmatter (R1); giving it `# concepts:` or `# hook:` would change when it loads, which is a change to how the kit works. E28 was written into it.
+- Options: change its loading; keep E28 there and leave the gate red; put E28 in the base rule about logs.
+- Chose: E28 goes into `plan-and-logs.md` ("Log it when several units fit different constants to one shared law, and fix the law once, with every unit's measurements"), `unattended-runs.md` is left as it was, and its missing frontmatter goes to the user (FOR THE USER). Other touched files were brought up to the set without a change of meaning: a `paths: placeholder` line in the reverse-engineering rules (paths are generated at install), `## Check` sections naming the checks that already point at a rule, nine skill descriptions cut under 200 characters, two "you" lines reworded, and a project's name taken out of `subagent-dispatch.md`'s example. The ratchet's counts fell (R1 83 to 75, R6 21 to 18, R7 21 to 20, S7 11 to 10).

@@ -1,5 +1,7 @@
 ---
 # concepts: cpp, js, notes, tooling
+paths:
+  - "placeholder"
 ---
 
 # Every law carries its source, and a guess is a debt
@@ -26,3 +28,6 @@ Never do:
 - Let a sourced fact launder a guess in the same formula.
 - Tag a block you wrote yourself as firmware-exact. Say what it is: the right kind of effect, not a clone.
 </constraints>
+
+## Check
+`ear-constant-tagged` refuses a constant tuned by ear with no `[EAR]` tag.

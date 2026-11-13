@@ -1,5 +1,7 @@
 ---
 # concepts: cpp, js, notes, tooling
+paths:
+  - "placeholder"
 ---
 
 # A computed value is a sum: account for every term
@@ -21,3 +23,6 @@ Never do:
 - Hide a missing term behind a fudge factor: fix the term, then re-anchor.
 - Let a value the loader distrusts fall back to a default in silence. Hundreds of presets sounded fine while being the wrong sound.
 </constraints>
+
+## Check
+`no-default-on-distrust` refuses a distrusted value that falls back to a default in silence; `prose-never-decides` refuses a description substring that decides a mechanism.

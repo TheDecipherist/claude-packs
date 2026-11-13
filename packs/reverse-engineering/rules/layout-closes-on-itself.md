@@ -1,5 +1,7 @@
 ---
 # concepts: cpp, js, notes, tooling
+paths:
+  - "placeholder"
 ---
 
 # A layout is proved by arithmetic that closes and was not used to fit it

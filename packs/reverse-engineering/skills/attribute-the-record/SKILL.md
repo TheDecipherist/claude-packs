@@ -1,6 +1,6 @@
 ---
 name: attribute-the-record
-description: Use when the bytes of a stored patch, program or preset are to be mapped to the machine's running parameters, when a sysex spec, a receive or bulk-dump handler, a controller table or a packer is found, or before any stored offset is given a name.
+description: Use when a stored patch's bytes are to be mapped to the running parameters, when a sysex spec, receive or bulk-dump handler or packer is found, or before a stored offset is named.
 ---
 
 # Attribute the record (one job: map every stored byte of a patch to the running record through the code that receives, reads and sends it)

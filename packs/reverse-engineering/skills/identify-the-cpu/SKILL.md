@@ -1,6 +1,6 @@
 ---
 name: identify-the-cpu
-description: Use when an image has to be disassembled and its processor is not yet proved, when a vendor name or a board photo is the only evidence for the CPU, when a listing looks plausible but wrong, or before a disassembler is chosen.
+description: Use when an image's processor is not yet proved, when a vendor name or board photo is the only evidence for the CPU, when a listing looks plausible but wrong, or before a disassembler is chosen.
 ---
 
 # Identify the CPU from the image (one job: name each processor, proved three ways, before a disassembler is chosen)

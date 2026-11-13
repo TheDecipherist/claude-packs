@@ -26,5 +26,5 @@ Never do:
 - Let a worker agent spawn its own reviewer. It doubles the cost and its approval counts for nothing.
 - Start an agent for something one script call or one Read can answer.
 - Never name a fixed instance in a brief ("drive slot 2", "the PAD slot"): a brief that names one instance gets work proved on that
-  instance only (Stellix B-178: every step proved on slot 2, the other three slots left behind).
+  instance only (one build's B-178: every step proved on slot 2, the other three slots left behind).
 </constraints>

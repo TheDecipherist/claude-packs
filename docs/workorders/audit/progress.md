@@ -13,4 +13,6 @@ Session 1 started 2026-11-13. `workorder check audit`: OK.
 
 ## FOR THE USER
 
+- `packs/base/rules/unattended-runs.md` has no frontmatter, so the conformance gate (R1) refuses any edit to it; a `# concepts:` or `# hook:` line would change when it loads. E28 went to plan-and-logs instead (d-5). [deferred: the lead, because it changes how the kit loads a rule]
+
 ## BLOCKED BY KIT

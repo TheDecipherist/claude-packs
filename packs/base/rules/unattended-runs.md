@@ -8,7 +8,6 @@ Always do:
 - Write each choice, and why, in the project's decisions file as it is made, so the user can overturn it.
 - Report a hook that blocks correct work as you would with someone there: log it, mark the refusal, and fix it where the fix belongs.
 - Stop only for what cannot be undone or leaves the project: publishing, deleting what you did not make, spending money, writing to another repo.
-- When several units fit different constants to one shared law, log it, and fix the law once with every unit's measurements.
 
 Never do:
 - Wait for an answer that cannot come, or end a run with work left that you could have done.

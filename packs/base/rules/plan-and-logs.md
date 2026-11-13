@@ -15,6 +15,7 @@ Always do:
 - Put date, time and zone on every log entry.
 - State a count once, and link to it from everywhere else.
 - Re-check a blocker that has stood a while before relying on it: it may be stale.
+- Log it when several units fit different constants to one shared law, and fix the law once, with every unit's measurements.
 - Send a question the spec leaves open to the user as a `d-n`, with the spec's recommendation. Never decide it by guessing.
 - Write internal docs plainly. The `humanize` skill is for public writing only, not for specs, logs or briefs.
 

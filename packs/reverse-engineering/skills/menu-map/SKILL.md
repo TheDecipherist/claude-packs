@@ -5,7 +5,7 @@ description: Use when mapping where each parameter is reached on the machine, wh
 
 # Map the menus (one job: every parameter joined to the page that reaches it, and every mismatch listed)
 
-A patch map says what byte N means. A menu map says how you reach byte N from the panel, and it names what you can edit that is no byte in a patch at all. On one machine the chorus and delay TYPE selectors sat outside the patch block, and that blocked the effects work for a day.
+A patch map says what byte N means. A menu map says how the panel reaches byte N, and names what can be edited that is no byte in a patch at all. On one machine the chorus and delay TYPE selectors sat outside the patch block, and that blocked the effects work for a day.
 
 <constraints>
 Always do:

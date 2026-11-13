@@ -108,6 +108,9 @@ test('the kit\'s own map: imports, names, the packs table, the preload', () => {
   assert.deepEqual(preload.filter((t) => !t.startsWith('test/integration/') && !/^test\/(?:unit\/fresh-tmp|repo-lint-suite)\.test\.mts$/.test(t)), [], 'the preload: no test outside the integration tier, its own and the repo lint');
   // KWB-190: the repo lint reads every file the repo keeps, the CHANGELOG with them, so a change to it is covered
   assert.deepEqual(choose(KIT, ['CHANGELOG.md'], g).uncovered, []);
+  // KWB-next (the audit run): a pack's rule, skill or check picks the conformance gate that reads every one of them
+  assert.ok(pick('packs/reverse-engineering/rules/two-sources-before-naming.md').includes('pack-content'), 'a rule: the pack-content gate');
+  assert.ok(pick('packs/reverse-engineering/skills/names-first/SKILL.md').includes('pack-content'), 'a skill: the pack-content gate');
   // KWB-141: the planner test reads every planner file through join(KIT, 'planner'), which no import or path literal shows
   assert.ok(pick('planner/ui-mockup/SKILL.md').includes('planner'), 'a planner skill: the planner test');
 });

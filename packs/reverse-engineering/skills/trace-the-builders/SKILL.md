@@ -1,6 +1,6 @@
 ---
 name: trace-the-builders
-description: Use when a record's fields have to become engine coefficients, when a parameter's law, slot or scaling is unknown, when a table's indexing is unclear, or when the firmware's factory restore, builders or task table need to be found.
+description: Use when a record's fields have to become engine coefficients, when a parameter's law, slot or scaling is unknown, or when the factory restore, builders or task table must be found.
 ---
 
 # Trace the builders (one job: read every routine that turns a record field into an engine coefficient)

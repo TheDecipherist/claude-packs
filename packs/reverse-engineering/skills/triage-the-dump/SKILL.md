@@ -1,6 +1,6 @@
 ---
 name: triage-the-dump
-description: Use when a .bin, EPROM dump, flash image, OS update or sample ROM is opened for the first time, before any name search, disassembly or table hunt, or when an image reads as noise, repeats, or half of it is blank.
+description: Use when a .bin, EPROM dump, flash image, OS update or sample ROM is opened for the first time, before any name search or disassembly, or when an image repeats or is half blank.
 ---
 
 # Triage the dump (one job: say what each image is and whether it is whole, before anything is read from it)

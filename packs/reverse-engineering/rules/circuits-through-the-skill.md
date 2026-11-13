@@ -1,5 +1,7 @@
 ---
 # concepts: cpp, js, notes, tooling
+paths:
+  - "placeholder"
 # hook: skill-first.mjs
 ---
 # A schematic, a service manual or a data sheet is read through read-a-circuit-diagram, never at a glance

@@ -60,6 +60,8 @@ export const TABLE: readonly TableRow[] = [
     tests: (text) => /true counts|counts\.mts --check/.test(text) },   // since W7 (c), d-8: counts --check holds them (KWB-191)
   { files: /^packs\/[\w-]+\/(hooks\/[\w-]+\.(mjs|mts|py)|pack\.json)$/, when: (c, status) => SHAPE(status) || c.endsWith('pack.json'), why: 'a hook added, removed or registered: every installed hook has its worktree case',
     tests: (text) => /every installed hook needs a worktree case/.test(text) },
+  // the conformance gate reads every rule, skill and check of every pack by a walk, which no import or name shows (KWB-next, the audit run)
+  { files: /^packs\/[\w-]+\/(rules|checks|skills)\//, why: 'a pack\'s rule, skill or check: the conformance gate of the pack content', tests: (text) => /conformance gate of the pack content/.test(text) },
   { files: /^configurations\//, why: 'a configuration: the tests that bring it in', tests: (text, changed) => installs(text) && new RegExp(`--config['"]?,?\\s*['"]?${changed.split('/')[1]}\\b|['"]configurations['"]`).test(text) },
   // a module of the CLI: the tests about it (named after it); a test that only runs its command on the way (every install runs
   // doctor) uses it and does not check it (KWB-166)

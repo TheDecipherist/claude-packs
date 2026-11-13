@@ -1,6 +1,6 @@
 ---
 name: profile-the-bank
-description: Use when a bank of patch or program records has been carved and its offsets are about to be attributed, when a record stride or count is unknown, or when an attribution needs checking against the corpus.
+description: Use when a carved bank of patch records is about to have its offsets attributed, when a record stride or count is unknown, or when an attribution needs checking against the corpus.
 ---
 
 # Profile the bank (one job: per-offset statistics of the patch corpus that every attribution must agree with)
