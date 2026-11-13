@@ -134,10 +134,34 @@ No `build/evidence/W7/` exists; numbers are in the three agent reports and `prog
    rules into the template; 9 skill descriptions fixed to "Use when". Gates 76 of 76 at the merge. Evidence: `agents/w7-a-report.md`, `progress.md`.
 
 ## W8. What a project pays per tool call, and TypeScript enforced in projects
-pending: W11.1 (`build/evidence/W8/summary.md` once the order closes the step).
+1. Node processes a Bash call waits on: 7 runners (bandwarp's settings, W0.5(g)) to 1 proxy call; a Write 4 to 1. Evidence:
+   `build/evidence/W0/replay-g.md`, `build/evidence/W8/summary.md`.
+2. A live Bash event's wall, the kit's own install: 142 ms p50 before KWB-201 (W8's first numbers were a test socket) to 2 to 5 ms;
+   Post 2 to 3 ms; the TypeScript runner as one process was 88 to 101 ms. Evidence: `workflow-bugs.md` (KWB-201),
+   `build/session2/doctor3.txt`, `build/session2/doctor4.txt`, `agents/kwb201-report.md`.
+3. Stop on the replay's 51 Stops: p50 1,880 ms and p95 7,785 ms (W0's replay) to 64 and 90 ms; git-guard at Stop 2,091 to 6 ms.
+   Evidence: `build/evidence/W8/summary.md`, `agents/w8-heavy-report.md`.
+4. A commit and push call: git-guard 9 git processes and kit-fresh 3 on the event to 0 and 0 in steady state; the first call after a
+   ref moved still pays one (139 to 315 ms before the follow-up, 74 to 143 after). Evidence: `agents/commit-cost-report.md`, `build/session2/doctor4.txt`.
+5. init plus doctor 38.0 s uncached (34.0 at W0 with fewer packs' selftests) and 0.85 s cached (W0 9.1 s warm); update 1.1 s warm (W0
+   4.6 s). Evidence: `build/evidence/W8/summary.md`, `agents/w8-budgets-report.md`.
+6. The daemon's memory: 731 MB on a copy of the kit's own install (16 workers) to 320 MB; the pool then 2 warm grown to 8: 95 to 97 MB
+   idle (line 100, met), 226 MB at 8 after 1,024 events (line 150, NOT met; d-31, d-35). Evidence: `agents/rss-report.md`, `agents/pool-report.md`.
+7. The status line served by the daemon: `hook-proxy status` 6.7 ms p50 over 100 renders on a quiet minute against the TypeScript
+   render's 79.5 ms; 41 to 43 ms while four agents' tests loaded the machine. Evidence: `build/evidence/agents/w86-status/w86/status-render.json`, `agents/w86-status-report.md`.
+8. The Go sampler: one snapshot about 1 ms CPU steady (6 to 12 ms the first) against `ps` at 27 ms; daemon plus sampler 177 MB after
+   1,000 events on a scratch install. Evidence: `agents/w8-sampler-report.md`.
 
 ## W8.8. The load governor
-pending: W11.1
+1. `load ask` end to end through the Go client: 31 ms p50 over 100 asks (38.5 ms on a later quiet run), against 77 ms for the node
+   tool alone and 68 ms for a bare node start. Evidence: `agents/gov-route-report.md`, `build/session2/gate4-reds.txt`.
+2. This order's heaviest wave replayed through `governed` (three test runs and a 600 s Go fuzzer): highest 1-minute load 11.95 against
+   the ceiling of 13, 0 of 121 samples over it, wall 605 s. Ungoverned, the same kinds of jobs reached load 43 and 47 on 2026-11-12
+   (the order's record). Evidence: `build/evidence/W8.8/summary.txt`, `build/evidence/W8.8/load.tsv`.
+3. Every case of the Done when red on its plant first: 16 for the governor and `load`, 11 for `governed`, the routing and the pause.
+   Evidence: `build/evidence/agents/gov-core/`, `build/evidence/agents/gov-route/`, `agents/gov-core-report.md`.
+4. The fuzzer under the governor ran at 2 workers on the efficiency cores: about 12,700 execs a second, against 47,000 at 4 workers
+   ungoverned (the cost of the user's load rule). Evidence: `build/evidence/W8.8/fuzz.txt`, `agents/w10b-fuzz-report.md`.
 
 ## W9. The release in five minutes (measured without publishing)
 Local registry (verdaccio 7.1.0) and a scratch remote; never public npm or GitHub. `build/evidence/W9/` is not in the main checkout at
@@ -152,10 +176,28 @@ drafting time; the numbers are from the agent's report.
    refusals and left the tree unchanged. Evidence: `progress.md` (W9), `agents/w9-release-report.md`.
 
 ## W10. Before calling it finished
-pending: W11.1
+1. Findings: 16 in the code review, 7 in the tests review, 11 CARRY rows and 14 other open rows; every one written in `progress.md`
+   with its fix or why it stays, 0 blank. Evidence: `progress.md` (W10 ledger), `review/w10-code.md`, `review/w10-tests.md`, `review/w10-rows.md`.
+2. Fixed: code findings 1, 2, 6, 7, 9, 12, 15 whole and 3, 4, 13, 14 in part; rows 115, 133, 135, 137, 174, 177, 178, 182, 186, 187, 194,
+   each with its test red first. Evidence: `agents/w10-codefix-report.md`, `agents/w10-codefix2-report.md`, `agents/w10-rowfix-report.md`, `agents/w10-rows2-report.md`.
+3. Stays, each tagged deferred with who and why: code findings 5, 8, 10, 11, 16; rows 86, 113, 129, 134, 151, 152, 153, 189.
+   Evidence: `progress.md` (W10 ledger), `workflow-bugs.md`.
 
 ## W10b. The resident runner and the Go proxy under stress
-pending: W11.1
+1. The 60-minute soak, alone, 4 clients on the efficiency cores: 120 samples; 1,420 events compared with the TypeScript runner, 0
+   different exit codes and 1 different text (the daemon cut stage-guard at its time limit and git-guard refused the same `git add -A`);
+   heap slope 0.01 MB per 10 minutes. Evidence: `build/evidence/W10b/summary.md`, `build/evidence/W10b/differences.jsonl`.
+2. NOT met: 29,779 events played, not over 200,000 (the efficiency cores played about 8 a second); RSS 226.9 MB at 8 workers against
+   150; descriptors after `kill -9` 127 against 136 at the start (fewer, outside the line's 2); one process left after the stop, the
+   agent's own inspector session holding the daemon (a 10-minute run with it closed first stopped clean). d-35. Evidence:
+   `build/evidence/W10b/summary.md`, `agents/w10b-soak-report.md`.
+3. A leak found and fixed: the first run grew 54 zombie children of the daemon by minute 60 (git-guard's detached refresh from a
+   worker thread); the second held at most 1. Evidence: `agents/w10b-soak-report.md`, `test/unit/hooks-lib/child-group-orphan.test.mts`.
+4. Fuzzing, 0 crashes and 0 hangs: Go `FuzzReadReply` 10 minutes, 28.27 million execs; the TypeScript wire parser 1.26 million inputs;
+   the daemon's socket 1.40 million connections; `go test -race`, `go vet` and `staticcheck` 2026.2.2 clean. Evidence:
+   `build/evidence/agents/w10b-fuzz/`, `agents/w10b-fuzz-report.md`.
+5. The independent review: 22 findings (3 high, 11 medium, 8 low); 1 to 21 fixed, each with its test red first, and the wire's shared
+   constants generated for Go from one table, a second copy red. Evidence: `review/w10b-review.md`, `agents/w10b-owners-report.md`, `agents/w10b-paths-report.md`.
 
 ## W11. The report, with the comparison
 pending: W11.1
