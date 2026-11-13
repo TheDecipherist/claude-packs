@@ -1,6 +1,6 @@
 ---
 name: chip-search
-description: Use when a chip, a CPU or other processor, a part number, a datasheet, a service manual or an owner's manual comes up, before reading, finding or converting one; when asked what a part does, where it is used, or which parts are like it.
+description: Use when a chip, a processor, a part number, a data sheet or a manual comes up, before reading or converting one, or when asked what a part does, where it is used, or which parts are like it.
 ---
 
 # Look in the reference library first (one job: never find, read or convert what the library already holds)

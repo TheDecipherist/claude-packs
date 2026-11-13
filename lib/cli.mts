@@ -31,6 +31,7 @@ import { statusCommand } from './status-cli.mts';
 import { detectedConfig, suggest, suggestionOf } from './suggest.mts';
 import { sync } from './sync.mts';
 import { workorderCheck } from './workorder-check.mts';
+import { toolchainCommand } from './toolchain.mts';
 import { assertTemplate, newWorkorder } from './workorder.mts';
 
 const INSTALLING = { installing: true }; // doctor at the end of an install: what the project has yet to do is a note
@@ -252,6 +253,7 @@ const COMMANDS: Record<string, Command> = {
   fix: async (run) => { await fixPlan(run.dir, { from: pathOf(run, '--from'), out: pathOf(run, '--out') }); return 0; },
   'new-pack': (run) => newPack(run.dir, run.rest[0], { repo: run.value['--repo'] ?? null, hook: run.hook }),
   'add-lesson-check': addLessonCheck,
+  toolchain: (run) => toolchainCommand(run.rest, pathOf(run, '--out')),
   survey: () => printPrompt('survey.md'),
   global: (run) => {
     const command = run.rest[0] !== undefined && Object.hasOwn(GLOBAL, run.rest[0]) ? GLOBAL[run.rest[0]] : undefined;
