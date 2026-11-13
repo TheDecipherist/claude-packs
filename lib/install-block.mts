@@ -11,11 +11,13 @@ import { readConfig } from './configs.mts';
 import { OWNED } from './layout.mts';
 import { sync } from './sync.mts';
 
-export const BLOCK_KEYS: readonly string[] = ['configuration', 'packs', ...OWNED];
+/** Keys the pre-flight reads and the install leaves out of the layout: `ghidra`, the processors the order needs Ghidra for. */
+export const CHECK_KEYS: readonly string[] = ['ghidra'];
+export const BLOCK_KEYS: readonly string[] = ['configuration', 'packs', ...OWNED, ...CHECK_KEYS];
 const BLOCK = /^```claude-packs[ \t]*\n([\s\S]*?)^```[ \t]*$/gm;
 
 /** What an install block says: the configuration and packs `init` takes, and the layout keys the project owns. */
-export interface InstallBlock { configuration: string | null; packs: string[]; owned: Record<string, unknown> }
+export interface InstallBlock { configuration: string | null; packs: string[]; owned: Record<string, unknown>; ghidra: string[] }
 
 const listOf = (packs: unknown): unknown => (typeof packs === 'string' ? packs.split(',').map((p) => p.trim()).filter(Boolean) : packs ?? []);
 
@@ -33,10 +35,11 @@ export function installBlockOf(text: string, where = 'the order'): InstallBlock 
   if (!keys) throw new Error(`${where}: the install block holds no keys`);
   const unknown = Object.keys(keys).filter((k) => !BLOCK_KEYS.includes(k));
   if (unknown.length) throw new Error(`${where}: the install block has ${unknown.map((k) => `"${k}"`).join(', ')}, a key the kit does not read. It takes: ${BLOCK_KEYS.join(', ')}. Nothing was installed`);
-  const { configuration = null, packs, ...owned } = keys;
+  const { configuration = null, packs, ghidra, ...owned } = keys;
   const list = listOf(packs);
+  const wanted = listOf(ghidra);
   if (!Array.isArray(list)) throw new Error(`${where}: the install block's packs is a list or a comma-separated line`);
-  return { configuration: typeof configuration === 'string' ? configuration : null, packs: list.map(String), owned };
+  return { configuration: typeof configuration === 'string' ? configuration : null, packs: list.map(String), owned, ghidra: Array.isArray(wanted) ? wanted.map(String) : [] };
 }
 
 /** The install block of the order at `path`. */

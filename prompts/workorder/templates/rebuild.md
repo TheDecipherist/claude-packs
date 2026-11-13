@@ -70,6 +70,7 @@ The kit is installed from this block and nothing else. Change it here, before th
 ```claude-packs
 configuration: synth-creator
 packs: cpp, audio-core, instrument-shell, midi, sound-design, reverse-engineering
+ghidra: <the processors W4 runs Ghidra on, comma-separated, or delete this line>
 commands:
   build: node .claude/tools/buildq.mjs cmake --build build --preset dev
   test: node .claude/tools/buildq.mjs ctest --preset dev
@@ -117,6 +118,8 @@ Use `names-first`, `menu-map` and `bank-census`. Follow `addresses-name-their-sp
 **Done when:** `docs/patch-map.csv` covers every byte or marks it unknown; `tools/` regenerates every number from the image; a test reads every factory patch and agrees with the map; the engine's routines are in `docs/firmware/` with their addresses; and every open question is stated with what was scanned.
 
 ## W4. The Ghidra second pass
+
+Before the run, `workorder check` proves Ghidra can do it: installed, a JDK it accepts, and a processor module for every name on the install block's `ghidra:` line. Ghidra ships no module for many synth CPUs (the H8/300H and the DSP56300 among them): where it has none, write the second pass with another independent reader (a binutils objdump, a blind disassembler from the maker's manual) and delete the line, before the run, with the reason in `decisions.md`.
 
 1. Run Ghidra headless on the same programs, its project in an ignored build folder inside the project. Its agent is blind to W3's findings: it gets the image and W3's questions, never W3's answers.
 2. Compare. A finding both made stands. One side alone: verify it. A disagreement: a third source decides, and it becomes a row in `docs/firmware/disagreements.md` naming the side that was wrong.
