@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T12:09:44Z",
+  "updated": "2026-11-13T13:10:20Z",
   "steps": [
     {
       "id": "W0",
@@ -111,5 +111,12 @@
       "note": "prepared (CHANGELOG, README, dry-run 0 refusals); npm is not logged in for @thedecipherist on this machine, so the publish waits for it"
     }
   ],
-  "agents": []
+  "agents": [
+    {
+      "name": "w89-top",
+      "worktree": ".claude/worktrees/w89-top",
+      "step": "W8.9",
+      "started": "2026-11-13T13:10:20Z"
+    }
+  ]
 }
