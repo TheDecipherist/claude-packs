@@ -1,8 +1,8 @@
 // resident/event: one event, from a decoded request to its reply (review-2-go 1.4, 1.11, 2.9 to 2.13, 4.2). The judges of the table's
 // rows for the event run at once on the pool; after the first exit 2 the rest get GRACE_MS more, and every refusal is returned in the
 // table's order, never the order they arrived in. Recorders then run in turn: those of a PreToolUse call for every call (they record
-// the call, a refusal included), the rest only when nothing refused; a PostToolUse call's are not waited for (the reply goes first). A hook that has not answered by the client's deadline is named in
-// an "over time" line and in the crash log; one that answers after the reply is logged `late`, its exit 2 counted by `logs`. The
+// the call, a refusal included), the rest only when nothing refused; a PostToolUse call's are not waited for (the reply goes first). A hook that has not answered by the client's deadline sends the whole event to the
+// TypeScript path (KWB-216), named in the crash log; one that answers after that is logged `late`, its exit 2 counted by `logs`. The
 // timing and event lines are written here, in one append, by this thread: workers only return `{hook, ms, code}`.
 import { crashVerdict } from '../lib/crash-policy.mts';
 import { CRASHES, REFUSALS, logCall, type HookRun } from '../lib/event-log.mts';
@@ -85,6 +85,14 @@ function lateLine(root: string, ev: HookEvent, hook: string, done: Done): void {
   appendRotated(root, done.code === 2 ? REFUSALS : CRASHES, `${line}\n`);
 }
 
+/** KWB-216: a hook past the deadline means the event is not judged whole, and a partial verdict (the others' answer plus a note) lets
+ *  through a call that only the missing hook would refuse. The whole event goes to the TypeScript path, which judges every hook; the
+ *  hooks that ran out of time are named in the crash log. */
+function overDeadline(root: string, text: string, slow: readonly string[]): Reply {
+  logCall(root, text, slow.map((hook): HookRun => ({ hook, ms: 0, code: 1, reason: `${overTime([hook])}\n` })), appendRotated, 0);
+  return fallback;
+}
+
 /** One event: a reply, or the TypeScript path's (`fallback`) for another project's event or a protocol this daemon does not speak. */
 export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer, arrival: number): Promise<Reply> {
   if (request.v !== PROTOCOL) return fallback;
@@ -102,6 +110,7 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
 
   const judges = rows.filter((r) => r.role === 'judge');
   const phase = await judgeAll(d, judges, job, request.deadline, (hook, done) => lateLine(root, ev, hook, done));
+  if (phase.slow.length > 0) return overDeadline(root, text, phase.slow);
   const refused = [...phase.ran.values()].some((r) => r.code === 2);
 
   // the recorders: in turn, and only while the client still waits
@@ -117,7 +126,7 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
       phase.ran.set(hook, await d.pool.run(job(hook)));
     }
   }
-  const slow = [...phase.slow, ...skipped];
+  if (skipped.length > 0) return overDeadline(root, text, skipped);
 
   // the verdict, in table order: arrival order never shows in the reply
   const arrived = rows.filter((r) => phase.ran.has(r.hook)).map((r): HookRun & { reason: string; out: string; queue: number } => {
@@ -126,8 +135,7 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
   });
   const crash = crashVerdict(root, ev, arrived, Date.now());
   const code = arrived.some((h) => h.code === 2) || crash.code === 2 ? 2 : 0;
-  const note = slow.length > 0 ? toJson({ systemMessage: overTime(slow) }) : '';
-  const outs = [...arrived.map((h) => h.out), crash.stdout, note, code === 0 ? unreadWrites(ev, root, request.env) : ''].filter((s): s is string => Boolean(s));
+  const outs = [...arrived.map((h) => h.out), crash.stdout, code === 0 ? unreadWrites(ev, root, request.env) : ''].filter((s): s is string => Boolean(s));
   const reply: Reply = { code, stdout: mergeOut(outs), stderr: [...arrived.map((h) => h.reason), crash.stderr ?? ''].join('') };
 
   // the lines: one append for the hooks and the event, then the call's own logs
@@ -136,7 +144,7 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
   const queue = picked + Math.max(0, ...arrived.map((h) => h.queue));
   appendRotated(root, LOG, arrived.map((h) => hookLogLine({ event: ev.hook_event_name, hook: h.hook, ms: h.ms, code: h.code, tool })).join('')
     + hookLogLine({ event: ev.hook_event_name, hook: 'event', ms: wall, code, tool, queue, source: 'daemon' }));
-  logCall(root, text, [...arrived, ...slow.map((hook): HookRun => ({ hook, ms: 0, code: 1, reason: `${overTime([hook])}\n` }))], appendRotated, wall);
+  logCall(root, text, arrived, appendRotated, wall);
   if (ev.hook_event_name === 'PostToolUse' && mayHaveWritten(ev.tool_name)) d.index.stale();
   noteEventGitState(d.table, root, ev.cwd ?? request.cwd, request.env, d.runner); // the git facts of the next event: kept again, detached, when stale
   return reply;
