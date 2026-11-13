@@ -11,6 +11,8 @@ Always do:
 - Name the token on every `gh` call, when the project's guards ask for it.
 - Commit before undoing anything: a work-in-progress commit on a branch, then undo.
 - Start work on a branch from the fetched remote trunk.
+- Fetch before saying a branch is ahead, behind or level with the remote.
+- Commit unfinished work at once, with a plain message of its state: what is done, what is unverified, the test state, and that it is interrupted, not abandoned. Never soften a red test in that message.
 
 Never do:
 - `git add -A`, `git add .` or `commit -a`.

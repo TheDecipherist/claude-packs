@@ -12,6 +12,9 @@ Always do:
 - Strike a step that is dropped through, with the reason and the date. A reopened step keeps its line, marked REOPENED.
 - Log a bug in `bugs.md` the moment it is found, before it is fixed. A fixed bug moves to Fixed with its cause, the fix, the date and the gate that now catches it.
 - Record in `docs/laws.md` every house law the project leaves, with the user's yes. Put a row in `docs/licences.md` before any file is copied in, with its source, commit and licence. Read what that row will say before choosing the source: a small fix taken from an installed package brings its licence with it, and only its copyright file says so.
+- Put date, time and zone on every log entry.
+- State a count once, and link to it from everywhere else.
+- Re-check a blocker that has stood a while before relying on it: it may be stale.
 - Send a question the spec leaves open to the user as a `d-n`, with the spec's recommendation. Never decide it by guessing.
 - Write internal docs plainly. The `humanize` skill is for public writing only, not for specs, logs or briefs.
 

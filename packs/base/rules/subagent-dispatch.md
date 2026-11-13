@@ -17,6 +17,10 @@ Always do:
 - Quote the `design/shape.json` row of every concept the brief touches, word for word: its shape,
   its generator, its selectors and constants. Name the shape and the generator; an instance appears only on a `seen in:` or
   `example:` line (`brief-guard` refuses any other, KWB-1).
+- Choose the model by the work: Sonnet by default, Haiku only for lookups, Opus only with a stated `OPUS BECAUSE:` reason in the brief.
+- Partition agents by file. Pull before committing; a change in the tree that you did not make is another agent's work: leave it.
+- Take baseline pass counts before agents touch shared code, so a later red test is told from an old one.
+- Ask the agent for its time estimate first. When one goes silent, send it its next step. Keep the queue balanced, so no agent waits behind another.
 
 Never do:
 - Let a worker agent spawn its own reviewer. It doubles the cost and its approval counts for nothing.

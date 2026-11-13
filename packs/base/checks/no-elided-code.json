@@ -1,0 +1,13 @@
+{
+  "id": "no-elided-code",
+  "why": "Written source with an elided part (rest of code, existing code, similar to above, implement here, a bare ... line) loses the code it stood for, and still looks finished. A spread (...args, [...a]) is code and never fires: the pattern reads only a comment's words or a line that is nothing but dots.",
+  "rule": ".claude/rules/no-elided-code.md",
+  "globs": ["**/*.{js,mjs,cjs,ts,mts,tsx,jsx,go,rs,c,cc,cpp,h,hpp,java,kt,swift,cs}"],
+  "code": false,
+  "exclude": ["**/*.test.*", "**/test/**", "**/tests/**", "**/*.d.ts", "**/*.d.mts"],
+  "pattern": "(?:(?:\\/\\/|#|\\/\\*|--)[ \\t]*\\.{3}[ \\t]*(?:existing|rest|other|remaining|previous|same|unchanged)\\b|(?:\\/\\/|#|\\/\\*)[ \\t]*(?:rest of (?:the )?(?:code|file|function|implementation)|similar to (?:above|before|the above)|same as above|implement (?:here|this|me)|your code here)\\b|^[ \\t]*\\.\\.\\.[ \\t]*$)",
+  "flags": "mi",
+  "mode": "forbid",
+  "bad": "function run() {\n  start();\n  // ... existing code\n  stop();\n}\n",
+  "good": "function run(...args) {\n  const all = [...args, 1];\n  return call(...all);\n}\n// the rest of the file is the same helper: see lib/x for why\n"
+}

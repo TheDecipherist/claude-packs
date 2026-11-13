@@ -185,6 +185,7 @@
     "hooks/untrusted-boundary.mts": ["test/hooks/base/untrusted-boundary.test.mts"],
     "tools/load.mts": ["test/integration/load-ask.test.mts"],
     "tools/governed.mts": ["test/tools/base/governed.test.mts"],
+    "tools/anchors-check.mts": ["test/tools/base/anchors-check.test.mts"],
     "tools/quiet-test.mts": ["test/tools/base/quiet-test.test.mts"],
     "tools/shape-symmetry-selftest.mts": ["test/tools/base/shape-symmetry.test.mts"],
     "tools/shape-symmetry.mts": ["test/tools/base/shape-symmetry.test.mts"],
