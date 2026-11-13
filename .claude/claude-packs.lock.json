@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-13T02:13:32.209Z",
+  "updated": "2026-11-13T04:50:47.959Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/agents-held.md": "586ba41d9f5b6e0ba3d7ee33d023c761133b9175bb2e5cbde82eac1308e5474e",
@@ -221,7 +221,7 @@
     ".claude/hooks/suite-once.mjs": "2435cfc743e24fd18536a06fad75c3a53ae3e3f50a5e2228a0c1455c4bf456c4",
     ".claude/hooks/template-law.mjs": "6099498a78d33fcdc6ef84ec134b78cec06554514b864cea6d5034fba2b93552",
     ".claude/hooks/untrusted-boundary.mjs": "d8f47b34c0f232fb9482f1b572a63512104732132e3f410969a9cbd08cff6a9f",
-    ".claude/tools/governed.mjs": "4c1154f6ad9ee7a7fa6e5db4f83dd0f1a6b1781c46fb54603ac1c148eb73766f",
+    ".claude/tools/governed.mjs": "9f62c27e9dcddffe631e705796a864274b4f6222e254dc65d8f3bc9e1149f0a1",
     ".claude/tools/load.mjs": "c7cbfa592ba6b3cfd28cd67b7d7f3d674b2a94c8b033def18a9e7e3c9a8ac217",
     ".claude/tools/quiet-test.mjs": "5b286448106d2edeaf85f51c4282fc0c6cef6a9bb1a79550a44e61ef36a824f0",
     ".claude/tools/shape-symmetry-selftest.mjs": "9daa1839b6bce63c0a3dfbdd72e9f99c1ae6d893d6a1ea4dbb81294e4f788e48",
