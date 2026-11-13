@@ -1,5 +1,5 @@
 ---
-# concepts: cpp, js
+# concepts: cpp, js, python, tooling
 paths:
   - "placeholder"
 ---
@@ -23,7 +23,7 @@ Always do:
 - Key stored divisions to a destination's name when its list is dynamic.
 
 Never do:
-- Leave a division off at open on a delay in a plugin, or on any time that stores its sync state.
+- Open a delay unsynced as a plugin in a DAW, or let an open-time default replace the sync state a patch stored.
 - Collapse "where our clock comes from" and "whether this unit is slaved to it".
 - Put divisions on the transport bar: a master clock has no say in what a slave does with its pulses.
 </constraints>

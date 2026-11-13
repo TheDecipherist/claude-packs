@@ -1,5 +1,5 @@
 ---
-# concepts: cpp, js
+# concepts: cpp, js, python, tooling
 paths:
   - "placeholder"
 ---

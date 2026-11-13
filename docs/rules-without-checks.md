@@ -17,13 +17,13 @@ the rule saying so. A rule here is a candidate only if someone finds a pattern t
 - **http-api:** `adapters-one-db-gateway`, `handlers-own-the-work`, `health-and-correlation`, `routes-are-thin`
 - **instrument-shell:** `fold-keeps-every-route`, `hidden-under-a-layer-is-idle`, `menu-is-one-route-table`, `quiet-announces-itself`, `render-the-extremes`, `seams-are-declared`
 - **js-ts:** `files-under-300-lines`, `guard-clauses-over-nesting`, `named-constants-not-magic-numbers`, `no-floating-promises`, `no-param-mutation`, `one-logger`, `parallel-independent-awaits`, `small-functions`, `typed-exports`, `zod-at-route-boundaries`
-- **midi:** `imports-count-every-loss`, `sync-is-a-mode`
+- **midi:** `imports-count-every-loss`, `nrpn-and-packed-values`, `sync-is-a-mode`
 - **postgres:** `postgres-one-pool-per-process`
 - **reverse-engineering:** `a-field-may-be-an-index`, `a-negative-names-what-was-scanned`, `addresses-name-their-space`, `decode-from-a-proven-boundary`, `findings-are-withdrawn-in-place`, `layout-closes-on-itself`, `names-before-code`, `reproduction-or-original`, `two-sources-before-naming`
 - **rust:** `rust-borrow-before-you-clone`
 - **sound-design:** `algorithms-are-data`, `unreachable-is-said`, `waveforms-and-octaves`
 - **stellix:** `stellix-reset-generated`, `world-continuous-collision`
-- **synth-creator:** `copy-trees-read-only`, `debug-by-measurement`, `done-means-fresh-evidence`, `hooks-and-gates`
+- **synth-creator:** `copy-trees-read-only`, `debug-by-measurement`, `docs-are-current`, `done-means-fresh-evidence`, `hooks-and-gates`
 - **ui-craft:** `page-holds-its-frame`, `page-proved-rendered`, `screen-answers-one-question`, `survives-real-data`, `type-space-colour`, `url-holds-the-state`
 - **web:** `tailwind-v4`
 - **writing:** `cut-the-padding`, `direct-voice`, `no-cargo-cult`, `no-scaffolding`, `write-from-your-own-corner`

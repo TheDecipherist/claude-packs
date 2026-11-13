@@ -429,7 +429,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 52 | 12 | 3 | 8 |
-| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 34 | 9 | 34 | 17 |
+| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 34 | 9 | 34 | 18 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 10 | 14 | 1 | 2 |
@@ -445,7 +445,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `http-api` | Any HTTP server, in any framework: every route ties a record to its caller, guards fail closed, input is validated, secrets are compared and stored safely, and what a route returns gives nothing away. | 9 | 31 | 0 | 2 |
 | `instrument-shell` | Instruments built on a shared shell: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit. | 7 | 1 | 0 | 3 |
 | `js-ts` | JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper. | 28 | 36 | 0 | 0 |
-| `midi` | MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. | 5 | 9 | 0 | 2 |
+| `midi` | MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. | 6 | 9 | 0 | 5 |
 | `mongo` | MongoDB with the native driver: one client, one gateway, aggregation reads, bulkWrite writes, safe deletes. | 6 | 18 | 0 | 0 |
 | `multi-tenant` | One system, many customers: no role crosses a tenant, every query carries the tenant key, and isolation is proved with a second tenant. | 1 | 2 | 0 | 1 |
 | `nginx` | NGINX in front of containers: Docker DNS resolver, keepalive, stdout logs, headers with always, CSP, ModSecurity/CRS tuning. | 2 | 7 | 0 | 1 |
@@ -459,7 +459,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `sound-design` | Sound that is proved by measuring audio: algorithms are data, neutral is exact, the meter is suspected before the engine, and tests sit off the easy point. | 7 | 7 | 0 | 7 |
 | `stellix` | Stellix spec laws: the world, determinism, generated reset, no shipped images. | 5 | 5 | 1 | 0 |
 | `stored-text` | Text from a database reaches the page through one renderer: line endings normalised, markdown parsed, code highlighted, HTML sanitized. | 1 | 4 | 0 | 1 |
-| `synth-creator` | The synth-creator configuration's own laws, installed with it and never by another: the build queue (build-guard), the time watch, the spec lock, frozen fixes, read-only vendored code and copy trees, staging by name, the session watches (idle-wake, user-asks, build-sweep), and the rules and skill a synth build lives by. | 8 | 3 | 10 | 2 |
+| `synth-creator` | The synth-creator configuration's own laws, installed with it and never by another: the build queue (build-guard), the time watch, the spec lock, frozen fixes, read-only vendored code and copy trees, staging by name, the session watches (idle-wake, user-asks, build-sweep), and the rules and skill a synth build lives by. | 9 | 3 | 11 | 4 |
 | `tui` | Terminal UIs (Ink + React or raw-mode Node): alternate screen, resize ordering, width as state, raw mode restored on every exit. | 1 | 5 | 0 | 1 |
 | `ui-craft` | Application and page design in any web stack: forms, motion, states, navigation, touch, copy, type and space, the look of generated UI, and a rendered-page gate. | 16 | 24 | 0 | 9 |
 | `web` | Web UI (Next.js, HTML, CSS, Tailwind 4): accessibility, one primitives module, styles in stylesheets, performance, production build, client boundaries. | 8 | 22 | 0 | 5 |
