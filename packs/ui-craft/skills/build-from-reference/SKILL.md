@@ -20,6 +20,7 @@ Always do:
 3. Build to it section by section, comparing a screenshot with the reference at the same width. A photograph is evidence of the design: draw the object straight on and aligned, never its camera angle or its wear.
 4. Resolve what is unclear in this order: the visible design language, the layout and spacing logic, the component family, the polish level, then the most faithful option that can be built.
 5. Report every place the code differs from the reference, and why.
+6. Where the reference is too small to read a part, regenerate that part larger as a fresh image in the same design language. Never crop an old image.
 
 Never do:
 - Improve it into a default layout, or swap a distinctive section for a generic row.

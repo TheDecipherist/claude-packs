@@ -16,6 +16,8 @@ Always do:
 - Stop what you start: after `child &`, `trap 'kill "$pid" 2>/dev/null' EXIT INT TERM`.
 - Keep a program in its own file: a script that needs Python or Node calls a file, which can be linted and tested.
 - Run `shellcheck` where the project has it.
+- Verify a write by its artefact and the exit code, never by an `echo` after `;`: `cmd; echo done` says done whatever `cmd` did. Say which you checked.
+- After a rename by `sed`, grep the quoted literals too: a blanket rename rewrites string literals (`"pp"` became `"Samples::pp"`).
 
 Never do:
 - Use `eval`, or pipe a download into a shell.

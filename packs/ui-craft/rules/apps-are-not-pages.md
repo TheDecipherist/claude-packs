@@ -6,7 +6,7 @@ paths:
 
 # App screens and pages are different things
 
-A page is read once and must be remembered. A screen is read every day and must stay out of the way. The rules that make a page distinctive break a working screen, so each keeps its own.
+A page is read once and must be remembered. A screen is read every day and must stay out of the way. The rules that make a page distinctive break a working screen, so each keeps its own. A plugin panel is neither: the page rules of ui-craft do not bind it. A panel is drawn from its reference (`analyse-reference-look`) and painted by the `gpu-painter` pack.
 
 <constraints>
 Always do, on an app screen (from taste-skill's study of 23 product screens):

@@ -22,6 +22,7 @@ Always do:
 - Every list surface designs its empty state (first login **is** the demo); every async surface designs loading and error. `EmptyState` is a primitive so the designed version is one import away.
 - Colour, spacing and type come from tokens; both colour schemes are first-class.
 - When `design/` holds approved reference images, surfaces are built to match them; kit rules (contrast, a11y, self-hosted fonts) win over the image and the deviation is recorded.
+- One design system per project: use its official package, and do not rebuild it or override most of its tokens.
 
 Never do:
 - `<button>`, `<input>`, `<select>`, `<textarea>` in a page or feature component (`ds-pages-compose-primitives`).

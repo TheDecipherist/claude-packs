@@ -15,6 +15,7 @@ Always do:
 4. **Output audit**: parse the entry HTML; count every request it triggers and list them; grep the emitted HTML/CSS/JS for third-party origins (a font host or runtime CDN is a blocker); every cacheable asset carries a content hash and the HTML references the hashed names; CSS is in files; total JS/CSS/image bytes (gzip) and the five largest assets against the budget; a full-resolution PNG hero is a blocker; run the bundle analyzer if it is already a dependency and report duplicates.
 5. **Fix** what is fixable (self-host the font, vendor the CDN file, add the hash, compress the image), rebuild, re-audit.
 6. **Gate**: blockers remaining → the deploy does not happen. Report: the three detected facts, the request count and origin list, the size table, each finding with its evidence and its fix.
+7. **Page hygiene**: no `href="#"` link, no `alert()`, a 404 page, a favicon.
 
 Never do:
 - Audit the source instead of `dist/`/`.next/`.

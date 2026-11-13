@@ -14,6 +14,7 @@ Always do:
 - Hydration data is initial-only: every client-side navigation target has its own data path (a route handler or server component fetch), or it renders stale or blank.
 - Loader/props payloads are a projection shaped to what the component renders, never the service's full result: SSR embeds the data twice (HTML + hydration JSON).
 - Verify once per feature that the client build contains no connection string, collection name or server env key.
+- Keep a value that changes every frame (pointer, scroll, physics) out of component state: use a motion value or a ref.
 
 Never do:
 - A value import from `/server/`, `/db/`, `gateway`, `.server` in a `'use client'` file (`client-no-server-import`).

@@ -22,6 +22,7 @@ Always do:
 4. **Is the build within the machine's budget?** Ninja, through the project's build queue, never `-j` above what the queue allows.
 5. **Will the tests run only what the change reaches?** One test binary that holds every check runs them all for any change: name it as a candidate to split by area. A gate's twin (the planted run) that repeats the clean checks before its plants does the clean run twice.
 6. **Write the estimate**: compile steps expected, and the test time the reached tests took last time. After the build, compare: more work or more time than estimated, by far, is something to find out, not to wait out.
+7. **Was a source file added?** A source list made with a glob is read at configure time: configure again after adding or removing a file, and a plain rebuild is not enough.
 
 Never do:
 - Start a project's first build, or a new worktree's, without step 2's answer.
