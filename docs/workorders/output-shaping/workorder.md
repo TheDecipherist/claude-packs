@@ -102,11 +102,21 @@ packs: base
 3. The same numbers land in the agent's status file and its report (the brief template's report gains the section, filled by the
    kit, not typed by the agent), and the status line shows each live agent's model and its tokens so far.
 4. `claude-packs logs agents` prints the records as a table, and per order: tokens and turns by agent, by model and by effort.
+5. What each feature or task cost to build (the user, 2026-11-12: "we should be able to tell how much each feature/task cost to
+   build in tokens/time"): every record is tied to its task, the order step or the `build.md` step it worked on (from the brief's
+   step field, the making line and the branch), and the lead's own messages are tied to the step that was in progress when they were
+   written; `claude-packs logs cost` then prints per task: the agents and the lead's share, tokens by kind and by model, turns, wall
+   time from the step's start to its done line, the time spent waiting on hooks and on the load governor, and the re-runs; with
+   `--by step|order|day`; a cost in money only from a price table with its date and source (the `latest-versions` way), stated as
+   an estimate. Run once over the past: the 2.0 order and bandwarp's tasks from their transcripts, so the first table has history.
 
 **Done when:** `test/hooks/base/agent-ledger.test.mts` is green with 0 failures, each case seen red on its plant: a planted
 transcript's token sums equal a hand count by kind; a model change mid-agent is counted; a missing usage field is written as
 unknown; a planted `Agent` call's model and effort are recorded; the status line shows a planted agent's model and tokens; and on
-this order's own first agent its record matches its transcript (the numbers in `build/evidence/W0b/`).
+this order's own first agent its record matches its transcript (the numbers in `build/evidence/W0b/`); `logs cost` on a planted
+order of two steps (two agents and the lead) puts every message's tokens in exactly one step (0 counted twice, 0 left out) and its
+totals equal the transcripts' sums; `build/evidence/W0b/cost-history.md` holds the per-task cost of the 2.0 order's steps and of
+bandwarp's 38 agent tasks.
 
 ## W1. The study: what Claude reads
 
