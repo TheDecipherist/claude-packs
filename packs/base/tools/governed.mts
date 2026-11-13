@@ -2,7 +2,7 @@
 // governed (typescript order W8.8 item 3): a heavy command run through the load governor. It takes a grant for the job's kind and
 // weight, waiting quietly in the governor's queue while the slots or the live load say no (one line of its state on stderr every 30 s,
 // inside its own tool call: never a turn spent polling); then starts the command in a process group of its own, at a low priority
-// (`taskpolicy -b` on macOS, `nice -n 15` elsewhere), with the concurrency it was granted set for it (CLAUDE_PACKS_TEST_CORES, -j,
+// (`nice -n 15`, on every core: KWB-149), with the concurrency it was granted set for it (CLAUDE_PACKS_TEST_CORES, -j,
 // CMAKE_BUILD_PARALLEL_LEVEL, GOMAXPROCS, -parallel on `go test -fuzz`, --test-concurrency), frees the grant when the command ends
 // (a kill frees it by the stale rule: the grant is held by this process's pid), and exits with the command's own code.
 //   governed [--for test|build|fuzz|agent|install|other] [--want N] [--priority P] -- <command> [args...]
@@ -94,9 +94,11 @@ export function grantedEnv(env: Env, grant: Pick<Grant, 'id' | 'settings'>): Rec
   return out;
 }
 
-/** The command at a low priority: the efficiency cores on macOS (the user's choice, 2026-11-12), nice elsewhere. */
+/** The command at a low priority, nice on every platform but Windows: macOS's background QoS (`taskpolicy -b`) held work to the
+ *  efficiency cores (KWB-149; the user, 2026-11-12: "it doesnt seem like we use the fast cores"), and the governor's budget and
+ *  ceiling already keep the last 20 % free, so a job may use every core at a lower priority. */
 export const lowPriority = (command: readonly string[], platform: string): string[] =>
-  platform === 'darwin' ? ['taskpolicy', '-b', ...command] : platform === 'win32' ? [...command] : ['nice', '-n', NICE, ...command];
+  platform === 'win32' ? [...command] : ['nice', '-n', NICE, ...command];
 
 /** Runs the command in its own process group and resolves with its exit code; a signal to this process goes to the whole group. */
 function runGroup(command: readonly string[], env: Record<string, string | undefined>, cwd: string, started: (pgid: number) => void): Promise<number> {

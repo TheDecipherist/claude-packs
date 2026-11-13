@@ -681,7 +681,7 @@ W10b's soak runs.
 3. `governed` (`.claude/tools/governed`, through the resident runner when it is up): asks for slots by the job's weight, waits in a
    queue while slots or live load (W8.7's sampler; `vm.loadavg` when the sampler is down) say no, quietly inside its own tool call
    with one line of its state on stderr every 30 s (never a turn spent polling); then starts the command in its own process group
-   under `taskpolicy -b` on macOS (`nice -n 15` elsewhere) with the concurrency it was granted set for it (`-j`, `CMAKE_BUILD_PARALLEL_LEVEL`,
+   at `nice -n 15` on every core (never macOS's background QoS, `taskpolicy -b`, which holds work to the efficiency cores: KWB-149, and the user, 2026-11-12: "it doesnt seem like we use the fast cores") with the concurrency it was granted set for it (`-j`, `CMAKE_BUILD_PARALLEL_LEVEL`,
    `CLAUDE_PACKS_TEST_CORES`, `GOMAXPROCS`, `-parallel` on `go test -fuzz`, `--test-concurrency`), frees its slots on exit (and on a
    kill, by the stale rule), and exits with the command's own code.
 4. The `PreToolUse` Bash hook routes heavy commands through `governed` by `updatedInput` (one table of heavy forms with their
