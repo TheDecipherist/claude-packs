@@ -12,6 +12,8 @@ Always do:
 3. Count the effectively distinct sounds, and report it next to the total.
 4. Check the upstream causes first: an invented global, programs loading defaults, an algorithm with min equal to max.
 5. Share one probe across units, so a number means the same on every machine.
+6. Render twice first. Report in sections: coverage, reach, settings, spread, twins. Render notes at C2, C4 and C6, set floors, and give the probe a collapse self-test that must fail on a bank of one sound.
+7. Use instrument-specific excitations (a long note, a sparse line, a held chord), and quote the shared metric's inert terms: the ones that cannot change on this bank.
 
 Never do:
 - Accept "they all sound the same" as an opinion. It is a testable report: 625 presets once measured as 146.

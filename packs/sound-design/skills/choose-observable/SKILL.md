@@ -12,6 +12,11 @@ Always do:
 3. On pitch, keep the depth tiny: the law is exponential, and the error accumulates.
 4. On a sampler, take the median of consecutive gaps.
 5. If it cannot see phase, say so. Assert the offset does not move, and log the open item.
+6. Prove two controls that sound alike are two axes by two different measurements.
+7. When signal and noise overlap in one quantity, measure another.
+8. Map a two-axis or macro control by the local gradient first, then by a rendered sweep.
+9. Measure after a transition, never across it. Use a falling-edge trigger, and choose the probe tone on purpose.
+10. For a layer on a harmonic the note already has, measure a ratio and read the start state.
 
 Never do:
 - Measure phase through a comb, or trust a filter's lowest point as its vertex.

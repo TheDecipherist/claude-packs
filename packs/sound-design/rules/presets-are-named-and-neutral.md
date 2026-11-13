@@ -20,6 +20,7 @@ Always do:
 - Make the mod wheel do something on every preset.
 - Put a delay on a subdivision other than the arp's.
 - Leave glide off by default; a preset that glides says why in its notes.
+- Take the categories from the machine's own bank, keep `Other` last and small, and freeze the list.
 
 Never do:
 - Name a preset after another machine, a brand, an artist or a track, or copy a factory name.
