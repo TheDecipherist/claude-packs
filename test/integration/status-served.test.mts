@@ -49,20 +49,20 @@ test('hook-proxy status: slow path with no daemon; with one, the agents from its
     assert.deepEqual(readdirNames(rig), [], 'the status client started no daemon');
     const up = await start(rig, ['--pool', '2']);
     assert.equal(up.kind, 'ready');
-    await ask(rig, event(rig, 'PreToolUse', 'a1'));
+    await ask(rig, event(rig, 'PreToolUse', null));
     const served = status(rig, '2.0.0');
     assert.doesNotMatch(served.out, /slow path/);
-    assert.match(served.out, /a1\s+> Bash 0:0\d/, 'the agent is listed with its tool and clock');
+    assert.match(served.out, /lead\s+> Bash 0:0\d/, 'the session is listed with its tool and clock');
     assert.match(served.out, /claude-packs 1\.0\.0 ●/, 'older than npm\'s newest: the red dot');
     assert.doesNotMatch(status(rig, '1.0.0').out, /●/, 'as new as npm\'s: none');
     await ask(rig, toJson({ hook_event_name: 'SessionStart', session_id: 's2', source: 'startup', cwd: rig.dir }));
-    assert.doesNotMatch(status(rig).out, /a1/, 'a SessionStart empties the list');
-    await ask(rig, event(rig, 'PostToolUse', 'a1'));
-    assert.match(status(rig).out, /a1/, 'a live agent\'s next event brings it back');
-    await ask(rig, toJson({ hook_event_name: 'SubagentStop', session_id: 'lead1', agent_id: 'a1', agent_type: 'a1', cwd: rig.dir }));
-    assert.doesNotMatch(status(rig).out, /a1/, 'its stop takes it off');
+    assert.doesNotMatch(status(rig).out, /lead\s+>/, 'a SessionStart empties the list');
+    await ask(rig, event(rig, 'PostToolUse', null));
+    assert.match(status(rig).out, /lead\s+>/, 'the session\'s next event brings it back');
+    await ask(rig, toJson({ hook_event_name: 'Stop', session_id: 'lead1', cwd: rig.dir }));
+    assert.doesNotMatch(status(rig).out, /lead\s+>/, 'its stop takes it off');
     // the numbers: one fork and exec per run; the bare fork and exec of the same loop is measured beside them
-    await ask(rig, event(rig, 'PreToolUse', 'a1'));
+    await ask(rig, event(rig, 'PreToolUse', null));
     status(rig);
     const env = { HOME: rig.dir, PATH: `${dirname(process.execPath)}:${process.env.PATH ?? ''}`, CLAUDE_PROJECT_DIR: rig.dir, CLAUDE_PACKS_CACHE: rig.cache, NO_COLOR: '1' };
     const timed = (runs: number, ...command: string[]): { p50: number; p95: number; min: number } => {

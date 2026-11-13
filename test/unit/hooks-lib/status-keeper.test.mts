@@ -26,23 +26,24 @@ function keeperFor(kit: string, over: Partial<ConstructorParameters<typeof Statu
   });
   return { keeper, project, env };
 }
-const pre = (project: string, agent: string): HookEvent => ({ hook_event_name: 'PreToolUse', session_id: 's1', agent_id: agent, agent_type: agent, tool_name: 'Bash', tool_input: { command: 'sleep 600' }, cwd: join(project, '.claude', 'worktrees', agent) });
+/** The session's own call (W8.9: the line draws the session and no agent; `agent` makes it an agent's, which the board keeps and the line leaves out). */
+const pre = (project: string, agent: string | null = null): HookEvent => ({ hook_event_name: 'PreToolUse', session_id: 's1', ...(agent === null ? {} : { agent_id: agent, agent_type: agent }), tool_name: 'Bash', tool_input: { command: 'sleep 600' }, cwd: agent === null ? project : join(project, '.claude', 'worktrees', agent) });
 
-test('the drawn line lists a planted agent with a clock that differs a second later, goes quiet at two minutes, and is gone at five', async () => {
+test('the drawn line lists the session with a clock that differs a second later, goes quiet at two minutes, and is gone at five', async () => {
   const { keeper, project, env } = keeperFor('2.0.0');
-  keeper.note(pre(project, 'a1'), 100, T0);
+  keeper.note(pre(project), 100, T0);
   const first = await keeper.render(SESSION, env, T0 + 42_000);
   const second = await keeper.render(SESSION, env, T0 + 43_000);
   assert.match(first, /claude-packs 2\.0\.0/);
-  assert.match(first, /a1\s+> Bash 0:42/);
-  assert.match(second, /a1\s+> Bash 0:43/);
+  assert.match(first, /lead\s+> Bash 0:42/);
+  assert.match(second, /lead\s+> Bash 0:43/);
   assert.notEqual(first, second);
   assert.match(await keeper.render(SESSION, env, T0 + 2 * MIN), /quiet 2m/);
-  assert.doesNotMatch(await keeper.render(SESSION, env, T0 + 5 * MIN), /a1/);
-  keeper.note(pre(project, 'a1'), 100, T0 + 5 * MIN + 1000);
-  assert.match(await keeper.render(SESSION, env, T0 + 5 * MIN + 2000), /a1\s+> Bash 0:01/);
+  assert.doesNotMatch(await keeper.render(SESSION, env, T0 + 5 * MIN), /lead\s+>/);
+  keeper.note(pre(project), 100, T0 + 5 * MIN + 1000);
+  assert.match(await keeper.render(SESSION, env, T0 + 5 * MIN + 2000), /lead\s+> Bash 0:01/);
   keeper.note({ hook_event_name: 'SessionStart', session_id: 's2', source: 'startup', cwd: project }, 200, T0 + 6 * MIN);
-  assert.doesNotMatch(await keeper.render(SESSION, env, T0 + 6 * MIN + 1000), /a1/);
+  assert.doesNotMatch(await keeper.render(SESSION, env, T0 + 6 * MIN + 1000), /lead\s+>/);
 });
 
 test('the lead\'s last tool and shell command come from its events, not from a transcript', async () => {
@@ -85,7 +86,7 @@ test('npm is asked at most hourly and a failed ask keeps the last answer', async
 test('a network outage (npm that never answers) leaves the render under 15 ms at the median over 100 renders', async () => {
   const { keeper, project, env } = keeperFor('1.0.0', { askNpm: () => new Promise<string | null>(() => undefined) });
   void keeper.refreshNewest(T0);   // hangs for good: no render may wait on it
-  keeper.note(pre(project, 'a1'), 100, T0);
+  keeper.note(pre(project), 100, T0);
   await keeper.render(SESSION, env, T0);   // the first render loads the drawing module
   const times: number[] = [];
   for (let i = 0; i < 100; i += 1) {
