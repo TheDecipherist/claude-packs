@@ -6,7 +6,7 @@ import type { FileStatements } from './near-copies.mts';
 
 // ---- The hook contract (Claude Code's hooks.md: stdin JSON, exit 0 or 2, stderr, JSON on stdout) ----
 
-export type HookEventName = 'PreToolUse' | 'PostToolUse' | 'UserPromptSubmit' | 'Stop' | 'SubagentStop' | 'SessionStart' | 'SessionEnd' | 'Notification' | 'PreCompact';
+export type HookEventName = 'PreToolUse' | 'PostToolUse' | 'UserPromptSubmit' | 'Stop' | 'SubagentStop' | 'SessionStart' | 'SessionEnd' | 'Notification' | 'PreCompact' | 'InstructionsLoaded';
 
 /** What a Write, Edit, MultiEdit, NotebookEdit, Bash, Read, Agent or other tool call carries; every field optional, since a
  *  payload is outside data and is narrowed where it is read. */
