@@ -1,3 +1,4 @@
+// runs alone: it asserts a p50 in milliseconds over the daemon, which other test files running at once double (KWB-219)
 // `claude-packs load` (typescript order W8.8 item 0): the question every lead and agent asks before a heavy start, through the real
 // command line, on a governor folder of its own with 18 planted cores and a planted load.
 import { existsSync } from 'node:fs';

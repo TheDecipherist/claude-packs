@@ -1,3 +1,4 @@
+// runs alone: it asserts a wall time and a memory size, which a machine busy with other test files moves by 25 times (KWB-219)
 // KWB-201: what a live event costs. W8's 0.5 ms was measured on a test socket; in the kit's own install a Bash event took 142 ms and a
 // Write 78 ms (364 at p95) through the picker, because no-find and suite-once each read the whole transcript on every Pre Bash call and
 // once-only and template-law read, stat and write back the whole repetition index on every Pre Write call. This installs a scratch project

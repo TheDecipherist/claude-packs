@@ -15,7 +15,7 @@ function planted(jdks: number[]): { home: string; roots: string[] } {
   const g = join(home, 'tools', 'ghidra_12.2_PUBLIC');
   mkdirSync(join(g, 'Ghidra'), { recursive: true });
   writeFileSync(join(g, 'Ghidra', 'application.properties'), 'application.name=Ghidra\napplication.java.min=25\n');
-  for (const [module, processor] of [['MC6800', '6809'], ['Z80', 'Z80']]) {
+  for (const [module, processor] of [['MC6800', '6809'], ['Z80', 'Z80']] as const) {
     const langs = join(g, 'Ghidra', 'Processors', module, 'data', 'languages');
     mkdirSync(langs, { recursive: true });
     writeFileSync(join(langs, `${module}.ldefs`), `<language processor="${processor}" id="${processor}:BE:16:default"><description>${processor} microprocessor</description></language>`);

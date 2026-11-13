@@ -38,7 +38,9 @@ before (written "slower" or "bigger") for one that rose.
 | T-k | (k) npm pack | 0.84 MB, 1,021 files | 6.95 MB, 1,150 files | 8.3x bigger (a miss, the binaries) | `build/evidence/W0/baseline-measured.md`, `build/evidence/W11/pack-parts.txt` |
 | T-l | (l) doctor --fresh | 29.8 s | 38.5 s | 1.3x slower (a miss) | `build/evidence/W0/baseline-measured.md`, `build/evidence/W11/retake/baseline-measured.md` |
 
-row (a): run 3, alone on the machine at load 4 (build/session4/suite3.txt): 1,650 tests, 868.6 s. The 9 reds: four tests stale against merged work or against the files' own lists (fixed in 38e8e01 and 497b363, KWB-218), and five that fail only inside the suite's load (live Pre Write p50 583 ms against 21 ms alone, `load ask` 72 ms against 38, the pool 101 MB against 100, the kit's own doctor on a log with cold calls, the KWB-96 worktree case); each passes alone (d-37). Runs 1 and 2 (build/evidence/W11/suite-runs.txt) exited 1 with 8 reds each.
+row (a): measured by the lead, build/evidence/W11/suite-runs.txt
+
+Row (a), run 3, alone on the machine at load 4 (build/session4/suite3.txt): 1,650 tests, 868.6 s. The 9 reds: four tests stale against merged work or against the files' own lists (fixed in 38e8e01 and 497b363, KWB-218), and five that fail only inside the suite's load (live Pre Write p50 583 ms against 21 ms alone, `load ask` 72 ms against 38, the pool 101 MB against 100, the kit's own doctor on a log with cold calls, the KWB-96 worktree case); each passes alone (d-37). Runs 1 and 2 (build/evidence/W11/suite-runs.txt) exited 1 with 8 reds each.
 
 Rows (b) and (c) are the same command as W0: touch one file, run the picker's tests through `quiet-test`. Row (g) before is the log as
 bandwarp's 1.9 recorded it under its own load; the second line replays the 1.9.0 tree (`git archive 905e6be`, not on npm) by the same method as

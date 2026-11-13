@@ -1,3 +1,4 @@
+// runs alone: red in two suites run beside other files, green alone every time; the cause is not found (KWB-219, a gap)
 // The rest of the worktree flow (split from worktrees.test.mts so no file sums over 60 s): the Stellix folder and size laws, git-guard's
 // Stop after a landing, and the pin guard, each judged from a real git worktree of the project.
 import assert from 'node:assert/strict';

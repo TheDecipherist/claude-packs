@@ -28,8 +28,8 @@ test('every layout key a project owns is a key of the block', () => {
 });
 
 test('with no packs named, a block installs its configuration\'s defaults', () => {
-  const named = blockPacks({ configuration: 'node', packs: [], owned: {} });
+  const named = blockPacks({ configuration: 'node', packs: [], owned: {}, ghidra: [] });
   assert.ok(named.length > 0 && named.includes('js-ts'));
-  assert.deepEqual(blockPacks({ configuration: 'node', packs: ['mongo'], owned: {} }), ['mongo']);
-  assert.deepEqual(blockPacks({ configuration: null, packs: [], owned: {} }), []);
+  assert.deepEqual(blockPacks({ configuration: 'node', packs: ['mongo'], owned: {}, ghidra: [] }), ['mongo']);
+  assert.deepEqual(blockPacks({ configuration: null, packs: [], owned: {}, ghidra: [] }), []);
 });

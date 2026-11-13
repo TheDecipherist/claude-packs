@@ -1,3 +1,4 @@
+// runs alone: doctor --strict reads the kit's own live timing log, which a busy machine fills with waits (KWB-219)
 // KWB-26: the kit is a project like any other (split from base-install.test.mts so no file sums over a minute). Its own .claude/ carries the base
 // pack (every base hook judges work on the kit, kit-lock beside them), doctor --strict passes on it, and a project's own node hook that is not
 // written for the runner keeps its own settings entry (the kit's kit-lock was folded into run-hooks.mjs and failed there as exit 1, so it never refused).

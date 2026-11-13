@@ -25,7 +25,7 @@ import { changedNames } from './changed-functions.mts';
 import { choose, graph } from './test-changed-graph.mts';
 import { proveHooks, selftestsOf } from './test-changed-hooks.mts';
 import { TABLE } from './test-changed-table.mts';
-import { runHeld } from './run-held.mts';
+import { runTests } from './run-tests.mts';
 
 export { changedNames, choose, graph, proveHooks, selftestsOf, TABLE };
 
@@ -118,12 +118,9 @@ export async function main(argv: readonly string[], env: Env, log: (line: string
   const red = proved.filter((r) => r.code !== 0);
   if (red.length) { for (const r of red) log(`\n${r.hook}:\n${r.out}`); log(GATE); return 1; }
   if (!chosen.size) { log(GATE); return 0; }
-  const args = ['--import', './test/fresh-tmp.mts', '--test', `--test-concurrency=${concurrency}`, ...chosen.keys()];
-  log(`running: node ${args.join(' ')}`);
-  // NODE_TEST_CONTEXT is set when this runs under a test runner; passed on, the nested run reports to it and exits 0 on a failure.
-  const { NODE_TEST_CONTEXT: _context, ...nested } = env;
+  // a file that asserts a time or memory budget runs alone, after the others (run-tests.mts, KWB-219); NODE_TEST_CONTEXT is dropped there
   // held: a stop of this script stops the test runner and every file it started (KWB-212)
-  const code = await runHeld(process.execPath, args, { cwd: o.root, env: nested });
+  const code = await runTests([...chosen.keys()], concurrency, o.root, env);
   log(GATE);
   return code;
 }
