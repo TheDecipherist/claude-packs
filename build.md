@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 session 4 (work/2.0.0-typescript), started 2026-11-13: W11 row (a) filled, KWB-218 and KWB-219 (stale tests, a runs-alone marker), d-38, then W8.9 (one row per project, the stale agent rows, the lagging status.json, `claude-packs top`).
+  making: one status-line row per project (run-projects.mts), a runs-alone marker for timing tests (run-tests.mts), W8.9 items 2 and 3 in run-status.mts; concepts: none (design/shape.json declares none); reuse: projectGroups (run-tree.mts), runRows (run-rows.mts), workLine (run-live.mts), runHeld (scripts/run-held.mts).
+
 - 2.0.0 w11-report (work/2.0.0-ts-w11-report), started 2026-11-13: W11 items 2 and 3, report.md finished, showcase.md, whats-new-in-2.0.md and the test that holds their rows.
   making: report.md rows with ids, showcase and whats-new lines tied to rows, a test that reads the three; concepts: none (design/shape.json declares none); reuse: readText and scratchDir (packs/base/hooks/lib/files.mts).
 

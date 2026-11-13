@@ -4,6 +4,8 @@
 import type { BoardRow } from '../hooks/resident/agent-board.mts';
 import type { Colours, Paint } from './statusline-paint.mts';
 
+const LEAD = 'lead';   // what the board calls a session's own entry (agent-board.mts)
+
 /** m:ss, minutes unbounded (`12:03`). */
 export function clock(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -14,7 +16,7 @@ const shortTarget = (t: string): string => { const parts = t.split('/').filter(B
 
 /** A row's text: the agent, then `Tool m:ss` for a running tool or `idle m:ss`, then its target; quiet rows end `quiet Nm`. */
 export function agentSegments(rows: readonly BoardRow[], paint: Paint, c: Colours, lastCommit?: { at: number; who: string } | null, now = 0): string[] {
-  const out = rows.map((r) => {
+  const out = rows.filter((r) => r.who === LEAD).map((r) => {   // W8.9: a row a session, never a row an agent: the agents are its project row's count and `claude-packs top`'s
     const hue = r.quiet ? c.amber : c.green;
     const what = r.running ? `${r.tool} ${clock(r.clockMs)}` : `idle ${clock(r.clockMs)}`;
     const target = r.target !== '' ? ` ${paint(shortTarget(r.target).slice(0, 50), c.dim)}` : '';

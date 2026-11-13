@@ -23,6 +23,7 @@
     "hooks/lib/merge-out.mts": ["test/integration/resident-sampler.test.mts"],
     "hooks/lib/program-named.mts": [],
     "hooks/lib/prompt-of.mts": [],
+    "hooks/lib/run-projects.mts": ["test/unit/hooks-lib/one-row-per-project.test.mts"],
     "hooks/lib/proxy-wire-table.mts": ["test/unit/lib/wire-owner.test.mts"],
     "hooks/lib/stop-cache-selftest.mts": [],
     "hooks/lib/stop-cache.mts": [],

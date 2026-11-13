@@ -48,41 +48,24 @@ test('the second line has the branch, then the last tool and its target and the 
   assert.equal(lines[1], '⎇ work/x ✱2 ↑1↓0 | Read /a/b.mjs | $ npm test');
 });
 
-test('each run is its project\'s row, with when it was checked, and one row per agent with its bar; a still agent says so', () => {
+test('each project is one row, with its progress, the lead\'s step and its agent count, and no row per agent (W8.9)', () => {
   const { lines } = scene();
-  assert.match(lines[2] ?? '', /^BANDWARP {14} █{8}░{12}  40%  6 of 10 items left, 2 agents, checked 0s ago$/);
-  assert.match(lines[3] ?? '', /^├ dsp {8}> W3 The cluster\s+█{5}░{5}  50%  ♡\s+COMB width$/);
-  assert.match(lines[4] ?? '', /^└ panel {6}> W8 The panel\s+█{3}░{7}  25%  ♡ 1h00m$/);   // no heartbeat, its file still an hour: red
-  assert.equal(lines[3]?.indexOf('█'), lines[4]?.indexOf('█'), 'the agents\' bars in one column');
+  assert.match(lines[2] ?? '', /^BANDWARP {14} █{8}░{12}  40%  6 of 10 items left · W3 The cluster · 2 agents$/);
+  assert.equal(lines.length, 3, 'the two agents are not rows');
 });
 
-test('the last heartbeat says what each agent did last and how long ago, a long call with what runs in its worktree', () => {
-  const at = (sec: number): string => new Date(NOW - sec * 1000).toISOString();
+test('the work of the lead and of every agent in a project is summed on its one row', () => {
   const [first, second] = RUN.agents;
-  const agents = [
-    { ...first, updated: at(3600), beat: { t: at(12), event: 'post', tool: 'Edit', what: 'src/Comb.cpp' } },
-    { ...second, updated: at(3600), beat: { t: at(1200), event: 'pre', tool: 'Bash', what: 'cmake --build' }, work: { procs: 3, cores: 2.4, memMb: 1229 } },
-    { name: 'demo', step: 'W8', title: 'The panel', percent: 0, now: '', updated: null, beat: { t: at(420), event: 'post', tool: 'Grep', what: 'kSlots' } },
-    { name: 'gate', step: 'W8', title: 'The panel', percent: 0, now: '', updated: null, beat: { t: at(420), event: 'pre', tool: 'Bash', what: 'ctest' }, work: { procs: 0, cores: 0, memMb: 0 } },
-    { name: 'old', step: 'W8', title: 'The panel', percent: 0, now: '', updated: null, beat: null, work: { procs: 2, cores: 0.5, memMb: 300 } },
-  ];
-  const { lines } = scene({ runs: [{ ...RUN, agents }] });
-  assert.match(lines[3] ?? '', /  50%  ♥ 12s\s+WRITE src\/Comb\.cpp  COMB width$/);
-  assert.match(lines[4] ?? '', /  25%  ♥ 20m ⚙ 3 proc · 2\.4 cpu · 1\.2G ram ⟳ RUN cmake --build$/);
-  assert.match(lines[5] ?? '', /   0%  ♥ 7m\s+READ kSlots$/);
-  assert.match(lines[6] ?? '', /   0%  ♥ 7m  ⚙ 0 proc · 0\.0 cpu ·   0M ram ⟳ RUN ctest$/);
-  assert.match(lines[7] ?? '', /   0%  ♡     ⚙ 2 proc · 0\.5 cpu · 300M ram$/);
-  // every value stands under the same value of the row above: the heartbeat, the processes, the cores, the memory, the action
-  for (const mark of ['♥', '⚙', ' cpu', ' ram', 'RUN']) {
-    const columns = lines.slice(3, 8).map((l) => l.indexOf(mark)).filter((i) => i >= 0);
-    assert.equal(new Set(columns).size, 1, `${mark} at columns ${columns.join(',')}`);
-  }
+  const agents = [{ ...first, work: { procs: 3, cores: 2.4, memMb: 1229 } }, { ...second, work: { procs: 2, cores: 0.5, memMb: 300 } }];
+  const { lines } = scene({ runs: [{ ...RUN, agents, leadWork: { procs: 1, cores: 0.1, memMb: 100 } }] });
+  assert.match(lines[2] ?? '', /2 agents  ⚙ 6 proc · 3\.0 cpu · 1\.6G ram$/);
+  assert.equal(lines.length, 3);
 });
 
 test('a run with no agent shows the lead on its current step; a stale cache says how old it is', () => {
   const { lines } = scene({ runs: [{ ...RUN, agents: [] }], cacheAge: 10 * 60_000 });
-  // the lead working alone is said on its order's row, never as a row of its own
-  assert.match(lines[2] ?? '', /6 of 10 items left, lead on W3 The cluster, checked 10m ago  \(as of 10m ago\)$/);
+  // the lead working alone is said on its project's row, never as a row of its own
+  assert.match(lines[2] ?? '', /6 of 10 items left · W3 The cluster · 0 agents  \(as of 10m ago\)$/);
   assert.equal(lines.length, 3);
 });
 

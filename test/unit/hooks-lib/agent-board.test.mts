@@ -18,13 +18,15 @@ const pre = (agent: string, tool = 'Bash', extra: HookEvent = {}): HookEvent => 
 const post = (agent: string, tool = 'Bash'): HookEvent => ({ ...pre(agent, tool), hook_event_name: 'PostToolUse' });
 const ids = (board: AgentBoard, now: number, usageOf: (owner: string) => Usage | null = none): string[] => board.rows(now, usageOf).map((r) => r.who);
 
+const leadPre = (): HookEvent => ({ hook_event_name: 'PreToolUse', session_id: 's1', tool_name: 'Bash', tool_input: { command: 'x' }, cwd: P });
+
 test('a tool call shows its tool with a clock that differs between two renders a second apart', () => {
   const board = new AgentBoard(P);
-  board.note(pre('a1'), 100, T0);
+  board.note(leadPre(), 100, T0);
   const paint = painter('none');
   const first = agentSegments(board.rows(T0 + 42_000, none), paint, C);
   const second = agentSegments(board.rows(T0 + 43_000, none), paint, C);
-  assert.match(first.join('\n'), /a1/);
+  assert.match(first.join('\n'), /lead/);
   assert.match(first.join('\n'), /Bash 0:42/);
   assert.match(second.join('\n'), /Bash 0:43/);
   assert.notEqual(first.join('\n'), second.join('\n'));
@@ -32,7 +34,7 @@ test('a tool call shows its tool with a clock that differs between two renders a
 
 test('two minutes without an event turns the line yellow and says `quiet 2m`; before that it does not', () => {
   const board = new AgentBoard(P);
-  board.note(pre('a1'), 100, T0);
+  board.note(leadPre(), 100, T0);
   const paint = painter('truecolor');
   const before = agentSegments(board.rows(T0 + QUIET_MS - 1000, none), paint, C).join('\n');
   assert.doesNotMatch(before, /quiet/);
@@ -40,6 +42,17 @@ test('two minutes without an event turns the line yellow and says `quiet 2m`; be
   assert.match(after, /quiet 2m/);
   assert.ok(after.includes(`\x1b[38;2;${C.amber.r};${C.amber.g};${C.amber.b}m`), 'the quiet line is yellow');
   assert.ok(!before.includes(`\x1b[38;2;${C.amber.r};${C.amber.g};${C.amber.b}m`), 'before two minutes it is not');
+});
+
+test('the status line draws the session\'s own row and no row for an agent (W8.9: the agents are the project row\'s count and the monitor\'s)', () => {
+  const board = new AgentBoard(P);
+  board.note(leadPre(), 100, T0);
+  board.note(pre('a1'), 100, T0);
+  board.note(pre('a2'), 100, T0);
+  assert.deepEqual(ids(board, T0 + 1000).sort(), ['a1', 'a2', 'lead'], 'the board keeps every one');
+  const drawn = agentSegments(board.rows(T0 + 1000, none), painter('none'), C);
+  assert.equal(drawn.length, 1, drawn.join('\n'));
+  assert.match(drawn[0] ?? '', /^lead/);
 });
 
 test('five minutes of silence with no process of its own removes the agent; its next event brings it back', () => {
