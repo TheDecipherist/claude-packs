@@ -50,7 +50,7 @@ Always do:
 
 ## The user's yes for W12
 
-publish 2.0.0: yes (Tim, 2026-11-11)
+publish 2.0.0: HELD (Tim, 2026-11-13: "yes lets do the supernova 2 first before we release the kit. its the ultimate test"). The yes of 2026-11-11 is withdrawn until ~/projects/supernova2, the kit's measured test, has run far enough to shake the kit out; the user gives the yes again then. Until it does: close W5 and W8; land W12's merge (the branch into main, pushed, tested against the trunk) but do NOT publish to npm, do not bump the version on npm, and do NOT write DONE; write in progress.md what is landed and ready to publish, and end there. Kit faults the supernova2 run finds arrive as KWB-next rows and merges on this branch: fold them in before the publish.
 
 The user's words, 2026-11-11: "go ahead ... use recommended choices for everything to run unattended. once the kit is complete and
 merged to main and pushed and new npm package release and README.md updated with the new kit details." So W12 lands on `main`,
