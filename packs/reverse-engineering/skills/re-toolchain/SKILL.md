@@ -9,7 +9,7 @@ A run that meets a missing tool hours in either stops or improvises: one order s
 
 <constraints>
 Always do:
-1. **Name every processor** the firmware runs on: the host CPU, any sub CPU, every DSP and effects processor, from the archive's recon, the reference library (`chip-search`), the manuals and the board photos (`boards-from-photos`). Write them on the order's install block line `processors: H8/300H, DSP56300`.
+1. **Name every processor** the firmware runs on: the host CPU, any sub CPU, every DSP and effects processor, from the proved answer of `identify-the-cpu`, the archive's recon, the reference library (`chip-search`), the manuals and the board photos (`boards-from-photos`). Write them on the order's install block line `processors: H8/300H, DSP56300`.
 2. **Scan this machine:** `npx @thedecipherist/claude-packs toolchain PROCESSOR... --out docs/workorders/NAME/toolchain.md`. It looks at our own tools first (the reference library's `toolchain/` shelf: `toolchain/disassemblers` and `toolchain/emulators`; every project's `tests/oracle` interpreter; the tools under `~/firmware`), then what is installed (`~/firmware/src`, binutils' objdumps, MAME's `unidasm`, Ghidra's modules) and the reference library, and writes one row per processor with each find: ours or third-party, its path and its licence.
 3. **Settle every `missing`,** cell by cell:
    - a disassembler: the library's `toolchain/disassemblers` first; a missing one is written there, never in a project, with its row in that folder's README, so the next machine finds it;
