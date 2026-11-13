@@ -221,7 +221,7 @@ its panel offers only the source. Let the machine declare which shape it has.
 
 **Asking for OFF on a machine that has none is silently granted as INTERNAL,
 and it has cost more than any other single line in this area.** `setSyncMode
-(syncOff)` cannot fail - the shell resolves it, because an effect must be on
+(syncOff)` cannot fail - the plugin resolves it, because an effect must be on
 some clock - so the caller gets a machine that is still synced and never hears
 about it. Once, three of four effects units had red clock probes from
 exactly this, and all three ENGINES were correct:
