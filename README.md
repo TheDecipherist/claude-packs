@@ -428,11 +428,11 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
-| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 65 | 12 | 4 | 8 |
+| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 66 | 12 | 4 | 8 |
 | `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 34 | 9 | 34 | 18 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
-| `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 10 | 14 | 1 | 2 |
+| `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 11 | 14 | 1 | 2 |
 | `docker` | Dockerfiles, Compose and Swarm: exec form, init, non-root, pinned bases, healthchecks, secrets, swarm-safe compose. | 5 | 24 | 0 | 1 |
 | `dynamic-data` | Systems driven by definitions: a CMS, an admin generator, a low-code platform. | 10 | 9 | 0 | 1 |
 | `fastify` | Fastify servers: security always on, trust config not headers, Zod at every route, streams and hijacks handled. | 6 | 15 | 0 | 0 |
@@ -443,7 +443,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `host-agent` | Software that runs as root on machines it does not own: updates are verified, secrets stay off the command line, system files are replaced atomically, and generated config is escaped. | 1 | 7 | 0 | 0 |
 | `html-ui` | Server-rendered HTML (template strings, views): every value escaped, no inline style or script, safe links. | 2 | 5 | 0 | 0 |
 | `http-api` | Any HTTP server, in any framework: every route ties a record to its caller, guards fail closed, input is validated, secrets are compared and stored safely, and what a route returns gives nothing away. | 9 | 31 | 0 | 2 |
-| `instrument-shell` | Instruments built on a shared shell: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit. | 7 | 1 | 0 | 3 |
+| `instrument-shell` | Instruments: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit. | 14 | 1 | 0 | 3 |
 | `js-ts` | JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper. | 28 | 36 | 0 | 0 |
 | `midi` | MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. | 6 | 9 | 0 | 5 |
 | `mongo` | MongoDB with the native driver: one client, one gateway, aggregation reads, bulkWrite writes, safe deletes. | 6 | 18 | 0 | 0 |
@@ -452,9 +452,9 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `postgres` | PostgreSQL: migrations that never stop traffic, values always bound, types that say what they hold, and no database wiped by mistake. | 5 | 10 | 1 | 1 |
 | `python` | Python projects: what is repeated becomes a template in the forms Python has for it, errors are handled where they can be, resources are closed, subprocess and network calls are safe. | 1 | 11 | 0 | 1 |
 | `react` | React: a failed request says so, a slow response never overwrites a newer one, effects are not used for derived state, and controls have names. | 2 | 6 | 0 | 0 |
-| `reverse-engineering` | Rebuilding a machine from its firmware, manuals and sound banks: two sources before naming anything, every law carries its source, a negative names what was scanned, every term of a sum is accounted for, and firmware stays out of git. | 14 | 5 | 1 | 32 |
+| `reverse-engineering` | Rebuilding a machine from its firmware, manuals and sound banks: two sources before naming anything, every law carries its source, a negative names what was scanned, every term of a sum is accounted for, and firmware stays out of git. | 15 | 5 | 2 | 33 |
 | `rust` | Rust: errors returned, unsafe proved, async never blocks, clippy as the gate. | 5 | 9 | 0 | 3 |
-| `shell` | Shell scripts: strict mode, quoted arguments, shared functions in one sourced file, tables and loops, and programs kept out of heredocs. | 1 | 9 | 0 | 1 |
+| `shell` | Shell scripts: strict mode, quoted arguments, shared functions in one sourced file, tables and loops, and programs kept out of heredocs. | 2 | 9 | 0 | 1 |
 | `shell-hooks` | Shell and Node hooks for Claude Code: portable, anchored, quoted, one prelude, JSON by a tool. | 1 | 4 | 0 | 0 |
 | `sound-design` | Sound that is proved by measuring audio: algorithms are data, neutral is exact, the meter is suspected before the engine, and tests sit off the easy point. | 14 | 8 | 0 | 14 |
 | `stellix` | Stellix spec laws: the world, determinism, generated reset, no shipped images. | 5 | 5 | 1 | 0 |
