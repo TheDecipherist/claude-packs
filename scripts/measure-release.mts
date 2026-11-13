@@ -169,6 +169,7 @@ async function main(): Promise<void> {
       // a change to an installed file comes with the regenerated manifest, as a developer commits it (the noop test holds that)
       run(clone, 'npm', ['run', 'build'], env);
       run(clone, 'node', ['scripts/counts.mts'], env);
+      run(clone, 'node', ['scripts/noop-pin.mts'], env); // and the pin a person reads and keeps when an installed file changes on purpose
       run(clone, 'git', ['commit', '-q', '-a', '-m', `measure: ${c.name}`]);
       const started = Date.now();
       const r = await released(clone, env, registry.url);
