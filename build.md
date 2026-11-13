@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 w11-ab (work/2.0.0-ts-w11-ab), started 2026-11-13: W11 item 0, the five A/B tasks compared with the originals in docs/workorders/typescript/ab.md.
+  making: ab.md assembled from scripts/ab-compare.mts rows, the clones' gate runs and logs; concepts: none (design/shape.json declares none); reuse: compareRow and summariseTranscript (scripts/ab-compare.mts, ab-transcript.mts).
+
 - 2.0.0 kwb216 (work/2.0.0-ts-kwb216), started 2026-11-12: KWB-216, a hook past the deadline sends the whole event to the TypeScript path, never a partial verdict.
   making: resident/event.mts overDeadline, scripts/soak-verdict.mts (the soak counts a partial verdict as a difference); concepts: none (design/shape.json declares none); reuse: logCall, overTime, the fallback reply.
 
