@@ -11,6 +11,9 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 audit (work/2.0.0-audit), started 2026-11-13: the audit work order (docs/workorders/audit/workorder.md), W0 onward.
+  making: the audit's micro units (rules, skills, checks, hooks, tools) in packs/<pack>/, the units.md ledger, evidence under build/evidence/W<n>/; concepts: none (design/shape.json declares none); reuse: scratchProject/runHook/verdicts (packs/base/hooks/lib/selftest.mts), runAsHook (hook-log.mts), writesOf (writes.mts), scripts/counts.mts, the lesson-check format.
+
 - 2.0.0 w89-top (work/2.0.0-ts-w89-top), started 2026-11-13: W8.9 item 4, `claude-packs top`.
   making: the terminal monitor as `hook-proxy top` (Go, proxy/top*.go) plus the `top` command in lib/; concepts: none (design/shape.json declares none); reuse: newSampler and chooseSource (proxy/sample.go), jobFor and exchange (proxy/client.go), build-proxy.mts and lib/proxy-binary.mts (the binary and its cache), the daemon's `status` reply (resident.mts).
 

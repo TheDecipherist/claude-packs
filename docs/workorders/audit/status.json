@@ -1,0 +1,83 @@
+{
+  "updated": "2026-11-13T21:57:24.890Z",
+  "steps": [
+    {
+      "id": "W0",
+      "title": "Set up",
+      "items": 4,
+      "done": 4,
+      "agent": null
+    },
+    {
+      "id": "W1",
+      "title": "reverse-engineering: the firmware pass",
+      "items": 4,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W2",
+      "title": "base",
+      "items": 4,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W3",
+      "title": "synth-creator",
+      "items": 3,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W4",
+      "title": "sound-design and midi",
+      "items": 3,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W5",
+      "title": "audio-core and the release lock",
+      "items": 5,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W6",
+      "title": "instrument-shell, cpp, shell, catalog, shell text",
+      "items": 4,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W7",
+      "title": "work-order templates",
+      "items": 2,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W8",
+      "title": "the second full read",
+      "items": 3,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W9",
+      "title": "before calling it finished",
+      "items": 1,
+      "done": 0,
+      "agent": null
+    },
+    {
+      "id": "W10",
+      "title": "the report",
+      "items": 1,
+      "done": 0,
+      "agent": null
+    }
+  ],
+  "agents": []
+}
