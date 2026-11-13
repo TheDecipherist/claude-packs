@@ -53,7 +53,8 @@ while [[ "$session" -le "$max_sessions" ]]; do
   before="$(moved)"
   echo "$(date +%Y-%m-%dT%H:%M:%S%z) session $session starts" | tee -a "$logs/runner.log"
   # the second sentence is what suite-once reads to allow a full run where a step's Done when names one (W0.6 proves it)
-  claude -p "Run docs/workorders/typescript/PROMPT.md; this session runs the whole suite where a step's Done when names it" \
+  # the lead runs on Sonnet (the user, 2026-11-12, for usage: "change to sonnet for the rest")
+  claude -p "Run docs/workorders/typescript/PROMPT.md; this session runs the whole suite where a step's Done when names it" --model claude-sonnet-5-5 \
     --permission-mode bypassPermissions --output-format stream-json --verbose \
     < /dev/null > "$logs/session-$session.jsonl" 2> "$logs/session-$session.err" || true
   if [[ "$(moved)" == "$before" ]] && refused "$logs/session-$session.jsonl"; then
