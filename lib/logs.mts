@@ -2,6 +2,8 @@
 //   logs                                 per hook: calls, refusals, right, wrong, not judged, crashes, time
 //   logs refusals [--hook <h>] [--open]  every refusal with its reason (--open: not judged yet)
 //   logs mark <id> right|wrong "<why>"   the verdict, added to .claude/logs/verdicts.jsonl; nothing is rewritten
+//   logs skills                          per installed skill: uses (Skill tool, /name prompt), last use; the never used (skills.jsonl)
+//   logs rules                           per installed rule: loads (at launch, by its paths), last load; the never loaded (rules.jsonl)
 //   logs crashes                         every crash, and whether it is cleared (KF-40: a crash is no refusal, and has no verdict)
 //   logs clear <hook>|all fixed|superseded "<why>"   clears the crashes so far, for doctor (KF-18); a later crash is red again
 import { appendFileSync, readdirSync } from 'node:fs';
@@ -9,6 +11,7 @@ import { join } from 'node:path';
 import { ensureDir, readText } from '../packs/base/hooks/lib/files.mts';
 import { readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
 import { asRecord, parseJson, toJson } from '../packs/base/hooks/lib/json.mts';
+import { rulesReport, skillsReport } from './logs-usage.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
 const DIR = join('.claude', 'logs');
@@ -66,12 +69,15 @@ function recordOf(value: unknown): LogRecord[] {
   }];
 }
 
-function jsonlRecords(dir: string, name: string): LogRecord[] {
+/** Every parsed line of `.claude/logs/<name>.jsonl` and its rotated files (`<name>-<stamp>.jsonl`), oldest file first. */
+export function readJsonl(dir: string, name: string): unknown[] {
   const logs = join(dir, DIR);
   let files: string[] = [];
   try { files = readdirSync(logs).filter((f) => f === `${name}.jsonl` || (f.startsWith(`${name}-`) && f.endsWith('.jsonl'))).sort(); } catch { return []; }
-  return files.flatMap((f) => (readText(join(logs, f)) ?? '').split('\n').filter(Boolean).flatMap((l) => recordOf(parseJson(l))));
+  return files.flatMap((f) => (readText(join(logs, f)) ?? '').split('\n').filter(Boolean).map((l) => parseJson(l)));
 }
+
+const jsonlRecords = (dir: string, name: string): LogRecord[] => readJsonl(dir, name).flatMap(recordOf);
 
 // A crash, in its own log or, in an old log, in refusals.jsonl with a code other than 2. Old lines are read as they are, never rewritten.
 const crashesOf = (dir: string): LogRecord[] => [...jsonlRecords(dir, 'crashes'), ...jsonlRecords(dir, 'refusals').filter((r) => r.code !== 2)];
@@ -181,6 +187,8 @@ export function logsCommand(dir: string, rest: readonly string[], log: Logger = 
   if (sub === 'mark') return markVerdict(dir, rest, log);
   if (sub === 'crashes') return listCrashes(dir, log);
   if (sub === 'clear') return clearCrashes(dir, rest, log);
+  if (sub === 'skills') return skillsReport(dir, log);
+  if (sub === 'rules') return rulesReport(dir, log);
   if (sub === 'refusals') return listRefusals(dir, rest, log);
   const s = logsSummary(dir);
   if (!s.calls) { log('no calls logged yet (.claude/logs/ fills as the hooks run)'); return 0; }

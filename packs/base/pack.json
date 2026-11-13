@@ -44,6 +44,8 @@
     "hooks/git-guard.mts": ["test/hooks/base/git-guard.test.mts"],
     "hooks/governor-route.mts": ["test/hooks/base/governor-route.test.mts"],
     "hooks/heartbeat.mts": ["test/hooks/base/heartbeat.test.mts"],
+    "hooks/rule-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
+    "hooks/skill-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
     "hooks/inside-the-project.mts": ["test/hooks/base/inside-the-project.test.mts"],
     "hooks/kit-fresh.mts": ["test/hooks/base/kit-fresh.test.mts"],
     "hooks/lesson-checks.mts": ["test/hooks/base/lesson-checks-articles.test.mts", "test/hooks/base/lesson-checks.test.mts"],
@@ -543,6 +545,13 @@
             "role": "judge",
             "order": 20,
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-log.mjs\"",
+            "role": "recorder",
+            "order": 30,
+            "timeout": 5
           }
         ]
       }
@@ -556,6 +565,18 @@
             "role": "recorder",
             "order": 10,
             "async": true,
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-log.mjs\"",
+            "role": "recorder",
+            "order": 30,
             "timeout": 5
           }
         ]
@@ -581,6 +602,19 @@
             "role": "recorder",
             "order": 20,
             "timeout": 20
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/rule-log.mjs\"",
+            "role": "recorder",
+            "order": 10,
+            "timeout": 5
           }
         ]
       }
@@ -624,6 +658,8 @@
     "hooks/run-hooks.mjs",
     "hooks/resident.mjs",
     "hooks/heartbeat.mjs",
+    "hooks/skill-log.mjs",
+    "hooks/rule-log.mjs",
     "hooks/no-find.mjs",
     "hooks/no-polling.mjs"
   ],

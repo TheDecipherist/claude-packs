@@ -24,6 +24,8 @@ import { worktreeCase as ONCE_ONLY } from '../../packs/base/hooks/once-only.mts'
 import { worktreeCase as ONCE_ONLY_INDEX } from '../../packs/base/hooks/once-only-index.mts';
 import { worktreeCase as PLACEMENT_LAW } from '../../packs/base/hooks/placement-law.mts';
 import { worktreeCase as SECRETS_GUARD } from '../../packs/base/hooks/secrets-guard.mts';
+import { worktreeCase as RULE_LOG } from '../../packs/base/hooks/rule-log.mts';
+import { worktreeCase as SKILL_LOG } from '../../packs/base/hooks/skill-log.mts';
 import { worktreeCase as SHAPE_LAW } from '../../packs/base/hooks/shape-law.mts';
 
 
@@ -73,6 +75,9 @@ const CASES: Record<string, (checkouts: Checkouts) => void | Promise<void>> = {
     assert.equal(fireAs(here, 'heartbeat.mjs', { hook_event_name: 'PostToolUse', cwd: here, tool_name: 'Read', tool_input: { file_path: join(here, 'CLAUDE.md') } }).status, 0);
     assert.equal(beat('lead')?.event, 'post');
   },
+  // the usage logs: a skill used or a rule loaded in the worktree is logged in the main checkout and passes
+  'skill-log.mjs': caseFrom('skill-log.mjs', SKILL_LOG),
+  'rule-log.mjs': caseFrom('rule-log.mjs', RULE_LOG),
   'stage-guard.mjs': installedCase('stage-guard.mjs'),
   'git-guard.mjs': caseFrom('git-guard.mjs', GIT_GUARD),
   // A non-base pack's hook cannot be imported from packs/ (its ./lib/ is base's, merged only by an install), so these cases stay
