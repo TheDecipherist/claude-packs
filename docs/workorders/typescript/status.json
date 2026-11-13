@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T13:10:20Z",
+  "updated": "2026-11-13T13:23:33Z",
   "steps": [
     {
       "id": "W0",
@@ -77,9 +77,9 @@
       "id": "W8.9",
       "title": "One row per project, and a terminal monitor",
       "items": 5,
-      "done": 3,
-      "agent": "w89-top",
-      "note": "items 1 to 3 done by the lead (1c9758c, e1a5a9b, aabc7dc); item 4, claude-packs top, with w89-top"
+      "done": 5,
+      "agent": null,
+      "note": "items 1 to 3 by the lead, item 4 (claude-packs top) by w89-top, merged dbbea7a; start 10 ms and 10.1 MB measured by the agent, the lead read the live frame"
     },
     {
       "id": "W9",
@@ -119,12 +119,5 @@
       "note": "prepared (CHANGELOG, README, dry-run 0 refusals); npm is not logged in for @thedecipherist on this machine, so the publish waits for it"
     }
   ],
-  "agents": [
-    {
-      "name": "w89-top",
-      "worktree": ".claude/worktrees/w89-top",
-      "step": "W8.9",
-      "started": "2026-11-13T13:10:20Z"
-    }
-  ]
+  "agents": []
 }
