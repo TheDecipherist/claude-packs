@@ -176,6 +176,16 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-35 W10b's soak: two lines stated as missed, with their causes {#d-35}
+- Measured (build/evidence/W10b/, agents/w10b-soak-report.md): 120 samples, 0 differing exit codes of 1,420 compared, heap slope
+  0.01 MB per 10 minutes, descriptors and children back to their start, the old daemon gone 16 s after the update, each leak plant red.
+- Missed: 29,779 events, not over 200,000: the user's rule of 16:06 runs the soak at 4 clients under `taskpolicy -b`, and the
+  efficiency cores played about 8 events a second. The daemon's RSS at the end 227 MB with 8 workers against the 150 MB line (85 to
+  100 MB at 2 workers, the idle line met); each grown worker holds about 15 MB, and d-31's floor still holds.
+- Chosen: W10b closed with both lines stated as missed and why; no rerun at 8 clients on the performance cores, which the user forbade.
+- Why: a rerun cannot meet the event count inside the user's load rule, and the RSS needs lighter workers or a lower maximum, which
+  is a pool decision for the user. Overturn by editing W10b's Done when or W8's pool.
+
 ## d-34 W11.0 runs the five tasks that build on this Mac, each as a child session in its clone {#d-34}
 - Question: W11.0's draw. Of bandwarp's measured and merged agent tasks on this machine (panel, dsp, demo, bypass, macdsp), four were
   built on the PC from a base that does not configure on this Mac (xvfb-run required, gcc-only source; build/evidence/W11/ab-prep.md),
