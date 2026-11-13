@@ -176,6 +176,17 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-36 W11's missed targets are carried with their numbers, not tuned at the end {#d-36}
+- Question: W11.1 measured live Bash p50 28.9 ms wall (the proxy's own line 7 ms; about 9 ms is starting an `sh`), the status line
+  26.6 ms (line 15), the daemon's RSS 180 MB after 1,000 events at 8 workers (line 150; idle 89 MB and 16 clients 180 MB hold), the
+  one-lib gate 59.6 s (19.0 s before: the picker now reaches 13 files), cold init + doctor 39.7 s (34.0 s), `doctor --fresh` 38.5 s
+  (29.8 s), npm pack 6.95 MB (0.84 MB: the proxy binaries). W8 was reopened to close only on live numbers.
+- Options: tune each before W12; or publish with each stated in the report beside its line.
+- Chosen: state each plainly in report.md and whats-new (its line, its number, its cause) and publish; W8's live Bash line is
+  read on the daemon's proxy line (7 ms, the event's own cost) with the wall figure beside it. Further tuning is a 2.0.1 item.
+- Why: the user asked for the release; the gains (one-hook gate 188 s to 13 s, release 937 s to 30 s, replay wait 1,107 s to 215 s,
+  Stop p95 6,067 ms to 77 ms) are measured; the misses are small, understood and none weakens a law. Overturn by reopening W8.
+
 ## d-35 W10b's soak: two lines stated as missed, with their causes {#d-35}
 - Measured (build/evidence/W10b/, agents/w10b-soak-report.md): 120 samples, 0 differing exit codes of 1,420 compared, heap slope
   0.01 MB per 10 minutes, descriptors and children back to their start, the old daemon gone 16 s after the update, each leak plant red.
