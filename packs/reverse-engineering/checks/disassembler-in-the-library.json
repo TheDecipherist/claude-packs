@@ -1,0 +1,30 @@
+{
+  "id": "disassembler-in-the-library",
+  "why": "A disassembler serves every machine with its processor: it is written once, in the reference library's toolchain shelf, never inside one project.",
+  "rule": ".claude/rules/house-tools-live-in-the-library.md",
+  "globs": [
+    "**/tools/**/*.py",
+    "**/tools/**/*.go",
+    "**/tools/**/*.c",
+    "**/tools/**/*.cpp",
+    "**/tools/**/*.mjs",
+    "**/tools/**/*.ts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    ".claude/**",
+    "**/.claude/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**"
+  ],
+  "code": true,
+  "pattern": "(?:^|\\n)\\s*(?:#|//|/\\*|\"\"\"|\\*)[^\\n]*\\b(?:disassembler|disassembles)\\b",
+  "kind": "quality",
+  "bad": "# dis6809.py: a 6809 disassembler for this unit",
+  "good": "# extract.py: pulls the DSP program out of the image"
+}

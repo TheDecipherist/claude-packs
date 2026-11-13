@@ -23,3 +23,14 @@ test('a circuit diagram is read tile by tile, one report an image, and set again
   assert.match(boards, /^description: Use when a machine has no public service manual/m);
   for (const law of [/Prove the absence first/, /What the sheets would have given/, /FCC ID/, /installation guides/, /two independent photos agree on/, /\[PHOTO\?\]/, /\[DS-REF\]/, /firmware's clock set-up/, /How the search went/, /Commit a photo/, /Chips in Synthesizers/, /spare-parts sellers who sell a part by the machine's name/, /\[\?\]` for the rest/]) assert.match(boards, law);
 });
+
+// the user, 2026-11-13: "the kit needs to check at the start whats missing to perform a proper RE ... ironclad"; and "new
+// disassemblers should never be in a project ... it now should be in the library"
+test('re-toolchain settles every processor\'s tools before the run, and house tools live in the library', () => {
+  const skill = readFileSync(join(KIT, 'packs/reverse-engineering/skills/re-toolchain/SKILL.md'), 'utf8');
+  assert.ok(skill.length < 8000);
+  assert.match(skill, /^description: Use when a work order or a reverse engineering of firmware starts/m);
+  for (const law of [/processors: H8\/300H, DSP56300/, /claude-packs toolchain/, /toolchain\/disassemblers/, /toolchain\/emulators\/FAMILY/, /search online/, /ask the user/, /build our own \(the user, yes, DATE\)/, /black box only/, /refuses a run/]) assert.match(skill, law);
+  const rule = readFileSync(join(KIT, 'packs/reverse-engineering/rules/house-tools-live-in-the-library.md'), 'utf8');
+  for (const law of [/written once, in the reference library/, /toolchain\/disassemblers\/FAMILY/, /`disassembler-in-the-library` refuses it/, /third-party\.md/]) assert.match(rule, law);
+});
