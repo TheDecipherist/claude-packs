@@ -109,6 +109,19 @@ packs: base
    time from the step's start to its done line, the time spent waiting on hooks and on the load governor, and the re-runs; with
    `--by step|order|day`; a cost in money only from a price table with its date and source (the `latest-versions` way), stated as
    an estimate. Run once over the past: the 2.0 order and bandwarp's tasks from their transcripts, so the first table has history.
+6. Detailed enough to find what to optimize (the user, 2026-11-12: "detailed enough so we can spot which tasks take the most
+   tokens so we can look into optimizing them. This will also help when we start our optimization project"):
+   - `logs cost --top N` ranks tasks by tokens, and also by tokens per unit of result (per changed line, per file changed, per gate
+     passed), so a task that is costly for what it delivered stands out, not only a big one; tasks more than twice the median of
+     their kind (UI, DSP, presets, kit, docs) are flagged.
+   - `logs cost --explain TASK` breaks one task down: tokens by where they went (model output; tool output by class: build log,
+     test output, git, package manager, file read, search, tool noise; injected text: hooks, rules, skills; context re-sent, cached
+     and not), its 10 costliest tool calls with their command or file and tokens, its turns by kind (W2b's kinds: real work, retry
+     after a refusal, re-run with nothing changed, re-read, search for a path, failed form, polling, a long output read for one
+     line), and the same against the median of its kind.
+   - One owner for the classes and kinds: `packs/base/hooks/lib/read-classes.mts` (the source classes) and `turn-kinds.mts` (the
+     turn kinds), written here and used by W1's and W2b's study, never a second copy.
+   - The output a person reads is a table; `--json` gives the same for the study's scripts and for a later optimization order.
 
 **Done when:** `test/hooks/base/agent-ledger.test.mts` is green with 0 failures, each case seen red on its plant: a planted
 transcript's token sums equal a hand count by kind; a model change mid-agent is counted; a missing usage field is written as
@@ -116,11 +129,13 @@ unknown; a planted `Agent` call's model and effort are recorded; the status line
 this order's own first agent its record matches its transcript (the numbers in `build/evidence/W0b/`); `logs cost` on a planted
 order of two steps (two agents and the lead) puts every message's tokens in exactly one step (0 counted twice, 0 left out) and its
 totals equal the transcripts' sums; `build/evidence/W0b/cost-history.md` holds the per-task cost of the 2.0 order's steps and of
-bandwarp's 38 agent tasks.
+bandwarp's 38 agent tasks, with `--top 10` by tokens and by tokens per changed line, the flagged outliers, and `--explain` for the
+three costliest; on a planted task `--explain`'s classes sum to the task's total (0 tokens unclassed) and its turn kinds sum to
+its turns; a planted task at three times its kind's median is flagged.
 
 ## W1. The study: what Claude reads
 
-1. `scripts/read-study.mts` reads transcripts (main sessions and subagents) and writes one row per tool result into
+1. `scripts/read-study.mts` (on W0b's `read-classes.mts` and `turn-kinds.mts`, never its own copy) reads transcripts (main sessions and subagents) and writes one row per tool result into
    `build/study/rows.jsonl`: the task (by agent id or session), the tool, the command or file, its source class (build log, test
    output, git, package manager, file read, search, hook text, rule or skill text injected, tool noise such as the cwd-reset line,
    other), its size in characters and in tokens (the transcript's usage where it has it, else characters over 4 stated as an
