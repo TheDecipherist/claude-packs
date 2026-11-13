@@ -132,7 +132,7 @@ test('every hook judges a worktree file against the worktree, inside a real git 
   assert.deepEqual(installed, Object.keys(CASES).sort(), 'every installed hook needs a worktree case here');
   const failed: string[] = [];
   for (const [hook, check] of Object.entries(CASES)) {
-    try { await check(p); } catch (e) { failed.push(`${hook}: ${(e instanceof Error ? e.message : String(e)).split('\n')[0]}`); }
+    try { await check(p); } catch (e) { failed.push(`${hook}: ${(e instanceof Error ? e.message : String(e)).split('\n').slice(0, 5).join(' | ')}`); }
   }
   assert.deepEqual(failed, []);
 });

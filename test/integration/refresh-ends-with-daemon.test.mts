@@ -22,10 +22,11 @@ test('daemon stop ends the refresh children its hooks started', () => {
   try {
     for (let i = 0; i < 4 && pidOf(r) === 0; i += 1) fire(r, event);   // the first events may be answered by the runner while the daemon starts
     assert.ok(pidOf(r) > 0, 'a daemon is running');
+    for (const pid of mine()) process.kill(Number(pid), 'SIGKILL');   // the early events were answered before the daemon ran: their children are not the daemon's
     fire(r, event);
     const daemon = String(pidOf(r));
-    ofDaemon = rows().filter((l) => l.trim().split(/\s+/)[1] === daemon).map((l) => l.trim().split(/\s+/)[0] ?? '');   // the ones the daemon's worker started
-    assert.ok(ofDaemon.length > 0, 'a refresh child is running under the daemon');
+    ofDaemon = mine();   // the worker starts it through `sh` (startOrphan, the W10b zombie fix), so its parent is init, not the daemon: its group is the daemon's to end
+    assert.ok(ofDaemon.length > 0, `a refresh child is running under the daemon ${daemon}; rows: ${JSON.stringify(rows())}`);
     spawnSync('node', [CLI, 'daemon', 'stop', '--dir', r.project], { env: r.env });
     assert.deepEqual(mine().filter((pid) => ofDaemon.includes(pid)), [], 'no refresh child of the daemon outlives the stop');
   } finally {

@@ -2,6 +2,7 @@
 // installed .mjs to a case. A daemon serves the project (`here`) for an agent working in a worktree (`wt`): the event's cwd is the
 // worktree and CLAUDE_PROJECT_DIR the main checkout, and the install's hooks judge the worktree's file by the worktree's layout.
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { readText } from '../packs/base/hooks/lib/files.mts';
@@ -24,11 +25,15 @@ export const RESIDENT_CASE: Record<string, (checkouts: Checkouts) => Promise<voi
         const stdin = toJson({ hook_event_name: 'PreToolUse', tool_name: 'Write', cwd: wt, tool_input: { file_path: file, content } });
         const answer = await askDaemon(files.socket, { v: PROTOCOL, env: { CLAUDE_PROJECT_DIR: here, PATH: process.env.PATH ?? '' }, cwd: wt, ppid: process.pid, deadline: Date.now() + 20_000 }, stdin);
         assert.equal(answer.kind, 'reply');
-        return answer.kind === 'reply' ? answer.reply.code : -1;
+        if (answer.kind !== 'reply') return -1;
+        if (answer.reply.fallback === undefined) return answer.reply.code;
+        // the daemon handed the event on (a refusal's grace left a judge unanswered, KWB-216): the client runs the TypeScript runner on the same stdin, as the Go proxy does
+        const env = { ...process.env, CLAUDE_PROJECT_DIR: here };
+        return spawnSync(process.execPath, [join(here, '.claude/hooks/run-hooks.mjs')], { cwd: wt, env, input: stdin, encoding: 'utf8' }).status ?? -1;
       };
-      assert.equal(await verdict(join(wt, 'src/core/Svf.cpp')), 0);
-      assert.equal(await verdict(join(wt, 'stray/Svf.cpp')), 2);
-      assert.equal(await verdict(join(wt, 'src/core/Huge.cpp'), 'x\n'.repeat(400)), 2);
+      assert.equal(await verdict(join(wt, 'src/core/Svf.cpp')), 0, 'a file in a src folder is let through');
+      assert.equal(await verdict(join(wt, 'stray/Svf.cpp')), 2, 'folder-law refuses a file outside every folder');
+      assert.equal(await verdict(join(wt, 'src/core/Huge.cpp'), 'x\n'.repeat(400)), 2, 'file-size-guard refuses 400 lines');
       assert.match(readText(join(here, '.claude/hooks.log')) ?? '', /\tfolder-law\t\d+\t2\tWrite/);
     } finally {
       if (up.kind === 'ready') process.kill(up.pid, 'SIGTERM');
