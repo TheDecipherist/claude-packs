@@ -24,11 +24,16 @@ export function backup(projectDir: string): string {
   return join(DIR, stamp);
 }
 
+/** Where makers' documents are read (a reverse-engineering project, a synth): their PDFs are never committed (the user, 2026-11-13,
+ *  after putting the DSP56300 Family Manual in a project's docs/). Only there: a project that ships its own PDFs keeps them. */
+export const MAKER_DOCS: readonly string[] = ['*.pdf', '*.PDF'];
+
 /** Adds the backup folder, the hooks' run state (.claude/state: frozen list, last test log) and brief-guard's refusal counter
- *  (.claude/usage.log, 0.9.2) to .gitignore (appends; never rewrites the file). */
-export function ensureGitignore(projectDir: string): void {
+ *  (.claude/usage.log, 0.9.2) to .gitignore, and `extra` lines (MAKER_DOCS where makers' documents are read) (appends; never
+ *  rewrites the file). */
+export function ensureGitignore(projectDir: string, extra: readonly string[] = []): void {
   const file = join(projectDir, '.gitignore');
-  for (const line of [`${slash(DIR)}/`, '.claude/state/', '.claude/checks.compiled.json', '.claude/usage.log', '.claude/hooks.log', '.claude/logs/']) {
+  for (const line of [`${slash(DIR)}/`, '.claude/state/', '.claude/checks.compiled.json', '.claude/usage.log', '.claude/hooks.log', '.claude/logs/', ...extra]) {
     const text = readText(file) ?? '';
     if (text.split('\n').includes(line)) continue;
     appendFileSync(file, `${text && !text.endsWith('\n') ? '\n' : ''}${line}\n`);

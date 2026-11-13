@@ -12,7 +12,7 @@ import { readText } from '../packs/base/hooks/lib/files.mts';
 import { TABLE_FILE } from '../packs/base/hooks/lib/hook-table.mts';
 import { parseJson, readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Configuration, Layout, Lock, Logger } from '../packs/base/hooks/lib/types.d.mts';
-import { backup, ensureGitignore } from './backup.mts';
+import { backup, ensureGitignore, MAKER_DOCS } from './backup.mts';
 import type { Preamble } from './claude-md.mts';
 import { writeClaudeMd } from './claude-md.mts';
 import { listedPacks, packsFor, resolveConfig } from './configs.mts';
@@ -146,7 +146,8 @@ export async function sync(projectDir: string, requested: readonly string[] | nu
   readSettings(claudeDir); // throws on a malformed settings.json before anything is written
   log(`  configuration: ${config.name}${how === 'packs' ? ` (from its packs: ${listed.join(', ')})` : ''}`);
   if (hadClaude) log(`  backup: ${backup(projectDir)}`);
-  ensureGitignore(projectDir);
+  // makers' PDFs are never committed where they are read: the reverse-engineering pack, or the synth-creator configuration
+  ensureGitignore(projectDir, packNames.includes('reverse-engineering') || config.name === 'synth-creator' ? MAKER_DOCS : []);
 
   const seed = existsSync(join(claudeDir, 'layout.json')) ? seedLayout : withFoundFolders(projectDir, seedLayout, config, log);
   const layout = buildLayout(claudeDir, packNames, seed, config);

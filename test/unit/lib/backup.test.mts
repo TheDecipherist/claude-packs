@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { backup, ensureGitignore } from '../../../lib/backup.mjs';
+import { backup, ensureGitignore, MAKER_DOCS } from '../../../lib/backup.mjs';
 import { put, readText, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 
 test('backup copies the managed files that exist and names the folder it made', () => {
@@ -40,4 +40,17 @@ test('ensureGitignore keeps the compiled checks file out of git, a checkout\'s o
   const dir = scratchDir('backup-ignore-compiled-');
   ensureGitignore(dir);
   assert.ok((readText(join(dir, '.gitignore')) ?? '').split('\n').includes('.claude/checks.compiled.json'));
+});
+
+// makers' PDFs (data sheets, family manuals) are never committed where they are read, and only there: a project shipping its own PDFs keeps them
+test('ensureGitignore adds the makers\' PDF lines only when asked, once', () => {
+  const plain = scratchDir('gitignore-plain-');
+  ensureGitignore(plain);
+  assert.doesNotMatch(readText(join(plain, '.gitignore')) ?? '', /\*\.pdf/);
+  const synth = scratchDir('gitignore-maker-');
+  ensureGitignore(synth, MAKER_DOCS);
+  ensureGitignore(synth, MAKER_DOCS);
+  const text = readText(join(synth, '.gitignore')) ?? '';
+  assert.equal(text.split('\n').filter((l) => l === '*.pdf').length, 1);
+  assert.ok(text.split('\n').includes('*.PDF'));
 });
