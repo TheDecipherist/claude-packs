@@ -13,6 +13,9 @@ Always do:
 - After a load, compare every field of every program with the engine's copy, and report the count.
 - Take ranges from the source's arithmetic, not a manual's rounded print.
 - Decide from the record's field, never from words in a description.
+- Write the value as named term fields in code, and tag an empty one `[TODO/FW]`: an unaccounted term is then a visible gap, and a zero is a claim.
+- Add and clamp in the firmware's own domain: the rate index, the 13-bit word, not seconds or hertz.
+- Model a route as computed: it may be a two-input VCA, `dest += (src x pct + offset) x (control x pct)`, and a plain `src x depth` is wrong on a large part of a bank.
 
 Never do:
 - Hide a missing term behind a fudge factor: fix the term, then re-anchor.

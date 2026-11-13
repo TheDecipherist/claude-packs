@@ -5,14 +5,12 @@ import { interleave, wrappings } from '../../../packs/reverse-engineering/tools/
 import { abbreviationOf, displayForms, readNames, report, sweep } from '../../../packs/reverse-engineering/tools/lib/names-report.mts';
 import type { Sweep } from '../../../packs/reverse-engineering/tools/lib/names-report.mts';
 import type { Group } from '../../../packs/reverse-engineering/tools/lib/names-tables.mts';
+import { PATCHES, imageWithBank, names, packed7 } from './names-fixtures.mts';
 
 // The command runs from an install, as a project runs it: it finds base's hook lib beside the tools (W4: isMain from hook-log).
 const INSTALL = fixture('cpp');
 run(INSTALL, 'add', 'reverse-engineering');
 const TOOL = join(INSTALL, '.claude/tools/names-sweep.mjs');
-const PATCHES = ['Super Saw', 'Glass Keys', 'Deep Bass', 'Soft Pad', 'Hard Sync', 'Bell Tree'];
-const names = PATCHES.map((name) => ({ group: 'patch', name }));
-
 /** The first group of a sweep, which every test here expects to exist. */
 function firstGroup(r: Sweep): Group {
   const [g] = r.groups;
@@ -20,23 +18,7 @@ function firstGroup(r: Sweep): Group {
   return g;
 }
 
-// Noise that holds no name, with a bank of records of `stride` bytes laid in at `at`: each record starts with its name.
-function imageWithBank(stride = 96, at = 0x400, size = 0x2000): Buffer {
-  let seed = 7;
-  const image = Buffer.from(Array.from({ length: size }, () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return 0x80 | (seed >> 16) & 0x7f; }));
-  PATCHES.forEach((p, i) => image.write(p, at + i * stride, 'latin1'));
-  return image;
-}
-
 const swapped = (b: Buffer, width: number): Buffer => { const o = Buffer.from(b); for (let i = 0; i + width <= b.length; i += width) for (let k = 0; k < width; k += 1) o[i + k] = b[i + width - 1 - k] ?? 0; return o; };
-function packed7(b: Buffer): Buffer {
-  const out: number[] = [];
-  for (let i = 0; i < b.length; i += 7) {
-    const seven = [...b.subarray(i, i + 7)];
-    out.push(seven.reduce((h, x, k) => h | (((x >> 7) & 1) << (6 - k)), 0), ...seven.map((x) => x & 0x7f));
-  }
-  return Buffer.from(out);
-}
 const nibbles = (b: Buffer): Buffer => Buffer.from([...b].flatMap((x) => [x >> 4, x & 15]));
 
 test('a bank as stored: the stride is the record size, and the manual order holds', () => {

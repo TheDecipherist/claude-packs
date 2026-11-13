@@ -12,6 +12,7 @@ Always do:
 3. Change the engine.
 4. Re-anchor before re-scaling.
 5. Take expected values from the printed source. A worked example is the first test.
+6. When several laws are wrong, fix in this order: the biggest error with a bounded `[FW]` fix first, conditional terms next, routing next, `[EAR]` laws, duplicated laws last.
 
 Never do:
 - Fit by ear when a term is missing. A 0.35 fudge once hid a whole term.

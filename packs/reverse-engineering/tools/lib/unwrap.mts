@@ -20,6 +20,12 @@ function everyOther(b: Buffer, from: number): Buffer {
   return out;
 }
 
+function everyThird(b: Buffer, from: number): Buffer {
+  const out: number[] = [];
+  for (let i = from; i < b.length; i += 3) out.push(at8(b, i));
+  return Buffer.from(out);
+}
+
 // Each word of `width` bytes reversed, the first whole word starting at `phase`.
 function reversedWords(b: Buffer, width: number, phase: number): Buffer {
   const out = Buffer.from(b);
@@ -83,6 +89,42 @@ const PACKINGS: readonly Wrapping[] = [
   { name: 'three bytes per word, low byte first', open: (m) => threeByteWords(m, false) },
 ];
 
+// Vendor 8-in-7 that is not MIDI's: a flag byte carries each data byte's LOW bit and the byte after it holds the value shifted right once, so the universal
+// scheme gives the right length and the wrong values, which looks like encryption (Clavia). The flag byte first or last.
+function unpackedLowBit(b: Buffer, phase: number, flagFirst: boolean): Buffer {
+  const out: number[] = [];
+  for (let i = phase; i + 8 <= b.length; i += 8) {
+    const flag = at8(b, flagFirst ? i : i + 7);
+    for (let k = 0; k < 7; k += 1) out.push(((at8(b, (flagFirst ? i + 1 : i) + k) & 0x7f) << 1) | ((flag >> k) & 1));
+  }
+  return Buffer.from(out);
+}
+
+// A dump read through address lines wired in another order: the lines `a` and `b` swapped. An index past the end keeps its own byte.
+function addressLinesSwapped(buf: Buffer, a: number, b: number): Buffer {
+  const out = Buffer.from(buf);
+  for (let i = 0; i < buf.length; i += 1) {
+    const j = ((i >> a) & 1) === ((i >> b) & 1) ? i : i ^ ((1 << a) | (1 << b));
+    if (j < buf.length) out[i] = at8(buf, j);
+  }
+  return out;
+}
+
+// A standard MIDI file stores a sysex event as F0, a variable-length count, then that many bytes ending in F7: the count is not data, so a fixed header length cannot skip it.
+function smfSysexBodies(b: Buffer): Buffer[] {
+  const out: Buffer[] = [];
+  for (let at = b.indexOf(0xf0); at !== -1; at = b.indexOf(0xf0, at + 1)) {
+    let p = at + 1, count = 0;
+    while (p < b.length && p < at + 5) { const x = at8(b, p); p += 1; count = (count << 7) | (x & 0x7f); if (!(x & 0x80)) break; }
+    if (at8(b, p + count - 1) !== 0xf7) continue;
+    out.push(b.subarray(p, p + count - 1));
+    at = p + count - 1;
+  }
+  return out;
+}
+const SMF_HEADER = 12;
+
+const ADDRESS_LINES = [0, 1, 2, 3, 4, 5, 6, 7];
 const phases = (n: number): number[] => Array.from({ length: n }, (_, i) => i);
 
 export function wrappings(): Wrapping[] {
@@ -96,6 +138,11 @@ export function wrappings(): Wrapping[] {
     ...phases(4).map((p) => ({ name: `32-bit words reversed, from ${p}`, open: (b: Buffer) => reversedWords(b, 4, p) })),
     ...phases(8).flatMap((p) => SEVEN_BIT.map((s) => ({ name: `${s.name}, from ${p}`, open: (b: Buffer) => unpacked7(b, p, s.first, s.bitK) }))),
     ...phases(2).flatMap((p) => [true, false].map((first) => ({ name: `nibbles, ${first ? 'high' : 'low'} first, from ${p}`, open: (b: Buffer) => joinedNibbles(b, p, first) }))),
+    { name: 'nibbles swapped within each byte', open: (b) => eachByte(b, (x) => ((x & 15) << 4) | (x >> 4)) },
+    ...phases(3).map((p) => ({ name: `one byte per 24-bit word, from ${p}`, open: (b: Buffer) => everyThird(b, p) })),
+    ...phases(8).flatMap((p) => [true, false].map((first) => ({ name: `8-in-7, flag byte ${first ? 'first' : 'last'} holding each byte's low bit, from ${p}`, open: (b: Buffer) => unpackedLowBit(b, p, first) }))),
+    ...ADDRESS_LINES.flatMap((a) => ADDRESS_LINES.filter((b) => b > a).map((b) => ({ name: `address lines A${a} and A${b} swapped`, open: (buf: Buffer) => addressLinesSwapped(buf, a, b) }))),
+    ...phases(SMF_HEADER + 1).flatMap((h) => PACKINGS.map((p) => ({ name: `SMF sysex events, ${h}-byte header, ${p.name}`, open: (b: Buffer) => Buffer.concat(smfSysexBodies(b).map((m) => p.open(m.subarray(h)))) }))),
     ...phases(LONGEST_HEADER + 1).flatMap((h) => PACKINGS.map((p) => ({ name: `sysex messages, ${h}-byte header, ${p.name}`, open: (b: Buffer) => perMessage(b, h, p.open) }))),
   ];
 }

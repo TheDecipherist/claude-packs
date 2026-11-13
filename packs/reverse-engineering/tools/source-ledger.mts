@@ -1,9 +1,11 @@
 // Check a project's ledger of source material against the folders that hold it. Every file is on the ledger, every row
 // that is ticked names evidence that exists, and no converted PDF still has an image only marked by a placeholder.
 //   node .claude/tools/source-ledger.mjs <ledger.md> <sources folder> [<sources folder> ...]
+//   node .claude/tools/source-ledger.mjs --hash <sources folder> [...]   the hash pass: every file's sha256, and the files that are one image under two names (exit 1 when there are any)
 // The ledger is a Markdown table whose rows start `| [x] |` or `| [ ] |`, then the file's path, then what it is, then the
 // evidence: reports, separated by commas, as paths relative to the ledger's folder. Exit 0: every file listed and every
 // row ticked with real evidence. Exit 1: what is still to do, listed. Exit 2: the command was used wrongly.
+import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { isMain } from '../hooks/lib/hook-log.mts';
@@ -59,7 +61,27 @@ export function audit(ledgerPath: string, folders: readonly string[]): string[] 
   return todo;
 }
 
+/** Files with identical bytes, grouped by their sha256: one image under several names, or a sibling's dump filed under another model. */
+export function duplicateGroups(folders: readonly string[]): { hash: string; files: string[] }[] {
+  const byHash = new Map<string, string[]>();
+  for (const folder of folders)
+    for (const file of onHand(resolve(folder))) {
+      const hash = createHash('sha256').update(readFileSync(file)).digest('hex');
+      byHash.set(hash, [...(byHash.get(hash) ?? []), file]);
+    }
+  return [...byHash].filter(([, files]) => files.length > 1).map(([hash, files]) => ({ hash, files }));
+}
+
+function hashPass(folders: readonly string[]): number {
+  const groups = duplicateGroups(folders);
+  if (groups.length === 0) { console.log('hash pass: no two files have the same bytes'); return 0; }
+  console.log(`hash pass: ${groups.length} groups of identical files; write the inheritance down with the hashes`);
+  for (const g of groups) console.log(`  ${g.hash.slice(0, 16)}: ${g.files.join(' = ')}`);
+  return 1;
+}
+
 function main(args: readonly string[]): number {
+  if (args[0] === '--hash') return args.length > 1 ? hashPass(args.slice(1)) : 2;
   const [ledger, ...folders] = args;
   if (ledger === undefined || folders.length === 0) {
     console.error('usage: node .claude/tools/source-ledger.mjs <ledger.md> <sources folder> [...]');

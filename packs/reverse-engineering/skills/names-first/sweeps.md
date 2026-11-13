@@ -1,0 +1,11 @@
+# Sweeps beyond the manual's names
+
+Read by `names-first` when the manual names nothing, or when a sweep finds few runs. Each is a way to find the ROM's own text; none of them is a law until the code that reads it is found.
+
+- **A keyword net, when no manual names exist.** Anything the display spells is in the ROM as padded strings in index order. Search voice words, transport and clock words, and a vendor's dialect (`OSC1 WAVE`, `AMP`, `PATCH`), cased both ways. One hit finds the table, and the table is the enumeration. No hit at all is a finding: packed text, or a segment display.
+- **A units sweep.** Search `Hz kHz dB msec ms sec BPM cent %`. A unit hands over a parameter's scale, which a corpus cannot settle and an ear only approximates: run it before fitting a curve by ear. Grep the string list for the thing about to be claimed (`tempo`) before claiming it.
+- **The word stream.** On a word-addressed machine a C string puts one character in each 16-bit or 24-bit word, and `strings` over bytes returns noise (57 runs of noise against 41 real ones). When load addresses advance by half the payload, sweep one character per word, both endians. Literal blobs may pack three characters per 24-bit word: read both ways. `names-sweep.mjs` tries one byte per 24-bit word as a wrapping.
+- **Few runs means a character table.** The text goes through a table of the machine's own: decode it first (a custom character set keeps the letters' distances).
+- **A repeated name with a suffix** is a further list in the same order. One display table held the edit names, the same names with `Ribbon:` appended and with `Velocity:` appended: two destination lists, in firmware order.
+- **The effect kind's vocabulary.** Know what the box does, then grep that kind's words (delay, reverb, compressor, pitch, modulation) and the unit templates written inline (`RT = s`). A compressor has no tempo, so no hit is expected there.
+- **The loader's own messages.** Unpack first, then read the unpacked image's strings for a description of its own container (`Getting Header`, `ERROR: Pkt.Cksm`): the cheapest second source, and the packed word boundaries show in their marker bytes.

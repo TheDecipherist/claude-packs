@@ -13,6 +13,9 @@ Always do:
 - Make an unpacked image answer "was this address ever written?". A zero read past where the loader stopped is unknown, and one blocked a law for a whole phase.
 - Print a table and check a known parameter before publishing what a field means. A compare instruction alone got min and max backwards.
 - Re-derive a field per block: one table's bytes can change meaning partway through.
+- Name the image with its address: its name, version and md5. A later firmware may be a recompile that shifts every address, and a version string in an image is not its version: find the code that reports it.
+- Keep a marker hit only when a neighbour sits one stride away, on the grid. Scanning every word offset returns each real label three times, once right and twice shifted.
+- Read a section table's offsets as possibly into the decompressed image. A carve at the compressed offset looks plausible and never checksums.
 
 Never do:
 - Read a stride across a segment: that invented a 2469-entry table.

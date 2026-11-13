@@ -11,9 +11,12 @@
     "tools/dump-triage.mts": ["test/tools/reverse-engineering/dump-triage.test.mts"],
     "tools/lib/multi-find.mts": ["test/tools/reverse-engineering/multi-find.test.mts"],
     "tools/lib/names-find.mts": ["test/tools/reverse-engineering/names-sweep.test.mts"],
+    "tools/lib/names-index.mts": ["test/tools/reverse-engineering/names-modes.test.mts"],
     "tools/lib/names-report.mts": ["test/tools/reverse-engineering/names-sweep.test.mts"],
+    "tools/lib/names-runs.mts": ["test/tools/reverse-engineering/names-modes.test.mts"],
     "tools/lib/names-tables.mts": ["test/tools/reverse-engineering/names-sweep.test.mts"],
-    "tools/lib/unwrap.mts": ["test/tools/reverse-engineering/names-sweep.test.mts"],
+    "tools/lib/unwrap-proofs.mts": ["test/tools/reverse-engineering/names-modes.test.mts"],
+    "tools/lib/unwrap.mts": ["test/tools/reverse-engineering/names-sweep.test.mts", "test/tools/reverse-engineering/names-modes.test.mts"],
     "tools/names-sweep.mts": ["test/tools/reverse-engineering/names-sweep.test.mts"],
     "tools/source-ledger.mts": ["test/tools/reverse-engineering/source-ledger.test.mts"]
   },
