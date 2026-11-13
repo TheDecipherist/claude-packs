@@ -7,6 +7,7 @@
   "requires": [],
   "tests": {
     "hooks/firmware-out-of-git.mts": ["test/hooks/reverse-engineering/firmware-out-of-git.test.mts"],
+    "tools/byte-profile.mts": ["test/tools/reverse-engineering/byte-profile.test.mts"],
     "tools/dump-triage.mts": ["test/tools/reverse-engineering/dump-triage.test.mts"],
     "tools/lib/multi-find.mts": ["test/tools/reverse-engineering/multi-find.test.mts"],
     "tools/lib/names-find.mts": ["test/tools/reverse-engineering/names-sweep.test.mts"],
