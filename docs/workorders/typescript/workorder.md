@@ -711,6 +711,17 @@ paused; the build queue's own tests green on the governor. Measured on this Mac 
 heaviest wave replayed (three test runs and a fuzzer started together) keeps the 1-minute load under the ceiling (13 on 18 cores)
 for its whole run, sampled every 5 s into `build/evidence/W8.8/`, with its wall time stated against the ungoverned one.
 
+## W8.9. One row per project, and a terminal monitor for the whole picture
+
+Added 2026-11-13 by the user (their screenshot: the status line grows a row per agent and crowds out the prompt; two agents finished hours ago still listed). Two views, one source: the daemon's state and W8.7's sampler.
+
+1. **One row per project** in the status line: the project's name, its order's progress bar and items left, the step its lead is on, the number of agents running, and their summed CPU, memory and processes (W8.7's sampler, over the project's lead and agents). No row per agent: the agents are the monitor's (item 4).
+2. **The stale rows:** in the user's screenshot `ab-prep` (4h11m) and `w10b-soak` (10h37m) were still listed with 0 processes and 0.0 CPU, though W8.6 removes an agent with no event and no CPU for 5 minutes. Find why they stayed, and fix it.
+3. **A project's progress as it is:** supernova2's row read "0 %, 86 of 86 items left, lead on W0" while its W0 was landing and ten agents had run. Find whether its run did not keep `status.json` or the line did not read it, and fix the side at fault.
+4. **The monitor:** `claude-packs top`, a Go program built and shipped like the proxy (one binary per platform in the user cache, built by `scripts/build-proxy.mts`), full screen in the terminal: every project with a live run or session; under each, its lead and every agent with name, step, model, worktree, CPU, memory and processes, how long since its last event, and its last action (the tool and a short form of its input, from the event log); the governor's load and grants at the top. It reads the daemon's state over its socket once a second and works without the daemon from the files. Keys: q quits, arrows move, enter opens a project or an agent (its last 20 actions). The terminal UI library, if one is used, is looked up by `latest-versions` and pinned; otherwise plain ANSI.
+
+**Done when:** a planted state of 3 projects (one with 4 live agents, one with none, one stale) renders as 3 status rows with the agent counts and the summed CPU, memory and processes equal to the sampler's (`test/statusline/one-row-per-project.test.mts`, red with a row per agent planted back); a planted agent with no event and no CPU for 5 minutes is gone from the next render, and 2 planted finished agents never show (red with the removal planted out); a project whose `status.json` says 40 of 86 shows 47 % (red on the 0 % reading); `claude-packs top` renders the planted state to a golden frame (`test/top/frame.test.mts` with the Go program's own `go test` beside it), every agent with its last action and the time since it, red when a field is dropped; it starts in under 100 ms and uses under 20 MB, measured; and the binary builds for darwin-arm64, darwin-amd64 and linux-amd64.
+
 ## W9. The release in five minutes (measured without publishing)
 
 1. `npm run release` with `patch`, `minor` or `major` does the whole of it: the gate (`test:changed --base origin/main` on committed
