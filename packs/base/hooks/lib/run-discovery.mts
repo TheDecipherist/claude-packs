@@ -2,8 +2,8 @@
 // with the project it runs in (the process's working folder: /proc on Linux, lsof on macOS), and every order a Claude Code
 // session works on (run-claudes.mjs, KWB-161). The environment and the platform are the caller's to pass, never read here.
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readlinkSync, statSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { readFileSync, readlinkSync, realpathSync, statSync } from 'node:fs';
+import { basename, join, resolve } from 'node:path';
 import { inFlight, machineHost } from './governor.mts';
 import { gitOut, gitRun } from './git-run.mts';
 import { sessionOrders } from './run-claudes.mts';
@@ -117,6 +117,16 @@ export function worktreesOf(project: string, env: Env): Worktree[] {
     try { gitdir = readFileSync(join(path, '.git'), 'utf8').match(/^gitdir: (.+)$/m)?.[1]?.trim() ?? null; } catch { /* a removed worktree */ }
     return [{ name: basename(path), path, branch: block.match(/^branch refs\/heads\/(.+)$/m)?.[1] ?? null, touched: gitdir ? lastTouched(gitdir) : 0 }];
   });
+}
+
+const realOf = (p: string): string => { try { return realpathSync(p); } catch { return resolve(p); } };
+
+/** The worktrees an order's agents work in: those directly under the project's own .claude/worktrees. Never the project itself,
+ *  its sibling worktrees, or another run's agents nested one level further (KWB-next: a run whose project is a worktree, the
+ *  audit order in claude-packs/.claude/worktrees/audit, listed its own lead as an agent, "audit > no status file yet"). */
+export function agentTreesOf(project: string, env: Env): Worktree[] {
+  const own = `${realOf(project)}/.claude/worktrees/`;
+  return worktreesOf(project, env).filter((t) => { const p = realOf(t.path); return p.startsWith(own) && !p.slice(own.length).includes('/'); });
 }
 
 /** How many commits `branch` has that `base` lacks: 0 for a branch just made from it; null when either cannot be read. */

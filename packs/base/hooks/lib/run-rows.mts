@@ -67,7 +67,8 @@ export function runRows(s: OrderStatus, nowMs: number = Date.now(), checkedAt: s
     const live = liveOf(a.beat, a.updated, a.work ?? null, nowMs);
     return { who: a.name, id: a.step ?? '', title: a.step ? (a.title || step?.title || '') : waiting ? 'not started yet' : 'no status file yet',
       percent: a.percent ?? (step ? percent(step.done, step.items) : 0), now: a.now ?? '', live: '',
-      ...live, ...(paused ? { quiet: 0, paused: true, action: '', work: null } : {}) };   // KWB-167: a stopped agent shows no last action or counts
+      ...live, ...(paused ? { quiet: 0, paused: true, action: '', work: null } : {}),   // KWB-167: a stopped agent shows no last action or counts
+      ...(a.percent !== null && a.percent >= 100 ? { quiet: 0 } : {}) };   // every item done: still is finished, never stuck (KWB-next)
   });
   const current = s.steps.find((x) => x.done < x.items);
   if (!s.finished && n === 0 && current) {
