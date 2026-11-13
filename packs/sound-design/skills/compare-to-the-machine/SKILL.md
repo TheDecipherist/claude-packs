@@ -20,6 +20,12 @@ Always do:
 9. Prove the comparison can fail: a planted fault, such as a filter a third too low, has to show in the report.
 10. Report the numbers as where to look, with the audio beside them, so a person can listen. The ear of someone who knows the machine is the verdict.
 11. Tag what comes from this as a recording, never as firmware or schematic. Where it disagrees with firmware or a schematic, write that down and find out why: don't quietly choose.
+12. With no presets to pair, take a published capture that moved one knob at a time, note for note, and tag each result `[REF]`.
+13. Report a mismatched pair beside every comparison: the verdict is the gap between a match and a mismatch.
+14. A demo validates, and only clean quantities fit it. MP3 is empty above about 15 kHz, so no band there decides.
+15. Take attack brightness as a within-note ratio, and read band tables, not one number.
+16. When the recordings cannot decide, write the recording checklist that would: which note, which knob, which setting.
+17. Port a gate by the shape that must survive, not its numbers. Test a residual's explanation by splitting the population and seeing it follow.
 
 Never do:
 - Compare waveforms sample by sample, or give a percentage. A performance has its own levers, timing and edits, and the patch may have been changed while it played.
