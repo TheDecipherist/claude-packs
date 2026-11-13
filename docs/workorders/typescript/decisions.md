@@ -176,6 +176,18 @@ order"), recorded here at W0; the user may overturn any by editing the order. d-
 - Why: a running order is changed only by the user, through its prompt (run-a-workorder); the yes line is the user's own record of
   the publish authorisation; docs/ is not in the package, so nothing shipped names anyone. Overturn by editing the two files.
 
+## d-39 The pool's queue wait is carried with its cause; the warm count stays 2 {#d-39}
+- Question: doctor --strict on the kit's own install names a full pool at Pre Bash (waits of 88 to 165 ms at p95 over the last 100 events, line 20 ms),
+  at Pre Write (131 to 136 ms) and `once-only-index` at Post (worst 3,024 ms). The order says to raise the warm count to 4 when the queue p95 passes 20 ms.
+- Read from `.claude/hooks.log`: the long waits follow events where `once-only` held one worker for 4.6 to 7.2 s (a Bash command that rewrites a source file
+  through a program: the write has candidate copies, jscpd confirms them in the worker). The pool then grows after a job has waited 40 ms, one worker
+  per 500 ms, and a new worker needs its own start: the 100 ms or so that the next events wait. An Edit or Write call does not do this (Write p50 21 ms alone).
+- Options: warm 4 (about 12 MB more idle each, and the idle line is under 100 MB at 2); confirm in a process of its own, off the pool; carry.
+- Chosen: carry, with the numbers. Warm stays 2 because the memory line is the order's own, and the confirm off the pool is the right fix and a design
+  change of its own, [deferred] by this run to after 2.0.0. The window of 100 calls clears as ordinary calls replace the heavy ones.
+- Why: no measured change of the live numbers is available to this run without that fix; a warm count of 4 would trade a missed time line for a missed
+  memory line. Overturn by editing the pool's `WARM` in resident.mts.
+
 ## d-38 reuse-hint has its own budget (80/200 ms) and the Prompt event 100/250, instead of a read the daemon does not yet spare {#d-38}
 - Question: doctor --strict is red on the kit's own install at `reuse-hint` (64/117 ms against the per-hook 10/50) and on the Prompt event (71/165
   against 80/150). The hook runs once per user prompt, so its worker has idled out (2 minutes) and the call reads the repetition index back from
