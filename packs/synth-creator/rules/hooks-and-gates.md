@@ -14,6 +14,7 @@ Always do:
 - Keep a planted fault in the test build only: one macro or `constexpr` flag that is false in the shipped binary, and a release gate that searches the binary for it (`cpp-faults-only-in-the-test-build`).
 - Treat a hook that blocks correct work as a red check: stop, report its exact message, and log it. The hook is fixed first, with a selftest that plants the right case and the wrong one; the work resumes after.
 - Make a fix to a hook, rule, check or skill that every synth uses in claude-packs, with its test, then take it in with `npx --no-install @thedecipherist/claude-packs update`. Only a law that is about this project alone stays in this project's `.claude/`.
+- Wire a guard into every entry point that reaches the guarded thing, and grep every caller on the day a shared trap is fixed.
 
 Never do:
 - Route around a block: no code put into an unrelated existing file, no file pushed past the line limit, no write through the shell after a refusal, no override variable.
