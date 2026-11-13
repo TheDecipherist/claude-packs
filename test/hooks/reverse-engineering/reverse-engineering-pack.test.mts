@@ -17,4 +17,9 @@ test('a circuit diagram is read tile by tile, one report an image, and set again
   assert.ok(skill.length < 8000);
   assert.match(skill, /^description: Use when/m);
   for (const law of [/One image, one report/, /overlapping tiles/, /Mermaid `flowchart`/, /chips\/<part>\.md/, /SPICE netlist for every analog stage/, /ngspice -b/, /lacks a curve a model needs/, /a pin-compatible copy/, /never as the original's/, /Guess a value/, /set the reports against the code/, /`change-order\.md`/, /CHANGE, VERIFY, MEASURE, DECIDE, DOC or FIND/, /closed only with its evidence/, /Drop a finding because it looks small/]) assert.match(skill, law);
+  // no schematic: the boards are read from photos (the user, 2026-11-13: "lots of synths dont have service manuals publicly available so we need to support it")
+  const boards = readFileSync(join(KIT, 'packs/reverse-engineering/skills/boards-from-photos/SKILL.md'), 'utf8');
+  assert.ok(boards.length < 8000);
+  assert.match(boards, /^description: Use when a machine has no public service manual/m);
+  for (const law of [/Prove the absence first/, /What the sheets would have given/, /FCC ID/, /installation guides/, /two independent photos agree on/, /\[PHOTO\?\]/, /\[DS-REF\]/, /firmware's clock set-up/, /How the search went/, /Commit a photo/, /\[\?\]` for the rest/]) assert.match(boards, law);
 });

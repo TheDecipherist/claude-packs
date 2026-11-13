@@ -1,0 +1,27 @@
+---
+name: boards-from-photos
+description: Use when a machine has no public service manual, schematic or parts list, when the search for one came back empty, or when its chips, crystals, converters or output stage have to be found without one.
+---
+
+# Read the boards from photos when no schematic exists (one job: what the circuits would have told, from the boards themselves)
+
+Many machines never had a public service manual: the makers of the DSP era kept theirs in-house. Without one, a rebuild still needs what the sheets would have given: the chips, the clocks, the converters and the analogue stages at each end. Photos of the boards, read part by part, give most of it, and say plainly what they cannot. `read-a-circuit-diagram` reads a schematic; this skill is for when there is none.
+
+<constraints>
+Always do:
+1. **Prove the absence first.** Look in the reference library (`chip-search`) and the archive, then search: the maker's support and legacy downloads, ManualsLib, ManualsHive, Elektrotanya, synthfool, archive.org (and the Wayback Machine for dead pages), the user forums and Gearspace, repair shops' pages. Record each search with its date and result in `docs/sources.md`. A file that only repeats "service manual" with no document behind it is spam: never download it.
+2. **Say what is lost, by kind of machine, before searching for photos:** for a digital machine, the analogue input and output stages (converters, reconstruction filter, buffers, headphone amplifier) and the clocks; for an analogue one, nearly everything, and photos alone will not do (a unit to measure is needed); for a hybrid, the analogue part. Write it in `docs/board-photos.md` under **What the sheets would have given**, so the search has a target and its end is known.
+3. **Find the photos.** In this order: the FCC ID's internal photos (fccid.io) where the machine has one; teardowns and repair videos (a still at full resolution, with the time); repair and modification posts; sale listings that show the inside (Reverb, eBay, local market sites, and their full-size images); upgrade and expansion kits' installation guides (they photograph the board the kit fits); museum and collector pages. For each: the source page, the image's own address, its size, the board and side it shows, and the board's revision or date codes where they are legible.
+4. **Read each photo like a sheet.** Tile it as `read-a-circuit-diagram` says, and for every part that can be read: its reference on the silkscreen, its marking in full (maker's logo, part number, suffix, date code), and where it sits (near which connector, which chip). Crystals and oscillators: the frequency printed on the can. Converters: the DAC and ADC part numbers. The analogue path: the op-amps between the converters and the jacks, the regulators, and any part whose value is printed (an electrolytic's value is often legible; a resistor's colour bands rarely are).
+5. **Weigh every reading.** A marking that two independent photos agree on (two units, two sources) is a fact, tagged `[PHOTO]` with both. One photo is a lead, tagged `[PHOTO?]`. A reading the firmware confirms (it programs that converter, that clock divider) is a fact with both tags. Note the board revision of each photo: two revisions can carry different parts, and that is a finding, not a contradiction.
+6. **Page every chip** that is read, by `read-a-circuit-diagram`'s chip-page method, after looking it up in the library, and bring the pages into the library with `import-project`.
+7. **Fill the gaps honestly.** Where the output stage's values cannot be read, the converter's data sheet's recommended application circuit is the likeliest design: use it as `[DS-REF]`, never as the machine's, and keep the stage `[EAR]` in the debt ledger with what would close it (a better photo, a unit to measure). Clocks: the crystal's frequency and the firmware's clock set-up together give the sample rate; prove it from both.
+8. **Write `docs/board-photos.md`:** a table of every photo (source, image address, board, side, revision, size); a table of every part read (reference, marking, fact or lead, the photos that show it, its chip page); the clocks; the analogue stages as far as they can be drawn (a Mermaid chart marked "from photos", each part's tag); what no photo showed; and **How the search went**: where you looked, what each place gave, and the turns it cost.
+
+Never do:
+- Commit a photo, or a still from a video: link it, and keep a copy outside the repo.
+- Read a part number off a blurred marking as a fact, or "complete" a partly legible one from a guess. Write what is legible and `[?]` for the rest.
+- Take a value from a typical circuit and call it the machine's.
+- Treat a photo of another revision, or the keyboard where the rack is rebuilt, as this one without saying so.
+- Give up after the manual searches: the photos are the step that matters, and an empty search is recorded with every place tried.
+</constraints>
