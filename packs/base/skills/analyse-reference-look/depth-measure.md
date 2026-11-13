@@ -20,9 +20,9 @@ A shadow only darkens, a lit edge only lightens. When a reference reading is out
 
 Never widen the tolerance for it, and never drop the row without naming it. A held-out row is an open point for the user, not a pass.
 
-## Surfaces on a dark theme: sample at named places
+## Surfaces on a dark theme: sample at named spots
 
-Do not find "the surface" as whatever is lighter than the ground: on a dark theme the cards may be darker than the ground, and the render and the reference then each return a different thing. Sample each surface at a named patch of a named element (a card's lower-left patch, a screen's centre), the same patch in the reference and in the render, by the same code.
+Do not find "the surface" as whatever is lighter than the ground: on a dark theme the cards may be darker than the ground, and the render and the reference then each return a different thing. Sample each surface at a named spot of a named element (a card's lower-left corner area, a screen's centre), the same spot in the reference and in the render, by the same code.
 
 ## Every theme
 

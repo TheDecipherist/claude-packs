@@ -125,7 +125,7 @@ test('the block, control, look and anchor laws and their skills install', () => 
   assert.match(depth, /# hook: skill-first\.mjs/, 'held with the look hook, loaded wherever it is');
   for (const clause of [/one light/i, /levels/, /Tint a shadow/, /On a dark ground/, /moat/, /hairline/, /corner-radius scale/, /every theme/, /glow to show height/]) assert.match(depth, clause);
   const measure = readFileSync(join(dir, '.claude/skills/analyse-reference-look/depth-measure.md'), 'utf8');
-  for (const clause of [/Per side or pooled/, /before the first fit/, /held_out/, /Never widen the tolerance/, /named patch/, /Every theme/]) assert.match(measure, clause);
+  for (const clause of [/Per side or pooled/, /before the first fit/, /held_out/, /Never widen the tolerance/, /named spot/, /Every theme/]) assert.match(measure, clause);
   const anchors = rule('references-use-anchors');
   assert.match(anchors, /"docs\/\*\*"/);
   assert.match(anchors, /never by line number/);
