@@ -73,6 +73,7 @@ async function within<T>(step: Promise<T>, what: string): Promise<T> {
   const limit = new Promise<never>((_, fail) => setTimeout(() => fail(new Error(`${what} did not end in ${STEP_LIMIT_MS / SECOND} s`)), STEP_LIMIT_MS).unref());
   try { return await Promise.race([step, limit]); } catch (e) { note(String(e)); throw e; }
 }
+const closeInspector = (): void => { inspector?.i.close(); };
 const rows: Row[] = [];
 const started = Date.now();
 const done = new Set<string>();
@@ -132,7 +133,7 @@ const startRow = rows.find((r) => r.fds !== null);
 const sameWorkers = afterKill === undefined ? undefined : rows.find((r) => r.pid === startRow?.pid && r.workers === afterKill.workers && r.fds !== null);
 const beforeWorker = [...rows].reverse().find((r) => r.t < (marks['killWorker'] ?? 0) && r.workers !== null);
 // the probe lets go of the daemon first: an inspector session attached to it is not part of what the daemon does when it stops
-inspector?.i.close();
+closeInspector();
 note(`stopping: ${stopDaemons(rig)}`);
 const gone = await Promise.race([oldGone, sleep(5 * SECOND).then(() => null)]);
 await sleep(5 * SECOND);
