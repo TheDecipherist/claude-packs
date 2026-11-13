@@ -13,7 +13,7 @@ import { sync } from './sync.mts';
 
 /** Keys the pre-flight reads and the install leaves out of the layout: `ghidra`, the processors the order needs Ghidra for. */
 export const CHECK_KEYS: readonly string[] = ['ghidra'];
-export const BLOCK_KEYS: readonly string[] = ['configuration', 'packs', ...CHECK_KEYS, ...OWNED];
+export const BLOCK_KEYS: readonly string[] = ['configuration', 'packs', ...OWNED, ...CHECK_KEYS];
 const BLOCK = /^```claude-packs[ \t]*\n([\s\S]*?)^```[ \t]*$/gm;
 
 /** What an install block says: the configuration and packs `init` takes, and the layout keys the project owns. */
