@@ -12,6 +12,7 @@
     "hooks/frozen-files.mts": ["test/hooks/synth-creator/frozen-files.test.mts"],
     "hooks/idle-wake.mts": ["test/hooks/synth-creator/idle-wake.test.mts"],
     "hooks/lib/build-guard-selftest.mts": ["test/hooks/synth-creator/build-guard.test.mts"],
+    "hooks/lib/time-look.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
     "hooks/lib/time-findings.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
     "hooks/lib/time-guard-selftest.mts": ["test/hooks/synth-creator/time-guard.test.mts"],
     "hooks/lib/time-state.mts": ["test/hooks/synth-creator/time-guard.test.mts"],

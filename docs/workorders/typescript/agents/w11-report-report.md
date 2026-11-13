@@ -4,8 +4,8 @@ Status: DONE (see the end). Branch `work/2.0.0-ts-w11-report`.
 
 ## What was made
 - `docs/workorders/typescript/report.md`: finished. Comparison table first (T-a to T-l with the sub rows), every step W0 to W10b with numbered rows citing evidence, W11.0 (the five tasks, looks plainly not meeting "0 tasks where 2.0 failed a gate the original passed"), W11.1 (the after, in rows), M (12 missed targets, d-36), O, K (kit logs), P (proved), N (not done), F (the user's first actions). Row (a) is the placeholder line for the lead.
-- `docs/workorders/typescript/showcase.md`: ten wins, each before, after, factor, with a row citation. Written through the `tim-writing` skill.
-- `docs/whats-new-in-2.0.md`: as W11 item 3 lists; the misses said in their own section; written through `tim-writing`.
+- `docs/workorders/typescript/showcase.md`: ten wins, each before, after, factor, with a row citation. Written through the writing skill.
+- `docs/whats-new-in-2.0.md`: as W11 item 3 lists; the misses said in their own section; written through the writing skill.
 - `test/unit/lib/report-evidence.test.mts`: report cites only files that exist (build/ evidence read only where `build/evidence` is present, `REPORT_BUILD_DIR` points at another build folder), 3+ rows per step each citing a file, the twelve table rows, ten wins, 0 numbers in the two public pages without a cited row that holds the number, every M row stated in whats-new.
 
 ## Logs as read (`node bin/claude-packs.mjs logs`, main checkout, 61,278 calls, 2026-11-11T09:02Z to 2026-11-13T09:19Z)
