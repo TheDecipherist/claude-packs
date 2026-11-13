@@ -7,6 +7,7 @@ import { put, readText, scratchDir } from '../../../packs/base/hooks/lib/files.m
 import { readLock } from '../../../lib/manifest.mts';
 import { createFolders, sync } from '../../../lib/sync.mts';
 import { reportSwitches, switches } from '../../../lib/switches.mts';
+import { readPack } from '../../../lib/packs.mts';
 
 const quiet = (): { said: string[]; log: (l: string) => void } => { const said: string[] = []; return { said, log: (l) => said.push(l) }; };
 
@@ -61,9 +62,11 @@ test('a pack the project is choosing switches its hooks on; one it had holds a n
   const dir = scratchDir('sync-switch-');
   const first = await sync(dir, ['base'], { log: () => {} });
   const lock = readLock(join(dir, '.claude'));
-  assert.deepEqual(switches(dir, first.packNames, first.layout, lock), { on: [], held: [] });
+  // base's own opt-in hooks (agent-model, the audit's U73) wait for "enable" in every install: held, never on
+  const optIn = readPack('base').optIn ?? [];
+  assert.deepEqual(switches(dir, first.packNames, first.layout, lock), { on: [], held: optIn });
   const fresh = switches(dir, ['base'], first.layout, { kit: '', packs: [], files: {} });
-  assert.deepEqual(fresh.held, []);
+  assert.deepEqual(fresh.held, optIn);
   const { said, log } = quiet();
   reportSwitches({ on: ['hooks/a.mjs'], held: ['hooks/b.mjs'] }, log);
   assert.match(said.join('\n'), /switching on.*hooks\/a\.mjs/);

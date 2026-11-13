@@ -29,3 +29,8 @@
 - Question: skill-log, rule-log (W2's L1, L2) and agent-ledger (U74) are new base hooks. A new hook never switches on silently in an existing project, but these refuse nothing.
 - Options: opt-in; on for new installs only; base's `onByDefault`, so `update` brings them too.
 - Chose: `onByDefault` for all three. They only record, and the user's reason for them ("the only way we can ever truly track which skills/hooks/rules are actually being triggered") needs every project's numbers. agent-model, a new refusal, stays opt-in.
+
+## d-7 The midi rules' concepts when the conformance gate makes them declare some {#d-7}
+- Question: five midi rules loaded by raw globs (`**/*.cpp`, `**/*.py`, `**/*.ts`, ...). Extending them makes the conformance gate (R1) require `# concepts:`; `cpp, js` would drop Python files.
+- Options: `cpp, js`; `cpp, js, python, tooling`; leave the extensions out.
+- Chose: `cpp, js, python, tooling`. Python files are covered where the python pack is installed and in tool folders; a project with loose Python scripts outside both and no python pack loses the rule there. Noted for the user.

@@ -13,6 +13,8 @@ Session 1 started 2026-11-13. `workorder check audit`: OK.
 
 ## FOR THE USER
 
+- The five midi rules extended in W4 now load by concepts (`cpp, js, python, tooling`) instead of raw globs (d-7): a project with loose Python files, no python pack and no tool folder no longer gets them on those files. [deferred: the lead; forced by the conformance gate R1]
+
 - `packs/base/rules/unattended-runs.md` has no frontmatter, so the conformance gate (R1) refuses any edit to it; a `# concepts:` or `# hook:` line would change when it loads. E28 went to plan-and-logs instead (d-5). [deferred: the lead, because it changes how the kit loads a rule]
 
 ## BLOCKED BY KIT

@@ -1,5 +1,5 @@
 ---
-# concepts: plan, notes
+# concepts: plan, notes, tooling
 paths:
   - "placeholder"
 ---
