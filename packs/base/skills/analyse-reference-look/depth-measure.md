@@ -16,7 +16,9 @@ Write which one, per kind and per theme, into the analysis with its reads, befor
 A shadow only darkens, a lit edge only lightens. When a reference reading is outside what any amount of the theme's tokens can draw (a ground lighter beyond a dark moat, so the shadow row reads negative), do one of:
 
 - add the token the reference shows (a moat, a second shadow) and fit it; or
-- hold the row out by name in the report's `held_out`, with its measured reading, the token range's floor and the reason.
+- hold the row out by name in the report's `held_out` as `{ "reference", "limit", "reason" }`: the reference's reading, the render's reading with the token at the end of its range (0 or its maximum, whichever way the reference lies), and why no token reaches it.
+
+A row the fit did not close is not out of reach: a fitter's best is no limit. Show the limit, or keep fitting. More than two rows held out on one look (the look's `heldOutMax` in layout.json) is a token the theme lacks, not readings no token can make: add the token (a moat, a lit rim), fit it, gate again. `look-gate` refuses to land a report with a held-out row missing its limit, or with more rows than the look allows. One run held out 14 rows on one theme on a fit's best, where the original held out one (KWB-217).
 
 Never widen the tolerance for it, and never drop the row without naming it. A held-out row is an open point for the user, not a pass.
 
