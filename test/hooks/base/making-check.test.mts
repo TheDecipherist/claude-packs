@@ -35,6 +35,11 @@ test('KF-24: the shape word after a concept is no concept, and a second list aft
   assert.deepEqual(unknownConcepts('making: x; concepts: program, one; widget, many; reuse: y', MANIFEST), ['widget']);
 });
 
+test('KWB-215: prose after a concepts list is no concept, a one-word item or a word and its shape is', () => {
+  assert.deepEqual(unknownConcepts('making: x; concepts: program (one); never a bare literal; reuse: y', MANIFEST), []);
+  assert.deepEqual(unknownConcepts('making: x; concepts: program, one; never; widget, many; reuse: y', MANIFEST), ['never', 'widget']);
+});
+
 const use = (name: string, input: ToolUse['input']): ToolUse => ({ name, input, cwd: '/p' });
 
 test('KF-34: what a turn landed is over: only the writes after its last landing are this step\'s', () => {

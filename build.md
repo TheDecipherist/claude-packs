@@ -11,6 +11,8 @@ Started 2026-11-04 (the kit had no build.md before 0.11.0; earlier steps are in 
 
 ## In progress
 
+- 2.0.0 kwb215 (work/2.0.0-ts-kwb215), started 2026-11-12: KWB-215, making-check judges only the lines a turn added, comments blanked, and a making line's prose is no concept.
+  making: addedConceptText in hooks lib making-concepts.mts used by making-check-turn.mts, and unknownConcepts reading only single-word items; concepts: none (design/shape.json declares none); reuse: languageOf/blank (hooks lib languages.mts), gitRun (git-run.mts).
 - 2.0.0 ab-prep (work/2.0.0-ts-ab-prep), started 2026-11-12: W11.0's preparation, the five bandwarp tasks picked and set up.
   making: scripts/ab-pick.mts (list, seed, draw) and scripts/ab-compare.mts (one task's row) with lib/ab-*.mts parts and test/unit/lib/ab-compare.test.mts; concepts: none (design/shape.json declares none); reuse: readJson/isRecord (hooks lib json.mts).
 - 2.0.0 gov-route (work/2.0.0-ts-gov-route), started 2026-11-12: W8.8 items 3, 4 and 5: `governed`, the Bash routing by updatedInput and the Agent slot, the watchdog's pause and resume; `load ask` answered by the Go client.
