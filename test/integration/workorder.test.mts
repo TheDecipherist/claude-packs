@@ -165,7 +165,7 @@ test('the plugin template is the house decided: no angle bracket from the stack 
 });
 
 // The source's markers, read from the synced claude.ai template (workorder-writer/templates/workorder-rebuild.md) on 2026-11-09.
-const REBUILD_IFS = ['...', 'the firmware computes the sound or the control', 'a real unit is owned', "a sibling model's firmware is mapped", 'the firmware computes the sound or the control',
+const REBUILD_IFS = ['...', 'the firmware computes the sound or the control', 'a real unit is owned', 'no service manual or schematic exists', "a sibling model's firmware is mapped", 'the firmware computes the sound or the control',
   'digital', 'analogue', 'a real unit is owned', 'it has one', 'it takes microcode and has no data sheet', 'W10 ran and recordings exist'];
 
 test('the rebuild template keeps every [if marker its source has, the HTML line and an install block', () => {
