@@ -108,7 +108,12 @@ func (p *topProject) header() string {
 	for _, r := range p.Rows {
 		sum.CPU, sum.RssMb, sum.Procs = sum.CPU+r.Use.CPU, sum.RssMb+r.Use.RssMb, sum.Procs+r.Use.Procs
 	}
-	return fmt.Sprintf("%s %s %3d%%  %d items left · %s · %d agents  %d proc · %.1f cpu · %s", pad(p.Name, 12), bar(p.Percent), p.Percent, p.Left, orDash(p.Step), p.agents(), sum.Procs, sum.CPU/100, memText(sum.RssMb))
+	n := p.agents()
+	noun := "agents"
+	if n == 1 {
+		noun = "agent"
+	}
+	return fmt.Sprintf("%s %s %3d%%  %d items left · %s · %d %s  %d proc · %.1f cpu · %s", pad(p.Name, 12), bar(p.Percent), p.Percent, p.Left, orDash(p.Step), n, noun, sum.Procs, sum.CPU/100, memText(sum.RssMb))
 }
 
 func (r *topRow) line() string {
