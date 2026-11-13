@@ -3,6 +3,8 @@
 // (typescript W4) so the hook stays small; it reads files only through the root it is given.
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { extname } from 'node:path';
+import { languageOf } from './languages.mts';
 import type { LoadedShape, ShapeConceptData } from './shape.mts';
 
 const NOT_CONCEPTS: ReadonlySet<string> = new Set(['none', 'no', '-', 'n/a', 'one', 'many', 'ids']);
@@ -29,6 +31,20 @@ export function conceptsIn(text: string, shape: Pick<LoadedShape, 'concepts'> | 
   return out;
 }
 
+/** The lines of a written text that the file did not hold before (`before`, its text at HEAD; null when new), comments blanked by
+ *  the file's language: what a turn added, never what a rewrite kept (KWB-215). A language the table lacks is not blanked. */
+export function addedCode(path: string, text: string, before: string | null): string {
+  const blank = languageOf(extname(path).toLowerCase())?.blank;
+  const code = (blank ? blank(text) : text).split('\n');
+  const held = new Map<string, number>();
+  for (const l of (before ?? '').split('\n')) held.set(l, (held.get(l) ?? 0) + 1);
+  return text.split('\n').flatMap((l, i) => {
+    const n = held.get(l) ?? 0;
+    if (n > 0) { held.set(l, n - 1); return []; }
+    return [code[i] ?? ''];
+  }).join('\n');
+}
+
 // The concepts listed after "concepts:" on a making line that the manifest does not know.
 export function unknownConcepts(making: string, shape: Pick<LoadedShape, 'concepts'> | null): string[] {
   const known = new Set(Object.entries(shape?.concepts ?? {}).flatMap(([n, c]) => wordsOf(n, c)));
@@ -39,7 +55,10 @@ export function unknownConcepts(making: string, shape: Pick<LoadedShape, 'concep
   // the list runs to `reuse:` or the line's end, and a shape word after a concept ("editKnob, many") is what the rule asks for (KF-24)
   for (const m of flat.matchAll(/\bconcepts?\s*:\s*(.*?)(?=\breuse\s*:|\||$)/gim)) {
     for (const item of (m[1] ?? '').split(/[,;]/)) {
-      const w = item.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      // a name alone, or a name and its shape word: a phrase ("never a bare literal") is prose, and its first word no concept (KWB-215)
+      const words = item.trim().split(/\s+/);
+      if (words.length > 2 || (words.length === 2 && !/^(?:one|many)$/i.test(words[1] ?? ''))) continue;
+      const w = words[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, '');
       if (w && !NOT_CONCEPTS.has(w) && !known.has(w)) out.push(w);
     }
   }

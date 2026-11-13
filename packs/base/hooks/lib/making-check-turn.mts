@@ -9,7 +9,7 @@ import { judgeCopyWrites } from './dup-index.mts';
 import { gitLines, gitRun } from './git-run.mts';
 import { matchesAny } from './glob.mts';
 import { readLayout } from './layout.mts';
-import { conceptsIn, makingLines, unknownConcepts } from './making-concepts.mts';
+import { addedCode, conceptsIn, makingLines, unknownConcepts } from './making-concepts.mts';
 import { checkoutRoot, claudeRoot, insideProject, relInCheckout } from './project.mts';
 import { readShape } from './shape.mts';
 import { emittedFrom } from './source-exts.mts';
@@ -76,6 +76,12 @@ function addedRanges(root: string, files: readonly string[], env: Env): Map<stri
 /** The manifest as the duplicate finder reads it: only its exclude list. */
 const excludesOf = (sh: LoadedShape | null): ShapeManifest | null => (sh ? { concepts: {}, exclude: sh.exclude } : null);
 
+// the file's text at HEAD, null when it is new or there is no git: what a rewrite kept is not what the turn added (KWB-215)
+function headText(root: string, relPath: string, env: Env): string | null {
+  const r = gitRun(['show', `HEAD:${relPath}`], { cwd: root, env });
+  return r.status === 0 ? r.stdout : null;
+}
+
 /** Problems 1: the concepts the turn's writes touch, against the making line and the manifest, in one checkout. */
 function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: Where, rel: (p: string) => string): { problems: string[]; judged: TurnWrite[] } {
   const problems: string[] = [];
@@ -99,7 +105,7 @@ function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: 
   };
   for (const w of mine) {
     if (!isCode(rel(w.path), lay)) continue;
-    for (const c of conceptsIn(w.text ?? '', sh)) if (!written.has(c) && (holds(w.path)?.has(c) ?? true)) written.set(c, rel(w.path));
+    for (const c of conceptsIn(addedCode(w.path, w.text ?? '', headText(root, rel(w.path), at.env)), sh)) if (!written.has(c) && (holds(w.path)?.has(c) ?? true)) written.set(c, rel(w.path));
   }
   const making = makingLines(root, at.projectDir).join('\n');
   const wroteSource = [...new Set(mine.filter((w) => isSource(w.path)).map((w) => rel(w.path)))];
