@@ -63,8 +63,11 @@ export function orderStatus(project: string, order: string, { env, nowMs = Date.
   const status = readJson<StatusFile>(join(folder, 'status.json'));   // the run's file: a broken one is no file, never a crash
   const ownSteps = Array.isArray(status?.steps) ? status.steps : [];
   const fromRun = ownSteps.length > 0;
+  // the lead writes status.json at its own moments and its progress lines after every item, so a count that stands still while the lines
+  // move (supernova2 read 0 % with W0.0 to W0.4 recorded, W8.9) is the file lagging: the step takes the further of the two
+  const lines = fromRun ? derivedSteps(project, order, trees) : [];
   const steps: Step[] = fromRun
-    ? ownSteps.map((s) => ({ id: s.id, title: s.title ?? '', items: s.items || 1, done: Math.min(s.done ?? 0, s.items || 1), agent: s.agent ?? null }))
+    ? ownSteps.map((s) => { const items = s.items || 1; return { id: s.id, title: s.title ?? '', items, done: Math.min(Math.max(s.done ?? 0, lines.find((l) => l.id === s.id)?.done ?? 0), items), agent: s.agent ?? null }; })
     : derivedSteps(project, order, trees);
   const listed = new Map((Array.isArray(status?.agents) ? status.agents : []).map((a) => [a.name, a]));
   // the heartbeat hook's file, else the agent's last call in Claude Code's own transcripts (an install with no heartbeat yet)
@@ -79,10 +82,14 @@ export function orderStatus(project: string, order: string, { env, nowMs = Date.
   // its own file says done and its branch is merged: finished, whatever its worktree (KWB-188: 37 finished worktrees listed)
   const finished = (t: { branch: string | null; file: AgentFile | null }): boolean =>
     (t.file?.state === 'done' || (t.file?.items !== undefined && (t.file.done ?? 0) >= t.file.items)) && merged(t.branch);
+  // nothing of its own for LIVE_MS: no heartbeat, no update of its file, its worktree untouched (ab-prep sat listed at 4 h and w10b-soak at 10 h, W8.9);
+  // the report still shows it while a process works in its worktree, and a call or an update brings it back
+  const idle = (t: { file: AgentFile | null; beat: Beat | null; touched: number }): boolean =>
+    nowMs - Math.max(Date.parse(t.file?.updated ?? '') || 0, Date.parse(t.beat?.t ?? '') || 0, t.touched || 0) > LIVE_MS;
   const agents: AgentStatus[] = trees.map((t) => ({ ...t, file: readJson<AgentFile>(join(t.path, 'docs', 'workorders', order, 'agents', `${t.name}.json`)), beat: beatOf(t.name) }))
     .map((t) => { const known = Boolean(t.file || listed.has(t.name) || alive(t.beat)); return { ...t, known, kinOnly: !known && kin(t.branch) }; })
     .filter((t) => t.known || t.kinOnly)
-    .map((t) => ({ ...t, stale: (t.kinOnly && stale(t)) || finished(t), fresh: t.kinOnly && t.branch !== null && commitsAhead(project, t.branch, `work/${order}`, env) === 0 }))   // runsReport drops a stale one unless work runs in it
+    .map((t) => ({ ...t, stale: (t.kinOnly && stale(t)) || finished(t) || idle(t), fresh: t.kinOnly && t.branch !== null && commitsAhead(project, t.branch, `work/${order}`, env) === 0 }))   // runsReport drops a stale one unless work runs in it
     .map((t): AgentStatus => {
       const f: AgentFile = t.file ?? {};
       const step = f.step ?? listed.get(t.name)?.step ?? null;

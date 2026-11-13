@@ -30,6 +30,17 @@ test('without one, the steps come from workorder.md and the progress lines; a DO
   assert.equal(orderStatus(project, 'x', { env: env(project), nowMs: NOW }).finished, true);
 });
 
+test('a status.json the lead has not kept (done 0) does not hide the items its progress lines record (W8.9, supernova2 read 0 % with W0.0 to W0.4 done)', () => {
+  const project = scratchDir('run-status-lag-');
+  put(join(orderDir(project), 'workorder.md'), '## W0. Set up\n\n1. a\n2. b\n3. c\n4. d\n\n## W1. Next\n\n1. x\n');
+  put(join(orderDir(project), 'status.json'), JSON.stringify({ steps: [{ id: 'W0', title: 'Set up', items: 5, done: 0 }, { id: 'W1', title: 'Next', items: 2, done: 1 }] }));
+  put(join(orderDir(project), 'progress.md'), '- 2026-11-13 W0.1: a\n- 2026-11-13 W0.2: b\n- 2026-11-13 W0.3: c\n');
+  const s = orderStatus(project, 'x', { env: env(project), nowMs: NOW });
+  assert.equal(s.source, 'status.json');
+  assert.deepEqual(s.steps.map((x) => `${x.id}:${x.done}/${x.items}`), ['W0:3/5', 'W1:1/2'], 'the lines are ahead of the file for W0; the file is ahead for W1');
+  assert.equal(s.percent, Math.round((1000 * 4) / 7) / 10);
+});
+
 test('a broken status.json is no file, never a crash', () => {
   const project = scratchDir('run-status-broken-');
   put(join(orderDir(project), 'status.json'), '{ half');

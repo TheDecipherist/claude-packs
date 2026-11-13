@@ -151,6 +151,25 @@ test('an agent whose branch is merged and whose own file says done leaves the li
   assert.deepEqual(run.agents.map((a) => a.name), ['open'], 'the merged and done agent left out');
 });
 
+test('an agent unmerged, not finished, with no event or file update for over an hour leaves the list; one that updated its file a minute ago stays (W8.9: ab-prep at 4 h, w10b-soak at 10 h)', () => {
+  const { dir, git } = project({ status: { steps: [{ id: 'W1', title: 'x', items: 2, done: 0 }], agents: [{ name: 'gone', step: 'W1' }, { name: 'busy', step: 'W1' }] } });
+  git('branch', 'work/demo');
+  const writeFile = (name: string, updated: string): void => {
+    git('worktree', 'add', '-q', `.claude/worktrees/${name}`, '-b', `work/demo-${name}`);
+    mkdirSync(join(dir, `.claude/worktrees/${name}/docs/workorders/demo/agents`), { recursive: true });
+    writeFileSync(join(dir, `.claude/worktrees/${name}/docs/workorders/demo/agents/${name}.json`), toJson({ name, step: 'W1', items: 3, done: 1, updated }));
+    gitIn(join(dir, `.claude/worktrees/${name}`), 'commit', '-q', '--allow-empty', '-m', 'a commit of its own');
+  };
+  writeFile('gone', new Date(Date.now() - 4 * 3600_000).toISOString());
+  writeFile('busy', new Date(Date.now() - 60_000).toISOString());
+  const gitdir = join(dir, '.git', 'worktrees', 'gone');
+  const hoursAgo = (Date.now() - 4 * 3600_000) / 1000;
+  for (const f of ['HEAD', 'index', 'logs/HEAD']) { try { utimesSync(join(gitdir, f), hoursAgo, hoursAgo); } catch { /* not every file is there */ } }
+  const [run] = runsReport({ ...HERE, dir, order: 'demo' }).runs;
+  assert.ok(run);
+  assert.deepEqual(run.agents.map((a) => a.name), ['busy'], 'the agent silent for 4 hours is not listed');
+});
+
 test('a status file that is not JSON is ignored and the progress is derived instead, never a crash', () => {
   const { dir } = project({ progress: '- W0.1 a\n' });
   writeFileSync(join(dir, 'docs/workorders/demo/status.json'), '{ not json');
