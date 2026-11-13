@@ -123,3 +123,9 @@ test('KF-41: one cheap pass of every instance is asked for, kept apart from the 
   const check = JSON.parse(pack('base/checks/one-walk-per-template.json')) as { why: string };
   assert.match(check.why, /every-instance pass/);
 });
+
+// the user, 2026-11-13, after putting the DSP56300 Family Manual in supernova2 by hand: "this is something the kit needs to be able to do on its own"
+test('gather-sources fetches every processor\'s manuals itself, into the archive and the library, never asking the user', () => {
+  const text = pack('reverse-engineering/skills/gather-sources/SKILL.md');
+  for (const law of [/every processor the firmware runs on/, /never ask the user to find one/, /programming or family manual/, /the maker's site/, /outside every repo/, /bring the Markdown into the reference library/, /never from memory/]) assert.match(text, law);
+});
