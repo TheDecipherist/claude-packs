@@ -1,7 +1,7 @@
 {
   "name": "instrument-shell",
   "version": "1.0.0",
-  "description": "Instruments built on a shared shell: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit.",
+  "description": "Instruments: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit.",
   "type": "stock",
   "fits": ["synth-creator"],
   "requires": [],

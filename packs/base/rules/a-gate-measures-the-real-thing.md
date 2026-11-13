@@ -15,7 +15,7 @@ Always do:
 - Fail a "skipped" gate when the data it needs exists.
 - Keep at least one gate that compares two independently generated artefacts, or one artefact against the world, never a record of itself.
 - Make a planted fault's target id exist, and show the fault changes the output; diff string names against the id list.
-- Mark a gate that tests the shell, not the unit. Every behaviour a unit owns keeps its own probe of the unit.
+- Mark a gate that tests the harness around a unit, not the unit. Every behaviour a unit owns keeps its own probe of the unit.
 - Make a verdict made of several parts name the part that failed.
 
 Never do:
