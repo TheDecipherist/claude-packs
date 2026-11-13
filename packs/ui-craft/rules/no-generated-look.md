@@ -32,6 +32,7 @@ Always do:
 - Use structure that carries information: an outline, a number or a divider earns its place by saying something.
 - Replace a tell with a procedure, never a product: derive it from the subject. Every published "use this instead" list becomes the next wave of tells.
 - Put an idea in first. A page with every tell removed and nothing in their place is an empty page with good manners, and that is a tell too.
+- One icon family and one stroke weight per project; no hand-rolled icon SVG.
 
 On the taste-skill study of 247 sites: those scored 7.5 or higher used icon feature cards 1% of the time against 28% for sites under 6.5, pill badges 14% against 34%, gradients 22% against 52%, shadows 24% against 48%, tiny tracked caps 16% against 57%.
 </constraints>

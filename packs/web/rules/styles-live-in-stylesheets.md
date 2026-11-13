@@ -15,6 +15,7 @@ Always do:
 - Fluid type with `clamp()`; `max-width`, `%` or `min(800px, 100%)` instead of fixed pixel widths; `width: 100%` never `100vw` (it includes the scrollbar); `img, video, svg { max-width: 100%; height: auto }` with intrinsic `width`/`height` on every `<img>`.
 - iOS: `overscroll-behavior: contain` on scroll regions, `100dvh` not `100vh`, `font-size: 16px` on inputs (no focus zoom), pinch-zoom never disabled.
 - `cursor: pointer` on everything clickable, in the base stylesheet: `button, [role="button"], [role="link"], [onclick] { cursor: pointer }`, `button:disabled { cursor: not-allowed }`. Buttons do not get it from the browser. The inverse holds: pointer on something inert is a lie.
+- Take every `z-index` from one named scale; put a noise or grain overlay on a fixed layer with `pointer-events: none`, never on scrolling content.
 
 Never do:
 - `style="…"` attributes or large `style={{…}}` objects in markup (`css-no-inline-style`): they cannot be responsive, hover or animate, and start a specificity war. A single `<style>` block is fine only in a single-file deliverable; email HTML is the one case that requires inline.

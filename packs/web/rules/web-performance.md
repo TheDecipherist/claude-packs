@@ -14,6 +14,7 @@ Always do:
 - Fonts self-hosted, subset, two weights not four.
 - Less JavaScript: built-ins and small deps, route-level code splitting, nothing blocking first paint or interaction on analytics.
 - A Core Web Vitals budget (LCP, CLS, INP) set at the start; Lighthouse for the lab number, field data for the truth.
+- Hold the budget to LCP under 2.5 s, INP under 200 ms and CLS under 0.1, and run Lighthouse before calling a page done.
 
 Never do:
 - `loading="lazy"` or `fetchpriority="low"` on the hero/LCP element (`wp-hero-not-lazy`).

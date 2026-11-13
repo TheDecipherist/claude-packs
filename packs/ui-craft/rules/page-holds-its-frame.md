@@ -18,6 +18,7 @@ Always do:
 - Carry the idea to the last section, pricing and FAQ included: most pages turn into stock blocks after the hero.
 - Make the phone a composition of its own, with its own crop and line breaks.
 - Keep to the order of the argument, not the stock order of hero, logos, features, testimonial, pricing, CTA.
+- Hold the hero to at most four text elements, supporting text of at most 20 words, and a nav on one line at 80px or less.
 
 Never do:
 - Pad a short page: a quarter of the studied sites are one or two screens.

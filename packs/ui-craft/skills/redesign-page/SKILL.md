@@ -12,6 +12,7 @@ Always do:
 3. Keep the stack, the content and what works. No framework or styling migration; check the dependency file before adding anything.
 4. Work in order of biggest effect for least risk: type, colour, the frame (margins, section rhythm, a title and headings), states (hover, focus, loading, empty, error), then the stock components.
 5. Prove it: measure again, compare before and after at every width, click through every link, form and menu that worked before, and report both sets of measurements side by side.
+6. Say first whether the work is to preserve or to overhaul. Keep routes (slugs), nav labels, form field names, analytics events, the logo and legal copy as they are, unless the user approves a change.
 
 Never do:
 - Change behaviour during a restyle.

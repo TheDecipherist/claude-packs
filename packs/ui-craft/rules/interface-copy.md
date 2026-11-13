@@ -17,6 +17,8 @@ Always do:
 - Write the full content. Thin sections are the commonest reason a clean page loses to a busier one.
 - Write the argument before the layout: the page is a list of claims, each with its proof. A section with no claim is filler. The `write-the-page` skill is the method.
 - Use the number the content has: not three features, three stats and three steps by reflex.
+- One label per intent on a page: no two buttons with the same intent and different words. A button label stays on one line at desktop width.
+- Write every visible string with ASCII dashes, never the em dash (`ascii-no-em-dash`).
 
 Never do:
 - Invent customers, quotes, reviews, press, logos or statistics. Sample details are fine when listed for the owner to confirm; proof is not.
