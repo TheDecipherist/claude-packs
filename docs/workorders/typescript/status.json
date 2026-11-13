@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T02:21:33Z",
+  "updated": "2026-11-13T12:09:44Z",
   "steps": [
     {
       "id": "W0",
@@ -91,30 +91,25 @@
       "id": "W10b",
       "title": "Resident runner and Go proxy under stress",
       "items": 5,
-      "done": 4,
-      "agent": "w10b-soak"
+      "done": 5,
+      "agent": null
     },
     {
       "id": "W11",
       "title": "The report, with the comparison",
       "items": 6,
-      "done": 2,
-      "agent": null
+      "done": 6,
+      "agent": null,
+      "note": "looks: 2 of 5 gates against the original (d-111 to d-113, the user decides the dark tokens); row (a) run 3 at 868.6 s, 9 reds read (d-37)"
     },
     {
       "id": "W12",
       "title": "Land and publish 2.0.0",
       "items": 2,
       "done": 0,
-      "agent": null
+      "agent": null,
+      "note": "prepared (CHANGELOG, README, dry-run 0 refusals); npm is not logged in for @thedecipherist on this machine, so the publish waits for it"
     }
   ],
-  "agents": [
-    {
-      "name": "w10b-soak",
-      "worktree": ".claude/worktrees/w10b-soak",
-      "step": "W10b",
-      "started": "2026-11-12T23:18:24Z"
-    }
-  ]
+  "agents": []
 }
