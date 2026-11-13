@@ -120,6 +120,12 @@ test('the block, control, look and anchor laws and their skills install', () => 
   const look = rule('page-matches-reference-look');   // W7 (a): ui-matches-reference-look folded into it, in base
   assert.match(look, /# hook: skill-first\.mjs/, 'held with its hook, loaded wherever the hook is');
   for (const clause of [/glow/, /surfaces/, /every control's parts/, /gaps between elements/, /contrast/, /Gate the look/, /picture stop/]) assert.match(look, clause);
+  assert.match(look, /depth-measure\.md/, 'the look rule points at how depth is measured');
+  const depth = rule('depth-is-designed');   // KWB-217: one light, levels as tokens, tinted shadows, dark-theme depth, borders, radius
+  assert.match(depth, /# hook: skill-first\.mjs/, 'held with the look hook, loaded wherever it is');
+  for (const clause of [/one light/i, /levels/, /Tint a shadow/, /On a dark ground/, /moat/, /hairline/, /corner-radius scale/, /every theme/, /glow to show height/]) assert.match(depth, clause);
+  const measure = readFileSync(join(dir, '.claude/skills/analyse-reference-look/depth-measure.md'), 'utf8');
+  for (const clause of [/Per side or pooled/, /before the first fit/, /held_out/, /Never widen the tolerance/, /named spot/, /Every theme/]) assert.match(measure, clause);
   const anchors = rule('references-use-anchors');
   assert.match(anchors, /"docs\/\*\*"/);
   assert.match(anchors, /never by line number/);

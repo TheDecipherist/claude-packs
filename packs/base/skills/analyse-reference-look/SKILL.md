@@ -25,6 +25,7 @@ Always do:
    - **bevel:** the width of the light edge and of the dark edge, and each one's contrast against the face;
    - **edge light:** the lit edge's brightness against the face, and its width.
    An element with none of them says so, measured: a flat reference is a result too. A flat render beside a raised reference fails here, whatever its colours and glow score.
+   Read `depth-measure.md` (beside this file) now: each side first, then per side or pooled for each kind and theme, decided from the reference and written down before anything is fitted; a reading no token can make held out by name; dark surfaces sampled at named spots.
 6. **Surfaces:** gradients across a face, textures, and how the light falls over the whole.
 7. **Type:** font, size, weight and letter spacing of every text style, and how they relate. The typeface is a stated item and a scored choice: render each candidate in the reference's own words, score it against them, and record the scores and the licence. When the real face is not to be had, say so.
 8. **Components:** each kind's parts (for a dial: track, value arc, pointer, ticks, cap; for a field: border, label, value, hint), where its label and value sit, and any shape's real ends: a band's end may be slanted or square, and the eye gets it wrong.
