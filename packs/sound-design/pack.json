@@ -5,6 +5,7 @@
   "type": "stock",
   "fits": ["cpp", "synth-creator"],
   "tests": {
+    "tools/bank-coverage.mts": ["test/tools/sound-design/bank-coverage.test.mts"],
     "tools/lib/bank-measures.mts": ["test/tools/sound-design/prove-a-bank.test.mts"],
     "tools/prove-a-bank.mts": ["test/tools/sound-design/prove-a-bank.test.mts"],
     "tools/vst3host/build.sh": ["test/hooks/sound-design/sound-design-pack.test.mts"],

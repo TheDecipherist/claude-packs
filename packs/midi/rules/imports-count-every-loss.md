@@ -13,6 +13,7 @@ Always do:
 - Treat a controller's edit semantics as separate from the stored byte.
 - Print one report row shape per field: field, status (mapped, approximated, clamped, lost), asked and given.
 - Prove a numbering by its values: a name match is not a numbering match.
+- Make bank generators and loaders fail on an unknown key, never skip it.
 - Test a published spec against firmware and the corpus.
 
 Never do:

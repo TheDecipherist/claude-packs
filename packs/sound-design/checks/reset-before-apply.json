@@ -1,0 +1,30 @@
+{
+  "id": "reset-before-apply",
+  "why": "A patch applied over what the last one left carries state the machine would have cleared.",
+  "rule": ".claude/rules/reset-before-apply.md",
+  "globs": [
+    "**/*.cpp",
+    "**/*.cc",
+    "**/*.h",
+    "**/*.hpp",
+    "**/*.mm"
+  ],
+  "exclude": [
+    "**/build/**",
+    "**/out/**",
+    "**/_deps/**",
+    "**/JUCE/**",
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/test/**",
+    "**/probes/**",
+    "**/gates/**",
+    "**/*_test.*",
+    "**/*.test.*"
+  ],
+  "pattern": "\\b(?:apply|load|recall|set)\\w*(?:Patch|Program|Preset)\\w*\\s*\\([^)]*\\)\\s*(?:const\\s*)?(?:override\\s*)?\\{(?![^}]*\\breset\\w*\\s*\\()",
+  "bad": "void Voice::applyPatch(const Patch& p) {\n    cutoff = p.cutoff;\n}",
+  "good": "void Voice::applyPatch(const Patch& p) {\n    resetState();\n    cutoff = p.cutoff;\n}",
+  "flags": "i",
+  "code": true
+}
