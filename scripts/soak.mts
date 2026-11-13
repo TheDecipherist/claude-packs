@@ -73,6 +73,7 @@ async function within<T>(step: Promise<T>, what: string): Promise<T> {
   const limit = new Promise<never>((_, fail) => setTimeout(() => fail(new Error(`${what} did not end in ${STEP_LIMIT_MS / SECOND} s`)), STEP_LIMIT_MS).unref());
   try { return await Promise.race([step, limit]); } catch (e) { note(String(e)); throw e; }
 }
+const closeInspector = (): void => { inspector?.i.close(); };
 const rows: Row[] = [];
 const started = Date.now();
 const done = new Set<string>();
@@ -128,6 +129,11 @@ const totals = { done: sum((c) => c.done), compared: sum((c) => c.compared), pla
 const afterKill = rows.find((r) => r.t >= (marks['killDaemon'] ?? Infinity) + 20 && r.pid !== null);
 const afterWorker = rows.find((r) => r.t >= (marks['killWorker'] ?? Infinity) + 30);
 const startRow = rows.find((r) => r.fds !== null);
+// fds follow the pool (a daemon with 8 workers holds more than one with 2): the new daemon is held to the first one's count at the same worker number
+const sameWorkers = afterKill === undefined ? undefined : rows.find((r) => r.pid === startRow?.pid && r.workers === afterKill.workers && r.fds !== null);
+const beforeWorker = [...rows].reverse().find((r) => r.t < (marks['killWorker'] ?? 0) && r.workers !== null);
+// the probe lets go of the daemon first: an inspector session attached to it is not part of what the daemon does when it stops
+closeInspector();
 note(`stopping: ${stopDaemons(rig)}`);
 const gone = await Promise.race([oldGone, sleep(5 * SECOND).then(() => null)]);
 await sleep(5 * SECOND);
@@ -135,7 +141,7 @@ const left = leftBehind(rig, keys);
 
 const facts: Facts = {
   expectedSamples: Math.floor(total / sampleS), rows, differences: totals.diff, compared: totals.compared, refusalsCompared: totals.planted, refusalsSeen: totals.seen,
-  events: totals.done + totals.compared, startFds: startRow?.fds ?? null, startChildren: startRow?.childrenNoSampler ?? null, startWorkers: startRow?.workers ?? null,
+  events: totals.done + totals.compared, startFds: sameWorkers?.fds ?? startRow?.fds ?? null, startChildren: startRow?.childrenNoSampler ?? null, startWorkers: beforeWorker?.workers ?? null,
   afterKill: afterKill === undefined ? null : { fds: afterKill.fds, children: afterKill.childrenNoSampler }, afterWorker: afterWorker === undefined ? null : { workers: afterWorker.workers },
   oldGoneS: gone, idleWindowS: IDLE_WINDOW_S, left, endRssMb: endRow?.rssMb ?? null,
 };

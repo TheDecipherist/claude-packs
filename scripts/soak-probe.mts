@@ -8,7 +8,7 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { alive, daemonsOf, type DaemonHost, type FoundDaemon } from '../packs/base/hooks/lib/daemon-find.mts';
-import { descendants, processTable } from '../packs/base/hooks/lib/own-processes.mts';
+import { descendants, processTable, type ProcessRow } from '../packs/base/hooks/lib/own-processes.mts';
 import { socketFolders } from '../packs/base/hooks/lib/proxy-wire.mts';
 import { forcedHeap, type Inspector } from './soak-inspect.mts';
 
@@ -29,9 +29,12 @@ export interface Row {
   heapStateMb: number | null;
   fds: number | null;
   workers: number | null;
-  /** Descendants of the daemon, the sampler counted in, and the count without it. */
+  /** Descendants of the daemon, the sampler counted in; the daemon's own children (neither the sampler nor a git look that ends by itself); those looks. */
   children: number | null;
   childrenNoSampler: number | null;
+  transient: number | null;
+  /** What the daemon's own children are, by command (age in seconds, first 110 characters), when there are more than a few: the leak evidence. */
+  kids?: string[];
   samplerPid: number | null;
   samplerRssMb: number | null;
   samplerGoHeapMb: number | null;
@@ -80,6 +83,9 @@ export function newestDaemon(h: DaemonHost, dir: string): { found: FoundDaemon; 
   return found === undefined ? null : { found, live: live.length };
 }
 
+/** The git looks the daemon starts and that end by themselves (git-guard's detached refresh and the git it runs, W8.3): not the daemon's own children. */
+export const isGitLook = (cmd: string): boolean => /git-guard\.mjs --refresh|(^|\/)git( |$)|git-upload-pack|git-receive-pack|git-remote/.test(cmd);
+
 const mb = (bytes: number): number => Math.round((bytes / MB) * 10) / 10;
 
 /** One sample. `inspector` reads the forced heap of the daemon; none given, the heap column stays null. */
@@ -87,18 +93,22 @@ export async function sampleRow(t: number, dir: string, h: DaemonHost, inspector
   const d = newestDaemon(h, dir);
   if (d !== null) keys.add(d.found.state.key);
   const files = cacheCounts(h, keys);
-  const empty: Row = { t, pid: null, daemons: 0, events: null, rssMb: null, heapMb: null, heapStateMb: null, fds: null, workers: null, children: null, childrenNoSampler: null,
+  const empty: Row = { t, pid: null, daemons: 0, events: null, rssMb: null, heapMb: null, heapStateMb: null, fds: null, workers: null, children: null, childrenNoSampler: null, transient: null,
     samplerPid: null, samplerRssMb: null, samplerGoHeapMb: null, samplerGoSysMb: null, ...files };
   if (d === null) return empty;
   const { state, file } = d.found;
-  const kids = [...descendants(processTable(), state.pid)];
+  const table = processTable();
+  const kids = [...descendants(table, state.pid)];
+  const describe = (r: ProcessRow): string => `${r.pid} ppid ${r.ppid} ${r.age}s ${r.cmd.slice(0, 110)}`;
+  const transient = kids.filter((p) => isGitLook(table.find((r) => r.pid === p)?.cmd ?? ''));
   const sampler = state.sampler ?? null;
+  const own = table.filter((r) => kids.includes(r.pid) && r.pid !== sampler && !isGitLook(r.cmd));
   const samplerRss = sampler === null ? null : rssMbOf(sampler);
   const go = sampler === null || samplerRss === null ? null : await samplerMemstats(sampler, join(dirname(file), `daemon-${state.key}.log`));
   return {
     ...empty, pid: state.pid, daemons: d.live, events: state.events, rssMb: rssMbOf(state.pid), heapStateMb: mb(state.heap),
     heapMb: inspector === null ? null : mb(await forcedHeap(inspector)), fds: fdCount(state.pid), workers: state.workers, children: kids.length,
-    childrenNoSampler: kids.filter((p) => p !== sampler).length, samplerPid: samplerRss === null ? null : sampler, samplerRssMb: samplerRss,
+    childrenNoSampler: own.length, transient: transient.length, ...(own.length > 5 ? { kids: own.slice(0, 12).map(describe) } : {}), samplerPid: samplerRss === null ? null : sampler, samplerRssMb: samplerRss,
     samplerGoHeapMb: go === null ? null : mb(go.heap), samplerGoSysMb: go === null ? null : mb(go.sys),
   };
 }
