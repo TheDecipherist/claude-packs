@@ -1,3 +1,4 @@
+// runs alone: it counts the zombies and children of the test process itself, which other files running at once add to (KWB-219)
 // lib/child-group.mts startOrphan (typescript order W10b soak finding): a daemon worker starts a child and is then ended, as the pool does when
 // it recycles a worker. A child started by startGroup is the daemon's own and, with its thread gone, nothing collects its exit: it stays a
 // zombie of this process (the soak saw 54 in an hour). A child started by startOrphan has init for its parent, and its group can still be ended.

@@ -1,3 +1,4 @@
+// runs alone: it asserts the daemon and sampler memory in MB, which other files running at once move (KWB-219)
 // The resident sampler and the watchdog against a real daemon and the real `hook-proxy sample` (typescript order W8.7, d-30): the totals of
 // a planted session and a planted agent, a planted orphan spinner flagged (and left running) and then stopped once the guard is set, a
 // planted test run over the cap flagged, and the control (a window nothing reaches) flagging nothing. Needs the built binary

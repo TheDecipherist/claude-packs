@@ -84,7 +84,7 @@ test('with other machines listed every run says where it runs, this machine\'s t
   assert.ok(runsReport({ ...HERE, remotes: [], here: 'pc' }).runs.every((r) => !r.host), 'one machine alone: no names');
 });
 
-test('a project with two orders is one row with both under it, its percent theirs together; a project with one keeps its row', () => {
+test('a project with two orders is one row, its percent theirs together; a project with one keeps its row', () => {
   const a: OrderStatus = { ...RUN, host: 'pc', project: '/p/vsynthgt', order: 'rebuild', items: 80, done: 48, percent: 60 };
   const b: OrderStatus = { ...RUN, host: 'pc', project: '/p/vsynthgt/.claude/worktrees/W12-look', order: 'ui-look', items: 20, done: 10, percent: 50 };
   const groups = projectGroups([a, b, { ...RUN, host: 'mac' }]);
@@ -93,13 +93,10 @@ test('a project with two orders is one row with both under it, its percent their
   const cache = join(dir, 'runs.json');
   writeFileSync(cache, toJson({ runs: [a, b, { ...RUN, host: 'mac' }] }));
   const rows = runsSegments(cache, Date.now(), (t) => t, 'none');
-  assert.match(rows[0] ?? '', /^PC: VSYNTHGT .* 58%  42 of 100 items left, 2 orders$/);
-  assert.match(rows[1] ?? '', /^├ rebuild /);     // the orders hang from their project
-  assert.match(rows[2] ?? '', /^│ └ api /);       // an order's agents from the order
-  assert.match(rows[3] ?? '', /^└ ui-look /);
-  assert.match(rows[4] ?? '', /^  └ api /);
-  assert.match(rows[5] ?? '', /^MAC: SHOP /);
-  assert.equal(new Set(rows.filter((r) => !r.includes('>')).map((r) => r.indexOf('█'))).size, 1, 'every head row\'s bar in one column');
+  assert.equal(rows.length, 2, 'one row a project, the orders of VSYNTHGT together');   // W8.9: no row for an order or an agent
+  assert.match(rows[0] ?? '', /^PC: VSYNTHGT .* 58%  42 of 100 items left · W1 The import · \d+ agents?/);
+  assert.match(rows[1] ?? '', /^MAC: SHOP /);
+  assert.equal(new Set(rows.map((r) => r.indexOf('█'))).size, 1, 'every row\'s bar in one column');
 });
 
 test('one project\'s report (--dir) asks no machine', () => {

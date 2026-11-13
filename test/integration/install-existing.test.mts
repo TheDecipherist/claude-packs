@@ -49,6 +49,6 @@ test('an existing .claude and CLAUDE.md are updated, never overwritten', () => {
   const md = text(dir, 'CLAUDE.md');
   assert.match(md, /^# Project\nKeep this\./);
   assert.equal(md.match(/claude-packs:start/g)?.length, 1, 'one generated section after two runs');
-  assert.match(text(dir, '.gitignore'), /^build\/\n\.claude\/\.claude-packs-backup\/\n\.claude\/state\/\n\.claude\/checks\.compiled\.json\n\.claude\/usage\.log\n\.claude\/hooks\.log\n\.claude\/logs\/\n$/);
+  assert.match(text(dir, '.gitignore'), /^build\/\n\.claude\/\.claude-packs-backup\/\n\.claude\/state\/\n\.claude\/checks\.compiled\.json\n\.claude\/usage\.log\n\.claude\/hooks\.log\n\.claude\/logs\/\n\*\.pdf\n\*\.PDF\n$/);
   assert.ok(readdirSync(join(dir, '.claude', '.claude-packs-backup')).length >= 1);
 });
