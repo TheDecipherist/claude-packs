@@ -5,7 +5,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { asRecord } from '../packs/base/hooks/lib/json.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
-import { readJsonl } from './logs.mts';
+import { readJsonl } from './logs-read.mts';
 
 const SKIP = new Set(['node_modules', '.git', 'worktrees', 'logs']);
 

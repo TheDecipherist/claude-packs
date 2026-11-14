@@ -16,7 +16,8 @@ export interface Snapshot { released: string; params: Record<string, ParamFacts>
 interface FactConfig { patchFormat: RegExp[]; programs: { file: string; number: number; name: number } }
 
 export const SNAPSHOT_FILE = join('.claude', 'release.lock.json');
-const DECLARATION = /AudioParameter(Float|Int|Bool|Choice)\b[^(]*\(/g;
+// A construction: the type, then its `(` (after `<...>` of make_unique, or `new`); a member `Type* x;` or an argument `Type& p` has no `(` next.
+const DECLARATION = /AudioParameter(Float|Int|Bool|Choice)\b\s*>?\s*\(/g;
 const DEFAULT_PATCH_FORMAT = ['\\b(?:k?[Pp]atch(?:Format)?Version|PATCH_VERSION)\\b\\s*(?:=|\\{)\\s*([^;,}\\n]+)'];
 
 /** The top-level arguments of the call whose `(` is at `open`, split at commas outside brackets and strings. */
@@ -40,17 +41,17 @@ const compact = (s: string | undefined): string => (s ?? '').replace(/\s+/g, '')
 const literals = (s: string): string[] => [...s.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1] ?? '');
 
 /** Every parameter declared in the sources: id to facts. The id is the first string literal of the call. */
-function paramFacts(root: string, config: IdConfig): Record<string, ParamFacts> {
+function paramFacts(texts: readonly string[]): Record<string, ParamFacts> {
   const found: Record<string, ParamFacts> = {};
-  for (const file of sourcesOf(root, config.extensions)) {
-    const text = readText(file) ?? '';
+  for (const text of texts) {
     for (const m of text.matchAll(DECLARATION)) {
       const args = argumentsAt(text, m.index + m[0].length - 1);
       const id = literals(args[0] ?? '')[0];
       if (!id) continue;
       const kind = m[1] ?? '';
       const facts: ParamFacts = { kind };
-      if (kind === 'Float') facts.range = compact(args[2]);
+      // (id, name, range, default[, attributes]) or (id, name, min, max, default): the second form has no range expression in the third place.
+      if (kind === 'Float') facts.range = args.length >= 5 && !/range/i.test(args[2] ?? '') ? compact(`${args[2] ?? ''},${args[3] ?? ''}`) : compact(args[2]);
       else if (kind === 'Int') facts.range = compact(`${args[2] ?? ''},${args[3] ?? ''}`);
       else if (kind === 'Choice') {
         const list = literals(args[2] ?? '');
@@ -87,10 +88,9 @@ function programsOf(root: string, c: FactConfig['programs']): Record<string, str
   return rows;
 }
 
-function patchFormatOf(root: string, config: IdConfig, patterns: RegExp[]): string[] {
+function patchFormatOf(texts: readonly string[], patterns: RegExp[]): string[] {
   const values: string[] = [];
-  for (const file of sourcesOf(root, config.extensions)) {
-    const text = readText(file) ?? '';
+  for (const text of texts) {
     for (const re of patterns) { re.lastIndex = 0; for (const m of text.matchAll(re)) values.push((m[1] ?? '').trim()); }
   }
   return values;
@@ -99,7 +99,8 @@ function patchFormatOf(root: string, config: IdConfig, patterns: RegExp[]): stri
 /** What the project holds now, in the shape of the release's snapshot. */
 export function releaseSnapshot(root: string, config: IdConfig): Snapshot {
   const c = factConfig(root);
-  return { released: new Date().toISOString(), params: paramFacts(root, config), patchFormat: patchFormatOf(root, config, c.patchFormat), programs: programsOf(root, c.programs) };
+  const texts = [...sourcesOf(root, config.extensions)].map((file) => readText(file) ?? '');   // each source read once for facts and patch format
+  return { released: new Date().toISOString(), params: paramFacts(texts), patchFormat: patchFormatOf(texts, c.patchFormat), programs: programsOf(root, c.programs) };
 }
 
 /** The first index where `now` stops starting with `locked`, or -1 when `locked` is a prefix of it (an append). */

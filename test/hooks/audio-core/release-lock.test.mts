@@ -1,5 +1,6 @@
 // release-lock: what a patch or a song depends on is frozen at the first release; additions pass (PostToolUse). The contract, then the facts.
 import assert from 'node:assert/strict';
+import { chmodSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { put } from '../../../packs/base/hooks/lib/files.mts';
 import { write } from '../../fixtures/installs.mts';
@@ -56,4 +57,38 @@ test('release-lock passes what is appended, and every change before the release'
   const free = workProject('audio-core');
   put(join(free, PARAMS_H), flt('cutoff', WIDE));
   assert.equal(post(free, PARAMS_H, flt('cutoff', '1.0f, 2.0f')), 0, 'no release, no lock');
+});
+
+// Review fx-1 findings 5, 7, 8.
+const five = (id: string, min: string, max: string): string => `layout.add (std::make_unique<juce::AudioParameterFloat> ("${id}", "${id}", ${min}, ${max}, 0.5f));\n`;
+const release = (dir: string): void => { spawnSync('node', [join(dir, '.claude/hooks/release-lock.mjs'), '--release'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' }); };
+
+test('release-lock locks the min and max of a Float declared with the five-argument overload', () => {
+  const dir = workProject('audio-core');
+  put(join(dir, PARAMS_H), five('gain', '0.0f', '1.0f'));
+  release(dir);
+  assert.equal(post(dir, PARAMS_H, five('gain', '0.0f', '2.0f')), 2);
+  assert.equal(post(dir, PARAMS_H, five('gain', '0.0f', '1.0f')), 0);
+});
+
+test('release-lock does not lock a string of the next call after a member or an argument declaration', () => {
+  const dir = workProject('audio-core');
+  put(join(dir, PARAMS_H), `juce::AudioParameterFloat* cutoff;\nvoid f (juce::AudioParameterFloat& p) { log ("bogus-id"); }\n${flt('real', WIDE)}`);
+  release(dir);
+  const snapshot = readFileSync(join(dir, '.claude/release.lock.json'), 'utf8');
+  assert.match(snapshot, /"real"/);
+  assert.doesNotMatch(snapshot, /bogus-id/);
+});
+
+test('release-lock does not walk into a folder it skips (node_modules, .git, build output)', () => {
+  const dir = workProject('audio-core');
+  put(join(dir, PARAMS_H), flt('cutoff', WIDE));
+  const deep = join(dir, 'node_modules/pkg/inner');
+  mkdirSync(deep, { recursive: true });
+  put(join(deep, 'x.h'), 'x');
+  chmodSync(join(dir, 'node_modules/pkg'), 0o000);
+  try {
+    release(dir);
+    assert.equal(post(dir, PARAMS_H, flt('cutoff', '1.0f, 2.0f')), 2, 'the release was written and judged although node_modules/pkg cannot be read');
+  } finally { chmodSync(join(dir, 'node_modules/pkg'), 0o755); }
 });

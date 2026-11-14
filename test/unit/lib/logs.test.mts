@@ -65,3 +65,10 @@ test('an empty project says nothing is logged', () => {
   assert.equal(logsCommand(scratchDir('logs-empty-'), [], (l) => said.push(l)), 0);
   assert.match(said[0] ?? '', /no calls logged yet/);
 });
+
+// Review fx-1 finding 24: logs.mts and logs-usage.mts do not import each other; both read the log through logs-read.mts.
+test('logs-usage.mts does not import logs.mts (no import cycle)', () => {
+  const usage = readText(join(import.meta.dirname, '../../../lib/logs-usage.mts')) ?? '';
+  assert.doesNotMatch(usage, /from '\.\/logs\.mts'/);
+  assert.match(usage, /from '\.\/logs-read\.mts'/);
+});

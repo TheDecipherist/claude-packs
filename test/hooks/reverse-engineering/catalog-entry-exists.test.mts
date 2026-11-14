@@ -33,3 +33,13 @@ test('a ticked step needs its catalog entry, and a catalog that is named is read
   put(join(dir, 'catalog/filters/acme/one.h'), '// one\n');
   assert.equal(tick(dir, 'filters/acme/one'), 0);
 });
+
+// Review fx-1 finding 22: a `module:` that is not a catalog path (n/a, prose) is not judged; a path with a wrong category still is.
+test('a module tag that is no catalog path passes, and a wrong category in a path is refused', () => {
+  const dir = reverseEngineeringInstall();
+  withLayout(dir, { catalog: 'catalog' });
+  assert.equal(tick(dir, 'n/a'), 0, 'module: n/a');
+  assert.equal(tick(dir, 'none'), 0, 'module: none');
+  assert.equal(tick(dir, 'voices/acme/one'), 2, 'a wrong category in a path');
+  assert.equal(tick(dir, 'filters/acme/one'), 2, 'a real category, no entry');
+});

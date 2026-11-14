@@ -71,3 +71,17 @@ test('the hash pass lists files that are one image under two names, and passes w
   assert.equal(done.status, 0, done.stdout);
   assert.match(clean.stdout, /sheet-01\.png = .*sheet-02\.png|sheet-02\.png = .*sheet-01\.png/);
 });
+
+test('a duplicate written down in the ledger with its hash is known, and the hash pass exits 0 for it', () => {
+  const dir = project();
+  const folder = join(dir, 'sources/sheets');
+  const first = spawnSync('node', [TOOL, '--hash', folder], { encoding: 'utf8' });
+  const hash = /^ {2}([0-9a-f]{16}):/m.exec(first.stdout)?.[1] ?? '';
+  assert.equal(first.status, 1);
+  writeFileSync(join(dir, 'inherited.md'), `| [x] | sources/sheets/sheet-02.png | a sibling's sheet, same as sheet-01 (${hash}) | a.md |\n`);
+  const known = spawnSync('node', [TOOL, '--hash', folder, '--ledger', join(dir, 'inherited.md')], { encoding: 'utf8' });
+  assert.equal(known.status, 0, known.stdout);
+  assert.match(known.stdout, /written down/);
+  writeFileSync(join(dir, 'other.md'), '| [x] | nothing about it |\n');
+  assert.equal(spawnSync('node', [TOOL, '--hash', folder, '--ledger', join(dir, 'other.md')], { encoding: 'utf8' }).status, 1);
+});

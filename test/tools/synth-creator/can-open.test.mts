@@ -57,3 +57,10 @@ test('a missing marker is named, and a command without a launched file says how 
   assert.match(check(t, '--marker', 'NOT-THERE').stdout, /marker not inside the launched file: "NOT-THERE"/);
   assert.equal(spawnSync('node', [TOOL], { encoding: 'utf8' }).status, 2);
 });
+
+test('a mistyped --source folder is a wrong use (exit 2), not a source that is never stale', () => {
+  const t = tree({});
+  const done = spawnSync('node', [TOOL, join(t.root, 'build'), t.binary, '--source', join(t.root, 'scr')], { encoding: 'utf8' });
+  assert.equal(done.status, 2, done.stdout);
+  assert.match(done.stderr, /--source.*scr/);
+});

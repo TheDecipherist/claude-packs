@@ -1,7 +1,10 @@
 // Width-prefixed name tables count themselves: a width byte, N fields of that width, then the next table's width byte, with no count and no terminator.
 // The distance divided by the width is the entry count, proved without a descriptor. names-sweep.mjs --run prints each table's offset, width, count and entries.
 //   widthPrefixedRuns(buffer, minCount) -> [{ at, width, count, entries }]
-//   widthTablesText(label, runs) -> the text names-sweep prints
+//   chanceRuns(buffer, minCount) -> the mean count of such tables in shuffled copies of the same bytes: what chance gives
+//   widthTablesText(label, runs, chance) -> the text names-sweep prints
+
+import { chanceSource } from './names-index.mts';
 
 /** One width-prefixed table: where its width byte sits, the width, how many fields it holds, and the fields. */
 export interface Run { at: number; width: number; count: number; entries: string[] }
@@ -26,8 +29,23 @@ export function widthPrefixedRuns(buffer: Buffer, minCount = 3): Run[] {
   return runs;
 }
 
-export function widthTablesText(label: string, runs: readonly Run[]): string {
+const CHANCE_SHUFFLES = 20;
+
+/** The mean number of tables found in shuffled copies of the image (same bytes, same printable share): a length divisible by its width is 1 in `width` by chance. */
+export function chanceRuns(buffer: Buffer, minCount = 3): number {
+  const next = chanceSource(4242);
+  let total = 0;
+  for (let n = 0; n < CHANCE_SHUFFLES; n += 1) {
+    const copy = Buffer.from(buffer);
+    for (let i = copy.length - 1; i > 0; i -= 1) { const j = next() % (i + 1); const t = copy[i] ?? 0; copy[i] = copy[j] ?? 0; copy[j] = t; }
+    total += widthPrefixedRuns(copy, minCount).length;
+  }
+  return total / CHANCE_SHUFFLES;
+}
+
+export function widthTablesText(label: string, runs: readonly Run[], chance = 0): string {
   if (!runs.length) return `${label}: no width-prefixed table found (a width byte below 0x20, then fields of that width, then the next width byte)`;
   const rows = runs.map((r, id) => `  ${id}: 0x${r.at.toString(16)} width ${r.width}, ${r.count} entries: ${r.entries.slice(0, 6).join(' | ')}${r.count > 6 ? ' ...' : ''}`);
-  return [`${label}: ${runs.length} width-prefixed tables, each count is its length divided by its width`, ...rows].join('\n');
+  return [`${label}: ${runs.length} width-prefixed tables, each count is its length divided by its width`, ...rows,
+    `  chance: ${chance.toFixed(1)} tables on average in shuffled copies of the same bytes (${CHANCE_SHUFFLES} shuffles); ${runs.length > chance ? 'more than chance gives' : 'no more than chance gives, so nothing is proved'}`].join('\n');
 }

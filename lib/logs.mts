@@ -11,10 +11,10 @@ import { join } from 'node:path';
 import { ensureDir, readText } from '../packs/base/hooks/lib/files.mts';
 import { readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
 import { asRecord, parseJson, toJson } from '../packs/base/hooks/lib/json.mts';
+import { LOG_DIR, readJsonl } from './logs-read.mts';
 import { rulesReport, skillsReport } from './logs-usage.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
-const DIR = join('.claude', 'logs');
 const HOW: readonly string[] = ['fixed', 'superseded'];
 export const ANSWERS: ReadonlySet<string> = new Set(['0', '2', '-', 'undefined', 'null']); // the codes of hooks.log that are no crash
 
@@ -69,14 +69,6 @@ function recordOf(value: unknown): LogRecord[] {
   }];
 }
 
-/** Every parsed line of `.claude/logs/<name>.jsonl` and its rotated files (`<name>-<stamp>.jsonl`), oldest file first. */
-export function readJsonl(dir: string, name: string): unknown[] {
-  const logs = join(dir, DIR);
-  let files: string[] = [];
-  try { files = readdirSync(logs).filter((f) => f === `${name}.jsonl` || (f.startsWith(`${name}-`) && f.endsWith('.jsonl'))).sort(); } catch { return []; }
-  return files.flatMap((f) => (readText(join(logs, f)) ?? '').split('\n').filter(Boolean).map((l) => parseJson(l)));
-}
-
 const jsonlRecords = (dir: string, name: string): LogRecord[] => readJsonl(dir, name).flatMap(recordOf);
 
 // A crash, in its own log or, in an old log, in refusals.jsonl with a code other than 2. Old lines are read as they are, never rewritten.
@@ -92,8 +84,8 @@ export function clearsOf(dir: string): Map<string, string> {
 export const clearedAt = (clears: ReadonlyMap<string, string>, hook: string): string => [clears.get(hook), clears.get('all')].filter(Boolean).sort().at(-1) ?? '';
 
 const addVerdict = (dir: string, line: Record<string, string>): void => {
-  ensureDir(join(dir, DIR));
-  appendFileSync(join(dir, DIR, 'verdicts.jsonl'), `${toJson({ ...line, t: new Date().toISOString() })}\n`);
+  ensureDir(join(dir, LOG_DIR));
+  appendFileSync(join(dir, LOG_DIR, 'verdicts.jsonl'), `${toJson({ ...line, t: new Date().toISOString() })}\n`);
 };
 
 function clearCrashes(dir: string, [, hook, how, ...why]: readonly string[], log: Logger): number {

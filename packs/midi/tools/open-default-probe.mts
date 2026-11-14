@@ -16,13 +16,28 @@ export type State = 'synced' | 'free';
 export interface Destination { name: string; kind: Kind; mode: Mode; hardware?: State; stored?: State }
 export interface Measured { name: string; at120: number; at90: number }
 
+const KINDS: readonly string[] = ['delay', 'lfo', 'envelope', 'timbre'];
+const MODES: readonly string[] = ['standalone', 'plugin'];
+const STATES: readonly string[] = ['synced', 'free'];
+
+/** The first field of a destination that is not in its list (a typo is never read as a plugin or a non-delay), or null. */
+export function invalidField(d: Destination): string | null {
+  if (!KINDS.includes(d.kind)) return `${d.name}: kind "${d.kind}" is not one of ${KINDS.join(', ')}`;
+  if (!MODES.includes(d.mode)) return `${d.name}: mode "${d.mode}" is not one of ${MODES.join(', ')}`;
+  for (const field of ['hardware', 'stored'] as const) {
+    const value = d[field];
+    if (value !== undefined && !STATES.includes(value)) return `${d.name}: ${field} "${value}" is not one of ${STATES.join(', ')}`;
+  }
+  return null;
+}
+
 const TOLERANCE = 0.02;
 const SYNCED_RATIO = 120 / 90;
 
-/** What a destination must be when the unit opens: its stored state, else by kind and mode (the decided defaults). */
+/** What a destination must be when the unit opens: a timbre time free (C9: never tempo, stored or not), else its stored state, else by kind and mode (the decided defaults). */
 export function requiredDefault(d: Destination): State {
-  if (d.stored !== undefined) return d.stored;
   if (d.kind === 'timbre') return 'free';
+  if (d.stored !== undefined) return d.stored;
   if (d.mode === 'standalone') return d.hardware ?? 'free';
   return d.kind === 'delay' ? 'synced' : 'free';
 }
@@ -53,6 +68,8 @@ function main(args: readonly string[]): number {
   const spec = readJson<{ destinations?: Destination[]; measured?: Measured[] }>(file);
   if (spec === null) { console.error(`cannot read ${file} as JSON`); return 2; }
   if (!Array.isArray(spec.destinations) || !Array.isArray(spec.measured)) { console.error('the spec needs "destinations" and "measured"'); return 2; }
+  const bad = spec.destinations.map(invalidField).find((m) => m !== null);
+  if (bad) { console.error(bad); return 2; }
   const faults = judge(spec.destinations, spec.measured);
   for (const line of faults) console.log(line);
   if (faults.length === 0) console.log(`${spec.destinations.length} destinations open as required`);

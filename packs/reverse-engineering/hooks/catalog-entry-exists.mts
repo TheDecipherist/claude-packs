@@ -20,7 +20,9 @@ const TICKED = /^\s*[-*]\s+\[[xX]\]/;
 const MODULE = /\bmodule:\s*`?([A-Za-z0-9_./-]+)`?/;
 
 /** The module tags of the step lines a text ticks. */
-const tickedModules = (text: string): string[] => text.split('\n').filter((l) => TICKED.test(l)).flatMap((l) => MODULE.exec(l)?.[1] ?? []);
+// Only a catalog path is judged: its first segment a category, or three segments (so a mistyped category is still refused). `module: n/a` and prose pass.
+const isPath = (tag: string): boolean => CATEGORIES.includes(tag.split('/')[0] ?? '') || tag.split('/').length >= 3;
+const tickedModules = (text: string): string[] => text.split('\n').filter((l) => TICKED.test(l)).flatMap((l) => MODULE.exec(l)?.[1] ?? []).filter(isPath);
 
 /** What is wrong with a module tag, or null when the catalog holds its entry. */
 function missing(catalog: string, tag: string): string | null {

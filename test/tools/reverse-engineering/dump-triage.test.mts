@@ -69,3 +69,38 @@ test('the skill names the tool and its laws', () => {
   assert.match(skill, /^description: Use when/m);
   assert.match(skill, /node \.claude\/tools\/dump-triage\.mjs/);
 });
+
+// Review fx-1 findings 1, 2, 15, 21.
+test('a flat random image is a finding: windows are judged by the threshold the census uses', () => {
+  const done = triage(random());
+  assert.equal(done.status, 1, done.stdout);
+  assert.match(done.stdout, /windows at 7\.9 or more bits per byte: encrypted or compressed/);
+  assert.doesNotMatch(done.stdout, /flat random 0\.0 %/);
+});
+
+test('--window must be a whole number of at least 1: 0, negative and fractional are refused with exit 2', () => {
+  const file = join(fresh('triage-w-'), 'image.bin');
+  writeFileSync(file, random());
+  for (const bad of ['-5', '0', '1.5', 'x']) {
+    const done = spawnSync('node', [TOOL, file, '--window', bad], { encoding: 'utf8', timeout: 5000 });
+    assert.equal(done.status, 2, `--window ${bad}: ${done.stdout}${done.stderr}`);
+  }
+});
+
+test('the period search is linear: a long run of one byte with a different last byte is judged at once', () => {
+  const bytes = new Uint8Array(1 << 18).fill(0xff);
+  bytes[bytes.length - 1] = 0;
+  const file = join(fresh('triage-p-'), 'image.bin');
+  writeFileSync(file, bytes);
+  const done = spawnSync('node', [TOOL, file], { encoding: 'utf8', timeout: 2500 });
+  assert.equal(done.status, 1, `${done.error ?? ''}${done.stdout}`);
+  const small = new Uint8Array(24);
+  for (let i = 0; i < 24; i++) small[i] = [1, 2, 3][i % 3] ?? 0;
+  assert.match(triage(small).stdout, /lower half repeats every 3 bytes/);
+});
+
+test('a window of text, which has no 0x00 byte either, is not "not plain 8-bit code"', () => {
+  const text = new Uint8Array(8192);
+  for (let i = 0; i < text.length; i++) text[i] = 0x61 + ((i * 7 + (i >> 3)) % 26);
+  assert.doesNotMatch(triage(text).stdout, /hold no 0x00/);
+});
