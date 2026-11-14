@@ -27,18 +27,14 @@ export function entropy(bytes: Uint8Array): number {
   return h;
 }
 
-/** The smallest p up to half the length with bytes[i] == bytes[i+p] all along, or 0 when the data does not repeat. Prefix function: n - fail[n-1], in O(n). */
+/** The smallest p up to half the length with bytes[i] == bytes[i+p] all along, or 0 when the data does not repeat. */
 export function minPeriod(bytes: Uint8Array): number {
-  const n = bytes.length;
-  if (n < 2) return 0;
-  const fail = new Int32Array(n);
-  for (let i = 1, k = 0; i < n; i++) {
-    while (k > 0 && bytes[i] !== bytes[k]) k = fail[k - 1] ?? 0;
-    if (bytes[i] === bytes[k]) k++;
-    fail[i] = k;
+  for (let p = 1; p <= bytes.length / 2; p++) {
+    let i = 0;
+    while (i + p < bytes.length && bytes[i] === bytes[i + p]) i++;
+    if (i + p >= bytes.length) return p;
   }
-  const p = n - (fail[n - 1] ?? 0);
-  return p <= n / 2 ? p : 0;
+  return 0;
 }
 
 /** Per address line k (a power-of-two image): how often b[i] == b[i ^ (1 << k)] over the pairs of the line. */
@@ -92,8 +88,8 @@ export function triage(bytes: Uint8Array, size = WINDOW): { findings: string[]; 
   const findings: string[] = [];
   const report: string[] = [`size: ${bytes.length} bytes, entropy ${entropy(bytes).toFixed(3)} bits per byte`];
   const windows = Array.from({ length: Math.ceil(bytes.length / size) }, (_, w) => bytes.subarray(w * size, (w + 1) * size));
-  const flat = windows.filter((w) => kindOf(w) === 'flat random').length;
-  if (flat > 0) findings.push(`${flat} of ${windows.length} windows at 7.9 or more bits per byte: encrypted or compressed (flat 8.000 is encrypted), not code`);
+  const flat = windows.filter((w) => entropy(w) >= 7.98).length;
+  if (flat > 0) findings.push(`${flat} of ${windows.length} windows at 7.98 or more bits per byte: encrypted or compressed (flat 8.000 is encrypted), not code`);
   for (const m of MAGICS) {
     const found = hits(bytes, m.bytes);
     const expected = bytes.length / 256 ** m.bytes.length;
@@ -107,7 +103,7 @@ export function triage(bytes: Uint8Array, size = WINDOW): { findings: string[]; 
     if (part.length > 0 && (part.every((b) => b === 0xff) || part.every((b) => b === 0x00))) findings.push(`${name} is blank: a wrong part size, or dumped twice`);
   });
   for (const s of stuckLines(bytes)) findings.push(`stuck address line A${s.line} (mask 0x${(1 << s.line).toString(16)}): b[i] == b[i^mask] for ${(s.agreement * 100).toFixed(1)} % of pairs`);
-  const noZero = windows.filter((w) => w.length === size && !w.includes(0) && kindOf(w) !== 'text').length;
+  const noZero = windows.filter((w) => w.length === size && !w.includes(0)).length;
   if (noZero > 0) findings.push(`${noZero} windows of ${size} bytes hold no 0x00 byte: not plain 8-bit code`);
   const share = census(bytes, size);
   report.push(`census: ${(Object.keys(share) as Kind[]).map((k) => `${k} ${(share[k] * 100).toFixed(1)} %`).join(', ')}`);
@@ -116,7 +112,7 @@ export function triage(bytes: Uint8Array, size = WINDOW): { findings: string[]; 
 
 function main(args: readonly string[]): number {
   const [image, flag, value] = args;
-  if (image === undefined || (flag !== undefined && (flag !== '--window' || !(Number.isInteger(Number(value)) && Number(value) >= 1)))) {
+  if (image === undefined || (flag !== undefined && (flag !== '--window' || !Number(value)))) {
     console.error('usage: node .claude/tools/dump-triage.mjs <image> [--window <bytes>]');
     return 2;
   }
