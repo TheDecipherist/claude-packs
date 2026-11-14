@@ -9,9 +9,9 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | R1 | new | packs/audio-core/hooks/release-lock.mts + lib/release-facts.mts + rules/release-lock.md | what a saved patch or song depends on is locked at the first release; only additions pass after | test/hooks/audio-core/release-lock.test.mts: a range, a skew, a mid-list choice, a renumbered program refused after release; appended parameter and choice pass; a range change before release passes (build/evidence/W5/lock-tests.log) | 81af574 | done |
 | C1 | split | packs/audio-core/rules/panel-surfaces.md, column-names.md, section-header-and-lamp.md, panel-tabs.md, instance-grid.md (panel-surface-and-sections retired) | five one-thing rules; the glow and shadow line gone; depth-is-designed governs | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | C2 | split + new | packs/audio-core/rules/knob-gestures.md, host-parameter-names.md, display-echo.md, modulation-by-drag-and-drop.md, modulation-overview-page.md (panel-gestures retired) | four one-thing rules and the modulation overview page; the no-matrix-page line gone | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
-| C3 | | | | | | |
+| C3 | extend | packs/audio-core/skills/copy-and-prove (E70.3) | rebuild both sides of an A/B at once, baseline under .claude/worktrees | text in place | be0983c | done |
 | C4 | new + extend | packs/reverse-engineering/skills/prove-a-disassembler; rules/house-tools-live-in-the-library.md | a house disassembler is proved opcode for opcode against unidasm run as a program; nothing ported | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | 3c7f57c | done |
-| C5 | | | | | | |
+| C5 | no change | ui-drawn-in-code stands | the UI drawn in code; every sprite item obsolete | none | - | no change needed (DECIDED.md C5: the kit wins) |
 | C6 | extend | packs/midi/rules/sync-is-a-mode.md, skills/clock-probe/clock-law.md, tools/open-default-probe.mts | the decided defaults at open, standalone and plugin, per destination; stored state loads as stored | test/tools/midi/open-default-probe.test.mts | 92ae1e4 | done |
 | C7 | extend | packs/base/skills/pdf-to-md (+ reading-a-pdf.md) | docling stays; the backup read when a converted file is found broken at use, and the user is told | text in place | 92ae1e4 | done |
 | C8 | extend | prompts/workorder/templates/rebuild.md (Sources, W2.4) | photo first, agreeing with analyse-reference-look (unchanged) | build/evidence/W7/templates.log | 92ae1e4 | done |
@@ -20,7 +20,7 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | C10 | extend | packs/reverse-engineering/skills/names-first (Never reworded, E8.11) | a panel table's columns are read, not assumed to hold or lack offsets | text in place | 3c7f57c | done |
 | C11 | new + extend | packs/reverse-engineering/rules/layout-closes-on-itself.md; rules/two-sources-before-naming.md (E2.8) | a closure the layout was not tuned to is an independent proof | paths: build/evidence/W1/rule-paths.md | 3c7f57c | done |
 | C12 | extend | prompts/workorder/templates/rebuild.md W8 (T6) | a machine's arp remade exactly, unless the user says otherwise | build/evidence/W7/templates.log | 92ae1e4 | done |
-| C13 | new | packs/reverse-engineering/skills/find-the-base | base scored on a linear read only, and why | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | 3c7f57c | done |
+| C13 | see U4 | packs/reverse-engineering/skills/find-the-base | base scored on a linear read only | see U4 | - | done |
 | C14 | extend | packs/audio-core/rules/host-parameter-names.md | a rebuild uses the machine's display strings; ours Column . Section . Name | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | C15 | extend | packs/base/skills/pdf-to-md | a slot from the governor (governed.mjs) in place of the polling loop | text in place | 92ae1e4 | done |
 | C16 | new | packs/base/skills/workflow-bugs | the skill hooks-and-gates names, shipped | pressure test: build/evidence/W3/pressure (3/3 fire, 3/3 silent; followed) | 92ae1e4 | done |
@@ -84,23 +84,23 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | U57 | new, reworded | packs/audio-core/rules/pan-and-mix-equal-power.md | equal-power pan and mix, on an original | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | U58 | new, reworded | packs/audio-core/rules/panel-colour-safe.md | no state by colour alone, on an original (the brightened cap a shape change) | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
 | U59 | new, reworded | packs/audio-core/rules/signal-reads-left-to-right.md | the layout follows the signal, on an original | paths: build/evidence/W5/rule-paths.md | 81af574 | done |
-| U60 | | | | | | |
-| U62 | | | | | | |
-| U63 | | | | | | |
-| U64 | | | | | | |
-| U65 | | | | | | |
-| U66 | | | | | | |
-| U67 | | | | | | |
-| U68 | | | | | | |
-| U69 | | | | | | |
-| U70 | | | | | | |
-| U71 | | | | | | |
+| U60 | new | packs/instrument-shell/rules/build-stamp-on-the-panel.md | every plugin shows which build it is | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U62 | new, reworded | packs/instrument-shell/rules/patch-inspector.md | stored, live and previous values visible, on a button or a modifier chord, never a bare key | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U63 | new | packs/instrument-shell/rules/effects-have-an-audition-source.md | an effects unit can be heard with no DAW | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U64 | new | packs/instrument-shell/rules/a-scope-is-honest.md | a scope at a fixed scale, triggered by the engine | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U65 | new | packs/instrument-shell/rules/selection-never-dangles.md | a selection clears with what it points at | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U66 | new | packs/instrument-shell/rules/one-owner-of-the-notes.md | exclusion between note sources lives in the state | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U67 | new | packs/instrument-shell/rules/caps-are-one-limit.md | a pool's cap, grid and counter type are one number | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U68 | new | packs/instrument-shell/rules/window-opens-from-the-display.md | the editor opens at a size computed from the display by one function | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U69 | obsolete | - | layout defaults are measurements (the shell's window split) | none | - | obsolete (DECIDED.md: shell-only items, U69) |
+| U70 | new, split | packs/cpp/rules/cpp-no-pointer-into-growing-container.md + packs/audio-core/rules/editor-gate-runs-in-a-fresh-process.md | no pointer into a growing container; the editor gate in a fresh process, its own rule | paths: build/evidence/W6/rule-paths.md | be0983c | done |
+| U71 | new | packs/shell/rules/kill-only-your-own.md | a script stops only the processes it started | paths: build/evidence/W6/rule-paths.md | be0983c | done |
 | U73 | new | packs/base/hooks/agent-model.mts + rules/agent-model.md (opt-in) | refuse an agent spawn with no model, and Opus with no listed reason; forks and self-defined models exempt | test/hooks/base/agent-model.test.mts; selftest 9 cases (build/evidence/W2/agent-model-selftest.txt); matcher held by test/unit/lib/hook-matchers.test.mts | 92ae1e4 | done |
 | U74 | new | packs/base/hooks/agent-ledger.mts (on by default, d-6) | log every agent's model, brief, run time and tokens in .claude/logs/agents.jsonl | test/hooks/base/agent-ledger.test.mts | 92ae1e4 | done |
 | N1 | new | packs/reverse-engineering/skills/find-the-reset | map exactly what the machine sets before a patch loads, and in what order | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | 3c7f57c | done |
 | N2 | new | packs/reverse-engineering/skills/find-the-init-patch | the machine's own INIT record, and the keys that load it | pressure test: build/evidence/W1/pressure (routing 3/3 fire, 3/3 silent; followed) | 3c7f57c | done |
-| N3 | | | | | | |
-| N4 | | | | | | |
+| N3 | new | packs/reverse-engineering/skills/file-into-the-catalog | every RE'd module becomes a catalog entry per its SCHEMA.md, then gen_all and drift_check | pressure test: build/evidence/W6/pressure (6/6 fire, 6/6 silent; followed) | be0983c | done |
+| N4 | new | packs/reverse-engineering/hooks/catalog-entry-exists.mts + rules/catalog-entry-exists.md (opt-in) | a step naming an RE'd module is not ticked without its catalog entry | test/hooks/reverse-engineering/catalog-entry-exists.test.mts: refuses a ticked filter step with no entry, passes once it exists (scratch catalog); red with the refusal off (build/evidence/W6/catalog-red.log) | be0983c | done |
 | E1.1 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | 3c7f57c | done |
 | E1.2 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | 3c7f57c | done |
 | E1.3 | extend | packs/reverse-engineering/rules/every-law-has-a-source.md | one tag list (DS, REF, EMU, SVC, DER, PHOTO, ASSUMED, MEAS); COR weak; host-only law provisional; chip vs board; same button name | text in place; rule loads as before | 3c7f57c | done |
@@ -329,25 +329,25 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | E68.1 | extend | packs/audio-core/rules/panel-sizes-by-kind.md | wrap a long legend, never shrink it; LED list pitch | text in place | 81af574 | done |
 | E68.2 | dropped | - | a control below its width floor drops chrome | none | - | dropped (SORTED.md section 2: "Drop.") |
 | E69 | extend | 13 audio-core rules (filters-stable-under-modulation, recursive-state-nan-guard, double-where-precision-matters (text only; float-phase-or-rate untouched), cpu-worst-case-per-block, reverb-loop-gain-bounded, nonlinear-stages-antialiased, knob-anatomy, colour-by-role, editor-paints-what-changed, audio-ui-thread-handoff, ...) | the 13 one-liners | text in place | 81af574 | done |
-| E70.1 | | | | | | |
-| E70.2 | | | | | | |
-| E70.3 | | | | | | |
-| E70.4 | | | | | | |
-| E71 | | | | | | |
-| E72.1 | | | | | | |
-| E72.2 | | | | | | |
-| E73 | | | | | | |
-| E74.1 | | | | | | |
-| E74.2 | | | | | | |
-| E75 | | | | | | |
-| E76 | | | | | | |
-| E77 | | | | | | |
-| E78.1 | | | | | | |
-| E78.2 | | | | | | |
-| E78.3 | | | | | | |
-| E78.4 | | | | | | |
-| E78.5 | | | | | | |
-| E79 | | | | | | |
+| E70.1 | obsolete | - | resource prefixes of the shared shell | none | - | obsolete (DECIDED.md: shell-only, E70.1) |
+| E70.2 | obsolete | - | greyed seam buttons | none | - | obsolete (DECIDED.md: shell-only, E70.2) |
+| E70.3 | extend, decided (C3) | packs/audio-core/skills/copy-and-prove | A/B both sides together, baseline under .claude/worktrees | text in place | be0983c | done |
+| E70.4 | obsolete | - | opt-out dependencies of the shell | none | - | obsolete (DECIDED.md: shell-only, E70.4) |
+| E71 | extend | packs/instrument-shell/rules/session-blob-append-only.md | the old blob as a literal in the test; refused header leaves state; Newer reports drops | text in place | be0983c | done |
+| E72.1 | obsolete | - | tabs joining the shell's header | none | - | obsolete (DECIDED.md: shell-only, E72.1) |
+| E72.2 | extend | packs/instrument-shell/rules/render-the-extremes.md | the overflow walk covers every row; off-default page mark; art at 75 and 200 per cent | text in place | be0983c | done |
+| E73 | extend | packs/instrument-shell/rules/fold-keeps-every-route.md, quiet-announces-itself.md | every state escapable by its control; a way-back message on its own line | text in place | be0983c | done |
+| E74.1 | extend, decided (D1) | packs/instrument-shell/skills/gates-from-commit-one | the kit describes the skeleton and ships none | text in place | be0983c | done |
+| E74.2 | extend | packs/instrument-shell/skills/gates-from-commit-one | the per-program RMS probe and the inspector before the first listening session | text in place | be0983c | done |
+| E75 | extend | packs/cpp/skills/build-preflight | re-configure after adding a globbed source file | text in place | be0983c | done |
+| E76 | extend | packs/shell/rules/shell-strict-and-quoted.md | verify a write by its artefact and exit code; grep the literal after a sed rename | text in place | be0983c | done |
+| E77 | extend | 14 ui-craft and web units (page-critique, interface-copy, type-space-colour, page-holds-its-frame, no-generated-look, redesign-page, build-from-reference, client-boundaries, web-performance, styles-live-in-stylesheets, ui-primitives-one-module, preflight-build, ui-no-furniture-text, start-from-a-workorder) | the 14 web one-liners | text in place; ui-no-furniture-text's bad and good in lesson-checks | be0983c | done |
+| E78.1 | extend | packs/instrument-shell/skills/hit-the-painted-control | pages first; draws attempted vs drawn; lit and unlit as a pair; walk the drawn table; drag past the edges | text in place | be0983c | done |
+| E78.2 | extend | packs/instrument-shell/skills/hit-the-painted-control | pages first; draws attempted vs drawn; lit and unlit as a pair; walk the drawn table; drag past the edges | text in place | be0983c | done |
+| E78.3 | extend | packs/instrument-shell/skills/hit-the-painted-control | pages first; draws attempted vs drawn; lit and unlit as a pair; walk the drawn table; drag past the edges | text in place | be0983c | done |
+| E78.4 | extend | packs/instrument-shell/skills/hit-the-painted-control | pages first; draws attempted vs drawn; lit and unlit as a pair; walk the drawn table; drag past the edges | text in place | be0983c | done |
+| E78.5 | extend | packs/instrument-shell/skills/hit-the-painted-control | pages first; draws attempted vs drawn; lit and unlit as a pair; walk the drawn table; drag past the edges | text in place | be0983c | done |
+| E79 | extend | packs/ui-craft/rules/apps-are-not-pages.md | page rules do not bind a plugin panel | text in place | be0983c | done |
 | E80 | extend | packs/base/skills/land-branch | list trunk paths the branch also touched before landing | text in place | 92ae1e4 | done |
 | T1 | extend, reworded | prompts/workorder/templates/rebuild.md W1 | grade the evidence and record the path; create nothing only with no names and no presets | build/evidence/W7/templates.log; test/integration/workorder.test.mts | 92ae1e4 | done |
 | T2 | extend | prompts/workorder/templates/rebuild.md W8 | every unit answers sync and clock in laws.md | build/evidence/W7/templates.log | 92ae1e4 | done |
@@ -360,11 +360,11 @@ Status: done, dropped (with the DECIDED.md or SORTED.md line), obsolete, or FOR 
 | T9 | extend, reworded | prompts/workorder/templates/rebuild.md W5 | an external simulator a black-box further check, never our interpreter's stand-in | build/evidence/W7/templates.log | 92ae1e4 | done |
 | T10 | extend | prompts/workorder/templates/rebuild.md, Shared OS block | shared OS across a family proved once | build/evidence/W7/templates.log | 92ae1e4 | done |
 | T11 | dropped | - | the engine step includes its panel layer | none | - | dropped (SORTED.md section 2: "Drop for 2.0. It changes the template's order") |
-| D1 | | | | | | |
-| D2 | | | | | | |
-| D3 | | | | | | |
-| O20 | | | | | | |
-| O30 | | | | | | |
+| D1 | decided | gates-from-commit-one (E74.1) | keep the description, no skeleton generator in 2.0 | text in place | be0983c | done (SORTED.md section 4) |
+| D2 | decided | - | a default shell spec | none | - | dropped (SORTED.md section 4: "leave it out", obsolete under C12) |
+| D3 | decided | packs/sound-design (U45, U46), design-a-preset tables | the kit keeps its baked tables and U45/U46's method; the Atlas skills stay the user's | text in place | be0983c | done |
+| O20 | re-marked | N3, N4 | parts catalogue per role with drift_check: covered by N3/N4 | see N3, N4 | be0983c | done (SORTED.md section 5) |
+| O30 | left out | - | Admiral check-signal hook | none | - | FOR THE USER (SORTED.md section 5: obsolete for the kit only if Admiral's installer adds its hook; noted for the admiral pack) |
 | L1 | new | packs/base/hooks/skill-log.mts; lib/logs-usage.mts (logs skills) | one line per skill used, and logs per skill with the never-used list | test/integration/usage-logs.test.mts; test/hooks/base/usage-log-hooks.test.mts (build/evidence/W2/unit-proofs.log) | 92ae1e4 | done |
 | L2 | new | packs/base/hooks/rule-log.mts (InstructionsLoaded); lib/logs-usage.mts (logs rules) | one line per rule loaded, and logs per rule with the never-used list | test/integration/usage-logs.test.mts (build/evidence/W2/unit-proofs.log) | 92ae1e4 | done |
-| S1 | | | | | | |
+| S1 | retire + reword | instrument-shell/rules/seams-are-declared.md retired; clock-law.md, every-time-control-syncs.md, a-gate-measures-the-real-thing.md, instrument-shell pack.json | the kit's text holds without a synth shell | build/evidence/W6/shell-grep.md (before and after; every remaining hit a Unix shell) | be0983c | done |

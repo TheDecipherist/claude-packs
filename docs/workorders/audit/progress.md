@@ -26,8 +26,14 @@ Session 1 started 2026-11-13. `workorder check audit`: OK.
 - 2026-11-13 W5.3: the release lock (R1: hook, rule, release-facts lib), param-id-lock starts at the first release, U39 folded in as the program-number row (agent ac-b).
 - 2026-11-13 W5.4: E57 (order line dropped), E58-E69 (E62.2b obsolete, E68.2 dropped; float-phase-or-rate untouched) (agent ac-b; merged cf39312, 81af574).
 - 2026-11-13 W5 done when: release-lock test refuses a range, a skew, a mid-list choice and a renumbered program after a release, passes an appended parameter and choice and a range change before any release; param-id-lock passes its own cases and an id renamed before any release (build/evidence/W5/lock-tests.log, 18 pass 0 fail); rule paths 22 of 22 (build/evidence/W5/rule-paths.md); test:changed 1367 pass 0 fail; counts --check exit 0.
+- 2026-11-13 W6.1: U60, U62 (button or modifier chord), U63-U68, U70 split (editor gate its own rule), U71, E70.3 (in copy-and-prove), E71-E79 (E70.1/2/4, E72.1, U69 obsolete; E74.1 per D1) (agents is-a, cpp-web; 5aa6869).
+- 2026-11-13 W6.2: N3 file-into-the-catalog (skill) and N4 catalog-entry-exists (opt-in hook + rule), the catalog named by layout.json `catalog` (agent cat).
+- 2026-11-13 W6.3: seams-are-declared retired (its division-index line stands in clock-law.md), "the plugin's master clock", the remaining synth-shell text reworded (agent shtext).
+- 2026-11-13 W6 done when: catalog-entry-exists.test refuses a ticked filter step with no entry and passes it once the entry exists in a scratch catalog, red with the refusal switched off (build/evidence/W6/catalog-red.log, catalog-green.log); grep evidence build/evidence/W6/shell-grep.md (no remaining hit relies on a synth shell); rule paths 11 of 11 (build/evidence/W6/rule-paths.md); pressure test build/evidence/W6/pressure; test:changed 1376 pass 2 fail plus the runs-alone kit test, the RE rules-load test fixed (a hook-held rule left out) and proxy-install green alone (build/evidence/W6/rerun.log, proxy-install.log); counts --check exit 0.
 
 ## FOR THE USER
+
+- O30 (the Admiral check-signal hook): left out of the kit; the admiral pack ships only its skill. It belongs in the admiral pack if Admiral's own installer does not add it (SORTED.md section 5). [deferred: the user, a different pack's scope]
 
 - The five midi rules extended in W4 now load by concepts (`cpp, js, python, tooling`) instead of raw globs (d-7): a project with loose Python files, no python pack and no tool folder no longer gets them on those files. [deferred: the lead; forced by the conformance gate R1]
 

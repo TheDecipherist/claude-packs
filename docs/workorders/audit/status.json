@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T23:48:08.648Z",
+  "updated": "2026-11-14T00:06:49.162Z",
   "steps": [
     {
       "id": "W0",
@@ -47,7 +47,7 @@
       "id": "W6",
       "title": "instrument-shell, cpp, shell, catalog, shell text",
       "items": 4,
-      "done": 3,
+      "done": 4,
       "agent": null
     },
     {
