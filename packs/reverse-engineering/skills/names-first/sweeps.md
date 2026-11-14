@@ -9,3 +9,6 @@ Read by `names-first` when the manual names nothing, or when a sweep finds few r
 - **A repeated name with a suffix** is a further list in the same order. One display table held the edit names, the same names with `Ribbon:` appended and with `Velocity:` appended: two destination lists, in firmware order.
 - **The effect kind's vocabulary.** Know what the box does, then grep that kind's words (delay, reverb, compressor, pitch, modulation) and the unit templates written inline (`RT = s`). A compressor has no tempo, so no hit is expected there.
 - **The loader's own messages.** Unpack first, then read the unpacked image's strings for a description of its own container (`Getting Header`, `ERROR: Pkt.Cksm`): the cheapest second source, and the packed word boundaries show in their marker bytes.
+- **One fixed word list for the net.** Keep the net's words in one list (voice, filter, envelope, LFO, transport, SYNC, INT, EXT, CLOCK, SOURCE and units), try both cases, report hits and misses with addresses, and read a vendor-dialect miss as a finding.
+- **A numbered menu.** `strings -n 4 <rom> | grep -nE '^[0-9]{1,2}:'`.
+- **Structure drawn on the LCD.** Where the display draws a structure (algorithms, routings), find the handlers that compose its drawing strings, decode the topology from them, and check it reaches the chip unchanged.

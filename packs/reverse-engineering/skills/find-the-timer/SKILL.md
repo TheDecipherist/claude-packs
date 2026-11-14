@@ -13,7 +13,7 @@ Always do:
 2. Write the chain as arithmetic, tagged `[FW]`: crystal, CPU clock (the baud divisor), timer reload, tick, control rate.
 3. Read a counter chip's MODE before its count: an 8254 in mode 3 interrupts at the half period.
 4. Pin the clock from three or more independent readings (baud, pitch table at 440, autotune targets, tempo table, a second crystal) and count them in `laws.md`.
-5. Derive the tick from a count range against a printed time range.
+5. Derive the tick from a count range against a printed time range. Try the small set of closed forms (`K/(n+i)`, `K*2^(i/N)`) over every entry of the table, accept only an exact one, and read the unit off K.
 6. Check the top of the fastest dependent range is musical: a 188 Hz LFO means a missing divisor, and a 16-voice scheduler scales every time by 16.
 7. Bound a hardware tick that lies outside the image from the firmware around it.
 8. Where a machine may do no voice allocation (divide-down), ask what the CPU drives before looking for a scheduler.

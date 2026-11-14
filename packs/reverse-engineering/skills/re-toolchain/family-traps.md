@@ -10,3 +10,11 @@ Read by `re-toolchain`: print the row beside each tool for its family. Each trap
 - **DSP5636x and 56300:** unpack the image first; a C string is one character per 24-bit word.
 - **SH family:** a `mov.l` then `jsr` needs a register shadow to resolve the target (reach went from 0.5 % to 4.7 %).
 - **Z80:** score the base address; a wrong base reads 0.5, the right one 0.99. **6502:** a pin-scrambled dump is a wiring problem, not code.
+- **SH family, more:** consecutive BRA opcodes (0xAxxx) read as a pointer table, and a sign-extended `mov.w` of -1 equals 0xFFFFFFFF, so a literal-pool census gave 31,017 false hits. SuperH is big endian on a 32-bit ROM bus.
+- **Cortex-M:** use capstone Thumb or `llvm-objdump --triple=thumbv7m`; write no disassembler.
+- **TI C2000:** `TMS320` names a product line, not an architecture. Read the memory map from `MOVW DP,#16bit` (`0x761F` then the page; page x 64 is the address). `unidasm -arch tms32025` on C28x is the vendor-name trap.
+- **uPD78312:** it is 78K/III; an 8080-descended decoder gives plausible nonsense.
+- **NEC V20, V30, V50, V55 (uPD70433):** 8086-compatible, so the x86 tool applies.
+- **uPD650:** 4-bit uCOM-43 (a uPD546 manual stands in).
+- **Z80 against 8080/8085:** with no Z80 prefix opcodes a listing is valid as Z80 or 8080/8085.
+- **H8/300 against H8/300H:** H8/300 (16-bit) differs from H8/300H.

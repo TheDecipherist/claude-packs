@@ -30,7 +30,7 @@ Always do:
 6. Write `README.md`: a table of every report (image, sheet, title, one line), the chips with links, a Mermaid map of how the sheets join through their connectors, the netlists and what each simulates, and everything not read.
 7. Check the work. Every part on the image is in its table, so count them. Every connector pin is found on its other sheet. Every value in Laws and in a netlist is one the image shows.
 8. Last, set the reports against the code that rebuilds the circuit. Make a table of each law and value: where the code holds it, and whether it matches, differs or is missing. That table is the point of the whole exercise.
-9. Let the parts list beat the block diagram for any value, and let arithmetic arbitrate a scan artefact (`1/760` against `67,737,600 / 88,200 = 768`). Read the notes printed on a sheet, and the switch, not its legend.
+9. Let the parts list beat the block diagram for any value, and let arithmetic arbitrate a scan artefact (`1/760` against `67,737,600 / 88,200 = 768`). Read the notes printed on a sheet, and the switch, not its legend. Before a printed voltage becomes a ratio, name the stage it drives and whether the next part is linear in it, and confirm by counting a period off a trace.
    - Two revisions of one board are a diffable pair: diff them sheet by sheet.
    - An inferred topology must predict numbers the documents already state (a notch at 0.6 of the cutoff, a passband loss that pins the feedback maximum): three printed statements landing on one constant beat any one source.
    - A tolerance may be intent: stretch tuning is flat at the bottom and sharp at the top by design. A chip's spec bounds a block, not the box: an on-chip delay ceiling says nothing about the DRAM beside it.
