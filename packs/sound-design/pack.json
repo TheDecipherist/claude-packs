@@ -15,6 +15,7 @@
     "tools/vst3host/session.h": ["test/hooks/sound-design/sound-design-pack.test.mts"]
   },
   "concepts": {
+    "engine-source": ["**/*.cpp", "**/*.cc", "**/*.h", "**/*.hpp", "**/*.mm", "**/*.py", "**/*.ts", "**/*.js", "**/*.mjs"],
     "preset-files": ["data/factory.csv", "data/params.csv", "presets/**", "banks/**", "**/*[Pp]reset*", "**/*[Bb]ank*"]
   },
   "folders": {},

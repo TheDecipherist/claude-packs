@@ -16,7 +16,7 @@ Load for an effects unit, a whole bank, or a modulation engine. Numbers are tagg
 
 ## Bank tiers
 
-- **3 / 30 / 100** [LAW]: three flagships no other machine can make, each with a wheel move that changes the song; thirty a producer keeps; the rest real variations. About 10, 60 and 30 percent of the bank.
+- **3 / 30 / 100** [EAR]: three flagships no other machine can make, each with a wheel move that changes the song; thirty (the three included) a producer keeps; the rest real variations. In a bank of 100 that is 3, 27 and 70. The author's split, with no measured source.
 - One **signature move** for the machine, heard across the bank.
 - The **one-hand demo**: each flagship carries a 20-second demonstration played with one hand.
 - Ship fewer if that is what passes the gate: 96 that pass beat 128 with filler.

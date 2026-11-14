@@ -6,7 +6,7 @@ paths:
 
 # A generator derives each item's seed by hashing the run seed with the item's index
 
-This rule is about the seeds of a generator or a fuzz run (a bank of random recipes, random test cases), never about the signal path. Seeds `1201` and `1202` with `seed + i` shared eleven recipes of a bank of 100, because run 1201 item 1 is run 1202 item 0.
+This rule is about the seeds of a generator or a fuzz run (a bank of random recipes, random test cases), never about the signal path. Seeds `1201` and `1202` with `seed + i` gave banks of 12 and 22 that shared eleven recipes, because run 1201 item 1 is run 1202 item 0.
 
 <constraints>
 Always do:

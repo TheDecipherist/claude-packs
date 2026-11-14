@@ -18,7 +18,7 @@ Always do:
    5. per-voice or per-sample use in the DSP;
    6. the audible result: render a short sweep of the parameter and run `measure-tone` if the sound itself is in question.
 3. Follow the other branch: parameter → editor attachment → widget → displayed text. Write down the mapping used there.
-4. When the sound moved after UI work, diff the DSP and the parameter table against the reference first, before reading the editor. Read defaults from the running plugin, not from the source. Check a wrong binding's neighbours (the controls on either side of it in the table), since a shifted row moves several. Check the provenance column first: where a value came from says which source to trust.
+4. When the sound moved after UI work, diff the DSP and the parameter table against the reference first, before concluding on the editor branch of step 3. Read defaults from the running plugin, not from the source. Check a wrong binding's neighbours (the controls on either side of it in the table), since a shifted row moves several. Check the provenance column first: where a value came from says which source to trust.
 5. Search for any second computation of the same value: `grep` for the parameter ID, its member name and its unit conversion.
 
 Never do:

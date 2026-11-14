@@ -11,7 +11,9 @@
     "tools/lib/route-plants.mts": ["test/tools/instrument-shell/route-table.test.mts"],
     "tools/route-table.mts": ["test/tools/instrument-shell/route-table.test.mts"]
   },
-  "concepts": {},
+  "concepts": {
+    "engine-source": ["**/*.cpp", "**/*.cc", "**/*.h", "**/*.hpp", "**/*.mm", "**/*.py", "**/*.ts", "**/*.js", "**/*.mjs"]
+  },
   "folders": {},
   "hooks": {},
   "skillsIn": null,

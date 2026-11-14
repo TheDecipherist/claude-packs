@@ -12,7 +12,7 @@ Always do:
 1. Read the delay as the peak of the autocorrelation of the power spectrum (the comb spacing).
 2. Read the modulation as that peak moving over time.
 3. Read the width as the two channels disagreeing.
-4. Excite it with a source correlated across channels, never noise (`choose-observable`).
+4. Excite it with a source correlated across channels, never noise that differs per channel (`choose-observable`).
 5. Prove the probe on a planted known delay before trusting a reading.
 
 Never do:

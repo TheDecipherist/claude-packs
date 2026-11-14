@@ -1,5 +1,5 @@
 ---
-# concepts: cpp, js, python, tooling, tests
+# concepts: engine-source, tests
 paths:
   - "placeholder"
 ---

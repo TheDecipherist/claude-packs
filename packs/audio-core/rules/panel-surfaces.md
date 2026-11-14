@@ -14,5 +14,5 @@ Always do:
 - Set displays in a near-black display surface.
 
 Never do:
-- Add a fourth surface level, or tell levels apart by anything but their fill and edge.
+- Add a fourth surface level.
 </constraints>

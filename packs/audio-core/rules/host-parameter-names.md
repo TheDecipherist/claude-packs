@@ -14,5 +14,5 @@ Always do:
 - On our own design, name it `Column . Section . Name`.
 
 Never do:
-- Mix the two forms in one unit.
+- Mix the two forms in one unit, except that a rebuild's own extra controls on our edit layer take the second form beside the machine's strings.
 </constraints>
