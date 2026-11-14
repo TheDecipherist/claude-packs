@@ -15,6 +15,7 @@ Always do:
 - Count ADAA's half-sample delay in the latency of that path. Inside a filter feedback loop, absorb it structurally (Parker, Zavalishin & Le Bivic, DAFx-16 §6.1). Never drop ADAA into a loop as-is.
 - Align a parallel layer's latency with the dry path when a stage runs oversampled beside it, so the two sum in phase.
 - Treat bit reduction and sample-rate reduction (FireBloom's BITS, the BIT effect) as *intended* aliasing: run them at host rate without oversampling, feed them an already band-limited signal, and follow them with a DC blocker.
+- Measure kernel length at 8, 16 and 32 taps before choosing it: it buys passband and not alias rejection. Keep oversampling of a bilinear-warped filter off by default, bit-identical when off, since it is not transparent.
 
 Never do:
 - Run a hard clipper or folder at the base rate with no ADAA or oversampling.

@@ -28,6 +28,7 @@ Never do:
 
 - Already a global component, or a block in `dspblocks`? Link it. This skill does not apply.
 - In `~/projects/synthcatalog`? Check before writing or copying a sound component.
+- Name the machines famous for what is being built and read their `synthcatalog` entries before the ones already read.
 - Finished and wanted by more than one synth? It may be time to make it a global component.
 
 ## 1. The licence row, before the first file moves
@@ -86,6 +87,8 @@ python3 tools/null_compare.py source.wav copy.wav
 - A difference only in the tail is un-reset state or a different block size.
 - `--allow-db` is for a difference the user has accepted, with the reason written in `docs/licences.md`. It is not for making
   a red result green.
+
+List each ported parameter's unit and range on both sides (decay as 0 to 1 feedback or seconds), then render both and measure the tail (RT60, energy at 1, 3 and 6 s, centroid) before calling it the same effect.
 
 Show the gate can fail: change one coefficient in the copy, see `DIFFERENT`, put it back.
 

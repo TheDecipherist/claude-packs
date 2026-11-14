@@ -18,6 +18,7 @@ Always do:
 - Log it when several units fit different constants to one shared law, and fix the law once, with every unit's measurements.
 - Send a question the spec leaves open to the user as a `d-n`, with the spec's recommendation. Never decide it by guessing.
 - Write internal docs plainly. The `humanize` skill is for public writing only, not for specs, logs or briefs.
+- When a milestone closes, grep every handoff file (CLAUDE.md, PROMPT.md, README) for the old state line and fix each: a hand-kept status line goes stale.
 
 Never do:
 - Edit the spec (`docs/*-spec.md`). It is the user's.

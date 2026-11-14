@@ -13,6 +13,7 @@ Always do:
 - Offer an inspector listing, per parameter: the stored value, the live value and the previous value, with the ones that differ marked.
 - Open it from a button on the panel or a modifier chord (for example Cmd or Ctrl with a letter). The computer keyboard plays notes and nothing else takes it (`keys-belong-to-the-keyboard`).
 - Read the live values from the engine on every paint, not from a copy.
+- Show the program's own location (its hardware number) in the inspector and in any panel display, never its list index.
 
 Never do:
 - Open the inspector on a bare key: a bare key is a note.

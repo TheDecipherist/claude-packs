@@ -14,6 +14,7 @@ Always do:
 - Show on the knob a ring with the number of connections, and a halo on the destination while dragging.
 - Remove a route with right-click.
 - Pair it with the overview page of `modulation-overview-page`.
+- Read an empty second source as unity, not zero (a route is `dest += src x depth`, scaled by the second source when there is one), and let patching the same source and destination pair edit the existing route instead of stacking a second.
 
 Never do:
 - Make a route by a menu alone.

@@ -9,7 +9,7 @@ A hand-kept parameter table disagrees with the engine within a week. Documents r
 
 <constraints>
 Always do:
-1. Write one command that writes every document, into one folder, from the engine source. Name it at `commands.docs` in `.claude/layout.json`, and keep the output folder in `docsFolder`.
+1. Decide what the documents are first (the whole machine, the effects path, the programs; two when it has no programs), and keep one hand-written sentence per parameter in a notes file the command reads. Then write one command that writes every document, into one folder, from the engine source. Name it at `commands.docs` in `.claude/layout.json`, and keep the output folder in `docsFolder`.
 2. Parse the source strictly: a parser raises on any line it does not read, so a new construct stops the run and is never skipped.
 3. Keep what only a person knows (the machine's name, the signal-flow story, section order) in a hand-written head file the command prepends.
 4. Cross-check the source parse with a lock written from the built plugin (its parameter list, ids, ranges, defaults): the two must agree, and a difference stops the run.

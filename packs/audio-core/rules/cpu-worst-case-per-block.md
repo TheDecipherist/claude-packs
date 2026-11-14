@@ -19,6 +19,7 @@ Always do:
 - Touch every pre-allocated buffer once in `prepareToPlay` so the first callbacks don't stall on page faults.
 - Look at the curve across voice counts. Anything worse than linear growth is a bug.
 - Replace a work order's cost-ledger estimate (`synth-cost`) with the W0 measurement of one INIT voice, worst block, at 44.1 kHz and 48 kHz, and hold the gate to the measured figure from then on.
+- Before approximating, remove work that is thrown away and read the call tree; where worker threads share a sum, order it and run ThreadSanitizer.
 
 Never do:
 - Report average CPU as the performance figure.

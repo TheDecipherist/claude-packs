@@ -9,7 +9,7 @@ A fault in how the work is done repeats until it is written down with the check 
 
 <constraints>
 Always do:
-1. Open `workflow-bugs.md` (the project's `files.workflowBugs` in `.claude/layout.json`) and add a row to the Open table before the fix: `WB-<n>`, the date, time and zone, what happens, where. Take the next number; a number is never reused, not even for a dropped entry.
+1. Open `workflow-bugs.md` (the project's `files.workflowBugs` in `.claude/layout.json`) and add a row to the Open table before the fix: `WB-<n>`, the date, time and zone, what happens, where. Take the next number; a number is never reused, not even for a dropped entry. Write a fault id from another project with its project name (`eproms WB-1`), never bare.
 2. Log these as workflow faults: an agent that wasted time or money, a hook that blocked harmless work or missed a fault, the queue misbehaving, a tool that lost time or work, a brief that told an agent the wrong thing.
 3. Fix it, then close the entry with three things: the cause, the fix, and what now catches it (a hook, a test, a check, a line in a brief).
 4. Leave the entry open when what catches it is only a written rule. Name the check still to build.

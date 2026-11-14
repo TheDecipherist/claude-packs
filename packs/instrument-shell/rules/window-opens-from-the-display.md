@@ -13,6 +13,9 @@ Always do:
 - Compute the opening size from the display in one function: the scale from the display height, the type bought from the scaled height, then the fit pass in a fixed order.
 - Call that same function from the snapshot tool, and judge the render at the opening width.
 - Clamp to the declared minimum display.
+- Check a plate's design width against the minimum display before shrinking its height: the design width, not the height, decides whether a panel scrolls.
+- Declare a layout decision as its test (`if panel + strip > display then fold`), not its outcome, so it expires with the measurement; a saved state always wins.
+- List the fit pass in order: compress vertical spacing only, shrink radii and never type, squeeze the gaps, push legends clear; when height binds, only height levers change the type size.
 
 Never do:
 - Hard-code an opening size in the editor.

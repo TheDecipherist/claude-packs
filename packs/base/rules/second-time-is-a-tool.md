@@ -12,6 +12,7 @@ The same triage was written by hand on eight machines in one day. A step done tw
 Always do:
 - At the second hand-done run of a research or build step, stop and make it a script (when it is mechanical) or a skill (when it takes judgement), then use that.
 - Put the script or skill where the project keeps such things, with its test or its pressure test.
+- When a second per-instance fix of one class of fault is about to be made, find the one function every item passes through, put the rule there, and fix the class once.
 
 Never do:
 - Do a step by hand a third time.

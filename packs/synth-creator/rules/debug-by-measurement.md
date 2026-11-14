@@ -15,6 +15,8 @@ Always do:
 - Dump the worst failures, name the shape of each, and put a gate on each shape.
 - Bisect the baseline (the last good build) before accusing the host. A third correction on one control means go back to what the control should do.
 - After three fixes that didn't work, stop changing code. Report what was tried, what each measurement showed, and whether the design itself is the problem.
+- Record the pass bracket of a swept constant and break a tie with a second quantity; when two populations overlap at every threshold, measure a different quantity.
+- Delete a duplicated constant and never update it; commit a mechanism change apart from new measurements.
 
 Never do:
 - Change several things at once, then listen.

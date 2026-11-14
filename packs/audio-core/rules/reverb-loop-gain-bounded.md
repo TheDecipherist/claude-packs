@@ -15,6 +15,7 @@ Always do:
 - Make freeze/infinite mode exactly unity gain with the unitary check, never "slightly above 1".
 
 - Apply the same bound to any multi-path feedback (a delay network, a comb bank, a resonator pair): make the loop's total gain below 1 and report the scale used.
+- Set decay per band from a target T60 per band with the same formula, so a low band can outlast a high one, and keep Dattorro's input diffusers as published.
 
 Never do:
 - Tune a "bigger" hall by raising feedback toward or past 1. Lengthen the lines or change the damping.

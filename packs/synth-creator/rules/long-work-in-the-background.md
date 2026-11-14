@@ -9,6 +9,7 @@ Always do:
 - When `time-guard` says something is slow, look at it now: find what is running, say so, and stop it if it is not needed.
 - Commit an agent's work when `time-guard` says it has gone unsaved.
 - Give every shell-out to a browser or renderer a deadline, and check the artefact it should have made before believing its error.
+- After each batch, list the calls that ran past five minutes, group them by kind and fix the cause (a test with no fast form, a cache that misses, a build of too much), not the one case.
 
 Never do:
 - Wait in a `sleep`, `until` or `pgrep` loop, or poll a job's output file.

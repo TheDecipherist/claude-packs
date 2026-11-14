@@ -13,6 +13,7 @@ Always do:
 - Give the unit a built-in source it can be fed from: a click, a drum loop and a held chord.
 - Keep test signals for measuring: an additive one, a periodic one and a ramped one, each with a click probe at zero.
 - Route the source through the same path as host input, so what is heard is what is rendered.
+- Carry a sustained source (pad), a transient one (drums) and a moving-pitch one (lead), and judge a unit's presets with the one that shows them, measuring the preset-to-preset spectral difference.
 
 Never do:
 - Ship an effect whose only input is the host.

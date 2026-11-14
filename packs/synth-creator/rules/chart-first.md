@@ -12,6 +12,7 @@ Always do:
 - Before a change bigger than one control, write its blast radius from the chart: the modules and routes it touches.
 - Compare the generated as-built chart with the committed design chart, and log each difference.
 - Keep the chart whole: every module the code has, every route between them, and the controls that steer each route.
+- In the blast radius also write what would have two sources of truth and what a cable already points into, and read the derived data (layout, params lock, enums) with a one-line query when the picture is not enough.
 
 Never do:
 - Write source before the chart is committed; `chart-first` refuses the write, naming the glob it looked for.

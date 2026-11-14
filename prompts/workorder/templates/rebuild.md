@@ -24,6 +24,8 @@ Finished looks like: every parameter, page and gesture in the manual present; <t
 
 **Shared OS.** **[if one OS serves a family of models]** Prove the shared parts once, record only each model's differences, and name the stand-in dump and manual in `docs/sources.md`.
 
+**Clone or variant.** **[if the machine is a circuit-level clone or variant]** Put the shared voice in one package both link, diff the schematics first, and write each deviation up as a finding.
+
 **The sources** (all in the archive, outside every repo; nothing is copied in):
 - **Firmware:** <path, version, size, hash>. <Earlier or sibling models' firmware, for reference.>
 - **Service notes:** <path>, converted by `pdf-to-md` with the image switch on and every page rendered at 300 dpi: <the block diagram, the board sheets, the test mode, the panel drawing, the parts list>.
@@ -99,7 +101,7 @@ The `processors:` line drives the `re-toolchain` skill of the reverse-engineerin
 3. Read every circuit sheet by `read-a-circuit-diagram`: one report per sheet in `docs/circuits/`, with `chips/`, `netlists/` for every analogue stage, `README.md` and `change-order.md` for what the sheets correct in this order. Name every chip from the sheets, with two sources.
 4. Fetch and read the data sheet of every chip the sheets name, by `pdf-to-md`, into `docs/circuits/chips/`. A custom part with none: record what was searched.
 5. Search for what is missing, and record each search and its date.
-6. Grade the evidence and record the path in `decisions.md`: build it (a table of names and ranges), build it tagged (presets but no table: every value tagged with what it rests on), or, only when there are no names and no presets, create nothing and write the findings.
+6. Grade the evidence and record the path in `decisions.md`: build it (a table of names and ranges), build it tagged (presets but no table: every value tagged with what it rests on), or, only when there are no names and no presets, create nothing and write the findings. Where the machine boots from disk and ships no sounds, the deliverable is the format documentation and a player with the factory disks as corpus; record that scope as a finding where the next reader sees it.
 
 **Done when:** `docs/sources.md` says what each source gave; every sheet has its report, with every part counted; every chip has its page; `names.txt` parses clean with 0 errors (`tests/names.test`); and `decisions.md` records the path, 1 of the 3.
 
@@ -188,7 +190,7 @@ The machine's arpeggiator is remade exactly as it is, unless the user says other
 
 ## W11. <The machine's own feature>  **[if it has one]**
 
-<One step per feature no earlier step covers: a sample engine, a vocoder, a physical model, a sequencer. Say what it is in code from W3's findings, build it the same way (ported and checked against the oracle, or from its schematic), and list what cannot be built with the exact reason.>
+<One step per feature no earlier step covers: a sample engine, a vocoder, a physical model, a sequencer. Say what it is in code from W3's findings, build it the same way (ported and checked against the oracle, or from its schematic), and list what cannot be built with the exact reason. For a stand-in for an unobtainable part, generate a dataset in the machine's own record layout so a real dump drops in unchanged, say it is ours, and name the way in in `todo.md`.>
 
 **Done when:** each of its types and settings in `names.txt` is built and checked (N of N in `tests/feature.test`), or listed with the exact reason it cannot be.
 
