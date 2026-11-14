@@ -44,8 +44,9 @@ export function problems(launched: string, sources: readonly string[], assets: r
   const stale = sources
     .filter((src) => newest(src) > built)
     .map((src) => `stale: ${launched} (${new Date(built).toISOString()}) is older than ${src} (${new Date(newest(src)).toISOString()}): rebuild, and tell the user to relaunch`);
-  const bytes = filesUnder(launched).map((f) => readFileSync(f));
-  const holds = (needle: Buffer): boolean => needle.length > 0 && bytes.some((b) => b.includes(needle));
+  const files = filesUnder(launched);
+  // One file in memory at a time, and the search stops at the first file that holds the needle.
+  const holds = (needle: Buffer): boolean => needle.length > 0 && files.some((f) => readFileSync(f).includes(needle));
   const missing = assets.map((a) => (!existsSync(a) ? `asset not found: ${a}` : holds(readFileSync(a)) ? '' : `asset not inside the launched file: ${a}: the build did not link its bytes`));
   const unmarked = markers.map((m) => (holds(Buffer.from(m)) ? '' : `marker not inside the launched file: "${m}"`));
   return [...stale, ...missing, ...unmarked].filter((line) => line !== '');
@@ -58,6 +59,8 @@ function main(args: readonly string[]): number {
     console.error('usage: node .claude/tools/can-open.mjs <build folder> <launched file or bundle> [--source <folder>]... [--asset <file>]... [--marker <text>]...');
     return 2;
   }
+  const absent = take('--source').filter((s) => !existsSync(s));
+  if (absent.length > 0) { console.error(`can-open: --source folder not found: ${absent.join(', ')}`); return 2; }
   const file = resolve(launched);
   if (!existsSync(file)) { console.log(`can-open: the launched file does not exist: ${launched}`); return 1; }
   console.log(`launched: ${file}\nbuilt: ${new Date(newest(file)).toISOString()}`);

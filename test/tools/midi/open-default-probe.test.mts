@@ -53,3 +53,15 @@ test('a time that scales with neither ratio is refused, an unmeasured destinatio
   assert.match(probe([DELAY], []).out, /delay: not measured at open/);
   assert.equal(spawnSync('node', [TOOL], { encoding: 'utf8' }).status, 2);
 });
+
+test('a kind or mode that is not in the list is a wrong use (exit 2), not read as a plugin or a non-delay', () => {
+  assert.equal(probe([{ ...DELAY, kind: 'dely' }], [synced('delay')]).status, 2);
+  assert.equal(probe([{ ...DELAY, mode: 'plug-in' }], [synced('delay')]).status, 2);
+  assert.equal(probe([{ ...DELAY, stored: 'sync' }], [synced('delay')]).status, 2);
+});
+
+test('a timbre time stored synced is a fault: timbre times never follow tempo (C9), stored or not', () => {
+  const done = probe([{ name: 'pre', kind: 'timbre', mode: 'plugin', stored: 'synced' }], [synced('pre', 12)]);
+  assert.equal(done.status, 1, done.out);
+  assert.match(done.out, /pre \(timbre, plugin\): must open free/);
+});
