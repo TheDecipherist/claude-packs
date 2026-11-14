@@ -14,7 +14,7 @@ Always do:
 3. List one row per status byte: honoured, ignored, or passed through, with the address of its branch.
 4. For a controller or NRPN message, follow the data bytes to the parameter they write, and record the range the handler accepts.
 5. Check each row against the chart. Where they differ, the firmware wins, and the row says so.
-6. Treat a compare against `F8` that is followed by a range check as a test on a range, not a clock handler, until the branch is read.
+6. Read a compare against `F8` followed by a range check as `does-it-sync` step 7 says.
 
 Never do:
 - Claim a message is ignored from its absence in a manual.

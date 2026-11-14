@@ -10,7 +10,7 @@ An NRPN parameter number is two bytes, and a machine may pack several parameters
 
 <constraints>
 Always do:
-- Form the parameter number as `(MSB << 8) | LSB`, with 7 bits per byte, and check each number against the manufacturer's chart.
+- Form the parameter number as `(MSB << 7) | LSB` (7 bits per byte; a machine whose chart packs a whole byte per half uses `<< 8`, and says so), and check each number against the manufacturer's chart.
 - Read an LSB that selects a namespace as part of the number, not as a value.
 - Decode a packed NRPN as the ranges it holds, one parameter per range, and name each range.
 - Write every decoded value back through the same packing on export, and prove a byte-exact round trip over the corpus.

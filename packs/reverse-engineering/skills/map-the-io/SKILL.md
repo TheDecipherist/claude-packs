@@ -13,7 +13,7 @@ Always do:
 4. Treat equally spaced windows as possibly one banked chip; identify a chip by its write protocol.
 5. Read both ends of a link: a diagnostic's addressing is not the runtime's.
 6. Use a masked read to show undriven lines.
-7. Read a decode PAL or GAL from its JEDEC file (rows by output, an all-zero enable row means an input), check its outputs against the service manual's sentences, and stop short of naming columns without the datasheet's column-to-pin map.
+7. Read a decode PAL or GAL from its JEDEC file (rows by output, read the enable rows as `read-a-fuse-map` says), check its outputs against the service manual's sentences, and stop short of naming columns without the datasheet's column-to-pin map.
 8. Read the panel converter's routine: its trial bits give each knob's resolution, a deadband marks a relative knob, and a calibration offset names a channel; autotune period targets give CV per octave.
 
 Never do:

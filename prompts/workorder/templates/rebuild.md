@@ -43,7 +43,7 @@ Finished looks like: every parameter, page and gesture in the manual present; <t
 <constraints>
 Always do:
 - Work the steps in order. The oracle and the parameter layer come before the engine.
-- Keep every law's source tag on its line: `[FW]` with an address and its space, `[SCH]`/`[SVC]` with page and sheet, `[MAN]` with page, `[DS]`, `[DATA]`, `[PUB]`, `[REF <model>]`, or `[EAR]` in the debt ledger with what would close it.
+- Keep every law's source tag on its line: `[FW]` with an address and its space, `[SCH]`/`[SVC]` with page and sheet, `[MAN]` with page, `[DS]`, `[DATA]`, `[PUB]`, `[REF <model>]`, or `[EAR]` in the debt ledger with what would close it; the full list is in `every-law-has-a-source`.
 - Run Ghidra as the blind second pass on every firmware finding (W4), and record every disagreement in `docs/firmware/disagreements.md` with the side that was wrong, the source that decided and the evidence.
 - Read every circuit sheet by `read-a-circuit-diagram` and every screen by `read-a-screen-image`, at full resolution, one report per image.
 - Convert PDFs at most two at a time across every session and agent (the `pdf-to-md` skill's wait for a slot).

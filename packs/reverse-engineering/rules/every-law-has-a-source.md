@@ -13,8 +13,9 @@ Always do:
   - `[REF]` a script's fit to a recording with published settings: weaker than a schematic, stronger than an ear, and kept apart from `[EAR]`.
   - `[EMU]` agreement with an emulator and nothing more: it confirms our reading of the firmware, never the hardware, and is never `[FW]`. Record where it disagrees with a published derivation; do not reconcile them.
   - `[SVC]` a service manual (page and sheet), `[DER]` derived from other tagged laws (name them), `[PHOTO]` read off a photograph.
+  - `[DATA]` a published data file or table, `[REF <model>]` a fit to a named reference model, `[PHOTO?]` one photo (a lead), `[REPAIR]` a part the maker supplied for a repair (with the thread), `[DS-REF]` a data sheet's application circuit used as a stand-in, never as the machine's.
   - `[ASSUMED]` a law not measured yet, a debt like `[EAR]` and listed in every output that used it; `[MEAS]` one measured.
-- Keep one tag list: this one and the work-order template's tag line say the same.
+- Keep one tag list, this one: the work-order template and `boards-from-photos` point here and add none.
 - Keep every `[EAR]` value in a ledger, with a lead to what would close it.
 - Replace an `[EAR]` value only with evidence. An ear will approve a wrong constant.
 - Say which tags cannot exist on a machine: a chip whose program was never dumped can have no `[FW]`.

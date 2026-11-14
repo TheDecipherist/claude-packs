@@ -10,7 +10,7 @@ A bank is a run of valid records, not a pair of offsets. The count of banks is a
 <constraints>
 Always do:
 1. Settle the bank counts from the manual first: banks A and B may hold copies of C and D.
-2. Carve by record validity: every byte under 128 and the name at a fixed offset, and keep the run's start, length and the records it holds.
+2. Carve by record validity: every byte in the layout's range (under 128 for a 7-bit, sysex-derived record; an 8-bit flash record uses the full byte) and the name at a fixed offset, and keep the run's start, length and the records it holds.
 3. Check the first carved name against an independent reader, such as the emulator's default patch.
 4. Suspect any reading that needs a skipped slot, and recheck the stride.
 
