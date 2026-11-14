@@ -12,10 +12,13 @@ import type { PackFields } from '../lib/pack-manifest.mts';
 export interface Finding { id: string; file: string; note: string }
 
 /** The checks no file may fail, new or old: the rest is a ratchet on old files and a law for new or changed ones. */
-export const HARD: ReadonlySet<string> = new Set(['R2', 'R3', 'R4', 'C1', 'C4', 'S1', 'S2', 'S5', 'P1', 'P2', 'P5', 'P6']);
+export const HARD: ReadonlySet<string> = new Set(['R2', 'R3', 'R4', 'C1', 'C4', 'S1', 'S2', 'S5', 'P1', 'P2', 'P5', 'P6', 'S9']);
 
 /** The fields a lesson check may have (CLAUDE.md "Authoring pack content", plus the four it never named). */
 export const CHECK_FIELDS: ReadonlySet<string> = new Set(['id', 'why', 'rule', 'globs', 'concepts', 'exclude', 'pattern', 'code', 'strings', 'language', 'mode', 'needs', 'whenDep', 'kind', 'bad', 'good', 'notInTests', 'newFilesOnly', 'replaces', 'flags', 'prose', 'examples']);
+
+/** The markup of a tool call pasted into a file by accident: a skill is compiled whole into a task, so it would reach the task. */
+const TOOL_MARKUP = /^\s*<\/?(?:invoke|parameter|content|function_calls)\b[^>]*>\s*$/m;
 
 const PROJECT_NAMES = /\b(?:Stellix|Solera|MegaSynth|MPX)\b/;
 const SECOND_PERSON = /\byou (?:can|should|must)\b|\bWe must\b/i;
@@ -135,6 +138,9 @@ function skillChecks({ packsDir, add }: Ctx, pack: string, file: string, names: 
   const unnamed = walk(join(file, '..')).map((f) => relative(join(file, '..'), f)).filter((f) => f !== 'SKILL.md' && !text.includes(basename(f)) && !text.includes(f.split('/')[0] ?? ''));
   if (unnamed.length) add('S6', rel, `does not name ${unnamed.join(', ')}`);
   if (styleFaults(text, pack).length) add('S7', rel, styleFaults(text, pack).join(', '));
+  // a pasted tool call (KWB: gates-from-commit-one ended in `</content>` `</invoke>`, and compile carried it into every task)
+  const pasted = [file, ...walk(join(file, '..')).filter((f) => f !== file && /\.(md|txt)$/.test(f))].filter((f) => TOOL_MARKUP.test(readText(f) ?? ''));
+  if (pasted.length) add('S9', rel, `holds tool-call markup (</invoke>, </content>, <parameter>) in ${pasted.map((f) => relative(join(file, '..'), f)).join(', ')}`);
   if (description.length > 200) add('S8', rel, `its description is ${description.length} characters (limit 200)`);
 }
 

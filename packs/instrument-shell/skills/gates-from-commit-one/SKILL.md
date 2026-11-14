@@ -42,5 +42,3 @@ endif()
 - `auval` finds only an installed component: build the AU with `COPY_PLUGIN_AFTER_BUILD TRUE`. The `TIMEOUT 30` is the 30 s the release law asks for.
 - Each format the build makes gets its own pluginval line (`<Target>_AU` too, on macOS).
 - See each one red once: a parameter whose state does not restore fails pluginval at 10, and a wrong subtype code fails `auval`.
-</content>
-</invoke>

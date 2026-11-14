@@ -87,6 +87,7 @@ const PLANTS: Record<string, (pack: string) => void> = {
   S1: (p) => edit(path(p, 'skills/plant-example/SKILL.md'), 'description: Use when', 'description: Use after'),
   S2: (p) => edit(path(p, 'skills/plant-example/SKILL.md'), 'name: plant-example', 'name: plant-other'),
   S5: (p) => appendFileSync(path(p, 'skills/plant-example/SKILL.md'), `\n${'A long line of words that makes the skill too large. '.repeat(170)}\n`),
+  S9: (p) => appendFileSync(path(p, 'skills/plant-example/SKILL.md'), '\n</content>\n</invoke>\n'),
   P1: (p) => edit(path(p, 'pack.json'), '"version": "0.1.0"', '"version": "one"'),
   P2: (p) => edit(path(p, 'pack.json'), '"directory": "packs/plant"', '"directory": "packs/elsewhere"'),
   P5: (p) => edit(path(p, 'rules/plant-example.md'), '# concepts: plant', '# concepts: nowhere-defined'),
