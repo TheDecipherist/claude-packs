@@ -104,6 +104,14 @@ const LANDING = /(?:^|[;&|\n])\s*git\s+(?:-C\s+\S+\s+)?merge\s+(?:\S+\s+)*?--ff-
 const sinceLanding = (uses: readonly ToolUse[]): readonly ToolUse[] => uses.slice(uses.findLastIndex((u) => u.name === 'Bash' && LANDING.test(u.input.command ?? '')) + 1);
 
 /** The files the calls of a turn wrote since its last landing, with the text each put there. `cwd` is where a call that names none ran, `env` what a shell path expands from. */
+/** Drops from `out`, in place, every write to `gone` or under it (a removed folder). */
+function takeBack(out: TurnWrite[], gone: string): void {
+  for (let k = out.length - 1; k >= 0; k -= 1) {
+    const p = out[k]?.path ?? '';
+    if (p === gone || p.startsWith(`${gone}/`)) out.splice(k, 1);
+  }
+}
+
 export function writesOfTurn(turn: { uses: readonly ToolUse[] }, cwd: string, env: Env): TurnWrite[] {
   const out: TurnWrite[] = [];
   for (const u of sinceLanding(turn.uses)) {
@@ -113,7 +121,14 @@ export function writesOfTurn(turn: { uses: readonly ToolUse[] }, cwd: string, en
     else if (u.name === 'Edit' && i.file_path) out.push({ path: at(i.file_path), text: i.new_string ?? '', tool: u.name });
     else if (u.name === 'MultiEdit' && i.file_path) out.push({ path: at(i.file_path), text: (i.edits ?? []).map((e) => e.new_string ?? '').join('\n'), tool: u.name });
     else if (u.name === 'NotebookEdit' && i.notebook_path) out.push({ path: at(i.notebook_path), text: i.new_source ?? '', tool: u.name });
-    else if (u.name === 'Bash') for (const w of shellWrites(i.command ?? '', u.cwd ?? cwd, env)) if (w.op !== 'delete') out.push({ path: w.path, text: w.content ?? (w.sed ? w.sed.scripts.join('\n') : null), tool: 'Bash' });
+    else if (u.name === 'Bash') {
+      for (const w of shellWrites(i.command ?? '', u.cwd ?? cwd, env)) {
+        // a file the turn wrote and then removed (or a folder it removed) is a write taken back, as making-check's send-back offers
+        // (supernova2_monitor: a removed scratch bench sent the supervisor's turn back three times)
+        if (w.op === 'delete') takeBack(out, w.path);
+        else out.push({ path: w.path, text: w.content ?? (w.sed ? w.sed.scripts.join('\n') : null), tool: 'Bash' });
+      }
+    }
   }
   return out;
 }
