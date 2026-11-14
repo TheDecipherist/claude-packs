@@ -72,7 +72,8 @@ function byName(line: string, words: string, c: ShapeConceptData, shape: HitShap
   const notARole = (m: RegExpMatchArray): boolean => {
     const [whole = '', first = '', word = ''] = m;
     const at = m.index ?? 0;
-    return NOT_ROLES.has(first) || c.words.includes(first.toLowerCase()) || c.names.has(first) || labelBefore(line, at) || isKnownName(first, word, shape) || isLongerName(words, at + whole.length);
+    // a caps word holding a digit (CC9, OS2, F1) is a code or a number, never a role (supernova2_monitor WB-19)
+    return /\d/.test(first) || NOT_ROLES.has(first) || c.words.includes(first.toLowerCase()) || c.names.has(first) || labelBefore(line, at) || isKnownName(first, word, shape) || isLongerName(words, at + whole.length);
   };
   for (const m of words.matchAll(role)) if (!notARole(m)) add(m[1] ?? '', `names it by a role ("${m[0]}"): the instance is a job or a value, not a ${c.name}`);
 }

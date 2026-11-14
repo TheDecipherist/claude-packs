@@ -37,6 +37,9 @@ test('an ordinal names an instance, except "the first X with" and a role word th
   assert.deepEqual(instances('the PAD slot'), ['PAD']);
   assert.deepEqual(instances('FAIL slot'), []);
   assert.deepEqual(instances('the CPU slot fitted'), [], 'a hardware part before the word is a chip, not a role (KWB-next)');
+  // supernova2_monitor WB-19: "CC9 arp speed", a MIDI controller number before the word, read as a role
+  assert.deepEqual(instances('CC9 slot speed is confirmed'), [], 'a caps word with a digit is a code, not a role');
+  assert.deepEqual(instances('the PAD slot is too quiet'), ['PAD'], 'a role word is still one');
   assert.deepEqual(instances('MIDI Program slot Change'), [], 'a longer proper name');
 });
 
