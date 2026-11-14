@@ -16,6 +16,8 @@ Always do:
 5. Treat rows that are one shape times multipliers as one table with a multiplier column.
 6. Confirm every candidate in code: find the routine that loads the base and adds the stride. A run in initialised data needs evidence that does not depend on its position before it is called a table.
 7. Name what was scanned (`a-negative-names-what-was-scanned`) and write the table's address with its space (`addresses-name-their-space`). The shapes are in `table-shapes.md`.
+8. On a segmented image, derive each segment register from the reset path, vector writes and `cs:` overrides, and repeat the table search under each before writing "absent".
+9. Check a candidate pointer table for a constant step before calling it pointers: a table stepping by a constant 0x372 was a ramp read at the wrong phase.
 
 Never do:
 - Call a structural scan's hit a table before the code that reads it is found.

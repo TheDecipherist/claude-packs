@@ -10,3 +10,4 @@
 | Erased-space run | `2^n` entries times a count, 0xFF or 0x00 around it | the size equals the arithmetic |
 | Coarse low end | steps wide at the bottom, narrow at the top | by design: check the manual's resolution |
 | Shape times multipliers | rows alike up to a scale factor | one row, a multiplier column |
+| Monotone run of N | N entries rising, N the manual's stated count (121 cutoff points) | one hit in the image |

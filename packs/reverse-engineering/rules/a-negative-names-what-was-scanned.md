@@ -18,6 +18,9 @@ Always do:
 - After the same absence on three images, stop and change the question: look for what builds the mapping, not for a static table.
 - Print the layout a tool assumes with every empty result: a tool built for one layout reads another's data as absence.
 - Test the analogy under a "blocked" note before its fact: a machine shelved because its sibling was blocked turned out to be mostly analogue, with its sample data public.
+- Close an item as "no design constant" when the schematic sheet shows a per-unit trimmer for it, and record the trimmer and the sheet.
+- Before a blank extraction row fails, search the neighbouring bank and the sibling algorithm for a twin split across them; then fail loudly with the layout assumed.
+- Where a doc and the code disagree, say so and let the code win; give file and line for each answer, and "NOT FOUND" with where it looked.
 
 Never do:
 - Ship "no table exists" as an `[EAR]` law because one search missed it.

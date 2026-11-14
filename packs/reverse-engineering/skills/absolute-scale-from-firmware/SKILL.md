@@ -15,6 +15,11 @@ Always do:
 4. Treat printed delay maxima that are binary sample counts as proof of the sample rate.
 5. Let printed numbers check themselves: N stated limits must land on integers under one law, exact power-of-two steps must round, and overlapping ranges prove a shared index table. Printed conversion ladders may be preferred-number series (R20), and power-of-two endpoint ratios pin a word range.
 6. Scan a candidate law over the whole image: one hit is proof, a dozen is too loose.
+7. Take a unit law from a number the firmware prints with each preset, and fit the law to it.
+8. Derive a unit from the table's own inverse function and check it against the factorised constant (7680 = 60 x 128 read as 60 per semitone; the table says 64). Read a scale constant's unit off the table it indexes, never off a factorisation.
+9. A coefficient ladder's stored word is the truth: fit to it, and treat the printed Hz column as a label.
+10. A `[ms]` or `[dB]` header is not one scale: settle each parameter by matching its published range against the stored range at both ends; with no published range, write "unsettled".
+11. Where one table serves two parameters, read both indexings and let the pair fix its span and direction.
 
 Never do:
 - Pick a scale by ear.

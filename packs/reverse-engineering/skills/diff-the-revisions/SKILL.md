@@ -9,12 +9,14 @@ The diff tool lives on the reference library's shelf (`claude-packs toolchain`, 
 
 <constraints>
 Always do:
-1. Diff every revision before disassembly: identical regions are presets and tables.
+1. Diff every revision before disassembly: identical regions are presets and tables. Descramble scrambled dumps first, prove the permutation by rebuilding a known image with 0 bytes differing, and count a dump whose vectors land in no fitted ROM as a bad read, not a revision.
 2. Diff the NEAREST pair, not the most different.
 3. Align by instruction or by k-mer anchors, on invariants: a raw byte diff is 7 to 98 percent wrong once code moves.
 4. Place a build by diffing. Banners and folder labels lie; the true version is what the code reports.
 5. Treat a finding in one revision as a hypothesis for another, and answer each feature per revision.
 6. A table byte-identical across versions is a design constant; one that moves is code.
+7. Pair each release-note line with a diff hunk and name what it fixes (a two-instruction diff named the pan word); keep unmatched hunks and unmatched notes in the record.
+8. Check a summary or group table against the records it summarises before treating its identity across versions as a constant: a table byte-identical across versions can be stale.
 
 Never do:
 - Trust a banner or folder name as the version.

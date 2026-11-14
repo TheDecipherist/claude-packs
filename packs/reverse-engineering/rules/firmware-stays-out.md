@@ -13,6 +13,7 @@ Always do:
 - Keep ROM images, DSP blobs, disassemblies and vendor banks out of every repo.
 - Ship original code and derived facts. Regenerate a table from its formula, with a tolerance test.
 - Name each small test fixture in `"guards": { "firmware": { "fixtures": ["<glob>"] } }`.
+- Keep a repo that holds vendor art, manuals or banks private until the user decides the asset question, and log the decision.
 
 Never do:
 - Paste table bytes into source, not even a 128-byte curve.

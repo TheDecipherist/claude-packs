@@ -13,6 +13,7 @@ Always do:
 - Treat a flat distribution as a sign the decode is wrong.
 - Follow a withdrawal to everything built on it: code that still includes the table, and other repos' copies of the finding.
 - Put a correction into the extraction tool as an assertion that names the old reading, so it cannot quietly reverse.
+- Keep a sound the user likes when the finding under it is withdrawn, tagged `[EAR]` as ours, and offer both in one flat list; remove it only after a listen and the user's word.
 
 Never do:
 - Delete a wrong finding: the next reader will make the same mistake.

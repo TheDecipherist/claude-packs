@@ -17,6 +17,8 @@ Always do:
 - Close every step table on its printed maximum.
 - Call a layout done only when every record is written as a byte sum to its length, with the residual stated.
 - Prefer a structure a wrong record size cannot produce (loops halving against roots an octave apart).
+- Take a field's width from the firmware's loop counter or copy length, not from its largest stored value.
+- Find a checksum's algorithm by trying the standard CRC family and plain sums on one record, take the one the data-path chip implies, then run it over every record.
 
 Never do:
 - Call a layout proved because the arithmetic that chose it adds up.

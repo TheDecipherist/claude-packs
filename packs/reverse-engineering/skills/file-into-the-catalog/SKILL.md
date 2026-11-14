@@ -14,7 +14,7 @@ Always do:
 3. Find the entry's place: `<catalog>/<category>/<brand>/<model>.md` and `.h` (one entry per machine and role: `<model>-<role>` for every role but `voice`); effects go by type first (`effects/<type>/<brand>-<model>`). An entry that exists is extended, not made again.
 4. Write the evidence file (`.md`) in the schema's sections, in its order, each law tagged with its source and grade, a first line that says how well the block is known, absent terms written as absent. Write the runnable `.h` against `module.h`, with its assumptions declared. Never smooth the machine's behaviour to fit a port.
 5. A block whose topology is not recovered gets its `.md` naming what would close it, and no `.h`: it is a finding, and its build step stays unticked.
-6. Run `tools/gen_all.sh` in the catalog (never `gen_readme.py` bare: it rewrites the wrong category), then `python3 tools/drift_check.py`. Read both outputs. A disagreement is a finding either way round: fix the entry or log the disagreement in the catalog's `findings.md`, never silence the check.
+6. Run `tools/gen_all.sh` in the catalog (never `gen_readme.py` bare: it rewrites the wrong category), then `python3 tools/drift_check.py`. Read both outputs. A disagreement is a finding either way round: fix the entry or log the disagreement in the catalog's `findings.md`, never silence the check. Then set the machine's status note in the catalog to what was just filed, and read it back.
 7. Tag the project's build step with the marker, then tick it: `module: <category>/<entry>`, the entry's path under its category with no extension (`module: filters/oberheim/matrix1000`). The `catalog-entry-exists` hook (opt-in) reads this tag and refuses the tick while the `.md` or the `.h` is missing.
 
 Never do:

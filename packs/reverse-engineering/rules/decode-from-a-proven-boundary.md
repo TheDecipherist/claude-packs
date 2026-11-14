@@ -14,6 +14,7 @@ Always do:
 - With no proven boundary, count instruction encodings instead of decoding: a count carries no desync.
 - Read a conditional by what the code intends, and check each branch target against the raw bytes.
 - Suspect swapped operands when a result is always zero or constant.
+- Trust a counted pattern only when an independent fact pins one member of it.
 
 Never do:
 - Disassemble from an address you picked and call the result a finding.

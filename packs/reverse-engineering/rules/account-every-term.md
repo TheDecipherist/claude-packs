@@ -18,6 +18,7 @@ Always do:
 - Write the value as named term fields in code, and tag an empty one `[TODO/FW]`: an unaccounted term is then a visible gap, and a zero is a claim.
 - Add and clamp in the firmware's own domain: the rate index, the 13-bit word, not seconds or hertz.
 - Model a route as computed: it may be a two-input VCA, `dest += (src x pct + offset) x (control x pct)`, and a plain `src x depth` is wrong on a large part of a bank.
+- Run every accumulator against these term shapes: a hardwired key follow beside the patch's own key track, a per-zone trim, velocity into envelope intensity, a controller sweep that is zero at rest, an engine-invented term, two terms folded into one constant, a modulator on the wrong one of a pair, a term applied where the machine gates it, a coupling between two terms, a control voltage tapped upstream, velocity scaling the output and not the depth.
 
 Never do:
 - Hide a missing term behind a fudge factor: fix the term, then re-anchor.

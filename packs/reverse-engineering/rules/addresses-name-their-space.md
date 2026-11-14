@@ -18,6 +18,8 @@ Always do:
 - Name the image with its address: its name, version and md5. A later firmware may be a recompile that shifts every address, and a version string in an image is not its version: find the code that reports it.
 - Keep a marker hit only when a neighbour sits one stride away, on the grid. Scanning every word offset returns each real label three times, once right and twice shifted.
 - Read a section table's offsets as possibly into the decompressed image. A carve at the compressed offset looks plausible and never checksums.
+- Test a byte that groups like categories (0,0,0,0,1,1,2,2) as the high byte of a rising 16-bit curve before calling it an enum.
+- Count a table's targets that fall beyond the image; when most do, record the data as undumped and stop fitting inside the image.
 
 Never do:
 - Read a stride across a segment: that invented a 2469-entry table.

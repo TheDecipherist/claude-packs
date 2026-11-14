@@ -23,6 +23,10 @@ Always do:
 - Hold a law read from the host side alone as provisional until the code that consumes it is read.
 - Say what the board did to compensate when a chip fact is about the hardware: the chip's figure is not the machine's.
 - Say which is ours when one button name stands for two different features.
+- Cite a `[PUB]` source by author and URL, date it, and prefer two independent ones before a finding is settled.
+- Record where a transcribed table came from; when its source cannot be found or does not hold it, mark every dependent law `[ASSUMED]` and list a re-capture.
+- Make a law's tag agree in every doc and header that names it, list the callers of each copy before calling one dead, and where the evidence points both ways record it OPEN with a table and name what would settle it.
+- Treat a parts-list `[SCH]` row as naming a chip, no evidence of what the algorithm does; call a unit with one hard claim and the rest `[REF]` a scaffold, in every report that counts it as decoded.
 
 Never do:
 - Let a sourced fact launder a guess in the same formula.
