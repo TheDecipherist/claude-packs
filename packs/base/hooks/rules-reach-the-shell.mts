@@ -93,31 +93,56 @@ function loadedIn(projectDir: string, session: string | undefined): Set<string> 
   }));
 }
 
+/** The most this hook gives in one call. Claude Code cuts a hook event's output at 10,000 characters, and the runner merges every
+ *  hook's context under that one cut: a rule past it is lost though logged as given (55,113 characters were cut once). */
+export const GIVE_BUDGET = 6000;
+
+interface Match { rule: PathRule; trigger: string }
+// The rules a session matched and has not been given yet, because the budget was spent: they go first on its next Bash call.
+const pendingBySession = new Map<string, Match[]>();
+
+/** As many of `todo` as fit the budget (one at least, so a long rule is never held for ever), and the rest. */
+export function withinBudget(todo: readonly Match[], text: (m: Match) => string, budget = GIVE_BUDGET): { give: Match[]; rest: Match[] } {
+  const give: Match[] = [];
+  let size = 0;
+  for (const [i, m] of todo.entries()) {
+    const n = text(m).length;
+    if (give.length > 0 && size + n > budget) return { give, rest: todo.slice(i) };
+    give.push(m);
+    size += n;
+  }
+  return { give, rest: [] };
+}
+
+const contents = ({ rule, trigger }: Match): string => `Contents of ${rule.file} (its paths match ${trigger}, which this command touches):\n\n${rule.body}`;
+
 export const hook: Hook = (event, ctx) => {
   const command = event.tool_input?.command;
   if (event.hook_event_name !== 'PreToolUse' || event.tool_name !== 'Bash' || typeof command !== 'string') return pass;
+  const key = `${ctx.projectDir}\n${event.session_id ?? ''}`;
+  const pending = pendingBySession.get(key) ?? [];
   const cwd = event.cwd ?? ctx.projectDir;
   const written = writesOf(event, cwd, ctx.env).map((w) => w.path);
   const files = filesTouched(command, cwd, ctx.projectDir, written);
-  if (!files.length) return pass;
-  const matched = pathRules(ctx.projectDir).flatMap((rule) => {
+  if (!files.length && !pending.length) return pass;
+  const matched = files.length ? pathRules(ctx.projectDir).flatMap((rule) => {
     const trigger = files.find((f) => matchesAny(f, rule.globs));
     return trigger ? [{ rule, trigger }] : [];
-  });
-  if (!matched.length) return pass;
-  const key = `${ctx.projectDir}\n${event.session_id ?? ''}`;
+  }) : [];
+  const all = [...pending, ...matched.filter((m) => !pending.some((p) => p.rule.name === m.rule.name))];
+  if (!all.length) return pass;
   let held = heldBySession.get(key) ?? new Set<string>();
-  if (matched.some(({ rule }) => !held.has(rule.name))) held = new Set([...held, ...loadedIn(ctx.projectDir, event.session_id)]);
+  if (all.some(({ rule }) => !held.has(rule.name))) held = new Set([...held, ...loadedIn(ctx.projectDir, event.session_id)]);
   if (event.session_id) heldBySession.set(key, held);
-  const given: string[] = [];
-  for (const { rule, trigger } of matched) {
-    if (held.has(rule.name)) continue;
+  const { give, rest } = withinBudget(all.filter(({ rule }) => !held.has(rule.name)), contents);
+  if (event.session_id) pendingBySession.set(key, rest);
+  for (const { rule, trigger } of give) {
     held.add(rule.name);
     logUsage(ctx, event, RULES, { rule: rule.name, file: rule.file, why: 'shell_path_match', globs: rule.globs, trigger });
-    given.push(`Contents of ${rule.file} (its paths match ${trigger}, which this command touches):\n\n${rule.body}`);
   }
-  if (!given.length) return pass;
-  return say({ hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: given.join('\n\n') } });
+  if (!give.length) return pass;
+  const more = rest.length ? `\n\n${rest.length} more rule(s) match the files this session touches and come with its next Bash call: ${rest.map((m) => m.rule.name).join(', ')}.` : '';
+  return say({ hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: give.map(contents).join('\n\n') + more } });
 };
 
 /** A rule reaches a shell call on a file in the worktree as in the main checkout; the log is the main checkout's. */
@@ -144,6 +169,10 @@ export function selftest(): number {
   put(join(dir, '.claude/rules/hooks.md'), '---\npaths:\n  - ".claude/hooks/**"\n---\n\n# Hooks are seen red\n');
   put(join(dir, '.claude/hooks/guard.mjs'), '// a guard\n');
   const ownHooks = sh('node .claude/hooks/guard.mjs --selftest', 's6');
+  const long = (n: string): string => `---\npaths:\n  - "notes/**"\n---\n\n# Long ${n}\n\n${'Keep it. '.repeat(280)}\n`;
+  const big = scratchProject({ '.claude/rules/l1.md': long('one'), '.claude/rules/l2.md': long('two'), '.claude/rules/l3.md': long('three'), 'notes/n.md': '# n\n' });
+  const budgeted = runHook(hookFile, big, { ...bashOf('cat notes/n.md', big), hook_event_name: 'PreToolUse', session_id: 'b1' });
+  const bigLogged = (readText(join(big, RULES)) ?? '').split('\n').filter(Boolean);
   return verdicts('rules-reach-the-shell', [
     ['a cat of build.md passes', first.status, 0],
     ['and gives the rule whole', /Plan and logs[\s\S]*Always date a log line/.test(first.stdout) && first.stdout.includes('additionalContext') ? 1 : 0, 1],
@@ -156,6 +185,9 @@ export function selftest(): number {
     ['a path relative to a cd target reaches its rule', /Plan and logs/.test(cdRel.stdout) ? 1 : 0, 1],
     ['a rule whose paths name .claude/hooks/** reaches a selftest run of a hook', /Hooks are seen red/.test(ownHooks.stdout) ? 1 : 0, 1],
     ['each giving is one log line', logged().length, 5],
+    ['three long rules: the output stays within the budget', budgeted.stdout.length <= GIVE_BUDGET + 600 ? 1 : 0, 1],
+    ['and the one held back is named, not given', /Long two/.test(budgeted.stdout) && !/# Long three/.test(budgeted.stdout) && /1 more rule\(s\).*l3/.test(budgeted.stdout) ? 1 : 0, 1],
+    ['only the rules given are logged', bigLogged.length, 2],
   ]);
 }
 

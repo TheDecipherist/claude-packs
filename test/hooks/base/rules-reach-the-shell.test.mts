@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { bash } from '../../fixtures/installs.mts';
 import { fixture, holdsTheContract } from '../hook-rig.mts';
-import { hook } from '../../../packs/base/hooks/rules-reach-the-shell.mts';
+import { GIVE_BUDGET, hook } from '../../../packs/base/hooks/rules-reach-the-shell.mts';
 import { put, scratchProject } from '../../../packs/base/hooks/lib/selftest.mts';
 
 holdsTheContract({
@@ -34,4 +34,21 @@ test('an edited rule is read again, and a rule is given once per session in one 
   utimesSync(join(dir, '.claude/rules/plan.md'), later, later);
   assert.match(call('b'), /Put the zone on a log line/, 'a new session gets the rule as its file now reads');
   assert.doesNotMatch(call('c'), /Date a log line/);
+});
+
+// supernova2_monitor: one call gave about 30 rules and Claude Code cut 55,113 characters of them, each logged as given
+test('a rule held back by the budget comes with the session\'s next Bash call, whatever it touches', () => {
+  const long = (n: string): string => `---\npaths:\n  - "build.md"\n---\n\n# Long ${n}\n\n${'Keep it. '.repeat(280)}\n`;
+  const dir = scratchProject({ '.claude/rules/l1.md': long('one'), '.claude/rules/l2.md': long('two'), '.claude/rules/l3.md': long('three'), 'build.md': '# b\n' });
+  const ctx = { projectDir: dir, cwd: dir, env: process.env, now: Date.now(), layout: {}, log: () => undefined } as never;
+  const run = (command: string): string => {
+    const verdict = hook({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command }, cwd: dir, session_id: 'p' }, ctx);
+    assert.ok(!(verdict instanceof Promise));
+    return verdict.stdout;
+  };
+  const first = run('cat build.md');
+  assert.ok(first.length <= GIVE_BUDGET + 600, `the first call gives ${first.length} characters`);
+  assert.doesNotMatch(first, /# Long three/);
+  assert.match(run('git status --short'), /# Long three/, 'the next call, naming no file, brings the rule held back');
+  assert.equal(run('git status --short'), '', 'and nothing after that');
 });
