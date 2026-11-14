@@ -2,13 +2,15 @@
 // was not followed: supernova2's sessions 3 to 28 met 41 refusals and judged none (KWB-next), so no hook's worth could be read.
 // A Stop hook. The refusals are the lines of .claude/logs/refusals.jsonl with this session's id and code 2 (a crash refused nothing
 // and has no verdict), its own send-backs left out (judging them is circular); a verdict is a line of .claude/logs/verdicts.jsonl with the refusal's id, which `logs mark` writes. It never
-// loops: it sends a turn back once, and a turn already sent back (stop_hook_active) ends.
+// loops: it sends a turn back while one stays open, and the third send-back in a row over the same open refusals ends the turn
+// (.claude/state/refusals-judged.json). Once was not enough: a refusal met after the send-back was never asked about (KWB-next).
 //   node refusals-judged.mjs --selftest
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
-import { asRecord, parseJson, toJson } from './lib/json.mts';
+import { ensureDir } from './lib/files.mts';
+import { asRecord, parseJson, readJson, toJson, writeJson } from './lib/json.mts';
 import { put, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook, VerdictRow } from './lib/types.d.mts';
@@ -16,6 +18,8 @@ import { pass, refuse } from './lib/verdict.mts';
 
 const LOGS = join('.claude', 'logs');
 const SHOWN = 12;   // ids named in the message; the rest are counted
+const STATE = join('.claude', 'state', 'refusals-judged.json');
+const REPEATS = 3;   // send-backs in a row over the same open refusals before a turn may end
 
 const linesOf = (file: string): Record<string, unknown>[] => {
   let text = '';
@@ -32,15 +36,21 @@ export function unjudged(root: string, session: string): string[] {
 }
 
 export const hook: Hook = (event, ctx) => {
-  if (event.hook_event_name !== 'Stop' || event.stop_hook_active || typeof event.session_id !== 'string') return pass;
+  if (event.hook_event_name !== 'Stop' || typeof event.session_id !== 'string') return pass;
   const open = unjudged(ctx.projectDir, event.session_id);
   if (!open.length) return pass;
+  const last = readJson<{ session?: unknown; open?: unknown; sends?: unknown }>(join(ctx.projectDir, STATE));
+  const same = event.stop_hook_active === true && last?.session === event.session_id && last?.open === open.join(',');
+  const sends = same ? (typeof last?.sends === 'number' ? last.sends : 0) + 1 : 1;
+  if (sends > REPEATS) return pass;
+  ensureDir(join(ctx.projectDir, '.claude', 'state'));
+  writeJson(join(ctx.projectDir, STATE), { session: event.session_id, open: open.join(','), sends });
   const named = open.slice(0, SHOWN).join(', ') + (open.length > SHOWN ? ` and ${open.length - SHOWN} more` : '');
   return refuse(
     `BLOCKED by refusals-judged: this session met ${open.length} refusal(s) with no verdict: ${named}. `
     + '`npx --no-install @thedecipherist/claude-packs logs refusals --open` shows each one\'s reason and command. Read each, then mark it: '
     + '`npx --no-install @thedecipherist/claude-packs logs mark <id> right|wrong "<why>"` (right when the hook was right and you fixed the work; '
-    + 'wrong when it refused correct work, which also goes into the workflow bug log). This turn is sent back once.',
+    + 'wrong when it refused correct work, which also goes into the workflow bug log). This turn is sent back until they are judged.',
   );
 };
 
@@ -71,6 +81,12 @@ export function selftest(): number {
     const v = hook({ hook_event_name: 'PostToolUse', session_id: 's1' }, contextOf({ projectDir: dir, cwd: dir, env: { CLAUDE_PROJECT_DIR: dir } }));
     return v instanceof Promise ? -1 : v.code;
   };
+  const repeats = (n: number): number => {
+    const d = project([refusal('aa', 's1')]);
+    let code = stop(d);
+    for (let i = 1; i < n; i += 1) code = stop(d, { stop_hook_active: true });
+    return code;
+  };
   const rows: VerdictRow[] = [
     ['a refusal of this session with no verdict', stop(project([refusal('aa', 's1')])), 2],
     ['two, one judged', stop(project([refusal('aa', 's1'), refusal('bb', 's1')], [verdict('aa')])), 2],
@@ -79,7 +95,8 @@ export function selftest(): number {
     ['a crash (code 1) has no verdict to give', stop(project([refusal('dd', 's1', 1)])), 0],
     ['its own send-back is not judged (circular)', stop(project([toJson({ id: 'ff', hook: 'refusals-judged', code: 2, session: 's1' })])), 0],
     ['no logs at all', stop(scratchProject({ 'README.md': '# x\n' })), 0],
-    ['a turn already sent back ends (never loops)', stop(project([refusal('aa', 's1')]), { stop_hook_active: true }), 0],
+    ['a turn already sent back, still open: sent back again', repeats(2), 2],
+    ['the same open refusals after the third send-back: it ends (never loops)', repeats(REPEATS + 1), 0],
     ['a hook event that is not Stop', other(), 0],
   ];
   return verdicts('refusals-judged', rows);

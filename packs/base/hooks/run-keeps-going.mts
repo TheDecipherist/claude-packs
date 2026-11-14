@@ -5,8 +5,9 @@
 // A Stop hook. Nobody there is lib/unattended.mts (CLAUDE_PACKS_UNATTENDED, or a `claude -p` session). The order is
 // CLAUDE_PACKS_ORDER (run.sh sets it), else the one folder under docs/workorders with a progress.md and no DONE; with none, or
 // more than one and none named, it passes. Progress is the order's progress.md: the hook keeps its hash at each send-back in
-// .claude/state/run-keeps-going.json, and a turn already sent back (stop_hook_active) whose progress.md has not changed since
-// ends, so a run that cannot move never loops.
+// .claude/state/run-keeps-going.json and counts the send-backs in a row that recorded nothing; the third such ends the turn, so a
+// run that cannot move never loops. One send-back was not enough: each session met it with a wrap-up (a refusal marked, a commit)
+// that recorded nothing, and its next Stop passed (KWB-next, supernova2 tonight: 6 sessions in 15 minutes, each sent back once).
 //   node run-keeps-going.mjs --selftest
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -23,6 +24,7 @@ import { pass, refuse } from './lib/verdict.mts';
 
 const ORDERS = join('docs', 'workorders');
 const STATE = join('.claude', 'state', 'run-keeps-going.json');
+const STALLS = 3;   // send-backs in a row with nothing new in progress.md before a turn may end
 
 /** The order this run works on: the one named, else the only one with progress and no DONE; null when that is not one. */
 export function openOrder(root: string, named: string | undefined): string | null {
@@ -43,15 +45,18 @@ export const hook: Hook = (event, ctx) => {
   const order = openOrder(root, ctx.env['CLAUDE_PACKS_ORDER']);
   if (!order || existsSync(join(root, ORDERS, order, 'DONE'))) return pass;
   const now = progressHash(root, order);
-  const last = readJson<{ session?: unknown; progress?: unknown }>(join(root, STATE));
-  // sent back already, and nothing recorded since: this run cannot move now, and the next session starts fresh
-  if (event.stop_hook_active && last?.session === event.session_id && last?.progress === now) return pass;
+  const last = readJson<{ session?: unknown; progress?: unknown; stalls?: unknown }>(join(root, STATE));
+  // sent back already and nothing recorded since: one more stall; STALLS of them in a row and this run cannot move now
+  const same = event.stop_hook_active === true && last?.session === event.session_id && last?.progress === now;
+  const stalls = same ? (typeof last?.stalls === 'number' ? last.stalls : 0) + 1 : 0;
+  if (stalls >= STALLS) return pass;
   ensureDir(join(root, '.claude', 'state'));
-  writeJson(join(root, STATE), { session: event.session_id ?? null, progress: now });
+  writeJson(join(root, STATE), { session: event.session_id ?? null, progress: now, stalls });
   return refuse(
-    `BLOCKED by run-keeps-going: nobody is there, and work order ${order} has no DONE. Do not end the turn: start the next item `
-    + `(docs/workorders/${order}/progress.md says where the run stands), record it there when it is done, and go on. `
-    + 'The turn ends on the DONE file, or when a stretch records nothing new in progress.md: then say in progress.md what stops the run.',
+    `BLOCKED by run-keeps-going: nobody is there, and work order ${order} has no DONE. Do not end the turn, and do not answer with a `
+    + `summary: start the next item now (docs/workorders/${order}/progress.md says where the run stands), record it there when it is done, `
+    + `and go on to the one after. The turn ends on the DONE file, or after ${STALLS} send-backs in a row that record nothing new in `
+    + 'progress.md: if something truly stops the run, write what in progress.md first.',
   );
 };
 
@@ -78,8 +83,13 @@ export function selftest(): number {
     const v = hook({ hook_event_name: 'Stop', session_id: 's1', ...extra }, contextOf({ projectDir: dir, cwd: dir, env: { CLAUDE_PROJECT_DIR: dir, ...env } }));
     return v instanceof Promise ? -1 : v.code;
   };
-  // a run that recorded nothing after its send-back ends; one that recorded an item is sent back again
-  const stalled = (): number => { const d = project({ a: { progress: '- W1.1 x\n' } }); stop(d); return stop(d, undefined, { stop_hook_active: true }); };
+  // a wrap-up that records nothing is sent back again; the third stall in a row ends; one that recorded an item is sent back again
+  const stalls = (n: number): number => {
+    const d = project({ a: { progress: '- W1.1 x\n' } });
+    let code = stop(d);
+    for (let i = 0; i < n; i += 1) code = stop(d, undefined, { stop_hook_active: true });
+    return code;
+  };
   const moving = (): number => {
     const d = project({ a: { progress: '- W1.1 x\n' } });
     stop(d);
@@ -94,7 +104,9 @@ export function selftest(): number {
     ['no order with progress', stop(project({ a: {} })), 0],
     ['two open orders, none named', stop(project({ a: { progress: '' }, b: { progress: '' } })), 0],
     ['two open orders, one named by the run', stop(project({ a: { progress: '' }, b: { progress: '' } }), { CLAUDE_PACKS_UNATTENDED: '1', CLAUDE_PACKS_ORDER: 'b' }), 2],
-    ['sent back, nothing recorded since: it ends (never loops)', stalled(), 0],
+    ['sent back, a wrap-up that records nothing: sent back again', stalls(1), 2],
+    ['two stalls in a row: sent back again', stalls(2), 2],
+    ['three stalls in a row: it ends (never loops)', stalls(STALLS), 0],
     ['sent back, an item recorded since: sent back again', moving(), 2],
     ['a hook event that is not Stop, as the runner calls it', runHook(hookFile, project({ a: { progress: '' } }), { hook_event_name: 'PostToolUse', session_id: 's1' }).status ?? -1, 0],
   ];

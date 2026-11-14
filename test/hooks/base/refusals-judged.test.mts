@@ -25,10 +25,16 @@ test('refusals-judged: sends a turn back while one of its refusals has no verdic
   assert.doesNotMatch(r.stderr, /aa11/);
 });
 
-test('refusals-judged: passes when all are judged, for another session\'s, for a crash, and once sent back', () => {
+test('refusals-judged: passes when all are judged, for another session\'s, for a crash, ', () => {
   const project = dir();
   assert.equal(hookRun(logs(project, [refused('aa11')], [{ id: 'aa11', verdict: 'wrong', why: 'x' }]), 'refusals-judged.mjs', stop()).status, 0);
   assert.equal(hookRun(logs(project, [refused('cc33', 's2')]), 'refusals-judged.mjs', stop()).status, 0);
   assert.equal(hookRun(logs(project, [refused('dd44', 's1', 1)]), 'refusals-judged.mjs', stop()).status, 0);
-  assert.equal(hookRun(logs(project, [refused('ee55')]), 'refusals-judged.mjs', stop({ stop_hook_active: true })).status, 0);
+});
+
+test('refusals-judged: sends a turn back again while it stays open, and lets it end after the third time over the same refusals', () => {
+  const project = logs(dir(), [refused('ee55')]);
+  const codes = [stop(), stop({ stop_hook_active: true }), stop({ stop_hook_active: true }), stop({ stop_hook_active: true })]
+    .map((p) => hookRun(project, 'refusals-judged.mjs', p).status);
+  assert.deepEqual(codes, [2, 2, 2, 0]);
 });

@@ -27,10 +27,10 @@ test('run-keeps-going: passes on DONE and with someone there', () => {
   assert.equal(hookRun(order(dir(), '- W1.1 x\n'), 'run-keeps-going.mjs', stop(), { CLAUDE_PACKS_UNATTENDED: '0' }).status, 0);
 });
 
-test('run-keeps-going: once sent back, a stretch that recorded nothing ends, and one that recorded an item goes on', () => {
+test('run-keeps-going: a wrap-up that records nothing is sent back again, an item resets the count, and three stalls in a row end it', () => {
   const project = order(dir(), '- W1.1 x\n');
-  assert.equal(hookRun(project, 'run-keeps-going.mjs', stop(), AWAY).status, 2);
-  assert.equal(hookRun(project, 'run-keeps-going.mjs', stop({ stop_hook_active: true }), AWAY).status, 0);
+  const run = (active: boolean): number | null => hookRun(project, 'run-keeps-going.mjs', stop(active ? { stop_hook_active: true } : {}), AWAY).status;
+  assert.deepEqual([run(false), run(true), run(true)], [2, 2, 2]);
   order(project, '- W1.1 x\n- W1.2 y\n');
-  assert.equal(hookRun(project, 'run-keeps-going.mjs', stop({ stop_hook_active: true }), AWAY).status, 2);
+  assert.deepEqual([run(true), run(true), run(true), run(true)], [2, 2, 2, 0]);
 });
