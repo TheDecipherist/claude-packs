@@ -10,10 +10,10 @@
 // A judge on the hook contract (W4): it writes nothing. It once kept a marker in the temp folder once a skill was found, to save
 // reading a long transcript again; a judge writes no state, and the transcript is read only when a source file was named, so the
 // marker is gone (W4 report).
-import { existsSync } from 'node:fs';
+import { closeSync, existsSync, fstatSync, openSync, readSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readText } from './lib/files.mjs';
+import { eachLineBack } from './lib/lines-back.mjs';
 import { matchesAny } from './lib/glob.mjs';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
 import { parseJson } from './lib/json.mjs';
@@ -75,21 +75,46 @@ const compiledIn = (entry, skill) => {
         ? content.map((b) => (typeof b === 'object' && b !== null && 'text' in b ? String(b.text ?? '') : '')).join('\n') : '';
     return text.includes(COMPILED) && text.includes(`## The skill \`${skill}\``);
 };
+/** True when one transcript line loads the skill: the compiled prompt, a Skill call, or a Read of its SKILL.md. */
+function lineLoads(line, skill) {
+    const entry = parseJson(line);
+    const content = entry?.message?.content;
+    return compiledIn(entry, skill) || (Array.isArray(content) && content.some((use) => loads(use, skill)));
+}
+// A transcript is read in pieces, never whole and never capped: readText's 8 MB cap made every transcript past it read as "unloaded", so a
+// long session could load no skill again (supernova2_monitor W1.6, 39 MB, WB-22). The head holds a compiled prompt; the rest is walked
+// from the end, where a Skill call or a Read of SKILL.md most likely is; only a line naming the skill is decoded.
+const HEAD = 1 << 20;
 function loadedIn(file, skill) {
-    const text = readText(file);
-    if (text === null)
-        return false; // not a refusal: an unreadable transcript counts as unloaded
-    for (const line of text.split('\n')) {
-        if (!line.includes(skill))
-            continue;
-        const entry = parseJson(line);
-        const content = entry?.message?.content;
-        if (compiledIn(entry, skill))
-            return true;
-        if (Array.isArray(content) && content.some((use) => loads(use, skill)))
-            return true;
+    let fd;
+    try {
+        fd = openSync(file, 'r');
     }
-    return false;
+    catch {
+        return false;
+    } // not a refusal: an unreadable transcript counts as unloaded
+    try {
+        const size = fstatSync(fd).size;
+        const head = Buffer.alloc(Math.min(HEAD, size));
+        readSync(fd, head, 0, head.length, 0);
+        const lastNewline = head.lastIndexOf(10);
+        const whole = size <= HEAD ? head.toString('utf8') : head.subarray(0, Math.max(0, lastNewline)).toString('utf8');
+        if (whole.split('\n').some((line) => line.includes(skill) && lineLoads(line, skill)))
+            return true;
+        if (size <= HEAD)
+            return false;
+        const name = Buffer.from(skill);
+        let found = false;
+        eachLineBack(fd, size, (line) => {
+            if (line.includes(name) && lineLoads(line.toString('utf8'), skill))
+                found = true;
+            return found;
+        });
+        return found;
+    }
+    finally {
+        closeSync(fd);
+    }
 }
 // An agent's own transcript sits beside the session's: <session>/subagents/agent-<id>.jsonl.
 function skillLoaded(event, transcript, skill) {
