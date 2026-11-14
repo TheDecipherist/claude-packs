@@ -205,7 +205,7 @@ The kit is strict about what counts as proof:
 Every project with the kit shows, under the prompt, what is working and where it is:
 
 ```
-claude-packs 1.9.0 | opus md | CTX 41% (1.0M) | 5h 38% | 7d 81%
+claude-packs 2.0.0-dev | opus md | CTX 41% (1.0M) | 5h 38% | 7d 81%
 ⎇ work/panel ✱3 ↑1↓0 | Edit src/ui/Panel.cpp | $ npm run test:changed
 BANDWARP               ███████████░░░░░░░░░  55%  34 of 76 items left, 4 agents, checked 8s ago
   > dsp        > W3b The cluster             ██████░░░░  60%  ♥ 12s ⚙ 13 proc · 1.3 cpu · 322M ram        WRITE src/dsp/Comb.cpp

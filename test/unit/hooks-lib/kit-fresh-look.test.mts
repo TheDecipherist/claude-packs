@@ -64,3 +64,12 @@ test('the kit\'s own checkout lacking origin/main refuses a commit; a planted on
   assert.equal(kitVerdict(dir, { git: level, fetch: false }), null);
   assert.equal(atStart(dir, { env: {}, now: 0, git: level }), null);
 });
+
+// the 2.0 branch is labelled 2.0.0-dev until the release (2026-11-14): newer than any 1.x on npm, older than 2.0.0 itself
+test('a pre-release sorts after the last release and before its own', () => {
+  assert.ok(compareVersions('2.0.0-dev', '1.8.2') > 0);
+  assert.ok(compareVersions('2.0.0-dev', '2.0.0') < 0);
+  assert.ok(compareVersions('2.0.0', '2.0.0-dev') > 0);
+  assert.equal(compareVersions('2.0.0-dev', '2.0.0-dev'), 0);
+  assert.equal(compareVersions('2.0.0', '2.0.0'), 0);
+});
