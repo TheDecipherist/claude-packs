@@ -11,10 +11,12 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ensureDir } from './lib/files.mts';
 import { shortHash } from './lib/hash.mts';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { readJson, writeJson } from './lib/json.mts';
 import { put, runHook, scratchProject, verdicts } from './lib/selftest.mts';
+import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook, VerdictRow } from './lib/types.d.mts';
 import { unattended } from './lib/unattended.mts';
 import { pass, refuse } from './lib/verdict.mts';
@@ -44,12 +46,21 @@ export const hook: Hook = (event, ctx) => {
   const last = readJson<{ session?: unknown; progress?: unknown }>(join(root, STATE));
   // sent back already, and nothing recorded since: this run cannot move now, and the next session starts fresh
   if (event.stop_hook_active && last?.session === event.session_id && last?.progress === now) return pass;
+  ensureDir(join(root, '.claude', 'state'));
   writeJson(join(root, STATE), { session: event.session_id ?? null, progress: now });
   return refuse(
     `BLOCKED by run-keeps-going: nobody is there, and work order ${order} has no DONE. Do not end the turn: start the next item `
     + `(docs/workorders/${order}/progress.md says where the run stands), record it there when it is done, and go on. `
     + 'The turn ends on the DONE file, or when a stretch records nothing new in progress.md: then say in progress.md what stops the run.',
   );
+};
+
+/** A Stop where no order has progress passes, in the worktree and in the main checkout: whoever runs the test, nobody there or not. */
+export const worktreeCase: WorktreeCase = {
+  steps: [
+    { label: 'a Stop in the worktree, no order running', event: { hook_event_name: 'Stop', session_id: 'wt', cwd: '{wt}' }, want: 0 },
+    { label: 'a Stop in the main checkout, no order running', event: { hook_event_name: 'Stop', session_id: 'wt', cwd: '{here}' }, want: 0 },
+  ],
 };
 
 export function selftest(): number {
@@ -78,6 +89,7 @@ export function selftest(): number {
   const rows: VerdictRow[] = [
     ['an open order, nobody there', stop(project({ a: { progress: '- W1.1 x\n' } })), 2],
     ['the order is DONE', stop(project({ a: { progress: '- W1 done\n', done: true } })), 0],
+    ['the order the run names is DONE', stop(project({ a: { progress: '- W1 done\n', done: true } }), { CLAUDE_PACKS_UNATTENDED: '1', CLAUDE_PACKS_ORDER: 'a' }), 0],
     ['someone is there', stop(project({ a: { progress: '' } }), { CLAUDE_PACKS_UNATTENDED: '0' }), 0],
     ['no order with progress', stop(project({ a: {} })), 0],
     ['two open orders, none named', stop(project({ a: { progress: '' }, b: { progress: '' } })), 0],

@@ -14,6 +14,8 @@ max_sessions="${MAX_SESSIONS:-30}"
 limit_wait="${LIMIT_WAIT:-900}"
 # nobody is there: the kit's agents-held hook keeps every agent in the foreground, since the session's end stops a background one (KWB-124)
 export CLAUDE_PACKS_UNATTENDED=1
+# the order this run works on, for run-keeps-going (a turn ends only on its DONE or a stretch that recorded nothing)
+export CLAUDE_PACKS_ORDER={{name}}
 mkdir -p "$logs"
 # each session's transcript holds this machine's paths and the user's name: it never reaches git (KWB-98)
 [[ -f "$logs/.gitignore" ]] || printf '*\n' > "$logs/.gitignore"

@@ -429,7 +429,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 71 | 12 | 4 | 10 |
-| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 36 | 9 | 34 | 18 |
+| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 36 | 9 | 36 | 18 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 12 | 14 | 1 | 2 |
@@ -590,6 +590,8 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `agents-held` | Stop | Refuses the end of a turn in a session with nobody there (`claude -p`, a work order's runner) while an agent it started in the background has not returned: the session's end would stop it mid-work |
 | `making-check` | Stop | Sends a turn back when what it wrote is not what it said |
 | `making-check-count` | Stop | Counts the times a turn was sent back, so a repeat is known |
+| `refusals-judged` | Stop | Opt-in. Refuses the end of a turn while a refusal this session met has no verdict (`logs mark <id> right\|wrong`); its own send-backs left out, and a turn already sent back ends |
+| `run-keeps-going` | Stop | Opt-in. Refuses the end of a turn in a session with nobody there while its work order (`CLAUDE_PACKS_ORDER`) has no DONE; a turn already sent back that recorded nothing new in progress.md ends |
 | `making` | Prompt | Asks what is being made and what it reuses |
 | `reuse-hint` | Prompt | Shows functions the repo already has when the prompt names them |
 | `skill-log` | Prompt, After Skill | Writes one line per skill used to `.claude/logs/skills.jsonl`, for `logs skills`; refuses nothing |
