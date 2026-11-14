@@ -11,7 +11,7 @@ Every stored time is a count of some tick. Fit a law before the tick is known an
 Always do:
 1. Read which interrupt vectors are live: a branch-to-self stub is dead, and a dead serial vector means MIDI is polled. Read the timer handler's rearm constant.
 2. Write the chain as arithmetic, tagged `[FW]`: crystal, CPU clock (the baud divisor), timer reload, tick, control rate.
-3. Read a counter chip's MODE before its count: an 8254 in mode 3 interrupts at the half period.
+3. Read a counter chip's MODE before its count: an 8254 in mode 3 (square wave) has an output period of the full count, high for half and low for half, so an interrupt wired to both edges sees the half period and one on a single edge sees the full count.
 4. Pin the clock from three or more independent readings (baud, pitch table at 440, autotune targets, tempo table, a second crystal) and count them in `laws.md`.
 5. Derive the tick from a count range against a printed time range. Try the small set of closed forms (`K/(n+i)`, `K*2^(i/N)`) over every entry of the table, accept only an exact one, and read the unit off K.
 6. Check the top of the fastest dependent range is musical: a 188 Hz LFO means a missing divisor, and a 16-voice scheduler scales every time by 16.

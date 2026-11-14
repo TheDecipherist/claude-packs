@@ -20,7 +20,7 @@ Always do:
 9. Write one line per image (what it is, whole or not, why) where the next step reads it, before `names-first` starts.
 10. Test for a lane or pin permutation (vectors and strings read only after one). Before two dumps are called revisions, apply the documented permutation and prove it by rebuilding a held assembled image byte for byte, and descramble before `diff-the-revisions`; the same position with different content may be a bad dump.
 11. When the container checksum is unknown, try a plain truncated sum first, name the serial or disk chip from the parts list, derive the bit order and frame from its datasheet, grid-search polynomial, init, xorout, reflect and endianness, and accept only the one that verifies on every record (n of n).
-12. Profile each block's lag-1 autocorrelation in a disk or sampler image: audio reads about 0.9 to 0.997, code and parameters near 0. One number validates a sector walk (`dump-triage` gains the column).
+12. Profile each block's lag-1 autocorrelation in a disk or sampler image: audio reads about 0.9 to 0.997, code and parameters near 0. One number validates a sector walk; `dump-triage` does not print it, so compute it by hand.
 
 Never do:
 - Search names in, or fit a law to, an image whose triage is unread.

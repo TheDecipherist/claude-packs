@@ -12,7 +12,7 @@ Always do:
 - Say which clock you mean. A setter that resolves OFF to INT cannot fail, so the caller never hears.
 - Follow the host's transport when there is one: a unit in a session follows the session.
 - Keep the sync switch a system setting, and the divisions in the program.
-- Open standalone as the hardware did, sync off, until the user turns sync on.
+- Open as the hardware did (standalone, sync off, on almost all of them), until the user turns sync on.
 - Open as a plugin in a DAW with the master clock following the host. Delays are synced by default; LFOs and envelopes start free and can be synced. Each time destination declares its default by what it is (delay, LFO, envelope), never one blanket default.
 - Load a patch that stores its sync state as stored: a stored 247 ms never becomes 500 ms. The defaults are for a new or INIT patch only.
 - Give every RHYTHM time a sync option, and a rebuild offers it on every rhythm time its hardware could slave to a clock.

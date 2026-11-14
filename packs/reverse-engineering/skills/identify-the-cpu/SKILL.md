@@ -9,7 +9,7 @@ A vendor name is not an architecture, and a wrong decoder prints plausible ficti
 
 <constraints>
 Always do:
-1. Read the reset and vector signatures: an x86 far JMP at the top, a 68000 table at 0, the 0xFFFE vector of a 6502 or 6809, a Cortex-M initial stack pointer followed by odd handler addresses. Add the boot idiom, a compiler banner and the initial SP.
+1. Read the reset and vector signatures: an x86 far JMP at the top, a 68000 table at 0, the reset vector at 0xFFFC of a 6502 and at 0xFFFE of a 6809, a Cortex-M initial stack pointer followed by odd handler addresses. Add the boot idiom, a compiler banner and the initial SP.
 2. Count opcodes per candidate ISA in both byte orders: positional measures, not histograms, with a known machine's image of each candidate as the control. Extended-addressing opcodes per KB say which files are code.
 3. Prove a third way: a vector table whose unused entries carry their own index proves table, base and decoder at once; so does a prologue and epilogue pair repeated across the image.
 4. Interleave byte and half-word pairs, then run the signature again: even/odd or adjacent banks is told by whether the family idiom appears whole. Swap byte-swapped 16-bit images before reading code. Shared vendor entry-point headers are headers, not desyncs. Score each interleave ordering by readable strings as well as vectors and decode density: only the right order reads as English.
