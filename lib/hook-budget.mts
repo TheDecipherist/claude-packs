@@ -34,12 +34,17 @@ export const STOP_WORST_MS = 1500;
 export const POOL_QUEUE_MS = 20;
 export const LAST = 100;
 export const MIN_CALLS = 5;
+/** Fewer warm calls than this and a p95 is the series' maximum: one slow event would be the verdict. The pool is judged on its median
+ *  until it has this many (supernova2_monitor: "pool full" from 8 events, one of them a 302 ms commit, the rest 2 to 9 ms). */
+export const P95_MIN_CALLS = 20;
 
 /** After a daemon starts, each worker pays a hook's first call (its module-level state, the project's files read the first time): up to SPREAD workers
  *  hold one hook, so its first SPREAD calls are a cold start, and so is the first event of each class (the client waited for the start). Doctor judges
  *  warm calls only, and a series needs MIN_CALLS of them. A log with no daemon-start line (the process-per-hook runner) has no cold calls. */
 export const COLD_HOOK_CALLS = SPREAD;
-export const COLD_EVENT_CALLS = 1;
+// The events of a class wait on the same cold workers as their hooks do: up to SPREAD of them start cold (an event after `update`
+// restarted the daemon waited 26 ms on its second call, warm events 2 to 9 ms).
+export const COLD_EVENT_CALLS = SPREAD;
 
 /** The entries without the cold calls of each daemon start (the start line itself goes too). */
 export function warmCalls(entries: readonly HookLogEntry[]): HookLogEntry[] {
@@ -121,8 +126,9 @@ function installedAt(projectDir: string): number {
 
 /** The problems of one event class: a full pool (and nothing else of it), else a slow event, else each hook over its budget. */
 function classProblems(c: EventClass, t: ClassTimes): string[] {
-  if (t.queue !== null && t.queue.calls >= MIN_CALLS && t.queue.p95 > POOL_QUEUE_MS) {
-    return [`the resident runner's pool is full at ${c}: its events waited for a worker ${t.queue.p95} ms at p95 over their last ${t.queue.calls} (over ${POOL_QUEUE_MS} ms). ` +
+  const [queued, at] = t.queue === null ? [0, 'p95'] : t.queue.calls >= P95_MIN_CALLS ? [t.queue.p95, 'p95'] : [t.queue.p50, 'p50'];
+  if (t.queue !== null && t.queue.calls >= MIN_CALLS && queued > POOL_QUEUE_MS) {
+    return [`the resident runner's pool is full at ${c}: its events waited for a worker ${queued} ms at ${at} over their last ${t.queue.calls} (over ${POOL_QUEUE_MS} ms). ` +
       'The pool is the cause, not a hook: more cores free, fewer agents at once, or a hook that holds a worker too long (the `late` lines in the daemon log)'];
   }
   const problems: string[] = [];

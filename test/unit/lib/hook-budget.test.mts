@@ -77,7 +77,7 @@ test('a full pool is named, and no hook is blamed for the time it waited', () =>
   }
   const { problems } = said(dir);
   assert.equal(problems.length, 1, problems.join('\n'));
-  assert.match(problems[0] ?? '', /^the resident runner's pool is full at Pre Bash: its events waited for a worker 80 ms at p95/);
+  assert.match(problems[0] ?? '', /^the resident runner's pool is full at Pre Bash: its events waited for a worker 80 ms at p50 over their last 10/);
   assert.doesNotMatch(problems.join('\n'), /busy-fake/);
   // the same lines with a queue under the limit blame the hook
   const calm = project();
@@ -86,6 +86,27 @@ test('a full pool is named, and no hook is blamed for the time it waited', () =>
     logHook(calm, { ...BASH, hook: 'event', ms: 330, code: 0, queue: POOL_QUEUE_MS, source: 'daemon' });
   }
   assert.match(said(calm).problems.join('\n'), /busy-fake at Pre Bash/);
+});
+
+// supernova2_monitor, 2026-11-14: `update` restarted the daemon, and doctor --strict called the pool full on 8 events
+test('a pool is judged on warm events, and on its median until it has 20: one slow event is no full pool', () => {
+  const series = [42, 26, 8, 5, 7, 35, 6, 9, 2, 4, 3, 2, 8];   // the queue waits after the start, in order: two cold, one slow commit
+  const dir = project();
+  logHook(dir, START);
+  for (const queue of series) logHook(dir, { ...BASH, hook: 'event', ms: queue + 4, code: 0, queue, source: 'daemon' });
+  assert.deepEqual(said(dir).problems, []);
+  const busy = project();   // a pool every event waits on is still full, at p95 once there are 20
+  for (let i = 0; i < 24; i += 1) logHook(busy, { ...BASH, hook: 'event', ms: 90, code: 0, queue: i % 10 === 0 ? 4 : 80, source: 'daemon' });
+  assert.match(said(busy).problems.join('\n'), /pool is full at Pre Bash: its events waited for a worker 80 ms at p95 over their last 24/);
+});
+
+test('every worker\'s first event after a start is cold, not only the first event', () => {
+  const dir = project();
+  logHook(dir, START);
+  // one cold wait per worker that starts cold (SPREAD of them, the count COLD_HOOK_CALLS names), whatever COLD_EVENT_CALLS says
+  lines(dir, COLD_HOOK_CALLS, { ...BASH, hook: 'event', ms: 84, code: 0, queue: 80, source: 'daemon' });
+  lines(dir, 20, { ...BASH, hook: 'event', ms: 7, code: 0, queue: 3, source: 'daemon' });
+  assert.deepEqual(said(dir).problems, [], 'the cold waits are not judged, and 20 warm ones are within the limit');
 });
 
 test('the table: the classes, the percentile, the tools no budget names', () => {

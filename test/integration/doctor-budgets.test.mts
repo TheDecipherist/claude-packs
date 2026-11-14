@@ -45,7 +45,7 @@ test('doctor names a full pool, not a hook: a daemon\'s events that waited for a
     logHook(dir, { event: 'PreToolUse', tool: 'Write', hook: 'event', ms: 300, code: 0, queue: 120, source: 'daemon' });
   }
   const r = cli(dir, 'doctor');
-  assert.match(r.stdout, /PROBLEM: the resident runner's pool is full at Pre Write: its events waited for a worker 120 ms at p95/);
+  assert.match(r.stdout, /PROBLEM: the resident runner's pool is full at Pre Write: its events waited for a worker 120 ms at p50 over their last 10/);
   assert.doesNotMatch(r.stdout, /PROBLEM: busy-fake/);
   assert.equal(r.status, 1);
 });
