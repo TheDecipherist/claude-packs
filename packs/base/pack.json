@@ -7,205 +7,658 @@
   "requires": [],
   "tests": {
     "hooks/lib/asked-index.mts": [],
-    "hooks/lib/background-agents.mts": ["test/hooks/base/agents-held.test.mts"],
-    "hooks/lib/checks-compiled.mts": ["test/unit/hooks-lib/checks-compiled.test.mts"],
-    "hooks/lib/dup-match.mts": ["test/unit/hooks-lib/index-cost.test.mts"],
+    "hooks/lib/background-agents.mts": [
+      "test/hooks/base/agents-held.test.mts"
+    ],
+    "hooks/lib/checks-compiled.mts": [
+      "test/unit/hooks-lib/checks-compiled.test.mts"
+    ],
+    "hooks/lib/dup-match.mts": [
+      "test/unit/hooks-lib/index-cost.test.mts"
+    ],
     "hooks/lib/dup-tokens.mts": [],
-    "hooks/lib/frame-gather.mts": ["test/hooks/base/frame-gather.test.mts"],
-    "hooks/lib/git-config.mts": ["test/hooks/base/commit-cost.test.mts"],
-    "hooks/lib/git-files.mts": ["test/unit/hooks-lib/git-state.test.mts"],
+    "hooks/lib/frame-gather.mts": [
+      "test/hooks/base/frame-gather.test.mts"
+    ],
+    "hooks/lib/git-config.mts": [
+      "test/hooks/base/commit-cost.test.mts"
+    ],
+    "hooks/lib/git-files.mts": [
+      "test/unit/hooks-lib/git-state.test.mts"
+    ],
     "hooks/lib/git-state-selftest.mts": [],
-    "hooks/lib/git-state.mts": ["test/unit/hooks-lib/git-state.test.mts"],
-    "hooks/lib/hook-table.mts": ["test/unit/hooks-lib/hook-table.test.mts", "test/integration/proxy-install.test.mts"],
-    "hooks/lib/kit-fresh-refs.mts": ["test/hooks/base/commit-cost.test.mts"],
-    "hooks/lib/last-prompt.mts": ["test/unit/hooks-lib/last-prompt.test.mts"],
+    "hooks/lib/git-state.mts": [
+      "test/unit/hooks-lib/git-state.test.mts"
+    ],
+    "hooks/lib/hook-table.mts": [
+      "test/unit/hooks-lib/hook-table.test.mts",
+      "test/integration/proxy-install.test.mts"
+    ],
+    "hooks/lib/kit-fresh-refs.mts": [
+      "test/hooks/base/commit-cost.test.mts"
+    ],
+    "hooks/lib/last-prompt.mts": [
+      "test/unit/hooks-lib/last-prompt.test.mts"
+    ],
     "hooks/lib/lines-back.mts": [],
-    "hooks/lib/merge-out.mts": ["test/integration/resident-sampler.test.mts"],
+    "hooks/lib/merge-out.mts": [
+      "test/integration/resident-sampler.test.mts"
+    ],
     "hooks/lib/program-named.mts": [],
     "hooks/lib/prompt-of.mts": [],
-    "hooks/lib/run-projects.mts": ["test/unit/hooks-lib/one-row-per-project.test.mts"],
-    "hooks/lib/proxy-wire-table.mts": ["test/unit/lib/wire-owner.test.mts"],
+    "hooks/lib/run-projects.mts": [
+      "test/unit/hooks-lib/one-row-per-project.test.mts"
+    ],
+    "hooks/lib/proxy-wire-table.mts": [
+      "test/unit/lib/wire-owner.test.mts"
+    ],
     "hooks/lib/stop-cache-selftest.mts": [],
     "hooks/lib/stop-cache.mts": [],
     "hooks/lib/stop-look.mts": [],
-    "hooks/resident/dup-windows.mts": ["test/unit/hooks-lib/index-cost.test.mts"],
+    "hooks/resident/dup-windows.mts": [
+      "test/unit/hooks-lib/index-cost.test.mts"
+    ],
     "hooks/resident/options.mts": [],
-    "hooks/resident/sampling.mts": ["test/hooks/base/resident-paths.test.mts"],
-    "hooks/resident/shutdown.mts": ["test/hooks/base/frame-gather.test.mts"],
-    "hooks/resident/usage.mts": ["test/unit/hooks-lib/resident-sampling.test.mts", "test/unit/hooks-lib/status-keeper.test.mts"],
-    "hooks/resident/watchdog.mts": ["test/unit/hooks-lib/resident-sampling.test.mts"],
-    "hooks/agent-ledger.mts": ["test/hooks/base/agent-ledger.test.mts"],
-    "hooks/agent-model.mts": ["test/hooks/base/agent-model.test.mts"],
-    "hooks/agents-held.mts": ["test/hooks/base/agents-held.test.mts"],
-    "hooks/brief-guard-count.mts": ["test/hooks/base/brief-guard-count.test.mts"],
-    "hooks/brief-guard.mts": ["test/hooks/base/brief-guard-count.test.mts", "test/hooks/base/brief-guard.test.mts"],
-    "hooks/code-shape.mts": ["test/hooks/base/code-shape.test.mts"],
-    "hooks/dispatch-once.mts": ["test/hooks/base/dispatch-once.test.mts"],
-    "hooks/file-size-guard.mts": ["test/hooks/base/file-size-guard.test.mts"],
-    "hooks/folder-law.mts": ["test/hooks/base/folder-law.test.mts"],
-    "hooks/git-guard.mts": ["test/hooks/base/git-guard.test.mts"],
-    "hooks/governor-route.mts": ["test/hooks/base/governor-route.test.mts"],
-    "hooks/heartbeat.mts": ["test/hooks/base/heartbeat.test.mts"],
-    "hooks/inside-the-project.mts": ["test/hooks/base/inside-the-project.test.mts"],
-    "hooks/kit-fresh.mts": ["test/hooks/base/kit-fresh.test.mts"],
-    "hooks/lesson-checks.mts": ["test/hooks/base/lesson-checks-articles.test.mts", "test/hooks/base/lesson-checks.test.mts"],
-    "hooks/lib/apply-edit.mts": ["test/unit/hooks-lib/apply-edit.test.mts"],
-    "hooks/lib/audience.mts": ["test/unit/hooks-lib/audience.test.mts"],
-    "hooks/lib/branches-ahead.mts": ["test/unit/hooks-lib/git-guard-libs.test.mts", "test/unit/hooks-lib/hub-rig.test.mts", "test/unit/hooks-lib/push-form.test.mts", "test/unit/hooks-lib/remote-heads.test.mts", "test/unit/hooks-lib/stop-verdict.test.mts"],
-    "hooks/lib/brief-findings.mts": ["test/unit/hooks-lib/brief-findings.test.mts"],
-    "hooks/lib/governor.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts", "test/tools/base/governed.test.mts"],
-    "hooks/lib/governor-agents.mts": ["test/hooks/base/governor-route.test.mts"],
-    "hooks/lib/heavy-commands.mts": ["test/hooks/base/governor-route.test.mts"],
-    "hooks/lib/governor-route-selftest.mts": ["test/hooks/base/governor-route.test.mts"],
-    "hooks/lib/governor-budget.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts"],
-    "hooks/lib/governor-policy.mts": ["test/unit/hooks-lib/governor.test.mts", "test/integration/load-ask.test.mts"],
-    "hooks/lib/governor-settings.mts": ["test/unit/hooks-lib/governor.test.mts"],
-    "hooks/lib/governor-store.mts": ["test/unit/hooks-lib/governor.test.mts"],
-    "hooks/lib/code-shapes.mts": ["test/unit/hooks-lib/code-shapes.test.mts"],
-    "hooks/lib/command-prefix.mts": ["test/unit/hooks-lib/command-prefix.test.mts"],
-    "hooks/lib/compile-cache.mts": ["test/unit/hooks-lib/compile-cache.test.mts"],
-    "hooks/lib/content.mts": ["test/unit/hooks-lib/content.test.mts"],
-    "hooks/lib/core-budget.mts": ["test/unit/hooks-lib/core-budget.test.mts"],
-    "hooks/lib/cpp-scan.mts": ["test/unit/hooks-lib/cpp-scan.test.mts"],
-    "hooks/lib/crash-policy.mts": ["test/unit/hooks-lib/crash-policy.test.mts"],
-    "hooks/lib/daemon-find.mts": ["test/unit/lib/daemon-cli.test.mts", "test/tools/base/statusline-daemon.test.mts"],
-    "hooks/lib/dup-index.mts": ["test/unit/hooks-lib/dup-index.test.mts"],
-    "hooks/lib/child-group.mts": ["test/hooks/base/hook-children.test.mts"],
-    "hooks/lib/dup.mts": ["test/unit/hooks-lib/dup-index.test.mts", "test/unit/hooks-lib/dup.test.mts"],
-    "hooks/lib/elements.mts": ["test/unit/hooks-lib/elements.test.mts"],
-    "hooks/lib/event-log.mts": ["test/unit/hooks-lib/event-log.test.mts"],
-    "hooks/lib/files.mts": ["test/unit/hooks-lib/files.test.mts"],
-    "hooks/lib/function-shapes.mts": ["test/unit/hooks-lib/function-shapes.test.mts"],
-    "hooks/lib/git-adds.mts": ["test/unit/hooks-lib/git-adds.test.mts"],
-    "hooks/lib/git-auth.mts": ["test/unit/hooks-lib/git-auth.test.mts"],
-    "hooks/lib/git-guard-selftest.mts": ["test/hooks/base/git-guard.test.mts"],
-    "hooks/lib/git-run.mts": ["test/unit/hooks-lib/git-run.test.mts"],
-    "hooks/lib/glob.mts": ["test/unit/hooks-lib/glob.test.mts"],
-    "hooks/lib/hash.mts": ["test/unit/hooks-lib/hash.test.mts"],
-    "hooks/lib/hook-log.mts": ["test/unit/hooks-lib/hook-log.test.mts"],
-    "hooks/lib/hub-rig.mts": ["test/unit/hooks-lib/hub-rig.test.mts"],
-    "hooks/lib/identifier-runs.mts": ["test/unit/hooks-lib/identifier-runs.test.mts"],
-    "hooks/lib/json.mts": ["test/unit/hooks-lib/brief-findings.test.mts", "test/unit/hooks-lib/dup.test.mts", "test/unit/hooks-lib/event-log.test.mts", "test/unit/hooks-lib/hook-log.test.mts", "test/unit/hooks-lib/json-record.test.mts", "test/unit/hooks-lib/kit-fresh-look.test.mts", "test/unit/hooks-lib/layout.test.mts", "test/unit/hooks-lib/making-check-turn.test.mts", "test/unit/hooks-lib/reentrancy.test.mts", "test/unit/hooks-lib/run-status-parts.test.mts", "test/unit/hooks-lib/source-exts.test.mts", "test/unit/hooks-lib/stop-verdict.test.mts", "test/unit/hooks-lib/turn.test.mts", "test/unit/hooks-lib/unread-writes.test.mts", "test/unit/hooks-lib/writes.test.mts"],
-    "hooks/lib/kit-fresh-look.mts": ["test/unit/hooks-lib/kit-fresh-look.test.mts"],
-    "hooks/lib/kit-fresh-selftest.mts": ["test/hooks/base/kit-fresh.test.mts"],
-    "hooks/lib/kit-version.mts": ["test/unit/hooks-lib/kit-version.test.mts"],
-    "hooks/lib/languages.mts": ["test/unit/hooks-lib/languages.test.mts"],
-    "hooks/lib/layout.mts": ["test/unit/hooks-lib/layout.test.mts"],
-    "hooks/lib/litter.mts": ["test/unit/hooks-lib/litter.test.mts"],
-    "hooks/lib/look-gate-selftest.mts": ["test/hooks/base/look-gate.test.mts"],
-    "hooks/lib/making-check-selftest.mts": ["test/hooks/base/making-check-count.test.mts", "test/hooks/base/making-check.test.mts"],
-    "hooks/lib/making-check-turn.mts": ["test/unit/hooks-lib/making-check-turn.test.mts"],
-    "hooks/lib/making-concepts.mts": ["test/unit/hooks-lib/making-concepts.test.mts"],
-    "hooks/lib/near-copies.mts": ["test/unit/hooks-lib/near-copies.test.mts"],
-    "hooks/lib/once-only-selftest.mts": ["test/hooks/base/once-only-index.test.mts", "test/hooks/base/once-only.test.mts"],
-    "hooks/lib/own-processes.mts": ["test/unit/hooks-lib/own-processes.test.mts"],
-    "hooks/lib/program-read.mts": ["test/unit/hooks-lib/program-read.test.mts"],
-    "hooks/lib/program-writes.mts": ["test/unit/hooks-lib/program-writes.test.mts"],
-    "hooks/lib/project.mts": ["test/unit/hooks-lib/project.test.mts"],
-    "hooks/lib/proxy-client.mts": ["test/unit/hooks-lib/proxy-wire.test.mts"],
-    "hooks/lib/proxy-wire.mts": ["test/unit/hooks-lib/proxy-wire.test.mts"],
-    "hooks/lib/prose.mts": ["test/unit/hooks-lib/prose.test.mts"],
-    "hooks/lib/push-form.mts": ["test/unit/hooks-lib/push-form.test.mts"],
-    "hooks/lib/pushed-selftest.mts": ["test/hooks/base/git-guard.test.mts", "test/unit/hooks-lib/git-guard-libs.test.mts", "test/unit/hooks-lib/hub-rig.test.mts", "test/unit/hooks-lib/push-form.test.mts", "test/unit/hooks-lib/remote-heads.test.mts"],
-    "hooks/lib/pushed.mts": ["test/unit/hooks-lib/git-guard-libs.test.mts", "test/unit/hooks-lib/hub-rig.test.mts", "test/unit/hooks-lib/push-form.test.mts", "test/unit/hooks-lib/remote-heads.test.mts"],
-    "hooks/lib/remote-heads.mts": ["test/unit/hooks-lib/remote-heads.test.mts"],
-    "hooks/lib/repo-index.mts": ["test/unit/hooks-lib/repo-index.test.mts"],
-    "hooks/lib/run-claudes.mts": ["test/unit/hooks-lib/run-discovery.test.mts"],
-    "hooks/lib/run-discovery.mts": ["test/unit/hooks-lib/run-discovery.test.mts"],
-    "hooks/lib/run-live.mts": ["test/unit/hooks-lib/run-status-parts.test.mts"],
-    "hooks/lib/run-progress.mts": ["test/unit/hooks-lib/run-status-parts.test.mts"],
-    "hooks/lib/run-remotes.mts": ["test/unit/hooks-lib/run-status-parts.test.mts"],
-    "hooks/lib/run-rows.mts": ["test/unit/hooks-lib/run-rows.test.mts"],
-    "hooks/lib/run-status.mts": ["test/unit/hooks-lib/run-status-parts.test.mts", "test/unit/hooks-lib/run-status.test.mts"],
-    "hooks/lib/run-transcripts.mts": ["test/unit/hooks-lib/run-status-parts.test.mts"],
-    "hooks/lib/run-tree.mts": ["test/unit/hooks-lib/run-tree.test.mts"],
-    "hooks/lib/rust-scan.mts": ["test/unit/hooks-lib/rust-scan.test.mts"],
-    "hooks/lib/secret-patterns.mts": ["test/unit/hooks-lib/secret-patterns.test.mts"],
-    "hooks/lib/selftest.mts": ["test/unit/hooks-lib/selftest.test.mts"],
-    "hooks/lib/send-backs.mts": ["test/unit/hooks-lib/send-backs.test.mts"],
-    "hooks/lib/shape-code.mts": ["test/unit/hooks-lib/shape-code.test.mts"],
-    "hooks/lib/shape-hits.mts": ["test/unit/hooks-lib/shape-hits.test.mts"],
-    "hooks/lib/shape-lines.mts": ["test/unit/hooks-lib/shape-lines.test.mts"],
-    "hooks/lib/shape-lists.mts": ["test/unit/hooks-lib/shape-lists.test.mts"],
-    "hooks/lib/shape-model.mts": ["test/unit/hooks-lib/shape-model.test.mts"],
-    "hooks/lib/shape-prose.mts": ["test/unit/hooks-lib/shape-prose.test.mts"],
-    "hooks/lib/shape.mts": ["test/unit/hooks-lib/shape-code.test.mts", "test/unit/hooks-lib/shape-hits.test.mts", "test/unit/hooks-lib/shape-lines.test.mts", "test/unit/hooks-lib/shape-lists.test.mts", "test/unit/hooks-lib/shape-model.test.mts", "test/unit/hooks-lib/shape-prose.test.mts", "test/unit/hooks-lib/shape.test.mts"],
-    "hooks/lib/shell-lex.mts": ["test/unit/hooks-lib/shell-lex.test.mts"],
-    "hooks/lib/shell-sed.mts": ["test/unit/hooks-lib/shell-sed.test.mts"],
-    "hooks/lib/shell-writes-selftest.mts": ["test/unit/hooks-lib/shell-writes.test.mts"],
-    "hooks/lib/shell-writes.mts": ["test/unit/hooks-lib/shell-writes.test.mts"],
-    "hooks/lib/skill-first-selftest.mts": ["test/hooks/base/skill-first.test.mts"],
-    "hooks/lib/source-exts.mts": ["test/unit/hooks-lib/source-exts.test.mts"],
-    "hooks/lib/stop-verdict.mts": ["test/unit/hooks-lib/stop-verdict.test.mts"],
-    "hooks/lib/tool-target.mts": ["test/tools/base/statusline.test.mts", "test/unit/hooks-lib/agent-board.test.mts"],
-    "hooks/lib/trunk-lag-selftest.mts": ["test/hooks/base/git-guard.test.mts", "test/unit/hooks-lib/trunk-lag.test.mts"],
-    "hooks/lib/trunk-lag.mts": ["test/unit/hooks-lib/trunk-lag.test.mts"],
-    "hooks/lib/turn.mts": ["test/unit/hooks-lib/turn.test.mts"],
-    "hooks/lib/unread-writes.mts": ["test/unit/hooks-lib/unread-writes.test.mts"],
-    "hooks/lib/verdict.mts": ["test/unit/hooks-lib/verdict.test.mts"],
-    "hooks/lib/write-layout.mts": ["test/unit/hooks-lib/write-layout.test.mts"],
-    "hooks/lib/writes.mts": ["test/unit/hooks-lib/writes.test.mts"],
-    "hooks/look-gate.mts": ["test/hooks/base/look-gate.test.mts"],
-    "hooks/making-check-count.mts": ["test/hooks/base/making-check-count.test.mts"],
-    "hooks/making-check.mts": ["test/hooks/base/making-check-count.test.mts", "test/hooks/base/making-check.test.mts"],
-    "hooks/making.mts": ["test/hooks/base/making-check-count.test.mts", "test/hooks/base/making-check.test.mts", "test/hooks/base/making.test.mts"],
-    "hooks/lib/polling.mts": ["test/hooks/base/no-polling.test.mts"],
-    "hooks/no-find.mts": ["test/hooks/base/no-find.test.mts"],
-    "hooks/no-polling.mts": ["test/hooks/base/no-polling.test.mts"],
-    "hooks/once-only-index.mts": ["test/hooks/base/once-only-index.test.mts"],
-    "hooks/once-only.mts": ["test/hooks/base/once-only-index.test.mts", "test/hooks/base/once-only.test.mts"],
-    "hooks/placement-law.mts": ["test/hooks/base/placement-law.test.mts"],
-    "hooks/repo-litter.mts": ["test/hooks/base/repo-litter.test.mts"],
-    "hooks/resident.mts": ["test/hooks/base/resident-parts.test.mts", "test/hooks/base/resident.test.mts"],
-    "hooks/resident/agent-board.mts": ["test/unit/hooks-lib/agent-board.test.mts"],
-    "hooks/resident/event.mts": ["test/hooks/base/resident.test.mts"],
-    "hooks/resident/governor-pause.mts": ["test/tools/base/governed.test.mts"],
-    "hooks/resident/load-ask.mts": ["test/integration/load-ask.test.mts"],
-    "hooks/resident/index.mts": ["test/hooks/base/resident-parts.test.mts"],
-    "hooks/resident/judge-check.mts": ["test/hooks/base/resident.test.mts"],
-    "hooks/resident/lifecycle.mts": ["test/hooks/base/resident-parts.test.mts"],
-    "hooks/resident/messages.mts": ["test/hooks/base/resident-parts.test.mts"],
-    "hooks/resident/pool.mts": ["test/hooks/base/hook-children.test.mts", "test/hooks/base/resident-parts.test.mts"],
-    "hooks/resident/selftest-events.mts": ["test/hooks/base/resident.test.mts"],
-    "hooks/resident/selftest-lifecycle.mts": ["test/hooks/base/resident.test.mts"],
-    "hooks/resident/selftest-plants.mts": ["test/hooks/base/resident.test.mts"],
-    "hooks/resident/selftest-rig.mts": ["test/hooks/base/resident.test.mts", "test/integration/resident-load.test.mts"],
-    "hooks/resident/selftest-status.mts": ["test/hooks/base/resident.test.mts"],
-    "hooks/resident/selftest.mts": ["test/hooks/base/resident.test.mts"],
-    "hooks/resident/socket.mts": ["test/hooks/base/resident-parts.test.mts"],
-    "hooks/resident/state.mts": ["test/hooks/base/resident-parts.test.mts", "test/unit/lib/daemon-cli.test.mts"],
-    "hooks/resident/status.mts": ["test/integration/status-served.test.mts", "test/unit/hooks-lib/status-keeper.test.mts"],
-    "hooks/resident/warm.mts": ["test/hooks/base/resident-parts.test.mts"],
-    "hooks/resident/worker.mts": ["test/hooks/base/hook-children.test.mts", "test/hooks/base/resident-parts.test.mts"],
-    "hooks/reuse-hint.mts": ["test/hooks/base/reuse-hint.test.mts"],
-    "hooks/run-hooks.mts": ["test/hooks/base/run-hooks-crashes.test.mts", "test/hooks/base/run-hooks.test.mts"],
-    "hooks/secrets-guard.mts": ["test/hooks/base/secrets-guard.test.mts"],
-    "hooks/shape-law.mts": ["test/hooks/base/shape-law-doctor-lists.test.mts", "test/hooks/base/shape-law-doctor.test.mts", "test/hooks/base/shape-law-install.test.mts", "test/hooks/base/shape-law.test.mts"],
-    "hooks/rule-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
-    "hooks/lib/usage-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
-    "hooks/skill-first.mts": ["test/hooks/base/skill-first.test.mts"],
-    "hooks/skill-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
-    "hooks/suite-once.mts": ["test/hooks/base/suite-once.test.mts"],
-    "hooks/template-law.mts": ["test/hooks/base/template-law.test.mts"],
-    "hooks/untrusted-boundary.mts": ["test/hooks/base/untrusted-boundary.test.mts"],
-    "tools/anchors-check.mts": ["test/tools/base/anchors-check.test.mts"],
-    "tools/governed.mts": ["test/tools/base/governed.test.mts"],
-    "tools/load.mts": ["test/integration/load-ask.test.mts"],
-    "tools/quiet-test.mts": ["test/tools/base/quiet-test.test.mts"],
-    "tools/shape-symmetry-selftest.mts": ["test/tools/base/shape-symmetry.test.mts"],
-    "tools/shape-symmetry.mts": ["test/tools/base/shape-symmetry.test.mts"],
-    "tools/statusline-daemon.mts": ["test/tools/base/statusline-daemon.test.mts"],
-    "tools/statusline-live.mts": ["test/unit/hooks-lib/status-keeper.test.mts"],
-    "tools/chip-search.mts": ["test/tools/base/chip-search.test.mts"],
-    "tools/statusline-agents.mts": ["test/unit/hooks-lib/agent-board.test.mts"],
-    "tools/statusline-governor.mts": ["test/tools/base/statusline.test.mts"],
-    "tools/statusline-paint.mts": ["test/tools/base/statusline.test.mts"],
-    "tools/statusline-runs.mts": ["test/tools/base/statusline.test.mts"],
-    "tools/statusline-session.mts": ["test/tools/base/statusline.test.mts"],
-    "tools/statusline-version.mts": ["test/unit/hooks-lib/status-keeper.test.mts"],
-    "tools/statusline-work.mts": ["test/tools/base/statusline.test.mts"],
-    "tools/statusline.mts": ["test/tools/base/statusline.test.mts"],
-    "tools/test-verdict.mts": ["test/tools/base/test-verdict.test.mts"]
+    "hooks/resident/sampling.mts": [
+      "test/hooks/base/resident-paths.test.mts"
+    ],
+    "hooks/resident/shutdown.mts": [
+      "test/hooks/base/frame-gather.test.mts"
+    ],
+    "hooks/resident/usage.mts": [
+      "test/unit/hooks-lib/resident-sampling.test.mts",
+      "test/unit/hooks-lib/status-keeper.test.mts"
+    ],
+    "hooks/resident/watchdog.mts": [
+      "test/unit/hooks-lib/resident-sampling.test.mts"
+    ],
+    "hooks/agent-ledger.mts": [
+      "test/hooks/base/agent-ledger.test.mts"
+    ],
+    "hooks/agent-model.mts": [
+      "test/hooks/base/agent-model.test.mts"
+    ],
+    "hooks/agents-held.mts": [
+      "test/hooks/base/agents-held.test.mts"
+    ],
+    "hooks/brief-guard-count.mts": [
+      "test/hooks/base/brief-guard-count.test.mts"
+    ],
+    "hooks/brief-guard.mts": [
+      "test/hooks/base/brief-guard-count.test.mts",
+      "test/hooks/base/brief-guard.test.mts"
+    ],
+    "hooks/code-shape.mts": [
+      "test/hooks/base/code-shape.test.mts"
+    ],
+    "hooks/dispatch-once.mts": [
+      "test/hooks/base/dispatch-once.test.mts"
+    ],
+    "hooks/file-size-guard.mts": [
+      "test/hooks/base/file-size-guard.test.mts"
+    ],
+    "hooks/folder-law.mts": [
+      "test/hooks/base/folder-law.test.mts"
+    ],
+    "hooks/git-guard.mts": [
+      "test/hooks/base/git-guard.test.mts"
+    ],
+    "hooks/governor-route.mts": [
+      "test/hooks/base/governor-route.test.mts"
+    ],
+    "hooks/heartbeat.mts": [
+      "test/hooks/base/heartbeat.test.mts"
+    ],
+    "hooks/inside-the-project.mts": [
+      "test/hooks/base/inside-the-project.test.mts"
+    ],
+    "hooks/kit-fresh.mts": [
+      "test/hooks/base/kit-fresh.test.mts"
+    ],
+    "hooks/lesson-checks.mts": [
+      "test/hooks/base/lesson-checks-articles.test.mts",
+      "test/hooks/base/lesson-checks.test.mts"
+    ],
+    "hooks/lib/apply-edit.mts": [
+      "test/unit/hooks-lib/apply-edit.test.mts"
+    ],
+    "hooks/lib/audience.mts": [
+      "test/unit/hooks-lib/audience.test.mts"
+    ],
+    "hooks/lib/branches-ahead.mts": [
+      "test/unit/hooks-lib/git-guard-libs.test.mts",
+      "test/unit/hooks-lib/hub-rig.test.mts",
+      "test/unit/hooks-lib/push-form.test.mts",
+      "test/unit/hooks-lib/remote-heads.test.mts",
+      "test/unit/hooks-lib/stop-verdict.test.mts"
+    ],
+    "hooks/lib/brief-findings.mts": [
+      "test/unit/hooks-lib/brief-findings.test.mts"
+    ],
+    "hooks/lib/governor.mts": [
+      "test/unit/hooks-lib/governor.test.mts",
+      "test/integration/load-ask.test.mts",
+      "test/tools/base/governed.test.mts"
+    ],
+    "hooks/lib/governor-agents.mts": [
+      "test/hooks/base/governor-route.test.mts"
+    ],
+    "hooks/lib/heavy-commands.mts": [
+      "test/hooks/base/governor-route.test.mts"
+    ],
+    "hooks/lib/governor-route-selftest.mts": [
+      "test/hooks/base/governor-route.test.mts"
+    ],
+    "hooks/lib/governor-budget.mts": [
+      "test/unit/hooks-lib/governor.test.mts",
+      "test/integration/load-ask.test.mts"
+    ],
+    "hooks/lib/governor-policy.mts": [
+      "test/unit/hooks-lib/governor.test.mts",
+      "test/integration/load-ask.test.mts"
+    ],
+    "hooks/lib/governor-settings.mts": [
+      "test/unit/hooks-lib/governor.test.mts"
+    ],
+    "hooks/lib/governor-store.mts": [
+      "test/unit/hooks-lib/governor.test.mts"
+    ],
+    "hooks/lib/code-shapes.mts": [
+      "test/unit/hooks-lib/code-shapes.test.mts"
+    ],
+    "hooks/lib/command-prefix.mts": [
+      "test/unit/hooks-lib/command-prefix.test.mts"
+    ],
+    "hooks/lib/compile-cache.mts": [
+      "test/unit/hooks-lib/compile-cache.test.mts"
+    ],
+    "hooks/lib/content.mts": [
+      "test/unit/hooks-lib/content.test.mts"
+    ],
+    "hooks/lib/core-budget.mts": [
+      "test/unit/hooks-lib/core-budget.test.mts"
+    ],
+    "hooks/lib/cpp-scan.mts": [
+      "test/unit/hooks-lib/cpp-scan.test.mts"
+    ],
+    "hooks/lib/crash-policy.mts": [
+      "test/unit/hooks-lib/crash-policy.test.mts"
+    ],
+    "hooks/lib/daemon-find.mts": [
+      "test/unit/lib/daemon-cli.test.mts",
+      "test/tools/base/statusline-daemon.test.mts"
+    ],
+    "hooks/lib/dup-index.mts": [
+      "test/unit/hooks-lib/dup-index.test.mts"
+    ],
+    "hooks/lib/child-group.mts": [
+      "test/hooks/base/hook-children.test.mts"
+    ],
+    "hooks/lib/dup.mts": [
+      "test/unit/hooks-lib/dup-index.test.mts",
+      "test/unit/hooks-lib/dup.test.mts"
+    ],
+    "hooks/lib/elements.mts": [
+      "test/unit/hooks-lib/elements.test.mts"
+    ],
+    "hooks/lib/event-log.mts": [
+      "test/unit/hooks-lib/event-log.test.mts"
+    ],
+    "hooks/lib/files.mts": [
+      "test/unit/hooks-lib/files.test.mts"
+    ],
+    "hooks/lib/function-shapes.mts": [
+      "test/unit/hooks-lib/function-shapes.test.mts"
+    ],
+    "hooks/lib/git-adds.mts": [
+      "test/unit/hooks-lib/git-adds.test.mts"
+    ],
+    "hooks/lib/git-auth.mts": [
+      "test/unit/hooks-lib/git-auth.test.mts"
+    ],
+    "hooks/lib/git-guard-selftest.mts": [
+      "test/hooks/base/git-guard.test.mts"
+    ],
+    "hooks/lib/git-run.mts": [
+      "test/unit/hooks-lib/git-run.test.mts"
+    ],
+    "hooks/lib/glob.mts": [
+      "test/unit/hooks-lib/glob.test.mts"
+    ],
+    "hooks/lib/hash.mts": [
+      "test/unit/hooks-lib/hash.test.mts"
+    ],
+    "hooks/lib/hook-log.mts": [
+      "test/unit/hooks-lib/hook-log.test.mts"
+    ],
+    "hooks/lib/hub-rig.mts": [
+      "test/unit/hooks-lib/hub-rig.test.mts"
+    ],
+    "hooks/lib/identifier-runs.mts": [
+      "test/unit/hooks-lib/identifier-runs.test.mts"
+    ],
+    "hooks/lib/json.mts": [
+      "test/unit/hooks-lib/brief-findings.test.mts",
+      "test/unit/hooks-lib/dup.test.mts",
+      "test/unit/hooks-lib/event-log.test.mts",
+      "test/unit/hooks-lib/hook-log.test.mts",
+      "test/unit/hooks-lib/json-record.test.mts",
+      "test/unit/hooks-lib/kit-fresh-look.test.mts",
+      "test/unit/hooks-lib/layout.test.mts",
+      "test/unit/hooks-lib/making-check-turn.test.mts",
+      "test/unit/hooks-lib/reentrancy.test.mts",
+      "test/unit/hooks-lib/run-status-parts.test.mts",
+      "test/unit/hooks-lib/source-exts.test.mts",
+      "test/unit/hooks-lib/stop-verdict.test.mts",
+      "test/unit/hooks-lib/turn.test.mts",
+      "test/unit/hooks-lib/unread-writes.test.mts",
+      "test/unit/hooks-lib/writes.test.mts"
+    ],
+    "hooks/lib/kit-fresh-look.mts": [
+      "test/unit/hooks-lib/kit-fresh-look.test.mts"
+    ],
+    "hooks/lib/kit-fresh-selftest.mts": [
+      "test/hooks/base/kit-fresh.test.mts"
+    ],
+    "hooks/lib/kit-version.mts": [
+      "test/unit/hooks-lib/kit-version.test.mts"
+    ],
+    "hooks/lib/languages.mts": [
+      "test/unit/hooks-lib/languages.test.mts"
+    ],
+    "hooks/lib/layout.mts": [
+      "test/unit/hooks-lib/layout.test.mts"
+    ],
+    "hooks/lib/litter.mts": [
+      "test/unit/hooks-lib/litter.test.mts"
+    ],
+    "hooks/lib/look-gate-selftest.mts": [
+      "test/hooks/base/look-gate.test.mts"
+    ],
+    "hooks/lib/making-check-selftest.mts": [
+      "test/hooks/base/making-check-count.test.mts",
+      "test/hooks/base/making-check.test.mts"
+    ],
+    "hooks/lib/making-check-turn.mts": [
+      "test/unit/hooks-lib/making-check-turn.test.mts"
+    ],
+    "hooks/lib/making-concepts.mts": [
+      "test/unit/hooks-lib/making-concepts.test.mts"
+    ],
+    "hooks/lib/near-copies.mts": [
+      "test/unit/hooks-lib/near-copies.test.mts"
+    ],
+    "hooks/lib/once-only-selftest.mts": [
+      "test/hooks/base/once-only-index.test.mts",
+      "test/hooks/base/once-only.test.mts"
+    ],
+    "hooks/lib/own-processes.mts": [
+      "test/unit/hooks-lib/own-processes.test.mts"
+    ],
+    "hooks/lib/program-read.mts": [
+      "test/unit/hooks-lib/program-read.test.mts"
+    ],
+    "hooks/lib/program-writes.mts": [
+      "test/unit/hooks-lib/program-writes.test.mts"
+    ],
+    "hooks/lib/project.mts": [
+      "test/unit/hooks-lib/project.test.mts"
+    ],
+    "hooks/lib/proxy-client.mts": [
+      "test/unit/hooks-lib/proxy-wire.test.mts"
+    ],
+    "hooks/lib/proxy-wire.mts": [
+      "test/unit/hooks-lib/proxy-wire.test.mts"
+    ],
+    "hooks/lib/prose.mts": [
+      "test/unit/hooks-lib/prose.test.mts"
+    ],
+    "hooks/lib/push-form.mts": [
+      "test/unit/hooks-lib/push-form.test.mts"
+    ],
+    "hooks/lib/pushed-selftest.mts": [
+      "test/hooks/base/git-guard.test.mts",
+      "test/unit/hooks-lib/git-guard-libs.test.mts",
+      "test/unit/hooks-lib/hub-rig.test.mts",
+      "test/unit/hooks-lib/push-form.test.mts",
+      "test/unit/hooks-lib/remote-heads.test.mts"
+    ],
+    "hooks/lib/pushed.mts": [
+      "test/unit/hooks-lib/git-guard-libs.test.mts",
+      "test/unit/hooks-lib/hub-rig.test.mts",
+      "test/unit/hooks-lib/push-form.test.mts",
+      "test/unit/hooks-lib/remote-heads.test.mts"
+    ],
+    "hooks/lib/remote-heads.mts": [
+      "test/unit/hooks-lib/remote-heads.test.mts"
+    ],
+    "hooks/lib/repo-index.mts": [
+      "test/unit/hooks-lib/repo-index.test.mts"
+    ],
+    "hooks/lib/run-claudes.mts": [
+      "test/unit/hooks-lib/run-discovery.test.mts"
+    ],
+    "hooks/lib/run-discovery.mts": [
+      "test/unit/hooks-lib/run-discovery.test.mts"
+    ],
+    "hooks/lib/run-live.mts": [
+      "test/unit/hooks-lib/run-status-parts.test.mts"
+    ],
+    "hooks/lib/run-progress.mts": [
+      "test/unit/hooks-lib/run-status-parts.test.mts"
+    ],
+    "hooks/lib/run-remotes.mts": [
+      "test/unit/hooks-lib/run-status-parts.test.mts"
+    ],
+    "hooks/lib/run-rows.mts": [
+      "test/unit/hooks-lib/run-rows.test.mts"
+    ],
+    "hooks/lib/run-status.mts": [
+      "test/unit/hooks-lib/run-status-parts.test.mts",
+      "test/unit/hooks-lib/run-status.test.mts"
+    ],
+    "hooks/lib/run-transcripts.mts": [
+      "test/unit/hooks-lib/run-status-parts.test.mts"
+    ],
+    "hooks/lib/run-tree.mts": [
+      "test/unit/hooks-lib/run-tree.test.mts"
+    ],
+    "hooks/lib/rust-scan.mts": [
+      "test/unit/hooks-lib/rust-scan.test.mts"
+    ],
+    "hooks/lib/secret-patterns.mts": [
+      "test/unit/hooks-lib/secret-patterns.test.mts"
+    ],
+    "hooks/lib/selftest.mts": [
+      "test/unit/hooks-lib/selftest.test.mts"
+    ],
+    "hooks/lib/send-backs.mts": [
+      "test/unit/hooks-lib/send-backs.test.mts"
+    ],
+    "hooks/lib/shape-code.mts": [
+      "test/unit/hooks-lib/shape-code.test.mts"
+    ],
+    "hooks/lib/shape-hits.mts": [
+      "test/unit/hooks-lib/shape-hits.test.mts"
+    ],
+    "hooks/lib/shape-lines.mts": [
+      "test/unit/hooks-lib/shape-lines.test.mts"
+    ],
+    "hooks/lib/shape-lists.mts": [
+      "test/unit/hooks-lib/shape-lists.test.mts"
+    ],
+    "hooks/lib/shape-model.mts": [
+      "test/unit/hooks-lib/shape-model.test.mts"
+    ],
+    "hooks/lib/shape-prose.mts": [
+      "test/unit/hooks-lib/shape-prose.test.mts"
+    ],
+    "hooks/lib/shape.mts": [
+      "test/unit/hooks-lib/shape-code.test.mts",
+      "test/unit/hooks-lib/shape-hits.test.mts",
+      "test/unit/hooks-lib/shape-lines.test.mts",
+      "test/unit/hooks-lib/shape-lists.test.mts",
+      "test/unit/hooks-lib/shape-model.test.mts",
+      "test/unit/hooks-lib/shape-prose.test.mts",
+      "test/unit/hooks-lib/shape.test.mts"
+    ],
+    "hooks/lib/shell-lex.mts": [
+      "test/unit/hooks-lib/shell-lex.test.mts"
+    ],
+    "hooks/lib/shell-sed.mts": [
+      "test/unit/hooks-lib/shell-sed.test.mts"
+    ],
+    "hooks/lib/shell-writes-selftest.mts": [
+      "test/unit/hooks-lib/shell-writes.test.mts"
+    ],
+    "hooks/lib/shell-writes.mts": [
+      "test/unit/hooks-lib/shell-writes.test.mts"
+    ],
+    "hooks/lib/skill-first-selftest.mts": [
+      "test/hooks/base/skill-first.test.mts"
+    ],
+    "hooks/lib/source-exts.mts": [
+      "test/unit/hooks-lib/source-exts.test.mts"
+    ],
+    "hooks/lib/stop-verdict.mts": [
+      "test/unit/hooks-lib/stop-verdict.test.mts"
+    ],
+    "hooks/lib/tool-target.mts": [
+      "test/tools/base/statusline.test.mts",
+      "test/unit/hooks-lib/agent-board.test.mts"
+    ],
+    "hooks/lib/trunk-lag-selftest.mts": [
+      "test/hooks/base/git-guard.test.mts",
+      "test/unit/hooks-lib/trunk-lag.test.mts"
+    ],
+    "hooks/lib/trunk-lag.mts": [
+      "test/unit/hooks-lib/trunk-lag.test.mts"
+    ],
+    "hooks/lib/turn.mts": [
+      "test/unit/hooks-lib/turn.test.mts"
+    ],
+    "hooks/lib/unread-writes.mts": [
+      "test/unit/hooks-lib/unread-writes.test.mts"
+    ],
+    "hooks/lib/verdict.mts": [
+      "test/unit/hooks-lib/verdict.test.mts"
+    ],
+    "hooks/lib/write-layout.mts": [
+      "test/unit/hooks-lib/write-layout.test.mts"
+    ],
+    "hooks/lib/writes.mts": [
+      "test/unit/hooks-lib/writes.test.mts"
+    ],
+    "hooks/look-gate.mts": [
+      "test/hooks/base/look-gate.test.mts"
+    ],
+    "hooks/making-check-count.mts": [
+      "test/hooks/base/making-check-count.test.mts"
+    ],
+    "hooks/making-check.mts": [
+      "test/hooks/base/making-check-count.test.mts",
+      "test/hooks/base/making-check.test.mts"
+    ],
+    "hooks/making.mts": [
+      "test/hooks/base/making-check-count.test.mts",
+      "test/hooks/base/making-check.test.mts",
+      "test/hooks/base/making.test.mts"
+    ],
+    "hooks/lib/polling.mts": [
+      "test/hooks/base/no-polling.test.mts"
+    ],
+    "hooks/no-find.mts": [
+      "test/hooks/base/no-find.test.mts"
+    ],
+    "hooks/no-polling.mts": [
+      "test/hooks/base/no-polling.test.mts"
+    ],
+    "hooks/once-only-index.mts": [
+      "test/hooks/base/once-only-index.test.mts"
+    ],
+    "hooks/once-only.mts": [
+      "test/hooks/base/once-only-index.test.mts",
+      "test/hooks/base/once-only.test.mts"
+    ],
+    "hooks/placement-law.mts": [
+      "test/hooks/base/placement-law.test.mts"
+    ],
+    "hooks/repo-litter.mts": [
+      "test/hooks/base/repo-litter.test.mts"
+    ],
+    "hooks/resident.mts": [
+      "test/hooks/base/resident-parts.test.mts",
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/agent-board.mts": [
+      "test/unit/hooks-lib/agent-board.test.mts"
+    ],
+    "hooks/resident/event.mts": [
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/governor-pause.mts": [
+      "test/tools/base/governed.test.mts"
+    ],
+    "hooks/resident/load-ask.mts": [
+      "test/integration/load-ask.test.mts"
+    ],
+    "hooks/resident/index.mts": [
+      "test/hooks/base/resident-parts.test.mts"
+    ],
+    "hooks/resident/judge-check.mts": [
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/lifecycle.mts": [
+      "test/hooks/base/resident-parts.test.mts"
+    ],
+    "hooks/resident/messages.mts": [
+      "test/hooks/base/resident-parts.test.mts"
+    ],
+    "hooks/resident/pool.mts": [
+      "test/hooks/base/hook-children.test.mts",
+      "test/hooks/base/resident-parts.test.mts"
+    ],
+    "hooks/resident/selftest-events.mts": [
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/selftest-lifecycle.mts": [
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/selftest-plants.mts": [
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/selftest-rig.mts": [
+      "test/hooks/base/resident.test.mts",
+      "test/integration/resident-load.test.mts"
+    ],
+    "hooks/resident/selftest-status.mts": [
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/selftest.mts": [
+      "test/hooks/base/resident.test.mts"
+    ],
+    "hooks/resident/socket.mts": [
+      "test/hooks/base/resident-parts.test.mts"
+    ],
+    "hooks/resident/state.mts": [
+      "test/hooks/base/resident-parts.test.mts",
+      "test/unit/lib/daemon-cli.test.mts"
+    ],
+    "hooks/resident/status.mts": [
+      "test/integration/status-served.test.mts",
+      "test/unit/hooks-lib/status-keeper.test.mts"
+    ],
+    "hooks/resident/warm.mts": [
+      "test/hooks/base/resident-parts.test.mts"
+    ],
+    "hooks/resident/worker.mts": [
+      "test/hooks/base/hook-children.test.mts",
+      "test/hooks/base/resident-parts.test.mts"
+    ],
+    "hooks/reuse-hint.mts": [
+      "test/hooks/base/reuse-hint.test.mts"
+    ],
+    "hooks/run-hooks.mts": [
+      "test/hooks/base/run-hooks-crashes.test.mts",
+      "test/hooks/base/run-hooks.test.mts"
+    ],
+    "hooks/secrets-guard.mts": [
+      "test/hooks/base/secrets-guard.test.mts"
+    ],
+    "hooks/shape-law.mts": [
+      "test/hooks/base/shape-law-doctor-lists.test.mts",
+      "test/hooks/base/shape-law-doctor.test.mts",
+      "test/hooks/base/shape-law-install.test.mts",
+      "test/hooks/base/shape-law.test.mts"
+    ],
+    "hooks/rule-log.mts": [
+      "test/hooks/base/usage-log-hooks.test.mts",
+      "test/integration/usage-logs.test.mts"
+    ],
+    "hooks/lib/usage-log.mts": [
+      "test/hooks/base/usage-log-hooks.test.mts",
+      "test/integration/usage-logs.test.mts"
+    ],
+    "hooks/skill-first.mts": [
+      "test/hooks/base/skill-first.test.mts"
+    ],
+    "hooks/skill-log.mts": [
+      "test/hooks/base/usage-log-hooks.test.mts",
+      "test/integration/usage-logs.test.mts"
+    ],
+    "hooks/suite-once.mts": [
+      "test/hooks/base/suite-once.test.mts"
+    ],
+    "hooks/template-law.mts": [
+      "test/hooks/base/template-law.test.mts"
+    ],
+    "hooks/untrusted-boundary.mts": [
+      "test/hooks/base/untrusted-boundary.test.mts"
+    ],
+    "tools/anchors-check.mts": [
+      "test/tools/base/anchors-check.test.mts"
+    ],
+    "tools/governed.mts": [
+      "test/tools/base/governed.test.mts"
+    ],
+    "tools/load.mts": [
+      "test/integration/load-ask.test.mts"
+    ],
+    "tools/quiet-test.mts": [
+      "test/tools/base/quiet-test.test.mts"
+    ],
+    "tools/shape-symmetry-selftest.mts": [
+      "test/tools/base/shape-symmetry.test.mts"
+    ],
+    "tools/shape-symmetry.mts": [
+      "test/tools/base/shape-symmetry.test.mts"
+    ],
+    "tools/statusline-daemon.mts": [
+      "test/tools/base/statusline-daemon.test.mts"
+    ],
+    "tools/statusline-live.mts": [
+      "test/unit/hooks-lib/status-keeper.test.mts"
+    ],
+    "tools/chip-search.mts": [
+      "test/tools/base/chip-search.test.mts"
+    ],
+    "tools/statusline-agents.mts": [
+      "test/unit/hooks-lib/agent-board.test.mts"
+    ],
+    "tools/statusline-governor.mts": [
+      "test/tools/base/statusline.test.mts"
+    ],
+    "tools/statusline-paint.mts": [
+      "test/tools/base/statusline.test.mts"
+    ],
+    "tools/statusline-runs.mts": [
+      "test/tools/base/statusline.test.mts"
+    ],
+    "tools/statusline-session.mts": [
+      "test/tools/base/statusline.test.mts"
+    ],
+    "tools/statusline-version.mts": [
+      "test/unit/hooks-lib/status-keeper.test.mts"
+    ],
+    "tools/statusline-work.mts": [
+      "test/tools/base/statusline.test.mts"
+    ],
+    "tools/statusline.mts": [
+      "test/tools/base/statusline.test.mts"
+    ],
+    "tools/test-verdict.mts": [
+      "test/tools/base/test-verdict.test.mts"
+    ],
+    "hooks/lib/unattended.mts": [
+      "test/hooks/base/agents-held.test.mts",
+      "test/hooks/base/run-keeps-going.test.mts"
+    ],
+    "hooks/refusals-judged.mts": [
+      "test/hooks/base/refusals-judged.test.mts"
+    ],
+    "hooks/run-keeps-going.mts": [
+      "test/hooks/base/run-keeps-going.test.mts"
+    ]
   },
   "author": "claude-packs",
   "license": "MIT",
@@ -543,6 +996,20 @@
             "role": "judge",
             "order": 30,
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/refusals-judged.mjs\"",
+            "role": "judge",
+            "order": 50,
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-keeps-going.mjs\"",
+            "role": "judge",
+            "order": 60,
+            "timeout": 10
           }
         ]
       }
@@ -701,5 +1168,9 @@
     "hooks/no-find.mjs",
     "hooks/no-polling.mjs"
   ],
-  "optIn": ["hooks/agent-model.mjs"]
+  "optIn": [
+    "hooks/agent-model.mjs",
+    "hooks/refusals-judged.mjs",
+    "hooks/run-keeps-going.mjs"
+  ]
 }

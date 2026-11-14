@@ -11,49 +11,15 @@
 // (`ctx.env`, `ctx.sessionPid`), never from this process, so a resident runner reads its caller's, not its own.
 import { spawnSync } from 'node:child_process';
 import { chmodSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { join } from 'node:path';
 import { pendingIn } from './lib/background-agents.mts';
+import { printSession, unattended } from './lib/unattended.mts';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { put, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
-import type { Hook, HookContext, HookEvent, VerdictRow } from './lib/types.d.mts';
+import type { Hook, HookEvent, VerdictRow } from './lib/types.d.mts';
 import { pass, refuse } from './lib/verdict.mts';
 import { fileURLToPath } from 'node:url';
-
-const ANCESTORS = 8;
-
-// The words after the claude command in a process's command line, or null when it runs no claude.
-function claudeArgs(args: string): string[] | null {
-  const words = args.trim().split(/\s+/).map((w) => w.replace(/^['"]|['"]$/g, ''));
-  const at = words.findIndex((w) => basename(w) === 'claude');
-  return at === -1 ? null : words.slice(at + 1);
-}
-
-/** A process's command line is a print session: the claude command with -p or --print among its words. */
-export function printSession(args: string): boolean {
-  return (claudeArgs(args) ?? []).some((w) => w === '-p' || w === '--print');
-}
-
-// The parent, and the command line, of one process, by ps (the same on Linux and macOS).
-function parentOf(pid: number): { ppid: number; args: string } | null {
-  const r = spawnSync('ps', ['-o', 'ppid=', '-o', 'args=', '-p', String(pid)], { encoding: 'utf8' });
-  const m = r.status === 0 ? r.stdout.trim().match(/^(\d+)\s+(.*)$/) : null;
-  return m ? { ppid: Number(m[1]), args: m[2] ?? '' } : null;
-}
-
-/** True when nobody is there: what the environment says, else what the session's own claude process is. */
-export function unattended(ctx: Pick<HookContext, 'env' | 'sessionPid'>): boolean {
-  const said = ctx.env['CLAUDE_PACKS_UNATTENDED'];
-  if (said === '1' || said === '0') return said === '1';
-  for (let pid = ctx.sessionPid, n = 0; pid > 1 && n < ANCESTORS; n += 1) {
-    const p = parentOf(pid);
-    if (!p) return false;
-    // the nearest claude is the session that runs this hook; one further up is another session (KWB-130)
-    if (claudeArgs(p.args)) return printSession(p.args);
-    pid = p.ppid;
-  }
-  return false;
-}
 
 export const hook: Hook = (event, ctx) => {
   if (event.hook_event_name !== 'Stop') return pass;
