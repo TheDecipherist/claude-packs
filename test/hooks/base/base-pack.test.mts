@@ -95,6 +95,14 @@ test('installed dependencies are no evidence about a project, even before it has
   assert.match(said, packLine('reverse-engineering'));
 });
 
+// supernova2_monitor W1.1: chip-search found the library's conversions, and the task ran pdftotext on the found PDFs to learn their
+// editions (the user's tripwire stopped it): the skill said not to re-read a held source, not how to tell one
+test('the library is asked first, and a found file is matched by its outside, never by extracting it', () => {
+  const skill = readFileSync(join(KIT, 'packs/base/skills/chip-search/SKILL.md'), 'utf8');
+  assert.ok(skill.length < 8000);
+  for (const law of [/pdfinfo/, /SHA-256/, /title page/, /never by extracting its text/, /archive\.json/, /another edition is a new source/]) assert.match(skill, law);
+});
+
 test('a PDF is read with its pictures: figures exported, every page rendered, never a placeholder', () => {
   const skill = readFileSync(join(KIT, 'packs/base/skills/pdf-to-md/SKILL.md'), 'utf8');
   assert.ok(skill.length < 8000);
