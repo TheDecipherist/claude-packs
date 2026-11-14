@@ -30,9 +30,9 @@ import type { Configuration, Layout, LayoutKind } from '../packs/base/hooks/lib/
 import { readPack } from './packs.mts';
 
 export const OWNED: readonly string[] = ['files', 'protected', 'buildOutput', 'writeOnce', 'keepWorktrees', 'disable', 'enable', 'commands', 'siblings', 'maxFileLines', 'paramIds',
-  'guards', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart', 'settingsLayer'];
+  'guards', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart', 'settingsLayer', 'catalog', 'docsFolder'];
 const OPTIONAL: readonly string[] = ['maxFileLines', 'paramIds', 'guards', 'buildOutput', 'writeOnce', 'keepWorktrees', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart',
-  'settingsLayer'];   // KWB-144: written only when the project has it
+  'settingsLayer', 'catalog', 'docsFolder'];   // KWB-144: written only when the project has it
 // "complete": true marks a tailored layout; see below.
 
 /** A kind as a pack or configuration ships it: "contentWas" lists the content patterns it used to ship (they are replaced, a project's own is kept). */

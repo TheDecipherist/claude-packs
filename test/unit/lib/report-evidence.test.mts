@@ -13,7 +13,9 @@ import { readText } from '../../../packs/base/hooks/lib/files.mts';
 const KIT = fileURLToPath(new URL('../../..', import.meta.url));
 const ORDER = join(KIT, 'docs/workorders/typescript');
 const BUILD = process.env['REPORT_BUILD_DIR'] ?? join(KIT, 'build');
-const HAS_EVIDENCE = existsSync(join(BUILD, 'evidence'));
+// this report's evidence is on this machine only where its own last step's folder is: another order's build/evidence/W<n>
+// beside it is not its evidence (KWB-next, the audit run: two orders share build/evidence/W<n>)
+let hasEvidence: boolean | undefined;
 const STEPS = ['W0', 'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W8.8', 'W9', 'W10', 'W10b', 'W11.0', 'W11.1'];
 
 const text = (path: string): string => readText(path) ?? assert.fail(`${path} is missing`);
@@ -58,7 +60,12 @@ function filesIn(md: string): string[] {
 
 /** Where a cited name lives. Returns null when it must not be checked here (build/ evidence on a machine without it). */
 function exists(token: string): boolean | null {
-  if (token.startsWith('build/')) return HAS_EVIDENCE ? existsSync(join(BUILD, token.slice('build/'.length))) : null;
+  if (token.startsWith('build/')) {
+    // W11 is this order's last step and no other order's: its folder says the evidence here is this report's (the audit's W0..W9
+    // share names with this order's, build/evidence/W0/baseline.md among them)
+    hasEvidence ??= existsSync(join(BUILD, 'evidence', 'W11'));
+    return hasEvidence ? existsSync(join(BUILD, token.slice('build/'.length))) : null;
+  }
   const candidates = [token, `docs/workorders/typescript/${token}`, `docs/workorders/typescript/agents/${token}`];
   if (candidates.some((c) => existsSync(join(KIT, c)))) return true;
   return !token.includes('/') && trackedNames.has(token);

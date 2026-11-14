@@ -72,9 +72,9 @@ export const hook: Hook = judgeEachCheckout((root, settingsRoot, file) => {
 
 const PARAMS_H = 'src/params/Params.h';
 const BANK = 'data/factory.csv';
-const cutoffLine = (id: string, range: string): string => `layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { "${id}", 1 }, "${id}", juce::NormalisableRange<float> (${range}), 1000.0f));\n`;
+const cutoffLine = (id: string, range: string): string => `params.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { "${id}", 1 }, "${id}", juce::NormalisableRange<float> (${range}), 1000.0f));\n`;
 const params = (range = '20.0f, 20000.0f, 0.0f, 0.3f', modes = '"Saw", "Pulse"', extra = ''): string =>
-  `${cutoffLine('cutoff', range)}layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { "mode", 1 }, "Mode", juce::StringArray { ${modes} }, 0));\n${extra}`;
+  `${cutoffLine('cutoff', range)}params.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { "mode", 1 }, "Mode", juce::StringArray { ${modes} }, 0));\n${extra}`;
 const bank = (...names: string[]): string => `program,name\n${names.map((n, i) => `${i},${n}`).join('\n')}\n`;
 
 /** A worktree whose lock holds a range, and whose file changes it, is refused (PostToolUse: the edit is already on disk). */

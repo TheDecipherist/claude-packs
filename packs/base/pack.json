@@ -182,6 +182,7 @@
     "hooks/secrets-guard.mts": ["test/hooks/base/secrets-guard.test.mts"],
     "hooks/shape-law.mts": ["test/hooks/base/shape-law-doctor-lists.test.mts", "test/hooks/base/shape-law-doctor.test.mts", "test/hooks/base/shape-law-install.test.mts", "test/hooks/base/shape-law.test.mts"],
     "hooks/rule-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
+    "hooks/lib/usage-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
     "hooks/skill-first.mts": ["test/hooks/base/skill-first.test.mts"],
     "hooks/skill-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
     "hooks/suite-once.mts": ["test/hooks/base/suite-once.test.mts"],
