@@ -251,7 +251,9 @@ test('the tool, the skill and the rule install with the pack, and a project can 
 test('reverse-engineering rules load where the work is: research notes and tools as well as code, and only the first step at launch', () => {
   const dir = INSTALL;
   const rule = (f: string): string => readFileSync(join(dir, '.claude/rules', f), 'utf8');
-  for (const f of readdirSync(join(KIT, 'packs/reverse-engineering/rules')).filter((n) => n !== 'names-before-code.md')) {
+  // a `# hook:` rule is held, left out and switched on with its hook (catalog-entry-exists, opt-in): it has no paths of its own
+  const heldWithAHook = (n: string): boolean => /^# hook:/m.test(readFileSync(join(KIT, 'packs/reverse-engineering/rules', n), 'utf8'));
+  for (const f of readdirSync(join(KIT, 'packs/reverse-engineering/rules')).filter((n) => n !== 'names-before-code.md' && !heldWithAHook(n))) {
     for (const where of ['docs/**/*.md', 'tools/**', 'src/**/*.cpp']) assert.ok(rule(f).includes(`"${where}"`), `${f} loads on ${where}`);
   }
   assert.doesNotMatch(rule('names-before-code.md'), /^paths:/m);

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T23:43:45.630Z",
+  "updated": "2026-11-13T23:48:08.648Z",
   "steps": [
     {
       "id": "W0",
@@ -47,8 +47,8 @@
       "id": "W6",
       "title": "instrument-shell, cpp, shell, catalog, shell text",
       "items": 4,
-      "done": 0,
-      "agent": "is-a"
+      "done": 3,
+      "agent": null
     },
     {
       "id": "W7",
@@ -62,7 +62,7 @@
       "title": "the second full read",
       "items": 3,
       "done": 0,
-      "agent": null
+      "agent": "sr-1"
     },
     {
       "id": "W9",
@@ -81,28 +81,28 @@
   ],
   "agents": [
     {
-      "name": "is-a",
-      "worktree": ".claude/worktrees/is-a",
-      "step": "W6",
-      "started": "2026-11-13T23:29:40.493Z"
+      "name": "sr-1",
+      "worktree": ".claude/worktrees/sr-1",
+      "step": "W8",
+      "started": "2026-11-13T23:48:08.646Z"
     },
     {
-      "name": "cpp-web",
-      "worktree": ".claude/worktrees/cpp-web",
-      "step": "W6",
-      "started": "2026-11-13T23:29:40.494Z"
+      "name": "sr-2",
+      "worktree": ".claude/worktrees/sr-2",
+      "step": "W8",
+      "started": "2026-11-13T23:48:08.648Z"
     },
     {
-      "name": "cat",
-      "worktree": ".claude/worktrees/cat",
-      "step": "W6",
-      "started": "2026-11-13T23:29:40.494Z"
+      "name": "sr-3",
+      "worktree": ".claude/worktrees/sr-3",
+      "step": "W8",
+      "started": "2026-11-13T23:48:08.648Z"
     },
     {
-      "name": "shtext",
-      "worktree": ".claude/worktrees/shtext",
-      "step": "W6",
-      "started": "2026-11-13T23:29:40.494Z"
+      "name": "sr-4",
+      "worktree": ".claude/worktrees/sr-4",
+      "step": "W8",
+      "started": "2026-11-13T23:48:08.648Z"
     }
   ]
 }
