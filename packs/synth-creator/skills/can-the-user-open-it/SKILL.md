@@ -9,7 +9,7 @@ A step called done because the code compiled left the user opening an old copy, 
 
 <constraints>
 Always do:
-1. Run `node .claude/tools/can-open.mjs <build folder> <launched file or bundle>` with a `--source` folder for each place the change was made, a `--asset` for each file compiled in (image, font, data), and a `--marker` for a string the change added.
+1. Run `node .claude/tools/can-open.mjs <build folder> <launched file or bundle>` with a `--source` folder for each place the change was made, a `--asset` for each font or data file compiled in, and a `--marker` for a string the change added.
 2. Read the report. It names the file that would be launched and when it was built. `stale` means the file is older than a changed source: rebuild through the queue and run it again.
 3. Delete a configuration folder named as a leftover (Debug, MinSizeRel, RelWithDebInfo beside Release), then run the tool again. A host takes the first it finds.
 4. An asset or marker "not inside the launched file" means the build did not link it: delete the generated binary-data folder, reconfigure and rebuild.

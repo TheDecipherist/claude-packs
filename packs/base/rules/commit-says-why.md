@@ -10,11 +10,11 @@ A message that names only the files tells the next person nothing about whether 
 
 <constraints>
 Always do:
-- Make one commit per finished, verified job.
+- Make one commit per finished, verified job; a work-in-progress commit is the git rule's (`git-right-first-time`).
 - Lead with what changed and for whom, then the evidence with numbers ("+6.2 dB became +13.8 dB at a played level, because ..."), then the wrong turn that stops the next person undoing it.
-- Commit a shared package first, and name its commit in the consumer's message.
+- Commit a shared package first, and name its commit in the consumer's message, unless the change is one atomic edit across a monorepo that cannot build in halves.
 
 Never do:
-- Put a shared package's change and its consumer's change in one commit.
+- Put a shared package's change and its consumer's change in one commit, except in that atomic case.
 - Write a message that holds no number where a number was measured.
 </constraints>

@@ -10,7 +10,7 @@ A reference document generated from the engine goes stale the day a parameter is
 
 <constraints>
 Always do:
-- Wire `docs-current` into the project's tests as a gate, with the generator's command at `commands.docs` in `.claude/layout.json`.
+- Where a generator exists, wire `docs-current` into the project's tests as a gate, with the generator's command at `commands.docs` in `.claude/layout.json`.
 - Commit the regenerated documents in the same commit as the engine change that moved them.
 - Make the generator deterministic: sorted order, no timestamps, no locale.
 

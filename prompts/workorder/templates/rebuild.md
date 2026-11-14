@@ -227,8 +227,7 @@ All of it is C++ drawing calls. Use `make-it-a-template` and `test-the-template-
 
 1. A report for every factory patch: distinct records, effective distinct sounds, twins, silent ones and clipping ones.
 2. **[if W10 ran and recordings exist]** Every recorded patch through the compare tool, its report beside it.
-
-3. The browser and the display show the machine's own program numbers (A000..H127, 80..99), never list indexes.
+3. The browser and the display show the machine's own program numbers (for example A000..H127 or 80..99), never list indexes.
 
 **Done when:** every patch sounds, levels are within a stated range, and twins are explained; 0 patches shown by list index (`tests/program-numbers.test`).
 

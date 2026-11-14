@@ -14,7 +14,7 @@ Always do:
 
 5. End a build's command with the build's own status. A background job reports its last command's status: a build followed by `echo` or `tail` reports theirs, and a stale binary reads as a pass. Keep the output in a file and read the build's exit.
 6. Read ctest's per-test lines: `***Not Run` is a target that was never built, not a failure of the unit. Build it.
-7. Before a build, check no export job is still alive. A "built" that did not relink means: delete the generated binary-data folder and reconfigure.
+7. Before a build, check no generation job is still alive. A "built" that did not relink means: delete the generated binary-data folder and reconfigure.
 
 Never do:
 - Run `cmake --build`, `ctest`, `make`, `ninja`, `xcodebuild`, or a program from a build folder straight from the shell.

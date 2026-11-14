@@ -15,7 +15,7 @@
     "**/*.test.*",
     "**/*.spec.*"
   ],
-  "pattern": "\\b(?:Field notes|Quietly trusted by|Scroll to explore|Scroll down|Stage\\s*1|Available for work|Est\\.\\s*(?:19|20)\\d\\d)\\b",
+  "pattern": "\\b(?:Field notes|Quietly trusted by|Scroll to explore|Scroll down|Stage\\s*0\\d|Available for work|Est\\.\\s*(?:19|20)\\d\\d)\\b",
   "bad": "<p>Est. 2024</p>\n<p>Scroll down</p>\n",
   "good": "<h2>Pricing</h2>\n<p>Plans for one person or a team.</p>\n",
   "strings": true,
