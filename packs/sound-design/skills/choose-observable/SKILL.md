@@ -17,6 +17,8 @@ Always do:
 8. Map a two-axis or macro control by the local gradient first, then by a rendered sweep.
 9. Measure after a transition, never across it. Use a falling-edge trigger, and choose the probe tone on purpose.
 10. For a layer on a harmonic the note already has, measure a ratio and read the start state.
+11. Never excite a stereo difference or a comb with noise: noise is independent per channel. Use a correlated tone or an impulse.
+12. Balance layers by K-weighted loudness read at each layer's own maximum, never by RMS: a different crest factor makes equal RMS unequal in loudness.
 
 Never do:
 - Measure phase through a comb, or trust a filter's lowest point as its vertex.

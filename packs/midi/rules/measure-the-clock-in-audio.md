@@ -18,6 +18,7 @@ Always do:
 - Land each tap on the grid at an absolute time, and when a parameter changes type, grep every gate that reads it.
 - Round event offsets to the nearest sample, never truncate them.
 - Use 90 and 140 BPM as well as 120: 120 lands on whole samples and passes with wrong arithmetic.
+- Make a random-mode choice (an arp's note pick) a pure function of the absolute step, so a locate replays the same notes.
 
 Never do:
 - Scale an absolute time (a flam) with the tempo: it does not move when the tempo does.

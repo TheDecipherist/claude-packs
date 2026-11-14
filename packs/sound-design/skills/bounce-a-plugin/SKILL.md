@@ -32,11 +32,12 @@ Always do:
 9. To compare two engines, render both with the same patch and the same notes, and name in the report what the other engine is. An emulation is a reference, not the machine: tag it as what it is, and record where it disagrees with the schematic rather than choosing quietly.
 10. Prove which binary loaded: its path, size and version. Resolve the path from the emulator's own configuration, never from memory.
 11. On a silent render of the right length, prove the source before the sink: a known note must make sound at the plugin before the capture is suspected.
-12. Confirm a state load took: load a different patch first, then read the displays before rendering.
+12. Confirm a state load took: load a different patch first, then read the displays before rendering. After reading the displays, render in a fresh instance: a display stops following once audio is rendered, and a plugin that refuses a layout keeps the previous preset's state.
 13. Reset every probed offset before each render, so one probe's value does not reach the next.
 14. Enumerate parameters headless as a second naming of them, and drive an emulator with a crafted patch in a spare slot.
 15. Sweep one value per note with settle time between notes, never a knob under a held note.
 16. When the offline renderer cannot load a plugin, open it once in an interactive host: see whether it loads at all and takes sysex, before a day goes into the renderer.
+17. When output looks like dropped writes, bisect the baseline one parameter at a time before changing the host or the message path.
 
 Never do:
 - Open an audio device, or route through a loopback, to capture a plugin. On macOS a permission denial returns silence, not an error.

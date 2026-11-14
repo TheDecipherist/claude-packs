@@ -12,6 +12,7 @@ Load for an effects unit, a whole bank, or a modulation engine. Numbers are tagg
 - **Delay** [WHY]: ping-pong reads only when the times differ or feedback is over 40%. Modulation of 0.3 to 0.8 Hz at 3 to 8 cents belongs to analogue-style presets only; a digital one has none. Inverted feedback is a named category. A delay can be movement (1 to 2% regeneration) rather than echo (25% and over), and that is its own category.
 - **Reverb** [LAW]: a spring is its own instrument, so keep the boing, for leads and not pads. Freeze presets are a category, with the amount on a macro. Ship one ducked and one un-ducked flagship hall. Give decay in beats where the module allows. The early control is the distance knob.
 - **Chain laws** [LAW]: one hero. The order is the preset (drive, filter, delay, reverb by default; any other order is a named type). Every block sits within 1 dB of its input, with overall gain set at MIX or OUTPUT. MIX is tuned on a send (100% wet) and on an insert. A follower drives one destination, with depth set so a quiet source still gets it. The chain that stands out does one unexpected thing.
+- **Treatment is identity** [LAW]: keep a source mono and take width from one send; use three-fader M/S width on one element only, with the mono risk in the notes. A resonant EQ sweep inside the delay return and a body resonator after the filter are named chain types. A multi-effect preset is an instrument, and a great bank through nothing is a demo.
 
 ## Bank tiers
 
@@ -36,11 +37,12 @@ Load for an effects unit, a whole bank, or a modulation engine. Numbers are tagg
 ## Envelope engine checklist
 
 - Seven stages with two intermediate levels, a delay stage, one curve function (EXP is the exact mirror of LOG), and the machine's timing laws.
+- One curve function has one strength, with LINEAR as its limit and EXP its exact mirror, never a separate function per shape.
 - A guard for a lag with sustain 0; retrigger from the current level; attack overshoot; velocity; time key-track; times in tempo divisions.
 - Stage boundaries are modulation sources named from the ROM's own list, and each boundary is gated to fire (an off-by-one never fired).
 
 ## LFO engine checklist
 
-- A direction change alters the order of the shape, never its rate (ping-pong runs the accumulator at half speed).
+- A direction change alters the order of the shape, never its rate (ping-pong runs the accumulator at half speed). A ping-pong cycle takes twice the time, so the rate stays the traverse speed.
 - Each shape is a generated point list that stores its cycle length in bars, and is probed at that length.
 - Per voice: shared coefficients, per-voice phase, fade-in, start phase, retrigger, song-position lock. Ask each of these of the machine.

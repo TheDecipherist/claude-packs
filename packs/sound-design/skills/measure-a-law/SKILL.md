@@ -21,6 +21,7 @@ Always do:
 12. Derive neutral values from the parameter map. The map's default is the displayed value, not the stored byte.
 13. Measure the part alone through the same code that measured the reference, never through a copy of it.
 14. Fit a pitch table at both 440 and 442 Hz, and let the machine's own adjustment procedure decide which it uses.
+15. Convert a manual's clock-face statements by the pot's travel, solved from printed figures that must agree (a wrong travel put a law 0.75 octave out).
 
 Never do:
 - Fit a single point.

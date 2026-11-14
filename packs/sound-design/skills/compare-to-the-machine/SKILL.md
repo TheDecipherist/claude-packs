@@ -14,13 +14,13 @@ Always do:
 3. Identify each sound from the machine's own display. Step through the video and write a timeline: time, patch number, patch name, page. Then look each name up in your banks.
 4. Match by **name**, never by number alone. A unit's slots get overwritten, so the same number can be a different patch. A name at the same slot is the same patch; a number with no name proves nothing. A multi or combination's name is not the sound's: its voice fields say which single is playing.
 5. Sort the timeline in two: same patch, for a direct comparison, and everything else, for character only. Compare singles: a multi holds per-voice settings you may not have.
-6. Cut each same-patch section to its own file: `ffmpeg -ss <from> -to <to> -i <audio> -ar 48000 -c:a pcm_f32le <name>.wav`. Check it holds sound, and write down the cut points.
+6. Cut each same-patch section to its own file: `ffmpeg -ss <from> -to <to> -i <audio> -ar 48000 -c:a pcm_f32le <name>.wav`. Check it holds sound, and write down the cut points. To cut one long recording into takes, take the floor from its own quietest second, set a minimum gap and length, never normalise, and number the takes in a TSV; naming a take is a person's job against the printed list.
 7. Render the same patch through your engine, with no effects unless the recording has them. Use `bounce-a-plugin` for anything that is a plugin. Find a clear held note in the recording, read its pitch, and play that note.
 8. Level-match, then compare what a performance can show: the long-term spectrum, brightness over time, the attack of a clear note, the pitch of a held one, and the noise floor.
 9. Prove the comparison can fail: a planted fault, such as a filter a third too low, has to show in the report.
 10. Report the numbers as where to look, with the audio beside them, so a person can listen. The ear of someone who knows the machine is the verdict.
 11. Tag what comes from this as a recording, never as firmware or schematic. Where it disagrees with firmware or a schematic, write that down and find out why: don't quietly choose.
-12. With no presets to pair, take a published capture that moved one knob at a time, note for note, and tag each result `[REF]`.
+12. With no presets to pair, take a published capture that moved one knob at a time, note for note, and tag each result `[REF]`. With no preset to pair, also measure what the recording shows by physics: tuning in cents against equal temperament, the harmonic ladder (a saw falls 6.0, 9.5, 12.0 dB; a square has no even harmonics), the spectral slope (poles = (slope - 6) / 6), the first note's rise and last note's fall, and the modulation rate.
 13. Report a mismatched pair beside every comparison: the verdict is the gap between a match and a mismatch.
 14. A demo validates, and only clean quantities fit it. MP3 is empty above about 15 kHz, so no band there decides.
 15. Take attack brightness as a within-note ratio, and read band tables, not one number.
