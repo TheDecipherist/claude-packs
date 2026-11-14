@@ -54,6 +54,15 @@ function layerOf(claude: string): SettingsLayer | null {
   return found;
 }
 
+// A layer the project will build in a later stage, declared with its reason: `settingsLayer: { "deferred": "<why, and when>" }`. A
+// law whose subject first exists before its stage (an empty plugin in a project's setup) is no fault while it says why; a blank
+// reason is no reason (supernova2_monitor W0.4: doctor red on a plugin whose settings page is drawn after its look is analysed).
+function deferredOf(claude: string): string | null {
+  const layer = readLayout(claude)['settingsLayer'];
+  const why = layer !== null && typeof layer === 'object' ? (layer as Record<string, unknown>)['deferred'] : undefined;
+  return typeof why === 'string' && why.trim() !== '' ? why : null;
+}
+
 // A write to the settings layer: the standard settings it names may not shrink, and a new layer names them all.
 function judgeLayer(w: FileWrite, rel: string, root: string, claude: string): string | null {
   const layer = layerOf(claude);
@@ -93,8 +102,8 @@ export function problems(root: string): string[] {
   if (!PLUGIN.test(all)) return [];
   const found: string[] = [];
   const layer = layerOf(root);
-  if (!layer) found.push('a JUCE plugin with no settings layer: declare its files in layout.json "settingsLayer": { "files": [...] }, rows from one table keyed by the standard ids (.claude/hooks/lib/settings-standard.mjs)');
-  else {
+  if (!layer && deferredOf(root) === null) found.push('a JUCE plugin with no settings layer, and none deferred with its reason ("settingsLayer": { "deferred": "<why, and when>" }): declare its files in layout.json "settingsLayer": { "files": [...] }, rows from one table keyed by the standard ids (.claude/hooks/lib/settings-standard.mjs)');
+  else if (layer) {
     const missing = missingIn(together(root, layer.files, null, ''), requiredSettings(layer.without));
     if (missing.length) found.push(`the settings layer leaves out ${named(missing)}`);
   }
@@ -143,7 +152,10 @@ export function selftest(): number {
   const bare = project({ 'CMakeLists.txt': PLUGIN_CMAKE }, null);
   const synth = project({ 'CMakeLists.txt': PLUGIN_CMAKE }, { files: [LAYER], without: { input: 'a synth: nothing listens to an input' } });
   const blank = project({ 'CMakeLists.txt': PLUGIN_CMAKE }, { files: [LAYER], without: { input: '' } });
-  const projects = [fresh, full, old, split, bare, synth, blank];
+  const later = project({ 'CMakeLists.txt': PLUGIN_CMAKE }, { deferred: 'drawn in stage 11, after stage 2 analyses the look' } as never);
+  const unsaid = project({ 'CMakeLists.txt': PLUGIN_CMAKE }, { deferred: ' ' } as never);
+  const laterInJuce = project({ 'CMakeLists.txt': STANDALONE_CMAKE }, { deferred: 'drawn in stage 11' } as never);
+  const projects = [fresh, full, old, split, bare, synth, blank, later, unsaid, laterInJuce];
   const before = projects.map((d) => snapshot(d));   // each project as the judge finds it: the rows below must leave it as it is
   return verdicts('settings-layer', [
     ['a new layer without Enable QWERTY', write(fresh, LAYER, rows(but('midi.qwerty'))), 2],
@@ -159,6 +171,9 @@ export function selftest(): number {
     ['--status: a plugin with no settings layer', runHook(hookFile, bare, null, ['--status']).status, 1],
     ['--status: an old layer and JUCE\'s window', runHook(hookFile, old, null, ['--status']).status, 1],
     ['--status: a complete plugin', runHook(hookFile, full, null, ['--status']).status, 0],
+    ['--status: a layer deferred with its reason', runHook(hookFile, later, null, ['--status']).status, 0],
+    ['--status: a layer deferred with a blank reason', runHook(hookFile, unsaid, null, ['--status']).status, 1],
+    ['--status: a deferred layer does not excuse JUCE\'s own window', runHook(hookFile, laterInJuce, null, ['--status']).status, 1],
     ['another project is not ours', write(full, `../elsewhere-${Date.now()}/src/ui/SettingsRows.cpp`, rows([])), 0],
     ['a judge writes no file (the write trap)', projects.flatMap((d, i) => writtenSince(d, before[i] ?? new Map())).join(','), ''],
   ]);
