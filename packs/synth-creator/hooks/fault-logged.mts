@@ -6,11 +6,12 @@
 // The log paths are `files.bugs` and `files.workflowBugs` in `.claude/layout.json` (defaults bugs.md and workflow-bugs.md); a log entry is
 // any write to either file in the turn. It never loops: it sends a turn back once, and a turn already sent back (stop_hook_active) ends.
 //   node fault-logged.mjs --selftest
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { toJson } from './lib/json.mts';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { readLayout } from './lib/layout.mts';
+import { checkoutRoot } from './lib/project.mts';
 import { put, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { lastTurn, writesOfTurn } from './lib/turn.mts';
@@ -46,7 +47,9 @@ export function logPaths(root: string): string[] {
 const wroteALog = (event: HookEvent, root: string, env: Env): boolean => {
   const logs = logPaths(root);
   const turn = lastTurn(event.transcript_path ?? '');
-  return writesOfTurn(turn, root, env).some((w) => logs.some((rel) => w.path === resolve(root, rel) || w.path.endsWith(`/${rel}`)));
+  // The project's own log, in its checkout (a worktree has its own): the same file name in another folder is no entry.
+  const checkout = checkoutRoot(root, join(event.cwd ?? root, 'x'), root);
+  return writesOfTurn(turn, root, env).some((w) => logs.some((rel) => w.path === resolve(root, rel) || w.path === resolve(checkout, rel)));
 };
 
 export const hook: Hook = (event, ctx) => {
