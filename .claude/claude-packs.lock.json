@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-14T20:45:32.970Z",
+  "updated": "2026-11-14T20:54:03.166Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/a-gate-measures-the-real-thing.md": "df368aa42cb0d3e7933f83f1a591c0d89ea8d9588b494f4c194b590b704310e3",
@@ -190,7 +190,7 @@
     ".claude/hooks/look-gate.mjs": "b6e2f02f4e21823c4cef4b8ad2bf229a0eed1758857a90ad812aa98f3744c959",
     ".claude/hooks/making-check-count.mjs": "e963c67a72c0b7b5344ebb4edeb415f728473ed9c873f77c095073508c49fe86",
     ".claude/hooks/making-check.mjs": "89d62a71a7550588e5c9e8fc3693459b29cdb3dbeef5e0f2c838c706400bb807",
-    ".claude/hooks/making.mjs": "f9966a86ffb59f98a9126b760ab2b4ee28151b633a501c142491e03abab66312",
+    ".claude/hooks/making.mjs": "ab88d5c65353cca699cffb9c3577c2d9c8e2816c5e66f43c596fa43d97e699dd",
     ".claude/hooks/no-find.mjs": "23913c1eec22598315400984d65fee029ef104ad37b673bcf62d1666b1c9cb2e",
     ".claude/hooks/no-polling.mjs": "d65da36e53d1a70fbcd72c732e6f04f804f29fad4d618dafe1a0843e3e4ea322",
     ".claude/hooks/once-only-index.mjs": "28e6fa148cae7be0d8c5868e9005799c0c547cf40ad036d7982f5857718c6c01",

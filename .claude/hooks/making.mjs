@@ -33,13 +33,19 @@ const plural = (c, name) => {
     const first = c?.plural instanceof Set && c.plural.size ? [...c.plural][0] : undefined;
     return first ?? (c?.words ?? []).find((w) => w === `${name}s` || w === `${name}es`) ?? `${name}s`;
 };
+/** The task's own words of a prompt: a compiled task's <constraints> block (the order's lines and its skills whole, with their
+ *  examples), its task ids (W0.5) and its line-start item marks ("5. ") out. Each was once read as the task naming an instance: a
+ *  skill's `--program` example and an item number told two tasks to build for all 128 programs (supernova2_monitor WB-13, WB-15). */
+export function ownWords(prompt) {
+    return prompt.replace(/<constraints>[\s\S]*?<\/constraints>/g, ' ').replace(/\bW\d+(?:\.\d+)?\b/g, ' ').replace(/^\s*\d+\.\s/gm, ' ');
+}
 // The echo line, or '' when the prompt names no instance of a many concept. One line, whatever the prompt holds.
 export function echo(prompt, shape) {
     if (!shape || !prompt)
         return '';
     const named = [];
     const seen = new Set();
-    for (const f of findInstanceLiterals(prompt, 'prompt.md', shape)) {
+    for (const f of findInstanceLiterals(ownWords(prompt), 'prompt.md', shape)) {
         const c = shape.concepts[f.concept];
         if (!c || c.shape !== 'many' || seen.has(f.concept) || f.instance === 'each')
             continue;
@@ -91,6 +97,8 @@ export function selftest() {
         ['a prompt naming slot 2 gets the echo', inject('the PAD in slot 2 is too quiet, fix it', shape).endsWith('you named slot 2: building for all slots (many, 4), slot 2 is the reproduction')],
         ['a prompt naming no instance gets the text alone', inject('make the reverb darker on every slot', shape) === TEXT],
         ['an example line is not an echo', inject('seen in: slot 3, build it for all slots', shape) === TEXT],
+        ['a compiled task\'s constraints, task id and item mark are no echo', inject('task W2.3 of the order\n3. Prove the guards\n<constraints>\n- render it with --slot 2 and listen\n</constraints>\n', shape) === TEXT],
+        ['a slot named in the task\'s own text still echoes', inject('3. Fix slot 2\n<constraints>\n- keep it quiet\n</constraints>\n', shape).includes('you named slot 2')],
         ['a selector is not an echo', inject('the selectedSlot loses its state after a load', shape) === TEXT],
         ['a one concept is never echoed as many', inject('the mixer 1 meter', shape).split('\n').length <= 2 && !inject('the mixer 1 meter', shape).includes('all mixers')],
         ['no manifest: the text alone', inject('drive slot 2', null) === TEXT],
