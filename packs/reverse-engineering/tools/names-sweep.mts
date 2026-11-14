@@ -14,7 +14,7 @@ import { isMain } from '../hooks/lib/hook-log.mts';
 import { readNames } from './lib/names-find.mts';
 import { indexCheck, indexText } from './lib/names-index.mts';
 import { report, sweep } from './lib/names-report.mts';
-import { widthPrefixedRuns, widthTablesText } from './lib/names-runs.mts';
+import { chanceRuns, widthPrefixedRuns, widthTablesText } from './lib/names-runs.mts';
 import type { Sweep } from './lib/names-report.mts';
 import { interleave } from './lib/unwrap.mts';
 
@@ -33,11 +33,11 @@ function imagesOf(files: readonly string[], pair: boolean): [string, Buffer][] {
   return files.map((f): [string, Buffer] => [basename(f), readFileSync(f)]);
 }
 
-// --run: no names file, the image counts its own tables. Exit 1 when it finds none.
-function runMode(files: readonly string[]): number {
-  const results = imagesOf(files, false).map(([label, image]) => [label, widthPrefixedRuns(image)] as const);
-  console.log(results.map(([label, runs]) => widthTablesText(label, runs)).join('\n\n'));
-  return results.some(([, runs]) => runs.length) ? 0 : 1;
+// --run: no names file, the image counts its own tables. Exit 1 when it finds no more than shuffled copies of the same bytes do. --min is the fewest entries.
+function runMode(files: readonly string[], min: number): number {
+  const results = imagesOf(files, false).map(([label, image]) => { const chance = chanceRuns(image, min); return [label, widthPrefixedRuns(image, min), chance] as const; });
+  console.log(results.map(([label, runs, chance]) => widthTablesText(label, runs, chance)).join('\n\n'));
+  return results.some(([, runs, chance]) => runs.length > chance) ? 0 : 1;
 }
 
 // --index AT,STRIDE,WIDTH: the names file is the manual's list in its order. Exit 1 unless the true alignment beats every control.
@@ -54,7 +54,7 @@ function main(argv: readonly string[]): number {
   const value = (flag: string): string | undefined => { const i = argv.indexOf(flag); return i === -1 ? undefined : argv[i + 1]; };
   const files = argv.filter((a, i) => !a.startsWith('--') && !['--names', '--base', '--min', '--index'].includes(argv[i - 1] ?? ''));
   const namesFile = value('--names');
-  if (argv.includes('--run')) return runMode(files);
+  if (argv.includes('--run')) return runMode(files, Number(value('--min') ?? 3));
   if (argv.includes('--index')) return indexMode(files, namesFile, value('--index'));
   if (!files.length || !namesFile) {
     console.error('usage: names-sweep.mjs <image>... --names <file> [--pair] [--base 0x8000,...] [--banked] [--min 4] [--json]');

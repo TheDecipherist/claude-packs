@@ -4,7 +4,7 @@
 //   rolandChecksumOk(body) -> address, data and checksum sum to 0 mod 128
 //   payloadStarts(buffer, stored, modulus) -> offsets where the bytes from there to the end sum to `stored`: a header sum pins where the payload starts
 //   checksumSpans(words, stored) -> word counts whose 16-bit sum is `stored` (a record's sum may run one word past its stated length)
-//   xorKeyFromErased(buffer, period) -> the repeating key, read from a run of erased bytes, and whether it holds at every other run
+//   xorKeyFromErased(buffer, period) -> the commonest repeating key read from runs of erased bytes, how many runs hold it, and whether every run does; null unless two runs agree
 //   xorWithKey(buffer, key) -> the buffer with the key removed
 //   oneBlockPerFile(file, size) -> exactly `size` bytes: a vendor's file over-runs its block with padding, and taking it all drifts the offset
 
@@ -60,9 +60,12 @@ export function xorKeyFromErased(buffer: Buffer, period: number, erased = BYTE):
     const varied = window.subarray(0, period).some((b) => b !== x);
     if (repeats && varied) keys.push(Buffer.from(window.subarray(0, period).map((b) => b ^ erased)));
   }
-  const [first] = keys;
-  if (!first) return null;
-  return { key: first, runs: keys.length, global: keys.every((k) => k.equals(first)) };
+  // The key is the commonest one: a header's padding or a repeated table makes a pair of equal blocks of its own, and it comes first.
+  const counts = new Map<string, number>();
+  for (const k of keys) counts.set(k.toString('hex'), (counts.get(k.toString('hex')) ?? 0) + 1);
+  const [best] = [...counts].sort((a, b) => b[1] - a[1]);
+  if (!best || best[1] < MIN_ERASED_RUN) return null;
+  return { key: Buffer.from(best[0], 'hex'), runs: best[1], global: counts.size === 1 };
 }
 
 export function xorWithKey(buffer: Buffer, key: Buffer): Buffer {
