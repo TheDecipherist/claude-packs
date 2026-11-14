@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-14T19:44:48.808Z",
+  "updated": "2026-11-14T20:29:01.030Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/a-gate-measures-the-real-thing.md": "df368aa42cb0d3e7933f83f1a591c0d89ea8d9588b494f4c194b590b704310e3",
@@ -109,7 +109,7 @@
     ".claude/hooks/lib/governor.mjs": "46aa82558c7989e518bbac333a3098cb1ef0ea89a01fb57ffb7e78eb9f5f2fa0",
     ".claude/hooks/lib/hash.mjs": "ca6901f58d9f0403f8f6a6c4dac57091dd073e4eef36318ea597dc7603f0e0a5",
     ".claude/hooks/lib/heavy-commands.mjs": "547294f214e908a2adf7c9df3716056acc123f241fbf88c6f3d276062f217e83",
-    ".claude/hooks/lib/hook-log.mjs": "8bdab4b6ae57fdc5f200595aa5dedaa6ea3a856aab32ce7c57585c5efec0a107",
+    ".claude/hooks/lib/hook-log.mjs": "13e231b9183af4ee9f90b733348a5222479c751018f99cf8db9205b7588065f2",
     ".claude/hooks/lib/hook-table.mjs": "9f974aa6353c4fc9e8f04394464bdb51c3b4e8f59def62eac6fb5b84ee0e735d",
     ".claude/hooks/lib/hub-rig.mjs": "df9fdd2e14c78451abe6576d74fed260b707c0ab5049c430d64d764e8fb421f2",
     ".claude/hooks/lib/identifier-runs.mjs": "74dd8601af12a9327a004766c50eb874a3eeeec07bd2e4febe0ee52834384580",
