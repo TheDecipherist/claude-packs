@@ -96,10 +96,10 @@ The `processors:` line drives the `re-toolchain` skill of the reverse-engineerin
 
 ## W1. The sources
 
-1. Convert every PDF by `pdf-to-md`, with the image switch on and every page rendered at 300 dpi, into the archive's `converted/`.
+1. Look every PDF up in the reference library first (`chip-search`); convert only what it lacks, by `pdf-to-md`, with the image switch on and every page rendered at 300 dpi, into the library's place for it (`manuals/`, `service-manuals/`, `chips/`), never the project.
 2. Write `docs/names.txt` from the manuals by `names-first`: every parameter, page, value list, type, mode, setting and message the display shows.
-3. Read every circuit sheet by `read-a-circuit-diagram`: one report per sheet in `docs/circuits/`, with `chips/`, `netlists/` for every analogue stage, `README.md` and `change-order.md` for what the sheets correct in this order. Name every chip from the sheets, with two sources.
-4. Fetch and read the data sheet of every chip the sheets name, by `pdf-to-md`, into `docs/circuits/chips/`. A custom part with none: record what was searched.
+3. Read every circuit sheet by `read-a-circuit-diagram`: one report per sheet in the library's `service-manuals/<brand>/<model>/circuits/`, with `netlists/` for every analogue stage, `README.md` and `change-order.md` for what the sheets correct in this order. Name every chip from the sheets, with two sources.
+4. Fetch and read the data sheet of every chip the sheets name, by `pdf-to-md`, into the library's `chips/<maker>/<part>/` with its page in the library's format. A custom part with none: record what was searched.
 5. Search for what is missing, and record each search and its date.
 6. Grade the evidence and record the path in `decisions.md`: build it (a table of names and ranges), build it tagged (presets but no table: every value tagged with what it rests on), or, only when there are no names and no presets, create nothing and write the findings. Where the machine boots from disk and ships no sounds, the deliverable is the format documentation and a player with the factory disks as corpus; record that scope as a finding where the next reader sees it.
 
@@ -173,7 +173,7 @@ The machine's arpeggiator is remade exactly as it is, unless the user says other
 ## W9. The engine: the sound
 
 1. **[if digital]** Every oscillator, filter and amplifier type, each routine ported and checked against its oracle trace bit for bit, block for block. Waves load from `<MACHINE>_FIRMWARE` at run time; never committed.
-2. **[if analogue]** Every stage from its schematic: oscillators band-limited, every filter mode's response computed from the resistor and capacitor values in `docs/circuits/`, not from a table of curves, and measured against what those values compute. Every constant is `[SCH]` with its sheet, `[FW]` with its address, or `[EAR]` in the ledger with what would close it.
+2. **[if analogue]** Every stage from its schematic: oscillators band-limited, every filter mode's response computed from the resistor and capacitor values in the library's circuit reports for the machine, not from a table of curves, and measured against what those values compute. Every constant is `[SCH]` with its sheet, `[FW]` with its address, or `[EAR]` in the ledger with what would close it.
 3. The realtime rules hold, and the full polyphony fits the CPU budget written in `docs/laws.md`, measured per block.
 
 **Done when:** every type agrees with its oracle trace or measures as its schematic computes; every factory patch sounds, none silent and none clipping beyond a stated limit; the polyphony meets the budget; and the realtime audit is clean with 0 findings (`tests/engine/oracle.test`).

@@ -22,7 +22,8 @@ const skip = built ? false : 'no proxy binary is built here (Go is not on PATH)'
 
 // a hook that refuses `rm -rf` the way a guard does, in a project that has the kit's table
 const PLANT = "export function hook(event, ctx) {\n  const c = event.tool_input?.command ?? '';\n  return /\\brm\\s+-rf\\b/.test(c) ? { code: 2, stdout: '', stderr: 'BLOCKED by plant-rm: rm -rf\\n' } : { code: 0, stdout: '', stderr: '' };\n}\n";
-const RM = toJson({ session_id: 's', cwd: '/', hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'rm -rf /tmp/some-folder' } });
+// an rm -rf inside the rig's own project: outside it, stay-inside stops the session before any refusal (KWB-next, 2026-11-14)
+const RM = (r: Rig): string => toJson({ session_id: 's', cwd: r.project, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'rm -rf build/some-folder' } });
 const FIND = toJson({ session_id: 's', cwd: '/', hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'find / -name x' } });   // no-find refuses it
 const LS =toJson({ session_id: 's', cwd: '/', hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'ls' } });
 
@@ -54,7 +55,7 @@ const sources = (r: Rig): string[] => readHookLog(r.project).filter((l) => l.hoo
 
 test('an install with no binary in the cache runs the TypeScript runner through the picker, and refuses rm -rf', () => {
   const r = rig(false);
-  const refused = fire(r, RM);
+  const refused = fire(r, RM(r));
   assert.equal(refused.code, 2);
   assert.match(refused.stderr, /BLOCKED by plant-rm/);
   assert.equal(fire(r, LS).code, 0);
@@ -64,11 +65,11 @@ test('an install with no binary in the cache runs the TypeScript runner through 
 test('the first event of a session with no daemon is judged by the fallback: rm -rf is refused, and the next is served by the daemon', { skip, timeout: 60_000 }, async () => {
   const r = rig(true);
   try {
-    const first = fire(r, RM);
+    const first = fire(r, RM(r));
     assert.equal(first.code, 2, `exit ${first.code}: ${first.stderr}`);
     assert.match(first.stderr, /BLOCKED by plant-rm/);
     await until('a daemon is listening', () => spawnSync('node', [CLI, 'daemon', 'status', '--dir', r.project], { env: r.env, encoding: 'utf8' }).stdout.includes('running'));
-    const second = fire(r, RM);
+    const second = fire(r, RM(r));
     assert.equal(second.code, 2);
     assert.match(second.stderr, /BLOCKED by plant-rm/);
     assert.equal(fire(r, LS).code, 0);
@@ -83,7 +84,7 @@ test('the picker under a planted uname of Linux x86_64 on this machine runs the 
   const bin = scratchDir('planted-uname-');
   put(join(bin, 'uname'), '#!/bin/sh\ncase "$*" in *r*) echo "Linux 5.15.0 x86_64" ;; *) echo "Linux x86_64" ;; esac\n');
   chmodSync(join(bin, 'uname'), 0o755);
-  const out = fire(r, RM, { ...r.env, PATH: `${bin}:${r.env.PATH}` });
+  const out = fire(r, RM(r), { ...r.env, PATH: `${bin}:${r.env.PATH}` });
   assert.equal(out.code, 2);
   assert.match(out.stderr, /BLOCKED by plant-rm/);
   assert.deepEqual(sources(r), ['event:runner']);
@@ -94,7 +95,7 @@ test('the picker under a planted macOS 11 runs the TypeScript runner: Go\'s mini
   const bin = scratchDir('planted-uname-old-');
   put(join(bin, 'uname'), '#!/bin/sh\necho "Darwin 20.6.0 arm64"\n');   // macOS 11
   chmodSync(join(bin, 'uname'), 0o755);
-  const out = fire(r, RM, { ...r.env, PATH: `${bin}:${r.env.PATH}` });
+  const out = fire(r, RM(r), { ...r.env, PATH: `${bin}:${r.env.PATH}` });
   assert.equal(out.code, 2);
   assert.deepEqual(sources(r), ['event:runner']);
 });

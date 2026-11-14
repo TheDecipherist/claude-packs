@@ -37,6 +37,7 @@
     "hooks/agent-ledger.mts": ["test/hooks/base/agent-ledger.test.mts"],
     "hooks/agent-model.mts": ["test/hooks/base/agent-model.test.mts"],
     "hooks/agents-held.mts": ["test/hooks/base/agents-held.test.mts"],
+    "hooks/stay-inside.mts": ["test/hooks/base/stay-inside.test.mts"],
     "hooks/lib/unattended.mts": ["test/hooks/base/agents-held.test.mts", "test/hooks/base/run-keeps-going.test.mts"],
     "hooks/refusals-judged.mts": ["test/hooks/base/refusals-judged.test.mts"],
     "hooks/run-keeps-going.mts": ["test/hooks/base/run-keeps-going.test.mts"],
@@ -302,6 +303,13 @@
       {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stay-inside.mjs\"",
+            "role": "judge",
+            "order": 5,
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/inside-the-project.mjs\"",

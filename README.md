@@ -429,7 +429,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
 | `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 71 | 12 | 4 | 10 |
-| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 36 | 9 | 36 | 18 |
+| `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 36 | 9 | 37 | 18 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
 | `cpp` | Any C++ project: what is repeated becomes a template, in the forms C++ has for it (a factory, a shared header, a table and a loop, a class template), gates and probes share one reader, and the library does the finding. | 12 | 14 | 1 | 2 |
@@ -562,6 +562,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | Hook | When | What it does |
 |---|---|---|
 | `heartbeat` | Every call | Records what each agent did last and when, for the status line; refuses nothing |
+| `stay-inside` | Write, Bash | Stops the session (`continue: false`, the call denied) when a call writes outside the project and outside every other git repository: /tmp and loose folders are work that left the kit's laws; another project (the kit, the reference library) is updating it and passes |
 | `inside-the-project` | Write, Bash | Refuses work for the project done outside it: a worktree added or moved beside the project, and any write, `cd` or `git -C` into a checkout of the same repo kept outside it, where no other hook can see |
 | `lesson-checks` | Write, Bash | Runs the installed lesson checks on what a write adds |
 | `file-size-guard` | Write, Bash | Refuses a source file past its line limit |

@@ -210,3 +210,15 @@ test('the branch and commit are read from the checkout, a worktree too', () => {
   assert.equal(checkoutHead(dir).branch, 'work/x');
   assert.deepEqual(checkoutHead(join(dir, 'nowhere')), {});
 });
+
+// KWB-next (2026-11-14): a halt wins. stay-inside stops a write outside the project with `continue: false`; another hook that refuses
+// the same call (exit 2) must not turn the stop into a message the session works round: the event answers 0 with the halt's JSON.
+test('a halt from one hook wins over a refusal from another: exit 0, continue false', () => {
+  const dir = fixture('base');
+  const refuser = join(dir, '.claude/hooks/planted-refuser.mjs');
+  put(refuser, "export function hook() { return { code: 2, stdout: '', stderr: 'BLOCKED by planted-refuser\\n' }; }\n");
+  const r = spawnSync('node', [join(dir, '.claude/hooks/run-hooks.mjs'), refuser, '.claude/hooks/stay-inside.mjs'],
+    { input: toJson(entry(dir, '/tmp/stay-inside-runner.py')), env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(parseJson<Record<string, unknown>>(r.stdout)?.['continue'], false);
+});
