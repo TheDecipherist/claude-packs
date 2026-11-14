@@ -205,3 +205,18 @@ test('shape scan lists every finding by file and concept, with a count, in code,
   assert.equal(r.status, 0, r.stdout);
   assert.match(r.stdout, /no findings/);
 });
+
+// KWB-next (supernova2 KF-6, 7, 9, 10): the word in another sense ("the CPU part" for a chip) has a route, a phrase in the concept's
+// "senses", and the refusal names it, so a run finds it instead of rewording around the hook.
+test('shape-law: a phrase in the concept\'s senses is no instance, and the refusal names the senses route', () => {
+  const project = fixture('base');
+  const shape = (senses: string[]): void => put(join(project, 'design/shape.json'),
+    toJson({ concepts: { lane: { shape: 'many', count: 8, generator: 'laneId(i)', words: ['lane', 'lanes'], senses } }, exclude: [] }));
+  const doc = write(join(project, 'docs/hardware.md'), 'The ROUTER lane fitted beside the main board.\n');
+  shape([]);
+  const refused = hookRun(project, 'shape-law.mjs', doc);
+  assert.equal(refused.status, 2, refused.stderr);
+  assert.match(refused.stderr, /"senses"/);
+  shape(['ROUTER lane']);
+  assert.equal(hookRun(project, 'shape-law.mjs', doc).status, 0);
+});
