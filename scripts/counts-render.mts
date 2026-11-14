@@ -39,7 +39,7 @@ export function readmeOf(root: string, text: string, version: string, errors: st
     if (next === null) errors.push(`README.md: no ${marks(name).join(' ... ')} markers`);
     else made = next;
   }
-  return made.replace(/^claude-packs \d+\.\d+\.\d+ \|/m, `claude-packs ${version} |`);
+  return made.replace(/^claude-packs \d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)? \|/m, `claude-packs ${version} |`);
 }
 
 /** The site with its six `data-count` numbers made true. */
@@ -91,7 +91,7 @@ export function renderAll(root: string, texts: Readonly<Record<GeneratedFile, st
     'site/index.html': siteOf(root, texts['site/index.html']),
     'docs/rules-without-checks.md': rulesWithoutChecksOf(root),
     'docs/versions.md': versionsOf(root, texts['docs/versions.md'], errors),
-    'planner/README.md': texts['planner/README.md'].replace(/Real at \d+\.\d+\.\d+/, `Real at ${version}`),
+    'planner/README.md': texts['planner/README.md'].replace(/Real at \d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/, `Real at ${version}`),
     [GRAPH_FILES.light]: svgOf(measures, 'light'),
     [GRAPH_FILES.dark]: svgOf(measures, 'dark'),
   };

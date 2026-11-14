@@ -54,7 +54,7 @@ test('a missing configuration, preset or command row in the README is seen red (
 
 test('a stale version in the docs is seen red: the status-line sample, the planner and the versions table follow package.json', () => {
   const stand = standing(KIT);
-  assert.deepEqual(documentsOf(KIT, { ...stand, 'README.md': stand['README.md'].replace(/^claude-packs \d+\.\d+\.\d+ \|/m, 'claude-packs 0.0.1 |') }).stale, ['README.md']);
+  assert.deepEqual(documentsOf(KIT, { ...stand, 'README.md': stand['README.md'].replace(/^claude-packs \S+ \|/m, 'claude-packs 0.0.1 |') }).stale, ['README.md']);
   assert.deepEqual(documentsOf(KIT, { ...stand, 'planner/README.md': stand['planner/README.md'].replace(/Real at \S+,/, 'Real at 0.0.1,') }).stale, ['planner/README.md']);
   assert.deepEqual(documentsOf(KIT, { ...stand, 'docs/versions.md': stand['docs/versions.md'].replace(/\| yaml \|/, '| yaml-x |') }).errors.length, 1);
 });
