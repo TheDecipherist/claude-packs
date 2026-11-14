@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-14T20:54:03.166Z",
+  "updated": "2026-11-14T21:00:18.421Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/a-gate-measures-the-real-thing.md": "df368aa42cb0d3e7933f83f1a591c0d89ea8d9588b494f4c194b590b704310e3",
@@ -259,7 +259,7 @@
     ".claude/skills/analyse-reference-look/controls-in-artwork.md": "f36fb75b852813e58607fd1b8b555516fbcc5ed11251d1e0a54fe2d191caa623",
     ".claude/skills/analyse-reference-look/depth-measure.md": "e3315bbe7a67cbed6b879a8d6c8b42cb33ff9e1eecc96b9106f1b5369f4d2758",
     ".claude/skills/analyse-reference-look/grade-the-reference.md": "ae094e9a61165b8fd0ed70b794a0e41fcb5384fd86e93347726b9637c3db250e",
-    ".claude/skills/chip-search/SKILL.md": "65e03f12c528d4229ad598d60886d2e332290caee68504b002f4956992092393",
+    ".claude/skills/chip-search/SKILL.md": "a9fa222b50db20cb9a5f5370fb4c0e905f030e531adb057a2594fe4f506201cf",
     ".claude/skills/fix-from-scan/SKILL.md": "66382d2d7e2bb787e8e04afe087374f5824910ba15d458f38c307100de33760d",
     ".claude/skills/land-branch/SKILL.md": "21119e3f824319eda37f2adac4dfba53fe729e6efa1f8e9258cb7173b7d03c27",
     ".claude/skills/latest-versions/SKILL.md": "0e1f89b683c2f1e832dfb455226b8526d6cfa63668995a200488e9b187596403",

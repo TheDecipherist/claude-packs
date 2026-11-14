@@ -15,6 +15,7 @@ Always do:
    - parts like one you have: `node .claude/tools/chip-search.mjs --similar TL072`.
 2. Read the page it names (`chips/MAKER/PART/PART.md`, its `datasheets/`, the machine's `service-manuals/` and `manuals/`) before anything else, and cite it by that path.
 3. Convert only what it does not have, into the library's own place for it (`pdf-to-md`), and say so: "not in the library (chip-search, from: atlas)".
+   - When a file you found may be one the library already holds (the same machine, a manual of the same kind), tell them apart by the library's record and the file's outside: its name, its page count (`pdfinfo`), its SHA-256, against the edition the conversion's own title page prints; never by extracting its text. Write the match into the conversion's `archive.json` (`source`: file, sha256, pages, edition), so the next lookup reads nothing. A file the library holds under another edition is a new source: convert it, and name its edition.
 4. Treat `--similar` as a lead: confirm a substitute against both pages (pinout, supply, the figures a model must hold) before relying on it.
 
 Never do:
