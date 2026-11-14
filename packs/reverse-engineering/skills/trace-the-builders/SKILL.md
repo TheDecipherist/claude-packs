@@ -18,6 +18,9 @@ Always do:
 7. Look for the generator (a seed, a recurrence) before the table, and scan for the data a compiled-out builder draws from (mutually prime lengths).
 8. Find a downloaded program by the hardware it writes, not by a diagnostics preamble. Read what the host writes to learn the topology: shared slots mean shared state.
 9. In an RTOS image, read the task table first: it is the map.
+10. Match the channels that take a firmware calibration offset to the service manual's calibration procedure to name individual CV channels.
+11. For each field, write what it is (rate, time, attenuation, complement) and which way it grows, read from the combining instruction; test that a rate table speeds up as its value rises, and never unify two tables that look alike.
+12. Where the load routine runs a compiler that emits threaded code, the stored record is not what runs: read each compiler's block start as a second source.
 
 Never do:
 - Fit a coefficient law to measured output while its builder is unread.

@@ -16,6 +16,9 @@ Always do:
 5. Tell allpass from comb by the feedback sign and the feedforward add. A driver with no conditionals means the routing is data.
 6. Read (pointer, mask) pairs as circular-buffer registers: they are the audio memory map.
 7. Check a recovered coefficient table's frequency response and its axis order before using it.
+8. Read a modulo register as a buffer size, prove the constant between a host slot id and its DSP X address once, treat a section that runs every Nth sample as control rate, read a run of 6-tap MACs as a band-limited edge kernel, and align version diffs on invariant counts.
+9. Where the machine is one DSP program in flash with no host half, disassemble the flash directly and use the OS versions with the sysex spec as the diff chain.
+10. When an operand's role is in doubt, read it by a same-shaped sibling block whose roles are plain (a register multiplied by itself is a square, `x:(r0)+` is the increment), and re-derive any law that rested on the other reading.
 
 Never do:
 - Fix a unit from the host code alone.

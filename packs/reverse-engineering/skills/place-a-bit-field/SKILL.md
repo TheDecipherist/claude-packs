@@ -12,6 +12,7 @@ Always do:
 3. Score an ambiguous rule against a physical invariant (zones cover 61 keys).
 4. Look for flag bits inside value bytes (values clustered at 1 to 7 and 64 to 71) and for a field whose width changes with a flag.
 5. Where two record lengths exist, brute-force the positions that drop out between them, and find boundaries from the corpus before the manual.
+6. A width inferred from a maximum stays a guess until a loop counter or copy length agrees; choose between factorisations of a size by a measured period.
 
 Never do:
 - Take a position because it is the first that fits.

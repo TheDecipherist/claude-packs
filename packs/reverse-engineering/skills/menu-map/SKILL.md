@@ -21,6 +21,8 @@ Always do:
 7. Write down what changes the map. Menus are dynamic: a page hidden while its effect is off still exists. Pages re-label themselves: one byte can carry two names, by mode, so list both.
 8. Read the routes as well as the pages: which press on which page opens which page, from the firmware's own page changes, with the manual as the second source. They become the build's route table (instrument-shell's `menu-is-one-route-table`), every row with its source.
 9. Keep corrections in the file, and end it with what is not established.
+10. Read the panel-input routine for each control's converter width, deadband, and whether it is relative to the stored value or goes absolute after touching an end, record it with the control, and quantise a reproduction's control to that width.
+11. Where the machine draws structure on its LCD (algorithm diagrams), read the display's own drawing routine as the second source.
 
 Never do:
 - Conclude a parameter does not exist, or does nothing, because no page shows it.

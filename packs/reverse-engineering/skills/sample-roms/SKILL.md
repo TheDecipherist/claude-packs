@@ -12,6 +12,9 @@ Always do:
 3. Fit the sample coding by a decay-line against controls (mu-law true magnitude, lower edge).
 4. Allow a voice with no sample rate (VCO-clocked).
 5. Find the rate by loop closure (whole cycles of the root); a broad peak means a sign or unit error.
+6. Judge a coding guess by a statistic it cannot scale, such as the DC offset after decoding (zero under sign-magnitude); three wrong codings gave smooth autocorrelations.
+7. When records address half the image, test the top address bit as a bank select by checking sustain against decay on both halves.
+8. Where sample names carry note names, fit the pitch index and unity rate against them over the whole library.
 
 Never do:
 - Classify companded audio by entropy.

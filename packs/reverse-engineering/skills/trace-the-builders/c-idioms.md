@@ -7,3 +7,5 @@
 - Bit-packed flags: one byte tested with several masks; list each mask with the code it guards.
 - Sign selects mode: a signed field whose sign picks one of two paths; the magnitude is the same parameter.
 - Bipolar coefficient: a centred field (0x40 or 0x80 is zero) subtracted before scaling; the centre is part of the law.
+- Asymmetric sign: a bipolar coefficient may cut twice as deep as it boosts; read both signs before linearising.
+- Gate as multiply: an enable is a multiplication by zero or one.
