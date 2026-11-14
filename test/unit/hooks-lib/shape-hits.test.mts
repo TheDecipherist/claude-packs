@@ -42,6 +42,11 @@ test('an array indexed by a number, a comparison, a case and a driving call are 
   assert.deepEqual(instances('Slot slots[4];'), [], 'a declaration\'s size');
   assert.deepEqual(instances('if (slotIx == 3) go();'), ['3']);
   assert.deepEqual(instances('if (2 == slotIx) go();'), ['2']);
+  // KWB-next (supernova2 KF-11): a named constant is a quantity, and an operand of a sum is no instance
+  assert.deepEqual(instances('if (SN2_SLOT_HOST_FILL != 0) go();'), [], 'a macro whose name carries the word');
+  assert.deepEqual(instances('if (steps % kStepsPerSlotStep == 0) step();'), [], 'a kName constant inside a modulo');
+  assert.deepEqual(instances('if (0 == kSlotFill) go();'), [], 'a kName constant on the right');
+  assert.deepEqual(instances('if (cfg.slotIx == 2) go();'), ['2'], 'a member that holds one instance still counts');
   assert.deepEqual(instances('if (1 + 2 == slotIx) go();'), [], 'a sum is an operand');
   assert.deepEqual(instances('case 2:', 'a.cpp'), []);
   assert.deepEqual(hits('case 2:', 'a.cpp', 'slot').map((h) => h.instance), ['2']);

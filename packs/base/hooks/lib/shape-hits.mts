@@ -26,6 +26,9 @@ const NOT_ROLES: ReadonlySet<string> = new Set([
 ]);
 // A number followed by a counted noun is a count ("slot 3 printed pages of 6"; KWB-next, supernova2).
 const COUNTED = /^\s+(?:[a-z]+\s+)?(?:pages|rows|items|entries|lines|words|controls|parameters|params|values|steps|bytes|columns|characters|bits)\b/i;
+// A named constant (a macro in capitals, a kName) is a quantity whose name carries the word, never a variable holding one instance:
+// "SN2_SLOT_FILL != 0", "kStepsPerSlotStep" (KWB-next, supernova2 KF-11)
+const isConstantName = (expr: string): boolean => { const last = expr.split(/\.|->|::/).at(-1) ?? ''; return /^[A-Z][A-Z0-9]*_[A-Z0-9_]+$/.test(last) || /^k[A-Z0-9]\w*$/.test(last); };
 const EXPR = '[A-Za-z_]\\w*(?:(?:\\.|->|::)[A-Za-z_]\\w*|\\(\\)|\\[\\w*\\])*';
 
 // A multi-word all-caps label ("AIM EFFECTS", "NOTES MONO") names a control, not an instance (KWB-22): the caps word before it.
@@ -82,9 +85,11 @@ function byUse(line: string, c: ShapeConceptData, shape: HitShape, aliases: Alia
     if (c.arrays.includes(name) || (ps.some((p) => c.words.includes(p)) && !ps.some(isCountish))) add(m[2] ?? m[3] ?? '', `indexes a per-${c.name} array with a number ("${m[0]}")`);
   }
   for (const m of line.matchAll(new RegExp(`(${EXPR})\\s*(?:===?|!==?)\\s*(\\d+)(?![\\w.])`, 'g'))) {
+    if (isConstantName(m[1] ?? '') || isSum(line.slice(0, m.index))) continue; // a quantity, or an operand of a sum (KWB-next)
     if (conceptOfExpr(m[1] ?? '', shape, aliases) === c.name) add(m[2] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
   }
   for (const m of line.matchAll(new RegExp(`(?<![\\w.])(\\d+)\\s*(?:===?|!==?)\\s*(${EXPR})`, 'g'))) {
+    if (isConstantName(m[2] ?? '')) continue;
     if (conceptOfExpr(m[2] ?? '', shape, aliases) === c.name && !isSum(line.slice(0, m.index))) add(m[1] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
   }
   if (inSwitch === c.name) for (const m of line.matchAll(/\bcase\s+(\d+)\s*:/g)) add(m[1] ?? '', `a case for one ${c.name} ("${m[0]}")`);
