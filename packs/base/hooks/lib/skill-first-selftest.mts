@@ -1,6 +1,7 @@
 // skill-first's selftest, kept apart so the hook stays small: each row refused with its skill unloaded and passed once a Skill
 // call or a Read of its SKILL.md loaded it; a skill named only in a command does not count; a row whose skill a project has not
 // installed applies nowhere there; a project's own layout rows and circuit globs are honoured.
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { toJson } from './json.mts';
 import { put, runHook, scratchProject, snapshot, verdicts, writtenSince } from './selftest.mts';
@@ -34,6 +35,10 @@ export function selftest(hook: string): number {
   };
   const compiled = prompt('compiled', 'Task W1.4\n\nCompiled by `workorder compile` with the skills `read-a-circuit-diagram`.\n\n## The skill `read-a-circuit-diagram`\n\nRead it tile by tile.\n');
   const mentioned = prompt('mentioned', 'Read the sheets; read-a-circuit-diagram is the skill for them.\n');
+  // supernova2_monitor W1.6: a 39 MB transcript read as "unloaded" under readText's 8 MB cap
+  const longRun = prompt('long', 'Compiled by `workorder compile` with the skills `read-a-circuit-diagram`.\n\n## The skill `read-a-circuit-diagram`\n\nRead it.\n');
+  const filler = `${toJson({ type: 'user', message: { content: [{ type: 'tool_result', content: 'x'.repeat(1 << 20) }] } })}\n`;
+  put(longRun, `${readFileSync(longRun, 'utf8')}${filler.repeat(9)}`);
   const before = snapshot(dir);   // the project as the judge finds it: the rows below must leave it as it is
   const read = (file: string, t: string | undefined, cwd: string = dir): number | null =>
     runHook(hook, cwd, { tool_name: 'Read', tool_input: { file_path: file }, cwd, transcript_path: t }).status;
@@ -48,6 +53,7 @@ export function selftest(hook: string): number {
     ['the tile after a Skill call', read(sheet, circuit), 0],
     ['a compiled task holding the skill', read(sheet, compiled), 0],
     ['a plain prompt that only names the skill', read(sheet, mentioned), 2],
+    ['a transcript past 8 MB still loads', read(sheet, longRun), 0],
     ['the render after the skill', bash(render, circuit), 0],
     ['a mock-up read with its skill unloaded', read(mock, none), 2],
     ['a mock-up with only the circuit skill loaded', read(mock, circuit), 2],
