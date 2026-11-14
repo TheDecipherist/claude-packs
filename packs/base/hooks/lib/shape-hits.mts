@@ -20,7 +20,12 @@ const NOT_ROLES: ReadonlySet<string> = new Set([
   'TODO', 'NOTE', 'FIXME', 'IN', 'ON', 'OF', 'TO', 'A', 'AN', 'EMPTY', 'SELECTED', 'OPEN', 'CURRENT',
   // a gate's verdict before the word ("FAIL slot 2"; KWB-15)
   'PASS', 'FAIL', 'FAILED', 'RED', 'GREEN', 'OK', 'SKIP', 'WARN', 'ERROR',
+  // a hardware part before the word: "the CPU part" is a chip, not one of the product's parts (KWB-next, supernova2); a domain chip
+  // word is the project's known name in design/shape.json
+  'CPU', 'MCU', 'ROM', 'RAM', 'EPROM', 'LCD', 'LED', 'PCB', 'IC', 'ASIC', 'FPGA', 'DAC', 'ADC',
 ]);
+// A number followed by a counted noun is a count ("slot 3 printed pages of 6"; KWB-next, supernova2).
+const COUNTED = /^\s+(?:[a-z]+\s+)?(?:pages|rows|items|entries|lines|words|controls|parameters|params|values|steps|bytes|columns|characters|bits)\b/i;
 const EXPR = '[A-Za-z_]\\w*(?:(?:\\.|->|::)[A-Za-z_]\\w*|\\(\\)|\\[\\w*\\])*';
 
 // A multi-word all-caps label ("AIM EFFECTS", "NOTES MONO") names a control, not an instance (KWB-22): the caps word before it.
@@ -35,6 +40,9 @@ function byNumber(line: string, words: string, c: ShapeConceptData, add: Add): v
     if (isSourceRole(line, m)) continue; // KF-28
     if (c.count !== null && !range && Number(first) > c.count) continue; // past the count: a value, not an instance (KWB-22)
     if (word === word.toUpperCase() && labelBefore(line, m.index)) continue; // AIM EFFECTS 100: a control's value
+    // "rows 48" in prose: the plural with one number is a count (KWB-next); a caps label ("SLOTS 2") still names one (KWB-22)
+    if (word !== word.toUpperCase() && c.plural.has(word.toLowerCase()) && !range) continue;
+    if (COUNTED.test(words.slice((m.index ?? 0) + whole.length))) continue; // "3 printed pages": a count of something else
     if (range && c.count !== null) {
       const [a, b] = [Number(first), Number(last)];
       if ((a === 0 && b === c.count - 1) || (a === 1 && b === c.count)) continue; // the whole range: every instance

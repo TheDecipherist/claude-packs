@@ -1,7 +1,7 @@
 // refusals-judged: a turn ends only when every refusal this session met has its verdict (refusals-are-judged). The rule alone
 // was not followed: supernova2's sessions 3 to 28 met 41 refusals and judged none (KWB-next), so no hook's worth could be read.
 // A Stop hook. The refusals are the lines of .claude/logs/refusals.jsonl with this session's id and code 2 (a crash refused nothing
-// and has no verdict), its own send-backs left out (judging them is circular); a verdict is a line of .claude/logs/verdicts.jsonl with the refusal's id, which `logs mark` writes. It never
+// and has no verdict), its own and run-keeps-going's send-backs left out (circular, and busywork); a verdict is a line of .claude/logs/verdicts.jsonl with the refusal's id, which `logs mark` writes. It never
 // loops: it sends a turn back while one stays open, and the third send-back in a row over the same open refusals ends the turn
 // (.claude/state/refusals-judged.json). Once was not enough: a refusal met after the send-back was never asked about (KWB-next).
 //   node refusals-judged.mjs --selftest
@@ -17,6 +17,9 @@ import type { Hook, VerdictRow } from './lib/types.d.mts';
 import { pass, refuse } from './lib/verdict.mts';
 
 const LOGS = join('.claude', 'logs');
+// the Stop send-backs ask for work, not a judgment of it: judging them is circular (its own) or busywork (a verdict per send-back,
+// supernova2 tonight); they are left out
+const SEND_BACKS: ReadonlySet<string> = new Set(['refusals-judged', 'run-keeps-going']);
 const SHOWN = 12;   // ids named in the message; the rest are counted
 const STATE = join('.claude', 'state', 'refusals-judged.json');
 const REPEATS = 3;   // send-backs in a row over the same open refusals before a turn may end
@@ -31,7 +34,7 @@ const linesOf = (file: string): Record<string, unknown>[] => {
 export function unjudged(root: string, session: string): string[] {
   const judged = new Set(linesOf(join(root, LOGS, 'verdicts.jsonl')).map((v) => v['id']).filter((id): id is string => typeof id === 'string'));
   return linesOf(join(root, LOGS, 'refusals.jsonl'))
-    .filter((r) => r['session'] === session && r['code'] === 2 && r['hook'] !== 'refusals-judged' && typeof r['id'] === 'string' && !judged.has(r['id']))
+    .filter((r) => r['session'] === session && r['code'] === 2 && !SEND_BACKS.has(String(r['hook'])) && typeof r['id'] === 'string' && !judged.has(r['id']))
     .map((r) => String(r['id']));
 }
 
@@ -94,6 +97,7 @@ export function selftest(): number {
     ['another session\'s open refusal is not this one\'s', stop(project([refusal('cc', 's2')])), 0],
     ['a crash (code 1) has no verdict to give', stop(project([refusal('dd', 's1', 1)])), 0],
     ['its own send-back is not judged (circular)', stop(project([toJson({ id: 'ff', hook: 'refusals-judged', code: 2, session: 's1' })])), 0],
+    ['a run-keeps-going send-back is not judged (busywork)', stop(project([toJson({ id: 'gg', hook: 'run-keeps-going', code: 2, session: 's1' })])), 0],
     ['no logs at all', stop(scratchProject({ 'README.md': '# x\n' })), 0],
     ['a turn already sent back, still open: sent back again', repeats(2), 2],
     ['the same open refusals after the third send-back: it ends (never loops)', repeats(REPEATS + 1), 0],

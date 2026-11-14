@@ -20,6 +20,11 @@ test('a number after the concept\'s word is an instance; a value past the count,
   assert.deepEqual(instances('slots 1-2 only'), ['1']);
   assert.deepEqual(instances('slot 0x18000'), []);
   assert.deepEqual(instances('AIM EFFECTS SLOT 2'), [], 'a control label before the word');
+  // KWB-next (supernova2): counts are not instances
+  assert.deepEqual(instances('the display reads slots 3 with the card in'), [], 'the plural with one number is a count');
+  assert.deepEqual(instances('slot 3 printed pages of 6'), [], 'a number followed by a counted noun');
+  assert.deepEqual(instances('slot 3 is muted'), ['3'], 'still an instance without a counted noun');
+  assert.deepEqual(instances('SLOTS 2 open'), ['2'], 'a caps label with a number still names one (KWB-22)');
 });
 
 test('an ordinal names an instance, except "the first X with" and a role word that is a name or a gate verdict', () => {
@@ -28,6 +33,7 @@ test('an ordinal names an instance, except "the first X with" and a role word th
   assert.deepEqual(instances('each slot\'s first slot with a name'), []);
   assert.deepEqual(instances('the PAD slot'), ['PAD']);
   assert.deepEqual(instances('FAIL slot'), []);
+  assert.deepEqual(instances('the CPU slot fitted'), [], 'a hardware part before the word is a chip, not a role (KWB-next)');
   assert.deepEqual(instances('MIDI Program slot Change'), [], 'a longer proper name');
 });
 
