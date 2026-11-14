@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14T00:06:49.162Z",
+  "updated": "2026-11-14T00:35:21.895Z",
   "steps": [
     {
       "id": "W0",
@@ -61,8 +61,8 @@
       "id": "W8",
       "title": "the second full read",
       "items": 3,
-      "done": 0,
-      "agent": "sr-1"
+      "done": 1,
+      "agent": "im-1"
     },
     {
       "id": "W9",
@@ -81,28 +81,28 @@
   ],
   "agents": [
     {
-      "name": "sr-1",
-      "worktree": ".claude/worktrees/sr-1",
+      "name": "im-1",
+      "worktree": ".claude/worktrees/im-1",
       "step": "W8",
-      "started": "2026-11-13T23:48:08.646Z"
+      "started": "2026-11-14T00:35:21.895Z"
     },
     {
-      "name": "sr-2",
-      "worktree": ".claude/worktrees/sr-2",
+      "name": "im-2",
+      "worktree": ".claude/worktrees/im-2",
       "step": "W8",
-      "started": "2026-11-13T23:48:08.648Z"
+      "started": "2026-11-14T00:35:21.895Z"
     },
     {
-      "name": "sr-3",
-      "worktree": ".claude/worktrees/sr-3",
+      "name": "im-3",
+      "worktree": ".claude/worktrees/im-3",
       "step": "W8",
-      "started": "2026-11-13T23:48:08.648Z"
+      "started": "2026-11-14T00:35:21.895Z"
     },
     {
-      "name": "sr-4",
-      "worktree": ".claude/worktrees/sr-4",
+      "name": "im-4",
+      "worktree": ".claude/worktrees/im-4",
       "step": "W8",
-      "started": "2026-11-13T23:48:08.648Z"
+      "started": "2026-11-14T00:35:21.895Z"
     }
   ]
 }
