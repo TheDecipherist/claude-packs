@@ -7,8 +7,10 @@ description: Use when work begins on a step of a synth's build.md, when a step's
 
 The canonical text is the repo's own `build.md` ("Rules for this file") and its `CLAUDE.md`. This file is the operating
 summary. Where they disagree, the repo wins. The step tool is the project's (the `step` command in `.claude/layout.json`,
-usually `python3 tools/step.py`); if the repo has none, copy `tools/step.py` and `tools/hooks/` from a sibling synth that
-has them before doing any of this by hand.
+usually `python3 tools/step.py`). A project with none does each section by hand, in the forms the git guard takes: start is
+`git switch -c step/<id>-<name> origin/<trunk>`, the task under "In progress" in `build.md`, committed by name and pushed;
+save is a commit by name and a push; finish is the `land-branch` skill. Never copy a tool in from another project.
+A work order's task is not a build.md step: it keeps the order's `progress.md` and its branch, and does not use this skill.
 
 The house rule: **every build task is built in a new branch. Once completed it is merged into the
 trunk. No work may be lost.** One synth lost two days of panel work to one checkout, more to work nobody

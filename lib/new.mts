@@ -5,8 +5,9 @@
 //   - the kit installed into it (`init` with the packs named, or a profile), then doctor.
 // A synth or effects unit is made by synthkit's new_synth.py first; `init` (or `new` on an empty folder) follows on it.
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { gitRun } from '../packs/base/hooks/lib/git-run.mts';
+import { put } from '../packs/base/hooks/lib/files.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Env, Layout, Lock, Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { doctor } from './doctor.mts';
@@ -38,6 +39,17 @@ function files(name: string): Record<string, string> {
     'docs/versions.md': '| name | latest stable | checked | source | used | decision |\n|---|---|---|---|---|---|\n',
     '.gitignore': 'build/\nout/\n.DS_Store\n',
   };
+}
+
+/** The house files the base rules read (build.md's In progress entry, bugs.md, workflow-bugs.md, docs/versions.md), written where they
+ *  are missing: `init` on a folder that already exists gets them as `new` does, so `making-line-first` and `workflow-bugs` have their file
+ *  from the first task (KWB-next: supernova2_monitor was set up by `init` and had none). CLAUDE.md and .gitignore stay the project's. */
+export const HOUSE_FILES = ['build.md', 'bugs.md', 'workflow-bugs.md', 'docs/versions.md'] as const;
+export function ensureHouseFiles(dir: string, name = basename(dir)): string[] {
+  const all = files(name);
+  const made = HOUSE_FILES.filter((rel) => !existsSync(join(dir, rel)));
+  for (const rel of made) put(join(dir, rel), all[rel] ?? '');
+  return made;
 }
 
 export interface NewOptions {

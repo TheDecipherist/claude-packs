@@ -18,7 +18,7 @@ import { daemonCommand } from './daemon-cli.mts';
 import { topCommand } from './top-cli.mts';
 import { logsCommand } from './logs.mts';
 import { readLock } from './manifest.mts';
-import { newProject } from './new.mts';
+import { ensureHouseFiles, newProject } from './new.mts';
 import { dupScan } from './once-only-report.mts';
 import { PRESETS, availablePacks, readPack } from './packs.mts';
 import type { CheckSpec } from './pack-template.mts';
@@ -98,9 +98,16 @@ function parse(command: string | undefined, argv: readonly string[]): Run {
 
 type Command = (run: Run) => number | Promise<number>;
 
+/** `init`'s house files, where missing (the base rules read them from the first turn), each named. */
+function houseFiles(dir: string): void {
+  const made = ensureHouseFiles(dir);
+  if (made.length) console.log(`  wrote ${made.join(', ')} (the house files the rules read; edit them as the project's own)`);
+}
+
 async function installAndCheck(run: Run, packs: readonly string[], config: string | null = null): Promise<number> {
   await sync(run.dir, packs, { force: run.force, mkdirs: true, seedLayout: run.seedLayout, config });
   if (isSynth(packs) && ensureShape(run.dir)) console.log(SHAPE_WRITTEN);
+  houseFiles(run.dir);
   return doctor(run.dir, console.log, INSTALLING);
 }
 
@@ -109,12 +116,14 @@ async function init(run: Run): Promise<number> {
   if (run.rest.includes('--auto')) {
     const pick = suggestionOf(run.dir);
     await sync(run.dir, pick.packs.map((p) => p.pack), { force: run.force, mkdirs: true, seedLayout: run.seedLayout, config: pick.config });
+    houseFiles(run.dir);
     return doctor(run.dir, console.log, INSTALLING);
   }
   const from = pathOf(run, '--from');
   if (from) {
     const block = await installFrom(run.dir, from, { force: run.force });
     if (isSynth(blockPacks(block)) && ensureShape(run.dir)) console.log(SHAPE_WRITTEN);
+    houseFiles(run.dir);
     return doctor(run.dir, console.log, INSTALLING);
   }
   if (run.rest.length === 0 && !config) throw new Error('name at least one pack or a configuration, e.g. `init audio-core` or `init --config base` (`configs` lists them)');
@@ -157,6 +166,7 @@ async function updateAll(run: Run): Promise<number> {
     console.log(`\n== ${d}`);
     try {
       await sync(d, lockPacks, { force: run.force, mkdirs: true });
+      houseFiles(d);
       failed += await doctor(d, console.log, INSTALLING);
     } catch (e) {
       failed += 1;
@@ -234,6 +244,7 @@ const COMMANDS: Record<string, Command> = {
   update: async (run) => {
     if (run.installed.length === 0) throw new Error('nothing installed here; run init first');
     await sync(run.dir, run.installed, { force: run.force, mkdirs: true, sources: run.fetched });
+    houseFiles(run.dir);
     return doctor(run.dir, console.log, INSTALLING);
   },
   'update-all': updateAll,
