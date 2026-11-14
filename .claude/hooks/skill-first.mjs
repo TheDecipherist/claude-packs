@@ -64,6 +64,17 @@ const loads = (use, skill) => {
         && ((name === 'Skill' && String(input?.skill ?? '').endsWith(skill))
             || (name === 'Read' && String(input?.file_path ?? '').endsWith(`${skill}/SKILL.md`)));
 };
+// A compiled task (`workorder compile`) holds the skill whole in its prompt, and under skillInvocation: user it cannot call the Skill
+// tool: the compile's own line and the skill's compiled heading in a user message load it (supernova2_monitor, before W1.4).
+const COMPILED = 'Compiled by `workorder compile`';
+const compiledIn = (entry, skill) => {
+    if (entry?.type !== 'user')
+        return false;
+    const content = entry.message?.content;
+    const text = typeof content === 'string' ? content : Array.isArray(content)
+        ? content.map((b) => (typeof b === 'object' && b !== null && 'text' in b ? String(b.text ?? '') : '')).join('\n') : '';
+    return text.includes(COMPILED) && text.includes(`## The skill \`${skill}\``);
+};
 function loadedIn(file, skill) {
     const text = readText(file);
     if (text === null)
@@ -71,7 +82,10 @@ function loadedIn(file, skill) {
     for (const line of text.split('\n')) {
         if (!line.includes(skill))
             continue;
-        const content = parseJson(line)?.message?.content;
+        const entry = parseJson(line);
+        const content = entry?.message?.content;
+        if (compiledIn(entry, skill))
+            return true;
         if (Array.isArray(content) && content.some((use) => loads(use, skill)))
             return true;
     }
