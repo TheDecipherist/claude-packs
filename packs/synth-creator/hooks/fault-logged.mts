@@ -33,9 +33,18 @@ const ADMITS: readonly RegExp[] = [
 
 const sentences = (text: string): string[] => text.split(/(?<=[.!?])\s+|\n+/).filter((s) => s.trim());
 
+// A negation earlier in the same clause: "No hook refused correct work" says there was none (supernova2_monitor, refusal fea1fedc).
+const NEGATED = /\b(?:no|not|never|nothing|none|neither)\b[^,;:]*$/i;
+
+/** True when one of the patterns matches `s` with no negation before it in its clause. */
+const admits = (s: string): boolean => ADMITS.some((re) => {
+  const m = re.exec(s);
+  return m !== null && !NEGATED.test(s.slice(0, m.index));
+});
+
 /** True when the reply admits a fault in the work, sentences about planted faults and expected failures left out. */
 export function admitsFault(reply: string): boolean {
-  return sentences(reply).filter((s) => !WANTED.test(s)).some((s) => ADMITS.some((re) => re.test(s)));
+  return sentences(reply).filter((s) => !WANTED.test(s)).some(admits);
 }
 
 /** The log files the project keeps, as relative paths. */
@@ -107,6 +116,8 @@ export function selftest(): number {
     ['a write to another file is no log', stop(FAULT, [other]), 2],
     ['a turn already sent back ends (never loops)', stop(FAULT, [], { stop_hook_active: true }), 0],
     ['a plain report', stop('Landed. 46 of 46 green.'), 0],
+    ['a report that says no hook refused correct work', stop('No hook refused correct work and nothing the task needed was missing, so I logged no new workflow bug.'), 0],
+    ['a plain admission still counts', stop('Done. A hook refused correct work on the last commit.'), 2],
     ...must.map((m): VerdictRow => [`must pass: ${m}`, stop(m), 0]),
     ['a hook event that is not Stop', other_event(), 0],
   ];
