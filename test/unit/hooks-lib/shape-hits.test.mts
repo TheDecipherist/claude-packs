@@ -25,6 +25,9 @@ test('a number after the concept\'s word is an instance; a value past the count,
   assert.deepEqual(instances('slot 3 printed pages of 6'), [], 'a number followed by a counted noun');
   assert.deepEqual(instances('slot 3 is muted'), ['3'], 'still an instance without a counted noun');
   assert.deepEqual(instances('SLOTS 2 open'), ['2'], 'a caps label with a number still names one (KWB-22)');
+  // supernova2_monitor WB-18: arcturus's controller list "LFO 16-19" read as instance 16 of a count-2 concept
+  assert.deepEqual(instances('the CCs slot 16-19 are confirmed'), [], 'a range that starts past the count is a set of values');
+  assert.deepEqual(instances('slots 3-9 only'), ['3'], 'a range that starts inside the count still names one');
 });
 
 test('an ordinal names an instance, except "the first X with" and a role word that is a name or a gate verdict', () => {
