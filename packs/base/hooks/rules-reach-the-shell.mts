@@ -38,14 +38,31 @@ export function globsOf(text: string): string[] {
   return globs.filter(Boolean);
 }
 
+// A rule file read once, kept while its mtime holds: the resident runner keeps this module loaded, and re-reading all 85 rules
+// of a project on every Bash call cost 6 ms of a 10 ms budget (KWB-next, WB-8 in supernova2_monitor).
+const ruleCache = new Map<string, { mtime: number; rule: PathRule | null }>();
+
+function ruleOf(dir: string, f: string): PathRule | null {
+  const path = join(dir, f);
+  let mtime: number;
+  try { mtime = statSync(path).mtimeMs; } catch { return null; }
+  const hit = ruleCache.get(path);
+  if (hit && hit.mtime === mtime) return hit.rule;
+  const text = readText(path) ?? '';
+  const globs = globsOf(text);
+  const body = text.replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+  const rule = globs.length ? { name: basename(f, '.md'), file: `.claude/rules/${f}`, globs, body } : null;
+  ruleCache.set(path, { mtime, rule });
+  return rule;
+}
+
 /** Every rule of the project's .claude/rules/ that is scoped by paths. */
 export function pathRules(projectDir: string): PathRule[] {
   const dir = join(projectDir, '.claude', 'rules');
   if (!existsSync(dir)) return [];
   return readdirSync(dir).filter((f) => f.endsWith('.md')).flatMap((f) => {
-    const text = readText(join(dir, f)) ?? '';
-    const globs = globsOf(text);
-    return globs.length ? [{ name: basename(f, '.md'), file: `.claude/rules/${f}`, globs, body: text.replace(/^---\n[\s\S]*?\n---\n/, '').trim() }] : [];
+    const rule = ruleOf(dir, f);
+    return rule ? [rule] : [];
   });
 }
 
@@ -62,6 +79,10 @@ export function filesTouched(command: string, cwd: string, projectDir: string, w
   return [...found].map((p) => relative(projectDir, p)).filter((r) => r && !r.startsWith('..') && !r.startsWith('.claude/'));
 }
 
+// The rules each session is known to hold. A rule once loaded stays in the context, so the set only grows: the log is read again
+// only when a matching rule is not in it yet (key: project and session).
+const heldBySession = new Map<string, Set<string>>();
+
 /** The rules this session already holds: every rules.jsonl line of this session, whatever loaded it. */
 function loadedIn(projectDir: string, session: string | undefined): Set<string> {
   if (!session) return new Set();
@@ -74,18 +95,23 @@ function loadedIn(projectDir: string, session: string | undefined): Set<string> 
 export const hook: Hook = (event, ctx) => {
   const command = event.tool_input?.command;
   if (event.hook_event_name !== 'PreToolUse' || event.tool_name !== 'Bash' || typeof command !== 'string') return pass;
-  const rules = pathRules(ctx.projectDir);
-  if (!rules.length) return pass;
   const cwd = event.cwd ?? ctx.projectDir;
   const written = writesOf(event, cwd, ctx.env).map((w) => w.path);
   const files = filesTouched(command, cwd, ctx.projectDir, written);
   if (!files.length) return pass;
-  const held = loadedIn(ctx.projectDir, event.session_id);
-  const given: string[] = [];
-  for (const rule of rules) {
-    if (held.has(rule.name)) continue;
+  const matched = pathRules(ctx.projectDir).flatMap((rule) => {
     const trigger = files.find((f) => matchesAny(f, rule.globs));
-    if (!trigger) continue;
+    return trigger ? [{ rule, trigger }] : [];
+  });
+  if (!matched.length) return pass;
+  const key = `${ctx.projectDir}\n${event.session_id ?? ''}`;
+  let held = heldBySession.get(key) ?? new Set<string>();
+  if (matched.some(({ rule }) => !held.has(rule.name))) held = new Set([...held, ...loadedIn(ctx.projectDir, event.session_id)]);
+  if (event.session_id) heldBySession.set(key, held);
+  const given: string[] = [];
+  for (const { rule, trigger } of matched) {
+    if (held.has(rule.name)) continue;
+    held.add(rule.name);
     logUsage(ctx, event, RULES, { rule: rule.name, file: rule.file, why: 'shell_path_match', globs: rule.globs, trigger });
     given.push(`Contents of ${rule.file} (its paths match ${trigger}, which this command touches):\n\n${rule.body}`);
   }
