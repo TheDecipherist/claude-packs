@@ -38,8 +38,15 @@ if [[ ! -f "$order/progress.md" ]] && ! {{kit}} workorder check {{name}} --dir "
 fi
 
 still=0
+# numbered on from the last session's log, so a resumed run never overwrites the logs a report is measured from (KWB-next)
 session=1
-while [[ "$session" -le "$max_sessions" ]]; do
+for f in "$logs"/session-*.jsonl; do
+  [[ -e "$f" ]] || continue
+  n="${f##*/session-}"; n="${n%.jsonl}"
+  [[ "$n" =~ ^[0-9]+$ ]] && (( n >= session )) && session=$((n + 1))
+done
+ran=0   # sessions this start has run, counted apart from their numbers
+while [[ "$ran" -lt "$max_sessions" ]]; do
   if [[ -f "$order/DONE" ]]; then
     echo "done before session $session"
     exit 0
@@ -65,6 +72,7 @@ while [[ "$session" -le "$max_sessions" ]]; do
     exit 4
   fi
   session=$((session + 1))
+  ran=$((ran + 1))
 done
 [[ -f "$order/DONE" ]] && exit 0
 echo "stopped after $max_sessions sessions, not finished" | tee -a "$logs/runner.log"
