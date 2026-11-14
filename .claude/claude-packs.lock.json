@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-14T19:08:36.362Z",
+  "updated": "2026-11-14T19:23:35.316Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/a-gate-measures-the-real-thing.md": "df368aa42cb0d3e7933f83f1a591c0d89ea8d9588b494f4c194b590b704310e3",
@@ -157,7 +157,7 @@
     ".claude/hooks/lib/run-transcripts.mjs": "28d2f2e64852849cda0890827d7fb0765d1f951d36860c99c676f8a7e6fce7c6",
     ".claude/hooks/lib/run-tree.mjs": "54a5e2997fd24e1b198c53108adc18aa0922512ff7b46f676b65062241140e14",
     ".claude/hooks/lib/rust-scan.mjs": "4cc41781fb73a7265de4709a40f8bbc2253b28d65bfeaa4082ae017bdfadaa52",
-    ".claude/hooks/lib/secret-patterns.mjs": "84c3636d666a1aefd35357daa5c8b4adedfdd9bfa1e8a83c5596bcc5434d0018",
+    ".claude/hooks/lib/secret-patterns.mjs": "67a5c7dcef602a4f4839012010643fcc11d6874dc4435488595dcb6024e969a5",
     ".claude/hooks/lib/selftest.mjs": "44a6478e30dd8ed5fca13e521e0e88bb7f4db3b44328c9fed7ca3884491e934d",
     ".claude/hooks/lib/send-backs.mjs": "eafa2993635815bbeded5eaeafa96802038fbbfa78f4dd1c32a2d1c57bb4a8b5",
     ".claude/hooks/lib/shape-code.mjs": "d10068afeb3b84ab5b4d17ab068bbd3fbc505637b7a40858757caad5bf382db4",

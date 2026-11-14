@@ -10,7 +10,8 @@ export const SECRETS = [
     ['a Stripe secret key', /\b[rs]k_live_[A-Za-z0-9]{20,}/g],
     ['a private key', /-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----\s+[A-Za-z0-9+/=\s]{64,}/g],
     // A key's random part runs unbroken; a long identifier (`cap_Filter_Env_Attack_2`) is short words between underscores.
-    ['a prefixed API key', /\b(?!price_|prod_|pk_|[rs]k_live_|github_pat_|gh[pousr]_)(?=[a-z]{2,8}_)(?=[\w-]*[A-Z])(?=[\w-]*\d)(?=[a-z]{2,8}_[\w-]*?[A-Za-z0-9]{20})[a-z]{2,8}_[A-Za-z0-9_-]{24,}\b/g],
+    // Anthropic's own ids (msg_, req_, toolu_, srvtoolu_) fill every transcript and are no secrets (supernova2_monitor, refusal d9103974).
+    ['a prefixed API key', /\b(?!price_|prod_|pk_|[rs]k_live_|github_pat_|gh[pousr]_|msg_|req_|toolu_|srvtoolu_)(?=[a-z]{2,8}_)(?=[\w-]*[A-Z])(?=[\w-]*\d)(?=[a-z]{2,8}_[\w-]*?[A-Za-z0-9]{20})[a-z]{2,8}_[A-Za-z0-9_-]{24,}\b/g],
     ['a connection string with its password', /\b(?:mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqp):\/\/[^\s:@/'"`]+:(?!\$\{|\$[A-Za-z_]|<|\*+@|[^\s@]*(?:[Pp]ass(?:word|wd)?|[Cc]hange|[Ee]xample|[Yy]our|[Ss]ecret|[Pp]laceholder|xxx|XXX))[^\s@/'"`]{3,}@/g],
 ];
 // A secret FILE, by name: a .env (a .env.example, .sample, .template or .dist is a list of names, fine), a key file, credentials.json.
