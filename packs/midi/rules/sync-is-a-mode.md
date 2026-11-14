@@ -21,6 +21,8 @@ Always do:
 - Record clock OUT (an output jack, a "Send" setting, a DLY/CLK switch) as its own setting beside the three receiving states: it is what the unit sends, not what it follows.
 - Declare each destination's minimum and maximum, by value and not by byte order, and show what cannot be reached.
 - Key stored divisions to a destination's name when its list is dynamic.
+- Record a tempo that the machine offers as a source to any parameter, with no division list, as its own shape beside OFF, INT and EXT, and say how the rebuild offers it.
+- Keep the division grid's floor: a 1/128 is 31 ms at 60 BPM and 10 ms at 180, so reach a timbre-length time through FREE, not by extending the grid downward.
 
 Never do:
 - Open a delay unsynced as a plugin in a DAW, or let an open-time default replace the sync state a patch stored.

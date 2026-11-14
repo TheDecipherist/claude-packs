@@ -20,6 +20,8 @@ Always do:
 9. Run the probe with the transport playing: a stopped host sends no clock. To isolate one tap, zero its division as well as its value, since a division overrides the stored time.
 10. For a unit with no time destination, gate the sound through an LFO-rate destination and measure it at three tempos.
 11. Probe a transport jump, a loop and a time-signature change.
+12. For an echo, also measure each repeat's peak, rise time and spread against the dry hit and a textbook delay at the same settings, not only its arrival time.
+13. State the tone the probe measures: solo one oscillator, drift and unison off, and list every parameter set and why, since a few-Hz beat as large as the effect fools the probe.
 
 Never do:
 - Call a division test proof of a clock.

@@ -17,6 +17,12 @@ Always do:
 6. Read a resonance as a Q, never as a level. A row the excitation cannot resolve (a peak between two harmonics) is NOT MEASURED; report the model-free peak height beside it.
 7. Use the corner the engine resolved (read it from the running engine or the render), not the one the knob names.
 8. Measure at the level the voices drive the filter at, not at a convenient quiet level.
+9. For a stereo, chorus or comb measurement, use an excitation correlated across channels: a synth's noise is independent per channel.
+10. Before measuring one block, list every block in the path and neutralise each: a routing value named after its pole count is not a bypass (a Ser4 routing keeps filter 2 in the path). Print that isolation set with the result.
+11. Divide every noise mode by one flat reference, not each mode's own wide-open render. A saw reads the noise floor deep (a one-pole reads steeper than a three-pole). Fit the corner and the passband gain together.
+12. Ask whether the cutoff register is absolute or relative to the oscillator's pitch (keyfollow is then relative too), and settle it with a key-tracking sweep.
+13. Measure drive's level change at resonance 0 and in the passband, put any make-up outside the loop, and let the stability sweep, not taste, set its number. A limiter with no make-up is a compressor.
+14. When a filter order is added, solve its own loop crossing, sweep stability over every corner and shape, and measure a highpass skirt one octave under the corner, where float cancellation cannot hide it.
 
 Never do:
 - Read a slope from a saw's raw spectrum, or a corner from a single harmonic.

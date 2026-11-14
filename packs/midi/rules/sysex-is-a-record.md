@@ -17,6 +17,7 @@ Always do:
 - Round-trip the plugin's own export of an edited patch, not only the factory dumps.
 - Decode off the audio thread.
 - Watch for bytes that change what their neighbours mean: flag bytes, shared enums, bit fields.
+- Record a controller's wire semantics apart from its stored byte, and prove the stored form from the record, never from the CC table: a CC table's "bipolar" is not the stored byte.
 
 Never do:
 - Parse only the first message of a program: every effects knob sat at its default for weeks.

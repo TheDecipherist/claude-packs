@@ -15,6 +15,7 @@ Always do:
 4. For an arp, give the onset detector a 30 ms refractory period, and put the test note well inside one frame.
 5. When a table scan fails to give a pattern's rhythm, read it from a held note.
 6. Write the stage times as measured values with the frame size beside them.
+7. Never assume a curve for a plugin's times or rates: measure it. Measure on the band around a high note so a demo's noise bursts drop out, and take the median of three takes started at different moments.
 
 Never do:
 - Read an attack from the peak time, or an onset from a fixed level.

@@ -14,6 +14,7 @@ Always do:
 - Give a layer the original's filter and envelope arrangement: shared where the original shared them, separate where it separated them.
 - Record, for each wave entry, how it was generated and how it behaves above Nyquist.
 - Seed per slot, so two slots of one preset do not share a random stream.
+- Apply the mode test: a selection that changes the number of oscillators, the port type or the sample rate is a mode, not a wave. A sample rate that is the pitch register is a mode.
 
 Never do:
 - Dedupe pitches in the allocator: two layers on one note is the sound.

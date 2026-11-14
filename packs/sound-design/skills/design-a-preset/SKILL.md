@@ -12,7 +12,7 @@ The method and the gate are here. The numbers are beside it; load only what the 
 - **An effects unit, a whole bank, or an envelope or LFO engine:** `references/effects-and-banks.md`.
 - **This machine's own engines:** the project's recipe file (`layout.json` `recipes`, default `docs/recipes/*.md`). The kit's recipes are the generic ones.
 
-A number's source is tagged: **[DATA]** measured over 6,223 hardware and 7,146 plugin factory patches; **[LAW]** the house's decision, kept until a measurement overturns it; **[WHY]** the physics or psychoacoustics; **[EAR]** the author's ear over seven rounds (253 presets heard, 92 liked). Where a measurement on this machine disagrees, the measurement wins.
+A number's source is tagged: **[DATA]** measured over 6,223 hardware and 7,146 plugin factory patches; **[LAW]** the house's decision, kept until a measurement overturns it; **[WHY]** the physics or psychoacoustics; **[EAR]** the author's ear over seven rounds (253 presets heard, 92 liked). Where a measurement on this machine disagrees, the measurement wins. Tag a value taken from a published recipe **[PUB]**: its numbers are knob positions on another machine, so re-find it on this engine, tune it, and freeze it with the gate; a recipe published only as a video is transcribed into the archive first.
 
 ## The words
 

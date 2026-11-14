@@ -293,10 +293,18 @@ clock instead of holding the last tempo for ever.
 **A machine's stored tempo knob IS its internal tempo field.** The knob in a
 preset and the unit's own BPM are one value with two faces, never two copies.
 
+A machine's tempo knob may have a narrower range than the host's and sit at its
+stop. A program change moves the clock, except while an external master runs:
+decide per machine whether a program load moves the stored tempo, record the
+choice, and never move it under an external master.
+
 **`phase()` reports the block's START.** Anchor a rate destination to it, not to
 a raw position, or the modulator sits about 10 ms past the beat. Sync may
 restart the phase rather than lock the rate, and a dynamic destination is
 queried live. Never hand-roll a division table.
+
+Take a synced modulator's phase anchor and its rate from the same tempo,
+including under internal sync with a host running, and test at that case.
 
 ## 7. What belongs where
 

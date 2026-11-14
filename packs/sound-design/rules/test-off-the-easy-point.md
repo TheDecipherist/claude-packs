@@ -17,6 +17,7 @@ Always do:
 - Read the block's invariant before gating on it.
 - Sum by power, never by amplitude.
 - Suspect a first-time pass: a test that never failed has not yet shown it can.
+- Re-check, on the control's real path, that a constant chosen to pass a gate is audible; a gate satisfied by a control nobody can hear measures nothing.
 
 Never do:
 - Use one point that is zero exactly where everyone auditions: `note - 60` passes at middle C.

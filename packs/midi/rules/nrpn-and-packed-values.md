@@ -14,6 +14,7 @@ Always do:
 - Read an LSB that selects a namespace as part of the number, not as a value.
 - Decode a packed NRPN as the ranges it holds, one parameter per range, and name each range.
 - Write every decoded value back through the same packing on export, and prove a byte-exact round trip over the corpus.
+- Keep a controller's edit behaviour apart from its stored polarity: one that edits relative to the current value can still be stored unipolar. Decide polarity from the stored values.
 
 Never do:
 - Treat the MSB alone as the parameter, or the two bytes as a 14-bit value when the chart says number and value.

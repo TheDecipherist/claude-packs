@@ -13,6 +13,8 @@ Always do:
 2. A byte that is inert across 0 to 127 is a switch. Try 0, 1, 2 and 3, and count the positions at which the output stops changing.
 3. For a bipolar control, find its neutral first and judge every render against it.
 4. Tag the result `[EMU]` or `[REC]` with the render it came from; a name from a signature alone is a guess until a second render agrees.
+5. Lay a parameter list onto offsets by measured signature, never by counting names: one byte may carry several names (a knob per waveform), so collapse aliases only after the byte is known.
+6. Read a decoded number by the plugin itself (host it, render, measure) and never fit a guessed curve. Read its displays before any render in a fresh instance, and expect a refused edited section to keep the previous preset.
 
 Never do:
 - Name a byte from one render at one value.
