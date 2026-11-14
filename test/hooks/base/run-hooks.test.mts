@@ -153,7 +153,7 @@ test('every call is logged with what it tried; a refusal keeps its reason and wh
   assert.match(String(r?.['reason']), /BLOCKED by secrets-guard/);
   assert.equal(r?.['file'], join(dir, 'src/a.js'));
   assert.equal(r?.['branch'], 'work/x');
-  assert.match(String(r?.['kit']), /^\d+\.\d+\.\d+$/);
+  assert.match(String(r?.['kit']), /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
   assert.match(String(r?.['hookHash']), /^[0-9a-f]{12}$/);
   assert.doesNotMatch(readFileSync(join(dir, '.claude/logs/refusals.jsonl'), 'utf8'), new RegExp(key), 'the written secret is never logged');
 });

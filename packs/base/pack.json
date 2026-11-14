@@ -186,6 +186,7 @@
     "hooks/secrets-guard.mts": ["test/hooks/base/secrets-guard.test.mts"],
     "hooks/shape-law.mts": ["test/hooks/base/shape-law-doctor-lists.test.mts", "test/hooks/base/shape-law-doctor.test.mts", "test/hooks/base/shape-law-install.test.mts", "test/hooks/base/shape-law.test.mts"],
     "hooks/rule-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
+    "hooks/rules-reach-the-shell.mts": ["test/hooks/base/rules-reach-the-shell.test.mts"],
     "hooks/lib/usage-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
     "hooks/skill-first.mts": ["test/hooks/base/skill-first.test.mts"],
     "hooks/skill-log.mts": ["test/hooks/base/usage-log-hooks.test.mts", "test/integration/usage-logs.test.mts"],
@@ -490,6 +491,13 @@
           },
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/rules-reach-the-shell.mjs\"",
+            "role": "judge",
+            "order": 70,
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/repo-litter.mjs\"",
             "role": "judge",
             "order": 70,
@@ -724,7 +732,9 @@
     "hooks/rule-log.mjs",
     "hooks/agent-ledger.mjs",
     "hooks/no-find.mjs",
-    "hooks/no-polling.mjs"
+    "hooks/no-polling.mjs",
+    "hooks/rules-reach-the-shell.mjs",
+    "hooks/stay-inside.mjs"
   ],
   "optIn": ["hooks/agent-model.mjs", "hooks/refusals-judged.mjs", "hooks/run-keeps-going.mjs"]
 }

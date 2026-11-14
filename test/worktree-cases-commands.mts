@@ -16,6 +16,7 @@ import { worktreeCase as GOVERNOR_ROUTE } from '../packs/base/hooks/governor-rou
 import { worktreeCase as MAKING_CHECK_COUNT } from '../packs/base/hooks/making-check-count.mts';
 import { worktreeCase as NO_FIND } from '../packs/base/hooks/no-find.mts';
 import { worktreeCase as NO_POLLING } from '../packs/base/hooks/no-polling.mts';
+import { worktreeCase as RULES_REACH_THE_SHELL } from '../packs/base/hooks/rules-reach-the-shell.mts';
 import { worktreeCase as REPO_LITTER } from '../packs/base/hooks/repo-litter.mts';
 import { worktreeCase as SUITE_ONCE } from '../packs/base/hooks/suite-once.mts';
 import { worktreeCase as TEMPLATE_LAW } from '../packs/base/hooks/template-law.mts';
@@ -77,6 +78,7 @@ export const COMMAND_CASES: Record<string, CheckoutCase> = {
   'no-find.mjs': caseFrom('no-find.mjs', NO_FIND),
   'stay-inside.mjs': caseFrom('stay-inside.mjs', STAY_INSIDE),
   'no-polling.mjs': caseFrom('no-polling.mjs', NO_POLLING),
+  'rules-reach-the-shell.mjs': caseFrom('rules-reach-the-shell.mjs', RULES_REACH_THE_SHELL),
   'governor-route.mjs': caseFrom('governor-route.mjs', GOVERNOR_ROUTE),
   'untrusted-boundary.mjs': caseFrom('untrusted-boundary.mjs', UNTRUSTED_BOUNDARY),
   'template-law.mjs': caseFrom('template-law.mjs', TEMPLATE_LAW),
