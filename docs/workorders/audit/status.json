@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14T00:35:21.895Z",
+  "updated": "2026-11-14T00:54:57.344Z",
   "steps": [
     {
       "id": "W0",
@@ -61,8 +61,8 @@
       "id": "W8",
       "title": "the second full read",
       "items": 3,
-      "done": 1,
-      "agent": "im-1"
+      "done": 3,
+      "agent": null
     },
     {
       "id": "W9",
@@ -79,30 +79,5 @@
       "agent": null
     }
   ],
-  "agents": [
-    {
-      "name": "im-1",
-      "worktree": ".claude/worktrees/im-1",
-      "step": "W8",
-      "started": "2026-11-14T00:35:21.895Z"
-    },
-    {
-      "name": "im-2",
-      "worktree": ".claude/worktrees/im-2",
-      "step": "W8",
-      "started": "2026-11-14T00:35:21.895Z"
-    },
-    {
-      "name": "im-3",
-      "worktree": ".claude/worktrees/im-3",
-      "step": "W8",
-      "started": "2026-11-14T00:35:21.895Z"
-    },
-    {
-      "name": "im-4",
-      "worktree": ".claude/worktrees/im-4",
-      "step": "W8",
-      "started": "2026-11-14T00:35:21.895Z"
-    }
-  ]
+  "agents": []
 }
