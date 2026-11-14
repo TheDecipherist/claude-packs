@@ -39,3 +39,8 @@
 - Question: the conformance gate makes a changed rule declare `# concepts:`; rules that loaded by raw globs (`**/*.cpp`, `**/*.cc`, `**/*.py`, `**/*.ts`, ...) lost `.cc` files, trees outside `src/` and loose Python under the nearest concepts (W9 review, audio-sound-shell #8; d-7).
 - Options: keep the nearest concepts and tell the user; a concept that holds exactly the old globs.
 - Chose: the concept `engine-source` (the nine old globs, unchanged), declared in the sound-design, instrument-shell and midi `pack.json`, so each pack's rules load where they loaded before this branch. It supersedes d-7: the midi rules use it, and nothing is narrowed.
+
+## d-9 Which trunk the final gate is measured against {#d-9}
+- Question: the final test-changed run is "measured against the trunk"; this branch was made from `work/2.0.0-typescript`, which lands on `main` later with the user.
+- Options: `origin/main`; `origin/work/2.0.0-typescript`.
+- Chose: `origin/work/2.0.0-typescript`, the branch the lead lands this one on, so the gate measures this order's own changes (against `main` it would also re-run the whole typescript order). The whole suite (W9) covered everything else.
