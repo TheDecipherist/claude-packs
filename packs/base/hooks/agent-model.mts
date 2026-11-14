@@ -32,7 +32,7 @@ function definesModel(type: string, folders: readonly string[]): boolean {
     const file = join(dir, '.claude', 'agents', `${type.replace(/^.*:/, '')}.md`);
     if (!existsSync(file)) return false;
     const front = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(file, 'utf8'))?.[1] ?? '';
-    return /^model:\s*\S/m.test(front);
+    return /^model:\s*(?!inherit\s*$)\S/mi.test(front);
   });
 }
 
