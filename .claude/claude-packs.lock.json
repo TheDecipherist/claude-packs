@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-14T20:29:01.030Z",
+  "updated": "2026-11-14T20:38:58.951Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/a-gate-measures-the-real-thing.md": "df368aa42cb0d3e7933f83f1a591c0d89ea8d9588b494f4c194b590b704310e3",
@@ -226,7 +226,7 @@
     ".claude/hooks/resident.mjs": "8e9d21d52e86f3b9a6ccffb86b6683fe50818abbb4003f56ce7dd33263124226",
     ".claude/hooks/reuse-hint.mjs": "c11f881497febe2635d7dd0fa328b713c6c43552967d99fea8bd71d4c1948e0d",
     ".claude/hooks/rule-log.mjs": "48cfa63d1de9e2b85b7948f4754a350752b708ed8493b2f2406896286da75088",
-    ".claude/hooks/rules-reach-the-shell.mjs": "a6632484be795febfe671bf7abbe3a722c3a82df9debe780d8ae3e27be139475",
+    ".claude/hooks/rules-reach-the-shell.mjs": "4d8026ca506152f59226e1cf17910a310fa28b7da2ec06a4fc307abe89ddbb70",
     ".claude/hooks/run-hooks.mjs": "b0119fee7af67c5048a8e43744a9b0bf19ea23300cda291762fad2ffa11769e3",
     ".claude/hooks/secrets-guard.mjs": "eaaebe914a2a5b65fde15bc8d0200d36fe61331ddccc94b0ba3411022cd8b6e0",
     ".claude/hooks/shape-law.mjs": "1887ed19d2a8d0b1ff7eba5bbfe71cb8edb02b755d1ce4298136ab81f2eb1409",
