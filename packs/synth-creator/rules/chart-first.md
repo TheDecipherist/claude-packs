@@ -10,7 +10,7 @@ Always do:
 - Commit a Mermaid chart (`docs/**/*.mmd`, or where `layout.json` `"chart"` says) of every module and every route before any UI or engine code.
 - Change the chart first when a change touches a route: the chart's commit comes before the code's.
 - Before a change bigger than one control, write its blast radius from the chart: the modules and routes it touches.
-- Compare the generated as-built chart with the committed design chart, and log each difference.
+- Where an as-built chart can be generated from the code, compare it with the committed design chart, and log each difference.
 - Keep the chart whole: every module the code has, every route between them, and the controls that steer each route.
 - In the blast radius also write what would have two sources of truth and what a cable already points into, and read the derived data (layout, params lock, enums) with a one-line query when the picture is not enough.
 

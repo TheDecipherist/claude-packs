@@ -1,6 +1,6 @@
 ---
 name: build-step
-description: Use when work begins on a step of a synth's build.md, when a step's "done when" may be met, when a session starts or ends in a repo with a build.md, or when asked where the build is.
+description: Use when work begins on a step of a synth's build.md, when a step's "done when" may be met, when a session starts or ends in a repo with a build.md, or when asked where the build is. Also /build-step.
 ---
 
 # One build step: its own branch, from start to merge (one job: no step is lost or called done unmeasured)
@@ -115,12 +115,16 @@ until the trunk is pushed.
 Conclusion first, in plain language: the step, what proved it, the new count, the next step. Show the changed `build.md`.
 Never claim a step works that has not been built, opened and measured.
 
-## Never
+## Always
 
 <constraints>
 Always do:
 - Walk sections 0 to 6 in order, and save before any risky command.
+</constraints>
 
+## Never
+
+<constraints>
 Never do:
 - Delete a branch, here or on GitHub. Rebase, amend, squash or force-push. `git add -A`.
 - `checkout`, `restore`, `stash` or `reset --hard` over uncommitted work. `save` first.

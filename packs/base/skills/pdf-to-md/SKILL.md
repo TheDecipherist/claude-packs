@@ -14,9 +14,9 @@ Always do:
 3. Convert with every image saved as its own file, beside the Markdown, in a folder of its own:
    `docling manual.pdf --to md --image-export-mode referenced --output out/`
    The Markdown then links each figure, so a reader finds the picture where the text refers to it.
-   **At most two conversions at once on one machine, at low priority.** Each docling run takes a whole core and 2 to 3 GB of memory; seven at once loaded an 8-core machine to 16. Run every conversion through the load governor's helper, which blocks inside its own call until a slot is free and frees it when the run ends (no polling loop; the same cap holds across agents):
+   **Conversions run at low priority, and the load governor holds how many run at once.** Each docling run takes a whole core and 2 to 3 GB of memory; seven at once loaded an 8-core machine to 16. Run every conversion through the load governor's helper, which blocks inside its own call until a slot is free and frees it when the run ends (no polling loop; the same cap holds across agents):
    `node .claude/tools/governed.mjs --for install --want 1 -- docling manual.pdf --to md --image-export-mode referenced --output out/`
-   (in the kit itself `node bin/claude-packs.mjs ...`; see the `load` skill). A lead that hands out many PDFs gives each agent its list.
+   (see the `load` skill). A lead that hands out many PDFs gives each agent its list.
 4. Render every page to an image as well, numbered by page, with an index of each page's first words, into `out/pages/`. docling's own Python has `pypdfium2`: `page.render(scale=dpi / 72)`, 150 dpi for text, 300 for a drawing or a schematic. A page with no text layer is still read this way.
 5. Judge the result. Count the pages, the images and the characters of text. Pages with almost no text are a scan or a drawing: read those from their images, and say so.
 6. For a scan, run docling again with `--force-ocr`, and treat the text as a lead only: OCR drops symbols, values and part numbers.

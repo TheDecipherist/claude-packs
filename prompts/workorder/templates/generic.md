@@ -70,4 +70,4 @@ Read the finished work as a senior engineer would. List what is left, what is un
 
 Before the final report, list each deliverable the user asked for and where it is. Write `docs/workorders/{{name}}/report.md`: what was built, what is proved and how, what is not, and what the kit did well and badly, with counts from `logs`.
 
-**Done when:** every section has counts, or a stated reason there are none, and each deliverable asked for is listed with its path (0 missing), and every section has counts.
+**Done when:** every section has counts, or a stated reason there are none, and each deliverable asked for is listed with its path (0 missing).
