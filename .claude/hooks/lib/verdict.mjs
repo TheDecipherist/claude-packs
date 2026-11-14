@@ -4,6 +4,7 @@
 //   pass                  code 0, nothing said
 //   refuse(reason)        code 2, the reason on stderr, ending in a newline (Claude Code shows stderr of an exit 2)
 //   say(stdout)           code 0, output for Claude Code: a JSON object (a string, or any value, which is serialised) or plain context
+//   halt(reason, event)   code 0, `continue: false`: Claude Code stops the session and hands it to the user; the call is denied
 import { toJson } from './json.mjs';
 /** The event passes and nothing is said. One frozen value: a caller reads it and never changes it. */
 export const pass = Object.freeze({ code: 0, stdout: '', stderr: '' });
@@ -14,6 +15,12 @@ export function refuse(reason) {
 /** The event passes and Claude Code is given `output`: JSON text as it is, a value as JSON, plain text as it is. */
 export function say(output) {
     return { code: 0, stdout: typeof output === 'string' ? output : toJson(output), stderr: '' };
+}
+/** The session stops: Claude Code reads `continue: false`, ends the turn and shows `stopReason` to the user; a tool call is denied as
+ *  well, so it never runs. For what must never happen at all (a write outside the project: the session left the kit's laws). */
+export function halt(reason, event = 'PreToolUse') {
+    return say({ continue: false, stopReason: reason,
+        ...(event === 'PreToolUse' ? { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason } } : {}) });
 }
 /** True when `value` has the three fields of a Verdict (a hook that returns anything else crashed). */
 export function isVerdict(value) {

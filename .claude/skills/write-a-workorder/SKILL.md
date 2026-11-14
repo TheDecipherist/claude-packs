@@ -20,7 +20,7 @@ Always do:
 9. Tell the run what to record: decisions as it makes them, bugs before fixing them, and one line of progress per item, so a new session can resume from files alone.
 10. Keep a last step that reads the finished work as a senior engineer would, and a report with counts.
 11. Name only skills the project has installed; `workorder check` refuses the rest, naming the pack to add.
-12. Rank a queue across many machines or units: what has enough in the archive first, then what can be measured against recordings, then earlier work that transfers.
+12. Rank a queue of many items: what has enough source material first, then what can be measured against a reference, then earlier work that transfers.
 13. Carry the order's install block (one fence with the info string `claude-packs`, in the kit's own keys); W0 installs from it with `init --from` and nothing else.
 
 Never do:

@@ -20,7 +20,7 @@ import { SHAPE_FILE } from './shape-model.mjs';
 export * from './shape-model.mjs';
 export * from './shape-lines.mjs';
 export const ASK = 'example, rule, or constant?';
-const HINT = '(an example goes on a "seen in:" line; a rule is a selector in design/shape.json; a constant is a named row there)';
+const HINT = '(an example goes on a "seen in:" line; a rule is a selector in design/shape.json; a constant is a named row there; the word in another sense (the "CPU part" of a board) is a phrase in the "senses" of that concept there)';
 export const isExcluded = (rel, shape) => rel === SHAPE_FILE || matchesAny(rel, shape?.exclude ?? []);
 export const isTestFile = (rel) => /(^|\/)(test|tests|probes)\//.test(rel) || /test|_probe/i.test(rel.split('/').pop() ?? '');
 export function findInstanceLiterals(text, file, shape, { only = null } = {}) {

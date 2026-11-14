@@ -11,6 +11,16 @@
     "role": "recorder"
   },
   {
+    "hook": "stay-inside",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+    "timeout": 10,
+    "order": 5,
+    "role": "judge"
+  },
+  {
     "hook": "inside-the-project",
     "events": [
       "PreToolUse"
@@ -238,6 +248,16 @@
     "matcher": "Bash",
     "timeout": 10,
     "order": 65,
+    "role": "judge"
+  },
+  {
+    "hook": "rules-reach-the-shell",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 70,
     "role": "judge"
   },
   {

@@ -1,12 +1,21 @@
 ---
-# concepts: plan, notes
+# concepts: tests, tooling, cpp, python, go, rust, js
 paths:
-  - "build.md"
-  - "**/build.md"
-  - "bugs.md"
-  - "workflow-bugs.md"
-  - "**/known-issues*.md"
-  - "docs/**/*.md"
+  - "test/**"
+  - "tools/**"
+  - ".claude/hooks/**"
+  - ".claude/settings.json"
+  - "src/**/*.cpp"
+  - "src/**/*.h"
+  - "src/**/*.hpp"
+  - "src/**/*.mm"
+  - "tests/**/*.cpp"
+  - "tests/**/*.h"
+  - "packs/**/*.cpp"
+  - "packs/**/*.h"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
 ---
 
 # A gate opens, names and counts what it measures, so it cannot pass on nothing
@@ -20,8 +29,11 @@ Always do:
 - Fail a "skipped" gate when the data it needs exists.
 - Keep at least one gate that compares two independently generated artefacts, or one artefact against the world, never a record of itself.
 - Make a planted fault's target id exist, and show the fault changes the output; diff string names against the id list.
-- Mark a gate that tests the shell, not the unit. Every behaviour a unit owns keeps its own probe of the unit.
+- Mark a gate that tests the harness around a unit, not the unit. Every behaviour a unit owns keeps its own probe of the unit.
 - Make a verdict made of several parts name the part that failed.
+- List in each gate's own output what it cannot see, so a green line is not read as more than it is.
+- When an audit compares a file's defaults, print the running program's live value beside each, and read the live one.
+- Delete a probe's output file before it writes it, and fail when the file is missing or older than the run.
 
 Never do:
 - Pass on an empty set, a zero count or a file that did not load.

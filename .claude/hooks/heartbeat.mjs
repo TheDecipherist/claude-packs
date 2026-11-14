@@ -13,23 +13,26 @@ import { readJson, writeJson } from './lib/json.mjs';
 import { runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { pass } from './lib/verdict.mjs';
 import { fileURLToPath } from 'node:url';
-const TREE = /\.claude\/worktrees\/([\w.-]+)/;
 const EVENTS = { PreToolUse: 'pre', PostToolUse: 'post' };
 const WHAT_FIELDS = ['description', 'file_path', 'notebook_path', 'command', 'pattern', 'url', 'path', 'prompt'];
 /** The main checkout: the project, even when the session was started inside one of its worktrees. */
 export const mainOf = (dir) => resolve(dir).replace(/\/\.claude\/worktrees\/[^/]+(?:\/.*)?$/, '');
 /** Which of the project's agents made this call: a worktree's name, 'lead', or null for a call outside the project. */
-export function agentOf(ev, main) {
+export function agentOf(ev, main, project = main) {
     const input = ev.tool_input ?? {};
     const paths = [ev.cwd, input.file_path, input.notebook_path, input['path']].filter((p) => typeof p === 'string');
     const named = typeof input.command === 'string' ? input.command.match(/(?:^|[\s'"=])((?:\/|\.\/)?[^\s'"]*\.claude\/worktrees\/[\w.-]+)/)?.[1] : null;
-    for (const p of [...paths, named]) {
-        if (!p)
-            continue;
-        const abs = isAbsolute(p) ? p : resolve(ev.cwd ?? main, p);
-        if (abs.startsWith(`${main}/.claude/worktrees/`))
-            return abs.match(TREE)?.[1] ?? null;
-    }
+    const all = [...paths, named].filter((p) => typeof p === 'string' && p !== '').map((p) => (isAbsolute(p) ? p : resolve(ev.cwd ?? main, p)));
+    // a worktree of the session's own project first: a run whose project is itself a worktree (the audit order, KF-6) has its
+    // agents one level further, and their calls carry the lead's cwd, so the cwd alone named every agent after the run (KWB-next)
+    const under = (root) => {
+        const prefix = `${root}/.claude/worktrees/`;
+        const hit = all.find((abs) => abs.startsWith(prefix));
+        return hit ? (hit.slice(prefix.length).match(/^[\w.-]+/)?.[0] ?? null) : null;
+    };
+    const tree = (project !== main ? under(project) : null) ?? under(main);
+    if (tree)
+        return tree;
     const known = ev.agent_id ? readJson(join(main, '.claude', 'logs', 'heartbeats', `agent-${ev.agent_id}.json`))?.name : null;
     if (typeof known === 'string')
         return known;
@@ -44,8 +47,9 @@ export const hook = (ev, ctx) => {
     const kind = EVENTS[ev.hook_event_name ?? ''];
     if (!kind)
         return pass; // not a refusal: a heartbeat only records
-    const root = mainOf(ctx.env['CLAUDE_PROJECT_DIR'] || ev.cwd || ctx.cwd);
-    const name = agentOf(ev, root);
+    const session = resolve(ctx.env['CLAUDE_PROJECT_DIR'] || ev.cwd || ctx.cwd);
+    const root = mainOf(session);
+    const name = agentOf(ev, root, session);
     if (!name)
         return pass; // not a refusal: a call outside the project is not this project's agent
     const dir = join(root, '.claude', 'logs', 'heartbeats');

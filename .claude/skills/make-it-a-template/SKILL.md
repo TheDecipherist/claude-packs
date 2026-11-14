@@ -14,6 +14,8 @@ Always do:
 5. Take the copies out first, each replaced by a call to the template, then write the template. `template-law` refuses the template while a copy stands, and `once-only` judges a command before it runs.
 6. Test the template once, with an instance as a parameter (`test-the-template-once`), and prove the instances with one read of the table.
 7. Run the tests the change reaches (`pick-tests`), then search for the copies by name: none is left.
+8. Before adding to a shared module, ask how many files outside it change when the second instance is added; the template is done when it is zero.
+9. When one defect shows in many generated units, fix the template they copy first, sweep the existing ones, and compare counts before and after to prove the sweep changed nothing else.
 
 Never do:
 - Mark a repeat `one-off:` to get past the refusal. It is for something that truly differs, with its reason.

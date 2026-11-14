@@ -15,7 +15,6 @@ Always do:
 4. Decide where each kind of thing goes before the first file of that kind, and write it in `.claude/layout.json`: `folders` for where, `kinds` for what goes there.
 5. When code needs a new folder, add it to `layout.json` first, then run `update`, then write the file. `folder-law` refuses it the other way round.
 6. In a project that keeps code in several folders, run `survey` and give Claude the prompt, so the layout is fitted to the real tree.
-
 7. Run `latest-versions` for the whole stack before the first build file is written.
 
 Never do:

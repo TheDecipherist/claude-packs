@@ -14,13 +14,14 @@ Always do:
    - a question: `node .claude/tools/chip-search.mjs "4-pole OTA lowpass with resonance"`, narrowed with `--kind`, `--maker`, `--brand`, `--model`, `--type owners-manual|service-document|datasheet|circuit-page`;
    - parts like one you have: `node .claude/tools/chip-search.mjs --similar TL072`.
 2. Read the page it names (`chips/MAKER/PART/PART.md`, its `datasheets/`, the machine's `service-manuals/` and `manuals/`) before anything else, and cite it by that path.
-3. Convert only what it does not have, and say so: "not in the library (chip-search, from: atlas)".
+3. Convert only what it does not have, into the library's own place for it (`pdf-to-md`), and say so: "not in the library (chip-search, from: atlas)".
 4. Treat `--similar` as a lead: confirm a substitute against both pages (pinout, supply, the figures a model must hold) before relying on it.
 
 Never do:
 - Convert or re-read a source the library already holds because it was quicker to open the PDF.
 - Report a part as missing when the answer came `from: files` and Atlas would have searched the manuals' text too: say which source answered.
 - Copy the library's pages into the project: point at them.
+- Keep a conversion, a data sheet page or a circuit report in the project: it goes into the library when it is made.
 </constraints>
 
 Exit 4 means there is no library on this machine: the message says how to clone it. Exit 1 means the part or machine is not there.

@@ -11,7 +11,15 @@ const NOT_ROLES = new Set([
     'TODO', 'NOTE', 'FIXME', 'IN', 'ON', 'OF', 'TO', 'A', 'AN', 'EMPTY', 'SELECTED', 'OPEN', 'CURRENT',
     // a gate's verdict before the word ("FAIL slot 2"; KWB-15)
     'PASS', 'FAIL', 'FAILED', 'RED', 'GREEN', 'OK', 'SKIP', 'WARN', 'ERROR',
+    // a hardware part before the word: "the CPU part" is a chip, not one of the product's parts (KWB-next, supernova2); a domain chip
+    // word is the project's known name in design/shape.json
+    'CPU', 'MCU', 'ROM', 'RAM', 'EPROM', 'LCD', 'LED', 'PCB', 'IC', 'ASIC', 'FPGA', 'DAC', 'ADC',
 ]);
+// A number followed by a counted noun is a count ("slot 3 printed pages of 6"; KWB-next, supernova2).
+const COUNTED = /^\s+(?:[a-z]+\s+)?(?:pages|rows|items|entries|lines|words|controls|parameters|params|values|steps|bytes|columns|characters|bits)\b/i;
+// A named constant (a macro in capitals, a kName) is a quantity whose name carries the word, never a variable holding one instance:
+// "SN2_SLOT_FILL != 0", "kStepsPerSlotStep" (KWB-next, supernova2 KF-11)
+const isConstantName = (expr) => { const last = expr.split(/\.|->|::/).at(-1) ?? ''; return /^[A-Z][A-Z0-9]*_[A-Z0-9_]+$/.test(last) || /^k[A-Z0-9]\w*$/.test(last); };
 const EXPR = '[A-Za-z_]\\w*(?:(?:\\.|->|::)[A-Za-z_]\\w*|\\(\\)|\\[\\w*\\])*';
 // A multi-word all-caps label ("AIM EFFECTS", "NOTES MONO") names a control, not an instance (KWB-22): the caps word before it.
 const labelBefore = (line, at) => { const w = /([A-Z][A-Z0-9]+)\s+$/.exec(line.slice(0, at)); return w !== null && !NOT_ROLES.has(w[1] ?? ''); };
@@ -27,6 +35,11 @@ function byNumber(line, words, c, add) {
             continue; // past the count: a value, not an instance (KWB-22)
         if (word === word.toUpperCase() && labelBefore(line, m.index))
             continue; // AIM EFFECTS 100: a control's value
+        // "rows 48" in prose: the plural with one number is a count (KWB-next); a caps label ("SLOTS 2") still names one (KWB-22)
+        if (word !== word.toUpperCase() && c.plural.has(word.toLowerCase()) && !range)
+            continue;
+        if (COUNTED.test(words.slice((m.index ?? 0) + whole.length)))
+            continue; // "3 printed pages": a count of something else
         if (range && c.count !== null) {
             const [a, b] = [Number(first), Number(last)];
             if ((a === 0 && b === c.count - 1) || (a === 1 && b === c.count))
@@ -72,10 +85,14 @@ function byUse(line, c, shape, aliases, inSwitch, add) {
             add(m[2] ?? m[3] ?? '', `indexes a per-${c.name} array with a number ("${m[0]}")`);
     }
     for (const m of line.matchAll(new RegExp(`(${EXPR})\\s*(?:===?|!==?)\\s*(\\d+)(?![\\w.])`, 'g'))) {
+        if (isConstantName(m[1] ?? '') || isSum(line.slice(0, m.index)))
+            continue; // a quantity, or an operand of a sum (KWB-next)
         if (conceptOfExpr(m[1] ?? '', shape, aliases) === c.name)
             add(m[2] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
     }
     for (const m of line.matchAll(new RegExp(`(?<![\\w.])(\\d+)\\s*(?:===?|!==?)\\s*(${EXPR})`, 'g'))) {
+        if (isConstantName(m[2] ?? ''))
+            continue;
         if (conceptOfExpr(m[2] ?? '', shape, aliases) === c.name && !isSum(line.slice(0, m.index)))
             add(m[1] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
     }

@@ -34,7 +34,7 @@ const KEPT = ['"assistant"', '"is_error":true'];
 let decoded = 0;
 /** Bytes of transcript lines this process made strings of, so far (a counter for tests). */
 export const bytesDecoded = () => decoded;
-function turnEntries(path) {
+function turnEntries(path, endsBefore) {
     let fd;
     try {
         fd = openSync(path, 'r');
@@ -45,7 +45,7 @@ function turnEntries(path) {
     const lines = [];
     try {
         eachLineBack(fd, fstatSync(fd).size, (line) => {
-            if (promptOfBytes(line) !== null)
+            if (promptOfBytes(line) !== null || endsBefore(line))
                 return true;
             if (KEPT.some((k) => line.includes(k))) {
                 decoded += line.length;
@@ -59,8 +59,9 @@ function turnEntries(path) {
     }
     return parseEntries(lines.reverse());
 }
-export function lastTurn(path) {
-    const entries = turnEntries(path);
+/** The last turn: what follows the last real prompt, or the last line `endsBefore` names (a caller's own boundary; none by default). */
+export function lastTurn(path, endsBefore = () => false) {
+    const entries = turnEntries(path, endsBefore);
     const refused = new Set();
     const uses = [];
     const text = [];

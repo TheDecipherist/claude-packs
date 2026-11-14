@@ -1,12 +1,21 @@
 ---
-# concepts: plan, notes
+# concepts: tests, tooling, cpp, python, go, rust, js
 paths:
-  - "build.md"
-  - "**/build.md"
-  - "bugs.md"
-  - "workflow-bugs.md"
-  - "**/known-issues*.md"
-  - "docs/**/*.md"
+  - "test/**"
+  - "tools/**"
+  - ".claude/hooks/**"
+  - ".claude/settings.json"
+  - "src/**/*.cpp"
+  - "src/**/*.h"
+  - "src/**/*.hpp"
+  - "src/**/*.mm"
+  - "tests/**/*.cpp"
+  - "tests/**/*.h"
+  - "packs/**/*.cpp"
+  - "packs/**/*.h"
+  - "src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
+  - "tests/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
+  - "test/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"
 ---
 
 # A count-of-debts gate keeps a floor, fails only on a rise, names its exemptions

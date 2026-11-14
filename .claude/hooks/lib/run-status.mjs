@@ -9,12 +9,14 @@
 // The step counting is run-progress, the live column run-live, the rows run-rows; they are re-exported here, so importers
 // keep one name for the lot.
 import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { readText } from './files.mjs';
 import { readJson } from './json.mjs';
-import { commitsAhead, mergedInto, processesOf, runningOrders, workIn, worktreesOf } from './run-discovery.mjs';
+import { agentTreesOf, commitsAhead, mergedInto, processesOf, runningOrders, workIn } from './run-discovery.mjs';
+import { clockOf } from './run-live.mjs';
 import { percent, progressOf, stepsOf } from './run-progress.mjs';
 import { machineName, remotesFile, remotesOf, remotesReport, sshAsk } from './run-remotes.mjs';
+import { projectOf } from './run-rows.mjs';
 import { claudeHome, transcriptBeats } from './run-transcripts.mjs';
 export { barCells, percent, percentLabel, progressOf, stepsOf } from './run-progress.mjs';
 export { SYMBOLS, actionOf, checkedText, workLine } from './run-live.mjs';
@@ -45,7 +47,7 @@ function agentsAhead(steps, agents) {
 /** One order's progress: { project, order, steps, agents, items, done, percent, source, finished }. */
 export function orderStatus(project, order, { env, nowMs = Date.now() }) {
     const folder = join(project, 'docs', 'workorders', order);
-    const trees = worktreesOf(project, env);
+    const trees = agentTreesOf(project, env);
     const status = readJson(join(folder, 'status.json')); // the run's file: a broken one is no file, never a crash
     const ownSteps = Array.isArray(status?.steps) ? status.steps : [];
     const fromRun = ownSteps.length > 0;
@@ -58,7 +60,11 @@ export function orderStatus(project, order, { env, nowMs = Date.now() }) {
     const listed = new Map((Array.isArray(status?.agents) ? status.agents : []).map((a) => [a.name, a]));
     // the heartbeat hook's file, else the agent's last call in Claude Code's own transcripts (an install with no heartbeat yet)
     const fromTranscripts = transcriptBeats(project, { home: claudeHome(env), nowMs });
-    const beatOf = (name) => readJson(join(project, '.claude', 'logs', 'heartbeats', `${name}.json`)) ?? fromTranscripts[name] ?? null;
+    // the heartbeat hook writes into the top checkout, named by the innermost worktree a call works in; a run whose project is
+    // itself a worktree has its lead's beats under that worktree's name (KWB-next: the audit run's agents all showed ♡)
+    const top = projectOf(project);
+    const beatOf = (name) => readJson(join(top, '.claude', 'logs', 'heartbeats', `${name}.json`)) ?? fromTranscripts[name] ?? null;
+    const leadName = top === project ? 'lead' : basename(project);
     const alive = (beat) => beat !== null && nowMs - Date.parse(beat.t ?? '') < LIVE_MS;
     // an agent of this order with nothing written yet still counts: its worktree is on the order's own branch, work/<order>-<name>
     // (the user: "I dont see those 5 agents"); one merged back and untouched for KIN_MS is a finished agent, unless work runs in it
@@ -69,7 +75,7 @@ export function orderStatus(project, order, { env, nowMs = Date.now() }) {
     const finished = (t) => (t.file?.state === 'done' || (t.file?.items !== undefined && (t.file.done ?? 0) >= t.file.items)) && merged(t.branch);
     // nothing of its own for LIVE_MS: no heartbeat, no update of its file, its worktree untouched (ab-prep sat listed at 4 h and w10b-soak at 10 h, W8.9);
     // the report still shows it while a process works in its worktree, and a call or an update brings it back
-    const idle = (t) => nowMs - Math.max(Date.parse(t.file?.updated ?? '') || 0, Date.parse(t.beat?.t ?? '') || 0, t.touched || 0) > LIVE_MS;
+    const idle = (t) => nowMs - Math.max(clockOf(t.file?.updated) ?? 0, Date.parse(t.beat?.t ?? '') || 0, t.touched || 0) > LIVE_MS;
     const agents = trees.map((t) => ({ ...t, file: readJson(join(t.path, 'docs', 'workorders', order, 'agents', `${t.name}.json`)), beat: beatOf(t.name) }))
         .map((t) => { const known = Boolean(t.file || listed.has(t.name) || alive(t.beat)); return { ...t, known, kinOnly: !known && kin(t.branch) }; })
         .filter((t) => t.known || t.kinOnly)
@@ -85,7 +91,7 @@ export function orderStatus(project, order, { env, nowMs = Date.now() }) {
     const items = steps.reduce((n, s) => n + s.items, 0);
     const done = steps.reduce((n, s) => n + s.done, 0) + agentsAhead(steps, agents);
     return { project, order, steps, agents, items, done, percent: percent(done, items), source: fromRun ? 'status.json' : 'progress lines',
-        finished: existsSync(join(folder, 'DONE')), lead: beatOf('lead') };
+        finished: existsSync(join(folder, 'DONE')), lead: beatOf(leadName) };
 }
 function ordersIn(project, only) {
     if (only)

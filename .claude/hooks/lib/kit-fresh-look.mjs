@@ -30,7 +30,11 @@ export function compareVersions(a, b) {
     if (!x || !y)
         return (x ? 1 : 0) - (y ? 1 : 0);
     const at = [0, 1, 2].find((i) => x[i] !== y[i]);
-    return at === undefined ? 0 : x[at] - y[at];
+    if (at !== undefined)
+        return x[at] - y[at];
+    // the same numbers: a pre-release (2.0.0-dev) comes before its release (2.0.0), so a dev install is told when the release is out
+    const pre = (v) => /^v?\d+\.\d+\.\d+-/.test(String(v ?? '').trim());
+    return (pre(a) ? 0 : 1) - (pre(b) ? 0 : 1);
 }
 /** the folder the day's npm answer is kept in: the user's own cache folder on Linux, macOS and Windows */
 export function cacheDir(env) {

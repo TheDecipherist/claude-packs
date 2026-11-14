@@ -31,7 +31,7 @@ import { appendRotated, isMain, logHook, projectRoot, readHookLog, readStdinText
 import { hookRowsFor, readHookTable } from './lib/hook-table.mjs';
 import { parseJson, toJson } from './lib/json.mjs';
 import { readLayout } from './lib/layout.mjs';
-import { OUT_CAP, asRecord, capOut, mergeOut } from './lib/merge-out.mjs';
+import { OUT_CAP, asRecord, capOut, halts, mergeOut } from './lib/merge-out.mjs';
 import { verdicts } from './lib/selftest.mjs';
 import { unreadWrites } from './lib/unread-writes.mjs';
 import { isVerdict } from './lib/verdict.mjs';
@@ -121,6 +121,8 @@ export async function runAll(args, text, root, caller, arrival = { at: Date.now(
     if (crash.code === 2)
         code = 2;
     outs.push(...[crash.stdout, code === 0 ? unreadWrites(ev, root, caller.env) : ''].filter((s) => Boolean(s)));
+    if (halts(outs))
+        code = 0; // a halt wins: Claude Code reads JSON only from an exit 0
     const wall = Date.now() - arrival.at;
     logCall(root, text, judged, appendRotated, wall);
     logHook(root, { event: ev.hook_event_name, hook: 'event', ms: wall, code, tool: ev.tool_name ?? ev.source, queue, source: arrival.source });

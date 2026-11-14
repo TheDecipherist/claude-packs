@@ -14,6 +14,8 @@ import { checkoutRoot, claudeRoot, insideProject, relInCheckout } from './projec
 import { readShape } from './shape.mjs';
 import { emittedFrom } from './source-exts.mjs';
 import { lastTurn, writesOfTurn } from './turn.mjs';
+/** A Stop's feedback that this check did not send: the stretch before it was judged and passed. */
+export const judgedBefore = (line) => line.includes('"role":"user","content":"Stop hook feedback:') && !line.includes('making-check');
 // the folder kinds a layout marks as code; a layout that marks none: any source file outside its docs folders
 const CODE_KINDS = new Set(['code', 'engine', 'ui', 'params', 'tests']);
 const NOT_CODE = ['build/**', 'inbox/**', 'docs/**', '**/*.md', '**/*.txt', '**/*.json'];
@@ -194,7 +196,9 @@ export function check(event, ctx) {
     const cwd = event.cwd ?? ctx.cwd;
     const stopped = event['agent_transcript_path'];
     const path = event.hook_event_name === 'SubagentStop' && typeof stopped === 'string' ? stopped : event.transcript_path;
-    const turn = lastTurn(path ?? '');
+    // a Stop sent back by another hook ended a stretch this check already judged and passed: only what follows is new (KWB-next: in an
+    // unattended session the turn is the whole session, and each Stop judged every write since its start, 0.75 s to 2.4 s in 25 minutes)
+    const turn = lastTurn(path ?? '', judgedBefore);
     const text = `${turn.text}\n${event.last_assistant_message ?? ''}`;
     const writes = writesOfTurn(turn, cwd, ctx.env).filter((w) => insideProject(ctx.projectDir, w.path, ctx.cwd));
     const rel = (p) => relInCheckout(ctx.projectDir, p, ctx.cwd);

@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { isMain } from '../hooks/lib/hook-log.mjs';
 const DEFINITION = /\{#([A-Za-z0-9_-]+)\}\s*$/;
 const LOCAL_REF = /\]\(#([A-Za-z0-9_-]+)\)/g;
-const CROSS_REF = /\b([A-Za-z0-9_-]+):([A-Za-z0-9_./-]+\.md)#([A-Za-z0-9_-]+)/g;
+const CROSS_REF = /\b([A-Za-z0-9_-]+):([A-Za-z0-9_.-][A-Za-z0-9_./-]*\.md)#([A-Za-z0-9_-]+)/g;
 /** The anchors a document defines, in order, with every one that repeats. */
 export function anchorsOf(text) {
     const all = text.split('\n').flatMap((line) => DEFINITION.exec(line)?.[1] ?? []);
@@ -23,7 +23,8 @@ export function check(docs, projects) {
         const { all, duplicates } = anchorsOf(text);
         for (const id of duplicates)
             verdict.failures.push(`${doc}: anchor {#${id}} is defined more than once`);
-        for (const [, id] of text.matchAll(LOCAL_REF))
+        // A document with no explicit {#id} uses heading slugs: its links are not this tool's to judge.
+        for (const [, id] of all.length > 0 ? text.matchAll(LOCAL_REF) : [])
             if (id && !all.includes(id))
                 verdict.failures.push(`${doc}: (#${id}) has no anchor`);
         for (const [, project, path, id] of text.matchAll(CROSS_REF)) {

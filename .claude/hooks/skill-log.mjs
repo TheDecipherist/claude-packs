@@ -10,6 +10,8 @@ import { runHook, scratchProject, verdicts } from './lib/selftest.mjs';
 import { SKILLS, logUsage } from './lib/usage-log.mjs';
 import { pass } from './lib/verdict.mjs';
 const SLASH = /^\s*\/([\w][\w:.-]*)/;
+/** Where a skill may be installed: the project, the call's folder, and each layout folder's own `.claude/skills/` (no tree walk). */
+const skillDirs = (project, cwd, folders) => [project, cwd, ...Object.values(folders ?? {}).map((f) => join(project, f.path))];
 export const hook = (event, ctx) => {
     if (event.hook_event_name === 'PostToolUse' && event.tool_name === 'Skill') {
         const skill = event.tool_input?.['skill'];
@@ -18,7 +20,7 @@ export const hook = (event, ctx) => {
     }
     else if (event.hook_event_name === 'UserPromptSubmit') {
         const name = SLASH.exec(event.prompt ?? '')?.[1];
-        if (name && [ctx.projectDir, event.cwd ?? ctx.projectDir].some((d) => existsSync(join(d, '.claude', 'skills', name, 'SKILL.md'))))
+        if (name && skillDirs(ctx.projectDir, event.cwd ?? ctx.projectDir, ctx.layout.folders).some((d) => existsSync(join(d, '.claude', 'skills', name, 'SKILL.md'))))
             logUsage(ctx, event, SKILLS, { skill: name, via: 'prompt' });
     }
     return pass; // not a refusal: a usage log only records

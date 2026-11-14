@@ -38,6 +38,9 @@ export function capOut(text) {
     const keep = OUT_CAP - cutNote(text.length).length;
     return text.slice(0, keep) + cutNote(text.length - keep);
 }
+/** True when any hook's output stops the session (`continue: false`): the event then answers 0, so Claude Code reads the JSON, and a
+ *  refusal from another hook cannot turn the stop into a message the session works round (KWB-next). */
+export const halts = (outs) => outs.some((o) => asRecord(parseJson(o))?.['continue'] === false);
 // Several hooks' stdout: one is passed as it is; JSON objects are merged (their messages joined), anything else joined by lines.
 export function mergeOut(outs) {
     const said = outs.filter((o) => o.trim());
@@ -57,6 +60,8 @@ export function mergeOut(outs) {
                 const ctx = [prior.additionalContext, here?.additionalContext].filter(Boolean).join('\n');
                 out[k] = { ...prior, ...here, ...(ctx ? { additionalContext: ctx } : {}) };
             }
+            else if (k === 'continue')
+                out[k] = have === false || v === false ? false : v; // a halt is never undone by a later hook
             else if (typeof v === 'string' && typeof have === 'string' && ['systemMessage', 'reason', 'stopReason'].includes(k))
                 out[k] = `${have}\n${v}`;
             else
