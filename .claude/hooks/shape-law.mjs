@@ -18,7 +18,7 @@ import { addressedOutside } from './lib/audience.mjs';
 import { isMain, runAsHook } from './lib/hook-log.mjs';
 import { checkoutRoot, insideProject, relInCheckout } from './lib/project.mjs';
 import { bashOf, editOf, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mjs';
-import { addedFindings, findInstanceLiterals, formatFinding, isExcluded, isTestFile, readShape } from './lib/shape.mjs';
+import { addedFindings, findInstanceLiterals, findInstanceLiteralsCached, formatFinding, isExcluded, isTestFile, readShape } from './lib/shape.mjs';
 import { addedDefs, findSelectorDefs, findUnknownTypes } from './lib/shape-code.mjs';
 import { declaredAmount } from './lib/shape-prose.mjs';
 import { pass, refuse } from './lib/verdict.mjs';
@@ -28,7 +28,7 @@ const HOW = 'Build for the shape: a loop over every instance or the generator; a
     'A page for a person outside the project, about the real machine\'s own named controls (never a spec, brief or code), says so in its first 5 lines: <!-- audience: outside --> (.md or .txt only).\n';
 function judgeText(rel, before, after, shape, root, env) {
     // a call that takes a count looks like one that takes an index; the declaration tells them apart (KF-17)
-    const lits = addedFindings(before, after, (t) => findInstanceLiterals(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after, env)));
+    const lits = addedFindings(before, after, (t) => findInstanceLiteralsCached(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after, env)));
     const test = isTestFile(rel);
     const out = lits.map((f) => `${formatFinding(f, rel)}${test ? `\n      ${TEST_NOTE}` : ''}`);
     const defs = [...addedDefs(before, after, (t) => findSelectorDefs(t, rel, shape)), ...addedDefs(before, after, (t) => findUnknownTypes(t, rel, shape))];

@@ -10,6 +10,8 @@
 //   shape-lists   a hand-listed set, one line per instance
 //   findInstanceLiterals(text, file, shape, { only }) -> [{ line, text, concept, instance, why }]
 //     only: 'example' (just a seen in / example line excuses), 'brief' (that, or a declared constant read by name)
+import { shortHash } from './hash.mjs';
+import { toJson } from './json.mjs';
 import { logRefusal } from './hook-log.mjs';
 import { matchesAny } from './glob.mjs';
 import { blankPaths } from './shape-prose.mjs';
@@ -62,6 +64,30 @@ export function findInstanceLiterals(text, file, shape, { only = null } = {}) {
 }
 // The findings an edit adds: those in the text after it, beyond the same findings already in the text before it.
 // Keyed by what a finding names, not its line's text: an edited or moved line adds nothing; one more copy does (KWB-23).
+// The finder's answer per manifest, file and text: a log appended to after every step is judged before and after each write, and the
+// one write's "after" is the next write's "before" (the resident runner keeps this module; 41 to 92 ms a write on a 25 KB log, KWB-next).
+const found = new Map();
+const manifestKeys = new WeakMap();
+const MEMO = 64;
+/** findInstanceLiterals, answered once per manifest, file and text. */
+export function findInstanceLiteralsCached(text, file, shape) {
+    if (!shape || !text)
+        return findInstanceLiterals(text, file, shape);
+    let manifest = manifestKeys.get(shape);
+    if (manifest === undefined) {
+        manifest = shortHash(toJson(shape.json ?? shape.concepts));
+        manifestKeys.set(shape, manifest);
+    }
+    const key = `${manifest}\n${file ?? ''}\n${shortHash(text)}`;
+    const hit = found.get(key);
+    if (hit)
+        return hit;
+    const answer = findInstanceLiterals(text, file, shape);
+    if (found.size >= MEMO)
+        found.delete(found.keys().next().value ?? '');
+    found.set(key, answer);
+    return answer;
+}
 export function addedFindings(before, after, find) {
     const key = (f) => `${f.concept}|${f.instance}|${f.why}`;
     const had = new Map();
