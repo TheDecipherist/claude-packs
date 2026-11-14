@@ -27,7 +27,14 @@ export const HOOK_BUDGET: Budget = { p50: 10, p95: 50 };
 /** A hook that runs once per user prompt, and so on a worker that has gone idle (a pool retires its workers after 2 idle minutes): its first call there reads the
  *  whole repetition index back (50 to 70 ms in the kit's own repo, measured in build/session4). A hook named here has its own budget, written with its reason (d-38);
  *  a daemon-side lookup that spares the read is the way to remove the row. */
-export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = { 'reuse-hint': { p50: 80, p95: 200 } };
+// git-guard and firmware-out-of-git: 0 ms on any other call, and on a git commit, add or push they run git itself (status, diff, the
+// remote's heads), 84 to 164 and 50 to 93 ms measured in supernova2_monitor on 2026-11-14, a session that commits after every step. Their
+// p50 stays the base budget; the p95 is the git child's own cost. Making the look incremental is the way to remove the rows (KWB-next).
+export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = {
+  'reuse-hint': { p50: 80, p95: 200 },
+  'git-guard': { p50: 10, p95: 200 },
+  'firmware-out-of-git': { p50: 10, p95: 200 },
+};
 export const WORST_MS = 200;
 export const STOP_WORST_MS = 1500;
 /** A daemon whose events wait for a worker longer than this at p95 has a full pool. */
@@ -160,7 +167,9 @@ function classProblems(c: EventClass, t: ClassTimes): string[] {
   for (const [hook, s] of [...t.hooks].sort(([a], [z]) => a.localeCompare(z))) {
     if (s.calls < MIN_CALLS) continue;
     const own = HOOK_OVERRIDES[hook] ?? HOOK_BUDGET;
-    if (s.p50 > own.p50 || s.p95 > own.p95 || s.worst > worst) {
+    // below P95_MIN_CALLS a p95 is the slowest call: the median, the worst and the median again stand for it (as for the pool)
+    const p95 = s.calls >= P95_MIN_CALLS ? s.p95 : s.p50;
+    if (s.p50 > own.p50 || p95 > own.p95 || s.worst > worst) {
       problems.push(`${hook} at ${c}: ${fmt(s)} ms (p50/p95, worst ${s.worst}) over its last ${s.calls} calls, over its budget of ${own.p50}/${own.p95} ms and worst ${worst}: ` +
         'find what it does on every call (a scan, a child process, a whole file read) and keep it or make it incremental');
     }

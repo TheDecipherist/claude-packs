@@ -13,7 +13,7 @@ import { matchesAny } from './lib/glob.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { parseJson } from './lib/json.mts';
 import { insideProject } from './lib/project.mts';
-import { bashOf, runHook, scratchProject, verdicts } from './lib/selftest.mts';
+import { bashOf, put, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook } from './lib/types.d.mts';
 import { RULES, logUsage } from './lib/usage-log.mts';
@@ -76,7 +76,8 @@ export function filesTouched(command: string, cwd: string, projectDir: string, w
   const found = new Set<string>();
   for (const w of named) for (const b of bases) { const p = resolve(b, w); if (isFile(p) && insideProject(projectDir, p, cwd)) found.add(p); }
   for (const p of written) if (insideProject(projectDir, p, cwd)) found.add(p);
-  return [...found].map((p) => relative(projectDir, p)).filter((r) => r && !r.startsWith('..') && !r.startsWith('.claude/'));
+  // a file under .claude/ counts like any other: a rule's own globs say whether it is theirs (hooks-and-gates names .claude/hooks/**)
+  return [...found].map((p) => relative(projectDir, p)).filter((r) => r && !r.startsWith('..'));
 }
 
 // The rules each session is known to hold. A rule once loaded stays in the context, so the set only grows: the log is read again
@@ -140,6 +141,9 @@ export function selftest(): number {
   const heredoc = sh("python3 - <<'EOF'\np='docs/x/v.md'\nopen(p,'a').write('x')\nEOF", 's3');
   const appended = sh('cat >> docs/x/new.md <<EOF\nrow\nEOF', 's4');
   const cdRel = sh('cd docs && cat x/v.md', 's5');
+  put(join(dir, '.claude/rules/hooks.md'), '---\npaths:\n  - ".claude/hooks/**"\n---\n\n# Hooks are seen red\n');
+  put(join(dir, '.claude/hooks/guard.mjs'), '// a guard\n');
+  const ownHooks = sh('node .claude/hooks/guard.mjs --selftest', 's6');
   return verdicts('rules-reach-the-shell', [
     ['a cat of build.md passes', first.status, 0],
     ['and gives the rule whole', /Plan and logs[\s\S]*Always date a log line/.test(first.stdout) && first.stdout.includes('additionalContext') ? 1 : 0, 1],
@@ -150,7 +154,8 @@ export function selftest(): number {
     ['a path inside a heredoc program reaches its rule', /Plan and logs/.test(heredoc.stdout) ? 1 : 0, 1],
     ['a new file appended through a redirect reaches its rule', /Plan and logs/.test(appended.stdout) ? 1 : 0, 1],
     ['a path relative to a cd target reaches its rule', /Plan and logs/.test(cdRel.stdout) ? 1 : 0, 1],
-    ['each giving is one log line', logged().length, 4],
+    ['a rule whose paths name .claude/hooks/** reaches a selftest run of a hook', /Hooks are seen red/.test(ownHooks.stdout) ? 1 : 0, 1],
+    ['each giving is one log line', logged().length, 5],
   ]);
 }
 

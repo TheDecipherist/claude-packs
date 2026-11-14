@@ -132,6 +132,23 @@ test('a build that never logged its end shields no call after an hour', () => {
   assert.match(said(dir).problems.join('\n'), /^slow-fake at Pre Bash/);
 });
 
+// supernova2_monitor WB-12: one commit's slow call failed a hook's budget for every later session
+test('a hook with fewer than 20 calls is judged on its median: one slow call among them is no slow hook', () => {
+  const dir = project();
+  lines(dir, 9, { ...BASH, hook: 'once-fake', ms: 0, code: 0 });
+  lines(dir, 1, { ...BASH, hook: 'once-fake', ms: 150, code: 0 });
+  assert.deepEqual(said(dir).problems, []);
+});
+
+test('git-guard has its git child\'s budget at p95; a hook with no row is held to the base budget on the same calls', () => {
+  const dir = project();
+  const commits = (hook: string): void => { for (let i = 0; i < 30; i += 1) logHook(dir, { ...BASH, hook, ms: i % 5 === 0 ? 110 : 0, code: 0 }); };
+  commits('git-guard');
+  assert.deepEqual(said(dir).problems, [], 'every fifth call a commit at 110 ms, the rest 0');
+  commits('plain-fake');
+  assert.match(said(dir).problems.join('\n'), /^plain-fake at Pre Bash: 0\/110 ms/);
+});
+
 test('the table: the classes, the percentile, the tools no budget names', () => {
   assert.deepEqual(Object.keys(EVENT_BUDGET), ['Pre Bash', 'Pre Write', 'Post', 'Prompt', 'SessionStart', 'Stop']);
   assert.deepEqual([EVENT_BUDGET.Stop.p50, EVENT_BUDGET.Stop.p95, EVENT_BUDGET['Pre Write'].p95], [200, 1000, 300]);
