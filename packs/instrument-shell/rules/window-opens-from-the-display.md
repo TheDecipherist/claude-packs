@@ -15,7 +15,7 @@ Always do:
 - Clamp to the declared minimum display.
 - Check a plate's design width against the minimum display before shrinking its height: the design width, not the height, decides whether a panel scrolls.
 - Declare a layout decision as its test (`if panel + strip > display then fold`), not its outcome, so it expires with the measurement; a saved state always wins.
-- List the fit pass in order: compress vertical spacing only, shrink radii and never type, squeeze the gaps, push legends clear; when height binds, only height levers change the type size.
+- List the fit pass in order: compress vertical spacing, then squeeze the gaps, then push legends clear. The pass moves spacing only: sizes (radii, type, controls) stay at their tokens, and a panel that still does not fit scrolls in its container.
 
 Never do:
 - Hard-code an opening size in the editor.

@@ -17,7 +17,7 @@ Always do:
 - Give an appended parameter a default that leaves every released patch rendering bit-identically, and prove it by rendering the factory bank before and after.
 
 Never do:
-- Change a released parameter's range, step count, skew or kind, insert, move or remove a choice, change the patch format, or renumber or remove a program.
+- Change a released parameter's range, step count, skew or kind, insert, move or remove a choice, change the patch format, or renumber, rename or remove a program.
 - Lock the parameter ORDER: JUCE's VST3 wrapper makes each ParamID from a hash of the string id, so a parameter that moves in the list breaks nothing.
 </constraints>
 

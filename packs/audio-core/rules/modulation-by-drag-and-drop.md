@@ -17,5 +17,5 @@ Always do:
 - Read an empty second source as unity, not zero (a route is `dest += src x depth`, scaled by the second source when there is one), and let patching the same source and destination pair edit the existing route instead of stacking a second.
 
 Never do:
-- Make a route by a menu alone.
+- Make a route by a menu alone on our own design; a rebuild keeps the machine's own edit-page matrix as well.
 </constraints>

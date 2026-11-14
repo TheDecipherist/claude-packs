@@ -9,7 +9,7 @@ The closing review is where a panel is called done; a walk by eye lets items sli
 
 <constraints>
 Always do:
-1. Build one list from the audio-core panel rules, grouped as structure (`panel-sizes-by-kind`, `panel-tabs`, `section-header-and-lamp`), controls (`house-control-behaviours`, `knob-anatomy`, `knob-gestures`), type and colour (`colour-by-role`, `panel-colour-safe`, `panel-icons`), behaviour (`display-echo`, `modulation-overview-page`, `undo-one-gesture-one-step`) and pipeline (`control-reaches-every-surface`, `curve-screen-drags`).
+1. Build one list from the audio-core panel rules, grouped as structure (`panel-sizes-by-kind`, `panel-tabs`, `section-header-and-lamp`), controls (`house-control-behaviours`, `knob-anatomy`, `knob-gestures`), type and colour (`colour-by-role`, `panel-colour-safe`, `panel-icons`), behaviour (`display-echo`, `modulation-overview-page`, `undo-one-gesture-one-step`) pipeline (`control-reaches-every-surface`, `curve-screen-drags`) and layout (`panel-surfaces`, `column-names`, `instance-grid`, `host-parameter-names`, `modulation-by-drag-and-drop`, `keys-belong-to-the-keyboard`); then walk every audio-core rule with `panel-spec` in its concepts and add any line still missing.
 2. Name the probe that answers each line (a gate, a render, a read of the table).
 3. Run the probe and tick the item only on its output; a tick from memory or by eye does not count.
 4. List an item no probe can answer as open, with why.

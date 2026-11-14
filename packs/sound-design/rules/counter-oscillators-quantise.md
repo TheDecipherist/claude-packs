@@ -6,7 +6,7 @@ paths:
 
 # A counter-clocked oscillator's pitch is an integer divisor, and the model rounds it
 
-A machine whose oscillator counts clock ticks per cycle has no drift and a coarse pitch step near the top: about 0.0023 semitone at C4 and 0.145 near 16 kHz. A float phase increment hides that step, and a bank tuned against the machine drifts from it exactly where the step is largest.
+A machine whose oscillator counts clock ticks per cycle has no drift and a coarse pitch step near the top. One machine's example, clocked at about 1.96 MHz, so C4 is a divisor near 7,490 and 16 kHz one near 122: a step of about 0.0023 semitone at C4 and 0.145 near 16 kHz. A float phase increment hides that step, and a bank tuned against the machine drifts from it exactly where the step is largest.
 
 <constraints>
 Always do:
@@ -16,5 +16,5 @@ Always do:
 
 Never do:
 - Add drift or a float increment to a counter oscillator to make it sound alive.
-- Test it at middle C alone: the step is under 3 cents there.
+- Test it at middle C alone: the step is a fraction of a cent there (0.23 cent in the example).
 </constraints>

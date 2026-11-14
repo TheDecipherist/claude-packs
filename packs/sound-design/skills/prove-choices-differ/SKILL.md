@@ -9,9 +9,9 @@ A selector whose two options null against each other is one option with two name
 
 <constraints>
 Always do:
-1. Render every option with the same note, level and every other control fixed.
+1. Render every option with the same note and level, and every other control set where the choice is audible (an LFO shape at depth 0 or a filter type with the cutoff open nulls on its own). Name those settings in the report.
 2. Measure the N by N difference between the renders, as in `spread-probe`.
-3. Fail the control when any two options null, and name the pair.
+3. Fail the control when any two options null at those settings, and name the pair.
 
 Never do:
 - Count the options of a choice as a feature before the N by N difference is measured.

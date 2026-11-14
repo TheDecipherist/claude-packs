@@ -22,9 +22,9 @@
     "**/*_test.*",
     "**/*.test.*"
   ],
-  "pattern": "\\b(?:apply|load|recall|set)\\w*(?:Patch|Program|Preset)\\w*\\s*\\([^)]*\\)\\s*(?:const\\s*)?(?:override\\s*)?\\{(?![^}]*\\breset\\w*\\s*\\()",
-  "bad": "void Voice::applyPatch(const Patch& p) {\n    cutoff = p.cutoff;\n}",
-  "good": "void Voice::applyPatch(const Patch& p) {\n    resetState();\n    cutoff = p.cutoff;\n}",
+  "pattern": "\\b(?:(?:apply|load|recall)(?:Patch|Program|Preset)|setPatch|setProgram|setPreset)\\s*\\([^)]*\\)\\s*(?:const\\s*)?(?:override\\s*)?\\{(?!(?:[^{}]|\\{[^{}]*\\})*?(?:\\{[^{}]*)?\\breset\\w*\\s*\\()",
+  "bad": "void Voice::applyPatch(const Patch& p) {\n    if (p.legato) { glide = p.glide; }\n    cutoff = p.cutoff;\n}",
+  "good": "void Voice::applyPatch(const Patch& p) {\n    if (p.legato) { glide = p.glide; }\n    resetState();\n    cutoff = p.cutoff;\n}\nvoid Proc::setCurrentProgram(int i) {\n    index = i;\n}\nvoid Proc::setPresetName(const String& n) {\n    name = n;\n}\nvoid Proc::loadPresetList() {\n    list.clear();\n}",
   "flags": "i",
   "code": true
 }
