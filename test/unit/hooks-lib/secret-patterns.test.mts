@@ -19,6 +19,13 @@ test('a placeholder password and a long identifier are not secrets', () => {
   assert.deepEqual(nameOf('cap_Filter_Env_Attack_2_long_identifier_here'), []);
 });
 
+// supernova2_monitor, refusal d9103974: a task transcript (stream-json) is full of Anthropic's own ids, and secrets-guard refused moving one
+test('an Anthropic message, request or tool-use id is no secret; a prefixed key still is', () => {
+  const tail = `01${'Ab3xQ9'.repeat(4)}`;
+  for (const prefix of ['msg_', 'req_', 'toolu_', 'srvtoolu_']) assert.deepEqual(nameOf(`"id":"${prefix}${tail}"`), [], prefix);
+  assert.deepEqual(nameOf(`token=live_${'Zq8'.repeat(9)}`), ['a prefixed API key']);
+});
+
 test('maskSecrets replaces a secret by its name, masks a password word, and takes any value', () => {
   const token = `ghp_${'b'.repeat(36)}`;
   assert.equal(maskSecrets(`push with ${token} now`), 'push with [a GitHub token] now');
