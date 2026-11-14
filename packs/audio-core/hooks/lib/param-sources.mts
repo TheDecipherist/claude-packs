@@ -1,4 +1,5 @@
 import { existsSync, readdirSync } from 'node:fs';
+import type { Dirent } from 'node:fs';
 import { join } from 'node:path';
 import { readText } from './files.mts';
 import { matchesAny } from './glob.mts';
@@ -55,13 +56,20 @@ export function loadConfig(root: string, hook = 'param-id-lock'): IdConfig | { e
   }
 }
 
+/** The source files under the project, as full paths. A skipped folder is never entered (node_modules, .git and build trees are not listed at all). */
 export function* sourcesOf(root: string, extensions: RegExp): Generator<string> {
   const output = readLayout(root).buildOutput;
   const skipped = Array.isArray(output) ? output.map(String) : [];
-  for (const entry of readdirSync(root, { recursive: true })) {
-    const rel = String(entry);
-    if (!SKIP_DIRS.test(rel) && extensions.test(rel) && !matchesAny(rel, skipped)) yield join(root, rel);
+  function* walk(rel: string): Generator<string> {
+    let entries: Dirent[] = [];
+    try { entries = readdirSync(join(root, rel), { withFileTypes: true }); } catch { return; }
+    for (const entry of entries) {
+      const path = rel === '' ? entry.name : `${rel}/${entry.name}`;
+      if (entry.isDirectory()) { if (!SKIP_DIRS.test(`${path}/`)) yield* walk(path); }
+      else if (!SKIP_DIRS.test(path) && extensions.test(path) && !matchesAny(path, skipped)) yield join(root, path);
+    }
   }
+  yield* walk('');
 }
 
 export function collectIds(root: string, { extensions, patterns }: IdConfig): Set<string> {

@@ -3,7 +3,7 @@
 //                                     each choice list in order, the patch format, the factory bank's program numbers) and the id
 //                                     lock (param-id-lock). Run it before tagging; run it again at each later release to lock the
 //                                     additions. It refuses while the sources hold a change the lock would refuse.
-//   node release-lock.mjs --status    exit 1 when a `v*` git tag exists and no release lock was written (doctor can run it)
+//   node release-lock.mjs --status    exit 1 when a `v*` git tag exists and no release lock was written (run by hand or by a release script; doctor does not run it)
 //   (as PostToolUse hook)             exit 2 when a write changes a locked fact: a range, step count or skew, a choice inserted,
 //                                     moved or removed, the patch format, a program's number. Additions pass. Before the release
 //                                     (no lock file) nothing is judged. The parameter ORDER is never locked: JUCE hashes each VST3
