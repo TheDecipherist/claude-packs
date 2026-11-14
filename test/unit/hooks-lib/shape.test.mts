@@ -5,12 +5,21 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { scratchDir } from '../../../packs/base/hooks/lib/files.mts';
-import { addedFindings, classify, findInstanceLiterals, isExampleLine, normaliseShape, quoteRow, readShape, validateShape } from '../../../packs/base/hooks/lib/shape.mts';
+import { addedFindings, classify, findInstanceLiterals, findInstanceLiteralsCached, isExampleLine, normaliseShape, quoteRow, readShape, validateShape } from '../../../packs/base/hooks/lib/shape.mts';
 import { escapeRegExp } from '../../../packs/base/hooks/lib/glob.mts';
 
 const manifest = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, f)', selectors: { activeSlot: 'the one playing' }, constants: { kHome: { instance: 0, reason: 'home' } } } }, exclude: [] };
 const shape = normaliseShape(manifest);
 const hits = (text: string): string[] => findInstanceLiterals(text, 'a.cpp', shape).map((f) => f.instance);
+
+// supernova2_monitor: shape-law ran 41 to 92 ms a write on its growing logs; the finder's answer is now kept per manifest, file, text
+test('the cached finder answers as the finder, and a changed manifest is found again', () => {
+  const text = 'play(slot 2);\n';
+  assert.deepEqual(findInstanceLiteralsCached(text, 'a.cpp', shape), findInstanceLiterals(text, 'a.cpp', shape));
+  assert.deepEqual(findInstanceLiteralsCached(text, 'a.cpp', shape).map((f) => f.instance), ['2'], 'a second call, from the cache');
+  const wider = normaliseShape({ ...manifest, concepts: { slot: { ...manifest.concepts.slot, count: 1 } } });
+  assert.deepEqual(findInstanceLiteralsCached(text, 'a.cpp', wider).map((f) => f.instance), [], 'past the new count of 1: the new manifest is asked, not the cache');
+});
 
 test('a literal instance is found by number, ordinal, index and compare', () => {
   assert.deepEqual(hits('play(slot 2);'), ['2']);

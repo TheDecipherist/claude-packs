@@ -19,7 +19,7 @@ import { isMain, runAsHook } from './lib/hook-log.mts';
 import { checkoutRoot, insideProject, relInCheckout } from './lib/project.mts';
 import { bashOf, editOf, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
-import { addedFindings, findInstanceLiterals, formatFinding, isExcluded, isTestFile, readShape } from './lib/shape.mts';
+import { addedFindings, findInstanceLiterals, findInstanceLiteralsCached, formatFinding, isExcluded, isTestFile, readShape } from './lib/shape.mts';
 import type { FormattedFinding } from './lib/shape.mts';
 import { addedDefs, findSelectorDefs, findUnknownTypes } from './lib/shape-code.mts';
 import type { LoadedShape } from './lib/shape-model.mts';
@@ -36,7 +36,7 @@ import type { Env } from './lib/types.d.mts';
 
 function judgeText(rel: string, before: string | null, after: string, shape: LoadedShape, root: string, env: Env): string[] {
   // a call that takes a count looks like one that takes an index; the declaration tells them apart (KF-17)
-  const lits = addedFindings(before, after, (t) => findInstanceLiterals(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after, env)));
+  const lits = addedFindings(before, after, (t) => findInstanceLiteralsCached(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after, env)));
   const test = isTestFile(rel);
   const out = lits.map((f) => `${formatFinding(f, rel)}${test ? `\n      ${TEST_NOTE}` : ''}`);
   const defs = [...addedDefs(before, after, (t) => findSelectorDefs(t, rel, shape)), ...addedDefs(before, after, (t) => findUnknownTypes(t, rel, shape))];
