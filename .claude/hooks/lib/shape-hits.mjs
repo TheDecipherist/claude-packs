@@ -69,7 +69,8 @@ function byName(line, words, c, shape, add) {
     const notARole = (m) => {
         const [whole = '', first = '', word = ''] = m;
         const at = m.index ?? 0;
-        return NOT_ROLES.has(first) || c.words.includes(first.toLowerCase()) || c.names.has(first) || labelBefore(line, at) || isKnownName(first, word, shape) || isLongerName(words, at + whole.length);
+        // a caps word holding a digit (CC9, OS2, F1) is a code or a number, never a role (supernova2_monitor WB-19)
+        return /\d/.test(first) || NOT_ROLES.has(first) || c.words.includes(first.toLowerCase()) || c.names.has(first) || labelBefore(line, at) || isKnownName(first, word, shape) || isLongerName(words, at + whole.length);
     };
     for (const m of words.matchAll(role))
         if (!notARole(m))
