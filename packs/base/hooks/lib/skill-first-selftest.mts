@@ -27,6 +27,13 @@ export function selftest(hook: string): number {
   const circuit = transcript('circuit', [{ name: 'Skill', input: { skill: 'read-a-circuit-diagram' } }]);
   const look = transcript('look', [{ name: 'Read', input: { file_path: '/kit/packs/audio-core/skills/analyse-reference-look/SKILL.md' } }]);
   const scan = transcript('scan', [{ name: 'Skill', input: { skill: 'read-a-scan' } }]);
+  const prompt = (name: string, text: string): string => {
+    const file = join(dir, `${name}.jsonl`);
+    put(file, `${toJson({ type: 'user', message: { role: 'user', content: text } })}\n`);
+    return file;
+  };
+  const compiled = prompt('compiled', 'Task W1.4\n\nCompiled by `workorder compile` with the skills `read-a-circuit-diagram`.\n\n## The skill `read-a-circuit-diagram`\n\nRead it tile by tile.\n');
+  const mentioned = prompt('mentioned', 'Read the sheets; read-a-circuit-diagram is the skill for them.\n');
   const before = snapshot(dir);   // the project as the judge finds it: the rows below must leave it as it is
   const read = (file: string, t: string | undefined, cwd: string = dir): number | null =>
     runHook(hook, cwd, { tool_name: 'Read', tool_input: { file_path: file }, cwd, transcript_path: t }).status;
@@ -39,6 +46,8 @@ export function selftest(hook: string): number {
     ['a render of a service manual with its skill unloaded', bash(render, none), 2],
     ['a sheet the layout names as circuit material', read(join(dir, 'sheets/board.png'), none), 2],
     ['the tile after a Skill call', read(sheet, circuit), 0],
+    ['a compiled task holding the skill', read(sheet, compiled), 0],
+    ['a plain prompt that only names the skill', read(sheet, mentioned), 2],
     ['the render after the skill', bash(render, circuit), 0],
     ['a mock-up read with its skill unloaded', read(mock, none), 2],
     ['a mock-up with only the circuit skill loaded', read(mock, circuit), 2],
