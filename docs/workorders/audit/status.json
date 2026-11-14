@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14T00:54:57.344Z",
+  "updated": "2026-11-14T00:55:45.250Z",
   "steps": [
     {
       "id": "W0",
@@ -69,7 +69,7 @@
       "title": "before calling it finished",
       "items": 1,
       "done": 0,
-      "agent": null
+      "agent": "rv-1"
     },
     {
       "id": "W10",
@@ -79,5 +79,30 @@
       "agent": null
     }
   ],
-  "agents": []
+  "agents": [
+    {
+      "name": "rv-1",
+      "worktree": ".claude/worktrees/rv-1",
+      "step": "W9",
+      "started": "2026-11-14T00:55:45.249Z"
+    },
+    {
+      "name": "rv-2",
+      "worktree": ".claude/worktrees/rv-2",
+      "step": "W9",
+      "started": "2026-11-14T00:55:45.250Z"
+    },
+    {
+      "name": "rv-3",
+      "worktree": ".claude/worktrees/rv-3",
+      "step": "W9",
+      "started": "2026-11-14T00:55:45.250Z"
+    },
+    {
+      "name": "rv-4",
+      "worktree": ".claude/worktrees/rv-4",
+      "step": "W9",
+      "started": "2026-11-14T00:55:45.250Z"
+    }
+  ]
 }
