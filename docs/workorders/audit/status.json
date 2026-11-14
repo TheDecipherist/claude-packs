@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14T01:06:37.932Z",
+  "updated": "2026-11-14T01:50:38.275Z",
   "steps": [
     {
       "id": "W0",
@@ -68,8 +68,8 @@
       "id": "W9",
       "title": "before calling it finished",
       "items": 1,
-      "done": 0,
-      "agent": "fx-1"
+      "done": 1,
+      "agent": null
     },
     {
       "id": "W10",
@@ -79,30 +79,5 @@
       "agent": null
     }
   ],
-  "agents": [
-    {
-      "name": "fx-1",
-      "worktree": ".claude/worktrees/fx-1",
-      "step": "W9",
-      "started": "2026-11-14T01:06:37.931Z"
-    },
-    {
-      "name": "fx-2",
-      "worktree": ".claude/worktrees/fx-2",
-      "step": "W9",
-      "started": "2026-11-14T01:06:37.932Z"
-    },
-    {
-      "name": "fx-3",
-      "worktree": ".claude/worktrees/fx-3",
-      "step": "W9",
-      "started": "2026-11-14T01:06:37.932Z"
-    },
-    {
-      "name": "fx-4",
-      "worktree": ".claude/worktrees/fx-4",
-      "step": "W9",
-      "started": "2026-11-14T01:06:37.932Z"
-    }
-  ]
+  "agents": []
 }
