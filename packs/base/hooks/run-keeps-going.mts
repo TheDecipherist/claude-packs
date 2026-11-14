@@ -55,7 +55,8 @@ export const hook: Hook = (event, ctx) => {
   return refuse(
     `BLOCKED by run-keeps-going: nobody is there, and work order ${order} has no DONE. Do not end the turn, and do not answer with a `
     + `summary: start the next item now (docs/workorders/${order}/progress.md says where the run stands), record it there when it is done, `
-    + `and go on to the one after. The turn ends on the DONE file, or after ${STALLS} send-backs in a row that record nothing new in `
+    + `and go on to the one after. A job of yours running in the background is no reason to stop: start an item that does not need its `
+    + `result now; its notice reaches you at your next call. The turn ends on the DONE file, or after ${STALLS} send-backs in a row that record nothing new in `
     + 'progress.md: if something truly stops the run, write what in progress.md first.',
   );
 };

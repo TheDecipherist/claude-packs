@@ -20,6 +20,7 @@ test('run-keeps-going: an open order with nobody there is sent back, naming the 
   const r = hookRun(order(dir(), '- W1.1 x\n'), 'run-keeps-going.mjs', stop(), AWAY);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /work order demo has no DONE/);
+  assert.match(r.stderr, /running in the background is no reason to stop/, 'a run waiting on its own background job (supernova2, an hour idle)');
 });
 
 test('run-keeps-going: passes on DONE and with someone there', () => {
