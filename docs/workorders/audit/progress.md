@@ -37,6 +37,10 @@ Session 1 started 2026-11-13. `workorder check audit`: OK.
 
 ## FOR THE USER
 
+- W9 review code #6: doctor could run `release-lock --status` (a `v*` tag with no release lock); wiring it into doctor's status hooks would fail such projects, which nothing decided. [deferred: changes doctor; for the user]
+- W9 review code #18: skill-log, rule-log and agent-ledger are on by default (d-6); turning them opt-in is the user's call. [deferred: the lead chose on by default, d-6]
+- W9 review audio-sound-shell #26: rename `instrument-shell` (the shell is gone) with the old name kept as an alias. [deferred: changes an installed pack name; for the user]
+
 - W8 T1 re-b#11: A reproduction offers a tappable or synced timbre time the hardware offered. Would change: It would add an exception to "Never sync a TIMBRE time", which C9 fixes ("TIMBRE times ... never follow tempo"). It goes to the user. [deferred: changes how the kit works; for the user]
 - W8 T2 S39: Offer a synced timbre time, off by default, when firmware shows the hardware synced it (MPX 500). Would change: Would narrow "Keep TIMBRE times off tempo for ever", which DECIDED.md C9 records: "TIMBRE times ... never follow tempo". C9a ("offers sync where its hardware did") reads on rhythm times. To the user: may a firmware-prove [deferred: changes how the kit works; for the user]
 - W8 T2 S47: Three-tier build decision before a unit is planned; never ship a stand-in. Would change: The step already grades build, build tagged, or "only when there are no names and no presets, create nothing". "Do not build, never ship a stand-in (a style player without its wave ROM)" would add a refusal to build wher [deferred: changes how the kit works; for the user]
@@ -49,7 +53,6 @@ Session 1 started 2026-11-13. `workorder check audit`: OK.
 
 - O30 (the Admiral check-signal hook): left out of the kit; the admiral pack ships only its skill. It belongs in the admiral pack if Admiral's own installer does not add it (SORTED.md section 5). [deferred: the user, a different pack's scope]
 
-- The five midi rules extended in W4 now load by concepts (`cpp, js, python, tooling`) instead of raw globs (d-7): a project with loose Python files, no python pack and no tool folder no longer gets them on those files. [deferred: the lead; forced by the conformance gate R1]
 
 - `packs/base/rules/unattended-runs.md` has no frontmatter, so the conformance gate (R1) refuses any edit to it; a `# concepts:` or `# hook:` line would change when it loads. E28 went to plan-and-logs instead (d-5). [deferred: the lead, because it changes how the kit loads a rule]
 

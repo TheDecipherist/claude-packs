@@ -23,7 +23,7 @@
 ## d-5 Where E28 goes, and what a touched file must pass {#d-5}
 - Question: the conformance gate (test/pack-content.test.mts) holds every new or changed pack file to the whole set. `unattended-runs.md` has no frontmatter (R1); giving it `# concepts:` or `# hook:` would change when it loads, which is a change to how the kit works. E28 was written into it.
 - Options: change its loading; keep E28 there and leave the gate red; put E28 in the base rule about logs.
-- Chose: E28 goes into `plan-and-logs.md` ("Log it when several units fit different constants to one shared law, and fix the law once, with every unit's measurements"), `unattended-runs.md` is left as it was, and its missing frontmatter goes to the user (FOR THE USER). Other touched files were brought up to the set without a change of meaning: a `paths: placeholder` line in the reverse-engineering rules (paths are generated at install), `## Check` sections naming the checks that already point at a rule, nine skill descriptions cut under 200 characters, two "you" lines reworded, and a project's name taken out of `subagent-dispatch.md`'s example. The ratchet's counts fell (R1 83 to 75, R6 21 to 18, R7 21 to 20, S7 11 to 10).
+- Chose: E28 goes into `plan-and-logs.md` ("Log it when several units fit different constants to one shared law, and fix the law once, with every unit's measurements"), `unattended-runs.md` is left as it was, and its missing frontmatter goes to the user (FOR THE USER). Other touched files were brought up to the set without a change of meaning: a `paths: placeholder` line in the reverse-engineering rules (paths are generated at install), `## Check` sections naming the checks that already point at a rule, nine skill descriptions cut under 200 characters, two "you" lines reworded, and a project's name taken out of `subagent-dispatch.md`'s example (and, in W8 and W9, project names taken out of examples in `filters-stable-under-modulation.md` and `copy-and-prove`, the meaning unchanged). The ratchet's counts fell (R1 83 to 75, R6 21 to 18, R7 21 to 20, S7 11 to 10).
 
 ## d-6 The three usage logs are on by default, in new and existing projects {#d-6}
 - Question: skill-log, rule-log (W2's L1, L2) and agent-ledger (U74) are new base hooks. A new hook never switches on silently in an existing project, but these refuse nothing.
@@ -33,4 +33,9 @@
 ## d-7 The midi rules' concepts when the conformance gate makes them declare some {#d-7}
 - Question: five midi rules loaded by raw globs (`**/*.cpp`, `**/*.py`, `**/*.ts`, ...). Extending them makes the conformance gate (R1) require `# concepts:`; `cpp, js` would drop Python files.
 - Options: `cpp, js`; `cpp, js, python, tooling`; leave the extensions out.
-- Chose: `cpp, js, python, tooling`. Python files are covered where the python pack is installed and in tool folders; a project with loose Python scripts outside both and no python pack loses the rule there. Noted for the user.
+- Chose: `cpp, js, python, tooling`. Python files are covered where the python pack is installed and in tool folders; a project with loose Python scripts outside both and no python pack loses the rule there. Noted for the user. Superseded by d-8: the rules now load exactly where they did.
+
+## d-8 One concept for the globs the old raw-path rules had {#d-8}
+- Question: the conformance gate makes a changed rule declare `# concepts:`; rules that loaded by raw globs (`**/*.cpp`, `**/*.cc`, `**/*.py`, `**/*.ts`, ...) lost `.cc` files, trees outside `src/` and loose Python under the nearest concepts (W9 review, audio-sound-shell #8; d-7).
+- Options: keep the nearest concepts and tell the user; a concept that holds exactly the old globs.
+- Chose: the concept `engine-source` (the nine old globs, unchanged), declared in the sound-design, instrument-shell and midi `pack.json`, so each pack's rules load where they loaded before this branch. It supersedes d-7: the midi rules use it, and nothing is narrowed.
