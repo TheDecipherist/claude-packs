@@ -55,13 +55,21 @@ export function alignLive<R extends Aligned>(rows: R[]): R[] {
   return rows;
 }
 
+/** When an agent's own file says it was updated, or null: a date with no time is no clock (KWB-next: "2026-11-13" read as
+ *  midnight UTC drew a finished agent red at 23h40m quiet). */
+export const clockOf = (iso: string | null | undefined): number | null => {
+  if (!/\d:\d\d/.test(iso ?? '')) return null;
+  const t = Date.parse(iso ?? '');
+  return Number.isNaN(t) ? null : t;
+};
+
 /** What an agent is doing now, from its last heartbeat, its own file and the check of its worktree, as the parts alignLive
  *  sets in columns: { beat: "♥ 12s", work, action: "⟳ RUN make", quiet }. quiet is the minutes it has been still when
  *  that means stuck, else 0. `work` is null where the processes could not be read. */
 export function liveOf(beat: Beat | null, updated: string | null, work: Work | null, nowMs: number): LiveParts {
   const at = (iso: string | null | undefined): number | null => { const t = Date.parse(iso ?? ''); return Number.isNaN(t) ? null : t; };
   const beatAt = at(beat?.t);
-  const last = Math.max(beatAt ?? -Infinity, at(updated) ?? -Infinity);
+  const last = Math.max(beatAt ?? -Infinity, clockOf(updated) ?? -Infinity);
   const still = last === -Infinity ? null : Math.max(0, Math.round((nowMs - last) / 1000));
   const running = beatAt !== null && beat?.event === 'pre' && last === beatAt;
   const quietFor = (min: number): boolean => still !== null && still / 60 >= min;

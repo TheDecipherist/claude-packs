@@ -6,6 +6,7 @@ import { orderStatus, progressOf, runRows, runnersIn, runsReport, stepsOf, workI
 import type { AgentStatus, OrderStatus } from '../../lib/run-status.mts';
 import { bar, statusCommand, statusLines } from '../../lib/status-cli.mts';
 import { toJson } from '../../packs/base/hooks/lib/json.mts';
+import { agentOf as beatName } from '../../packs/base/hooks/heartbeat.mts';
 
 const HERE = { env: process.env, platform: process.platform };
 const ORDER = '# Work order: demo\n\n## W0. Set up\n\n1. one\n2. two\n\n**Done when:** x\n\n## W1. The import\n\n1. read\n\n**Done when:** y\n\n## L2. The look\n\n**Done when:** z\n';
@@ -189,4 +190,47 @@ test('--watch prints the report again on every tick, each under its time', async
   assert.equal(out.filter((l) => l.startsWith('-- ')).length, 2);
   assert.deepEqual(waits, [15 * 60_000]);
   assert.equal(bar(50, 10), '[█████░░░░░]');
+});
+
+// KWB-next: a run whose project is itself a worktree (the audit order ran in claude-packs/.claude/worktrees/audit, KF-6)
+test('a run in a worktree lists only the agents directly under it, never itself or its siblings, and reads their beats from the top checkout', () => {
+  const { dir, git } = project();
+  git('worktree', 'add', '-q', '.claude/worktrees/run', '-b', 'work/run');
+  git('worktree', 'add', '-q', '.claude/worktrees/sibling', '-b', 'work/sibling');
+  const run = join(dir, '.claude/worktrees/run');
+  gitIn(run, 'worktree', 'add', '-q', '.claude/worktrees/cat', '-b', 'work/run-cat');
+  mkdirSync(join(run, '.claude/worktrees/cat/docs/workorders/demo/agents'), { recursive: true });
+  writeFileSync(join(run, '.claude/worktrees/cat/docs/workorders/demo/agents/cat.json'), toJson({ name: 'cat', step: 'W1', items: 2, done: 1 }));
+  const now = new Date().toISOString();
+  mkdirSync(join(dir, '.claude/logs/heartbeats'), { recursive: true });
+  writeFileSync(join(dir, '.claude/logs/heartbeats/cat.json'), toJson({ t: now, event: 'post', tool: 'Read', what: 'x' }));
+  writeFileSync(join(dir, '.claude/logs/heartbeats/run.json'), toJson({ t: now, event: 'post', tool: 'Bash', what: 'y' }));
+  const s = orderStatus(run, 'demo', HERE);
+  assert.deepEqual(s.agents.map((a) => a.name), ['cat']);   // not 'run' (the lead) and not 'sibling'
+  assert.equal(s.agents[0]?.beat?.t, now);                  // the agent's beat, written in the top checkout
+  assert.equal(s.lead?.t, now);                             // the lead's, under the run's worktree name
+});
+
+test('a date with no time is no clock, and an agent with every item done is never drawn stuck', () => {
+  const now = Date.parse('2026-11-13T23:40:00Z');
+  const s = orderWith([
+    agentOf({ name: 'dated', step: 'W1', updated: '2026-11-13', percent: 100 }),
+    agentOf({ name: 'datedopen', step: 'W1', updated: '2026-11-13', percent: 50 }),
+    agentOf({ name: 'done', step: 'W1', updated: at(now, 40), percent: 100, beat: { t: at(now, 40), event: 'post', tool: 'Bash', what: 'git commit' } }),
+    agentOf({ name: 'open', step: 'W1', updated: at(now, 40), percent: 50, beat: { t: at(now, 40), event: 'post', tool: 'Bash', what: 'git commit' } })]);
+  const { agents } = runRows(s, now);
+  assert.deepEqual(agents.map((a) => a.quiet), [0, 0, 0, 40]);   // 'datedopen' too: midnight UTC is not when it last moved
+  assert.doesNotMatch(agents[1]?.live ?? '', /\dh\d\dm/);
+});
+
+test('the heartbeat names the innermost worktree a call works in', () => {
+  const main = '/p/kit';
+  const ev = (cwd: string, file: string): Record<string, unknown> => ({ hook_event_name: 'PreToolUse', cwd, tool_name: 'Edit', tool_input: { file_path: file } });
+  const run = `${main}/.claude/worktrees/run`;
+  // an agent's call carries the lead's cwd (the run's worktree) and names its own file
+  assert.equal(beatName(ev(run, `${run}/.claude/worktrees/cat/a.mts`), main, run), 'cat');
+  assert.equal(beatName(ev(run, `${run}/a.mts`), main, run), 'run');   // the run's lead
+  assert.equal(beatName({ hook_event_name: 'PreToolUse', cwd: run, tool_name: 'Bash', tool_input: { command: `cd ${run}/.claude/worktrees/cat && ls` } }, main, run), 'cat');
+  assert.equal(beatName(ev(main, `${main}/.claude/worktrees/api/a.mts`), main), 'api');   // a run in the top checkout, as before
+  assert.equal(beatName(ev(main, `${main}/src/a.mts`), main), 'lead');
 });
