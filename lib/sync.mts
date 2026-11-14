@@ -4,7 +4,7 @@
 //   - a pack file the user edited is kept; the new version goes beside it as <file>.pack-new
 //   - CLAUDE.md: only the marked claude-packs section is written; settings.json: only our hooks
 //   - CLAUDE.md, settings.json and layout.json are backed up before every run
-import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeCompiledChecks } from '../packs/base/hooks/lib/checks-compiled.mts';
@@ -22,6 +22,7 @@ import { hashFile, isModified, readLock, writeLock } from './manifest.mts';
 import { PACKS_DIR, normalisePacks, planFiles } from './packs.mts';
 import { installBinary } from './proxy-install.mts';
 import { applyPaths, renderRule } from './rules.mts';
+import { isSkillFile, renderSkill } from './skill-render.mts';
 import { readSettings, syncSettings } from './settings.mts';
 import { reportSwitches, switches } from './switches.mts';
 import { TS_CHECK, enforceTypeScript } from './ts-project.mts';
@@ -42,6 +43,7 @@ function placeBeside(src: string, dest: string, why: string, log: Logger): void 
 function isPackVersion(src: string, dest: string, rel: string, layout: Layout): boolean {
   if (!existsSync(dest)) return false;
   if (hashFile(src) === hashFile(dest)) return true;
+  if (isSkillFile(rel)) { const skill = renderSkill(readText(src) ?? '', layout); return skill !== null && skill === readText(dest); }
   if (!/(^|[\\/])rules[\\/][^\\/]+\.md$/.test(rel)) return false;
   const rendered = renderRule(readText(src) ?? '', layout);
   return rendered !== null && rendered === readText(dest);
@@ -71,7 +73,9 @@ function copyPackFiles(projectDir: string, packNames: readonly string[], layout:
         continue;
       }
       mkdirSync(dirname(dest), { recursive: true });
-      copyFileSync(src, dest);
+      const skill = isSkillFile(rel) ? renderSkill(readText(src) ?? '', layout) : null;   // "skillInvocation": "user"
+      if (skill === null) copyFileSync(src, dest);
+      else writeFileSync(dest, skill);
       rmSync(dest + NEW_SUFFIX, { force: true });
       files[rel] = hashFile(dest);
     }

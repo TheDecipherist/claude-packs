@@ -160,6 +160,7 @@ export interface Layout {
   looks?: readonly Look[];
   paramIds?: ParamIdSettings;
   guards?: LayoutGuards;
+  skillInvocation?: 'user';   // every skill installed user-invocable only (lib/skill-render.mts)
   [key: string]: unknown;
 }
 

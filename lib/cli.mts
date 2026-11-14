@@ -31,6 +31,7 @@ import { statusCommand } from './status-cli.mts';
 import { detectedConfig, suggest, suggestionOf } from './suggest.mts';
 import { sync } from './sync.mts';
 import { workorderCheck } from './workorder-check.mts';
+import { compileTask } from './workorder-compile.mts';
 import { toolchainCommand } from './toolchain.mts';
 import { assertTemplate, newWorkorder } from './workorder.mts';
 
@@ -140,6 +141,7 @@ async function newCommand(run: Run): Promise<number> {
 async function workorder(run: Run): Promise<number> {
   const [sub, name] = run.rest;
   if (sub === 'check') return workorderCheck(run.dir, name);
+  if (sub === 'compile') { process.stdout.write(compileTask(run.dir, name ?? '', run.rest[2] ?? '').prompt); return 0; }
   const template = run.value['--template'];
   newWorkorder(run.dir, sub, template ? { template } : {});
   console.log(`  What is left to fill in, as \`workorder check ${sub ?? ''}\` will judge it before a run starts:`);
