@@ -42,3 +42,12 @@ test('a project absent from the machine is a warning and exit 0', () => {
 test('a wrong command line exits 2', () => {
   assert.equal(run([]).status, 2);
 });
+
+test('a heading-slug link in a document with no explicit anchor is not judged, and a URL is not a project', () => {
+  const dir = fresh('anchors-');
+  const plain = run([doc(dir, 'plain.md', 'see [x](#some-heading)\n## Some heading\n')]);
+  assert.equal(plain.status, 0, plain.stderr);
+  const url = run([doc(dir, 'url.md', 'see https://example.com/y.md#f\n')]);
+  assert.equal(url.status, 0, url.stderr);
+  assert.doesNotMatch(url.stderr, /not judged/);
+});
