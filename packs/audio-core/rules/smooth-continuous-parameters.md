@@ -18,6 +18,7 @@ Always do:
 - Slew a synced or base delay time per sample (about 60 ms), the recirculating path first, so a tempo or time change glides; snap it after a reset, so a loaded patch does not sweep.
 - Remove a meter reconfiguration click by subtraction: the settled value minus the value that has arrived, applied mid-leg, never a restart.
 - Keep a census: every continuous control with the smoother it runs through, generated from the parameter table, with a control that has none red.
+- Build the reconfiguration-artefact meter on a periodic input, so the settled and arrived runs align for the subtraction; bound the artefact's amplitude and not its duration; test mid-leg of a crossfade and not only the printed detents; and prove cells that always run state-identical.
 
 Never do:
 - Smooth by hand anywhere but the module: no `juce::SmoothedValue`, no `x += k * (target - x)`, no `exp (-1 / (seconds * rate))` coefficient. A line that is not parameter smoothing (a compressor's ballistics, a one-pole audio filter) ends with `// smooth-ok: <reason>`; the reason is required.

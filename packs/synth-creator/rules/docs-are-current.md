@@ -22,3 +22,5 @@ Never do:
 ## Check
 
 `tools/docs-current.mts` runs the generator twice and compares both runs with the committed documents; it exits 1 on any difference.
+
+Believe the gate only after four plants turn it red, restoring the source each time: add a parameter, add the note but not the document, move a default, reorder two declarations.

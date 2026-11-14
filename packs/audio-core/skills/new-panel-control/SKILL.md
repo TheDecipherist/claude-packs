@@ -15,7 +15,7 @@ Always do:
    A centre-off three-position switch is its own kind of control (two lit ends, a dark middle). An editable readout is a control and gets the house behaviours. Address each screen by an id.
 3. **Parameter.** Append the parameter at the end of the parameter table, with a new id that never changes (`parameter-ids-never-change`). Never insert, never reuse an id.
 4. **Wire all three links.** Drawn (on the page), bound (the control moves the parameter, and the parameter moves the control), carried (the sound changes). Check each one with `prove-control`.
-5. **House behaviours.** Double click to default, fine drag, wheel, value readout, no keyboard focus, one undo step (`house-control-behaviours`).
+5. **House behaviours.** Double click to default, fine drag, wheel, value readout, no keyboard focus, one undo step (`house-control-behaviours`). An ordered lever reads bottom-up: order its members as an existing working lever does, and check its legends top to bottom against index 0.
 6. **Look.** Match the page's reference: the control's parts, value placement and spacing (`page-matches-reference-look`).
 7. **Gates.** Run the behaviour gate, the look gate and the silent-control gate. Each must pass and must still fail on its planted fault.
 

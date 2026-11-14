@@ -19,6 +19,7 @@ Always do:
 - Let sync override the knob and keep its free value, so turning sync off returns it.
 - Move only synced times when the tempo changes, and align rate destinations to the beat.
 - Gate it with a sync probe at 120, 90 and 140 BPM that checks the mirror and the beat alignment.
+- Resolve the tempo first in each block and pass it into every time-based node as an argument, never fetch it inside, so a tempo move reaches a synced delay in the same block.
 
 Never do:
 - Put one global sync switch in place of a sync per control.

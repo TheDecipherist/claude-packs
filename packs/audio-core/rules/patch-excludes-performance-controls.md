@@ -13,6 +13,7 @@ Always do:
 - Treat selectors and edit-focus controls (which slot, which page, which edit target) as session state: they are not in a patch.
 - Decide solo and bypass by a written choice: they clear on load or they stick, and the choice is written down.
 - Store routes as patch data: a modulation or routing assignment is part of the sound.
+- Treat a stored byte that mirrors a live control (a CC7 mixer byte) as performance state, never as sound: find it by the neutral check (a patch that loads near-silent), keep it out of the load path, and let only program data reset on load.
 
 Never do:
 - Store MAIN volume, octave, the mod wheel or the pitch wheel in a patch. Those belong to the player and the session, not the sound, so loading a patch never changes them.

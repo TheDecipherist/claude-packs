@@ -12,6 +12,7 @@ Always do:
 - Handle any `buffer.getNumSamples()`, including 0, and blocks of varying size on every call.
 - Program defensively for a block *larger* than `maximumExpectedSamplesPerBlock`: process it in chunks no bigger than what you prepared. JUCE's own docs warn that buggy hosts can exceed it.
 - Test at 44.1, 48, 96 and 192 kHz.
+- Rescale a tap length published for a reference rate (29761 Hz) to the running rate, and treat allocating for the maximum and scaling the runtime tap as two separate scalers.
 
 Never do:
 - Write `44100`, `48000`, `96000` (or `44100.0f` etc.) in DSP code as a rate.

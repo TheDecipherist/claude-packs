@@ -14,6 +14,7 @@ Always do:
 - Append: a new parameter, a new choice at the end of a list, a new program at the next number. They pass, and the next release locks them.
 - Say where the patch format and the factory bank are read in `.claude/release-lock.config.json` when the defaults do not fit: `patchFormat` (regexes with one group: a version constant, a field list) and `programs` (`file`, and the `number` and `name` columns; default `data/factory.csv`).
 - Give a control whose meaning must change a NEW parameter, and migrate old patches on load (`parameter-ids-never-change`).
+- Give an appended parameter a default that leaves every released patch rendering bit-identically, and prove it by rendering the factory bank before and after.
 
 Never do:
 - Change a released parameter's range, step count, skew or kind, insert, move or remove a choice, change the patch format, or renumber or remove a program.

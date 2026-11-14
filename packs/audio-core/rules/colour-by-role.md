@@ -15,6 +15,7 @@ Always do:
 - Light an LED red for engaged-and-you-should-know (bypass, ducker, clip), green for a detector open or a lock, white for a header's ON. A toggle brightens its cap and has no LED.
 - Draw a slider as a dark groove with a silver capsule cap, a meter as a green, yellow and red ladder, and a display as a dark grid with a 2-unit orange curve and hollow orange nodes, no fill.
 - Draw a caption that is state from the state, live (`MANUAL TEMPO` / `HOST TEMPO`).
+- Freeze a colour census (each role and its count) as a gate, and give a new box its accents by copying the pattern, not by choosing them.
 
 Never do:
 - Colour a knob red, or make a dangerous action (panic) a red button: it is dark red text on a dark box.

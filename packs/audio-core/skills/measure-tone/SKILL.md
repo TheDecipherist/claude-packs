@@ -16,7 +16,9 @@ Always do:
    - nonlinear stage: `--snr-min 45`
    - DC: `--dc-max -80`
 3. When a stage has a drive control, render one file per drive step, not one at the default. Measure asymmetry as a bias inside the gain stage (the DC the offset puts on its output), not by a separate offset after it.
-4. A deliberate crusher or vintage mode is exempt from the aliasing thresholds. Compare it against its golden file instead.
+4. On a soft clipper or drive, report the change of each metric (even-harmonic share, centroid, level) from one drive step to the next, not THD alone.
+5. Also report the harmonic profile in octave bands, since drift moves a pitch by a few cents and a per-bin read misses it.
+6. A deliberate crusher or vintage mode is exempt from the aliasing thresholds. Compare it against its golden file instead.
 
 Never do:
 - Change code in this skill.

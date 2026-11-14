@@ -18,11 +18,13 @@ Always do:
 - Run `shellcheck` where the project has it.
 - Verify a write by its artefact and the exit code, never by an `echo` after `;`: `cmd; echo done` says done whatever `cmd` did. Say which you checked.
 - After a rename by `sed`, grep the quoted literals too: a blanket rename rewrites string literals (`"pp"` became `"Samples::pp"`).
+- Test a hook's scan with input over 64 KB.
 
 Never do:
 - Use `eval`, or pipe a download into a shell.
 - Parse `ls`: use a glob.
 - Write to a fixed path in `/tmp`.
+- End a pipeline under `pipefail` with `grep -q`: past the pipe size it reports no match. Use `grep >/dev/null`.
 </constraints>
 
 ## Check

@@ -13,6 +13,7 @@ Always do:
 - Give every synth a modulation overview page in settings that lists every route: source, destination, depth and any second source.
 - Keep it in step with the knobs: a route made by drag and drop shows there, and one removed there is removed on the knob (`control-reaches-every-surface`).
 - Keep drag and drop from a source onto a knob as well (`modulation-by-drag-and-drop`).
+- Read an empty second source as unity, not zero; patching the same source and destination twice edits the route instead of stacking one; test that a fresh route is audible.
 
 Never do:
 - Ship the page without drag and drop, or drag and drop without the page.

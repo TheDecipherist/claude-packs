@@ -14,6 +14,7 @@ Always do:
 - Use pages only on machines designed with them.
 - Render the page-select and hit regions from the first frame: a page select carries an off-default mark, and every hit region is live at once.
 - Walk the overflow check over every row container, and render art at 75 and 200 per cent.
+- When a panel scrolls sideways, check its design width against the minimum display first: a design wider than the display cannot show whole at any height.
 
 Never do:
 - Copy the artwork without that setting.

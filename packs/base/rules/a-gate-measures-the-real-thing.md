@@ -17,6 +17,9 @@ Always do:
 - Make a planted fault's target id exist, and show the fault changes the output; diff string names against the id list.
 - Mark a gate that tests the harness around a unit, not the unit. Every behaviour a unit owns keeps its own probe of the unit.
 - Make a verdict made of several parts name the part that failed.
+- List in each gate's own output what it cannot see, so a green line is not read as more than it is.
+- When an audit compares a file's defaults, print the running program's live value beside each, and read the live one.
+- Delete a probe's output file before it writes it, and fail when the file is missing or older than the run.
 
 Never do:
 - Pass on an empty set, a zero count or a file that did not load.

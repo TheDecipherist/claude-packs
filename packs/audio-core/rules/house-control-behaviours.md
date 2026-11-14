@@ -37,6 +37,10 @@ Always do:
   control is built from its template and its binding reaches a live parameter, which is what catches a control wired to nothing. The gate is red on a planted control that does nothing and on a planted dropdown
   that steps instead of opening.
 - When a project's reference synth does a behaviour differently, copy it and write down what was copied.
+- Audit each group of bools against the order the engine reads them, so two cannot be lit at once, and never draw a power mark on a choice whose first member is Off.
+- Show on a shortcut or favourite pad whether it holds something (filled or empty), resolve its target once into a cache, and refresh the cache on the pad's own change events.
+- Let a macro or morph handle write the controls and store nothing of its own: its position is read back from them, and it never writes a control that is a property of the instrument (key track).
+- Give the three feedback cases their look: a preset saved flashes its name once, a reset animates the needle about 120 ms, a section switched off dims to 40% with its header bar at full strength.
 
 Never do:
 - Draw a control by hand on one page instead of using the shared piece.

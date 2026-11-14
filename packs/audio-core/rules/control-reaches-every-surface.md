@@ -21,6 +21,9 @@ Always do:
 - Open every drawn control's enabling switches, and prove each of its parameters audible with them open.
 - Set each parameter's default equal to its engine field's initialiser, so INIT and a fresh engine agree.
 - Record the evidence for each surface in the step or bug log (command plus result). Use the `prove-control` skill.
+- Draw a control that reaches nothing at another control's setting dim and leave it live, and probe that the dim control still reaches audio; a full-strength control reaching no audio is a dead cap.
+- Count an engine step as unfinished until its own controls are drawn; route a new source through the voice filter as its siblings are; and bind a shared knob place to one parameter at a time.
+- Write the save direction from the same table as the load and never a second one, and leave a stored byte alone when its (narrower) parameter still decodes to the stored value.
 
 Never do:
 - Call a control done because the DSP function passes its unit test. "The function works" and "the knob reaches the function" are different claims.
