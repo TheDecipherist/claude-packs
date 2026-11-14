@@ -1,7 +1,5 @@
 ---
-# concepts: cpp, js, notes, tooling
-paths:
-  - "placeholder"
+# loads: at launch. It applies before any file is opened, so no path could trigger it.
 ---
 
 # The machine's own names come first: the manual, then the strings, then the code
@@ -12,7 +10,6 @@ Always do:
 - Treat a manual's name as the test of an unpacking: when it reads, the unwrapping is right.
 - Take the stride between names as a record size and their order as the parameter order, then prove both.
 - Complete a manual's cut lists from the firmware, and map the menus (`menu-map`): what the panel reaches and no dump holds is a finding.
-- Copy a name or mark the ROM stores by hand (the asterisk in a preset name); never derive it from the record.
 
 Never do:
 - Open a disassembler on an image whose names have not been searched for.

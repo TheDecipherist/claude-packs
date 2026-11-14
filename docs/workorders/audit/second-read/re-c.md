@@ -2,7 +2,7 @@
 
 ## 1. Read
 
-`/Users/tim.clausen/projects/eproms/reverse-engineer.md`, the whole slice, in order, no sampling:
+`~/projects/eproms/reverse-engineer.md`, the whole slice, in order, no sampling:
 
 - 4205-4600 (Sony DRE-2000, Yamaha AN1x, Yamaha TX81Z, Nord Lead 1/2/2X, start of Korg M1)
 - 4600-4850 (rest of Korg M1, Yamaha PSR-730)

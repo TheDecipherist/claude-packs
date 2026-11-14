@@ -21,7 +21,7 @@ Always do:
 - Partition agents by file. Pull before committing; a change in the tree that the agent did not make is another agent's work: leave it.
 - Take baseline pass counts before agents touch shared code, so a later red test is told from an old one.
 - Ask the agent for its time estimate first. When one goes silent, send it its next step. Keep the queue balanced, so no agent waits behind another.
-- Pull before every commit and every push, retry on rejection and never force, run the other agents' tests in the agent's own build, and partition by repo where you can.
+- Pull before every commit and every push, retry on rejection and never force, run the other agents' tests in the agent's own build, and partition by repo where the work allows.
 - For a batch of research agents, give one item per run, a search budget (about five searches), and a give-up-and-record row per item; keep partial work and create no empty folders.
 - Tell every agent to stop and report a bug found on the way (a red test it did not plant, a wrong number, a crash): what, how to reproduce, the evidence, and no workaround, retry or carrying on. The controller logs and fixes it, then tells the agent to go on. Put that in every brief's "When to stop" line.
 - To pause an agent, stop it, commit and push its worktree (tracked and new files) and note where it stopped; resume by a message saying what changed on the trunk.

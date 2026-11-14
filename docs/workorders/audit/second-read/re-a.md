@@ -2,7 +2,7 @@
 
 ## 1. Read
 
-`/Users/tim.clausen/projects/eproms/reverse-engineer.md` lines 1-250, 251-490, 491-730, 731-967: every line from the top to the line before `## 12.` (preamble, contents, sections 1, 2, 3, 4 with 4a-4d, 5.0-5.10, 6, 7, 8, 8a, 9, 10, 11).
+`~/projects/eproms/reverse-engineer.md` lines 1-250, 251-490, 491-730, 731-967: every line from the top to the line before `## 12.` (preamble, contents, sections 1, 2, 3, 4 with 4a-4d, 5.0-5.10, 6, 7, 8, 8a, 9, 10, 11).
 
 Kit read: `packs/reverse-engineering/` (all 11+ rules and the skills gather-sources with its two reference files, source-checklist, triage-the-dump, identify-the-cpu, find-the-base, find-a-table, attribute-the-record, trace-the-builders and c-idioms, profile-the-bank, bank-census, names-first and sweeps, read-the-dsp-program, absolute-scale-from-firmware, tripwire-the-law, re-deliverables, place-a-bit-field, find-the-init-patch, byte-reach, diff-the-revisions, manual-is-fully-covered, find-a-sequence, re-toolchain, find-the-timer, find-the-reset, map-the-io, read-a-circuit-diagram by grep), `packs/midi/` (vendor-sysex, midi-from-firmware, sysex-is-a-record, nrpn-and-packed-values), `packs/base/skills/pdf-to-md/reading-a-pdf.md`, `packs/sound-design/skills/bounce-a-plugin`, `prompts/workorder/templates/rebuild.md` (grep and sections).
 
