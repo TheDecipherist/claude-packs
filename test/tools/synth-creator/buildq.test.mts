@@ -4,6 +4,7 @@
 // granted to one build), so no test waits on the machine's real
 // jobs or load. First test for the command (W5).
 import { spawn } from 'node:child_process';
+import { mkdirSync } from 'node:fs';
 import { assert, fresh, join, readFileSync, spawnSync, test } from '../../kit-cli.mts';
 import { plantGovernorJob } from '../../governor-plant.mts';
 import { fixture } from '../../fixtures/installs.mts';
@@ -11,7 +12,7 @@ import { fixture } from '../../fixtures/installs.mts';
 const TOOL = join(fixture('synth-creator'), '.claude/tools/buildq.mjs');
 const envOf = (governor: string): NodeJS.ProcessEnv =>
   ({ ...process.env, CLAUDE_PACKS_GOVERNOR_DIR: governor, CLAUDE_PACKS_GOVERNOR_CORES: '4', CLAUDE_PACKS_GOVERNOR_LOAD: '0', CLAUDE_PACKS_PRIORITY: '1',
-    BUILDQ_PRIORITY: 'normal' });
+    BUILDQ_PRIORITY: 'normal', CLAUDE_PROJECT_DIR: governor });   // the build's hooks.log lines go to the test's own folder
 /** The tool run on its own governor folder, the way a project's build-guard runs it. */
 const buildq = (governor: string, args: readonly string[]) => spawnSync('node', [TOOL, ...args], { encoding: 'utf8', env: envOf(governor) });
 
@@ -27,6 +28,17 @@ test('a job runs on a grant, keeps its own exit status, and gives the grant back
   assert.equal(ok.status, 0, ok.stderr);
   assert.equal(buildq(governor, ['sh', '-c', 'exit 5']).status, 5, 'the status is the command\'s own');
   assert.equal(buildq(governor, ['--status']).stdout.trim(), '0 of 2 slots taken', 'both slots are free again');
+});
+
+// supernova2_monitor WB-11: doctor judged hooks by the time the project's build took from them; the build's window is in hooks.log
+test('a build writes its start and its end to the project\'s hooks.log, keyed by its pid, failed or not', () => {
+  const governor = fresh('buildq-window-');
+  mkdirSync(join(governor, '.claude'));   // a project of the kit's has its .claude folder; the log goes in it
+  assert.equal(buildq(governor, ['sh', '-c', 'exit 3']).status, 3);
+  const rows = readFileSync(join(governor, '.claude', 'hooks.log'), 'utf8').trim().split('\n').map((l) => l.split('\t'));
+  assert.deepEqual(rows.map((r) => [r[1], r[2]]), [['Build', 'build-start'], ['Build', 'build-end']]);
+  assert.equal(rows[0]?.[5], rows[1]?.[5], 'the end names the start\'s pid');
+  assert.match(rows[0]?.[5] ?? '', /^\d+$/);
 });
 
 test('a job is started with the cores it was granted: CLAUDE_PACKS_TEST_CORES and the CMake level', () => {

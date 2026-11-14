@@ -14,7 +14,7 @@ import { capJobs, coreBudget, gentle, projectLayout } from '../hooks/lib/core-bu
 import type { Env } from '../hooks/lib/core-budget.mts';
 import { budgetOf, free, grantWhenFree, inFlight, machineHost } from '../hooks/lib/governor.mts';
 import type { GovernorHost } from '../hooks/lib/governor.mts';
-import { isMain } from '../hooks/lib/hook-log.mts';
+import { BUILD_END, BUILD_START, isMain, logHook } from '../hooks/lib/hook-log.mts';
 
 /** What `--status` prints: the governor's slots in use of its budget (every governed job, builds and the rest). */
 export function statusText(host: GovernorHost, project: string): string {
@@ -33,6 +33,9 @@ export function run(asked: readonly string[], { env, cwd, pid, platform }: Where
   // W8.8 0b: the build runs at its agent's priority (CLAUDE_PACKS_PRIORITY, set from the brief), the governor's default without one
   const priority = env['CLAUDE_PACKS_PRIORITY'] ? Number(env['CLAUDE_PACKS_PRIORITY']) : undefined;
   const grant = grantWhenFree(host, { kind: 'build', upTo: coreBudget(env, projectLayout(project)), priority, pid, project, command: asked.join(' ') });
+  const started = Date.now();
+  // the build's window in the project's hooks.log, so doctor never judges a hook by the time a build took from it
+  logHook(project, { event: 'Build', hook: BUILD_START, ms: 0, code: 0, tool: String(pid) });
   try {
     const command = gentle(capJobs(asked, grant.slots), { platform, env });
     const [program = '', ...rest] = command;
@@ -41,6 +44,7 @@ export function run(asked: readonly string[], { env, cwd, pid, platform }: Where
     return r.status ?? 1;
   } finally {
     free(host, grant.id);
+    logHook(project, { event: 'Build', hook: BUILD_END, ms: Date.now() - started, code: 0, tool: String(pid) });
   }
 }
 

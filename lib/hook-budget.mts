@@ -5,7 +5,7 @@
 // that event is blamed for time it spent waiting. Fewer than MIN_CALLS calls are printed, not judged (one call is not a p95).
 import { statSync } from 'node:fs';
 import { join } from 'node:path';
-import { DAEMON_START, readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
+import { BUILD_END, BUILD_START, DAEMON_START, readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
@@ -62,6 +62,26 @@ export function warmCalls(entries: readonly HookLogEntry[]): HookLogEntry[] {
     warm.push(e);
   }
   return warm;
+}
+
+/** A build that never logged its end (killed) holds its window this long at most. */
+export const BUILD_WINDOW_MS = 60 * 60_000;
+
+/** The entries made while no build of buildq ran (its build-start and build-end lines, keyed by the build's pid), and how many
+ *  were left out: a build that holds the cores slows every hook beside it, which says nothing of the hook's own work. */
+export function outsideBuilds(entries: readonly HookLogEntry[]): { kept: HookLogEntry[]; during: number } {
+  const open = new Map<string, number>();
+  const kept: HookLogEntry[] = [];
+  let during = 0;
+  for (const e of entries) {
+    const at = Date.parse(e.time);
+    if (e.hook === BUILD_START) { open.set(e.tool, at); continue; }
+    if (e.hook === BUILD_END) { open.delete(e.tool); continue; }
+    for (const [pid, from] of open) if (at - from > BUILD_WINDOW_MS) open.delete(pid);
+    if (open.size > 0) { during += 1; continue; }
+    kept.push(e);
+  }
+  return { kept, during };
 }
 
 const WRITES = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
@@ -158,7 +178,9 @@ export function budgetProblems(projectDir: string, log: Logger = console.log): s
   // the calls since the current install only: an update changes the hooks, and the calls before it were another install's (KWB-196)
   const since = installedAt(projectDir);
   const current = readHookLog(projectDir).filter((e) => Date.parse(e.time) >= since);
-  const times = classTimes(warmCalls(current).filter((e) => named === null || NOT_HOOKS.has(e.hook) || named.has(e.hook)));
+  const { kept, during } = outsideBuilds(current);
+  if (during > 0) log(`  note: ${during} hook line(s) made while a build ran are not judged (buildq's build-start and build-end)`);
+  const times = classTimes(warmCalls(kept).filter((e) => named === null || NOT_HOOKS.has(e.hook) || named.has(e.hook)));
   if (times.size === 0) return [];
   log(`  event budgets (wall p50/p95 ms, last ${LAST} calls): ${EVENT_CLASSES.filter((c) => times.has(c)).map((c) => {
     const t = times.get(c);

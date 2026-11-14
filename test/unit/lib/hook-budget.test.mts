@@ -5,8 +5,8 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { toJson } from '../../../packs/base/hooks/lib/json.mts';
-import { DAEMON_START, logHook, type HookLogCall } from '../../../packs/base/hooks/lib/hook-log.mts';
-import { COLD_EVENT_CALLS, COLD_HOOK_CALLS, EVENT_BUDGET, POOL_QUEUE_MS, budgetProblems, classOf, percentile } from '../../../lib/hook-budget.mts';
+import { BUILD_END, BUILD_START, DAEMON_START, logHook, type HookLogCall } from '../../../packs/base/hooks/lib/hook-log.mts';
+import { BUILD_WINDOW_MS, COLD_EVENT_CALLS, COLD_HOOK_CALLS, EVENT_BUDGET, POOL_QUEUE_MS, budgetProblems, classOf, percentile } from '../../../lib/hook-budget.mts';
 
 const project = (): string => { const dir = scratchDir('hook-budget-'); ensureDir(join(dir, '.claude')); return dir; };
 const lines = (dir: string, n: number, call: HookLogCall): void => { for (let i = 0; i < n; i += 1) logHook(dir, call); };
@@ -107,6 +107,29 @@ test('every worker\'s first event after a start is cold, not only the first even
   lines(dir, COLD_HOOK_CALLS, { ...BASH, hook: 'event', ms: 84, code: 0, queue: 80, source: 'daemon' });
   lines(dir, 20, { ...BASH, hook: 'event', ms: 7, code: 0, queue: 3, source: 'daemon' });
   assert.deepEqual(said(dir).problems, [], 'the cold waits are not judged, and 20 warm ones are within the limit');
+});
+
+// supernova2_monitor WB-11: hooks slowed by the project's own build (buildq held most of the cores) failed doctor --strict
+test('a hook is not judged by the time a build took from it, and is judged again once the build ends', () => {
+  const dir = project();
+  logHook(dir, { event: 'Build', hook: BUILD_START, ms: 0, code: 0, tool: '4242' });
+  lines(dir, 10, { ...BASH, hook: 'slow-fake', ms: 300, code: 0 });
+  logHook(dir, { event: 'Build', hook: BUILD_END, ms: 90_000, code: 0, tool: '4242' });
+  const during = said(dir);
+  assert.deepEqual(during.problems, []);
+  assert.match(during.out.join('\n'), /10 hook line\(s\) made while a build ran are not judged/);
+  lines(dir, 10, { ...BASH, hook: 'slow-fake', ms: 300, code: 0 });
+  assert.match(said(dir).problems.join('\n'), /^slow-fake at Pre Bash/, 'the same calls with no build beside them are judged');
+});
+
+test('a build that never logged its end shields no call after an hour', () => {
+  const dir = project();
+  const at = (msAgo: number): string => new Date(Date.now() - msAgo).toISOString();
+  const row = (time: string, event: string, hook: string, ms: number, tool: string): string => `${time}\t${event}\t${hook}\t${ms}\t0\t${tool}\n`;
+  const old = row(at(2 * BUILD_WINDOW_MS), 'Build', BUILD_START, 0, '99');
+  const slow = Array.from({ length: 10 }, () => row(at(1000), 'PreToolUse', 'slow-fake', 300, 'Bash')).join('');
+  writeFileSync(join(dir, '.claude', 'hooks.log'), old + slow);
+  assert.match(said(dir).problems.join('\n'), /^slow-fake at Pre Bash/);
 });
 
 test('the table: the classes, the percentile, the tools no budget names', () => {
