@@ -31,8 +31,10 @@ function byNumber(line, words, c, add) {
         const [whole = '', word = '', first = '', range, last = ''] = m;
         if (isSourceRole(line, m))
             continue; // KF-28
-        if (c.count !== null && !range && Number(first) > c.count)
-            continue; // past the count: a value, not an instance (KWB-22)
+        // past the count: a value, not an instance (KWB-22); a range that starts past it is a set of values ("LFO 16-19", CC numbers in
+        // supernova2_monitor's ledger, WB-18)
+        if (c.count !== null && Number(first) > c.count)
+            continue;
         if (word === word.toUpperCase() && labelBefore(line, m.index))
             continue; // AIM EFFECTS 100: a control's value
         // "rows 48" in prose: the plural with one number is a count (KWB-next); a caps label ("SLOTS 2") still names one (KWB-22)
