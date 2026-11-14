@@ -527,6 +527,7 @@ Each is `npx @thedecipherist/claude-packs <command>`, or `npx --no-install @thed
 | `new <name>` | A new project in `<dir>`/`<name>`: the house files (CLAUDE.md, build.md, bugs.md, workflow-bugs.md, docs/versions.md), a git repo on a work/ branch, the kit installed |
 | `workorder <name>` | A work order in docs/workorders/`<name>`: the steps, the prompt that runs them with nobody there, and a runner that starts session after session |
 | `workorder check <name>` | Before a run: refuses a placeholder left, a step whose Done when has no number or test path, a skill named that is not installed (with the pack to add), and a red doctor --strict |
+| `workorder compile <name> <step>[.<item>]` | One task as the prompt a fresh session runs: the task's text, then one `<constraints>` block with the order's own Always/Never lines and every Always/Never line of the skills on the step's Skills: line; logged to .claude/logs/compiled.jsonl. skillInvocation: user in the layout or install block installs every skill user-invocable only |
 | `status` | Every unattended run alive on this machine: each project with a progress bar, each agent with its step and its bar, and how much is left; --dir `<project>` [--order `<name>`] for one project, running or not; --watch `<minutes>` to print it again every so many minutes |
 | `init [pack...]` | Install packs or presets (e.g. init node-api; list shows them); base is always included and create the layout folders |
 | `add <pack...>` | Add packs to an existing install |

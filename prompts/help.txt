@@ -11,6 +11,10 @@ usage: npx --no-install @thedecipherist/claude-packs <command> [options]
                                        plugin (a new synth or effect), rebuild (a hardware instrument as a plugin)
   workorder check <name>  before a run: refuses a placeholder left, a step whose Done when has no number or test path,
                      a skill named that is not installed (with the pack to add), and a red doctor --strict
+  workorder compile <name> <step>[.<item>]  one task as the prompt a fresh session runs: the task's text, then one
+                     <constraints> block with the order's own Always/Never lines and every Always/Never line of the
+                     skills on the step's Skills: line; logged to .claude/logs/compiled.jsonl. skillInvocation: user in the
+                     layout or install block installs every skill user-invocable only
   status             every unattended run alive on this machine: each project with a progress bar, each agent with its
                      step and its bar, and how much is left; --dir <project> [--order <name>] for one project, running or
                      not; --watch <minutes> to print it again every so many minutes
