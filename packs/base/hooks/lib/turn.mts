@@ -63,13 +63,13 @@ let decoded = 0;
 /** Bytes of transcript lines this process made strings of, so far (a counter for tests). */
 export const bytesDecoded = (): number => decoded;
 
-function turnEntries(path: string): TranscriptEntry[] {
+function turnEntries(path: string, endsBefore: (line: Buffer) => boolean): TranscriptEntry[] {
   let fd: number;
   try { fd = openSync(path, 'r'); } catch { return []; }
   const lines: string[] = [];
   try {
     eachLineBack(fd, fstatSync(fd).size, (line) => {
-      if (promptOfBytes(line) !== null) return true;
+      if (promptOfBytes(line) !== null || endsBefore(line)) return true;
       if (KEPT.some((k) => line.includes(k))) { decoded += line.length; lines.push(line.toString('utf8')); }
       return false;
     });
@@ -79,8 +79,9 @@ function turnEntries(path: string): TranscriptEntry[] {
   return parseEntries(lines.reverse());
 }
 
-export function lastTurn(path: string): Turn {
-  const entries = turnEntries(path);
+/** The last turn: what follows the last real prompt, or the last line `endsBefore` names (a caller's own boundary; none by default). */
+export function lastTurn(path: string, endsBefore: (line: Buffer) => boolean = () => false): Turn {
+  const entries = turnEntries(path, endsBefore);
   const refused = new Set<string>();
   const uses: ToolUse[] = [];
   const text: string[] = [];

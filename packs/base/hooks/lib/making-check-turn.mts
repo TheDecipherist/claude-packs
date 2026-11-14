@@ -15,6 +15,9 @@ import { readShape } from './shape.mts';
 import { emittedFrom } from './source-exts.mts';
 import type { LoadedShape } from './shape.mts';
 import { lastTurn, writesOfTurn } from './turn.mts';
+
+/** A Stop's feedback that this check did not send: the stretch before it was judged and passed. */
+export const judgedBefore = (line: Buffer): boolean => line.includes('"role":"user","content":"Stop hook feedback:') && !line.includes('making-check');
 import type { TurnWrite } from './turn.mts';
 import type { Env, HookContext, HookEvent, Layout, ShapeManifest } from './types.d.mts';
 
@@ -181,7 +184,9 @@ export function check(event: HookEvent, ctx: Where): string[] {
   const cwd = event.cwd ?? ctx.cwd;
   const stopped = event['agent_transcript_path'];
   const path = event.hook_event_name === 'SubagentStop' && typeof stopped === 'string' ? stopped : event.transcript_path;
-  const turn = lastTurn(path ?? '');
+  // a Stop sent back by another hook ended a stretch this check already judged and passed: only what follows is new (KWB-next: in an
+  // unattended session the turn is the whole session, and each Stop judged every write since its start, 0.75 s to 2.4 s in 25 minutes)
+  const turn = lastTurn(path ?? '', judgedBefore);
   const text = `${turn.text}\n${event.last_assistant_message ?? ''}`;
   const writes = writesOfTurn(turn, cwd, ctx.env).filter((w) => insideProject(ctx.projectDir, w.path, ctx.cwd));
   const rel = (p: string): string => relInCheckout(ctx.projectDir, p, ctx.cwd);

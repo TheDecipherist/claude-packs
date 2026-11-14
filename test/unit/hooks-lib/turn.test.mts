@@ -26,6 +26,13 @@ test('a hook\'s feedback is not a prompt, and a torn last line is dropped', () =
   assert.equal(lastTurn(f).text, 'a\nb');
 });
 
+test('a caller\'s boundary ends the turn there; without one the turn runs back to the prompt (KWB-next)', () => {
+  const f = transcript([user('run'), asst({ type: 'text', text: 'a' }, tool('1', 'Write', { file_path: 'a.ts', content: 'x' })),
+    user('Stop hook feedback: BLOCKED by run-keeps-going'), asst({ type: 'text', text: 'b' }, tool('2', 'Write', { file_path: 'b.ts', content: 'y' }))]);
+  assert.deepEqual(lastTurn(f).uses.map((u) => u.id), ['1', '2']);
+  assert.deepEqual(lastTurn(f, (line) => line.includes('Stop hook feedback')).uses.map((u) => u.id), ['2']);
+});
+
 test('a 30 MB turn of tool results is read without decoding them: its calls are found and under 1 MB is made strings (rss)', () => {
   // an unattended run's turn is the whole transcript; each Stop's two turn readers decoded and parsed all of it, 213 MB of a worker's RSS on 25 MB
   const f = join(scratchDir('turn-big-'), 't.jsonl');
