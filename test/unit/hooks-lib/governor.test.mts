@@ -7,7 +7,8 @@ import { test } from 'node:test';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { AGING_EVERY_MS, ask, budgetOf, free, inFlight, pauseOrder, queueUp, resumeOrder, setPaused, take } from '../../../packs/base/hooks/lib/governor.mts';
 import type { GovernorHost, Job, TakeResult } from '../../../packs/base/hooks/lib/governor.mts';
-import { settingsFor } from '../../../packs/base/hooks/lib/governor-settings.mts';
+import { MATH_THREADS, settingsFor } from '../../../packs/base/hooks/lib/governor-settings.mts';
+import { LOAD_LAG_MS } from '../../../packs/base/hooks/lib/governor-policy.mts';
 import { changeState } from '../../../packs/base/hooks/lib/governor-store.mts';
 
 const START_MS = 1_000_000;
@@ -113,6 +114,21 @@ test('a job granted 3 slots is started with CLAUDE_PACKS_TEST_CORES=3 and -j3', 
   assert.equal(r.grant.settings.env['CMAKE_BUILD_PARALLEL_LEVEL'], '3');
   assert.equal(r.grant.settings.env['GOMAXPROCS'], '3');
   assert.deepEqual(r.grant.settings.flags, ['-j3']);
+});
+
+test('a burst of asks inside the load average\'s minute: the slots granted seconds ago count as load, so eight one-slot installs are not all granted at an idle load', () => {
+  const host = planted(6);
+  const grants = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => take(host, { kind: 'install', want: 1, priority: 1, pid: 400 + i }));
+  assert.equal(grants.filter((r) => r.ok).length, 7, 'the ceiling 13 less the load 6 leaves room for seven, not eight');
+  assert.match(grants[7]!.ok ? '' : grants[7]!.answer.line, /^wait: /);
+  host.at(LOAD_LAG_MS);
+  assert.equal(ask(host, { kind: 'install', want: 1 }).go, true, 'a minute on, the planted load is the whole truth again');
+});
+
+test('a granted job\'s math libraries are held to its slots: OpenMP, MKL, OpenBLAS, Accelerate, numexpr and Rayon', () => {
+  const r = take(planted(0), { kind: 'install', want: 1, pid: 501 });
+  assert.ok(r.ok);
+  for (const name of MATH_THREADS) assert.equal(r.grant.settings.env[name], '1', name);
 });
 
 test('settingsFor gives each kind its own flags: --test-concurrency, -j, and -parallel one under the slots for a fuzzer', () => {

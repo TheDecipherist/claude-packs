@@ -32,11 +32,17 @@ const FLAGS: Readonly<Record<JobKind, (slots: number) => string[]>> = {
   other: () => [],
 };
 
+/** The thread pools a job's math libraries read (OpenMP, MKL, OpenBLAS, Accelerate, numexpr, Rayon): unset, one docling granted
+ *  1 slot runs torch on every core. */
+export const MATH_THREADS = ['OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'VECLIB_MAXIMUM_THREADS',
+  'NUMEXPR_NUM_THREADS', 'RAYON_NUM_THREADS'] as const;
+
 /** The settings for a job of `kind` granted `slots` (at least 1). */
 export function settingsFor(kind: JobKind, slots: number): JobSettings {
   const n = Math.max(1, Math.floor(slots));
   const tools = budgetEnv({}, n);
   const env: Record<string, string> = { CLAUDE_PACKS_TEST_CORES: String(n), GOMAXPROCS: String(n) };
+  for (const name of MATH_THREADS) env[name] = String(n);
   for (const [name, value] of Object.entries(tools)) if (value !== undefined) env[name] = value;
   const agents = Math.floor(n / AGENT_WORK_CORES);
   const words = `tests: CLAUDE_PACKS_TEST_CORES=${n}; builds: -j${n}; fuzz: -parallel=${fuzzWorkers(n)}; agents: ${agents} more`;

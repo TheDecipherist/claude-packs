@@ -79,6 +79,14 @@ function leftAfter(free: number, waiting: readonly Waiter[], me: Place, ticket: 
   return { left: Math.max(0, free - held), ahead: ahead.length };
 }
 
+/** How long the 1-minute load average takes to show a job just started. */
+export const LOAD_LAG_MS = 60_000;
+
+/** The slots of the running jobs started inside the load average's minute: load the average has not seen yet, so a burst of asks
+ *  cannot all read the same idle load (KWB: eight docling runs granted at once took an 18-core machine to 17.9). */
+export const unseenLoad = (jobs: readonly Job[], now: number): number =>
+  jobs.filter((j) => j.pausedAt === null && now - j.start < LOAD_LAG_MS).reduce((sum, j) => sum + j.slots, 0);
+
 const round1 = (n: number): string => (Math.round(n * 10) / 10).toFixed(1);
 const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -89,7 +97,7 @@ export function answerOn(host: GovernorHost, state: GovernorState, request: Requ
   const load = host.load();
   const now = host.now();
   const used = state.jobs.reduce((sum, j) => sum + j.slots, 0);
-  const free = Math.max(0, Math.min(budget.slots - used, Math.floor(budget.ceiling - load)));
+  const free = Math.max(0, Math.min(budget.slots - used, Math.floor(budget.ceiling - load - unseenLoad(state.jobs, now))));
   const me = queuePlace(state.waiting, request, ticket, now);
   const cap = priorityCap(me.priority, budget.slots);
   const { left, ahead } = leftAfter(free, state.waiting, me, ticket, budget.slots, now);
