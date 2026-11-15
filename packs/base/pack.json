@@ -155,6 +155,7 @@
     "hooks/making.mts": ["test/hooks/base/making-check-count.test.mts", "test/hooks/base/making-check.test.mts", "test/hooks/base/making.test.mts"],
     "hooks/lib/polling.mts": ["test/hooks/base/no-polling.test.mts"],
     "hooks/no-find.mts": ["test/hooks/base/no-find.test.mts"],
+    "hooks/no-zsh-only.mts": ["test/hooks/base/no-zsh-only.test.mts"],
     "hooks/no-polling.mts": ["test/hooks/base/no-polling.test.mts"],
     "hooks/once-only-index.mts": ["test/hooks/base/once-only-index.test.mts"],
     "hooks/once-only.mts": ["test/hooks/base/once-only-index.test.mts", "test/hooks/base/once-only.test.mts"],
@@ -498,6 +499,13 @@
           },
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-zsh-only.mjs\"",
+            "role": "judge",
+            "order": 62,
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/repo-litter.mjs\"",
             "role": "judge",
             "order": 70,
@@ -734,7 +742,8 @@
     "hooks/no-find.mjs",
     "hooks/no-polling.mjs",
     "hooks/rules-reach-the-shell.mjs",
-    "hooks/stay-inside.mjs"
+    "hooks/stay-inside.mjs",
+    "hooks/no-zsh-only.mjs"
   ],
   "optIn": ["hooks/agent-model.mjs", "hooks/refusals-judged.mjs", "hooks/run-keeps-going.mjs"]
 }
