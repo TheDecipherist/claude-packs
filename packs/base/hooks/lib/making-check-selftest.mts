@@ -97,6 +97,8 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
     ['slot code with a making line that names slot', slotTurn(), 0],
     ['slot code, no making line', slotTurn({ making: '' }), 2],
     ['a making line moved to the Log by a shell program counts', slotTurn({ making: '', logged: `S1: ${good}. Done, abc1234.` }), 0],
+    ['an earlier step\'s Log line naming lane is not this turn\'s to judge', slotTurn({ logged: `S0: ${MAKING_LANE}. Done, abc1234.` }), 0],
+    ['nor in a turn that wrote only a doc', turn([W('docs/notes.md', 'The slot filter.\n')], { making: '', logged: `S0: ${MAKING_LANE}. Done, abc1234.` }), 0],
     ['a making line the turn moved to the Log counts', turn([W('src/slot/gain.cpp', slotCode), use('Edit', { file_path: at('build.md'), old_string: '## Log\n', new_string: `## Log\n\n- S1: ${good}. Done, abc1234.\n` })], { making: '' }), 0],
     ['the making line names mixer, the turn wrote slot', slotTurn({ making: 'making: mixer meter; concepts: mixer (one)' }), 2],
     ['the making line names lane, which has no manifest row', slotTurn({ making: MAKING_LANE }), 2],

@@ -133,7 +133,10 @@ function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: 
   // reading In progress alone sent such a turn back at every Stop (supernova2_monitor W1.1, seven send-backs, KWB-next)
   const movedHere = writes.filter((w) => w.path.endsWith('/build.md') && w.text)
     .flatMap((w) => (w.text ?? '').split('\n').filter((l) => /\bmaking:/i.test(l)));
-  const making = [...makingLines(root, at.projectDir), ...movedHere, ...makingAddedThisSession(root, transcript, at.env)].join('\n');
+  const own = [...makingLines(root, at.projectDir), ...movedHere].join('\n');
+  // a Log line the session added counts only as the step's line being there: a long session (a supervisor's) holds every earlier
+  // step's line, and judging their concepts sent back a turn that wrote none of them (supernova2_monitor, W0.3's "bank", KWB-next)
+  const making = [own, ...makingAddedThisSession(root, transcript, at.env)].filter(Boolean).join('\n');
   const wroteSource = [...new Set(mine.filter((w) => isSource(w.path)).map((w) => rel(w.path)))];
   // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
   if (!making && (written.size || wroteSource.length)) {
@@ -145,7 +148,7 @@ function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: 
     for (const [c, f] of written) {
       if (!named.has(c)) problems.push(`the making line does not name ${c}, which this turn wrote (${f}): add it with its shape from design/shape.json, or take the write back`);
     }
-    for (const u of unknownConcepts(making, sh)) {
+    for (const u of unknownConcepts(own, sh)) {
       problems.push(`the making line names "${u}", which has no row in design/shape.json: add the row first (one or many, its generator, its selectors)`);
     }
   }
