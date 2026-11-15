@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-14T23:08:30.266Z",
+  "updated": "2026-11-15T03:11:23.510Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/a-gate-measures-the-real-thing.md": "df368aa42cb0d3e7933f83f1a591c0d89ea8d9588b494f4c194b590b704310e3",
@@ -158,7 +158,7 @@
     ".claude/hooks/lib/run-tree.mjs": "54a5e2997fd24e1b198c53108adc18aa0922512ff7b46f676b65062241140e14",
     ".claude/hooks/lib/rust-scan.mjs": "4cc41781fb73a7265de4709a40f8bbc2253b28d65bfeaa4082ae017bdfadaa52",
     ".claude/hooks/lib/secret-patterns.mjs": "67a5c7dcef602a4f4839012010643fcc11d6874dc4435488595dcb6024e969a5",
-    ".claude/hooks/lib/selftest.mjs": "44a6478e30dd8ed5fca13e521e0e88bb7f4db3b44328c9fed7ca3884491e934d",
+    ".claude/hooks/lib/selftest.mjs": "8584efa1e6489075e0cb653ccf7f4f34f04014a14fc04a201ac412eebfe74316",
     ".claude/hooks/lib/send-backs.mjs": "eafa2993635815bbeded5eaeafa96802038fbbfa78f4dd1c32a2d1c57bb4a8b5",
     ".claude/hooks/lib/shape-code.mjs": "d10068afeb3b84ab5b4d17ab068bbd3fbc505637b7a40858757caad5bf382db4",
     ".claude/hooks/lib/shape-hits.mjs": "f7f0e2de637426064f0b852ffc2e3a7bd0b47d6f85786d668129fbd2f1a174c4",
@@ -193,6 +193,7 @@
     ".claude/hooks/making.mjs": "ab88d5c65353cca699cffb9c3577c2d9c8e2816c5e66f43c596fa43d97e699dd",
     ".claude/hooks/no-find.mjs": "23913c1eec22598315400984d65fee029ef104ad37b673bcf62d1666b1c9cb2e",
     ".claude/hooks/no-polling.mjs": "d65da36e53d1a70fbcd72c732e6f04f804f29fad4d618dafe1a0843e3e4ea322",
+    ".claude/hooks/no-zsh-only.mjs": "15d1fbc1e8f3fbb049e8efe1b4548b6fb94aa4195ac02e11dfe8c79d1063fc49",
     ".claude/hooks/once-only-index.mjs": "28e6fa148cae7be0d8c5868e9005799c0c547cf40ad036d7982f5857718c6c01",
     ".claude/hooks/once-only.mjs": "8c60859317a47232ff20d4415f31e43f7b95d0abb2787cca210360249455dcf3",
     ".claude/hooks/placement-law.mjs": "ee18a5ec4cae78a6e73ce3c2c7acce117dccd3458d17edefca12dcfda64ffb36",
@@ -362,6 +363,6 @@
     ".claude/checks/void-needs-catch.json": "12b4b35a57eb7ef30a3caf58b05963598cf6707cb8675a322e3b770a4e555bed",
     ".claude/checks/zod-string-needs-max.json": "ab9f77c1e21580f1267428719b0559e88e249f5e556a6f21d6ff287651f5213a",
     ".claude/checks/zod-v4-formats.json": "f166bdec2daec4cb077ce26e790918069483245aad361ac11031bf1c2cb9894f",
-    ".claude/hooks/hooks.json": "61429a8d32ad8cb735e39a28a24cd6335c4c002a7cddffd9733eaaedc95d7083"
+    ".claude/hooks/hooks.json": "e8b5eb5a379400a6b32b4c0080996a547fef7c5c329a6a5465e6bcdbd9164297"
   }
 }

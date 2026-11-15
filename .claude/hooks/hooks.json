@@ -241,6 +241,16 @@
     "role": "judge"
   },
   {
+    "hook": "no-zsh-only",
+    "events": [
+      "PreToolUse"
+    ],
+    "matcher": "Bash",
+    "timeout": 10,
+    "order": 62,
+    "role": "judge"
+  },
+  {
     "hook": "no-polling",
     "events": [
       "PreToolUse"
