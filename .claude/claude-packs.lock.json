@@ -10,7 +10,7 @@
     "writing",
     "hook-proof"
   ],
-  "updated": "2026-11-15T03:11:23.510Z",
+  "updated": "2026-11-15T03:33:46.611Z",
   "files": {
     ".claude/rules/a-control-is-seen-to-fire.md": "49d6cab630a695000d57cd9e5ae161189b8226fd1d37ca0589224bf7c43294d2",
     ".claude/rules/a-gate-measures-the-real-thing.md": "df368aa42cb0d3e7933f83f1a591c0d89ea8d9588b494f4c194b590b704310e3",
@@ -124,8 +124,8 @@
     ".claude/hooks/lib/lines-back.mjs": "9245755a67a9683e41229016a006bda7373c1deebe1d640abb37f265097ad9f3",
     ".claude/hooks/lib/litter.mjs": "388746a3a5967e05a4f1ae841d918103fa38475d08e73ba0df3fa20da34c74bf",
     ".claude/hooks/lib/look-gate-selftest.mjs": "0bbe635f5e1c3f3ce69a222c1a50ccda4c11f1ffc4a41ac92ed03421ebcb44cb",
-    ".claude/hooks/lib/making-check-selftest.mjs": "eb439fb6a60cf7ad1678a11f7c1a78654a5313777db7b1747b3e159bc0ed5782",
-    ".claude/hooks/lib/making-check-turn.mjs": "a0809174773fb9ea932f1d81a64df7f95570c0ca705c262c198fb70c0c7b188f",
+    ".claude/hooks/lib/making-check-selftest.mjs": "bf40f0d62f70a4d6b0dba9880afcf0a9c61f0edc21c0554ec1e35584d73d2932",
+    ".claude/hooks/lib/making-check-turn.mjs": "a98d9f7727fa981b3cf8ebde7fda91e5f2b92de338ae3a1f2ed0edd6a3ba2ea0",
     ".claude/hooks/lib/making-concepts.mjs": "91a5cd7b04dad553712654872973cf341bfa414754a595ddd9b0d7d3a5a17cbf",
     ".claude/hooks/lib/merge-out.mjs": "083c32b0b48331da9e440fc0c594e03870ac45d7bcff6784f76ec095694f8026",
     ".claude/hooks/lib/near-copies.mjs": "7d5cd3c380e7fa4480aa6ed59f0a7dd27b2bb5b5acc7d5d5f6f69f40a6cf781e",

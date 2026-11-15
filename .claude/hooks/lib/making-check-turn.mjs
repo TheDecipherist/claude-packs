@@ -2,7 +2,7 @@
 // problem as a line. Split out of the hook (typescript W4) so the judge (making-check) and the recorder that counts its send-backs
 // (making-check-count) read the turn one way and neither repeats it. It reads the transcript and the checkout's files, and
 // writes nothing; the project, the folder and the environment come in as `ctx`.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './dup.mjs';
 import { judgeCopyWrites } from './dup-index.mjs';
@@ -83,8 +83,39 @@ function headText(root, relPath, env) {
     const r = gitRun(['show', `HEAD:${relPath}`], { cwd: root, env });
     return r.status === 0 ? r.stdout : null;
 }
+/** The making lines build.md holds now that it did not hold at the commit before the session began (its transcript's birth): a step's
+ *  line moved to the Log however it was moved, a shell program's slice included, which no tool write records (supernova2_monitor W1.1). */
+function makingAddedThisSession(root, transcript, env) {
+    if (!transcript)
+        return [];
+    let born;
+    try {
+        const st = statSync(transcript);
+        born = st.birthtimeMs || st.ctimeMs;
+    }
+    catch {
+        return [];
+    }
+    const sha = gitRun(['rev-list', '-1', `--before=@${Math.floor(born / 1000)}`, 'HEAD'], { cwd: root, env }).stdout.trim();
+    const old = sha ? gitRun(['show', `${sha}:build.md`], { cwd: root, env }) : null;
+    const before = new Set(old && old.status === 0 ? old.stdout.split('\n') : []);
+    let now = '';
+    try {
+        now = readFileSync(join(root, 'build.md'), 'utf8');
+    }
+    catch {
+        return [];
+    }
+    // the Log only: In progress is read on its own, and a line still there that an earlier step wrote is that step's, not this one's
+    const log = now.search(/^##\s+Log\b/im);
+    if (log < 0)
+        return [];
+    const section = now.slice(log).split('\n').slice(1);
+    const end = section.findIndex((l) => /^##\s/.test(l));
+    return (end < 0 ? section : section.slice(0, end)).filter((l) => /\bmaking:/i.test(l) && !before.has(l));
+}
 /** Problems 1: the concepts the turn's writes touch, against the making line and the manifest, in one checkout. */
-function writtenConceptProblems(root, writes, at, rel) {
+function writtenConceptProblems(root, writes, at, rel, transcript) {
     const problems = [];
     const lay = readLayout(root);
     const sh = readShape(root) ?? readShape(at.projectDir);
@@ -119,7 +150,11 @@ function writtenConceptProblems(root, writes, at, rel) {
             if (!written.has(c) && (holds(w.path)?.has(c) ?? true))
                 written.set(c, rel(w.path));
     }
-    const making = makingLines(root, at.projectDir).join('\n');
+    // a making line this turn wrote into build.md counts wherever it now stands: the order moves a finished step's line to the Log, and
+    // reading In progress alone sent such a turn back at every Stop (supernova2_monitor W1.1, seven send-backs, KWB-next)
+    const movedHere = writes.filter((w) => w.path.endsWith('/build.md') && w.text)
+        .flatMap((w) => (w.text ?? '').split('\n').filter((l) => /\bmaking:/i.test(l)));
+    const making = [...makingLines(root, at.projectDir), ...movedHere, ...makingAddedThisSession(root, transcript, at.env)].join('\n');
     const wroteSource = [...new Set(mine.filter((w) => isSource(w.path)).map((w) => rel(w.path)))];
     // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
     if (!making && (written.size || wroteSource.length)) {
@@ -214,7 +249,7 @@ export function check(event, ctx) {
     const problems = [];
     const judged = [];
     for (const [root, ws] of byRoot) {
-        const r = writtenConceptProblems(root, ws, ctx, rel);
+        const r = writtenConceptProblems(root, ws, ctx, rel, path ?? undefined);
         problems.push(...r.problems);
         judged.push(...r.judged);
     }
