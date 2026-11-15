@@ -77,6 +77,13 @@ export const runHook = (hook: string, dir: string, payload: unknown, args: reado
 export const writeOf = (file_path: string, content = '// new\n') => ({ tool_name: 'Write', tool_input: { file_path, content } });
 export const editOf = (file_path: string, old_string = 'a', new_string = 'b') => ({ tool_name: 'Edit', tool_input: { file_path, old_string, new_string } });
 export const bashOf = (command: string, cwd?: string) => ({ tool_name: 'Bash', tool_input: { command }, ...(cwd ? { cwd } : {}) });
+
+/** A command judge's selftest rig: a scratch project, its snapshot for the write trap, and `sh`, which runs one command through the hook
+ *  and gives its exit code (the setup every Bash judge's selftest opened with, written once). */
+export function bashRig(hookFile: string, files: Record<string, string> = { 'a.txt': 'one\n' }): { dir: string; before: Map<string, string>; sh: (cmd: string) => number | null } {
+  const dir = scratchProject(files);
+  return { dir, before: snapshot(dir), sh: (cmd) => runHook(hookFile, dir, bashOf(cmd, dir)).status };
+}
 /** A transcript whose last prompt is `words`, for a hook that reads what the user asked this turn (suite-once, no-find). */
 export function promptFile(dir: string, name: string, words: string): string {
   const file = join(dir, `${name}.jsonl`);

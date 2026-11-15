@@ -22,6 +22,12 @@ test('hookTimes keeps each hook\'s last calls only and puts the slowest median f
   ]);
 });
 
+test('buildq\'s build window lines are no hook', () => {
+  const dir = scratchDir('timing-build-');
+  put(join(dir, '.claude/hooks.log'), [logOf([['fast', 1]]), '2026-01-01T00:00:00Z\tBuild\tbuild-start\t0\t0\t42', '2026-01-01T00:00:01Z\tBuild\tbuild-end\t1022\t0\t42'].join('\n'));
+  assert.deepEqual(hookTimes(dir, 5).map((t) => t.hook), ['fast']);
+});
+
 test('timingProblems judges a slow median over 3 calls, prints a slow one over fewer, and says so when no calls are logged', () => {
   const dir = scratchDir('timing-judge-');
   const said: string[] = [];

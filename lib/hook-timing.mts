@@ -4,7 +4,7 @@
 // call on a loaded machine, or the once-only index built the first time, is a spike and not the hook's cost. A hook with fewer
 // than MIN_CALLS calls logged is printed, not judged.
 // The runner's own line (run-hooks: one process for a settings entry, node's start-up included) is judged the same way.
-import { DAEMON_START, readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
+import { BUILD_END, BUILD_START, DAEMON_START, readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
 export const SLOW_MS = 500;
@@ -23,7 +23,8 @@ export function median(values: readonly number[]): number {
 /** Per hook the median and worst of its last `last` calls, slowest median first. */
 export function hookTimes(projectDir: string, last: number = LAST): HookTime[] {
   const by = new Map<string, number[]>();
-  for (const r of readHookLog(projectDir).filter((x) => x.hook !== DAEMON_START)) {
+  // the daemon's start and buildq's build window lines mark times, they are no hook (a build-end once read "13/1022" here)
+  for (const r of readHookLog(projectDir).filter((x) => x.hook !== DAEMON_START && x.hook !== BUILD_START && x.hook !== BUILD_END)) {
     const list = by.get(r.hook) ?? [];
     list.push(r.ms);
     by.set(r.hook, list);

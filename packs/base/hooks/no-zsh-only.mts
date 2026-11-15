@@ -6,7 +6,7 @@
 // The refusal names the portable form: a list written out, or kept in a file and passed with --pathspec-from-file or xargs.
 import { fileURLToPath } from 'node:url';
 import { isMain, runAsHook } from './lib/hook-log.mts';
-import { bashOf, runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
+import { bashRig, verdicts, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { dropHeredocs } from './lib/shell-lex.mts';
 import type { Hook } from './lib/types.d.mts';
@@ -41,10 +41,7 @@ export const worktreeCase: WorktreeCase = {
 };
 
 export function selftest(): number {
-  const hookFile = fileURLToPath(import.meta.url);
-  const dir = scratchProject({ 'a.txt': 'one\n' });
-  const before = snapshot(dir);
-  const sh = (cmd: string): number | null => runHook(hookFile, dir, bashOf(cmd, dir)).status;
+  const { dir, before, sh } = bashRig(fileURLToPath(import.meta.url));
   return verdicts('no-zsh-only', [
     ['the command that stalled a build', sh('C=(${(f)"$(git status --short | cut -c4-)"}) && git add $C'), 2],
     ['a word split', sh('git add ${=P}'), 2],
