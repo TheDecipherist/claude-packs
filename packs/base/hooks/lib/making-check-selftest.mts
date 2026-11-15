@@ -27,7 +27,7 @@ const OVERRIDE_DECIDED = 'Overnight: the order did not name a fade, but no law c
 const MAKING_LANE = 'making: one filter per slot; concepts: slot (many, 4), lane (many); reuse: slotFilter in src/slot/filter.cpp';
 const MAKING_SEMICOLON = 'making: one filter per slot; concepts: slot (many, 4; slotId(i, field)), mixer (one); reuse: slotFilter in src/slot/filter.cpp';
 
-interface TurnOptions { making?: string; last?: string; active?: boolean; session?: string }
+interface TurnOptions { making?: string; last?: string; active?: boolean; session?: string; logged?: string }
 
 /** Runs every planted fault against the hook file named by `hookUrl` (its import.meta.url), then the recorder `recorderUrl` that
  *  counts its send-backs, as the runner orders a Stop's hooks; the exit code. */
@@ -55,9 +55,10 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
   // every selftest run names its own sessions: the send-back counter lives in the temp folder, and a second run with the same names
   // added to the first run's counts (0.9.3, KWB-7: the counter no longer resets between turns)
   const run = `${process.pid}-${Date.now()}`;
-  const turn = (entries: readonly Part[], { making = good, last = '', active = false, session = `s${n += 1}` }: TurnOptions = {}): number | null => {
+  const turn = (entries: readonly Part[], { making = good, last = '', active = false, session = `s${n += 1}`, logged = '' }: TurnOptions = {}): number | null => {
     const named = `${run}-${session}`;
-    writeFileSync(join(dir, 'build.md'), BUILD(making));
+    // `logged`: a making line the session moved to the Log by a means no tool write records (a shell program's slice)
+    writeFileSync(join(dir, 'build.md'), `${BUILD(making)}${logged ? `\n## Log\n\n- ${logged}\n` : ''}`);
     writeFileSync(T, [user('build the slot filter'), ...entries.flat()].map((e) => toJson(e)).join('\n'));
     const stop = { hook_event_name: 'Stop', transcript_path: T, cwd: dir, session_id: named, stop_hook_active: active, last_assistant_message: last };
     const before = snapshot(dir);   // the judge's own run: it must leave the project as it is (the fixtures above are in place)
@@ -95,6 +96,8 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
   const cases: VerdictRow[] = [
     ['slot code with a making line that names slot', slotTurn(), 0],
     ['slot code, no making line', slotTurn({ making: '' }), 2],
+    ['a making line moved to the Log by a shell program counts', slotTurn({ making: '', logged: `S1: ${good}. Done, abc1234.` }), 0],
+    ['a making line the turn moved to the Log counts', turn([W('src/slot/gain.cpp', slotCode), use('Edit', { file_path: at('build.md'), old_string: '## Log\n', new_string: `## Log\n\n- S1: ${good}. Done, abc1234.\n` })], { making: '' }), 0],
     ['the making line names mixer, the turn wrote slot', slotTurn({ making: 'making: mixer meter; concepts: mixer (one)' }), 2],
     ['the making line names lane, which has no manifest row', slotTurn({ making: MAKING_LANE }), 2],
     ['slot written by Edit, no making line', turn([editOf('x', slotCode)], { making: '' }), 2],
