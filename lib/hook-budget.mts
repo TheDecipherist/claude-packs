@@ -3,14 +3,12 @@
 // wall, the `proxy` line's when the client wrote one (the whole call as the user waits for it) and the runner's or daemon's `event`
 // line when not. A daemon whose pool is full (the `queue` of its event lines over 20 ms at p95) is named as the cause, and no hook of
 // that event is blamed for time it spent waiting. Fewer than MIN_CALLS calls are printed, not judged (one call is not a p95).
-import { statSync } from 'node:fs';
 import { join } from 'node:path';
 import { BUILD_END, BUILD_START, DAEMON_START, readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
-import { readJson } from '../packs/base/hooks/lib/json.mts';
 import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { SPREAD } from '../packs/base/hooks/resident/options.mts';
-import { median } from './hook-timing.mts';
+import { installedAt, median } from './hook-timing.mts';
 
 export const EVENT_CLASSES = ['Pre Bash', 'Pre Write', 'Post', 'Prompt', 'SessionStart', 'Stop'] as const;
 export type EventClass = (typeof EVENT_CLASSES)[number];
@@ -142,14 +140,6 @@ function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, ClassTime
 }
 
 const fmt = (s: Spread): string => `${s.p50}/${s.p95}`;
-
-/** When the project's current install was written, in ms since the epoch: the lock's `updated`, else its file's mtime, else 0 (no lock). */
-function installedAt(projectDir: string): number {
-  const file = join(projectDir, '.claude', 'claude-packs.lock.json');
-  const updated = Date.parse(readJson<{ updated?: string }>(file)?.updated ?? '');
-  if (!Number.isNaN(updated)) return updated;
-  try { return statSync(file).mtimeMs; } catch { return 0; }   // no lock: every call is the project's
-}
 
 /** The problems of one event class: a full pool (and nothing else of it), else a slow event, else each hook over its budget. */
 function classProblems(c: EventClass, t: ClassTimes): string[] {

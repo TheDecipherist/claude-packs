@@ -32,10 +32,23 @@ test('timingProblems judges a slow median over 3 calls, prints a slow one over f
   const dir = scratchDir('timing-judge-');
   const said: string[] = [];
   assert.deepEqual(timingProblems(dir, (l) => said.push(l)), []);
-  assert.match(said[0] ?? '', /no calls logged yet/);
+  assert.match(said[0] ?? '', /no calls logged since the current install/);
   put(join(dir, '.claude/hooks.log'), logOf([['slowpoke', 800], ['slowpoke', 900], ['slowpoke', 7000], ['twice', 9000], ['twice', 9000]]));
   const problems = timingProblems(dir, (l) => said.push(l));
   assert.equal(problems.length, 1);
   assert.match(problems[0] ?? '', /^slowpoke: median 900 ms over its last 3 calls \(worst 7000 ms\)/);
   assert.match(said.at(-1) ?? '', /twice 9000\/9000/);
+});
+
+test('timingProblems judges only the calls since the current install: a hook made fast is not red for its old calls (KWB-next)', () => {
+  const dir = scratchDir('timing-install-');
+  const at = (time: string, hook: string, ms: number): string => `${time}\tStop\t${hook}\t${ms}\t0\t-`;
+  const old = [at('2026-01-01T00:00:00Z', 'judge', 1000), at('2026-01-01T00:00:01Z', 'judge', 1100), at('2026-01-01T00:00:02Z', 'judge', 1200)];
+  put(join(dir, '.claude/hooks.log'), old.join('\n'));
+  assert.equal(timingProblems(dir, () => undefined).length, 1, 'with no lock every call is judged');
+  put(join(dir, '.claude/claude-packs.lock.json'), JSON.stringify({ updated: '2026-02-01T00:00:00Z' }));
+  assert.deepEqual(timingProblems(dir, () => undefined), [], 'the calls before the install are another install\'s');
+  const slowAgain = [at('2026-02-02T00:00:00Z', 'judge', 900), at('2026-02-02T00:00:01Z', 'judge', 950), at('2026-02-02T00:00:02Z', 'judge', 990)];
+  put(join(dir, '.claude/hooks.log'), [...old, ...slowAgain].join('\n'));
+  assert.match(timingProblems(dir, () => undefined)[0] ?? '', /^judge: median 950 ms over its last 3 calls/);
 });
