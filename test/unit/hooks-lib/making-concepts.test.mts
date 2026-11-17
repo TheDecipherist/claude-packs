@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { join } from 'node:path';
-import { conceptsIn, makingLines, unknownConcepts } from '../../../packs/base/hooks/lib/making-concepts.mts';
+import { addedCode, conceptsIn, makingLines, unknownConcepts } from '../../../packs/base/hooks/lib/making-concepts.mts';
 import type { LoadedShape, ShapeConceptData } from '../../../packs/base/hooks/lib/shape.mts';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 
@@ -41,4 +41,14 @@ test('with no build.md of its own a checkout reads the project\'s', () => {
   const wt = scratchDir('making-wt-');
   put(join(project, 'build.md'), '## In progress\n- making: p; concepts: none\n');
   assert.deepEqual(makingLines(wt, project), ['making: p; concepts: none']);
+});
+
+test('a language\'s own global read as a member (performance.now) is no concept word; the concept itself still is (KWB-next)', () => {
+  const perf: Pick<LoadedShape, 'concepts'> = { concepts: { performance: concept('performance', { shape: 'one', words: ['performance'] }) } };
+  const timer = addedCode('scratch/prof.mjs', 'const t0 = performance.now();\nconst ms = performance.now() - t0;\n', null);
+  assert.deepEqual([...conceptsIn(timer, perf)], [], 'performance.now() is the timer global');
+  const own = addedCode('src/params/Performance.mjs', 'const performance = loadPerformance(slot);\n', null);
+  assert.deepEqual([...conceptsIn(own, perf)], ['performance']);
+  const cpp = addedCode('src/params/Store.cpp', 'auto& p = performance.part (i);\n', null);
+  assert.deepEqual([...conceptsIn(cpp, perf)], ['performance'], 'C++ has no such global: the word is the concept');
 });

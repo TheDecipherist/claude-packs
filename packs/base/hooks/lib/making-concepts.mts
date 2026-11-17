@@ -31,11 +31,19 @@ export function conceptsIn(text: string, shape: Pick<LoadedShape, 'concepts'> | 
   return out;
 }
 
+// A language's own globals, read as a member (`performance.now()`), are the platform's, never a concept of the project's manifest,
+// and cannot be renamed as a local can (supernova2_monitor: a scratch timer sent a turn back as the Performance concept, KWB-next).
+const JS_FAMILY = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.mts', '.cts', '.tsx']);
+const JS_GLOBALS = /\b(?:performance|globalThis|process|console)(?=\s*\.)/g;
+const blankGlobals = (ext: string, text: string): string => (JS_FAMILY.has(ext) ? text.replace(JS_GLOBALS, (m) => ' '.repeat(m.length)) : text);
+
 /** The lines of a written text that the file did not hold before (`before`, its text at HEAD; null when new), comments blanked by
- *  the file's language: what a turn added, never what a rewrite kept (KWB-215). A language the table lacks is not blanked. */
+ *  the file's language, and its platform globals read as a member: what a turn added, never what a rewrite kept (KWB-215). A language
+ *  the table lacks is not blanked. */
 export function addedCode(path: string, text: string, before: string | null): string {
-  const blank = languageOf(extname(path).toLowerCase())?.blank;
-  const code = (blank ? blank(text) : text).split('\n');
+  const ext = extname(path).toLowerCase();
+  const blank = languageOf(ext)?.blank;
+  const code = blankGlobals(ext, blank ? blank(text) : text).split('\n');
   const held = new Map<string, number>();
   for (const l of (before ?? '').split('\n')) held.set(l, (held.get(l) ?? 0) + 1);
   return text.split('\n').flatMap((l, i) => {
