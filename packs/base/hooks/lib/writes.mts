@@ -33,7 +33,9 @@ function shellChanges(writes: readonly ShellWrite[]): FileWrite[] {
   for (const w of writes) {
     const prev = byPath.get(w.path);
     const r = prev ? (prev.after === null ? { before: prev.before, after: null } : afterText(w, prev.after)) : afterText(w);
-    byPath.set(w.path, prev ? { ...prev, op: w.op === 'delete' ? 'delete' : prev.op, after: r.after } : { path: w.path, op: w.op, ...r });
+    // a copy keeps its source only while it is the whole of the file's change: a write after it makes the file new text (KWB-next)
+    const from = !prev && (w.op === 'copy' || w.op === 'move') && w.from ? { from: w.from } : {};
+    byPath.set(w.path, prev ? { path: prev.path, before: prev.before, op: w.op === 'delete' ? 'delete' : prev.op, after: r.after } : { path: w.path, op: w.op, ...r, ...from });
   }
   return [...byPath.values()];
 }

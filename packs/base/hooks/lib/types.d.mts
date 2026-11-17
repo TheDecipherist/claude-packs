@@ -112,6 +112,8 @@ export interface FileWrite {
   op: WriteOp;
   before: string | null;
   after: string | null;
+  /** A shell copy's or move's source, when the file is that copy and nothing else (a later write in the same command drops it). */
+  from?: string;
 }
 
 // ---- The project's own files ----

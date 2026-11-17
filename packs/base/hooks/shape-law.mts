@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { addressedOutside } from './lib/audience.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { checkoutRoot, insideProject, relInCheckout } from './lib/project.mts';
+import { put } from './lib/files.mts';
 import { bashOf, editOf, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { addedFindings, findInstanceLiterals, findInstanceLiteralsCached, formatFinding, isExcluded, isTestFile, readShape } from './lib/shape.mts';
@@ -50,6 +51,9 @@ function judgeText(rel: string, before: string | null, after: string, shape: Loa
 export const hook: Hook = (event, ctx) => {
   for (const w of writesOf(event, event.cwd ?? ctx.cwd, ctx.env)) {
     if (w.after === null || w.op === 'delete' || !insideProject(ctx.projectDir, w.path, ctx.cwd) || w.after.includes('\0')) continue;
+    // a copy or move of a project file carries text judged where it was written (or excluded there): scanning it again found nothing
+    // new and cost a Pre Bash event up to 1.3 s on an 86 KB JSON (supernova2_monitor, KWB-next); text copied in from outside is new
+    if (w.from && insideProject(ctx.projectDir, w.from, ctx.cwd)) continue;
     const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
     const shape = readShape(root) ?? readShape(ctx.projectDir);
     if (!shape || shape.error) continue;
@@ -114,7 +118,12 @@ export function selftest(): number {
   const notInstances = 'float s = buffer[1]; if (channel == 1) s = pos[0];\nif (slots == kSlots) full = true;\n';
   const outside = 'Route LFO 1 to VCO1 FREQ at +20, slot 2 triangle.\n';
   const moved = '// PLACE\nvoid f() { if (slot == 2) g(); } // closed: B-1';
+  put(join(bare, 'outside.cpp'), 'void f() { if (slot == 2) g(); }\n');   // the same literal Old.cpp holds, in a folder outside the project
   return verdicts('shape-law', [
+    // KWB-next: a copy carries its source's text, judged where it was written; text copied in from outside is new to the project
+    ['a copy of a project file is no new text', sh('cp src/world/Old.cpp scratch/Old.cpp'), 0],
+    ['a copy into the project from outside it is judged', sh(`cp ${join(bare, 'outside.cpp')} src/world/Copied.cpp`), 2],
+    ['a copy written over again in the same command is judged', sh("cp src/world/Old.cpp scratch/Old2.cpp && echo 'if (slot == 3) h();' >> scratch/Old2.cpp"), 2],
     // planted: an engine file
     ['engine: slotIx == 1', w('src/engines/Engine.cpp', 'void f() { if (slotIx == 1) startCrew(); }\n'), 2],
     ['engine: slots[1]', w('src/engines/Engine.cpp', 'auto& s = slots[1];\n'), 2],
