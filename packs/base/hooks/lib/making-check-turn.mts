@@ -6,7 +6,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { copyGlobs, excludeGlobs, FIX, isGenerated, isSource, realPath } from './dup.mts';
 import { judgeCopyWrites } from './dup-index.mts';
-import { gitLines, gitRun } from './git-run.mts';
+import { gitBlobs, gitLines, gitRun } from './git-run.mts';
 import { matchesAny } from './glob.mts';
 import { readLayout } from './layout.mts';
 import { addedCode, conceptsIn, makingLines, unknownConcepts } from './making-concepts.mts';
@@ -79,10 +79,12 @@ function addedRanges(root: string, files: readonly string[], env: Env): Map<stri
 /** The manifest as the duplicate finder reads it: only its exclude list. */
 const excludesOf = (sh: LoadedShape | null): ShapeManifest | null => (sh ? { concepts: {}, exclude: sh.exclude } : null);
 
-// the file's text at HEAD, null when it is new or there is no git: what a rewrite kept is not what the turn added (KWB-215)
-function headText(root: string, relPath: string, env: Env): string | null {
-  const r = gitRun(['show', `HEAD:${relPath}`], { cwd: root, env });
-  return r.status === 0 ? r.stdout : null;
+// the file's text at HEAD, null when it is new or there is no git: what a rewrite kept is not what the turn added (KWB-215). Every
+// file the turn wrote is read in one `git cat-file --batch`: one `git show` per write cost a Stop 920 ms on W2.2's transcript, seven
+// for one file edited seven times and one for each untracked scratch file (supernova2_monitor, KWB-next)
+function headTexts(root: string, env: Env, relPaths: readonly string[]): (relPath: string) => string | null {
+  const blobs = gitBlobs([...new Set(relPaths)].map((p) => `HEAD:${p}`), { cwd: root, env });
+  return (relPath) => blobs.get(`HEAD:${relPath}`) ?? null;
 }
 
 /** build.md's lines at the commit before the session began (its transcript's birth): empty when no commit was before it, null when
@@ -131,9 +133,10 @@ function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: 
     if (!standing.has(p)) { try { standing.set(p, conceptsIn(readFileSync(p, 'utf8'), sh)); } catch { standing.set(p, null); } }
     return standing.get(p) ?? null;
   };
+  const headText = headTexts(root, at.env, mine.filter((w) => isCode(rel(w.path), lay)).map((w) => rel(w.path)));
   for (const w of mine) {
     if (!isCode(rel(w.path), lay)) continue;
-    for (const c of conceptsIn(addedCode(w.path, w.text ?? '', headText(root, rel(w.path), at.env)), sh)) if (!written.has(c) && (holds(w.path)?.has(c) ?? true)) written.set(c, rel(w.path));
+    for (const c of conceptsIn(addedCode(w.path, w.text ?? '', headText(rel(w.path))), sh)) if (!written.has(c) && (holds(w.path)?.has(c) ?? true)) written.set(c, rel(w.path));
   }
   // a making line this turn wrote into build.md counts wherever it now stands: the order moves a finished step's line to the Log, and
   // reading In progress alone sent such a turn back at every Stop (supernova2_monitor W1.1, seven send-backs, KWB-next). Only a line

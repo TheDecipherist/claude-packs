@@ -46,3 +46,27 @@ export function gitLines(args: readonly string[], options: GitOptions): string[]
   const r = gitRun(args, options);
   return r.ok ? r.stdout.split('\n').filter(Boolean) : [];
 }
+
+/** The text of each `<rev>:<path>` from one `git cat-file --batch`, one process for any number of files; null for one git does not
+ *  hold (an untracked file, a new one). Read by bytes, so a file's multi-byte text is cut where git says it ends (KWB-next: a Stop
+ *  hook paid one `git show` per file, 20 ms each). */
+export function gitBlobs(specs: readonly string[], { cwd, env, timeoutMs = 30_000 }: GitOptions): Map<string, string | null> {
+  const out = new Map<string, string | null>(specs.map((s) => [s, null]));
+  if (!specs.length) return out;
+  const input = specs.map((s) => `${s}\n`).join('');
+  const r = spawnSync('git', ['cat-file', '--batch'], { cwd, env, input, timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
+  const buf = r.stdout;
+  if (r.status !== 0 || !buf) return out;
+  let at = 0;
+  for (const spec of specs) {
+    const nl = buf.indexOf(0x0a, at);
+    if (nl < 0) break;
+    const head = /^\S+ (\S+) (\d+)$/.exec(buf.subarray(at, nl).toString('utf8'));
+    at = nl + 1;
+    if (!head) continue;   // "<spec> missing": git holds no such file
+    const size = Number(head[2]);
+    if (head[1] === 'blob') out.set(spec, buf.subarray(at, at + size).toString('utf8'));
+    at += size + 1;
+  }
+  return out;
+}
