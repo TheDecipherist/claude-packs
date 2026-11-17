@@ -152,7 +152,10 @@ function classProblems(c: EventClass, t: ClassTimes): string[] {
   }
   const problems: string[] = [];
   const b = EVENT_BUDGET[c];
-  if (t.wall.calls >= MIN_CALLS && (t.wall.p50 > b.p50 || t.wall.p95 > b.p95)) {
+  // below P95_MIN_CALLS a p95 is the slowest call: the median stands for it, as for each hook and the pool (one push's network round
+  // trip failed the event budget over 14 calls, supernova2_monitor, KWB-next)
+  const wallP95 = t.wall.calls >= P95_MIN_CALLS ? t.wall.p95 : t.wall.p50;
+  if (t.wall.calls >= MIN_CALLS && (t.wall.p50 > b.p50 || wallP95 > b.p95)) {
     problems.push(`${c}: the event took ${fmt(t.wall)} ms (p50/p95 of ${t.wall.calls} calls, the ${t.wallFrom} line's wall), over its budget of ${b.p50}/${b.p95} ms`);
   }
   const worst = c === 'Stop' ? STOP_WORST_MS : WORST_MS;

@@ -214,3 +214,11 @@ test('git-guard\'s worst allows one network round trip (a push asks GitHub for i
   calls('plain-fake');
   assert.match(said(dir).problems.join('\n'), /^plain-fake at Pre Bash: .*worst 539/);
 });
+
+test('below 20 calls an event\'s p95 is its slowest call, and the median stands for it, as for a hook (KWB-next)', () => {
+  const dir = project();
+  for (let i = 0; i < 14; i += 1) logHook(dir, { ...BASH, hook: 'proxy', ms: i === 5 ? 543 : 15, code: 0, queue: 0, source: 'proxy' });
+  assert.deepEqual(said(dir).problems.filter((p) => /^Pre Bash: the event/.test(p)), [], 'one push among 14 calls');
+  for (let i = 0; i < 20; i += 1) logHook(dir, { ...BASH, hook: 'proxy', ms: 543, code: 0, queue: 0, source: 'proxy' });
+  assert.match(said(dir).problems.join('\n'), /^Pre Bash: the event took/m, 'slow calls in number still are');
+});
