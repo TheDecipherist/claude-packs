@@ -19,14 +19,8 @@ export interface Done { hook: string; ms: number; code: number; stdout: string; 
 /** `preload`: import every hook at start (the first workers of the pool); the others import a hook when first asked for it. */
 export interface WorkerData { dir: string; hooks: readonly string[]; ext: string; preload?: boolean }
 
-/** The events a worker keeps the payload of, the oldest out first: the jobs of a few events at once interleave on the pool. */
-export const KNOWN_EVENTS = 8;
-
-/** A job as it travels: the event and its context go to a worker once (`key` names them after), not once per judge (KWB-next). */
-export interface RunJob { hook: string; key: number; event?: HookEvent; ctx?: WireContext }
-
 export type ToWorker =
-  | { type: 'run'; id: number; job: RunJob }
+  | { type: 'run'; id: number; job: Job }
   | { type: 'answer'; id: number; files: FileStatements[] };
 
 export type FromWorker =
