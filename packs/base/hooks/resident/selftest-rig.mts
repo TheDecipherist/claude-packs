@@ -50,8 +50,10 @@ export async function start(rig: Rig, args: readonly string[] = ['--pool', '4', 
   return started;
 }
 
+// the machine's own load is planted at 0: a selftest's lines never depend on what else the machine runs (a busy mark at load 11.5
+// turned 2,000 hook lines into 2,001); the busy case plants its own
 export const request = (rig: Rig, over: Partial<WireRequest> = {}): WireRequest =>
-  ({ v: PROTOCOL, env: { CLAUDE_PROJECT_DIR: rig.dir, PATH: process.env.PATH ?? '' }, cwd: rig.dir, ppid: 4242, deadline: Date.now() + 8000, ...over });
+  ({ v: PROTOCOL, env: { CLAUDE_PROJECT_DIR: rig.dir, PATH: process.env.PATH ?? '', CLAUDE_PACKS_GOVERNOR_LOAD: '0' }, cwd: rig.dir, ppid: 4242, deadline: Date.now() + 8000, ...over });
 
 /** An event as Claude Code writes it on stdin: the tool names the hooks that reach it. */
 export const eventText = (rig: Rig, tool: string, input: Record<string, unknown> = {}, name = 'PreToolUse'): string =>
