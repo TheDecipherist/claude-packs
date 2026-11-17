@@ -32,7 +32,8 @@ export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = {
   'reuse-hint': { p50: 80, p95: 200 },
   // a push asks GitHub for its branch heads (git ls-remote): one network round trip, 400 to 550 ms (supernova2_monitor, KWB-next)
   'git-guard': { p50: 10, p95: 200, worst: 1500 },
-  'firmware-out-of-git': { p50: 10, p95: 200 },
+  // its git child reads every staged path: a commit of many files took 255 ms in supernova2_monitor's W2.1 rerun (KWB-next)
+  'firmware-out-of-git': { p50: 10, p95: 200, worst: 1000 },
 };
 export const WORST_MS = 200;
 export const STOP_WORST_MS = 1500;

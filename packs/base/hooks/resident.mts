@@ -43,8 +43,11 @@ const FORCE_EXIT_MS = 15_000;
 /** Uncaught exceptions and rejections the daemon logs and carries on after, before it restarts itself. */
 const MAX_FAULTS = 5;
 const PRELOAD = 1;
-/** The pool (W8 item 2, 2026-11-12): 2 warm workers, grown on demand to 8, the grown ones retired after 2 idle minutes. */
-const WARM = 2;
+/** The pool (W8 item 2, 2026-11-12): warm workers, grown on demand to 8, the grown ones retired after 2 idle minutes. 4, not 2: a write
+ *  runs three judges of 50 to 110 ms (once-only, template-law, shape-law) and the light ones queued behind them; with the real index,
+ *  at the machine's load of 7, one write's queue measured median 10 ms, worst 33 with 2; 4.7 and 17 with 3; 2.9 and 16 with 4 (KWB-next).
+ *  At rest the two read alike; the cost is about 17 MB a worker (W8.4). */
+const WARM = 4;
 const POOL_MAX = 8;
 const POOL_IDLE_MS = 2 * 60_000;
 /** V8 flags the daemon sets before its workers start, for every isolate after (rss: 16 workers that each ran every hook held 389 MB

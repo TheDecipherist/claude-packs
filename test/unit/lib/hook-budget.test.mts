@@ -222,3 +222,9 @@ test('below 20 calls an event\'s p95 is its slowest call, and the median stands 
   for (let i = 0; i < 20; i += 1) logHook(dir, { ...BASH, hook: 'proxy', ms: 543, code: 0, queue: 0, source: 'proxy' });
   assert.match(said(dir).problems.join('\n'), /^Pre Bash: the event took/m, 'slow calls in number still are');
 });
+
+test('firmware-out-of-git\'s worst allows a commit of many files (its git child reads every staged path) (KWB-next)', () => {
+  const dir = project();
+  for (let i = 0; i < 6; i += 1) logHook(dir, { ...BASH, hook: 'firmware-out-of-git', ms: i === 3 ? 255 : 0, code: 0 });
+  assert.deepEqual(said(dir).problems, [], 'one commit of many files at 255 ms');
+});
