@@ -10,7 +10,8 @@ import { watchGroups } from '../lib/child-group.mts';
 import { isVerdict } from '../lib/verdict.mts';
 import type { FileStatements } from '../lib/near-copies.mts';
 import type { Hook, HookContext } from '../lib/types.d.mts';
-import type { FromWorker, Job, ToWorker, WorkerData } from './messages.mts';
+import { KNOWN_EVENTS } from './messages.mts';
+import type { FromWorker, Job, RunJob, ToWorker, WorkerData } from './messages.mts';
 
 const port = parentPort;
 const data = workerData as WorkerData;
@@ -66,8 +67,23 @@ async function run(id: number, { hook, event, ctx }: Job): Promise<void> {
   say({ type: 'done', id, done: { ...done, ms: performance.now() - t0 } });
 }
 
+// The events this worker was sent, by key: an event's later jobs here carry only the key (pool.mts `travelling`, KWB-next).
+const events = new Map<number, { event: Job['event']; ctx: Job['ctx'] }>();
+function jobOf(j: RunJob): Job | null {
+  if (j.event !== undefined && j.ctx !== undefined) {
+    events.set(j.key, { event: j.event, ctx: j.ctx });
+    if (events.size > KNOWN_EVENTS) events.delete(events.keys().next().value as number);
+  }
+  const e = events.get(j.key);
+  return e ? { hook: j.hook, event: e.event, ctx: e.ctx } : null;
+}
+
 port?.on('message', (m: ToWorker) => {
-  if (m.type === 'run') void run(m.id, m.job);
+  if (m.type === 'run') {
+    const job = jobOf(m.job);
+    if (job) void run(m.id, job);
+    else say({ type: 'done', id: m.id, done: { hook: m.job.hook, ms: 0, code: 1, stdout: '', stderr: `worker: no event for key ${m.job.key}\n` } });
+  }
   else { waiting.get(m.id)?.(m.files); waiting.delete(m.id); }
 });
 process.on('unhandledRejection', (e) => say({ type: 'log', line: `worker: unhandled rejection: ${e instanceof Error ? (e.stack ?? e.message) : childError(e)}` }));

@@ -5,7 +5,8 @@
 import { Worker } from 'node:worker_threads';
 import { killGroup } from '../lib/child-group.mts';
 import type { FileStatements } from '../lib/near-copies.mts';
-import type { Done, FromWorker, Job, ToWorker, WorkerData } from './messages.mts';
+import { KNOWN_EVENTS } from './messages.mts';
+import type { Done, FromWorker, Job, RunJob, ToWorker, WorkerData } from './messages.mts';
 
 export interface PoolOptions {
   workerUrl: URL;
@@ -32,7 +33,7 @@ export interface PoolOptions {
 }
 
 /** `has`: the hooks this worker has imported; a job goes to an idle worker that has its hook, and a hook new to the pool to the one holding the fewest. */
-interface Slot { worker: Worker; ready: boolean; busy: { id: number; job: Job; take: (d: Done) => void } | null; events: number; idleSince: number; gone: boolean; preload: boolean; has: Set<string>; groups: Set<number> }
+interface Slot { worker: Worker; ready: boolean; busy: { id: number; job: Job; take: (d: Done) => void } | null; events: number; idleSince: number; gone: boolean; preload: boolean; has: Set<string>; groups: Set<number>; known: number[] }
 interface Waiting { id: number; job: Job; take: (d: Done) => void; at: number }
 
 export interface Pool {
@@ -78,7 +79,7 @@ export function startPool(o: PoolOptions): Pool {
 
   function spawn(preload = false): void {
     const worker = new Worker(o.workerUrl, { workerData: { ...o.data, preload }, stdin: false, resourceLimits: WORKER_HEAP });
-    const s: Slot = { worker, ready: false, busy: null, events: 0, idleSince: clock(), gone: false, preload, has: new Set(), groups: new Set() };
+    const s: Slot = { worker, ready: false, busy: null, events: 0, idleSince: clock(), gone: false, preload, has: new Set(), groups: new Set(), known: [] };
     slots.add(s);
     worker.on('message', (m: FromWorker) => {
       if (m.type === 'ready') {
@@ -125,6 +126,19 @@ export function startPool(o: PoolOptions): Pool {
     return idle.reduce<Slot | undefined>((best, s) => (best === undefined || s.has.size < best.has.size ? s : best), undefined);
   }
 
+  // An event's jobs share one event and one context object: each worker is sent them once, its later jobs of that event name the key.
+  // Sent whole, a 20 KB write and the project's layout were copied once per judge, about 20 times an event (KWB-next).
+  const keys = new WeakMap<object, number>();
+  let lastKey = 0;
+  function travelling(s: Slot, job: Job): RunJob {
+    let key = keys.get(job.event);
+    if (key === undefined) { lastKey += 1; key = lastKey; keys.set(job.event, key); }
+    if (s.known.includes(key)) return { hook: job.hook, key };
+    s.known.push(key);
+    if (s.known.length > KNOWN_EVENTS) s.known.shift();
+    return { ...job, key };
+  }
+
   function pump(): void {
     for (let i = 0; i < queue.length;) {
       const next = queue[i];
@@ -132,7 +146,7 @@ export function startPool(o: PoolOptions): Pool {
       if (next === undefined || s === undefined) { i += 1; continue; }
       queue.splice(i, 1);
       s.busy = { id: next.id, job: next.job, take: next.take };
-      send(s, { type: 'run', id: next.id, job: next.job });
+      send(s, { type: 'run', id: next.id, job: travelling(s, next.job) });
     }
     const first = queue[0];
     if (first === undefined || closing) return;
