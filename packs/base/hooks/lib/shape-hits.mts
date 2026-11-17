@@ -34,10 +34,32 @@ const EXPR = '[A-Za-z_]\\w*(?:(?:\\.|->|::)[A-Za-z_]\\w*|\\(\\)|\\[\\w*\\])*';
 // A multi-word all-caps label ("AIM EFFECTS", "NOTES MONO") names a control, not an instance (KWB-22): the caps word before it.
 const labelBefore = (line: string, at: number): boolean => { const w = /([A-Z][A-Z0-9]+)\s+$/.exec(line.slice(0, at)); return w !== null && !NOT_ROLES.has(w[1] ?? ''); };
 
+// Each concept's expressions, built once: building them per line and per concept cost 1.3 s on a 17,000-line JSON, and a hook judges
+// a write's text before and after (supernova2_monitor, brief-guard 4,953 ms on one cp, KWB-next). matchAll copies a regex before
+// it runs, so one shared object holds no state between lines.
+interface ConceptRegs { num: RegExp; camel: RegExp; ord: RegExp; role: RegExp }
+const REGS = new WeakMap<ShapeConceptData, ConceptRegs>();
+function regsOf(c: ShapeConceptData): ConceptRegs {
+  const kept = REGS.get(c);
+  if (kept) return kept;
+  const W = c.words.map(escapeRegExp).sort((a, b) => b.length - a.length).join('|');
+  const S = c.single.map(escapeRegExp).join('|');
+  const roleWords = c.single.flatMap((w) => [escapeRegExp(w), escapeRegExp(cap(w))]).join('|');
+  const made: ConceptRegs = {
+    num: new RegExp(`(?<![A-Za-z0-9])(${W})(?:[ _#-]|\\s+(?:no\\.?|number|#)\\s*)?(\\d+)(?![\\dxX])((?:\\s*(?:-|–|\\.\\.|to|through)\\s*)(\\d+))?`, 'gi'), // 0x18000 is an address (KF-13)
+    camel: new RegExp(`(?<=[a-z0-9_])(${c.words.map((w) => escapeRegExp(cap(w))).join('|')})_?(\\d+)(?!\\d)`, 'g'),
+    ord: new RegExp(`(?<![A-Za-z0-9])(${ORDINALS.join('|')}|\\d+(?:st|nd|rd|th))[\\s_-]*(${S})(?![a-z])`, 'gi'),
+    role: new RegExp(`(?<![A-Za-z0-9_])([A-Z][A-Z0-9]+)\\s+(${roleWords})(?![A-Za-z0-9_])`, 'g'),
+  };
+  REGS.set(c, made);
+  return made;
+}
+const COMPARE_RIGHT = new RegExp(`(${EXPR})\\s*(?:===?|!==?)\\s*(\\d+)(?![\\w.])`, 'g');
+const COMPARE_LEFT = new RegExp(`(?<![\\w.])(\\d+)\\s*(?:===?|!==?)\\s*(${EXPR})`, 'g');
+
 // "slot 2", "slot #2", "slot2", "slots 1-3": a number after the concept's word.
 function byNumber(line: string, words: string, c: ShapeConceptData, add: Add): void {
-  const W = c.words.map(escapeRegExp).sort((a, b) => b.length - a.length).join('|');
-  const num = new RegExp(`(?<![A-Za-z0-9])(${W})(?:[ _#-]|\\s+(?:no\\.?|number|#)\\s*)?(\\d+)(?![\\dxX])((?:\\s*(?:-|–|\\.\\.|to|through)\\s*)(\\d+))?`, 'gi'); // 0x18000 is an address (KF-13)
+  const { num, camel } = regsOf(c);
   for (const m of words.matchAll(num)) {
     const [whole = '', word = '', first = '', range, last = ''] = m;
     if (isSourceRole(line, m)) continue; // KF-28
@@ -54,21 +76,18 @@ function byNumber(line: string, words: string, c: ShapeConceptData, add: Add): v
     }
     add(first, `names it by number ("${whole.trim()}")`);
   }
-  const camel = new RegExp(`(?<=[a-z0-9_])(${c.words.map((w) => escapeRegExp(cap(w))).join('|')})_?(\\d+)(?!\\d)`, 'g');
   for (const m of line.matchAll(camel)) add(m[2] ?? '', `names it by number in an identifier ("${m[0]}")`);
 }
 
 // "the second slot", "3rd slot", and the role names ("the PAD slot").
 function byName(line: string, words: string, c: ShapeConceptData, shape: HitShape, add: Add): void {
-  const S = c.single.map(escapeRegExp).join('|');
-  const ord = new RegExp(`(?<![A-Za-z0-9])(${ORDINALS.join('|')}|\\d+(?:st|nd|rd|th))[\\s_-]*(${S})(?![a-z])`, 'gi');
+  const { ord, role } = regsOf(c);
   for (const m of words.matchAll(ord)) {
     if (isFirstMatch(words, m)) continue; // KF-17
     const o = (m[1] ?? '').toLowerCase();
     add(ORDINALS.includes(o) ? ORDINALS.indexOf(o) + 1 : parseInt(o, 10), `names it by ordinal ("${m[0].trim()}")`);
   }
   if (c.shape !== 'many') return;
-  const role = new RegExp(`(?<![A-Za-z0-9_])([A-Z][A-Z0-9]+)\\s+(${c.single.flatMap((w) => [escapeRegExp(w), escapeRegExp(cap(w))]).join('|')})(?![A-Za-z0-9_])`, 'g');
   const notARole = (m: RegExpMatchArray): boolean => {
     const [whole = '', first = '', word = ''] = m;
     const at = m.index ?? 0;
@@ -87,11 +106,11 @@ function byUse(line: string, c: ShapeConceptData, shape: HitShape, aliases: Alia
     const ps = parts(name);
     if (c.arrays.includes(name) || (ps.some((p) => c.words.includes(p)) && !ps.some(isCountish))) add(m[2] ?? m[3] ?? '', `indexes a per-${c.name} array with a number ("${m[0]}")`);
   }
-  for (const m of line.matchAll(new RegExp(`(${EXPR})\\s*(?:===?|!==?)\\s*(\\d+)(?![\\w.])`, 'g'))) {
+  for (const m of line.matchAll(COMPARE_RIGHT)) {
     if (isConstantName(m[1] ?? '') || isSum(line.slice(0, m.index))) continue; // a quantity, or an operand of a sum (KWB-next)
     if (conceptOfExpr(m[1] ?? '', shape, aliases) === c.name) add(m[2] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
   }
-  for (const m of line.matchAll(new RegExp(`(?<![\\w.])(\\d+)\\s*(?:===?|!==?)\\s*(${EXPR})`, 'g'))) {
+  for (const m of line.matchAll(COMPARE_LEFT)) {
     if (isConstantName(m[2] ?? '')) continue;
     if (conceptOfExpr(m[2] ?? '', shape, aliases) === c.name && !isSum(line.slice(0, m.index))) add(m[1] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
   }
