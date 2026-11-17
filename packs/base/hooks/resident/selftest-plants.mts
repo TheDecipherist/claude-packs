@@ -41,6 +41,11 @@ export const PLANTS: readonly Plant[] = [
   { name: 'rm-judge', source: source("return no('rm refused');"), row: judge('Race') },
   { name: 'post-judge', source: source("return no('post refused');"), row: judge('PostRef', 10, ['PostToolUse']) },
   { name: 'rec-post', source: source("note(ctx, 'post.txt', 'rec-post\\n');\nreturn pass;"), row: recorder('PostRef', 20, ['PostToolUse']) },
+  // a Stop and a SubagentStop carry no subject, so only a row with no matcher reaches them ('*'); no other case sends either event
+  { name: 'stop-judge', source: source("return no('stop sent back');"), row: judge('*', 10, ['Stop']) },
+  { name: 'rec-stop', source: source("note(ctx, 'stop.txt', 'rec-stop\\n');\nreturn pass;"), row: recorder('*', 20, ['Stop']) },
+  { name: 'sub-judge', source: source("return no('subagent sent back');"), row: judge('*', 10, ['SubagentStop']) },
+  { name: 'rec-sub', source: source("note(ctx, 'sub.txt', 'rec-sub\\n');\nreturn pass;"), row: recorder('*', 20, ['SubagentStop']) },
   { name: 'rec-post-slow', source: source("await nap(300);\nnote(ctx, 'postslow.txt', 'rec-post-slow\\n');\nreturn pass;"), row: recorder('PostSlow', 20, ['PostToolUse']) },
 ];
 

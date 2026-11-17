@@ -1,7 +1,7 @@
 // resident/event: one event, from a decoded request to its reply (review-2-go 1.4, 1.11, 2.9 to 2.13, 4.2). The judges of the table's
 // rows for the event run at once on the pool; after the first exit 2 the rest get GRACE_MS more, and every refusal is returned in the
-// table's order, never the order they arrived in. Recorders then run in turn: those of a PreToolUse call for every call (they record
-// the call, a refusal included), the rest only when nothing refused; a PostToolUse call's are not waited for (the reply goes first). A hook that has not answered by the client's deadline sends the whole event to the
+// table's order, never the order they arrived in. Recorders then run in turn: those of a PreToolUse call or a Stop for every one (they
+// record it, a refusal included), the rest only when nothing refused; a PostToolUse call's are not waited for (the reply goes first). A hook that has not answered by the client's deadline sends the whole event to the
 // TypeScript path (KWB-216), named in the crash log; one that answers after that is logged `late`, its exit 2 counted by `logs`. The
 // timing and event lines are written here, in one append, by this thread: workers only return `{hook, ms, code}`.
 import { crashVerdict } from '../lib/crash-policy.mts';
@@ -22,6 +22,9 @@ import type { Done, Job } from './messages.mts';
 import type { Pool } from './pool.mts';
 import type { StatusKeeper } from './status.mts';
 import type { HookEvent, HookTableRow } from '../lib/types.d.mts';
+
+/** The events whose recorders run when a judge refused: the call or the stop happened, refused or not. */
+const RECORDS_A_REFUSAL: ReadonlySet<string> = new Set(['PreToolUse', 'Stop']);
 
 /** After the first refusal, how long the other judges get to answer before the reply goes (review-2-go 2.9). */
 export const GRACE_MS = 30;
@@ -113,8 +116,10 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
   if (phase.slow.length > 0) return overDeadline(root, text, phase.slow);
   const refused = [...phase.ran.values()].some((r) => r.code === 2);
 
-  // the recorders: in turn, and only while the client still waits
-  const record = rows.filter((r) => r.role === 'recorder' && (ev.hook_event_name === 'PreToolUse' || !refused));
+  // the recorders: in turn, and only while the client still waits. A refused PreToolUse call's record the refusal; a refused Stop is
+  // a send-back that happened, and making-check-count counts exactly those (its limit never held while the daemon skipped it: KWB-next,
+  // forty send-backs of one turn); a refused PostToolUse or SubagentStop records nothing
+  const record = rows.filter((r) => r.role === 'recorder' && (RECORDS_A_REFUSAL.has(ev.hook_event_name ?? '') || !refused));
   const skipped: string[] = [];
   if (ev.hook_event_name === 'PostToolUse') {
     // a Post recorder refuses nothing and the call has already happened: the reply does not wait for it (once-only-index took 120 to 148 ms

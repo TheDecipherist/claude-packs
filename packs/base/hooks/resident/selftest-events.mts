@@ -55,6 +55,13 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
     const post = await ask(rig, eventText(rig, 'PostRef', {}, 'PostToolUse'));
     cases.push(['a refused PostToolUse call: its recorder does not run', post.code === 2 && !existsSync(join(rig.dir, 'post.txt')), true]);
 
+    // a refused Stop is a send-back that happened, and its recorder counts it (making-check-count; KWB-next, forty send-backs never
+    // reached the limit of three); a refused SubagentStop is not: the agent goes on
+    const stop = await ask(rig, eventText(rig, 'StopRef', {}, 'Stop'));
+    cases.push(['a refused Stop: its recorder still runs', stop.code === 2 && existsSync(join(rig.dir, 'stop.txt')), true]);
+    const sub = await ask(rig, eventText(rig, 'SubRef', {}, 'SubagentStop'));
+    cases.push(['a refused SubagentStop: its recorder does not run', sub.code === 2 && !existsSync(join(rig.dir, 'sub.txt')), true]);
+
     const t3 = Date.now();
     const slowPost = await ask(rig, eventText(rig, 'PostSlow', {}, 'PostToolUse'));
     cases.push(['a PostToolUse call whose recorder takes 300 ms: answered without waiting for it', slowPost.code === 0 && Date.now() - t3 < 150 && !existsSync(join(rig.dir, 'postslow.txt')), true]);
