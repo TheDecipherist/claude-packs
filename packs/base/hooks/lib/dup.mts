@@ -129,9 +129,19 @@ export function realPath(p: string): string {
 // The files a TypeScript build emitted beside their sources: the build's output, never a copy in the repo (KWB-170).
 const TWIN: Readonly<Record<string, string>> = { '.mts': '.mjs', '.cts': '.cjs', '.ts': '.js', '.tsx': '.js' };
 const NOT_WALKED = (name: string): boolean => name === 'node_modules' || name === '.git' || isJunk(name);
+const TS_SOURCE = /\.(?:mts|cts|tsx|ts)$/;
+const twinOf = (f: string): string => f.replace(TS_SOURCE, (ext) => TWIN[ext] ?? ext);
 function emittedTwins(abs: string): string[] {
-  return walk(abs, NOT_WALKED).filter((f) => /\.(?:mts|cts|tsx|ts)$/.test(f) && !f.endsWith('.d.mts'))
-    .map((f) => f.replace(/\.(?:mts|cts|tsx|ts)$/, (ext) => TWIN[ext] ?? ext)).filter((twin) => existsSync(twin));
+  return walk(abs, NOT_WALKED).filter((f) => TS_SOURCE.test(f) && !f.endsWith('.d.mts')).map(twinOf).filter((twin) => existsSync(twin));
+}
+// The emitted twins among the files a scan is given, by their sources beside them: a scan of a few candidate files does not walk
+// the repo (it cost once-only about 90 ms on every write it confirmed, supernova2_monitor, KWB-next)
+const EMITTED: Readonly<Record<string, readonly string[]>> = { '.mjs': ['.mts'], '.cjs': ['.cts'], '.js': ['.ts', '.tsx'] };
+function twinsAmong(files: readonly string[]): string[] {
+  return files.filter((f) => {
+    const ext = Object.keys(EMITTED).find((e) => f.endsWith(e));
+    return ext !== undefined && (EMITTED[ext] ?? []).some((src) => existsSync(f.slice(0, -ext.length) + src));
+  });
 }
 
 interface JscpdFile { name: string; start: number; end: number }
@@ -142,7 +152,7 @@ export function scan(root: string, { env, extra = [], ignore: alsoIgnore = [], l
   if (!bin) return { clones: [], error: 'jscpd not found (it is an optional dependency of @thedecipherist/claude-packs: npm install in the project, or set CLAUDE_PACKS_JSCPD)' };
   const out = scratchDir('once-only-');
   const abs = realPath(root);
-  const ignore = [...excludeGlobs(layout, shape).map((g) => `${abs}/${g}`), ...extra.map((x) => realPath(x.as)), ...alsoIgnore.map(realPath), ...emittedTwins(abs)];
+  const ignore = [...excludeGlobs(layout, shape).map((g) => `${abs}/${g}`), ...extra.map((x) => realPath(x.as)), ...alsoIgnore.map(realPath), ...(paths ? twinsAmong(paths) : emittedTwins(abs))];
   const args = ['-a', '-s', '-k', String(LIMITS.tokens), '-l', String(LIMITS.lines), '--max-gap-lines', String(LIMITS.gap), '--exit-code', '0',
     '-f', FORMATS, '-r', 'json', '-o', out, '--cross-formats', CROSS, '-i', ignore.join(','), '--ignore-pattern', IMPORT_LINES, ...(paths ?? [abs]), ...extra.map((x) => x.path)];
   const t0 = Date.now();
