@@ -65,3 +65,12 @@ test('escapeRegExp makes text a RegExp matches literally', () => {
   assert.equal(new RegExp(escapeRegExp('a.b*(c)')).test('a.b*(c)'), true);
   assert.equal(new RegExp(escapeRegExp('a.b')).test('axb'), false);
 });
+
+test('a sense is blanked whatever its case: the screen\'s own "Program change" and a caps "PROGRAM CHANGE" (KWB-next)', () => {
+  const s = normaliseShape({ concepts: { program: { shape: 'many', count: 128, generator: 'programId(i)', words: ['program', 'programs'], senses: ['Program Change'] } }, exclude: [] });
+  assert.equal(findInstanceLiterals('PCAVN    Program change', 'docs/notes.md', normaliseShape({ concepts: { program: { shape: 'many', count: 128, generator: 'programId(i)', words: ['program', 'programs'] } }, exclude: [] })).length, 1, 'with no sense the switch letters read as a role');
+  for (const line of ['PCAVN    Program Change', 'PCAVN    Program change', 'PCAVN    program change']) {
+    assert.deepEqual(findInstanceLiterals(line, 'docs/notes.md', s), [], line);
+  }
+  assert.equal(findInstanceLiterals('program 5 is loaded', 'docs/notes.md', s).length, 1, 'the concept itself is still found');
+});

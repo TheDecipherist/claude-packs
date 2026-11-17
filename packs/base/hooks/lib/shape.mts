@@ -10,6 +10,7 @@
 //   shape-lists   a hand-listed set, one line per instance
 //   findInstanceLiterals(text, file, shape, { only }) -> [{ line, text, concept, instance, why }]
 //     only: 'example' (just a seen in / example line excuses), 'brief' (that, or a declared constant read by name)
+import { escapeRegExp } from './glob.mts';
 import { shortHash } from './hash.mts';
 import { toJson } from './json.mts';
 import { logRefusal } from './hook-log.mts';
@@ -39,7 +40,8 @@ export function findInstanceLiterals(text: string | null | undefined, file: stri
   if (!shape || !text) return [];
   const concepts = Object.values(shape.concepts).filter((c) => c.shape === 'many' || (c.shape === 'one' && c.id));
   let body = only === 'brief' ? blankPaths(text) : text; // in a brief, a path names a file (KWB-117)
-  for (const c of concepts) for (const q of c.quotes) body = body.split(q).join(' '.repeat(q.length));
+  // a sense is blanked whatever its case: a screen draws "Program change", a manual "PROGRAM CHANGE" (supernova2_monitor W2.4, KWB-next)
+  for (const c of concepts) for (const q of c.quotes) if (q) body = body.replace(new RegExp(escapeRegExp(q), 'gi'), (m) => ' '.repeat(m.length));
   const lines = body.split('\n');
   const shown = text.split('\n');
   const aliases = aliasesOf(body, shape);
