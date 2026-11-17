@@ -5,12 +5,15 @@
 // machine catalog) is updating that project and passes; inside-the-project judges another checkout of this same repository. Anything
 // else, /tmp included, halts: Claude Code stops the session and hands it to the user (`continue: false`), and the call never runs.
 // Writes are a write tool's path, and every file a shell command writes (lib/shell-writes.mts: redirects, heredocs, cp, mv, tee, rm,
-// touch, sed -i ...). /dev/* is no file.
+// touch, sed -i ...). /dev/* is no file. One more place passes, only with the owner's yes written in the layout: the build's own
+// plugin copy for a host gate (auval finds only an installed component), `guards.stayInside.pluginCopies` naming each bundle, and a
+// write passes only into `~/Library/Audio/Plug-Ins/Components` or `VST3`, at or inside a bundle so named (KWB-next, WB-10).
 //   node stay-inside.mjs --selftest
 import { existsSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
+import { readLayout } from './lib/layout.mts';
 import { insideProject } from './lib/project.mts';
 import { git, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
@@ -27,6 +30,24 @@ export function repoOf(path: string): string | null {
     if (existsSync(join(dir, '.git'))) return dir;
     if (dirname(dir) === dir) return null;
   }
+}
+
+/** The plug-in folders a host gate reads, under the user's home. */
+const PLUGIN_FOLDERS = ['Library/Audio/Plug-Ins/Components', 'Library/Audio/Plug-Ins/VST3'] as const;
+
+/** True when `path` is, or lies inside, a bundle the owner allowed (`bundles`) in one of the host gates' plug-in folders. */
+export function isAllowedPluginCopy(path: string, bundles: readonly string[], home: string | undefined): boolean {
+  if (!home || !bundles.length) return false;
+  return PLUGIN_FOLDERS.some((folder) => bundles.some((name) => {
+    const bundle = join(home, folder, name);
+    return name.length > 0 && !name.includes('/') && (path === bundle || path.startsWith(`${bundle}/`));
+  }));
+}
+
+/** The bundles the owner allows copied for a host gate: layout.json `guards.stayInside.pluginCopies`. */
+function pluginCopies(root: string): string[] {
+  const list = readLayout(root).guards?.stayInside?.pluginCopies;
+  return Array.isArray(list) ? list.filter((n): n is string => typeof n === 'string') : [];
 }
 
 /** The files a call writes: a write tool's path, or every file its shell command writes. */
@@ -51,7 +72,8 @@ export function escapes(paths: readonly string[], root: string, cwd: string): st
 export const hook: Hook = (event, ctx) => {
   if (event.hook_event_name !== 'PreToolUse') return pass;
   const cwd = event.cwd ?? ctx.cwd;
-  const out = escapes(writtenBy(event, cwd, ctx.env), ctx.projectDir, cwd);
+  const bundles = pluginCopies(ctx.projectDir);
+  const out = escapes(writtenBy(event, cwd, ctx.env), ctx.projectDir, cwd).filter((p) => !isAllowedPluginCopy(p, bundles, ctx.env.HOME));
   if (!out.length) return pass;
   return halt(
     `STOPPED by stay-inside: this call writes outside the project, to ${out.slice(0, 3).join(', ')}${out.length > 3 ? ` and ${out.length - 3} more` : ''}, `
@@ -74,6 +96,14 @@ export function selftest(): number {
   const other = scratchProject({ 'README.md': '# other\n' });
   git(other, 'init', '-q');
   const loose = scratchProject({});   // a folder in no repository, like /tmp
+  const home = scratchProject({});    // a user's home, holding no repository
+  const allowed = { guards: { stayInside: { pluginCopies: ['Unit.component', 'Unit.vst3'] } } };
+  const yes = scratchProject({ '.claude/layout.json': JSON.stringify({ folders: {}, concepts: {}, ...allowed }) });
+  const stopsIn = (root: string, ev: Record<string, unknown>): boolean => {
+    const v = hook({ hook_event_name: 'PreToolUse', cwd: root, ...ev }, contextOf({ projectDir: root, cwd: root, env: { CLAUDE_PROJECT_DIR: root, HOME: home } }));
+    return !(v instanceof Promise) && v.code === 0 && v.stdout.includes('"continue":false');
+  };
+  const plugIns = join(home, 'Library/Audio/Plug-Ins');
   const stops = (ev: Record<string, unknown>): boolean => {
     const v = hook({ hook_event_name: 'PreToolUse', cwd: dir, ...ev }, contextOf({ projectDir: dir, cwd: dir, env: { CLAUDE_PROJECT_DIR: dir } }));
     return !(v instanceof Promise) && v.code === 0 && v.stdout.includes('"continue":false');
@@ -92,6 +122,13 @@ export function selftest(): number {
     ['a redirect inside the project passes', stops(bash('python3 tools/x.py > build/out.csv')), false],
     ['output to /dev/null passes', stops(bash('make 2>/dev/null')), false],
     ['a read of /tmp passes', stops(bash('cat /tmp/anything')), false],
+    ['the owner\'s bundle copied into Components passes', stopsIn(yes, bash(`cp -R build/Unit.component ${plugIns}/Components/Unit.component`)), false],
+    ['a file inside the owner\'s VST3 bundle passes', stopsIn(yes, write(`${plugIns}/VST3/Unit.vst3/Contents/Info.plist`)), false],
+    ['the gate removing its copy passes', stopsIn(yes, bash(`rm -rf ${plugIns}/Components/Unit.component`)), false],
+    ['a bundle the owner did not name stops it', stopsIn(yes, write(`${plugIns}/Components/Other.component/x`)), true],
+    ['the owner\'s bundle in another plug-in folder stops it', stopsIn(yes, write(`${plugIns}/HAL/Unit.component/x`)), true],
+    ['the plug-in folder itself stops it', stopsIn(yes, write(`${plugIns}/Components/loose.txt`)), true],
+    ['with no yes in the layout the copy stops it', stopsIn(dir, write(`${plugIns}/Components/Unit.component/x`)), true],
     ['the runner gets the halt as JSON on exit 0', runner.status === 0 && runner.stdout.includes('"continue":false'), true],
   ];
   return verdicts('stay-inside', rows);

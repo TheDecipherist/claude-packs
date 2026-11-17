@@ -138,6 +138,8 @@ export interface LayoutGuards {
   time?: { probePattern?: string; saveCommand?: string };
   images?: { guarded?: readonly string[]; allowed?: readonly string[] };
   watchdog?: { stop?: boolean };
+  /** stay-inside: the bundles the owner allows copied into ~/Library/Audio/Plug-Ins/{Components,VST3} for a host gate (auval). */
+  stayInside?: { pluginCopies?: readonly string[] };
   [guard: string]: unknown;
 }
 

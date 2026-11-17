@@ -33,12 +33,13 @@ get_target_property (VST3_BUNDLE <Target>_VST3 JUCE_PLUGIN_ARTEFACT_FILE)
 add_test (NAME pluginval COMMAND ${PLUGINVAL} --strictness-level 10 ${VST3_BUNDLE})
 
 if (APPLE)
-    add_test (NAME auval COMMAND auval -v aumu <Plug> <Manu>)
+    # a script that copies <Product>.component in, runs auval, and removes the copy (below)
+    add_test (NAME auval COMMAND <copy-validate-remove script> aumu <Plug> <Manu>)
     set_tests_properties (auval PROPERTIES TIMEOUT 30)
 endif()
 ```
 
 - pluginval exits 1 when any test fails, so ctest reads it as is. `REQUIRED` stops the configure where pluginval is not installed, rather than leaving a gate out.
-- `auval` finds only an installed component: build the AU with `COPY_PLUGIN_AFTER_BUILD TRUE`. The `TIMEOUT 30` is the 30 s the release law asks for.
+- `auval` finds only an installed component, under `~/Library/Audio/Plug-Ins/Components`, which is outside the project: `stay-inside` stops the session on a write there unless the owner has said yes. Ask once; with the yes, name the bundle in `.claude/layout.json` (`"guards": { "stayInside": { "pluginCopies": ["<Product>.component"] } }`, the VST3 bundle too where a gate needs it) and record the yes in the project's decisions. Then the gate itself copies the built bundle there, runs `auval`, and removes its copy whatever the verdict, so nothing is left installed. Never `COPY_PLUGIN_AFTER_BUILD TRUE`: it writes there on every build, where no hook sees it. With no yes, register the test `DISABLED TRUE` with the reason beside it: ctest lists it Not Run, never as a pass. The `TIMEOUT 30` is the 30 s the release law asks for.
 - Each format the build makes gets its own pluginval line (`<Target>_AU` too, on macOS).
 - See each one red once: a parameter whose state does not restore fails pluginval at 10, and a wrong subtype code fails `auval`.
