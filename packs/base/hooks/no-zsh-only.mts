@@ -16,9 +16,12 @@ import { judgeVerdict } from './lib/writes.mts';
 const ZSH_ONLY = /\$\{(?:\([a-zA-Z@#%:,;!.'"0-9\- ]+\)|[=^~])/;
 const singleQuoted = (text: string): string => text.replace(/'[^']*'/g, "''");
 
-/** The zsh-only expansion a command uses, or null. Single-quoted text and heredoc bodies are no commands. */
+// an escaped dollar is a literal one wherever it stands: a note quoting the form it was refused for is no expansion (KWB-next)
+const escapedDollars = (text: string): string => text.replace(/\\\$/g, '');
+
+/** The zsh-only expansion a command uses, or null. Single-quoted text, heredoc bodies and escaped dollars are no commands. */
 export function zshOnlyIn(command: string): string | null {
-  const body = singleQuoted(dropHeredocs(command));
+  const body = escapedDollars(singleQuoted(dropHeredocs(command)));
   return ZSH_ONLY.exec(body)?.[0] ?? null;
 }
 
@@ -52,6 +55,8 @@ export function selftest(): number {
     ['a default and a strip', sh('echo ${A:-x} ${B%.md}'), 0],
     ['the form in single quotes is no command', sh("echo 'never ${(f)x}'"), 0],
     ['nor in a heredoc body', sh("cat <<'EOF'\n${=P}\nEOF"), 0],
+    ['an escaped dollar in double quotes is a literal, no expansion (KWB-next)', sh('npx x logs mark 1 right "used \\${=F}; staged from a file"'), 0],
+    ['the form unescaped in double quotes still expands, and is refused', sh('echo "${=F}"'), 2],
     ['a judge writes no file (the write trap)', writtenSince(dir, before).join(','), ''],
   ]);
 }
