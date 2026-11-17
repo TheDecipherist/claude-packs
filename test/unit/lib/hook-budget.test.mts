@@ -5,7 +5,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { toJson } from '../../../packs/base/hooks/lib/json.mts';
-import { BUILD_END, BUILD_START, DAEMON_START, logHook, type HookLogCall } from '../../../packs/base/hooks/lib/hook-log.mts';
+import { BUILD_END, BUILD_START, BUSY_END, BUSY_START, DAEMON_START, logHook, type HookLogCall } from '../../../packs/base/hooks/lib/hook-log.mts';
 import { BUILD_WINDOW_MS, COLD_EVENT_CALLS, COLD_HOOK_CALLS, EVENT_BUDGET, POOL_QUEUE_MS, budgetProblems, classOf, percentile } from '../../../lib/hook-budget.mts';
 
 const project = (): string => { const dir = scratchDir('hook-budget-'); ensureDir(join(dir, '.claude')); return dir; };
@@ -192,4 +192,15 @@ test('without a daemon-start line no call is cold: the process-per-hook runner p
   const dir = project();
   lines(dir, 8, { ...BASH, hook: 'plain', ms: 900, code: 0 });
   assert.equal(said(dir).problems.length, 1);
+});
+
+// supernova2_monitor, after its turn 31: the pool's waits came while another project's gates held the machine past the ceiling
+test('an event the pool made wait while the machine was past the governor\'s ceiling is not charged to the pool; after it is (KWB-next)', () => {
+  const dir = project();
+  logHook(dir, { event: 'Load', hook: BUSY_START, ms: 0, code: 0, tool: 'machine' });
+  lines(dir, 30, { ...BASH, hook: 'event', ms: 160, code: 0, queue: 150, source: 'daemon' });
+  logHook(dir, { event: 'Load', hook: BUSY_END, ms: 0, code: 0, tool: 'machine' });
+  assert.deepEqual(said(dir).problems, [], 'waits on a full machine are not the pool');
+  lines(dir, 30, { ...BASH, hook: 'event', ms: 160, code: 0, queue: 150, source: 'daemon' });
+  assert.match(said(dir).problems.join('\n'), /pool is full at Pre Bash/, 'the same waits on a machine with room are');
 });

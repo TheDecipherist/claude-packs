@@ -6,7 +6,7 @@
 // The runner's own line (run-hooks: one process for a settings entry, node's start-up included) is judged the same way.
 import { statSync } from 'node:fs';
 import { join } from 'node:path';
-import { BUILD_END, BUILD_START, DAEMON_START, readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
+import { BUILD_END, BUILD_START, BUSY_END, BUSY_START, DAEMON_START, readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
@@ -35,7 +35,8 @@ export function installedAt(projectDir: string): number {
 export function hookTimes(projectDir: string, last: number = LAST, since = 0): HookTime[] {
   const by = new Map<string, number[]>();
   // the daemon's start and buildq's build window lines mark times, they are no hook (a build-end once read "13/1022" here)
-  const calls = readHookLog(projectDir).filter((x) => x.hook !== DAEMON_START && x.hook !== BUILD_START && x.hook !== BUILD_END);
+  const MARKS = new Set([DAEMON_START, BUILD_START, BUILD_END, BUSY_START, BUSY_END]);
+  const calls = readHookLog(projectDir).filter((x) => !MARKS.has(x.hook));
   for (const r of calls.filter((x) => since === 0 || Date.parse(x.time) >= since)) {
     const list = by.get(r.hook) ?? [];
     list.push(r.ms);

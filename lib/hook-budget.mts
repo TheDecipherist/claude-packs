@@ -4,7 +4,7 @@
 // line when not. A daemon whose pool is full (the `queue` of its event lines over 20 ms at p95) is named as the cause, and no hook of
 // that event is blamed for time it spent waiting. Fewer than MIN_CALLS calls are printed, not judged (one call is not a p95).
 import { join } from 'node:path';
-import { BUILD_END, BUILD_START, DAEMON_START, readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
+import { BUILD_END, BUILD_START, BUSY_END, BUSY_START, DAEMON_START, readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
 import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { SPREAD } from '../packs/base/hooks/resident/options.mts';
@@ -80,8 +80,9 @@ export function outsideBuilds(entries: readonly HookLogEntry[]): { kept: HookLog
   let during = 0;
   for (const e of entries) {
     const at = Date.parse(e.time);
-    if (e.hook === BUILD_START) { open.set(e.tool, at); continue; }
-    if (e.hook === BUILD_END) { open.delete(e.tool); continue; }
+    // a build's window, keyed by its pid, and a busy machine's (KWB-next: another project held the cores), keyed `machine`
+    if (e.hook === BUILD_START || e.hook === BUSY_START) { open.set(e.tool, at); continue; }
+    if (e.hook === BUILD_END || e.hook === BUSY_END) { open.delete(e.tool); continue; }
     for (const [pid, from] of open) if (at - from > BUILD_WINDOW_MS) open.delete(pid);
     if (open.size > 0) { during += 1; continue; }
     kept.push(e);

@@ -7,7 +7,8 @@
 import { crashVerdict } from '../lib/crash-policy.mts';
 import { CRASHES, REFUSALS, logCall, type HookRun } from '../lib/event-log.mts';
 import { shortHash } from '../lib/hash.mts';
-import { LOG, appendRotated, hookLogLine } from '../lib/hook-log.mts';
+import { BUSY_END, BUSY_START, LOG, appendRotated, hookLogLine } from '../lib/hook-log.mts';
+import { budgetOf, machineHost } from '../lib/governor-budget.mts';
 import { noteEventGitState } from '../lib/git-state.mts';
 import { hookRowsFor } from '../lib/hook-table.mts';
 import { parseJson, toJson } from '../lib/json.mts';
@@ -21,10 +22,23 @@ import { mayHaveWritten, type ResidentIndex } from './index.mts';
 import type { Done, Job } from './messages.mts';
 import type { Pool } from './pool.mts';
 import type { StatusKeeper } from './status.mts';
-import type { HookEvent, HookTableRow } from '../lib/types.d.mts';
+import type { Env, HookEvent, HookTableRow } from '../lib/types.d.mts';
 
 /** The events whose recorders run when a judge refused: the call or the stop happened, refused or not. */
 const RECORDS_A_REFUSAL: ReadonlySet<string> = new Set(['PreToolUse', 'Stop']);
+
+/** Whether each project's last event found the machine past the governor's ceiling. */
+const BUSY = new Map<string, boolean>();
+
+/** A marker line when the machine's 1-minute load crosses the governor's ceiling, written before the event's own lines so the event
+ *  lies inside the window it opens: doctor judges no hook and no pool wait in a machine others filled (KWB-next), as in a build. */
+function busyMark(root: string, env: Env): string {
+  const host = machineHost(env);
+  const busy = host.load() > budgetOf(host, root).ceiling;
+  if (busy === (BUSY.get(root) ?? false)) return '';
+  BUSY.set(root, busy);
+  return hookLogLine({ event: 'Load', hook: busy ? BUSY_START : BUSY_END, ms: 0, code: 0, tool: 'machine' });
+}
 
 /** After the first refusal, how long the other judges get to answer before the reply goes (review-2-go 2.9). */
 export const GRACE_MS = 30;
@@ -147,7 +161,7 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
   const wall = Date.now() - arrival;
   const tool = ev.tool_name ?? ev.source;
   const queue = picked + Math.max(0, ...arrived.map((h) => h.queue));
-  appendRotated(root, LOG, arrived.map((h) => hookLogLine({ event: ev.hook_event_name, hook: h.hook, ms: h.ms, code: h.code, tool })).join('')
+  appendRotated(root, LOG, busyMark(root, request.env) + arrived.map((h) => hookLogLine({ event: ev.hook_event_name, hook: h.hook, ms: h.ms, code: h.code, tool })).join('')
     + hookLogLine({ event: ev.hook_event_name, hook: 'event', ms: wall, code, tool, queue, source: 'daemon' }));
   logCall(root, text, arrived, appendRotated, wall);
   if (ev.hook_event_name === 'PostToolUse' && mayHaveWritten(ev.tool_name)) d.index.stale();

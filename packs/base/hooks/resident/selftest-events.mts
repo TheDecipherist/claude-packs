@@ -7,9 +7,10 @@ import { put, readText } from '../lib/files.mts';
 import { parseJson } from '../lib/json.mts';
 import { asRecord } from '../lib/merge-out.mts';
 import { PLANTS, asks, INTRUDER } from './selftest-plants.mts';
-import { alive, ask, dropRig, eventText, filesOf, makeRig, start, stopAll, waitFor } from './selftest-rig.mts';
+import { alive, ask, dropRig, eventText, filesOf, makeRig, request, start, stopAll, waitFor } from './selftest-rig.mts';
 import { readState } from './state.mts';
 import type { VerdictRow } from '../lib/types.d.mts';
+import type { WireRequest } from '../lib/proxy-wire.mts';
 
 const lines = (file: string): Record<string, unknown>[] => (readText(file) ?? '').split('\n').filter(Boolean).map((l) => asRecord(parseJson(l)) ?? {});
 const nap = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
@@ -61,6 +62,13 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
     cases.push(['a refused Stop: its recorder still runs', stop.code === 2 && existsSync(join(rig.dir, 'stop.txt')), true]);
     const sub = await ask(rig, eventText(rig, 'SubRef', {}, 'SubagentStop'));
     cases.push(['a refused SubagentStop: its recorder does not run', sub.code === 2 && !existsSync(join(rig.dir, 'sub.txt')), true]);
+
+    // KWB-next: a machine past the governor's ceiling is marked before the event's lines, and marked again when it has room
+    const planted = (load: string): Partial<WireRequest> => ({ env: { ...request(rig).env, CLAUDE_PACKS_GOVERNOR_CORES: '10', CLAUDE_PACKS_GOVERNOR_LOAD: load } });
+    await ask(rig, eventText(rig, 'Fast'), planted('9.5'));
+    await ask(rig, eventText(rig, 'Fast'), planted('0'));
+    const marks = (readText(join(rig.dir, '.claude/hooks.log')) ?? '').split('\n').filter((l) => /\tbusy-(start|end)\t/.test(l)).map((l) => l.split('\t')[2]);
+    cases.push(['a busy machine is marked, and its end is marked', marks.join(','), 'busy-start,busy-end']);
 
     const t3 = Date.now();
     const slowPost = await ask(rig, eventText(rig, 'PostSlow', {}, 'PostToolUse'));

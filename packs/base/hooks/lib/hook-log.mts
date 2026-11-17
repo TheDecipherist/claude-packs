@@ -30,6 +30,10 @@ export const DAEMON_START = 'daemon-start';
  *  because a build that holds the cores slows every hook beside it (KWB-next, supernova2_monitor WB-11). */
 export const BUILD_START = 'build-start';
 export const BUILD_END = 'build-end';
+/** The daemon's lines around a time the machine's load stood past the governor's ceiling (event `Load`, tool `machine`): doctor judges
+ *  no hook's time and no pool wait inside one, as inside a build, since a machine others filled slows every hook (KWB-next). */
+export const BUSY_START = 'busy-start';
+export const BUSY_END = 'busy-end';
 export const LOG_MAX_BYTES = 1024 * 1024;
 export const LOGS: string = join('.claude', 'logs');
 
