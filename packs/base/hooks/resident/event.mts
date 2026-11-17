@@ -30,11 +30,13 @@ const RECORDS_A_REFUSAL: ReadonlySet<string> = new Set(['PreToolUse', 'Stop']);
 /** Whether each project's last event found the machine past the governor's ceiling. */
 const BUSY = new Map<string, boolean>();
 
-/** A marker line when the machine's 1-minute load crosses the governor's ceiling, written before the event's own lines so the event
+/** A marker line when the machine's 1-minute load crosses the governor's budget, written before the event's own lines so the event
  *  lies inside the window it opens: doctor judges no hook and no pool wait in a machine others filled (KWB-next), as in a build. */
 function busyMark(root: string, env: Env): string {
   const host = machineHost(env);
-  const busy = host.load() > budgetOf(host, root).ceiling;
+  // past the governor's budget (the share of the machine its jobs may hold together), others have taken what it would give work:
+  // the load of 8 to 12 another project's builds hold on 18 cores sat under the ceiling (12.6) and the pool was charged for it
+  const busy = host.load() > budgetOf(host).slots;
   if (busy === (BUSY.get(root) ?? false)) return '';
   BUSY.set(root, busy);
   return hookLogLine({ event: 'Load', hook: busy ? BUSY_START : BUSY_END, ms: 0, code: 0, tool: 'machine' });
