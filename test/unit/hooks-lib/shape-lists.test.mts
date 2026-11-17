@@ -40,3 +40,14 @@ test('a concept that is one, has no count or a count under two, is never a list;
   assert.deepEqual(find(run, concept({ shape: 'many', generator: 'g()', count: 1 })), []);
   assert.deepEqual(find(run, concept(MANY), new Set(['0|slot'])), []);
 });
+
+test('in prose the pieces and the concept are read in one sentence: a numbered list in another sentence is no set (KWB-next)', () => {
+  const lfo = normaliseShape({ concepts: { lfo: { shape: 'many', count: 2, generator: 'lfoId(i)', words: ['lfo', 'lfos'] } } }).concepts['lfo'];
+  assert.ok(lfo);
+  // the window supernova2_monitor's refusal 4efa301d was bisected to: lfo named in its first sentence, the boxes listed in its last
+  const prose = 'lfo or oscillator instance by number, or as a program instance named by role. The strings are on the seen-in line below. ' +
+    'The five readings are done on the renders (boxes p0054:2, p0072:0, p0074:0, p0074:1';
+  assert.deepEqual(find([prose], lfo), [], 'the lfo is named in one sentence, the boxes listed in another');
+  assert.match(find(['lfo 0 on; lfo 1 on; then the rest.'], lfo).map((f) => f.why).join(), /one piece per lfo/, 'one sentence still is');
+  assert.match(find(['lfos[0].on(); lfos[1].on();'], lfo).map((f) => f.why).join(), /one piece per lfo/, 'a line of code still is');
+});

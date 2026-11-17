@@ -10,6 +10,9 @@ export interface InstanceFinding { line: number; text: string; concept: string; 
 
 interface Template { tpl: string; v: number }
 
+/** A line's sentences: each ends at . ! or ? followed by a space (`a.b` in code is no end). A line with none is one sentence. */
+const SENTENCES = (line: string): string[] => line.split(/(?<=[.!?])\s+/);
+
 const templatesOf = (t: string): Template[] => [...t.matchAll(/(?<![\w.])\d+(?![\w.])/g)].map((m) => ({ tpl: t.slice(0, m.index) + '#' + t.slice(m.index + m[0].length), v: Number(m[0]) }));
 
 export function handLists(lines: readonly string[], c: ShapeConceptData, out: InstanceFinding[], seen: Set<string>): void {
@@ -34,7 +37,12 @@ export function handLists(lines: readonly string[], c: ShapeConceptData, out: In
   }
   lines.forEach((l, i) => {
     if (seen.has(`${i}|${c.name}`) || isExampleLine(l) || classify(l, c, null)) return;
-    const pieces = l.split(/[;,]/);
-    if (pieces.length >= count && runOver(pieces, l) !== null) out.push({ line: i + 1, text: l.trim(), concept: c.name, instance: 'each', why: `a hand-listed set, one piece per ${c.name}: write one loop over every ${c.name}, or the generator` });
+    // the pieces and the concept's mention are read in one sentence: a line of code is one statement, a line of prose a paragraph,
+    // and an lfo named in one sentence made a list of measured boxes in another one piece per lfo (supernova2_monitor, KWB-next)
+    const run = SENTENCES(l).some((sentence) => {
+      const pieces = sentence.split(/[;,]/);
+      return pieces.length >= count && runOver(pieces, sentence) !== null;
+    });
+    if (run) out.push({ line: i + 1, text: l.trim(), concept: c.name, instance: 'each', why: `a hand-listed set, one piece per ${c.name}: write one loop over every ${c.name}, or the generator` });
   });
 }
