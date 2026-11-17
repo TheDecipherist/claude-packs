@@ -13,6 +13,8 @@ import { join } from 'node:path';
 import { agentSlot, AGENT_WAIT_MS, freeAgentSlot } from './lib/governor-agents.mts';
 import { machineHost } from './lib/governor.mts';
 import { routeCommand } from './lib/heavy-commands.mts';
+import type { DeclaredHeavy } from './lib/heavy-commands.mts';
+import { readLayout } from './lib/layout.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { claudeRoot } from './lib/project.mts';
 import { bashStep } from './lib/selftest.mts';
@@ -32,12 +34,20 @@ function governedTool(ctx: HookContext): string | null {
   return null;
 }
 
+/** The project's own heavy scripts, from layout.json `guards.governor.heavy`: each a script path and the slots it wants. */
+function declaredHeavy(root: string): DeclaredHeavy[] {
+  const list = readLayout(root).guards?.['governor'];
+  const heavy = typeof list === 'object' && list !== null ? (list as { heavy?: unknown }).heavy : null;
+  if (!Array.isArray(heavy)) return [];
+  return heavy.filter((d): d is DeclaredHeavy => typeof d?.script === 'string' && Number.isInteger(d?.want) && d.want > 0);
+}
+
 /** The Bash call with its heavy parts put through `governed`, or nothing to say. */
 function route(event: HookEvent, ctx: HookContext): Verdict {
   const input = event.tool_input ?? {};
   const command = typeof input['command'] === 'string' ? input['command'] : '';
   const tool = command === '' ? null : governedTool(ctx);
-  const routed = tool === null ? null : routeCommand(command, tool);
+  const routed = tool === null ? null : routeCommand(command, tool, declaredHeavy(ctx.projectDir));
   if (routed === null) return pass;
   return say({ hookSpecificOutput: { hookEventName: 'PreToolUse', updatedInput: { ...input, command: routed } } });
 }

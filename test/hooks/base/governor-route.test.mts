@@ -5,7 +5,7 @@
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-import { assert, fresh, hookRun, test } from '../../kit-cli.mts';
+import { assert, fresh, hookRun, readFileSync, test, writeFileSync } from '../../kit-cli.mts';
 import type { Payload } from '../../kit-cli.mts';
 import { fixture, holdsTheContract } from '../hook-rig.mts';
 import { heavyOf, routeCommand } from '../../../packs/base/hooks/lib/heavy-commands.mts';
@@ -114,4 +114,20 @@ test('an agent start that gets no slot in time is refused with the governor\'s a
   assert.equal(inFlight(machineHost(env)).waiting.length, 0, 'a refused start leaves the queue');
   assert.equal(hookRun(project, HOOK, { hook_event_name: 'SubagentStop', agent_id: 'x' }, env).status, 0);
   assert.equal(hookRun(project, HOOK, agentStart('c'), env).status, 0);
+});
+
+test('governor-route: a heavy script the project names in guards.governor.heavy is routed like a build; one not named is not (KWB-next)', () => {
+  const declared = [{ script: 'tools/screen-boxes.py', want: 4 }];
+  assert.deepEqual(heavyOf(['python3', '-I', 'tools/screen-boxes.py', 'out.json'], declared), { kind: 'other', want: 4 });
+  assert.deepEqual(heavyOf(['python3', '-I', '/p/proj/tools/screen-boxes.py'], declared), { kind: 'other', want: 4 }, 'an absolute path to it too');
+  assert.equal(heavyOf(['python3', '-I', 'tools/other.py'], declared), null, 'a script not named');
+  assert.equal(heavyOf(['python3', '-I', 'tools/screen-boxes.py'], []), null, 'with nothing named, nothing is heavy');
+  const routed = routeCommand('python3 -I tools/screen-boxes.py a.json > log.txt', '/p/.claude/tools/governed.mjs', declared) ?? '';
+  assert.match(routed, /governed\.mjs' --for other --want 4 -- python3 -I tools\/screen-boxes\.py/);
+  const project = fixture('base');
+  const layoutFile = join(project, '.claude/layout.json');
+  const layout = JSON.parse(readFileSync(layoutFile, 'utf8')) as Record<string, unknown>;
+  writeFileSync(layoutFile, JSON.stringify({ ...layout, guards: { governor: { heavy: declared } } }));
+  assert.match(routedBy(project, 'python3 -I tools/screen-boxes.py a.json'), /--for other --want 4 -- python3/, 'the installed hook reads the layout');
+  assert.equal(routedBy(project, 'python3 -I tools/other.py a.json'), '');
 });

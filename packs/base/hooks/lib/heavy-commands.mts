@@ -9,6 +9,9 @@ import type { JobKind } from './governor-store.mts';
 
 /** A heavy form: what kind of job it is and how many slots it asks for. */
 export interface Heavy { kind: JobKind; want: number }
+/** A project's own heavy script, named in layout.json `guards.governor.heavy`: a measure over hundreds of pictures, say, that no table
+ *  of the kit's could know (supernova2_monitor's screen measures took every core ungoverned, KWB-next). */
+export interface DeclaredHeavy { script: string; want: number }
 
 const TEST: Heavy = { kind: 'test', want: 3 };
 const BUILD: Heavy = { kind: 'build', want: 4 };
@@ -93,11 +96,14 @@ function realWords(words: readonly string[]): string[] {
 }
 
 /** What a command's words are: a heavy form, a command already governed (or one that takes its own grant, buildq), or null. */
-export function heavyOf(words: readonly string[]): Heavy | 'governed' | null {
+export function heavyOf(words: readonly string[], declared: readonly DeclaredHeavy[] = []): Heavy | 'governed' | null {
   if (words.includes('sudo')) return null;
   const real = realWords(words);
   const [head = '', ...args] = real;
   if (GOVERNED.test(head) || (basename(head) === 'node' && GOVERNED.test(args[0] ?? ''))) return 'governed';
+  // the program itself or the script an interpreter runs, named by the project, by its path or a path ending in it
+  const own = declared.find((d) => real.slice(0, 4).some((w) => w === d.script || w.endsWith(`/${d.script}`)));
+  if (own) return { kind: 'other', want: own.want };
   const name = basename(head);
   if (PACKAGE_MANAGERS.has(name)) return packageForm(args);
   if (MAKES.has(name)) return BUILD;
@@ -174,14 +180,14 @@ export const governedPrefix = (tool: string, heavy: Heavy): string => `node '${t
 
 /** The line with each heavy segment that starts a list item or a pipe put through `governed` (the tool's path), or null when nothing
  *  in it is routed. */
-export function routeCommand(command: string, tool: string): string | null {
+export function routeCommand(command: string, tool: string, declared: readonly DeclaredHeavy[] = []): string | null {
   const segments = segmentsOf(command);
   if (segments === null) return null;
   const inserts: { at: number; text: string }[] = [];
   for (const segment of segments) {
     if (segment.piped) continue;
     const words = wordsOf(segment.text);
-    const heavy = heavyOf(words.map((w) => w.word));
+    const heavy = heavyOf(words.map((w) => w.word), declared);
     if (heavy === null || heavy === 'governed') continue;
     const first = words.findIndex((w) => !ASSIGNMENT.test(w.word) && !BUILTINS.has(w.word));
     const at = words[first]?.at;
