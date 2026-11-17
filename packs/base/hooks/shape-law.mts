@@ -48,12 +48,20 @@ function judgeText(rel: string, before: string | null, after: string, shape: Loa
   return out;
 }
 
+/** True when a copy's source lies in a path its checkout's manifest excludes: its text was never judged. */
+function sourceExcluded(projectDir: string, from: string, cwd: string): boolean {
+  const root = checkoutRoot(projectDir, from, cwd);
+  const shape = readShape(root) ?? readShape(projectDir);
+  return shape !== null && isExcluded(relInCheckout(projectDir, from, cwd), shape);
+}
+
 export const hook: Hook = (event, ctx) => {
   for (const w of writesOf(event, event.cwd ?? ctx.cwd, ctx.env)) {
     if (w.after === null || w.op === 'delete' || !insideProject(ctx.projectDir, w.path, ctx.cwd) || w.after.includes('\0')) continue;
-    // a copy or move of a project file carries text judged where it was written (or excluded there): scanning it again found nothing
-    // new and cost a Pre Bash event up to 1.3 s on an 86 KB JSON (supernova2_monitor, KWB-next); text copied in from outside is new
-    if (w.from && insideProject(ctx.projectDir, w.from, ctx.cwd)) continue;
+    // a copy or move of a file this law judges carries text judged where it was written: scanning it again found nothing new and cost
+    // a Pre Bash event up to 1.3 s on an 86 KB JSON (supernova2_monitor, KWB-next). Text from outside the project, or from a file the
+    // manifest excludes, was never judged, and is judged here
+    if (w.from && insideProject(ctx.projectDir, w.from, ctx.cwd) && !sourceExcluded(ctx.projectDir, w.from, ctx.cwd)) continue;
     const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
     const shape = readShape(root) ?? readShape(ctx.projectDir);
     if (!shape || shape.error) continue;
@@ -104,7 +112,7 @@ const SELFTEST_LAYOUT: Partial<Layout> = {
 
 export function selftest(): number {
   const hookFile = fileURLToPath(import.meta.url);
-  const dir = scratchProject({ 'design/shape.json': JSON.stringify(SELFTEST_SHAPE), 'src/world/Old.cpp': 'void f() { if (slot == 2) g(); }\n// PLACE\n' }, SELFTEST_LAYOUT);
+  const dir = scratchProject({ 'design/shape.json': JSON.stringify(SELFTEST_SHAPE), 'src/world/Old.cpp': 'void f() { if (slot == 2) g(); }\n// PLACE\n', 'third_party/lib/v.cpp': 'void v() { if (slot == 2) g(); }\n' }, SELFTEST_LAYOUT);
   const bare = scratchProject({}, SELFTEST_LAYOUT);
   const before = snapshot(dir);   // the project as the judge finds it: the rows below must leave it as it is
   const w = (rel: string, text: string, at = dir): number | null => runHook(hookFile, at, writeOf(join(at, rel), text)).status;
@@ -123,6 +131,7 @@ export function selftest(): number {
     // KWB-next: a copy carries its source's text, judged where it was written; text copied in from outside is new to the project
     ['a copy of a project file is no new text', sh('cp src/world/Old.cpp scratch/Old.cpp'), 0],
     ['a copy into the project from outside it is judged', sh(`cp ${join(bare, 'outside.cpp')} src/world/Copied.cpp`), 2],
+    ['a copy of an excluded file is judged: its text never was', sh('cp third_party/lib/v.cpp src/world/V.cpp'), 2],
     ['a copy written over again in the same command is judged', sh("cp src/world/Old.cpp scratch/Old2.cpp && echo 'if (slot == 3) h();' >> scratch/Old2.cpp"), 2],
     // planted: an engine file
     ['engine: slotIx == 1', w('src/engines/Engine.cpp', 'void f() { if (slotIx == 1) startCrew(); }\n'), 2],
