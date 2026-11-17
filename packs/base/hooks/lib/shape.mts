@@ -93,7 +93,27 @@ export function findInstanceLiteralsCached(text: string | null | undefined, file
   return answer;
 }
 
-export function addedFindings<F extends Keyed>(before: string | null | undefined, after: string | null | undefined, find: (text: string) => F[]): F[] {
+/** How many of the old text's last lines judge an append in a window: a run of hand-listed lines never spans more. */
+const APPEND_CONTEXT = 40;
+
+/** What an append to prose adds, judged on a window: the old text's last lines, with and without what was appended. A log appended
+ *  to after every step cost three hooks its whole length twice on each append (supernova2_monitor, 315 ms on one `cat >>`, KWB-next).
+ *  Prose only (`window`): in code an alias set far above a line changes what the line means. */
+function appendWindow(before: string, after: string): { before: string; after: string; offset: number } | null {
+  if (!after.startsWith(before) || after.length === before.length) return null;
+  const lines = before.split('\n');
+  if (lines.length <= APPEND_CONTEXT * 2) return null;
+  const offset = lines.length - APPEND_CONTEXT;
+  const kept = lines.slice(offset).join('\n');
+  return { before: kept, after: kept + after.slice(before.length), offset };
+}
+
+export function addedFindings<F extends Keyed>(before: string | null | undefined, after: string | null | undefined, find: (text: string) => F[], { window = false }: { window?: boolean } = {}): F[] {
+  const tail = window && before && after ? appendWindow(before, after) : null;
+  if (tail) {
+    const shift = (f: F): F => ('line' in f && typeof f.line === 'number' ? { ...f, line: f.line + tail.offset } : f);
+    return addedFindings(tail.before, tail.after, find).map(shift);
+  }
   const key = (f: Keyed): string => `${f.concept}|${f.instance}|${f.why}`;
   const had = new Map<string, number>();
   for (const f of find(before ?? '')) had.set(key(f), (had.get(key(f)) ?? 0) + 1);

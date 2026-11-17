@@ -56,7 +56,7 @@ export function briefFindings(event: HookEvent, ctx: Pick<HookContext, 'projectD
     if (!BRIEFS.test(rel)) continue;
     const shape = readShape(checkoutRoot(ctx.projectDir, w.path, ctx.cwd)) ?? readShape(ctx.projectDir);
     if (!shape || shape.error || isExcluded(rel, shape) || addressedOutside(rel, w.after)) continue;
-    const findings = addedFindings(w.before, w.after, find(shape));
+    const findings = addedFindings(w.before, w.after, find(shape), { window: /\.(?:md|txt)$/i.test(rel) });
     if (findings.length) return { where: rel, findings, shape };
   }
   return null;

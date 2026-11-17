@@ -35,9 +35,11 @@ const HOW = 'Build for the shape: a loop over every instance or the generator; a
 
 import type { Env } from './lib/types.d.mts';
 
+const PROSE = /\.(?:md|txt)$/i;
+
 function judgeText(rel: string, before: string | null, after: string, shape: LoadedShape, root: string, env: Env): string[] {
   // a call that takes a count looks like one that takes an index; the declaration tells them apart (KF-17)
-  const lits = addedFindings(before, after, (t) => findInstanceLiteralsCached(t, rel, shape)).filter((f) => !(f.call && declaredAmount(root, f.call, after, env)));
+  const lits = addedFindings(before, after, (t) => findInstanceLiteralsCached(t, rel, shape), { window: PROSE.test(rel) }).filter((f) => !(f.call && declaredAmount(root, f.call, after, env)));
   const test = isTestFile(rel);
   const out = lits.map((f) => `${formatFinding(f, rel)}${test ? `\n      ${TEST_NOTE}` : ''}`);
   const defs = [...addedDefs(before, after, (t) => findSelectorDefs(t, rel, shape)), ...addedDefs(before, after, (t) => findUnknownTypes(t, rel, shape))];

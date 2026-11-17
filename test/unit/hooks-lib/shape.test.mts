@@ -74,3 +74,16 @@ test('a sense is blanked whatever its case: the screen\'s own "Program change" a
   }
   assert.equal(findInstanceLiterals('program 5 is loaded', 'docs/notes.md', s).length, 1, 'the concept itself is still found');
 });
+
+test('an append to prose is judged on a window: the same findings at the same lines, and the finder never reads the whole old text (KWB-next)', () => {
+  const s = normaliseShape({ concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i)', words: ['slot', 'slots'] } }, exclude: [] });
+  const before = Array.from({ length: 2000 }, (_, i) => `- line ${i} of the log, about the work and nothing else.`).join('\n') + '\n';
+  const after = `${before}- the reverb sits on slot 2 for now.\n`;
+  const read: number[] = [];
+  const find = (t: string): ReturnType<typeof findInstanceLiterals> => { read.push(t.length); return findInstanceLiterals(t, 'docs/log.md', s); };
+  const whole = addedFindings(before, after, (t) => findInstanceLiterals(t, 'docs/log.md', s));
+  const windowed = addedFindings(before, after, find, { window: true });
+  assert.deepEqual(windowed.map((f) => [f.line, f.instance]), whole.map((f) => [f.line, f.instance]));
+  assert.equal(windowed[0]?.line, 2001);
+  assert.ok(Math.max(...read) < before.length / 10, `the finder read ${Math.max(...read)} of ${before.length} characters`);
+});
