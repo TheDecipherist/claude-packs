@@ -85,15 +85,21 @@ function headText(root: string, relPath: string, env: Env): string | null {
   return r.status === 0 ? r.stdout : null;
 }
 
-/** The making lines build.md holds now that it did not hold at the commit before the session began (its transcript's birth): a step's
- *  line moved to the Log however it was moved, a shell program's slice included, which no tool write records (supernova2_monitor W1.1). */
-function makingAddedThisSession(root: string, transcript: string | undefined, env: Env): string[] {
-  if (!transcript) return [];
+/** build.md's lines at the commit before the session began (its transcript's birth): empty when no commit was before it, null when
+ *  there is no transcript to date the session by (then nothing is known of what it added). */
+function buildMdAtBirth(root: string, transcript: string | undefined, env: Env): Set<string> | null {
+  if (!transcript) return null;
   let born: number;
-  try { const st = statSync(transcript); born = st.birthtimeMs || st.ctimeMs; } catch { return []; }
+  try { const st = statSync(transcript); born = st.birthtimeMs || st.ctimeMs; } catch { return null; }
   const sha = gitRun(['rev-list', '-1', `--before=@${Math.floor(born / 1000)}`, 'HEAD'], { cwd: root, env }).stdout.trim();
   const old = sha ? gitRun(['show', `${sha}:build.md`], { cwd: root, env }) : null;
-  const before = new Set(old && old.status === 0 ? old.stdout.split('\n') : []);
+  return new Set(old && old.status === 0 ? old.stdout.split('\n') : []);
+}
+
+/** The making lines build.md holds now that it did not hold at the commit before the session began (`before`): a step's line moved to
+ *  the Log however it was moved, a shell program's slice included, which no tool write records (supernova2_monitor W1.1). */
+function makingAddedThisSession(root: string, before: ReadonlySet<string> | null): string[] {
+  if (!before) return [];
   let now = '';
   try { now = readFileSync(join(root, 'build.md'), 'utf8'); } catch { return []; }
   // the Log only: In progress is read on its own, and a line still there that an earlier step wrote is that step's, not this one's
@@ -130,13 +136,16 @@ function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: 
     for (const c of conceptsIn(addedCode(w.path, w.text ?? '', headText(root, rel(w.path), at.env)), sh)) if (!written.has(c) && (holds(w.path)?.has(c) ?? true)) written.set(c, rel(w.path));
   }
   // a making line this turn wrote into build.md counts wherever it now stands: the order moves a finished step's line to the Log, and
-  // reading In progress alone sent such a turn back at every Stop (supernova2_monitor W1.1, seven send-backs, KWB-next)
+  // reading In progress alone sent such a turn back at every Stop (supernova2_monitor W1.1, seven send-backs, KWB-next). Only a line
+  // build.md did not hold when the session began: a write's text may be the whole file (a shell program's rewrite, a Write), and its
+  // earlier steps' lines are not this turn's (supernova2_monitor W1b.1, W0.3's "bank", forty send-backs, KWB-next)
+  const atBirth = buildMdAtBirth(root, transcript, at.env);
   const movedHere = writes.filter((w) => w.path.endsWith('/build.md') && w.text)
-    .flatMap((w) => (w.text ?? '').split('\n').filter((l) => /\bmaking:/i.test(l)));
+    .flatMap((w) => (w.text ?? '').split('\n').filter((l) => /\bmaking:/i.test(l) && !atBirth?.has(l)));
   const own = [...makingLines(root, at.projectDir), ...movedHere].join('\n');
   // a Log line the session added counts only as the step's line being there: a long session (a supervisor's) holds every earlier
   // step's line, and judging their concepts sent back a turn that wrote none of them (supernova2_monitor, W0.3's "bank", KWB-next)
-  const making = [own, ...makingAddedThisSession(root, transcript, at.env)].filter(Boolean).join('\n');
+  const making = [own, ...makingAddedThisSession(root, atBirth)].filter(Boolean).join('\n');
   const wroteSource = [...new Set(mine.filter((w) => isSource(w.path)).map((w) => rel(w.path)))];
   // a turn that writes source answers "what are you making" first, even before the manifest knows the concept
   if (!making && (written.size || wroteSource.length)) {

@@ -161,6 +161,19 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
     ['the word "never" in a making line is no concept (KWB-215)', slotTurn({ making: `${good.replace('; reuse', '; never a bare literal; reuse')}` }), 0],
     ['the shape word the rule asks for is no concept (KF-24)', turn([W('src/mix/level.cpp', mixerCode)], { making: 'making: x; concepts: slot, many; mixer, one; reuse: none' }), 0],
   ];
+  // KWB-next (supernova2_monitor W1b.1, forty send-backs): a shell program rewrote build.md whole, moving the step's line to the Log
+  // beside an earlier step's line naming lane; the write's text holds both, and only the line the session added is the turn's
+  const rewroteBuildMd = (): number | null => {
+    const old = `- S0: ${MAKING_LANE}. Done, abc1234.`;
+    writeFileSync(at('build.md'), `${BUILD('')}\n## Log\n\n${old}\n`);
+    const then = `@${Math.floor(Date.now() / 1000) - 5} +0000`;
+    git('add', 'build.md');
+    gitRun(['commit', '-qm', 'an earlier step'], { cwd: dir, env: { ...process.env, GIT_COMMITTER_DATE: then, GIT_AUTHOR_DATE: then }, identity: IDENTITY });
+    rmSync(T, { force: true });   // a new session: its transcript is born after that commit
+    const whole = `${BUILD('')}\n## Log\n\n- S1: ${good}. Done, abc1235.\n${old}\n`;
+    return turn([W('src/slot/gain.cpp', slotCode), use('Bash', { command: `cat > build.md <<'EOF'\n${whole}EOF` })], { making: '' });
+  };
+  cases.push(['a whole build.md rewritten by the shell: an earlier step\'s Log line naming lane is not this turn\'s (KWB-next)', rewroteBuildMd(), 0]);
   cases.push(['a judge writes no file (the write trap)', trapped.join(','), '']);
   return verdicts('making-check', cases);
 }
