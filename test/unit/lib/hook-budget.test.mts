@@ -228,3 +228,22 @@ test('firmware-out-of-git\'s worst allows a commit of many files (its git child 
   for (let i = 0; i < 6; i += 1) logHook(dir, { ...BASH, hook: 'firmware-out-of-git', ms: i === 3 ? 255 : 0, code: 0 });
   assert.deepEqual(said(dir).problems, [], 'one commit of many files at 255 ms');
 });
+
+test('an event made slow only by a hook\'s declared wait (git-guard\'s push) is judged by that hook\'s allowance, not again as the event\'s wall (KWB-next)', () => {
+  // as supernova2_monitor's W2.9 logged it: over 35 calls one push (git-guard 402 ms) and one other slow event made the p95
+  const dir = project();
+  for (let i = 0; i < 35; i += 1) {
+    const push = i === 30;
+    logHook(dir, { ...BASH, hook: 'git-guard', ms: push ? 402 : 1, code: 0 });
+    logHook(dir, { ...BASH, hook: 'other-fake', ms: i === 10 ? 40 : 1, code: 0 });
+    logHook(dir, { ...BASH, hook: 'event', ms: push ? 404 : i === 10 ? 300 : 8, code: 0, queue: 0, source: 'daemon' });
+    logHook(dir, { ...BASH, hook: 'proxy', ms: push ? 405 : i === 10 ? 310 : 11, code: 0, queue: 0, source: 'proxy' });
+  }
+  assert.deepEqual(said(dir).problems, [], 'the push is git-guard\'s to answer for; one other slow event is not a p95');
+  const other = project();
+  for (let i = 0; i < 35; i += 1) {
+    logHook(other, { ...BASH, hook: 'slow-fake', ms: i === 30 ? 400 : 1, code: 0 });
+    logHook(other, { ...BASH, hook: 'proxy', ms: i === 30 ? 405 : i === 10 ? 310 : 11, code: 0, queue: 0, source: 'proxy' });
+  }
+  assert.match(said(other).problems.join('\n'), /^Pre Bash: the event took/m, 'a hook with no declared wait still makes the event slow');
+});

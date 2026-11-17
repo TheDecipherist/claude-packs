@@ -118,6 +118,27 @@ export interface ClassTimes { wall: Spread; wallFrom: 'proxy' | 'event'; queue: 
 
 function lastOf<T>(list: readonly T[]): T[] { return list.slice(-LAST); }
 
+/** The wall lines (an `event` line and the `proxy` line after it) of events in which a hook with a declared worst ran past `over`:
+ *  the lines run hook lines, then the event's line, then the proxy's. */
+function excusedWalls(lines: readonly HookLogEntry[], over: number): Set<HookLogEntry> {
+  const out = new Set<HookLogEntry>();
+  let waited = false;
+  let lastWasExcused = false;
+  for (const l of lines) {
+    if (l.hook === 'event') {
+      if (waited) out.add(l);
+      lastWasExcused = waited;
+      waited = false;
+    } else if (l.hook === 'proxy') {
+      if (lastWasExcused) out.add(l);
+      lastWasExcused = false;
+    } else if (!NOT_HOOKS.has(l.hook) && HOOK_OVERRIDES[l.hook]?.worst !== undefined && l.ms > over) {
+      waited = true;
+    }
+  }
+  return out;
+}
+
 /** Per event class, from the log's last LAST calls of each series. */
 function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, ClassTimes> {
   const byClass = new Map<EventClass, HookLogEntry[]>();
@@ -127,8 +148,11 @@ function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, ClassTime
   }
   const out = new Map<EventClass, ClassTimes>();
   for (const [c, lines] of byClass) {
-    const proxy = lines.filter((l) => l.hook === 'proxy');
-    const events = lines.filter((l) => l.hook === 'event');
+    // an event whose wall a hook's declared wait made slow (git-guard's push, its HOOK_OVERRIDES worst) is judged by that hook's
+    // allowance, not again as the event's wall: a task pushes every commit, and its pushes were the event's p95 (KWB-next)
+    const excused = excusedWalls(lines, EVENT_BUDGET[c].p95);
+    const proxy = lines.filter((l) => l.hook === 'proxy' && !excused.has(l));
+    const events = lines.filter((l) => l.hook === 'event' && !excused.has(l));
     const walls = proxy.length > 0 ? proxy : events;
     const queued = events.filter((l) => l.source === 'daemon' && l.queue !== undefined);
     const hooks = new Map<string, number[]>();
