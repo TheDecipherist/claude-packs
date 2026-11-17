@@ -38,3 +38,17 @@ test('making-check: another hook\'s Stop feedback is a boundary, its own is not'
   assert.equal(judgedBefore(feedback('BLOCKED by making-check: no making line')), false);
   assert.equal(judgedBefore(Buffer.from('{"type":"user","message":{"content":[{"type":"tool_result","content":"Stop hook feedback: x"}]}}')), false, 'a tool result quoting it');
 });
+
+test('a concept word written as a local name: the finding offers the rename beside the making line and the take-back (KWB-next, supernova2_monitor WB-29)', () => {
+  const dir = scratchDir('mct-rename-');
+  put(join(dir, 'design/shape.json'), toJson({ concepts: { part: { shape: 'many', count: 8, generator: 'partId(i, field)', words: ['part', 'parts'] } }, exclude: [] }));
+  put(join(dir, 'build.md'), '# x\n\n## In progress\n\n- W2.2: making: the display measured; concepts: none; reuse: none\n\n## Log\n');
+  const t = join(scratchDir('mct-rename-t-'), 't.jsonl');
+  const write = { type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: join(dir, 'scratch/scan.mjs'), content: 'const part = prof.slice(0, 4);\n' } };
+  put(t, [toJson({ type: 'user', message: { content: 'measure the display' } }), toJson({ type: 'assistant', cwd: dir, message: { content: [write] } })].join('\n') + '\n');
+  put(join(dir, 'scratch/scan.mjs'), 'const part = prof.slice(0, 4);\n');
+  const problems = check({ hook_event_name: 'Stop', transcript_path: t, cwd: dir }, ctx(dir));
+  const found = problems.find((p) => p.includes('does not name part'));
+  assert.ok(found, `the local name is still read as the concept: ${problems.join(' | ')}`);
+  assert.match(found ?? '', /rename/);
+});

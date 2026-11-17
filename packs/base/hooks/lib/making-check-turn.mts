@@ -155,7 +155,11 @@ function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: 
   } else if (making) {
     const named = conceptsIn(making, sh);
     for (const [c, f] of written) {
-      if (!named.has(c)) problems.push(`the making line does not name ${c}, which this turn wrote (${f}): add it with its shape from design/shape.json, or take the write back`);
+      if (!named.has(c)) {
+        problems.push(`the making line does not name ${c}, which this turn wrote (${f}): add it with its shape from design/shape.json; ` +
+          'or, where the word is not that concept (a local name, a slice), rename it, since in code a word the manifest owns means its ' +
+          'concept (supernova2_monitor WB-29); or take the write back');
+      }
     }
     for (const u of unknownConcepts(own, sh)) {
       problems.push(`the making line names "${u}", which has no row in design/shape.json: add the row first (one or many, its generator, its selectors)`);
