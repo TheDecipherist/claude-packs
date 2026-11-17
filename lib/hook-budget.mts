@@ -12,7 +12,7 @@ import { installedAt, median } from './hook-timing.mts';
 
 export const EVENT_CLASSES = ['Pre Bash', 'Pre Write', 'Post', 'Prompt', 'SessionStart', 'Stop'] as const;
 export type EventClass = (typeof EVENT_CLASSES)[number];
-export interface Budget { p50: number; p95: number }
+export interface Budget { p50: number; p95: number; /** A hook's own worst, where its work holds a known wait (a network round trip); else WORST_MS. */ worst?: number }
 
 /** The event's wall, p50 and p95 in ms (the order's table). */
 export const EVENT_BUDGET: Readonly<Record<EventClass, Budget>> = {
@@ -30,7 +30,8 @@ export const HOOK_BUDGET: Budget = { p50: 10, p95: 50 };
 // p50 stays the base budget; the p95 is the git child's own cost. Making the look incremental is the way to remove the rows (KWB-next).
 export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = {
   'reuse-hint': { p50: 80, p95: 200 },
-  'git-guard': { p50: 10, p95: 200 },
+  // a push asks GitHub for its branch heads (git ls-remote): one network round trip, 400 to 550 ms (supernova2_monitor, KWB-next)
+  'git-guard': { p50: 10, p95: 200, worst: 1500 },
   'firmware-out-of-git': { p50: 10, p95: 200 },
 };
 export const WORST_MS = 200;
@@ -158,10 +159,11 @@ function classProblems(c: EventClass, t: ClassTimes): string[] {
   for (const [hook, s] of [...t.hooks].sort(([a], [z]) => a.localeCompare(z))) {
     if (s.calls < MIN_CALLS) continue;
     const own = HOOK_OVERRIDES[hook] ?? HOOK_BUDGET;
+    const hookWorst = own.worst ?? worst;
     // below P95_MIN_CALLS a p95 is the slowest call: the median, the worst and the median again stand for it (as for the pool)
     const p95 = s.calls >= P95_MIN_CALLS ? s.p95 : s.p50;
-    if (s.p50 > own.p50 || p95 > own.p95 || s.worst > worst) {
-      problems.push(`${hook} at ${c}: ${fmt(s)} ms (p50/p95, worst ${s.worst}) over its last ${s.calls} calls, over its budget of ${own.p50}/${own.p95} ms and worst ${worst}: ` +
+    if (s.p50 > own.p50 || p95 > own.p95 || s.worst > hookWorst) {
+      problems.push(`${hook} at ${c}: ${fmt(s)} ms (p50/p95, worst ${s.worst}) over its last ${s.calls} calls, over its budget of ${own.p50}/${own.p95} ms and worst ${hookWorst}: ` +
         'find what it does on every call (a scan, a child process, a whole file read) and keep it or make it incremental');
     }
   }

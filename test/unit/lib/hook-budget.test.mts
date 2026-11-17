@@ -204,3 +204,13 @@ test('an event the pool made wait while the machine was past the governor\'s cei
   lines(dir, 30, { ...BASH, hook: 'event', ms: 160, code: 0, queue: 150, source: 'daemon' });
   assert.match(said(dir).problems.join('\n'), /pool is full at Pre Bash/, 'the same waits on a machine with room are');
 });
+
+// supernova2_monitor after W2.8: one push's ls-remote (539 ms) turned doctor red on git-guard's worst
+test('git-guard\'s worst allows one network round trip (a push asks GitHub for its heads); a hook with no row is held to 200 ms (KWB-next)', () => {
+  const dir = project();
+  const calls = (hook: string): void => { for (let i = 0; i < 6; i += 1) logHook(dir, { ...BASH, hook, ms: i === 2 ? 539 : 3, code: 0 }); };
+  calls('git-guard');
+  assert.deepEqual(said(dir).problems, [], 'a push at 539 ms among quick calls');
+  calls('plain-fake');
+  assert.match(said(dir).problems.join('\n'), /^plain-fake at Pre Bash: .*worst 539/);
+});
