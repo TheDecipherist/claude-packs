@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import { join } from 'node:path';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { CRASHES, EVENTS, REFUSALS, checkoutHead, logCall } from '../../../packs/base/hooks/lib/event-log.mts';
+import { toJson } from '../../../packs/base/hooks/lib/json.mts';
 
 const collect = (): { written: { file: string; row: Record<string, unknown> }[]; append: (root: string, file: string, line: string) => void } => {
   const written: { file: string; row: Record<string, unknown> }[] = [];
@@ -34,4 +35,22 @@ test('checkoutHead reads the branch and commit from files, and nothing from a mi
   put(join(dir, '.git', 'refs', 'heads', 'work', 'x'), 'abcdef0123456789\n');
   assert.deepEqual(checkoutHead(dir), { branch: 'work/x', commit: 'abcdef012345' });
   assert.deepEqual(checkoutHead(join(dir, 'nowhere')), {});
+});
+
+// KWB-next (2026-11-21): stay-inside's two wrong halts on the user's memory note left no refusal row, so neither could be marked wrong
+test('a halt (exit 0, continue false) is a refusal line marked halt, with its stop reason; a plain pass and a message are not', () => {
+  const { written, append } = collect();
+  const halted = toJson({ continue: false, stopReason: 'STOPPED by stay-inside: outside', hookSpecificOutput: { hookEventName: 'PreToolUse' } });
+  const hooks = [
+    { hook: 'stay-inside', ms: 1, code: 0, out: halted },
+    { hook: 'quiet', ms: 1, code: 0, out: '' },
+    { hook: 'says', ms: 1, code: 0, out: toJson({ systemMessage: 'note', continue: true }) },
+  ];
+  logCall('/nowhere', toJson({ session_id: 's1', tool_name: 'Write', tool_input: { file_path: '/x/a.md' } }), hooks, append);
+  assert.deepEqual(written.map((w) => w.file), [EVENTS, REFUSALS], 'one refusal line, for the halt alone');
+  const row = written[1]?.row;
+  assert.equal(row?.hook, 'stay-inside');
+  assert.equal(row?.halt, true);
+  assert.equal(row?.reason, 'STOPPED by stay-inside: outside');
+  assert.equal(row?.id, createHash('sha1').update(`${String(row?.t)}stay-insideSTOPPED by stay-inside: outside`).digest('hex').slice(0, 8));
 });

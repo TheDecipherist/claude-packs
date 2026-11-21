@@ -10,6 +10,7 @@ import { appendFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, readText } from '../packs/base/hooks/lib/files.mts';
 import { readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
+import { isRefusalRow } from '../packs/base/hooks/lib/event-log.mts';
 import { asRecord, parseJson, toJson } from '../packs/base/hooks/lib/json.mts';
 import { LOG_DIR, readJsonl } from './logs-read.mts';
 import { rulesReport, skillsReport } from './logs-usage.mts';
@@ -34,6 +35,8 @@ export interface LogRecord {
   session: string | undefined;
   verdict: string | undefined;
   clear: string | undefined;
+  /** A halt (a hook's `continue: false`): a refusal with code 0 (lib/event-log `isRefusalRow`). */
+  halt: boolean;
   hooks: LoggedHook[];
 }
 
@@ -65,15 +68,16 @@ function recordOf(value: unknown): LogRecord[] {
   const hooks = Array.isArray(r['hooks']) ? r['hooks'].flatMap(loggedHook) : [];
   return [{
     id: str(r['id']), t: str(r['t']), hook: str(r['hook']), code: num(r['code']), file: str(r['file']), command: str(r['command']),
-    tool: str(r['tool']), reason: str(r['reason']), session: str(r['session']), verdict: str(r['verdict']), clear: str(r['clear']), hooks,
+    tool: str(r['tool']), reason: str(r['reason']), session: str(r['session']), verdict: str(r['verdict']), clear: str(r['clear']), halt: r['halt'] === true, hooks,
   }];
 }
 
 const jsonlRecords = (dir: string, name: string): LogRecord[] => readJsonl(dir, name).flatMap(recordOf);
 
 // A crash, in its own log or, in an old log, in refusals.jsonl with a code other than 2. Old lines are read as they are, never rewritten.
-const crashesOf = (dir: string): LogRecord[] => [...jsonlRecords(dir, 'crashes'), ...jsonlRecords(dir, 'refusals').filter((r) => r.code !== 2)];
-const refusalsOf = (dir: string): LogRecord[] => jsonlRecords(dir, 'refusals').filter((r) => r.code === 2);
+const refused = (r: LogRecord): boolean => isRefusalRow({ code: r.code, halt: r.halt });
+const crashesOf = (dir: string): LogRecord[] => [...jsonlRecords(dir, 'crashes'), ...jsonlRecords(dir, 'refusals').filter((r) => !refused(r))];
+const refusalsOf = (dir: string): LogRecord[] => jsonlRecords(dir, 'refusals').filter(refused);
 
 /** hook -> the time of its last clear ("all" stands for every hook). doctor counts only a crash after it. */
 export function clearsOf(dir: string): Map<string, string> {

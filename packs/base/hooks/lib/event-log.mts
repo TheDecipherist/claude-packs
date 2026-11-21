@@ -62,7 +62,19 @@ function lawOf(root: string, hook: string): { kit?: string; hookHash?: string } 
   } catch { return {}; }
 }
 
-/** One call's lines in the logs: the call itself, and each hook that did not let it through (a refusal, a crash). Never throws. */
+/** A halt's reason: a hook that answered exit 0 with `continue: false` (lib/verdict `halt`) stopped the session, which is a refusal the
+ *  user meets; null for any other answer. Before this, no halt reached refusals.jsonl, so none could be judged (KWB-next, 2026-11-21). */
+export function haltReason(out: string | undefined): string | null {
+  if (!out || !out.includes('"continue"')) return null;
+  const said = parseJson<{ continue?: unknown; stopReason?: unknown }>(out);
+  return said !== null && typeof said === 'object' && said.continue === false ? String(said.stopReason ?? 'stopped the session') : null;
+}
+
+/** True for a line of refusals.jsonl that refused something: an exit 2, or a halt (code 0, `halt: true`). Any other code there is an old
+ *  crash line. Every reader of the refusal log decides by this, so a halt is judged like a refusal and never counted a crash. */
+export const isRefusalRow = (r: Readonly<Record<string, unknown>>): boolean => r['code'] === 2 || r['halt'] === true;
+
+/** One call's lines in the logs: the call itself, and each hook that did not let it through (a refusal, a halt, a crash). Never throws. */
 export function logCall(root: string, text: string, hooks: readonly HookRun[], append: AppendLine, total?: number): void {
   try {
     const parsed = parseJson<HookEvent>(text);
@@ -72,9 +84,13 @@ export function logCall(root: string, text: string, hooks: readonly HookRun[], a
     const what = attempt(ev);
     const judged = hooks.map((h) => ({ hook: h.hook, ms: Math.round(h.ms), code: h.code, ...(h.code !== 0 && h.reason ? { reason: cut(h.reason, KEEP.reason) } : {}), ...(h.out ? { out: cut(h.out, KEEP.out) } : {}) }));
     append(root, EVENTS, `${toJson({ t, ...where, ...what, ...(total ? { ms: Math.round(total) } : {}), hooks: judged })}\n`);
-    for (const h of judged.filter((x) => x.code !== 0)) {
-      const id = shortHash(`${t}${h.hook}${h.reason ?? ''}`, 8);
-      append(root, h.code === 2 ? REFUSALS : CRASHES, `${toJson({ id, t, hook: h.hook, code: h.code, reason: h.reason, ...where, ...what, ...checkoutHead(ev.cwd ?? root), ...lawOf(root, h.hook) })}\n`);
+    const halts = new Map(hooks.flatMap((h) => { const why = h.code === 0 ? haltReason(h.out) : null; return why === null ? [] : [[h.hook, why] as const]; }));
+    for (const h of judged.filter((x) => x.code !== 0 || halts.has(x.hook))) {
+      const halt = halts.get(h.hook);
+      const reason = halt === undefined ? h.reason : cut(halt, KEEP.reason);
+      const id = shortHash(`${t}${h.hook}${reason ?? ''}`, 8);
+      const file = h.code === 2 || halt !== undefined ? REFUSALS : CRASHES;
+      append(root, file, `${toJson({ id, t, hook: h.hook, code: h.code, reason, ...(halt === undefined ? {} : { halt: true }), ...where, ...what, ...checkoutHead(ev.cwd ?? root), ...lawOf(root, h.hook) })}\n`);
     }
   } catch { /* the log never stops a hook */ }
 }

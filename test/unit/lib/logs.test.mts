@@ -72,3 +72,19 @@ test('logs-usage.mts does not import logs.mts (no import cycle)', () => {
   assert.doesNotMatch(usage, /from '\.\/logs\.mts'/);
   assert.match(usage, /from '\.\/logs-read\.mts'/);
 });
+
+// KWB-next (2026-11-21): a halt (stay-inside's `continue: false`, code 0) is a refusal to judge, not an old crash line
+test('a halt in the refusal log is listed open, can be marked, and is no crash', () => {
+  const dir = scratchDir('logs-halt-');
+  put(join(dir, '.claude/logs/refusals.jsonl'), jsonl([
+    { id: 'h1', t: '2026-01-01T00:00:01Z', hook: 'stay-inside', code: 0, halt: true, reason: 'STOPPED by stay-inside', session: 's' },
+  ]));
+  const said: string[] = [];
+  const log = (l: string): number => said.push(l);
+  logsCommand(dir, ['refusals', '--open'], log);
+  assert.ok(said.some((l) => l.startsWith('h1 ')), `the halt is open: ${said.join(' | ')}`);
+  said.length = 0;
+  logsCommand(dir, ['crashes'], log);
+  assert.ok(!said.some((l) => l.startsWith('h1 ')), 'and no crash');
+  assert.equal(logsCommand(dir, ['mark', 'h1', 'wrong', 'the', 'user', 'asked', 'for', 'it'], log), 0);
+});
