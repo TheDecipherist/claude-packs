@@ -91,7 +91,7 @@ function remade(defs: readonly Def[], entries: RepoIndex, rel: string): string |
 const countById = (list: readonly Shape[]): Map<string, number> => list.reduce((m, s) => m.set(s.id, (m.get(s.id) ?? 0) + 1), new Map<string, number>());
 
 /** `asked`: the index of the files that share something with the event's writes, as the daemon answered it (lib/asked-index.mts); without it the checkout's whole index is read. */
-export function judgeWrite(w: FileWrite, rel: string, ctx: Pick<HookContext, 'projectDir' | 'cwd'>, asked: RepoIndex | null = null): string | null {
+export function judgeWrite(w: FileWrite, rel: string, ctx: Pick<HookContext, 'projectDir' | 'cwd'> & { env?: HookContext['env'] }, asked: RepoIndex | null = null): string | null {
   if (w.op === 'delete' || w.after === null || !EXTS.has(extname(w.path)) || matchesAny(rel, TESTS)) return null;
   const before = shapesOfText(w.before ?? '', rel);
   const after = shapesOfText(w.after, rel);
@@ -104,7 +104,7 @@ export function judgeWrite(w: FileWrite, rel: string, ctx: Pick<HookContext, 'pr
   const skip = skippedBy(layout);
   if (matchesAny(rel, skip) || isContent(rel, layout)) return null;
   const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
-  const entries = asked ? without(asked, [...TESTS, ...skip]) : repoIndex(root, [...TESTS, ...skip], layout);
+  const entries = asked ? without(asked, [...TESTS, ...skip]) : repoIndex(root, [...TESTS, ...skip], layout, ctx.env ?? {});
   const others = copiesElsewhere(entries, rel);
   for (const s of fresh) {
     const elsewhere = others.get(s.id) ?? [];

@@ -2,6 +2,7 @@
 // write after `stale`, and a rebuild never holds the main thread: a 2 ms timer keeps its pace while the thread rebuilds, where the index
 // built on the main thread (the control, which shows the meter can see a block) stalls it (KWB-next: doctor's pool verdict 93 ms at p95,
 // a rebuild after each write on the main thread).
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { indexThread, residentIndex } from '../../../packs/base/hooks/resident/index.mts';
@@ -73,5 +74,19 @@ test('a file written after the thread starts, before its first ask, is found wit
     await new Promise((done) => setTimeout(done, 3000));   // past the thread's start-up build (5,000 files: under a second here)
     put(join(dir, 'src', 'early.ts'), body(11));
     assert.ok((await thread.candidates(keys)).some((f) => f.file === 'src/early.ts'), 'the first ask reads the files again');
+  } finally { await thread.close(); }
+});
+
+test('the index thread, given the environment, leaves out what git ignores (supernova2_monitor WB-39: a probe\'s helper name refused a real one)', async () => {
+  const dir = scratchDir('index-thread-ignored-');
+  put(join(dir, 'src/kept.ts'), body(1));
+  const probe = 'export function probe(list) {\n  const seen = new Set(list.filter((item) => item.kind === "probe").map((item) => item.id));\n  return [...seen].sort();\n}\n';
+  put(join(dir, 'scratch/probe.ts'), probe);
+  put(join(dir, '.gitignore'), 'scratch/\n');
+  spawnSync('git', ['init', '-q'], { cwd: dir });
+  const thread = indexThread(dir, layout, THREAD, process.env);
+  try {
+    assert.deepEqual((await thread.candidates(keysOf(probe))).map((f) => f.file), [], 'the ignored probe is not indexed');
+    assert.deepEqual((await thread.candidates(keysOf(body(1)))).map((f) => f.file), ['src/kept.ts']);
   } finally { await thread.close(); }
 });

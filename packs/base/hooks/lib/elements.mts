@@ -10,6 +10,7 @@ import { extname, join, relative } from 'node:path';
 import { codeShapes } from './code-shapes.mts';
 import type { CodeShape } from './code-shapes.mts';
 import { slash } from './files.mts';
+import { ignoredPaths } from './git-run.mts';
 import { matchesAny } from './glob.mts';
 import { emittedFrom, extsOf } from './source-exts.mts';
 import type { Layout } from './types.d.mts';
@@ -91,13 +92,14 @@ export const TEMPLATE: Record<Shape['kind'], string> = {
   rows: 'one table of the arguments, and one loop',
 };
 
-export function codeFiles(root: string, skipGlobs: readonly string[] = [], exts: ReadonlySet<string> = CODE): string[] {
+export function codeFiles(root: string, skipGlobs: readonly string[] = [], exts: ReadonlySet<string> = CODE, env: Readonly<Record<string, string | undefined>> = {}): string[] {
   const out: string[] = [];
+  const ignored = ignoredPaths(root, env);
   const walk = (dir: string): void => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       const abs = join(dir, e.name);
       const rel = slash(relative(root, abs));
-      if (SKIP.test(rel) || matchesAny(rel, skipGlobs)) continue;
+      if (SKIP.test(rel) || matchesAny(rel, skipGlobs) || ignored.has(rel) || (e.isDirectory() && ignored.has(`${rel}/`))) continue;
       if (e.isDirectory()) walk(abs);
       else if (exts.has(extname(e.name)) && !emittedFrom(abs) && statSync(abs).size < 400_000) out.push(rel);   // an emitted twin is the build's (KWB-170)
     }

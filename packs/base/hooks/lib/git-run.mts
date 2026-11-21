@@ -70,3 +70,10 @@ export function gitBlobs(specs: readonly string[], { cwd, env, timeoutMs = 30_00
   }
   return out;
 }
+
+/** What git ignores under `root`, as `git ls-files` prints it: a folder whole with its trailing slash, a file by its path. Empty outside a
+ *  repository or where git cannot run. A probe in an ignored scratch folder is no part of the project's code (supernova2_monitor WB-39, KWB-next). */
+export function ignoredPaths(root: string, env: Readonly<Record<string, string | undefined>>): Set<string> {
+  const r = gitRun(['ls-files', '--others', '--ignored', '--exclude-standard', '--directory'], { cwd: root, env });
+  return new Set(r.ok ? r.stdout.split('\n').map((l) => l.trim()).filter(Boolean) : []);
+}

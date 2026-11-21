@@ -7,8 +7,8 @@ import { readLayout } from '../lib/layout.mts';
 import { residentIndex } from './index.mts';
 import type { IndexToThread } from './index.mts';
 
-const { root } = workerData as { root: string };
-const index = residentIndex(root, () => readLayout(root));
+const { root, env } = workerData as { root: string; env: Readonly<Record<string, string | undefined>> };
+const index = residentIndex(root, () => readLayout(root), env);
 index.candidates(['build', 'dup:build']);   // both indexes built beside the daemon's start, not on the first Write
 index.stale();   // and the first ask reads the files' mtimes again, as the main thread's first query did: a file written since the start counts
 parentPort?.on('message', (m: IndexToThread) => {

@@ -34,7 +34,7 @@ export const hook: Hook = (event, ctx) => {
   for (const root of roots) {
     if (ctx.candidates && root === resolve(ctx.projectDir)) continue;   // the resident runner's main thread holds this checkout's index and brings it up to date when it is asked (KWB-201)
     const sample = join(root, 'x');
-    loadIndex(root, { layout: layoutOfWrite(ctx, sample), shape: readShape(root) });
+    loadIndex(root, { layout: layoutOfWrite(ctx, sample), shape: readShape(root), env: ctx.env });
   }
   return pass;
 };

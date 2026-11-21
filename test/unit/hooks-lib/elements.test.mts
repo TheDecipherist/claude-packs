@@ -1,5 +1,6 @@
 // elements.mts: markup and code read into shapes. A copy has one shape, a changed copy names its parameters, a non-copy has another.
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
 import { join } from 'node:path';
 import { CODE, MARKUP, TEMPLATE, codeFiles, copiesNeeded, shapesOf, skippedBy } from '../../../packs/base/hooks/lib/elements.mts';
@@ -69,4 +70,17 @@ test('codeFiles walks code, skips SKIP folders, skip globs, an emitted twin and 
   put(join(dir, 'big.js'), 'x'.repeat(400_001));
   assert.equal(CODE.has('.mts'), true);
   assert.deepEqual(codeFiles(dir, ['skipme/**']).sort(), ['a.js', 'sub/b.ts', 'x.mts']);
+});
+
+// KWB-next (2026-11-21): a probe in a folder git ignores (scratch/) was indexed as the project's code, and template-law refused a helper
+// whose name a probe already held (supernova2_monitor WB-39); outside a git repository nothing is ignored
+test('codeFiles leaves out what git ignores; outside a repository it walks everything', () => {
+  const dir = scratchDir('el-ignored-');
+  put(join(dir, 'src/a.ts'), 'export const a = 1;\n');
+  put(join(dir, 'scratch/probe.mjs'), 'export const b = 2;\n');
+  put(join(dir, 'tools/one.log.ts'), 'export const c = 3;\n');
+  put(join(dir, '.gitignore'), 'scratch/\n*.log.ts\n');
+  assert.deepEqual(codeFiles(dir, [], undefined, process.env).sort(), ['scratch/probe.mjs', 'src/a.ts', 'tools/one.log.ts'], 'no repository: nothing ignored');
+  spawnSync('git', ['init', '-q'], { cwd: dir });
+  assert.deepEqual(codeFiles(dir, [], undefined, process.env).sort(), ['src/a.ts'], 'the ignored folder and the ignored file are left out');
 });

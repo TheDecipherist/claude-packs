@@ -64,14 +64,14 @@ const isEntry = (v: unknown): v is IndexEntry => typeof v === 'object' && v !== 
 // whole index back cost a worker 30 ms a write). A caller's skip list is part of the key, as the index it keeps holds only what that list leaves.
 const held = new Map<string, { skips: string; index: RepoIndex }>();
 
-export function repoIndex(root: string, skip: readonly string[], layout: Partial<Layout> = {}): RepoIndex {
+export function repoIndex(root: string, skip: readonly string[], layout: Partial<Layout> = {}, env: Readonly<Record<string, string | undefined>> = {}): RepoIndex {
   const file = fileOf(root);
   const skips = skip.join('\0');
   const mine = held.get(file);
   const old: Record<string, unknown> = mine && mine.skips === skips ? mine.index : readJson<Record<string, unknown>>(file) ?? {};   // the first call builds it
   const now: RepoIndex = {};
   let changed = false;
-  for (const rel of codeFiles(root, skip, EXTS).filter((f) => !isContent(f, layout))) {
+  for (const rel of codeFiles(root, skip, EXTS, env).filter((f) => !isContent(f, layout))) {
     const st = statSync(join(root, rel));
     const had = old[rel];
     if (isEntry(had) && had.m === st.mtimeMs && had.s === st.size) { now[rel] = had; continue; }

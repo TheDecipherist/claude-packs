@@ -1,5 +1,6 @@
 // dup-index.mts: once-only's index of a checkout's copies (KWB-24), kept in the temp folder (W3 layer 2).
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { test } from 'node:test';
 import { join } from 'node:path';
@@ -36,6 +37,20 @@ test('an index is built, read again unchanged, and a copy of a function in it is
     assert.equal(found.length, 1);
     assert.ok(found[0]?.other.file.endsWith('src/a.js'));
     assert.deepEqual(clonesIn(again, [{ path: join(root, 'src/c.js'), after: 'const x = 1;\n', range: [1, 1] }]), []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// KWB-next (2026-11-21): a probe in a folder git ignores is no part of the project's code; once-only read it as one (supernova2_monitor WB-39)
+test('the duplicate index leaves out what git ignores', () => {
+  const root = scratchDir('dup-index-ignored-');
+  try {
+    put(join(root, 'src/a.js'), fn('first'));
+    put(join(root, 'scratch/probe.js'), fn('probe'));
+    put(join(root, '.gitignore'), 'scratch/\n');
+    spawnSync('git', ['init', '-q'], { cwd: root });
+    assert.deepEqual(Object.keys(loadIndex(root, { persist: false, env: process.env }).files).sort(), ['src/a.js']);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

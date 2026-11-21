@@ -58,7 +58,7 @@ export function matches(prompt: string, index: RepoIndex): Match[] {
 export const hook: Hook = (event, ctx) => {
   const at = `${event.cwd ?? ctx.cwd}/x`;
   const layout = readLayout(claudeRoot(ctx.projectDir, at, ctx.cwd));
-  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(ctx.projectDir, at, ctx.cwd), [...TESTS, ...skippedBy(layout)], layout));
+  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(ctx.projectDir, at, ctx.cwd), [...TESTS, ...skippedBy(layout)], layout, ctx.env));
   return found.length ? say(`Already in this repo, call it rather than write it again:\n${found.map((f) => `- ${f.name} (${f.at})`).join('\n')}\n`) : pass;
 };
 

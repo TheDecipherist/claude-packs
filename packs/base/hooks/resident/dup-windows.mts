@@ -65,7 +65,7 @@ function windowsOf(t: Table, side: ReadonlyMap<number, number[]>, hash: number):
   return [...out, ...(side.get(hash) ?? [])];
 }
 
-export function dupWindows(root: string, layout: () => Layout): DupWindows {
+export function dupWindows(root: string, layout: () => Layout, env: Readonly<Record<string, string | undefined>> = {}): DupWindows {
   const ids = new Map<string, number>();
   const names: string[] = [];
   const held = new Map<number, IndexedFile>();   // by id: the files as they are now
@@ -109,7 +109,7 @@ export function dupWindows(root: string, layout: () => Layout): DupWindows {
   const refresh = (): void => {
     if (!dirty) return;
     dirty = false;
-    const now = new Map(Object.entries(loadIndex(root, { layout: layout(), shape: readShape(root), persist: false, keep: true }).files));
+    const now = new Map(Object.entries(loadIndex(root, { layout: layout(), shape: readShape(root), persist: false, keep: true, env }).files));
     for (const [rel, f] of files) if (now.get(rel) !== f) { forget(idOf(rel), f); held.delete(idOf(rel)); }
     for (const [rel, f] of now) if (files.get(rel) !== f) { held.set(idOf(rel), f); if (table !== null) addSide(idOf(rel), f); }
     files = now;

@@ -16,6 +16,7 @@
 //       the caller's (where jscpd is found); nothing here reads the process. (Named for its job: spec-lock has a judgeWrites.)
 //   judgeCopyWritesAsked(root, writes, ask, { env, layout, shape, ignore }) -> { clones, error }: the same, with the candidates asked
 //       of the resident runner's main thread, which holds the one index (ctx.candidates, `dup:<hash>` keys, KWB-201): a worker keeps none.
+import { ignoredPaths } from './git-run.mts';
 import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, relative } from 'node:path';
@@ -59,15 +60,16 @@ const fileOf = (root: string): string => join(tmpdir(), 'claude-packs-dup-index'
 interface Stat { m: number; s: number }
 
 /** Every source file under root that the index judges: { rel: { m, s } }. Folders an exclude covers are never entered. */
-function sourceStats(root: string, ex: readonly string[]): Record<string, Stat> {
+function sourceStats(root: string, ex: readonly string[], env: Readonly<Record<string, string | undefined>>): Record<string, Stat> {
   const out: Record<string, Stat> = {};
+  const ignored = ignoredPaths(root, env);   // a probe in an ignored scratch folder is no part of the project's code (KWB-next, WB-39)
   const go = (dir: string, rel: string): void => {
     let entries;
     try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return; }
     for (const e of entries) {
       const r = rel ? `${rel}/${e.name}` : e.name;
-      if (e.isDirectory()) { if (!matchesAny(`${r}/x`, ex) && !matchesAny(`${r}/x/x`, ex)) go(join(dir, e.name), r); continue; }
-      if (!e.isFile() || !SOURCE.test(e.name) || matchesAny(r, ex)) continue;
+      if (e.isDirectory()) { if (!ignored.has(`${r}/`) && !matchesAny(`${r}/x`, ex) && !matchesAny(`${r}/x/x`, ex)) go(join(dir, e.name), r); continue; }
+      if (!e.isFile() || !SOURCE.test(e.name) || matchesAny(r, ex) || ignored.has(r)) continue;
       try { const st = statSync(join(dir, e.name)); if (st.size <= MAX_BYTES) out[r] = { m: st.mtimeMs, s: st.size }; } catch { /* gone */ }
     }
   };
@@ -82,7 +84,7 @@ interface StoredIndex { v?: number; root?: string; files: Record<string, Indexed
 const kept = new Map<string, StoredIndex>();
 
 /** The checkout's index, read from the temp folder (or from this process's memory with `keep`) and brought up to date for the files that changed. */
-export function loadIndex(root: string, { layout = {}, shape = null, persist = true, keep = false }: { layout?: Partial<Layout>; shape?: ShapeExclude | null; persist?: boolean; keep?: boolean } = {}): DupIndex {
+export function loadIndex(root: string, { layout = {}, shape = null, persist = true, keep = false, env = {} }: { layout?: Partial<Layout>; shape?: ShapeExclude | null; persist?: boolean; keep?: boolean; env?: Readonly<Record<string, string | undefined>> } = {}): DupIndex {
   const file = fileOf(root);
   const real = realPath(root);
   // read whole, not through readText: a big checkout's index is past its 8 MB cap
@@ -92,7 +94,7 @@ export function loadIndex(root: string, { layout = {}, shape = null, persist = t
   let old = held ?? parseJson<StoredIndex>(text);
   if (old?.v !== VERSION || old.root !== real || typeof old.files !== 'object') old = null;
   const ex = excludeGlobs(layout, shape);
-  const now = sourceStats(root, ex);
+  const now = sourceStats(root, ex, env);
   const files: Record<string, IndexedFile> = {};
   let read = 0;
   for (const [rel, st] of Object.entries(now)) {

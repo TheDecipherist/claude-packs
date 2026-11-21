@@ -119,7 +119,7 @@ export async function serve(o: ServeOptions, host: Host, usage = new UsageStore(
   if (table === null) { log(`start refused: ${o.hooks} holds no hook table`); releaseStartLock(files.lock); sayReady(o.readyFd, 'failed no hook table\n'); return 1; }
   for (const flag of SMALL_V8) setFlagsFromString(flag);
   // the indexes on a thread of their own, built beside the start: no rebuild after a write holds the main thread (KWB-next)
-  const index = indexThread(project, () => readLayout(project), new URL(`./resident/index-thread${EXT}`, import.meta.url));
+  const index = indexThread(project, () => readLayout(project), new URL(`./resident/index-thread${EXT}`, import.meta.url), host.env);
   const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
   // the pool never grows past its size: a burst of 16 events at once grew it to 20 to 22 workers, each about 10 MB the daemon kept (rss)
   const pool = startPool({

@@ -40,20 +40,20 @@ function keysOf(index: RepoIndex): Map<string, string[]> {
   return by;
 }
 
-export function residentIndex(root: string, layout: () => Layout): ResidentIndex {
+export function residentIndex(root: string, layout: () => Layout, env: Readonly<Record<string, string | undefined>> = {}): ResidentIndex {
   let warming: Promise<void> | null = null;
   let builder: Worker | null = null;
   let built: { index: RepoIndex; keys: Map<string, string[]> } | null = null;
   let dirty = true;
   const fresh = (): { index: RepoIndex; keys: Map<string, string[]> } => {
     if (built === null || dirty) {
-      const index = repoIndex(root, [], layout());
+      const index = repoIndex(root, [], layout(), env);
       built = { index, keys: keysOf(index) };
       dirty = false;
     }
     return built;
   };
-  const dup = dupWindows(root, layout);
+  const dup = dupWindows(root, layout, env);
   const repoOf = (wanted: readonly string[]): FileStatements[] => {
     const { index, keys } = fresh();
     const files = new Set(wanted.flatMap((k) => keys.get(k) ?? []));
@@ -93,18 +93,18 @@ export interface IndexThread {
 
 /** Starts the index thread (`threadUrl`: resident/index-thread). A thread that fails or exits is replaced by the indexes built on the main
  *  thread, as before it existed, and every ask still waiting is answered from those: an ask is never answered with nothing. */
-export function indexThread(root: string, layout: () => Layout, threadUrl: URL): IndexThread {
+export function indexThread(root: string, layout: () => Layout, threadUrl: URL, env: Readonly<Record<string, string | undefined>> = {}): IndexThread {
   const waiting = new Map<number, { keys: readonly string[]; done: (files: FileStatements[]) => void }>();
   let next = 0;
   let closing = false;
   let local: ResidentIndex | null = null;
   const fallBack = (): void => {
     if (closing || local !== null) return;
-    local = residentIndex(root, layout);
+    local = residentIndex(root, layout, env);
     for (const { keys, done } of waiting.values()) done(local.candidates(keys));
     waiting.clear();
   };
-  const thread = new Worker(threadUrl, { workerData: { root }, execArgv: [] });
+  const thread = new Worker(threadUrl, { workerData: { root, env }, execArgv: [] });
   thread.on('message', (m: IndexFromThread) => { waiting.get(m.id)?.done(m.files); waiting.delete(m.id); });
   thread.on('error', fallBack);
   thread.on('exit', fallBack);
