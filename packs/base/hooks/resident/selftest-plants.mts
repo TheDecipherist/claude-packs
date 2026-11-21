@@ -31,6 +31,9 @@ export const PLANTS: readonly Plant[] = [
   { name: 'nap-b', source: source('await nap(100);\nreturn pass;'), row: judge('Par', 20) },
   { name: 'ref-slow', source: source("await nap(20);\nreturn no('REFUSED by ref-slow');"), row: judge('Ref', 10) },
   { name: 'ref-fast', source: source("await nap(5);\nreturn no('REFUSED by ref-fast');"), row: judge('Ref', 20) },
+  // a refusal at once beside a judge still running: the reply is the refusal after the grace, never the TypeScript path (KWB-next)
+  { name: 'grace-ref', source: source("return no('REFUSED by grace-ref');"), row: judge('Grace', 10) },
+  { name: 'grace-slow', source: source('await nap(300);\nreturn pass;'), row: judge('Grace', 20) },
   { name: 'rec-ref', source: source("note(ctx, 'rec.txt', 'rec-ref\\n');\nreturn pass;"), row: recorder('Ref', 50) },
   { name: 'ser-a', source: source("await nap(30);\nnote(ctx, 'ser.txt', 'a');\nreturn pass;"), row: recorder('Ser', 10) },
   { name: 'ser-b', source: source("note(ctx, 'ser.txt', 'b');\nreturn pass;"), row: recorder('Ser', 20) },

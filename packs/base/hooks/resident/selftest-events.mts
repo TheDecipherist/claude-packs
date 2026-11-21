@@ -88,6 +88,14 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
     cases.push(['a hook rejecting a promise after returning: the call passes, the rejection is in the daemon log', rejected.code === 0 && (readText(filesOf(rig).log) ?? '').includes('unhandled rejection'), true]);
     cases.push(['and the daemon is alive and serving', (await ask(rig, eventText(rig, 'Fast'))).code, 0]);
 
+    // KWB-next: after a refusal the other judges get the grace; one still running then is not over the client's deadline, so the call is
+    // refused by the daemon (a task's refused writes went whole to the TypeScript path, 131 false 'over time' crashes)
+    const tg = Date.now();
+    const graced = await ask(rig, eventText(rig, 'Grace'));
+    cases.push(['a refusal beside a judge still running: the daemon refuses after the grace, not the TypeScript path', graced.code === 2 && graced.fallback === undefined && graced.stderr.includes('REFUSED by grace-ref') && Date.now() - tg < 250, true]);
+    await nap(400);
+    cases.push(['and the judge still running is no "over time" crash', logs('crashes.jsonl').some((r) => r.hook === 'grace-slow'), false]);
+
     const t2 = Date.now();
     const over = await ask(rig, eventText(rig, 'Over'), { deadline: Date.now() + 300 });
     cases.push(['an event past the client\'s deadline is handed whole to the TypeScript path, never answered by the judges that were in time (KWB-216)', Date.now() - t2 < 900 && over.fallback === 'ts' && over.code === 0 && over.stdout === '', true]);

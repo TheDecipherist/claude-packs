@@ -67,29 +67,31 @@ const names = (rows: readonly HookTableRow[]): string[] => rows.map((r) => r.hoo
 interface JudgePhase { ran: Map<string, Ran>; slow: string[] }
 
 /** Every judge at once; resolves at the grace after the first refusal, at the deadline, or when all have answered. A judge that
- *  answers after that is handed to `late`. */
+ *  answers after that is handed to `late`. Only the deadline makes a judge `slow` (the event goes whole to the TypeScript path): at the
+ *  grace the call is refused already, and a judge still running could only add a reason (KWB-next: a task's refused writes went to the
+ *  TypeScript path whole, once-only and shape-law named 'over time' 131 times). */
 function judgeAll(d: Served, judges: readonly HookTableRow[], job: (hook: string) => Job, deadline: number, late: (hook: string, done: Ran) => void): Promise<JudgePhase> {
   const ran = new Map<string, Ran>();
   const jobs = new Map(names(judges).map((h) => [h, job(h)]));
   return new Promise((resolve) => {
     let over = false;
     let grace: NodeJS.Timeout | undefined;
-    const finish = (): void => {
+    const finish = (atDeadline: boolean): void => {
       over = true;
       clearTimeout(grace);
       clearTimeout(cutoff);
-      const slow = names(judges).filter((h) => !ran.has(h));
+      const slow = atDeadline ? names(judges).filter((h) => !ran.has(h)) : [];
       d.pool.abandon(slow.flatMap((h) => jobs.get(h) ?? []));   // KWB-205: what a judge past the deadline started does not outlive it
       resolve({ ran, slow });
     };
-    const cutoff = setTimeout(finish, Math.max(0, deadline - Date.now()));
-    if (judges.length === 0) finish();
+    const cutoff = setTimeout(() => finish(true), Math.max(0, deadline - Date.now()));
+    if (judges.length === 0) finish(false);
     for (const { hook } of judges) {
       void d.pool.run(jobs.get(hook) ?? job(hook)).then((done) => {
         if (over) { late(hook, done); return; }
         ran.set(hook, done);
-        if (done.code === 2 && grace === undefined) grace = setTimeout(finish, GRACE_MS);
-        if (ran.size === judges.length) finish();
+        if (done.code === 2 && grace === undefined) grace = setTimeout(() => finish(false), GRACE_MS);
+        if (ran.size === judges.length) finish(false);
       });
     }
   });
