@@ -34,6 +34,10 @@ export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = {
   'git-guard': { p50: 10, p95: 200, worst: 1500 },
   // its git child reads every staged path: a commit of many files took 255 ms in supernova2_monitor's W2.1 rerun (KWB-next)
   'firmware-out-of-git': { p50: 10, p95: 200, worst: 1000 },
+  // each reads every statement of a whole new file at Pre Write: 7 ms for 155 lines at rest, 12 to 13 ms at p50 under a task's load
+  // (supernova2_monitor stage 5, after the per-line and digitless-line savings, KWB-next); a new file must be read whole
+  'shape-law': { p50: 20, p95: 50 },
+  'template-law': { p50: 20, p95: 50 },
 };
 export const WORST_MS = 200;
 export const STOP_WORST_MS = 1500;
@@ -139,6 +143,34 @@ function excusedWalls(lines: readonly HookLogEntry[], over: number): Set<HookLog
   return out;
 }
 
+/** A canary took this long, so its worker was starved, and the event's hook times say nothing of the hooks. */
+const STALL_MS = 50;
+
+/** The hook lines of the events a starved worker ran: an event (its hook lines closed by its event line) in which a canary (a hook whose
+ *  median is 1 ms or less over at least MIN_CALLS calls, with no budget row of its own) and at least one other hook each took STALL_MS or
+ *  more. A starved worker slows every hook of the event; one slow hook alone is that hook's own. On a machine others loaded, a 0 ms hook
+ *  took 141 ms beside a 150 ms once-only, and over 29 calls that pair was each hook's p95 (supernova2_monitor stage 6, KWB-next). */
+function stalledHookLines(lines: readonly HookLogEntry[]): Set<HookLogEntry> {
+  const groups: HookLogEntry[][] = [];
+  let current: HookLogEntry[] = [];
+  for (const l of lines) {
+    if (l.hook === 'event' || l.hook === 'proxy') {
+      if (current.length > 0) groups.push(current);
+      current = [];
+    } else if (!NOT_HOOKS.has(l.hook)) current.push(l);
+  }
+  const times = new Map<string, number[]>();
+  for (const g of groups) for (const l of g) times.set(l.hook, [...(times.get(l.hook) ?? []), l.ms]);
+  const quiet = ([hook, ms]: [string, number[]]): boolean => !HOOK_OVERRIDES[hook] && ms.length >= MIN_CALLS && percentile(ms, 50) <= 1;
+  const canaries = new Set([...times].filter(quiet).map(([hook]) => hook));
+  const out = new Set<HookLogEntry>();
+  for (const g of groups) {
+    const slow = g.filter((l) => l.ms >= STALL_MS);
+    if (slow.length >= 2 && slow.some((l) => canaries.has(l.hook))) for (const l of g) out.add(l);
+  }
+  return out;
+}
+
 /** Per event class, from the log's last LAST calls of each series. */
 function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, ClassTimes> {
   const byClass = new Map<EventClass, HookLogEntry[]>();
@@ -156,7 +188,8 @@ function classTimes(entries: readonly HookLogEntry[]): Map<EventClass, ClassTime
     const walls = proxy.length > 0 ? proxy : events;
     const queued = events.filter((l) => l.source === 'daemon' && l.queue !== undefined);
     const hooks = new Map<string, number[]>();
-    for (const l of lines.filter((x) => !NOT_HOOKS.has(x.hook))) hooks.set(l.hook, [...(hooks.get(l.hook) ?? []), l.ms]);
+    const stalled = stalledHookLines(lines);
+    for (const l of lines.filter((x) => !NOT_HOOKS.has(x.hook) && !stalled.has(x))) hooks.set(l.hook, [...(hooks.get(l.hook) ?? []), l.ms]);
     out.set(c, {
       wall: spread(lastOf(walls).map((l) => l.ms)), wallFrom: proxy.length > 0 ? 'proxy' : 'event',
       queue: queued.length > 0 ? spread(lastOf(queued).map((l) => l.queue ?? 0)) : null,
@@ -186,7 +219,9 @@ function classProblems(c: EventClass, t: ClassTimes): string[] {
   const worst = c === 'Stop' ? STOP_WORST_MS : WORST_MS;
   for (const [hook, s] of [...t.hooks].sort(([a], [z]) => a.localeCompare(z))) {
     if (s.calls < MIN_CALLS) continue;
-    const own = HOOK_OVERRIDES[hook] ?? HOOK_BUDGET;
+    // a hook at Stop runs once per turn and may read the whole turn: it is held to the Stop event's budget, not a tool call's (KWB-next:
+    // making-check took 100 to 300 ms at every Stop, and failed a tool call's 10/50 whenever a window held five Stops)
+    const own = HOOK_OVERRIDES[hook] ?? (c === 'Stop' ? EVENT_BUDGET.Stop : HOOK_BUDGET);
     const hookWorst = own.worst ?? worst;
     // below P95_MIN_CALLS a p95 is the slowest call: the median, the worst and the median again stand for it (as for the pool)
     const p95 = s.calls >= P95_MIN_CALLS ? s.p95 : s.p50;

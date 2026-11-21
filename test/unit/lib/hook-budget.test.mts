@@ -247,3 +247,43 @@ test('an event made slow only by a hook\'s declared wait (git-guard\'s push) is 
   }
   assert.match(said(other).problems.join('\n'), /^Pre Bash: the event took/m, 'a hook with no declared wait still makes the event slow');
 });
+
+// KWB-next (2026-11-22): a hook at Stop runs once per turn and reads the turn (making-check took 100 to 300 ms at every Stop since
+// supernova2_monitor's first stage); it was held to a tool call's 10/50 and failed doctor whenever a window held five Stops
+test('a hook at Stop is held to the Stop event\'s budget, not a tool call\'s; the same time at a tool call still fails', () => {
+  const dir = project();
+  lines(dir, 8, { event: 'Stop', tool: '-', hook: 'turn-reader', ms: 120, code: 0 });
+  assert.deepEqual(said(dir).problems.filter((p) => p.startsWith('turn-reader')), [], '120 ms at Stop is inside Stop\'s budget');
+  const slow = project();
+  lines(slow, 8, { event: 'Stop', tool: '-', hook: 'turn-reader', ms: EVENT_BUDGET.Stop.p50 + 100, code: 0 });
+  assert.ok(said(slow).problems.some((p) => p.startsWith('turn-reader at Stop')), 'past Stop\'s own median it is still named');
+  const tool = project();
+  lines(tool, 8, { ...BASH, hook: 'turn-reader', ms: 120, code: 0 });
+  assert.ok(said(tool).problems.some((p) => p.startsWith('turn-reader at Pre Bash')), 'at a tool call 120 ms is still over 10/50');
+});
+
+// KWB-next (2026-11-22): on a machine others loaded, an event now and then ran on a starved worker: settings-layer, 0 ms on every other
+// call, took 141 ms, and once-only 150 beside it; over 29 calls that pair was each hook's p95 (supernova2_monitor stage 6)
+test('an event a starved worker ran (a canary hook, about 0 ms on every other call, took 50 ms or more) leaves every hook\'s times; a hook slow on its own is still named', () => {
+  const event = (dir: string, canary: number, judged: number): void => {
+    logHook(dir, { ...BASH, hook: 'canary-fake', ms: canary, code: 0 });
+    logHook(dir, { ...BASH, hook: 'judged-fake', ms: judged, code: 0 });
+    logHook(dir, { ...BASH, hook: 'event', ms: canary + judged + 2, code: 0, queue: 1, source: 'daemon' });
+  };
+  const dir = project();
+  for (let i = 0; i < 27; i += 1) event(dir, 0, 6);
+  event(dir, 141, 150);
+  event(dir, 120, 140);
+  assert.deepEqual(said(dir).problems.filter((p) => p.includes('-fake')), [], 'the two starved events are left out');
+  const alone = project();
+  for (let i = 0; i < 25; i += 1) event(alone, 0, 6);
+  for (let i = 0; i < 4; i += 1) event(alone, 0, 150);
+  assert.ok(said(alone).problems.some((p) => p.startsWith('judged-fake')), 'slow beside a fast canary: the hook itself, still named');
+});
+
+test('shape-law and template-law, which read a whole new file at Pre Write, have their own row at 20 ms p50; a hook with none is held to 10', () => {
+  const dir = project();
+  for (const hook of ['shape-law', 'template-law', 'plain-fake']) lines(dir, 20, { event: 'PreToolUse', tool: 'Write', hook, ms: 14, code: 0 });
+  const named = said(dir).problems.map((p) => p.split(' ')[0]);
+  assert.deepEqual(named, ['plain-fake'], `named: ${named.join(', ')}`);
+});
