@@ -122,6 +122,9 @@ export function selftest(): number {
     ['a Python set comprehension is one statement (KF-14)', w('src/s.py', 'left = {keep(row) for row in rows} - {drop(row) for row in rows}\n'), 0],
     ['a lambda in a list counts as in a call (KF-27)', w('src/l.cpp', lambdas), 0],
     ['a for header is one statement', w('src/d.cpp', 'void f() {\n  for (int i = 0; i < n; i++) total += v(i);\n}\n'), 0],
+    // supernova2_monitor WB-35: a brace inside a regular expression literal opened a block, so `const A = /x{6}/;` read as two statements
+    ['a regex literal holding braces is one statement', w('src/r.mjs', 'const ROW = /^P:\\$([0-9A-F]{6})\\s+(?:[0-9A-F]{6}\\s+){1,2}\\s*(.*)$/;\n'), 0],
+    ['three statements on a line of JavaScript are still packed', w('src/r2.mjs', 'export function f(a) {\n  run(a); go(a); stop(a);\n}\n'), 2],
     ['a wide line', w('src/e.cpp', wide), 2],
     ['a wide comment is no code', w('src/f.cpp', `// ${'word '.repeat(50)}\nint x = 1;\n`), 0],
     ['an old long function, edited without growing', grow('step(3)', 'step(4)'), 0],

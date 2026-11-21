@@ -43,7 +43,7 @@ const blank = (m: string): string => m.replace(/[^\n]/g, ' ');
 
 /** Every statement that does something: it calls or assigns, or in shell runs a command. A row of a table does neither. */
 export function statementsOf(text: string, lang: Language): Statement[] {
-  const code = lang.blank(text).replace(lang.notCode ?? /^$^/gm, blank).replace(TEXT_BLOCK, blank);
+  const code = (lang.structure ?? lang.blank)(text).replace(lang.notCode ?? /^$^/gm, blank).replace(TEXT_BLOCK, blank);
   const starts = [0];
   for (let i = code.indexOf('\n'); i !== -1; i = code.indexOf('\n', i + 1)) starts.push(i + 1);
   const out: Statement[] = [];

@@ -10,6 +10,8 @@ export interface Language {
   name: string;
   exts: readonly string[];
   blank: (src: string) => string;
+  /** The blanker a reader of structure uses (statementsOf), when it differs from `blank`: JavaScript's blanks a regex literal's body too. */
+  structure?: (src: string) => string;
   lines?: boolean;
   braces?: boolean;
   commands?: boolean;
@@ -73,7 +75,7 @@ const lineStart = (words: string): RegExp => new RegExp(`^[ \\t]*(?:${words})\\b
 export const LANGUAGES: readonly Language[] = [
   { name: 'c', exts: ['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm'], blank: blankCode, notCode: /^[ \t]*(?:#(?:.*\\\n)*.*|using\b.*)$/gm, minTokens: 60,
     define: /^(?:[A-Za-z_][\w:<>,*& ]*[\s*&])?([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:const\s*)?(?:noexcept\s*)?\{/gm },
-  { name: 'js', exts: [...EXTS_OF.js, ...EXTS_OF.ts], blank: blankCode, lines: true, notCode: /^[ \t]*import\b[^;]*;?$/gm, minTokens: 60,
+  { name: 'js', exts: [...EXTS_OF.js, ...EXTS_OF.ts], blank: blankCode, structure: (src) => blankCode(src, false, true), lines: true, notCode: /^[ \t]*import\b[^;]*;?$/gm, minTokens: 60,
     define: /^(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:function\*?\s+([A-Za-z_$][\w$]*)|(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>|class\s+([A-Za-z_$][\w$]*))/gm },
   { name: 'python', exts: [...EXTS_OF.python, '.pyi'], blank: blanker({ line: ['#'], raw: ['"""', "'''"] }), lines: true, braces: false, notCode: /^[ \t]*(?:from\s+\S+\s+)?import\b.*$/gm, minTokens: 45,
     define: /^(?:async\s+)?(?:def|class)\s+([A-Za-z_]\w*)/gm },

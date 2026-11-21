@@ -44,8 +44,9 @@ function regexEnd(src: string, i: number): number {
   return i;
 }
 
-// keepStrings: blank comments only, so a check can read string literals in code but not prose
-export function blankCode(src: string, keepStrings = false): string {
+// keepStrings: blank comments only, so a check can read string literals in code but not prose. blankRegexes: a regex literal's body is
+// blanked too, its slashes kept, for a reader of structure (statementsOf): a `{` in `/[0-9A-F]{6}/` opens no block (supernova2_monitor WB-35)
+export function blankCode(src: string, keepStrings = false, blankRegexes = false): string {
   let out = '';
   let i = 0;
   const blank = (s: string): string => s.replace(/[^\n]/g, ' ');
@@ -64,7 +65,8 @@ export function blankCode(src: string, keepStrings = false): string {
     } else if (src[i] === '/' && regexAt(src, i)) {
       // A regex literal is kept as written; a quote or backtick inside it opens no string (KWB-178).
       const end = regexEnd(src, i);
-      out += src.slice(i, end);
+      const close = src.lastIndexOf('/', end - 1);
+      out += blankRegexes && close > i ? `/${blank(src.slice(i + 1, close))}${src.slice(close, end)}` : src.slice(i, end);
       i = end;
     } else if (src[i] === '"' || src[i] === "'" || src[i] === '`') {
       // A string is walked either way, so a // inside one is no comment. A template string can span lines and stays as written.
