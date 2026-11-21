@@ -3,7 +3,8 @@
 import type { ProgramWrite } from './program-writes.mts';
 
 const PATH_LIKE = /^[~\w.@+\-/]+$/;
-const NOT_A_PATH = /^[-.]+$|^-|^\d+(\.\d+)*$/;
+// a literal with no letter ("/15", "3/4") is a number or a ratio, never a file a program writes (KWB-next, supernova2_monitor WB-46)
+const NOT_A_PATH = /^[-.]+$|^-|^\d+(\.\d+)*$|^[^A-Za-z]*$/;
 const HAS_EXTENSION = /\.[A-Za-z][A-Za-z0-9]{0,7}$/;
 const MAX_LITERAL = 300;
 

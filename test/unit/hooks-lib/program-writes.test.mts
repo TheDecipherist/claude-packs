@@ -57,3 +57,12 @@ test('a python replace with a literal count replaces that many, as python does; 
   assert.equal(edit("'b', 'z', 2"), 'z1 z2 b3 b4');
   assert.equal(edit("'b','z'"), 'z1 z2 z3 z4');
 });
+
+// KWB-next (2026-11-21): a program whose write target the reader cannot resolve has its path-like literals added as writes; '/15', a
+// substring test for ctest's "15/15" lines, was taken for a file at the root, and stay-inside stopped the session (supernova2_monitor WB-46)
+test('a literal with no letter is no file a program writes; a named path still is', () => {
+  const code = (lit: string): string => `import sys\nk = '${lit}'\np = sys.argv[1]\nopen(p, 'w').write('a')`;
+  assert.deepEqual(programWrites({ lang: 'python', code: code('/15') }, at, none).map((w) => w.path), []);
+  assert.deepEqual(programWrites({ lang: 'python', code: code('3/4') }, at, none).map((w) => w.path), []);
+  assert.deepEqual(programWrites({ lang: 'python', code: code('/tmp/out.csv') }, at, none).map((w) => w.path), ['/tmp/out.csv'], 'still guessed');
+});
