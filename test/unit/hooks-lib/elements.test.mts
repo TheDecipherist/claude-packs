@@ -2,7 +2,9 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
+import { utimesSync } from 'node:fs';
 import { join } from 'node:path';
+import { ignoredPaths } from '../../../packs/base/hooks/lib/git-run.mts';
 import { CODE, MARKUP, TEMPLATE, codeFiles, copiesNeeded, shapesOf, skippedBy } from '../../../packs/base/hooks/lib/elements.mts';
 import { parametersOf } from '../../../packs/base/hooks/lib/code-shapes.mts';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
@@ -83,4 +85,20 @@ test('codeFiles leaves out what git ignores; outside a repository it walks every
   assert.deepEqual(codeFiles(dir, [], undefined, process.env).sort(), ['scratch/probe.mjs', 'src/a.ts', 'tools/one.log.ts'], 'no repository: nothing ignored');
   spawnSync('git', ['init', '-q'], { cwd: dir });
   assert.deepEqual(codeFiles(dir, [], undefined, process.env).sort(), ['src/a.ts'], 'the ignored folder and the ignored file are left out');
+});
+
+// KWB-next (2026-11-22): every index rebuild ran `git ls-files --ignored` (20 to 30 ms), and each write rebuilds the index, so the next Write's
+// hooks waited for it; the list is kept per checkout until its .gitignore changes or a minute passes
+test('the ignored list is kept between calls, and read again when the .gitignore changes', () => {
+  const dir = scratchDir('el-ignored-kept-');
+  put(join(dir, '.gitignore'), 'scratch/\n');
+  put(join(dir, 'scratch/a.mjs'), 'x\n');
+  put(join(dir, 'out2/b.mjs'), 'y\n');
+  spawnSync('git', ['init', '-q'], { cwd: dir });
+  const first = ignoredPaths(dir, process.env);
+  assert.ok(first.has('scratch/'));
+  assert.equal(ignoredPaths(dir, process.env), first, 'the same list, kept');
+  put(join(dir, '.gitignore'), 'scratch/\nout2/\n');
+  utimesSync(join(dir, '.gitignore'), new Date(), new Date(Date.now() + 5000));
+  assert.ok(ignoredPaths(dir, process.env).has('out2/'), 'the changed .gitignore is read');
 });

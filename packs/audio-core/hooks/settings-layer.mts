@@ -16,11 +16,12 @@ import { readText, walk } from './lib/files.mts';
 import { contextOf, isMain, runAsHook, writeVerdict } from './lib/hook-log.mts';
 import { readLayout } from './lib/layout.mts';
 import { checkoutRoot, claudeRoot } from './lib/project.mts';
-import { runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
+import { gitRun } from './lib/git-run.mts';
+import { git, runHook, scratchProject, snapshot, verdicts, writeOf, writtenSince } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { missingIn, requiredSettings } from './lib/settings-standard.mts';
 import type { SettingRow } from './lib/settings-standard.mts';
-import type { FileWrite, Hook, Verdict } from './lib/types.d.mts';
+import type { Env, FileWrite, Hook, Verdict } from './lib/types.d.mts';
 import { pass } from './lib/verdict.mts';
 import { judgeVerdict } from './lib/writes.mts';
 
@@ -38,7 +39,14 @@ const inJuceWindow = (cmake: string): boolean => STANDALONE.test(cmake) && !CUST
 const named = (rows: readonly SettingRow[]): string => rows.map(([id, label]) => `"${id}" (${label})`).join(', ');
 
 // The CMake files of a checkout, by their path from its root (build folders and the like left out).
-const cmakeFiles = (root: string): string[] => walk(root, (name) => SKIP_DIRS.test(name)).map((f) => relative(root, f)).filter((rel) => CMAKE.test(rel));
+/** The checkout's CMake files: git's own list of what it holds or would add (`ls-files -co --exclude-standard`), so the ignored
+ *  scratch, build and reference folders are never walked (a CMake write cost 141 ms walking 4,867 ignored files, supernova2_monitor,
+ *  KWB-next); outside a repository, or where git cannot run, the walk as before. */
+function cmakeFiles(root: string, env: Env = {}): string[] {
+  const listed = gitRun(['ls-files', '-co', '--exclude-standard', '--', '*.cmake', '*CMakeLists.txt'], { cwd: root, env });
+  if (listed.ok) return listed.stdout.split('\n').filter((rel) => CMAKE.test(rel) && !rel.split('/').some((part) => SKIP_DIRS.test(part)));
+  return walk(root, (name) => SKIP_DIRS.test(name)).map((f) => relative(root, f)).filter((rel) => CMAKE.test(rel));
+}
 
 /** The text of a checkout's files, the one being written (`rel`) read as `text`. */
 const together = (root: string, files: readonly string[], rel: string | null, text: string): string =>
@@ -78,9 +86,9 @@ function judgeLayer(w: FileWrite, rel: string, root: string, claude: string): st
 }
 
 // A CMake write that puts the standalone in JUCE's own window, with its Options button, where it was not before.
-function judgeCmake(w: FileWrite, rel: string, root: string): string | null {
+function judgeCmake(w: FileWrite, rel: string, root: string, env: Env): string | null {
   if (!CMAKE.test(rel) || w.after === null) return null;
-  const files = [...new Set([...cmakeFiles(root), rel])];
+  const files = [...new Set([...cmakeFiles(root, env), rel])];
   if (!inJuceWindow(together(root, files, rel, w.after)) || inJuceWindow(together(root, files, rel, w.before ?? ''))) return null;
   return `${rel} adds a JUCE Standalone without JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1, so the standalone opens in JUCE's own ` +
     `window, whose Options button sets the audio and MIDI devices beside the plugin's own settings layer. Build the standalone as ` +
@@ -91,7 +99,7 @@ export const hook: Hook = (event, ctx) => judgeVerdict(event, {
   name: 'settings-layer',
   write: (w, rel) => {
     const root = checkoutRoot(ctx.projectDir, w.path, ctx.cwd);
-    return judgeLayer(w, rel, root, claudeRoot(ctx.projectDir, w.path, ctx.cwd)) ?? judgeCmake(w, rel, root);
+    return judgeLayer(w, rel, root, claudeRoot(ctx.projectDir, w.path, ctx.cwd)) ?? judgeCmake(w, rel, root, ctx.env);
   },
 }, ctx);
 
@@ -155,7 +163,10 @@ export function selftest(): number {
   const later = project({ 'CMakeLists.txt': PLUGIN_CMAKE }, { deferred: 'drawn in stage 11, after stage 2 analyses the look' } as never);
   const unsaid = project({ 'CMakeLists.txt': PLUGIN_CMAKE }, { deferred: ' ' } as never);
   const laterInJuce = project({ 'CMakeLists.txt': STANDALONE_CMAKE }, { deferred: 'drawn in stage 11' } as never);
-  const projects = [fresh, full, old, split, bare, synth, blank, later, unsaid, laterInJuce];
+  // the flag only in a folder git ignores (a probe in scratch/) is no part of the build: the walk read it (KWB-next)
+  const ignored = project({ 'CMakeLists.txt': PLUGIN_CMAKE, 'scratch/app.cmake': FLAG, '.gitignore': 'scratch/\n', [LAYER]: rows(ALL) });
+  git(ignored, 'init', '-q');
+  const projects = [fresh, full, old, split, bare, synth, blank, later, unsaid, laterInJuce, ignored];
   const before = projects.map((d) => snapshot(d));   // each project as the judge finds it: the rows below must leave it as it is
   return verdicts('settings-layer', [
     ['a new layer without Enable QWERTY', write(fresh, LAYER, rows(but('midi.qwerty'))), 2],
@@ -167,6 +178,7 @@ export function selftest(): number {
     ['a Standalone added in JUCE\'s own window', write(full, 'CMakeLists.txt', STANDALONE_CMAKE), 2],
     ['a Standalone added as its own app', write(full, 'CMakeLists.txt', STANDALONE_CMAKE + FLAG), 0],
     ['the flag set in another CMake file', write(split, 'CMakeLists.txt', STANDALONE_CMAKE), 0],
+    ['the flag only in a CMake file git ignores does not count', write(ignored, 'CMakeLists.txt', STANDALONE_CMAKE), 2],
     ['an old Standalone, another CMake edit', write(old, 'CMakeLists.txt', `${STANDALONE_CMAKE}# tidy\n`), 0],
     ['--status: a plugin with no settings layer', runHook(hookFile, bare, null, ['--status']).status, 1],
     ['--status: an old layer and JUCE\'s window', runHook(hookFile, old, null, ['--status']).status, 1],

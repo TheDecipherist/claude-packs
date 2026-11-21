@@ -2,6 +2,8 @@
 // signatures). One result type; the folder and the environment are the caller's, never the process's own, so a resident runner
 // judging another session's event runs git where that event happened (review-2 8.5).
 import { spawnSync } from 'node:child_process';
+import { statSync } from 'node:fs';
+import { join } from 'node:path';
 
 export interface GitResult {
   /** True when git exited 0. */
@@ -73,7 +75,19 @@ export function gitBlobs(specs: readonly string[], { cwd, env, timeoutMs = 30_00
 
 /** What git ignores under `root`, as `git ls-files` prints it: a folder whole with its trailing slash, a file by its path. Empty outside a
  *  repository or where git cannot run. A probe in an ignored scratch folder is no part of the project's code (supernova2_monitor WB-39, KWB-next). */
-export function ignoredPaths(root: string, env: Readonly<Record<string, string | undefined>>): Set<string> {
+export function ignoredPaths(root: string, env: Readonly<Record<string, string | undefined>>, now = Date.now()): Set<string> {
+  // kept per checkout until its .gitignore or its repository changes, or IGNORED_KEPT_MS passes: every index rebuild asked git (20 to 30 ms), and each write
+  // rebuilds the index, so the next Write's hooks waited for it (KWB-next)
+  const stamp = `${stampOf(join(root, '.gitignore'))}:${stampOf(join(root, '.git'))}`;
+  const kept = IGNORED_KEPT.get(root);
+  if (kept && kept.stamp === stamp && now - kept.at < IGNORED_KEPT_MS) return kept.set;
   const r = gitRun(['ls-files', '--others', '--ignored', '--exclude-standard', '--directory'], { cwd: root, env });
-  return new Set(r.ok ? r.stdout.split('\n').map((l) => l.trim()).filter(Boolean) : []);
+  const set = new Set(r.ok ? r.stdout.split('\n').map((l) => l.trim()).filter(Boolean) : []);
+  IGNORED_KEPT.set(root, { stamp, at: now, set });
+  return set;
 }
+
+/** How long a checkout's ignored list is kept when its .gitignore has not changed (a nested .gitignore's change waits this long). */
+const IGNORED_KEPT_MS = 60_000;
+const IGNORED_KEPT = new Map<string, { stamp: string; at: number; set: Set<string> }>();
+const stampOf = (path: string): number => { try { return statSync(path).mtimeMs; } catch { return -1; } };
