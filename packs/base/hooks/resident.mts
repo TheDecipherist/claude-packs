@@ -22,7 +22,7 @@ import { cacheFolder, crashReply, daemonFiles, daemonKey, lockHash } from './lib
 import { WIRE } from './lib/proxy-wire-table.mts';
 import { serveEvent, type Served } from './resident/event.mts';
 import { residentIndex } from './resident/index.mts';
-import { SPREAD, againOf, givenOf, numberOf, textOf } from './resident/options.mts';
+import { WARM, againOf, poolShape, givenOf, numberOf, textOf } from './resident/options.mts';
 import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mts';
 import { startPool } from './resident/pool.mts';
 import { answers, listen, prepareFolder, type Incoming, type Listening } from './resident/socket.mts';
@@ -37,17 +37,12 @@ import { ORPHAN_MS, TEST_MS } from './resident/watchdog.mts';
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const EXT = extname(fileURLToPath(import.meta.url));
 const LOCK_FILE: string = WIRE.lockFile;
-/** The warm workers that import every hook at start; the others import a hook when a job first brings it (W8.4: 16 workers holding every hook were 270 MB). */
 /** A stop that has not ended the process in this long ends it (each closing step is bounded too, resident/shutdown). */
 const FORCE_EXIT_MS = 15_000;
 /** Uncaught exceptions and rejections the daemon logs and carries on after, before it restarts itself. */
 const MAX_FAULTS = 5;
-const PRELOAD = 1;
-/** The pool (W8 item 2, 2026-11-12): warm workers, grown on demand to 8, the grown ones retired after 2 idle minutes. 4, not 2: a write
- *  runs three judges of 50 to 110 ms (once-only, template-law, shape-law) and the light ones queued behind them; with the real index,
- *  at the machine's load of 7, one write's queue measured median 10 ms, worst 33 with 2; 4.7 and 17 with 3; 2.9 and 16 with 4 (KWB-next).
- *  At rest the two read alike; the cost is about 17 MB a worker (W8.4). */
-const WARM = 4;
+/** The pool (W8 item 2, 2026-11-12): warm workers (resident/options `WARM`, each preloading every hook), grown on demand to 8, the grown ones
+ *  retired after 2 idle minutes. */
 const POOL_MAX = 8;
 const POOL_IDLE_MS = 2 * 60_000;
 /** V8 flags the daemon sets before its workers start, for every isolate after (rss: 16 workers that each ran every hook held 389 MB
@@ -63,7 +58,7 @@ export interface Host { env: Readonly<Record<string, string | undefined>>; uid: 
 export interface ServeOptions {
   project: string;
   hooks: string;
-  /** The most workers the pool grows to (`--pool`, default 8), and how many start warm (`--warm`, default 2, never past the most). */
+  /** The most workers the pool grows to (`--pool`, default 8), and how many start warm (`--warm`, default resident/options `WARM`, never past the most). */
   pool: number;
   warm: number;
   idleMs: number;
@@ -128,7 +123,7 @@ export async function serve(o: ServeOptions, host: Host, usage = new UsageStore(
   const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
   // the pool never grows past its size: a burst of 16 events at once grew it to 20 to 22 workers, each about 10 MB the daemon kept (rss)
   const pool = startPool({
-    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, warm: o.warm, preload: Math.min(PRELOAD, o.warm), spread: SPREAD, max: o.pool,
+    workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, ...poolShape(o.warm), max: o.pool,
     idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, warming: index.warming, log,
   });
   const failed = await pool.ready();
