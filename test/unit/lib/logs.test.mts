@@ -88,3 +88,21 @@ test('a halt in the refusal log is listed open, can be marked, and is no crash',
   assert.ok(!said.some((l) => l.startsWith('h1 ')), 'and no crash');
   assert.equal(logsCommand(dir, ['mark', 'h1', 'wrong', 'the', 'user', 'asked', 'for', 'it'], log), 0);
 });
+
+// KWB-next (2026-11-21): a send-back's reason is several lines (making-check: a header, then each missing name); the list printed its first
+// line only, "making-check sent this turn back:", and a task read the send-back as empty and logged it as a fault (supernova2_monitor WB-38)
+test('logs refusals prints a reason of several lines whole, up to its limit, saying how many more', () => {
+  const dir = scratchDir('logs-lines-');
+  const many = Array.from({ length: 20 }, (_, i) => `- line ${i + 1}`).join('\n');
+  put(join(dir, '.claude/logs/refusals.jsonl'), jsonl([
+    { id: 'm1', t: '2026-01-01T00:00:01Z', hook: 'making-check', code: 2, reason: 'making-check sent this turn back:\n- the making line does not name part', session: 's' },
+    { id: 'm2', t: '2026-01-01T00:00:02Z', hook: 'h', code: 2, reason: `head\n${many}`, session: 's' },
+  ]));
+  const said: string[] = [];
+  logsCommand(dir, ['refusals', '--open'], (l: string): number => said.push(l));
+  const text = said.join('\n');
+  assert.match(text, /does not name part/, 'the second line of the reason is printed');
+  assert.match(text, /- line 11/);
+  assert.doesNotMatch(text, /- line 12\b/, 'up to 12 lines');
+  assert.match(text, /9 more lines/);
+});

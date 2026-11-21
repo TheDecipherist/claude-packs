@@ -147,6 +147,9 @@ export function selftest(): number {
     ['world: case 2 in a switch on the slot', w('src/world/Space.cpp', 'switch (slot) {\ncase 2: addDelay(); break;\n}\n'), 2],
     ['ui: a hand-listed set, one line per slot', w('src/ui/View.cpp', handList), 2],
     ['ui: "the PAD slot"', w('src/ui/View.cpp', '// the PAD slot gets the arp\n'), 2],
+    // supernova2_monitor WB-37: a roman numeral that ends a machine's name ("Jupiter VIII slot memory") is the name, not a role
+    ['a roman numeral in a proper name is no role', w('src/ui/Name.cpp', '// the bank is the machine\'s own (Jupiter VIII slot memory); nothing else\n'), 0],
+    ['a caps role after a capitalised word is still one', w('src/ui/Role.cpp', '// Mode PAD slot gets the arp\n'), 2],
     ['ui: an unlisted name before a concept word ("the PAD planet", KWB-12)', w('src/ui/View.cpp', '// the PAD planet gets the arp\n'), 2],
     ['ui: a caps concept word with no label before it, by number ("SLOTS 2", KWB-22)', w('src/ui/View.cpp', '// SLOTS 2 gets the arp\n'), 2],
     ['ui: kSlotNames[2]', w('src/ui/View.cpp', 'draw(kSlotNames[2]);\n'), 2],

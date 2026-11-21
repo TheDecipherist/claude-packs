@@ -103,6 +103,13 @@ function clearCrashes(dir: string, [, hook, how, ...why]: readonly string[], log
 
 const where = (r: LogRecord): string => r.file ?? r.command ?? r.tool ?? '-';
 const firstLine = (r: LogRecord): string => (r.reason ?? '').split('\n')[0] ?? '';
+/** A refusal's reason as it was given, up to REASON_LINES lines, each indented: a send-back is a header and a list (KWB-next, WB-38). */
+const REASON_LINES = 12;
+const reasonLines = (r: LogRecord): string => {
+  const lines = (r.reason ?? '').trimEnd().split('\n');
+  const more = lines.length > REASON_LINES ? [`... ${lines.length - REASON_LINES} more lines`] : [];
+  return [...lines.slice(0, REASON_LINES), ...more].join('\n  ');
+};
 
 function listCrashes(dir: string, log: Logger): number {
   const clears = clearsOf(dir);
@@ -170,7 +177,7 @@ function listRefusals(dir: string, rest: readonly string[], log: Logger): number
   const verdictOf = (r: LogRecord): string | undefined => (r.id === undefined ? undefined : verdicts.get(r.id)?.verdict);
   const judged = (r: LogRecord): boolean => r.id !== undefined && verdicts.has(r.id);
   const list = refusalsOf(dir).filter((r) => (!hook || r.hook === hook) && (!rest.includes('--open') || !judged(r)));
-  for (const r of list) log(`${r.id} ${r.t} ${r.hook} ${verdictOf(r) ?? 'not judged'}\n  ${where(r)}\n  ${firstLine(r)}`);
+  for (const r of list) log(`${r.id} ${r.t} ${r.hook} ${verdictOf(r) ?? 'not judged'}\n  ${where(r)}\n  ${reasonLines(r)}`);
   log(`${list.length} refusal(s)`);
   return 0;
 }

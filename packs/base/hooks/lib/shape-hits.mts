@@ -79,6 +79,9 @@ function byNumber(line: string, words: string, c: ShapeConceptData, add: Add): v
   for (const m of line.matchAll(camel)) add(m[2] ?? '', `names it by number in an identifier ("${m[0]}")`);
 }
 
+/** A roman numeral, as a machine's name ends with one. */
+const ROMAN = /^(?:I{1,3}|IV|VI{0,3}|IX|XI{0,3})$/;
+
 // "the second slot", "3rd slot", and the role names ("the PAD slot").
 function byName(line: string, words: string, c: ShapeConceptData, shape: HitShape, add: Add): void {
   const { ord, role } = regsOf(c);
@@ -92,6 +95,8 @@ function byName(line: string, words: string, c: ShapeConceptData, shape: HitShap
     const [whole = '', first = '', word = ''] = m;
     const at = m.index ?? 0;
     // a caps word holding a digit (CC9, OS2, F1) is a code or a number, never a role (supernova2_monitor WB-19)
+    // a roman numeral ending a capitalised name ("Supernova II", "Jupiter VIII") is the name, not a role (supernova2_monitor WB-37)
+    if (ROMAN.test(first) && /[A-Z][\w-]*\s+$/.test(words.slice(0, at))) return true;
     return /\d/.test(first) || NOT_ROLES.has(first) || c.words.includes(first.toLowerCase()) || c.names.has(first) || labelBefore(line, at) || isKnownName(first, word, shape) || isLongerName(words, at + whole.length);
   };
   for (const m of words.matchAll(role)) if (!notARole(m)) add(m[1] ?? '', `names it by a role ("${m[0]}"): the instance is a job or a value, not a ${c.name}`);

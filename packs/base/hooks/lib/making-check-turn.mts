@@ -113,11 +113,22 @@ function makingAddedThisSession(root: string, before: ReadonlySet<string> | null
 }
 
 /** Problems 1: the concepts the turn's writes touch, against the making line and the manifest, in one checkout. */
+/** The paths of `rels` that git ignores, by one `git check-ignore --stdin` (none when git cannot say). */
+function ignoredOf(root: string, env: Env, rels: readonly string[]): Set<string> {
+  if (!rels.length) return new Set();
+  const r = gitRun(['check-ignore', '--stdin'], { cwd: root, env, input: `${[...new Set(rels)].join('\n')}\n` });
+  return new Set(r.stdout.split('\n').map((l) => l.trim()).filter(Boolean));
+}
+
 function writtenConceptProblems(root: string, writes: readonly TurnWrite[], at: Where, rel: (p: string) => string, transcript?: string): { problems: string[]; judged: TurnWrite[] } {
   const problems: string[] = [];
   const lay = readLayout(root);
   const sh = readShape(root) ?? readShape(at.projectDir);
-  const mine = writes.filter((w) => !matchesAny(rel(w.path), [...PLAN, ...excludeGlobs(lay, excludesOf(sh))]));
+  // a file git ignores (scratch/, a build folder) is no part of what the turn makes: its throwaway probes were judged for their words, and a
+  // probe naming `part` sent the turn back (supernova2_monitor W4.1, KWB-next)
+  const kept = writes.filter((w) => !matchesAny(rel(w.path), [...PLAN, ...excludeGlobs(lay, excludesOf(sh))]));
+  const ignored = ignoredOf(root, at.env, kept.map((w) => rel(w.path)));
+  const mine = kept.filter((w) => !ignored.has(rel(w.path)));
   const sourceNames = [...new Set(mine.filter((w) => isSource(w.path)).map((w) => rel(w.path)))];
   if (!sh && sourceNames.length) {
     problems.push(`no design/shape.json, and this turn wrote source (${sourceNames.slice(0, 4).join(', ')}): ` +
