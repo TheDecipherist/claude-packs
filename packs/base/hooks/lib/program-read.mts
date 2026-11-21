@@ -236,8 +236,11 @@ function callMethod(base: Value, m: string, args: string[], ctx: EvalContext): V
     const [a, b] = vs.map(str);
     if (a === null || b === null || a === undefined || b === undefined || /^\//.test(args[0] ?? '')) return null;
     if (m === 'replace' && ctx.lang === 'node') return { t: 'str', v: base.v.replace(a, () => b) };
+    // python's third argument is a count, a number literal the evaluator reads as nothing: read it as written (KWB-next: replace(a, b, 1)
+    // was taken as replace-all). A count it cannot read stays replace-all, the superset, so a hook never judges less than is written
     const count = vs[2];
-    const n = count ? Number(str(count) ?? args[2]) : -1;
+    const literal = /^\s*\d+\s*$/.test(args[2] ?? '') ? Number(args[2]) : null;
+    const n = literal ?? (count ? Number(str(count) ?? args[2]) : -1);
     if (!(n < 0)) { let out = base.v; for (let k = 0; k < n && out.includes(a); k += 1) out = out.replace(a, () => b); return { t: 'str', v: out }; }
     return { t: 'str', v: base.v.split(a).join(b) };
   }

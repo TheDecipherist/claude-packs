@@ -14,6 +14,7 @@ import { alive } from '../../../packs/base/hooks/lib/daemon-find.mts';
 import { binaryCache, daemonFiles, keepEnv, socketFolders } from '../../../packs/base/hooks/lib/proxy-wire.mts';
 import { WIRE } from '../../../packs/base/hooks/lib/proxy-wire-table.mts';
 import { serveOptions, type Host } from '../../../packs/base/hooks/resident.mts';
+import { WARM } from '../../../packs/base/hooks/resident/options.mts';
 import { cachedBinary } from '../../../lib/proxy-binary.mts';
 import { renderWireGo, secondCopies, wireGoCurrent, writeWireGo } from '../../../scripts/wire-gen.mts';
 
@@ -89,11 +90,11 @@ test('a re-exec keeps every flag the daemon was given, and never the ready pipe'
   assert.equal(o.testMs, 90);
 });
 
-test('the daemon\'s pool by default: 2 warm workers, at most 8, retired after 2 idle minutes; --pool is the most, --warm the start, both kept by a re-exec', () => {
+test('the daemon\'s pool by default: WARM warm workers (resident/options), at most 8, retired after 2 idle minutes; --pool is the most, --warm the start, both kept by a re-exec', () => {
   const host: Host = { env: {}, uid: 1, home: '/h', platform: 'linux', node: 'node', script: '/k/resident.mjs' };
   const o = serveOptions(['--serve', '/p'], host);
   assert.ok(o);
-  assert.deepEqual([o.warm, o.pool, o.poolIdleMs], [2, 8, 120_000]);
+  assert.deepEqual([o.warm, o.pool, o.poolIdleMs], [WARM, 8, 120_000], 'the start is resident/options WARM, the one place it is set');
   const small = serveOptions(['--serve', '/p', '--pool', '1'], host);
   assert.deepEqual([small?.warm, small?.pool], [1, 1], 'the start never passes the most');
   const tuned = serveOptions(['--serve', '/p', '--pool', '5', '--warm', '3'], host);

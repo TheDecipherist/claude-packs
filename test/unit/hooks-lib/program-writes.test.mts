@@ -46,3 +46,14 @@ test('programWrites: a write whose path did not resolve leaves an earlier write 
   const w = programWrites({ lang: 'python', code: "open('a.txt','w').write('x')\nopen(dyn + '.txt','w').write('y')" }, at, none);
   assert.equal(w.find((r) => r.path === '/proj/a.txt')?.content, 'x');
 });
+
+// KWB-next (2026-11-21): python's str.replace(old, new, 1) was read as replace-all (the count, a number, evaluated to nothing), so a
+// one-row edit of a 51 KB bug log reached the hooks as the whole log changed: judged as a different text, and every window lost
+test('a python replace with a literal count replaces that many, as python does; with no count, every one', () => {
+  const read = (p: string): string | null => (p === '/proj/log.md' ? 'b1 b2 b3 b4' : null);
+  const edit = (args: string): string | undefined =>
+    programWrites({ lang: 'python', code: `p='log.md'; s=open(p).read()\ns=s.replace(${args})\nopen(p,'w').write(s)` }, at, read)[0]?.content ?? undefined;
+  assert.equal(edit("'b','z',1"), 'z1 b2 b3 b4');
+  assert.equal(edit("'b', 'z', 2"), 'z1 z2 b3 b4');
+  assert.equal(edit("'b','z'"), 'z1 z2 z3 z4');
+});

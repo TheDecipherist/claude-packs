@@ -87,3 +87,24 @@ test('an append to prose is judged on a window: the same findings at the same li
   assert.equal(windowed[0]?.line, 2001);
   assert.ok(Math.max(...read) < before.length / 10, `the finder read ${Math.max(...read)} of ${before.length} characters`);
 });
+
+// KWB-next (2026-11-21): an edit in place, mid-document, cost shape-law 52 ms warm on a 51 KB bug log (every python or Edit change to a
+// row), the window reaching only appends; now any edit to prose is judged on the changed lines and their context
+test('an edit in the middle of prose is judged on a window: the same findings at the same lines, the finder never reading the whole', () => {
+  const s = normaliseShape({ concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i)', words: ['slot', 'slots'] } }, exclude: [] });
+  const lines = Array.from({ length: 2000 }, (_, i) => `- line ${i} of the log, about the work and nothing else.`);
+  const before = `${lines.join('\n')}\n`;
+  const edited = [...lines];
+  edited[1000] = '- the reverb sits on slot 2 for now.';
+  const after = `${edited.join('\n')}\n`;
+  const read: number[] = [];
+  const find = (t: string): ReturnType<typeof findInstanceLiterals> => { read.push(t.length); return findInstanceLiterals(t, 'docs/log.md', s); };
+  const whole = addedFindings(before, after, (t) => findInstanceLiterals(t, 'docs/log.md', s));
+  const windowed = addedFindings(before, after, find, { window: true });
+  assert.deepEqual(windowed.map((f) => [f.line, f.instance]), whole.map((f) => [f.line, f.instance]));
+  assert.equal(windowed[0]?.line, 1001);
+  assert.ok(Math.max(...read) < before.length / 10, `the finder read ${Math.max(...read)} of ${before.length} characters`);
+  // the finding taken out again in the middle adds nothing, and an unchanged text adds nothing
+  assert.deepEqual(addedFindings(after, before, find, { window: true }), []);
+  assert.deepEqual(addedFindings(after, after, find, { window: true }), []);
+});

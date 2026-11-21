@@ -49,3 +49,22 @@ test('addedDefs keeps only the names an edit adds', () => {
   assert.deepEqual(addedDefs(before, `${before}int selectSlot(int n) { return n; }\n`, find).map((d) => d.name), ['selectSlot']);
   assert.deepEqual(addedDefs(null, before, find).map((d) => d.name), ['pickSlot']);
 });
+
+// KWB-next (2026-11-21): the definitions an edit to prose adds are found on its window, and confirmed on the whole old text only when the
+// window holds one: a name defined elsewhere in the document is not new
+test('addedDefs on a window: a new name is found, a name defined far away is not new, and the whole is read only to confirm one', () => {
+  const lines = Array.from({ length: 2000 }, (_, i) => `- row ${i} of the notes, nothing defined here.`);
+  lines[10] = 'def alpha';
+  const before = `${lines.join('\n')}\n`;
+  const read: number[] = [];
+  const find = (t: string): { name: string }[] => {
+    read.push(t.length);
+    return [...t.matchAll(/^def (\w+)$/gm)].map((m) => ({ name: m[1] ?? '' }));
+  };
+  const at = (n: number, text: string): string => `${lines.map((l, i) => (i === n ? text : l)).join('\n')}\n`;
+  assert.deepEqual(addedDefs(before, at(1500, 'def beta'), find, { window: true }).map((d) => d.name), ['beta']);
+  assert.deepEqual(addedDefs(before, at(1500, 'def alpha'), find, { window: true }), [], 'alpha is defined at row 10 already');
+  read.length = 0;
+  assert.deepEqual(addedDefs(before, at(1500, '- an edit that defines nothing.'), find, { window: true }), []);
+  assert.ok(Math.max(...read) < before.length / 10, `with no new name the finder read ${Math.max(...read)} of ${before.length}`);
+});

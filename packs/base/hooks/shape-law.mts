@@ -42,7 +42,8 @@ function judgeText(rel: string, before: string | null, after: string, shape: Loa
   const lits = addedFindings(before, after, (t) => findInstanceLiteralsCached(t, rel, shape), { window: PROSE.test(rel) }).filter((f) => !(f.call && declaredAmount(root, f.call, after, env)));
   const test = isTestFile(rel);
   const out = lits.map((f) => `${formatFinding(f, rel)}${test ? `\n      ${TEST_NOTE}` : ''}`);
-  const defs = [...addedDefs(before, after, (t) => findSelectorDefs(t, rel, shape)), ...addedDefs(before, after, (t) => findUnknownTypes(t, rel, shape))];
+  const window = { window: PROSE.test(rel) };
+  const defs = [...addedDefs(before, after, (t) => findSelectorDefs(t, rel, shape), window), ...addedDefs(before, after, (t) => findUnknownTypes(t, rel, shape), window)];
   for (const d of defs) {
     const finding: FormattedFinding = { ...d, concept: d.concept ?? 'new-type', instance: '' };
     out.push(formatFinding(finding, rel));

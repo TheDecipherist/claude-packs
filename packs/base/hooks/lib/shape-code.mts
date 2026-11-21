@@ -6,6 +6,7 @@
 //     a new class/struct/enum whose name holds no concept's word and that looks like an instance container (an index
 //     member, or it is made N times in an array): its concept has no row yet; a type in the manifest's "values" is skipped
 import { extname } from 'node:path';
+import { editWindow } from './edit-window.mts';
 import { languageOf } from './languages.mts';
 import { conceptOfName, parts, SHAPE_FILE } from './shape.mts';
 import type { LoadedShape } from './shape.mts';
@@ -153,7 +154,13 @@ export function findUnknownTypes(text: string, file: string | null | undefined, 
 }
 
 // The definitions an edit adds: names defined after it that were not defined before it.
-export function addedDefs<D extends { name: string }>(before: string | null | undefined, after: string | null | undefined, find: (text: string) => D[]): D[] {
+export function addedDefs<D extends { name: string }>(before: string | null | undefined, after: string | null | undefined, find: (text: string) => D[], { window = false }: { window?: boolean } = {}): D[] {
+  const part = window && before && after ? editWindow(before, after) : null;
+  if (part) {
+    // the window's new names, confirmed against the whole old text only when there are any: a name defined elsewhere in it is not new
+    const near = addedDefs(part.before, part.after, find);
+    return near.length === 0 ? near : addedDefs(before, after, find);
+  }
   const had = new Set(find(before ?? '').map((d) => d.name));
   return find(after ?? '').filter((d) => !had.has(d.name));
 }
