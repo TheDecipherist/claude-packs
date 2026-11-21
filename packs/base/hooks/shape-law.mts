@@ -150,6 +150,8 @@ export function selftest(): number {
     // supernova2_monitor WB-37: a roman numeral that ends a machine's name ("Jupiter VIII slot memory") is the name, not a role
     ['a roman numeral in a proper name is no role', w('src/ui/Name.cpp', '// the bank is the machine\'s own (Jupiter VIII slot memory); nothing else\n'), 0],
     ['a caps role after a capitalised word is still one', w('src/ui/Role.cpp', '// Mode PAD slot gets the arp\n'), 2],
+    // supernova2_monitor WB-43: a concept word that describes the next noun, another concept's, names no instance of it
+    ['a concept word that describes another concept\'s noun is no role', w('src/ui/Mod.cpp', '// the ARC slot planet keeps its stride\n'), 0],
     ['ui: an unlisted name before a concept word ("the PAD planet", KWB-12)', w('src/ui/View.cpp', '// the PAD planet gets the arp\n'), 2],
     ['ui: a caps concept word with no label before it, by number ("SLOTS 2", KWB-22)', w('src/ui/View.cpp', '// SLOTS 2 gets the arp\n'), 2],
     ['ui: kSlotNames[2]', w('src/ui/View.cpp', 'draw(kSlotNames[2]);\n'), 2],
