@@ -12,6 +12,8 @@ const index = residentIndex(root, () => readLayout(root), env);
 index.candidates(['build', 'dup:build']);   // both indexes built beside the daemon's start, not on the first Write
 index.stale();   // and the first ask reads the files' mtimes again, as the main thread's first query did: a file written since the start counts
 parentPort?.on('message', (m: IndexToThread) => {
-  if (m.type === 'stale') index.stale();
+  // a write may have changed files: rebuild now, between this write and the next ask, so the hook that asks does not wait for it
+  // (KWB-next: once-only and template-law waited 110 ms at p50 for a rebuild on the ask)
+  if (m.type === 'stale') { index.stale(); index.candidates(['build', 'dup:build']); }
   else parentPort?.postMessage({ type: 'answer', id: m.id, files: index.candidates(m.keys) });
 });

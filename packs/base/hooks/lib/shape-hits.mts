@@ -102,28 +102,48 @@ function byName(line: string, words: string, c: ShapeConceptData, shape: HitShap
   for (const m of words.matchAll(role)) if (!notARole(m)) add(m[1] ?? '', `names it by a role ("${m[0]}"): the instance is a job or a value, not a ${c.name}`);
 }
 
+/** Each use pattern's matches in one line, found once and read by every concept: the patterns do not depend on the concept, and running them
+ *  once per concept made byUse 40 % of shape-law on a new file (KWB-next: 13 ms for 155 lines at rest, 22 under a task's load). */
+interface Uses { index: RegExpMatchArray[]; right: RegExpMatchArray[]; left: RegExpMatchArray[]; cases: RegExpMatchArray[]; calls: RegExpMatchArray[] }
+const NO_USES: Uses = { index: [], right: [], left: [], cases: [], calls: [] };
+let usesOf: { line: string; uses: Uses } | null = null;
+function usesIn(line: string): Uses {
+  if (!/\d/.test(line)) return NO_USES;   // every pattern names a number
+  if (usesOf?.line !== line) {
+    usesOf = { line, uses: {
+      index: [...line.matchAll(/([A-Za-z_]\w*)\s*(?:\[\s*(\d+)\s*\]|\.at\(\s*(\d+)\s*\))/g)],
+      right: [...line.matchAll(COMPARE_RIGHT)],
+      left: [...line.matchAll(COMPARE_LEFT)],
+      cases: [...line.matchAll(/\bcase\s+(\d+)\s*:/g)],
+      calls: [...line.matchAll(/(?<![\w])([A-Za-z_]\w*)\s*\(\s*(\d+)\s*[,)]/g)],
+    } };
+  }
+  return usesOf.uses;
+}
+
 // An array indexed by a number, a comparison with a number, a case, and a call that drives one instance by number.
 function byUse(line: string, c: ShapeConceptData, shape: HitShape, aliases: Aliases, inSwitch: string | null, add: Add): void {
-  for (const m of line.matchAll(/([A-Za-z_]\w*)\s*(?:\[\s*(\d+)\s*\]|\.at\(\s*(\d+)\s*\))/g)) {
+  const uses = usesIn(line);
+  for (const m of uses.index) {
     const lead = line.slice(0, m.index).trimEnd();
     if (/[\w*&>]$/.test(lead) && !/(?:\b(?:return|case|else|do|in|of|throw|yield|await|and|or|not)|>>)$/.test(lead)) continue; // a declaration's size: Slot slots[4]
     const name = m[1] ?? '';
     const ps = parts(name);
     if (c.arrays.includes(name) || (ps.some((p) => c.words.includes(p)) && !ps.some(isCountish))) add(m[2] ?? m[3] ?? '', `indexes a per-${c.name} array with a number ("${m[0]}")`);
   }
-  for (const m of line.matchAll(COMPARE_RIGHT)) {
+  for (const m of uses.right) {
     if (isConstantName(m[1] ?? '') || isSum(line.slice(0, m.index))) continue; // a quantity, or an operand of a sum (KWB-next)
     if (conceptOfExpr(m[1] ?? '', shape, aliases) === c.name) add(m[2] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
   }
-  for (const m of line.matchAll(COMPARE_LEFT)) {
+  for (const m of uses.left) {
     if (isConstantName(m[2] ?? '')) continue;
     if (conceptOfExpr(m[2] ?? '', shape, aliases) === c.name && !isSum(line.slice(0, m.index))) add(m[1] ?? '', `compares a ${c.name} with a number ("${m[0]}")`);
   }
-  if (inSwitch === c.name) for (const m of line.matchAll(/\bcase\s+(\d+)\s*:/g)) add(m[1] ?? '', `a case for one ${c.name} ("${m[0]}")`);
-  for (const m of line.matchAll(/(?<![\w])([A-Za-z_]\w*)\s*\(\s*(\d+)\s*[,)]/g)) {
+  if (inSwitch === c.name) for (const m of uses.cases) add(m[1] ?? '', `a case for one ${c.name} ("${m[0]}")`);
+  for (const m of uses.calls) {
     const fn = m[1] ?? '';
     const ps = parts(fn);
-    if (isLibraryCall(line, m.index, shape)) continue; // KF-20
+    if (isLibraryCall(line, m.index ?? 0, shape)) continue; // KF-20
     if (ps.some((p) => c.single.includes(p)) && !ps.some((p) => c.plural.has(p) || isCountish(p))) add(m[2] ?? '', `drives one ${c.name} by number ("${m[0].replace(/[,)]$/, '')}")`, fn);
   }
 }

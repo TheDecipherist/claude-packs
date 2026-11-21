@@ -90,3 +90,25 @@ test('the index thread, given the environment, leaves out what git ignores (supe
     assert.deepEqual((await thread.candidates(keysOf(body(1)))).map((f) => f.file), ['src/kept.ts']);
   } finally { await thread.close(); }
 });
+
+// KWB-next (2026-11-21): the thread rebuilt on the ask after a write, so the hook that asked waited for the whole rebuild (once-only and
+// template-law 110 ms at p50 at Pre Write on supernova2_monitor); it rebuilds when told a write happened, and the next ask finds it fresh
+test('a stale rebuilds at once: an ask a moment later is answered without waiting for a rebuild', async () => {
+  const dir = project();
+  const keys = keysOf(body(5));
+  const thread = indexThread(dir, layout, THREAD);
+  try {
+    await thread.candidates(keys);   // built
+    const t0 = performance.now();
+    thread.stale();
+    await thread.candidates(keys);   // waits for the rebuild either way: the cost of one rebuild
+    const rebuild = performance.now() - t0;
+    thread.stale();
+    await new Promise((done) => setTimeout(done, Math.max(200, rebuild * 3)));   // the gap between a write and the next one
+    const t1 = performance.now();
+    await thread.candidates(keys);
+    const ask = performance.now() - t1;
+    assert.ok(rebuild > 20, `the meter: a rebuild over ${FILES} files took ${Math.round(rebuild)} ms`);
+    assert.ok(ask < rebuild / 3, `an ask after the gap took ${Math.round(ask)} ms, a rebuild ${Math.round(rebuild)} ms`);
+  } finally { await thread.close(); }
+});
