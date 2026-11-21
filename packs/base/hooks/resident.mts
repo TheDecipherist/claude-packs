@@ -7,7 +7,7 @@
 // Its files (folder at mode 700, name = 16 hex of the user, project, lock hash and node, lib/proxy-wire.mts daemonFiles): KEY.sock,
 // KEY.pid (what `claude-packs daemon status|stop` reads), KEY.lock (the start lock) and daemon-KEY.log. The job of each part lives in
 // resident/: socket, pool and worker, event, index, state, lifecycle. The main thread does only socket I/O, framing, the table, the
-// repetition index and every state and timing write; hooks run on the workers (review-2-go 2.2).
+// messages to the index thread and every state and timing write; hooks run on the workers (review-2-go 2.2).
 import { homedir } from 'node:os';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,7 +21,7 @@ import { real } from './lib/project.mts';
 import { cacheFolder, crashReply, daemonFiles, daemonKey, lockHash } from './lib/proxy-wire.mts';
 import { WIRE } from './lib/proxy-wire-table.mts';
 import { serveEvent, type Served } from './resident/event.mts';
-import { residentIndex } from './resident/index.mts';
+import { indexThread } from './resident/index.mts';
 import { WARM, againOf, poolShape, givenOf, numberOf, textOf } from './resident/options.mts';
 import { IDLE_MS, MAX_AGE_MS, MAX_RSS, alive, daemonLog, reexec, releaseStartLock, sayReady, takeStartLock, watch } from './resident/lifecycle.mts';
 import { startPool } from './resident/pool.mts';
@@ -118,13 +118,13 @@ export async function serve(o: ServeOptions, host: Host, usage = new UsageStore(
   const table = readHookTable(o.hooks);
   if (table === null) { log(`start refused: ${o.hooks} holds no hook table`); releaseStartLock(files.lock); sayReady(o.readyFd, 'failed no hook table\n'); return 1; }
   for (const flag of SMALL_V8) setFlagsFromString(flag);
-  const index = residentIndex(project, () => readLayout(project));
-  index.warm(new URL(`./resident/warm${EXT}`, import.meta.url));   // the indexes are built beside the start, not on the first Write
+  // the indexes on a thread of their own, built beside the start: no rebuild after a write holds the main thread (KWB-next)
+  const index = indexThread(project, () => readLayout(project), new URL(`./resident/index-thread${EXT}`, import.meta.url));
   const hooks = [...new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook))];
   // the pool never grows past its size: a burst of 16 events at once grew it to 20 to 22 workers, each about 10 MB the daemon kept (rss)
   const pool = startPool({
     workerUrl: new URL(`./resident/worker${EXT}`, import.meta.url), data: { dir: o.hooks, hooks, ext: EXT }, ...poolShape(o.warm), max: o.pool,
-    idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, warming: index.warming, log,
+    idleMs: o.poolIdleMs, recycleAfter: o.recycleAfter, growAfterMs: 40, candidates: index.candidates, log,
   });
   const failed = await pool.ready();
   const counts = { events: 0, last: 0, inflight: 0 };

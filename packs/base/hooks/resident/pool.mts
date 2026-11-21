@@ -25,7 +25,7 @@ export interface PoolOptions {
   /** The clock the idle time is read by (default `Date.now`): a test plants one. */
   now?: () => number;
   /** The index on the main thread, asked by a worker. */
-  candidates: (hashes: readonly string[]) => FileStatements[];
+  candidates: (hashes: readonly string[]) => FileStatements[] | Promise<FileStatements[]>;
   /** A warm-up the main thread's index is still waiting on: an ask is answered after it (null: none). */
   warming?: () => Promise<void> | null;
   log: (line: string) => void;
@@ -98,8 +98,10 @@ export function startPool(o: PoolOptions): Pool {
         if (s.events >= o.recycleAfter) { drop(s); if (!closing) spawn(s.preload); } else pump();
       } else if (m.type === 'group') {
         if (m.kind === 'started') s.groups.add(m.pid); else s.groups.delete(m.pid);
-      } else if (m.type === 'ask') void Promise.resolve(o.warming?.()).then(() => { if (!s.gone) send(s, { type: 'answer', id: m.id, files: o.candidates(m.hashes) }); });
-      else o.log(m.line);
+      } else if (m.type === 'ask') {
+        void Promise.resolve(o.warming?.()).then(() => o.candidates(m.hashes)).then((files) => { if (!s.gone) send(s, { type: 'answer', id: m.id, files }); });
+      }
+      else if (m.type === 'log') o.log(m.line);
     });
     worker.on('error', (e) => o.log(`worker error: ${e.stack ?? e.message}`));
     worker.on('exit', (code) => {

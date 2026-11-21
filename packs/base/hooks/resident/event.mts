@@ -18,7 +18,7 @@ import { PROTOCOL, overTime, type Reply, type WireRequest } from '../lib/proxy-w
 import { real } from '../lib/project.mts';
 import { unreadWrites } from '../lib/unread-writes.mts';
 import { resolve } from 'node:path';
-import { mayHaveWritten, type ResidentIndex } from './index.mts';
+import { mayHaveWritten, type IndexThread } from './index.mts';
 import type { Done, Job } from './messages.mts';
 import type { Pool } from './pool.mts';
 import type { StatusKeeper } from './status.mts';
@@ -50,7 +50,7 @@ export interface Served {
   project: string;
   table: readonly HookTableRow[];
   pool: Pool;
-  index: ResidentIndex;
+  index: Pick<IndexThread, 'stale'>;
   /** Hook events served, and when the last one arrived (the idle clock). */
   counts: { events: number; last: number; inflight: number };
   log: (line: string) => void;

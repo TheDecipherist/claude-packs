@@ -1,4 +1,5 @@
-// resident/index: the repetition indexes, kept on the daemon's main thread (review-2-go 2.5). A worker never holds one and never gets
+// resident/index: the repetition indexes, kept on one thread of their own (resident/index-thread, `indexThread`; they were on the daemon's
+// main thread, review-2-go 2.5, until a rebuild after each write held every worker's reply behind it). A worker never holds one and never gets
 // one: it asks by message which files hold any of the keys it names (a statement's hash, an element shape's `shape:<id>`, a definition's
 // `def:<name>`; and `dup:<window hash>` of the duplicate index, resident/dup-windows.mts), and the answer is those files' entries only. The index is built when first asked and rebuilt, from the files' mtimes,
 // after a tool call that may have written (a PostToolUse event marks it stale), so a write and a second write repeating it, served by
@@ -76,5 +77,45 @@ export function residentIndex(root: string, layout: () => Layout): ResidentIndex
     close: () => { void builder?.terminate(); },
     stale: () => { dirty = true; dup.stale(); },
     size: () => (built === null ? 0 : Object.keys(built.index).length),
+  };
+}
+
+/** What the main thread says to the index thread: a write may have changed files, or an ask for the files holding these keys. */
+export type IndexToThread = { type: 'stale' } | { type: 'ask'; id: number; keys: readonly string[] };
+type IndexFromThread = { type: 'answer'; id: number; files: FileStatements[] };
+
+/** The indexes as the daemon's main thread holds them: on their own thread, asked by message, so no rebuild blocks the main thread. */
+export interface IndexThread {
+  candidates: (keys: readonly string[]) => Promise<FileStatements[]>;
+  stale: () => void;
+  close: () => Promise<void>;
+}
+
+/** Starts the index thread (`threadUrl`: resident/index-thread). A thread that fails or exits is replaced by the indexes built on the main
+ *  thread, as before it existed, and every ask still waiting is answered from those: an ask is never answered with nothing. */
+export function indexThread(root: string, layout: () => Layout, threadUrl: URL): IndexThread {
+  const waiting = new Map<number, { keys: readonly string[]; done: (files: FileStatements[]) => void }>();
+  let next = 0;
+  let closing = false;
+  let local: ResidentIndex | null = null;
+  const fallBack = (): void => {
+    if (closing || local !== null) return;
+    local = residentIndex(root, layout);
+    for (const { keys, done } of waiting.values()) done(local.candidates(keys));
+    waiting.clear();
+  };
+  const thread = new Worker(threadUrl, { workerData: { root }, execArgv: [] });
+  thread.on('message', (m: IndexFromThread) => { waiting.get(m.id)?.done(m.files); waiting.delete(m.id); });
+  thread.on('error', fallBack);
+  thread.on('exit', fallBack);
+  return {
+    candidates: (keys) => new Promise((done) => {
+      if (local !== null) { done(local.candidates(keys)); return; }
+      next += 1;
+      waiting.set(next, { keys, done });
+      thread.postMessage({ type: 'ask', id: next, keys } satisfies IndexToThread);
+    }),
+    stale: () => { if (local !== null) local.stale(); else thread.postMessage({ type: 'stale' } satisfies IndexToThread); },
+    close: async () => { closing = true; local?.close(); await thread.terminate(); },
   };
 }
