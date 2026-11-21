@@ -148,11 +148,20 @@ function byUse(line: string, c: ShapeConceptData, shape: HitShape, aliases: Alia
   }
 }
 
+/** Whether the line holds one of the concept's singular words, in any case (the ordinal and role patterns' words). */
+function mentions(line: string, c: ShapeConceptData): boolean {
+  const lower = line.toLowerCase();
+  return c.single.some((w) => lower.includes(w.toLowerCase()));
+}
+
 export function lineHits(line: string, c: ShapeConceptData, shape: HitShape, aliases: Aliases, inSwitch: string | null, file: string | null | undefined): LineHit[] {
   const hits: LineHit[] = [];
   const add: Add = (instance, why, call) => hits.push(call === undefined ? { instance: String(instance), why } : { instance: String(instance), why, call });
   const words = blankMessages(line, file); // what is read as words: a sentence in a string is text (KF-17)
   for (const re of c.patterns) for (const m of line.matchAll(re)) add(m[1] ?? m[0], `matches the pattern ${re.source}`);
+  // a line with no digit can hit only by an ordinal or a role, and both need one of the concept's singular words: without one, nothing
+  // here can hit (KWB-next: shape-law 15 ms at p50 on a new file's Write, every concept read on every line)
+  if (!/\d/.test(line) && !mentions(line, c)) return hits;
   byNumber(line, words, c, add);
   byName(line, words, c, shape, add);
   byUse(line, c, shape, aliases, inSwitch, add);
