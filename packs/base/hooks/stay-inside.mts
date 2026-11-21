@@ -7,7 +7,8 @@
 // Writes are a write tool's path, and every file a shell command writes (lib/shell-writes.mts: redirects, heredocs, cp, mv, tee, rm,
 // touch, sed -i ...). /dev/* is no file. One more place passes, only with the owner's yes written in the layout: the build's own
 // plugin copy for a host gate (auval finds only an installed component), `guards.stayInside.pluginCopies` naming each bundle, and a
-// write passes only into `~/Library/Audio/Plug-Ins/Components` or `VST3`, at or inside a bundle so named (KWB-next, WB-10).
+// write passes only into `~/Library/Audio/Plug-Ins/Components` or `VST3`, at or inside a bundle so named (KWB-next, WB-10). And a note
+// in Claude Code's own memory folder for this project passes (`isOwnMemoryNote`).
 //   node stay-inside.mjs --selftest
 import { existsSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -44,6 +45,18 @@ export function isAllowedPluginCopy(path: string, bundles: readonly string[], ho
   }));
 }
 
+/** True when `path` is a note in Claude Code's own memory folder for this project (`<config>/projects/<project path, each character
+ *  that is no letter or digit a dash>/memory/<name>.md`, config being CLAUDE_CONFIG_DIR or ~/.claude): the harness keeps what the user
+ *  asks it to remember there, outside every project, and a refusal stopped the session on the user's own "make a note in memory"
+ *  (KWB-next, 2026-11-21). Only a Markdown file directly in that folder: another project's memory, a subfolder, a script, and the rest
+ *  of ~/.claude still stop the session. */
+export function isOwnMemoryNote(path: string, root: string, env: Record<string, string | undefined>): boolean {
+  const config = env.CLAUDE_CONFIG_DIR ?? (env.HOME ? join(env.HOME, '.claude') : undefined);
+  if (!config) return false;
+  const folder = join(config, 'projects', resolve(root).replace(/[^A-Za-z0-9]/g, '-'), 'memory');
+  return dirname(path) === folder && path.endsWith('.md');
+}
+
 /** The bundles the owner allows copied for a host gate: layout.json `guards.stayInside.pluginCopies`. */
 function pluginCopies(root: string): string[] {
   const list = readLayout(root).guards?.stayInside?.pluginCopies;
@@ -73,7 +86,8 @@ export const hook: Hook = (event, ctx) => {
   if (event.hook_event_name !== 'PreToolUse') return pass;
   const cwd = event.cwd ?? ctx.cwd;
   const bundles = pluginCopies(ctx.projectDir);
-  const out = escapes(writtenBy(event, cwd, ctx.env), ctx.projectDir, cwd).filter((p) => !isAllowedPluginCopy(p, bundles, ctx.env.HOME));
+  const out = escapes(writtenBy(event, cwd, ctx.env), ctx.projectDir, cwd)
+    .filter((p) => !isAllowedPluginCopy(p, bundles, ctx.env.HOME) && !isOwnMemoryNote(p, ctx.projectDir, ctx.env));
   if (!out.length) return pass;
   return halt(
     `STOPPED by stay-inside: this call writes outside the project, to ${out.slice(0, 3).join(', ')}${out.length > 3 ? ` and ${out.length - 3} more` : ''}, `
@@ -104,6 +118,7 @@ export function selftest(): number {
     return !(v instanceof Promise) && v.code === 0 && v.stdout.includes('"continue":false');
   };
   const plugIns = join(home, 'Library/Audio/Plug-Ins');
+  const memoryOf = (h: string, root: string): string => join(h, '.claude/projects', root.replace(/[^A-Za-z0-9]/g, '-'), 'memory');
   const stops = (ev: Record<string, unknown>): boolean => {
     const v = hook({ hook_event_name: 'PreToolUse', cwd: dir, ...ev }, contextOf({ projectDir: dir, cwd: dir, env: { CLAUDE_PROJECT_DIR: dir } }));
     return !(v instanceof Promise) && v.code === 0 && v.stdout.includes('"continue":false');
@@ -129,6 +144,12 @@ export function selftest(): number {
     ['the owner\'s bundle in another plug-in folder stops it', stopsIn(yes, write(`${plugIns}/HAL/Unit.component/x`)), true],
     ['the plug-in folder itself stops it', stopsIn(yes, write(`${plugIns}/Components/loose.txt`)), true],
     ['with no yes in the layout the copy stops it', stopsIn(dir, write(`${plugIns}/Components/Unit.component/x`)), true],
+    ['a note in this project\'s own Claude Code memory folder passes', stopsIn(dir, write(join(memoryOf(home, dir), 'a-note.md'))), false],
+    ['the memory index passes', stopsIn(dir, write(join(memoryOf(home, dir), 'MEMORY.md'))), false],
+    ['another project\'s memory folder stops it', stopsIn(dir, write(join(memoryOf(home, other), 'a-note.md'))), true],
+    ['a file there that is no note stops it', stopsIn(dir, write(join(memoryOf(home, dir), 'run.sh'))), true],
+    ['a folder inside the memory folder stops it', stopsIn(dir, write(join(memoryOf(home, dir), 'deep/a-note.md'))), true],
+    ['the rest of ~/.claude stops it', stopsIn(dir, write(join(home, '.claude/settings.json'))), true],
     ['the runner gets the halt as JSON on exit 0', runner.status === 0 && runner.stdout.includes('"continue":false'), true],
   ];
   return verdicts('stay-inside', rows);
