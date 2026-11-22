@@ -19,6 +19,10 @@ Always do:
 - Default a control the original lacks to "does nothing": a wet/dry at 0.5 once made every preset half wet.
 
 Never do:
+- Build a reproduction's engine from its manual and guesses while its firmware holds the formulas: every oscillator, filter, envelope, LFO and effect law is read from the host's coefficient builders (`trace-the-builders`) and the DSP's own program (`read-the-dsp-program`), and checked against the machine's code run as an oracle.
 - Invent a global control on a reproduction. It rewrites every preset.
 - Copy the machine's artwork, unless the brief asks for it and `"guards": { "instrument": { "artwork": "verbatim" } }` says so. By default a reproduction has the same sections, positions and labels, drawn your own way. With `"artwork": "verbatim"` the picture is the spec, and whoever ships it decides whether they may: log that as an open question.
 </constraints>
+
+## Check
+`workorder check` refuses a reverse-engineering project that declares no kind, and, in a reproduction, a step that builds engine code (the layout's `audio`, `engines` and `dsp` folders) without `trace-the-builders` and `read-the-dsp-program` on its Skills line or without an oracle in its Done when. `doctor` is red while a reproduction's engine holds more `[ASSUMED]` and `[EAR]` laws than `docs/engine-debt.json`'s floor, or holds engine code with no floor written; the floor only falls (`lib/reproduction-law.mts`).

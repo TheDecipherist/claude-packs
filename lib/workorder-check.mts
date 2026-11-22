@@ -12,6 +12,7 @@ import { readLock } from './manifest.mts';
 import { ghidraRefusals } from './ghidra-check.mts';
 import { toolchainRefusals } from './toolchain.mts';
 import { installBlockOf } from './install-block.mts';
+import { reproductionOrderRefusals } from './reproduction-law.mts';
 
 const KIT = fileURLToPath(new URL('..', import.meta.url));
 const FENCE = /^\s*(```|~~~)/;
@@ -112,7 +113,8 @@ export async function checkWorkorder(dir: string, name: string, { withDoctor = t
   const wanted = block?.ghidra ?? [];
   // every processor the firmware runs on has a disassembler and an emulator settled before the run (the user: "ironclad")
   const toolchain = block?.processors.length ? toolchainRefusals(block.processors, readText(join(dir, 'docs', 'workorders', name, 'toolchain.md')), name) : [];
-  const refusals = [...placeholders(lines), ...doneWhens(lines), ...missingSkills(dir, lines), ...ghidraRefusals(wanted, env ?? process.env), ...toolchain];
+  const refusals = [...placeholders(lines), ...doneWhens(lines), ...missingSkills(dir, lines), ...ghidraRefusals(wanted, env ?? process.env), ...toolchain,
+    ...reproductionOrderRefusals(dir, text)]; // a reproduction's engine from its firmware, never its manual and guesses (the user: "ironclad")
   if (withDoctor) {
     const said: string[] = [];
     if (await doctor(dir, (l) => said.push(String(l)), { strict: true, ...(env ? { env } : {}) }) !== 0) {

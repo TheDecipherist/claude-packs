@@ -22,6 +22,7 @@ import { onceOnlyDoctor, useJscpd } from './once-only-report.mts';
 import type { DetectorEnv } from './once-only-report.mts';
 import { manifestProblems } from './pack-manifest.mts';
 import { HOOK_FILE, availablePacks, readPack } from './packs.mts';
+import { engineDebtProblems } from './reproduction-law.mts';
 import { ruleTestProblems } from './rule-tests.mts';
 import { applyPaths } from './rules.mts';
 import { proved, remember, selftestKey, sharedHash } from './selftest-cache.mts';
@@ -179,6 +180,7 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
   const toDo = (found: readonly string[]): void => { if (installing) found.forEach((f) => log(`  note: ${f}`)); else problems.push(...found); };
   toDo(statusProblems(projectDir, env)); // what a hook says a project still lacks: an empty id lock (KF-15), a missing settings layer (1.7.0)
   toDo(buildQueueProblems(projectDir, layout)); // a queue that is not there queues nothing (KF-1)
+  toDo(engineDebtProblems(projectDir)); // a reproduction's engine debt over its floor: laws come from the firmware (the user: "ironclad")
   problems.push(...await pageGateProblems(projectDir, layout, env)); // UI code is proved rendered (0.17.0)
   problems.push(...await hoverGateProblems(projectDir, layout, env)); // UI code needs a declared hover gate (0.10.1, Stellix B-261)
   problems.push(...typescriptProblems(projectDir)); // a project holding typescript-only holds typescript and the declaration (W8.5)
