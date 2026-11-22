@@ -27,19 +27,35 @@ import type { Env, HookEvent, HookTableRow } from '../lib/types.d.mts';
 /** The events whose recorders run when a judge refused: the call or the stop happened, refused or not. */
 const RECORDS_A_REFUSAL: ReadonlySet<string> = new Set(['PreToolUse', 'Stop']);
 
-/** Whether each project's last event found the machine past the governor's ceiling. */
-const BUSY = new Map<string, boolean>();
+/** Each project's busy window: open while the machine is past the governor's budget, and when it opened its calm. */
+const BUSY = new Map<string, BusyState>();
 
-/** A marker line when the machine's 1-minute load crosses the governor's budget, written before the event's own lines so the event
- *  lies inside the window it opens: doctor judges no hook and no pool wait in a machine others filled (KWB-next), as in a build. */
+export interface BusyState { busy: boolean; calmSince: number | null }
+
+/** How long the load must stay under the budget before a busy window closes: the 5-minute load's span. One dip of the 1-minute load
+ *  closed the window while the 5-minute load was near 30, and the pool waits of the next five minutes were charged to the pool (KWB-next). */
+export const BUSY_CALM_MS = 5 * 60_000;
+
+/** The next busy state: past the budget opens (or holds) the window and ends any calm; under it, an open window closes only once the
+ *  calm has lasted BUSY_CALM_MS. */
+export function busyNext(prev: BusyState, load: number, slots: number, now: number): BusyState {
+  if (load > slots) return { busy: true, calmSince: null };
+  if (!prev.busy) return prev;
+  const calmSince = prev.calmSince ?? now;
+  return now - calmSince >= BUSY_CALM_MS ? { busy: false, calmSince: null } : { busy: true, calmSince };
+}
+
+/** A marker line when the machine's busy window opens or closes (busyNext), written before the event's own lines so the event lies
+ *  inside the window it opens: doctor judges no hook and no pool wait in a machine others filled (KWB-next), as in a build. Past the
+ *  governor's budget (the share its jobs may hold together), others have taken what it would give work: the load of 8 to 12 another
+ *  project's builds hold on 18 cores sat under the ceiling (12.6) and the pool was charged for it. */
 function busyMark(root: string, env: Env): string {
   const host = machineHost(env);
-  // past the governor's budget (the share of the machine its jobs may hold together), others have taken what it would give work:
-  // the load of 8 to 12 another project's builds hold on 18 cores sat under the ceiling (12.6) and the pool was charged for it
-  const busy = host.load() > budgetOf(host).slots;
-  if (busy === (BUSY.get(root) ?? false)) return '';
-  BUSY.set(root, busy);
-  return hookLogLine({ event: 'Load', hook: busy ? BUSY_START : BUSY_END, ms: 0, code: 0, tool: 'machine' });
+  const prev = BUSY.get(root) ?? { busy: false, calmSince: null };
+  const next = busyNext(prev, host.load(), budgetOf(host).slots, host.now());
+  BUSY.set(root, next);
+  if (next.busy === prev.busy) return '';
+  return hookLogLine({ event: 'Load', hook: next.busy ? BUSY_START : BUSY_END, ms: 0, code: 0, tool: 'machine' });
 }
 
 /** After the first refusal, how long the other judges get to answer before the reply goes (review-2-go 2.9). */

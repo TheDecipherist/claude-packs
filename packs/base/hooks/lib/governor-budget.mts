@@ -34,12 +34,13 @@ export interface GovernorHost {
 export function machineHost(env: Env): GovernorHost {
   const plantedCores = Number(env['CLAUDE_PACKS_GOVERNOR_CORES']);
   const plantedLoad = env['CLAUDE_PACKS_GOVERNOR_LOAD'];
+  const plantedNow = Number(env['CLAUDE_PACKS_GOVERNOR_NOW']);   // a selftest's clock, in ms (the busy window's calm)
   return {
     env,
     home: env['HOME'] || homedir(),
     cores: plantedCores >= 1 ? Math.floor(plantedCores) : availableParallelism(),
     load: () => (plantedLoad !== undefined && plantedLoad !== '' ? Number(plantedLoad) : loadavg()[0] ?? 0),
-    now: Date.now,
+    now: plantedNow >= 1 ? () => plantedNow : Date.now,
     alive,
   };
 }

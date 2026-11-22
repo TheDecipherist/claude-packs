@@ -8,6 +8,7 @@ import { parseJson } from '../lib/json.mts';
 import { asRecord } from '../lib/merge-out.mts';
 import { PLANTS, asks, INTRUDER } from './selftest-plants.mts';
 import { alive, ask, dropRig, eventText, filesOf, makeRig, request, start, stopAll, waitFor } from './selftest-rig.mts';
+import { BUSY_CALM_MS } from './event.mts';
 import { readState } from './state.mts';
 import type { VerdictRow } from '../lib/types.d.mts';
 import type { WireRequest } from '../lib/proxy-wire.mts';
@@ -63,12 +64,17 @@ export async function eventCases(cases: VerdictRow[]): Promise<void> {
     const sub = await ask(rig, eventText(rig, 'SubRef', {}, 'SubagentStop'));
     cases.push(['a refused SubagentStop: its recorder does not run', sub.code === 2 && !existsSync(join(rig.dir, 'sub.txt')), true]);
 
-    // KWB-next: a machine past the governor's ceiling is marked before the event's lines, and marked again when it has room
-    const planted = (load: string): Partial<WireRequest> => ({ env: { ...request(rig).env, CLAUDE_PACKS_GOVERNOR_CORES: '10', CLAUDE_PACKS_GOVERNOR_LOAD: load } });
-    await ask(rig, eventText(rig, 'Fast'), planted('9.5'));
-    await ask(rig, eventText(rig, 'Fast'), planted('0'));
-    const marks = (readText(join(rig.dir, '.claude/hooks.log')) ?? '').split('\n').filter((l) => /\tbusy-(start|end)\t/.test(l)).map((l) => l.split('\t')[2]);
-    cases.push(['a busy machine is marked, and its end is marked', marks.join(','), 'busy-start,busy-end']);
+    // KWB-next: a machine past the governor's budget is marked before the event's lines, and marked again once it has had room for
+    // BUSY_CALM_MS: a dip alone does not close the window
+    const planted = (load: string, now: number): Partial<WireRequest> =>
+      ({ env: { ...request(rig).env, CLAUDE_PACKS_GOVERNOR_CORES: '10', CLAUDE_PACKS_GOVERNOR_LOAD: load, CLAUDE_PACKS_GOVERNOR_NOW: String(now) } });
+    const busyMarks = (): string => (readText(join(rig.dir, '.claude/hooks.log')) ?? '').split('\n')
+      .filter((l) => /\tbusy-(start|end)\t/.test(l)).map((l) => l.split('\t')[2]).join(',');
+    await ask(rig, eventText(rig, 'Fast'), planted('9.5', 1000));
+    await ask(rig, eventText(rig, 'Fast'), planted('0', 2000));
+    cases.push(['a busy machine is marked; one dip under the budget leaves the window open', busyMarks(), 'busy-start']);
+    await ask(rig, eventText(rig, 'Fast'), planted('0', 2000 + BUSY_CALM_MS));
+    cases.push(['the window closes once the load has stayed under the budget BUSY_CALM_MS', busyMarks(), 'busy-start,busy-end']);
 
     const t3 = Date.now();
     const slowPost = await ask(rig, eventText(rig, 'PostSlow', {}, 'PostToolUse'));
