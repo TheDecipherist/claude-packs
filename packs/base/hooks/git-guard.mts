@@ -111,6 +111,10 @@ function realEnv(env: NonNullable<GitEnv>): HouseEnv {
     hasHead: (cwd) => headRead(cwd, () => gitRun(['rev-parse', '-q', '--verify', 'HEAD'], at(cwd, env)).ok, (h) => h.sha !== null),
     remoteUrl: (cwd, name) => { const config = gitConfigRead(cwd, env); return (config ? config.get('remote', name, 'url') : gitOut(['remote', 'get-url', name], at(cwd, env))) || null; },
     merging: (cwd) => gitRun(['rev-parse', '-q', '--verify', 'MERGE_HEAD'], at(cwd, env)).ok,
+    atHead: (cwd, name) => {
+      const ref = gitOut(['rev-parse', '-q', '--verify', `refs/heads/${name}^{commit}`], at(cwd, env));
+      return ref !== null && ref !== '' && ref === gitOut(['rev-parse', 'HEAD'], at(cwd, env));
+    },
   };
 }
 
@@ -149,6 +153,10 @@ function undoRefusal(p: string, here: string, env: HouseEnv, c: HouseCfg): strin
     (verb === 'reset' && !rest.includes('--hard')) || (verb === 'checkout' && /\s-b\b/.test(rest)) ||
     (verb === 'clean' && /\s-[a-zA-Z]*n/.test(rest)) ||
     (verb === 'checkout' && /\s--(?:theirs|ours)\b/.test(rest) && env.merging?.(here)); // KF-21: a conflict resolved, not an undo
+  // a branch that points at HEAD's own commit: switching to it changes no file, so it loses nothing (KWB-next: the supervisor switched
+  // the main checkout under a running task and the guard held it on the wrong branch)
+  const onlyArg = rest.trim().split(/\s+/).filter(Boolean);
+  if (verb === 'checkout' && onlyArg.length === 1 && !onlyArg[0]?.startsWith('-') && env.atHead?.(here, onlyArg[0] ?? '')) return null;
   if (harmless) return null;
   // an untracked file is touched only by clean: checkout, restore, stash and reset --hard leave it, and git itself refuses a
   // checkout that would overwrite one (KWB-147: a worktree's node_modules link, the status line's state file)

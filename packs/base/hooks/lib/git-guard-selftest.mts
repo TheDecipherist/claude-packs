@@ -19,6 +19,8 @@ export interface HouseEnv {
   vars?: Readonly<Record<string, string | undefined>>;
   remoteUrl?: (here: string, remote: string) => string | null;
   merging?: (here: string) => boolean;
+  /** Whether a branch name points at HEAD's own commit: a checkout of it changes no file (KWB-next). */
+  atHead?: (here: string, branch: string) => boolean;
   unpushed?: (here: string, cfg: GitGuards) => Unpushed | Failure | null;
   warn?: (message: string) => void;
 }
@@ -101,6 +103,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
     ['git push -u origin work/x', remote('git@github.com:other-org/app.git')], ['git push origin work/x', remote('https://github.com/HouseOwner/app.git')],
     ['git push git@github.com:other-org/app.git work/x', clean], ['git push -f origin work/x', remote('git@github.com:HouseOwner/app.git')],
     ['git checkout --theirs a.txt', isDirty],
+    ['git checkout stage-8', { ...isDirty, atHead: () => false }], ['git checkout stage-8 -- a.h', { ...isDirty, atHead: () => true }],
   ];
   const mustPass: readonly Mark[] = [
     ['git add build.md src/Row.h', isDirty], ["git commit -m 'C1: row clock' -- build.md src/Row.h", isDirty],
@@ -115,6 +118,7 @@ export function selftest(hookFile: string, { problem, house }: GitGuardLaws): nu
     ['git push -u origin work/x', remote('git@github.com:HouseOwner/app.git')], ['git push origin work/x', remote('git@github-house:HouseOwner/app.git')],
     ['git push git@github.com:HouseOwner/app.git work/x', clean], ['git push ssh://git@github.com/HouseOwner/app.git work/x', clean],
     ['git add -n .', clean], ['git add --dry-run -A', clean], ['git checkout --theirs a.txt', { ...isDirty, merging: () => true }],
+    ['git checkout stage-8', { ...isDirty, atHead: () => true }], // a branch at HEAD's commit: no file changes (KWB-next)
   ];
   const OWNED: GitGuards = { owner: 'HouseOwner' };
   for (const [cmd, env] of mustBlock) if (house(cmd, '.', env, OWNED) === null) bad.push(`NOT BLOCKED: ${cmd}`);
