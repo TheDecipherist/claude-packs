@@ -36,6 +36,9 @@ export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = {
   'firmware-out-of-git': { p50: 10, p95: 200, worst: 1000 },
   // each reads every statement of a whole new file at Pre Write: 7 ms for 155 lines at rest, 12 to 13 ms at p50 under a task's load
   // (supernova2_monitor stage 5, after the per-line and digitless-line savings, KWB-next); a new file must be read whole
+  // runs every installed lesson's patterns over the written text at Pre Write: 12 ms p50 over 23 writes of whole new files in
+  // supernova2_monitor's stage 7 (the C++ voice, the editor); a lesson is read once per write and none can be skipped (KWB-next)
+  'lesson-checks': { p50: 20, p95: 50 },
   'shape-law': { p50: 20, p95: 50 },
   'template-law': { p50: 20, p95: 50 },
 };
