@@ -14,7 +14,7 @@
 //   grantWithin(host, request, giveUpMs, onWait) -> the grant, or null when it did not come in time (an agent's start)
 import { randomBytes } from 'node:crypto';
 import { DEFAULT_WANT, type GovernorHost } from './governor-budget.mts';
-import { answerOn, priorityOf, type Answer, type Request } from './governor-policy.mts';
+import { STARVE_MS, answerOn, priorityOf, type Answer, type Request } from './governor-policy.mts';
 import { changeState, governorDir, liveState, napSync } from './governor-store.mts';
 import type { GovernorState, JobKind } from './governor-store.mts';
 import { settingsFor } from './governor-settings.mts';
@@ -58,7 +58,8 @@ export function take(host: GovernorHost, request: TakeRequest): TakeResult {
     state.waiting = state.waiting.filter((w) => w.id !== request.ticket);
     const settings = settingsFor(answer.kind, answer.grant);
     const line = `granted ${id}: ${answer.grant} cores at priority ${answer.priority} (${settings.words}); free it with \`load free ${id}\``
-      + ` (freed by itself when pid ${request.pid} ends)`;
+      + ` (freed by itself when pid ${request.pid} ends)`
+      + (answer.starved ? `; starved: first in the queue ${Math.round(STARVE_MS / 60_000)} min under a load no kit job makes, so one core anyway` : '');
     return { ok: true, grant: { id, kind: answer.kind, slots: answer.grant, priority: answer.priority, pid: request.pid, settings, line } };
   });
 }

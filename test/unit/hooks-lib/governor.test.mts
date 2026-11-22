@@ -8,7 +8,7 @@ import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { AGING_EVERY_MS, ask, budgetOf, free, inFlight, pauseOrder, queueUp, resumeOrder, setPaused, take } from '../../../packs/base/hooks/lib/governor.mts';
 import type { GovernorHost, Job, TakeResult } from '../../../packs/base/hooks/lib/governor.mts';
 import { MATH_THREADS, settingsFor } from '../../../packs/base/hooks/lib/governor-settings.mts';
-import { LOAD_LAG_MS } from '../../../packs/base/hooks/lib/governor-policy.mts';
+import { LOAD_LAG_MS, STARVE_MS } from '../../../packs/base/hooks/lib/governor-policy.mts';
 import { changeState } from '../../../packs/base/hooks/lib/governor-store.mts';
 
 const START_MS = 1_000_000;
@@ -196,4 +196,23 @@ test('a lock left by a dead holder is broken, and the change goes through', () =
   put(join(dir, 'jobs.lock', 'pid'), '801\n');
   host.dead.add(801);
   assert.equal(changeState(dir, host.alive, () => 'changed'), 'changed');
+});
+
+// KWB-next (2026-11-22, supernova2_monitor W6.1): another project's ungoverned builds (an older kit's buildq) held the load at 40 to 71 on 18
+// cores for hours with no kit job running; a one-package go build waited over 100 minutes and never started, though the policy promises
+// "at least 1 core, so none starves"
+test('a job first in the queue, waiting STARVE_MS under a load the kit\'s jobs do not make, is granted one core; before that, and with a kit job running, it waits', () => {
+  const host = planted(40);
+  const t = queueUp(host, { kind: 'build', want: 4, pid: 701 });
+  host.at(STARVE_MS - 1);
+  assert.equal(take(host, { kind: 'build', want: 4, pid: 701, ticket: t }).ok, false, 'before STARVE_MS it waits');
+  host.at(STARVE_MS);
+  const r = take(host, { kind: 'build', want: 4, pid: 701, ticket: t });
+  assert.equal(granted(r).slots, 1, 'one core, not its four');
+  assert.match(r.ok ? r.grant.line : '', /starved/);
+  const busy = planted(0);
+  granted(take(busy, { kind: 'build', want: 10, priority: 1, pid: 801 }));   // every slot held by a kit job
+  const w = queueUp(busy, { kind: 'test', want: 1, pid: 802 });
+  busy.at(STARVE_MS * 2);
+  assert.equal(take(busy, { kind: 'test', want: 1, pid: 802, ticket: w }).ok, false, 'a kit job running: its end frees the slot');
 });

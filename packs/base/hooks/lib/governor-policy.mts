@@ -30,6 +30,8 @@ export interface Answer {
   grant: number;
   settings: JobSettings;
   load: number;
+  /** Granted one core by the starvation floor (STARVE_MS), not by free load. */
+  starved: boolean;
   budget: Budget;
   used: number;
   running: number;
@@ -79,6 +81,10 @@ function leftAfter(free: number, waiting: readonly Waiter[], me: Place, ticket: 
   return { left: Math.max(0, free - held), ahead: ahead.length };
 }
 
+/** How long the first job in the queue waits under a load no kit job makes before it is granted one core anyway: the floor that keeps
+ *  "at least 1 core, so none starves" true when the load is another project's ungoverned builds (supernova2_monitor W6.1, KWB-next). */
+export const STARVE_MS = 20 * 60_000;
+
 /** How long the 1-minute load average takes to show a job just started. */
 export const LOAD_LAG_MS = 60_000;
 
@@ -103,17 +109,20 @@ export function answerOn(host: GovernorHost, state: GovernorState, request: Requ
   const { left, ahead } = leftAfter(free, state.waiting, me, ticket, budget.slots, now);
   const want = request.want === undefined ? null : Math.max(1, Math.min(Math.floor(request.want), cap));
   const grant = want === null ? Math.min(left, cap, Math.max(1, Math.floor(request.upTo ?? DEFAULT_WANT[kind]))) : want <= left ? want : 0;
-  const go = grant >= 1;
+  // the starvation floor: first in the queue, no kit job running to wait for, and waited STARVE_MS: one core
+  const starved = grant < 1 && used === 0 && ahead === 0 && ticket !== null && now - me.since >= STARVE_MS;
+  const given = starved ? 1 : grant;
+  const go = given >= 1;
   // ask with no want: everything this priority may use now; with one: what it would be granted
-  const shown = go && want !== null ? grant : Math.min(left, cap);
+  const shown = starved ? 1 : go && want !== null ? grant : Math.min(left, cap);
   const settings = settingsFor(kind, Math.max(1, shown));
   const tail = `load ${round1(load)} of ${budget.cores}, ceiling ${budget.ceiling}, ${plural(state.jobs.length, 'job')} running; priority ${me.priority}`;
   const line = go
     ? `you may use ${shown} cores now (${settings.words}); ${tail}`
     : `wait: ${waitReason({ budget, load, used, free, want, ahead, left })}; ${plural(left, 'core')} free; ${waitUntil(state.jobs, ahead)}; priority ${me.priority}`;
   const paused = state.jobs.filter((j) => j.pausedAt !== null).length;
-  return { go, kind, priority: me.priority, free, grant: go ? grant : 0, settings, load, budget, used, running: state.jobs.length,
-    queued: state.waiting.length, paused, line };
+  return { go, kind, priority: me.priority, free, grant: go ? given : 0, settings, load, budget, used, running: state.jobs.length,
+    queued: state.waiting.length, paused, starved, line };
 }
 
 interface WaitFacts { budget: Budget; load: number; used: number; free: number; want: number | null; ahead: number; left: number }
