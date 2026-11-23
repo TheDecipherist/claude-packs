@@ -68,14 +68,11 @@ test('KF-40: the same edit passes through every base hook with no crash logged',
   assert.equal(logLines(dir, 'crashes.jsonl').length, 0);
 });
 
-test('KF-40: a write whose text no hook could read says so where the author sees it', () => {
+test('KF-40: a write whose text no hook could read is refused, naming the file (the user, 2026-11-22: "ironclad")', () => {
   const dir = workProject();
   const r = runner(dir, bashEvent(dir, HELPER_EDIT), '.claude/hooks/lesson-checks.mjs');
-  assert.equal(r.status, 0);
-  const said = parseJson<{ hookSpecificOutput: { additionalContext: string }; systemMessage: string }>(r.stdout);
-  assert.match(said?.hookSpecificOutput.additionalContext ?? '', /tests\/panel_drawn\.cpp/);
-  assert.match(said?.hookSpecificOutput.additionalContext ?? '', /could not read/);
-  assert.match(said?.systemMessage ?? '', /not judged/);
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /BLOCKED by unread-writes: this command writes tests\/panel_drawn\.cpp/);
 });
 
 test('KF-40: a command that writes what the hooks can read adds nothing', () => {

@@ -25,7 +25,7 @@ import { parseJson, toJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
 import { OUT_CAP, asRecord, capOut, halts, mergeOut, type Json } from './lib/merge-out.mts';
 import { verdicts } from './lib/selftest.mts';
-import { unreadWrites } from './lib/unread-writes.mts';
+import { unreadRefusal } from './lib/unread-writes.mts';
 import { isVerdict } from './lib/verdict.mts';
 import type { Env } from './lib/shell-writes.mts';
 import type { Hook, HookContext, HookEvent, HookTableRow, Verdict } from './lib/types.d.mts';
@@ -121,7 +121,12 @@ export async function runAll(args: readonly string[], text: string, root: string
   const crash = crashVerdict(root, ev, judged, Date.now());
   if (crash.stderr) err.push(crash.stderr);
   if (crash.code === 2) code = 2;
-  outs.push(...[crash.stdout, code === 0 ? unreadWrites(ev, root, caller.env) : ''].filter((s): s is string => Boolean(s)));
+  const unread = code === 0 ? unreadRefusal(ev, root, caller.env) : '';   // an inline program's unread write is refused
+  if (unread) {
+    err.push(unread);
+    code = 2;
+  }
+  outs.push(...[crash.stdout].filter((s): s is string => Boolean(s)));
   if (halts(outs)) code = 0;   // a halt wins: Claude Code reads JSON only from an exit 0
   const wall = Date.now() - arrival.at;
   logCall(root, text, judged, appendRotated, wall);

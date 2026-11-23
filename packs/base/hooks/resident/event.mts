@@ -16,7 +16,7 @@ import { readLayout } from '../lib/layout.mts';
 import { asRecord, mergeOut } from '../lib/merge-out.mts';
 import { PROTOCOL, overTime, type Reply, type WireRequest } from '../lib/proxy-wire.mts';
 import { real } from '../lib/project.mts';
-import { unreadWrites } from '../lib/unread-writes.mts';
+import { unreadRefusal } from '../lib/unread-writes.mts';
 import { resolve } from 'node:path';
 import { mayHaveWritten, type IndexThread } from './index.mts';
 import type { Done, Job } from './messages.mts';
@@ -173,9 +173,11 @@ export async function serveEvent(d: Served, request: WireRequest, stdin: Buffer,
     return { hook: r.hook, ms: r2.ms, code: r2.code, reason: r2.stderr, out: r2.stdout, queue: r2.queue };
   });
   const crash = crashVerdict(root, ev, arrived, Date.now());
-  const code = arrived.some((h) => h.code === 2) || crash.code === 2 ? 2 : 0;
-  const outs = [...arrived.map((h) => h.out), crash.stdout, code === 0 ? unreadWrites(ev, root, request.env) : ''].filter((s): s is string => Boolean(s));
-  const reply: Reply = { code, stdout: mergeOut(outs), stderr: [...arrived.map((h) => h.reason), crash.stderr ?? ''].join('') };
+  const judgedCode = arrived.some((h) => h.code === 2) || crash.code === 2 ? 2 : 0;
+  const unread = judgedCode === 0 ? unreadRefusal(ev, root, request.env) : '';   // an inline program's unread write is refused
+  const code = unread ? 2 : judgedCode;
+  const outs = [...arrived.map((h) => h.out), crash.stdout].filter((s): s is string => Boolean(s));
+  const reply: Reply = { code, stdout: mergeOut(outs), stderr: [...arrived.map((h) => h.reason), crash.stderr ?? '', unread].join('') };
 
   // the lines: one append for the hooks and the event, then the call's own logs
   const wall = Date.now() - arrival;
