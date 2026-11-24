@@ -72,6 +72,20 @@ function blanker({ line = [], block = [], quotes = ['"', "'"], raw = [], hashWor
 const SLASHES: BlankerOptions = { line: ['//'], block: [['/*', '*/']] };
 const lineStart = (words: string): RegExp => new RegExp(`^[ \\t]*(?:${words})\\b.*$`, 'gm');
 
+// A Java/C#/Dart method or constructor head, matched on blanked code: modifiers, one type token (generics with one level of
+// nesting, arrays), the name, the parameters, an optional throws list, the brace. Every separator before the name is [ \t], so a
+// match stays on its line and no two parts take the same whitespace: the old pattern's `(?:...|\s)+` before `[\w<>[\],\s]+\s`
+// split each blank run (a comment blanked to spaces) about n³ ways, 24 ms on a 60-line file, and read `for`, `while` and `if`
+// across lines as method names (KWB-next of 2026-11-24, collider WB-9). Control keywords are never the name, nor the type.
+const JAVA_MODIFIER = 'public|private|protected|internal|static|final|async|override|virtual|abstract|synchronized|sealed|extern|unsafe|partial|new';
+const JAVA_KEYWORD = 'if|for|foreach|while|switch|catch|using|lock|fixed|return|new|else|throw|do|try|await|yield|case|goto|synchronized';
+const JAVA_GENERIC = '<[^<>;{}()\\n]*(?:<[^<>;{}()\\n]*>[^<>;{}()\\n]*)*>';
+const JAVA_DEFINE = new RegExp(
+  `^[ \\t]*(?:(?:${JAVA_MODIFIER})[ \\t]+)*(?!(?:${JAVA_KEYWORD})\\b)[\\w.?]+(?:${JAVA_GENERIC})?(?:\\[\\])*[ \\t]+`
+  + `(?!(?:${JAVA_KEYWORD})\\b)([A-Za-z_]\\w*)[ \\t]*\\([^;{}]*\\)\\s*(?:throws\\s+[\\w.]+(?:\\s*,\\s*[\\w.]+)*\\s*)?\\{`,
+  'gm',
+);
+
 export const LANGUAGES: readonly Language[] = [
   { name: 'c', exts: ['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.mm'], blank: blankCode, notCode: /^[ \t]*(?:#(?:.*\\\n)*.*|using\b.*)$/gm, minTokens: 60,
     define: /^(?:[A-Za-z_][\w:<>,*& ]*[\s*&])?([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:const\s*)?(?:noexcept\s*)?\{/gm },
@@ -85,7 +99,7 @@ export const LANGUAGES: readonly Language[] = [
   { name: 'rust', exts: EXTS_OF.rust, blank: blankRust, withoutTests, ownDefinitions, methodRows: true, notCode: lineStart('use|mod|extern|pub use'), minTokens: 60,
     define: /^[ \t]*(?:pub(?:\([^)]*\))?\s+)?(?:default\s+)?(?:const\s+)?(?:async\s+)?(?:unsafe\s+)?(?:extern\s+"[^"]*"\s+)?fn\s+([A-Za-z_]\w*)/gm },
   { name: 'java', exts: [...EXTS_OF.java, ...EXTS_OF.csharp, '.scala', '.dart'], blank: blanker(SLASHES), notCode: lineStart('import|package|using|namespace'), minTokens: 60,
-    define: /^[ \t]*(?:public|private|protected|internal|static|final|async|override|virtual|\s)+[\w<>[\],\s]+\s([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:throws [\w, ]+)?\s*\{/gm },
+    define: JAVA_DEFINE },
   { name: 'kotlin', exts: [...EXTS_OF.kotlin, '.kts', ...EXTS_OF.swift], blank: blanker({ ...SLASHES, raw: ['"""'] }), lines: true, notCode: lineStart('import|package'), minTokens: 50,
     define: /^(?:(?:public|private|internal)\s+)?(?:fun|func)\s+([A-Za-z_]\w*)/gm },
   { name: 'ruby', exts: ['.rb', '.rake'], blank: blanker({ line: ['#'], block: [['=begin', '=end']] }), lines: true, notCode: lineStart('require|require_relative|include'), minTokens: 45, define: /^\s*def\s+(?:self\.)?([A-Za-z_]\w*[?!]?)/gm },
