@@ -32,6 +32,14 @@ export const FAMILIES: readonly { id: string; name: string; re: RegExp }[] = [
   { id: 'superh', name: 'Hitachi SuperH', re: /superh|\bsh-?[1-4]a?\b|sh7\d{3}|sh-4a/i },
   { id: 'x86', name: 'x86 (16-bit)', re: /x86|8086|\bv30\b|nec v-series/i },
   { id: 'adsp21xx', name: 'Analog Devices ADSP-21xx', re: /adsp-?21\d\d/i },
+  // Ghidra's PIC module names its language PIC-18; a part is PIC18F/PIC18LF<digits> (the collider run, its WB-3)
+  { id: 'pic18', name: 'Microchip PIC18', re: /pic\s*-?\s*18(?![0-9])|pic18l?f\d|\bdis18\b/i },
+  { id: 'sigmadsp', name: 'Analog Devices SigmaDSP', re: /sigma\s*-?\s*dsp|adau1[4-7]\d\d/i },
+];
+/** Third-party programs on the PATH that serve one family: [file name, family, kind, licence, note]. */
+const ON_PATH: readonly [string, string, Tool['kind'], string, string][] = [
+  ['gpdasm', 'pic18', 'disassembler', 'GPL-2.0', 'gputils gpdasm'],
+  ['gpsim', 'pic18', 'emulator', 'GPL-2.0', 'gpsim'],
 ];
 export const familyOf = (name: string): string | null => FAMILIES.find((f) => f.re.test(name))?.id ?? null;
 /** Every family a text names (a tool written for the DSP56000 and the DSP56300 serves both). */
@@ -98,6 +106,10 @@ export function scanTools({ home, path, env }: Places): Tool[] {
   }
   // MAME's unidasm on the PATH disassembles most CPUs
   for (const dir of path.split(delimiter).filter(Boolean)) if (existsSync(join(dir, 'unidasm'))) { for (const f of FAMILIES) tools.push({ family: f.id, kind: 'disassembler', where: join(dir, 'unidasm'), origin: 'third-party', licence: 'GPL-2.0+', note: 'MAME unidasm, if it has this CPU' }); break; }
+  for (const [file, family, kind, licence, note] of ON_PATH) {
+    const dir = path.split(delimiter).filter(Boolean).find((d) => existsSync(join(d, file)));
+    if (dir) tools.push({ family, kind, where: join(dir, file), origin: 'third-party', licence, note });
+  }
   // Ghidra's processor modules
   const ghidra = ghidraHome(env, home);
   if (ghidra) for (const m of ghidraProcessors(ghidra)) for (const n of m.names) { const fam = familyOf(n); if (fam && !tools.some((t) => t.family === fam && t.kind === 'ghidra')) tools.push({ family: fam, kind: 'ghidra', where: `${ghidra} (${m.module})`, origin: 'third-party', licence: 'Apache-2.0' }); }
