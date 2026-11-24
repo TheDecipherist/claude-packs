@@ -8,6 +8,7 @@
     "tools/bank-coverage.mts": ["test/tools/sound-design/bank-coverage.test.mts"],
     "tools/lib/bank-measures.mts": ["test/tools/sound-design/prove-a-bank.test.mts"],
     "tools/prove-a-bank.mts": ["test/tools/sound-design/prove-a-bank.test.mts"],
+    "tools/reset-census.mts": ["test/tools/sound-design/reset-census.test.mts"],
     "tools/vst3host/build.sh": ["test/hooks/sound-design/sound-design-pack.test.mts"],
     "tools/vst3host/host_events.h": ["test/hooks/sound-design/sound-design-pack.test.mts"],
     "tools/vst3host/options.h": ["test/hooks/sound-design/sound-design-pack.test.mts"],
