@@ -12,6 +12,14 @@ test('runnersIn finds bash run.sh processes and leaves a claude one out', () => 
   assert.deepEqual(runnersIn(''), []);
 });
 
+test('runnersIn finds a compiled task run (tools/run-task.sh <order> <step>), the order its first word', () => {
+  // supernova2_monitor runs each task by its PROTOCOL as `bash tools/run-task.sh <order> <step.item>`; the status line
+  // drew no row for it while it ran (seen 2026-11-24)
+  const ps = ['201 bash tools/run-task.sh s10-firmware-sound W10', '202 /bin/bash /p/tools/run-task.sh w-2 W3.1',
+    '203 claude -p tools/run-task.sh x W1', '204 bash tools/run-task.sh'].join('\n');
+  assert.deepEqual(runnersIn(ps), [{ pid: 201, order: 's10-firmware-sound' }, { pid: 202, order: 'w-2' }]);
+});
+
 test('workIn counts a process for the deepest folder, and is null when no process can be read', () => {
   const all = [{ pid: 1, cpu: 50, rssKb: 2048, cwd: '/p/.claude/worktrees/a/src', queued: true }, { pid: 2, cpu: 100, rssKb: 1024, cwd: '/p', queued: false }];
   assert.deepEqual(workIn(['/p', '/p/.claude/worktrees/a'], all), {

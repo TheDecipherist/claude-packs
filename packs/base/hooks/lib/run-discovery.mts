@@ -31,7 +31,9 @@ export interface RunningOrdersInput {
   nowMs?: number;
 }
 
-const RUNNER = /\bdocs\/workorders\/([\w.-]+)\/run\.sh\b/;
+/** A run of an order: its `run.sh`, or a compiled task's runner `tools/run-task.sh <order> <step>` (a project run by
+    its PROTOCOL, one task a session); the order is the folder, or the runner's first word. */
+const RUNNERS = [/\bdocs\/workorders\/([\w.-]+)\/run\.sh\b/, /\btools\/run-task\.sh\s+([\w.-]+)/];
 const BIG = 32 * 1024 * 1024;
 
 function cwdOf(pid: number, env: Env): string | null {
@@ -49,7 +51,7 @@ export function runnersIn(psText: string): Runner[] {
     const pid = m?.[1];
     const args = m?.[2];
     if (pid === undefined || args === undefined || !/\bbash\b/.test(args) || /\bclaude\b/.test(args)) return [];
-    const order = args.match(RUNNER)?.[1];
+    const order = RUNNERS.map((r) => args.match(r)?.[1]).find((o) => o !== undefined);
     return order === undefined ? [] : [{ pid: Number(pid), order }];
   });
 }
