@@ -59,3 +59,30 @@ test('the pre-flight refuses an unsettled processor and passes a settled one', (
   assert.deepEqual(toolchainRefusals(['H8/300H', 'DSP56300'], online, 'sn2'), [], 'an emulator found online, with its address');
   assert.equal(toolchainRefusals(['H8/300H'], table.replace(/\| H8\/300H \|.*\n/, ''), 'sn2').length, 1, 'a processor with no row');
 });
+
+// The collider run (2026-11-24, its WB-3): `toolchain PIC18 SigmaDSP` wrote every cell missing with Ghidra's PIC-18 module
+// installed, because no family row knew either processor.
+test('a PIC18 and a SigmaDSP are known by their family and part names', () => {
+  for (const n of ['PIC18', 'PIC18F46J50', 'PIC18LF26J50', 'PIC-18', 'pic18f4550']) assert.equal(familyOf(n), 'pic18', n);
+  for (const n of ['SigmaDSP', 'Sigma DSP', 'ADAU1701', 'ADAU1452']) assert.equal(familyOf(n), 'sigmadsp', n);
+  for (const n of ['PIC16F84', 'PIC-16', 'dsPIC33', 'ADSP-2181']) assert.notEqual(familyOf(n), 'pic18', n);
+  assert.notEqual(familyOf('ADSP-2181'), 'sigmadsp');
+});
+
+test("Ghidra's PIC-18 module, gpdasm and gpsim are found for a PIC18", () => {
+  const home = plantedHome();
+  put(join(home, 'tools/ghidra_12.2_PUBLIC/Ghidra/application.properties'), 'application.name=Ghidra\n');
+  put(join(home, 'tools/ghidra_12.2_PUBLIC/Ghidra/Processors/PIC/data/languages/pic18.ldefs'),
+    '<language processor="PIC-18" id="PIC-18:LE:24:PIC-18"><description>PIC-18F</description></language>\n'
+    + '<language processor="PIC-16" id="PIC-16:LE:16:PIC-16"><description>PIC-16F</description></language>\n');
+  put(join(home, 'bin/gpdasm'), '');
+  put(join(home, 'bin/gpsim'), '');
+  const tools = scanTools({ home, path: join(home, 'bin'), env: { REFERENCE_LIBRARY: join(home, 'none') } });
+  const of = (kind: string) => tools.filter((t) => t.family === 'pic18' && t.kind === kind);
+  assert.equal(of('ghidra').length, 1, 'the PIC-18 language of the PIC module');
+  assert.match(of('ghidra')[0]?.where ?? '', /\(PIC\)$/);
+  assert.ok(of('disassembler').some((t) => /gpdasm$/.test(t.where) && t.licence === 'GPL-2.0'), 'gpdasm on the PATH');
+  assert.ok(of('emulator').some((t) => /gpsim$/.test(t.where) && t.licence === 'GPL-2.0'), 'gpsim on the PATH');
+  const row = toolchainTable(['PIC18'], tools).split('\n').find((l) => l.startsWith('| PIC18')) ?? '';
+  assert.doesNotMatch(row.split('|')[4] ?? 'missing', /missing/, 'the Ghidra cell');
+});
