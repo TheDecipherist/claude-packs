@@ -32,6 +32,10 @@ const stripped = (t: string): string => (KEYWORDS.has(t) ? t : /^[A-Za-z_]/.test
 const strippedWord = (t: string, i: number): string => (i === 0 || t.length === 1 || KEYWORDS.has(t) || /^-/.test(t) ? t : /=/.test(t) ? 'k=v' : 'w');
 const shapeOf = (words: string[], lang: Language): string => (lang.commands ? words.map(strippedWord) : words.map(stripped)).join(' ');
 const CONTINUES = /^(?:\\|,|\+|&|\||\.|\(|\[|=)$/;
+// a brace after one of these opens a value, not a block: `x = {`, `return {`, `f(a, {`, `{ key: {`, `c ? {`
+const EXPR_BEFORE = /^(?:=|return|,|\(|\[|:|\?)$/;
+// a brace after one of these opens a body, a block wherever it stands: a lambda's or a function's (`) {`, `=> {`, `noexcept {`)
+const BLOCK_BEFORE = /^(?:\)|\]|=>|>|mutable|noexcept|override|final|const|else|do|try)$/;   // `=>` reaches here as `=` then `>`; `[&] {` a lambda's
 const hashOf = (s: string): string => shortHash(s, 16);
 const lineAt = (starts: readonly number[], offset: number): number => {
   let lo = 0;
@@ -60,6 +64,9 @@ export function statementsOf(text: string, lang: Language): Statement[] {
     tokens = [];
   };
   let last = 0;
+  // each open brace's kind: a block, or part of an expression (a braced initializer, an object literal, a destructured
+  // parameter), which is one value of its statement and ends nothing (KWB-238: 14 of code-shape's wrong refusals)
+  const braces: boolean[] = [];
   for (const m of code.matchAll(lang.token ?? TOKEN)) {
     const t = m[0];
     const at = m.index ?? 0;
@@ -68,9 +75,13 @@ export function statementsOf(text: string, lang: Language): Statement[] {
     tokens.push({ t, at, to: at + t.length });
     last = at + t.length;
     const dataBrace = lang.braces === false && (t === '{' || t === '}'); // a Python set or dict is one value, not a block (KF-14)
-    if (t === '(' || t === '[' || (dataBrace && t === '{')) depth += 1;
-    else if (t === ')' || t === ']' || (dataBrace && t === '}')) depth = Math.max(depth - 1, 0);
-    if ((t === ';' && depth === 0) || (!dataBrace && (t === '{' || t === '}'))) close();
+    const before = prev?.t ?? '';
+    const exprOpen = t === '{' && !dataBrace && !BLOCK_BEFORE.test(before) && (depth > 0 || EXPR_BEFORE.test(before));
+    const exprClose = t === '}' && !dataBrace && braces.pop() === true;
+    if (t === '{' && !dataBrace) braces.push(exprOpen);
+    if (t === '(' || t === '[' || (dataBrace && t === '{') || exprOpen) depth += 1;
+    else if (t === ')' || t === ']' || (dataBrace && t === '}') || exprClose) depth = Math.max(depth - 1, 0);
+    if ((t === ';' && depth === 0) || (!dataBrace && !exprOpen && !exprClose && (t === '{' || t === '}'))) close();
   }
   close();
   return out;

@@ -122,6 +122,9 @@ export function selftest(): number {
     ['a Python set comprehension is one statement (KF-14)', w('src/s.py', 'left = {keep(row) for row in rows} - {drop(row) for row in rows}\n'), 0],
     ['a lambda in a list counts as in a call (KF-27)', w('src/l.cpp', lambdas), 0],
     ['a for header is one statement', w('src/d.cpp', 'void f() {\n  for (int i = 0; i < n; i++) total += v(i);\n}\n'), 0],
+    ['a braced initializer passed to a call is one statement (KWB-238)', w('src/e.cpp', 'void f() {\n  marks.push_back ({ signedDb (db, 0), { 0.0f, yOfDb (db) } });\n}\n'), 0],
+    ['an object parameter with defaults is one statement (KWB-238)', w('src/e.mjs', 'export function run(m, { level = 0, vars = {}, trace = null } = {}) {\n  go(m);\n}\n'), 0],
+    ['three calls in a block on one line still pack it (KWB-238: no change outside a value brace)', w('src/f.mjs', 'function g() {\n  a(); b(); c();\n}\n'), 2],
     // supernova2_monitor WB-35: a brace inside a regular expression literal opened a block, so `const A = /x{6}/;` read as two statements
     ['a regex literal holding braces is one statement', w('src/r.mjs', 'const ROW = /^P:\\$([0-9A-F]{6})\\s+(?:[0-9A-F]{6}\\s+){1,2}\\s*(.*)$/;\n'), 0],
     ['three statements on a line of JavaScript are still packed', w('src/r2.mjs', 'export function f(a) {\n  run(a); go(a); stop(a);\n}\n'), 2],
