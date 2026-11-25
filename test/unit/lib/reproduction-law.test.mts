@@ -43,6 +43,14 @@ test('a reproduction\'s engine step needs both derivation skills and an oracle i
   assert.deepEqual(good, []);
 });
 
+test('a plain "Skills:" line, as the work order template writes it, is read like the bold one (KWB-238)', async () => {
+  const plain = (skills: string): string =>
+    `## W3. The engine\n\n1. The taps in \`src/dsp/\`.\n\nSkills: ${skills}\n\n**Done when:** tests/t.cpp matches the oracle.\n`;
+  assert.deepEqual(await refusals(project('reproduction', plain(DERIVED))), []);
+  const bare = await refusals(project('reproduction', plain('`build-step`')));
+  assert.ok(bare.some((r) => /W3\. The engine.*without `trace-the-builders` and `read-the-dsp-program`/.test(r)), bare.join('\n'));
+});
+
 test('an original, and a reproduction\'s step that writes no engine code, are not held to the derivation law', async () => {
   assert.deepEqual(await refusals(project('original', ENGINE_STEP('`build-step`', 'pitch within 1 cent, tests/p.cpp.'))), []);
   const panel = '## W9. The panel\n\n**Skills:** `build-step`.\n\n1. The front in `src/app/`.\n\n**Done when:** 133 controls drawn.\n';

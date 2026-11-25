@@ -60,7 +60,8 @@ export function reproductionOrderRefusals(dir: string, text: string): string[] {
   const paths = enginePaths(dir);
   return steps(text).flatMap(({ head, body }) => {
     if (!paths.some((p) => body.includes(`${p}/`) || body.includes(`\`${p}\``))) return [];
-    const skills = body.match(/^\*\*Skills:\*\*(.*)$/m)?.[1] ?? '';
+    // the template writes a plain `Skills:` line, hand-written orders the bold one: both are the step's Skills (KWB-238)
+    const skills = body.match(/^(?:\*\*)?Skills:(?:\*\*)?(.*)$/m)?.[1] ?? '';
     const missing = DERIVE_SKILLS.filter((s) => !skills.includes(`\`${s}\``));
     const done = body.split(/^\*\*Done when:\*\*/m)[1] ?? '';
     const found: string[] = [];
