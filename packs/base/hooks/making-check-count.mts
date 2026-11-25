@@ -4,6 +4,7 @@
 // and refuses nothing. It must run after making-check, so the judge reads the count as it stood before this stop.
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readText } from './lib/files.mts';
 import { readJson, toJson } from './lib/json.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { check } from './lib/making-check-turn.mts';
@@ -12,11 +13,15 @@ import type { WorktreeCase } from './lib/selftest.mts';
 import { recordSendBack, sendBackFile } from './lib/send-backs.mts';
 import type { SendBacks } from './lib/send-backs.mts';
 import type { Hook } from './lib/types.d.mts';
+import { MAKING, logUsage } from './lib/usage-log.mts';
 import { pass } from './lib/verdict.mts';
 
 export const hook: Hook = (event, ctx) => {
   if (event.hook_event_name && !['Stop', 'SubagentStop'].includes(event.hook_event_name)) return pass;
-  recordSendBack(sendBackFile(ctx.env, event.session_id), check(event, ctx));
+  const problems = check(event, ctx);
+  recordSendBack(sendBackFile(ctx.env, event.session_id), problems);
+  // making-check reports and no longer holds the turn (KWB-234): what it found is kept here, for the supervisor's turn check
+  for (const finding of problems) logUsage(ctx, event, MAKING, { finding });
   return pass;
 };
 
@@ -32,7 +37,7 @@ const SLOT = 'float slotGain (int slot) { return gains[slot]; }\n';
 export function selftest(): number {
   const hookFile = fileURLToPath(import.meta.url);
   const shape = { concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot'] } }, exclude: [] };
-  const dir = scratchProject({ 'design/shape.json': toJson(shape) });
+  const dir = scratchProject({ 'design/shape.json': toJson(shape), '.claude/logs/.keep': '' });   // a project has its .claude/: the log is kept there
   const session = `count-${basename(dir)}`;   // the scratch folder's own name: no other run shares it
   const file = sendBackFile({}, session);
   const turn = (name: string, writes: boolean): string => {
@@ -48,6 +53,8 @@ export function selftest(): number {
   rows.push(['a turn with findings is counted, and the recorder refuses nothing', `${stop(faulty)}:${String(count())}`, '0:1']);
   rows.push(['the same findings again make two', `${stop(faulty)}:${String(count())}`, '0:2']);
   rows.push(['a clean turn resets the count', `${stop(clean)}:${String(count())}`, '0:0']);
+  const kept = (readText(join(dir, MAKING)) ?? '').split('\n').filter((l) => l.includes('"finding"')).length;
+  rows.push(['each finding is kept in the making log, the clean turn adds none (KWB-234)', kept > 0 && kept % 2 === 0 ? 'kept' : String(kept), 'kept']);
   return verdicts('making-check-count', rows.map(([label, got, want]) => [label, String(got), String(want)]));
 }
 

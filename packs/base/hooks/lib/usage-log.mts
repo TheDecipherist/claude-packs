@@ -11,6 +11,8 @@ import type { HookContext, HookEvent } from './types.d.mts';
 
 export const SKILLS: string = join('.claude', 'logs', 'skills.jsonl');
 export const RULES: string = join('.claude', 'logs', 'rules.jsonl');
+/** What making-check found at a Stop, one line a finding, kept by its recorder making-check-count (KWB-234). */
+export const MAKING: string = join('.claude', 'logs', 'making.jsonl');
 
 /** One usage line in the main checkout's log (the project's, also for an agent in a worktree). The time is the event's. Never throws. */
 export function logUsage(ctx: HookContext, event: HookEvent, file: string, what: Record<string, string | string[] | undefined>): void {
