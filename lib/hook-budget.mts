@@ -34,6 +34,10 @@ export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = {
   'git-guard': { p50: 10, p95: 200, worst: 1500 },
   // its git child reads every staged path: a commit of many files took 255 ms in supernova2_monitor's W2.1 rerun (KWB-next)
   'firmware-out-of-git': { p50: 10, p95: 200, worst: 1000 },
+  // 0 ms on every other call; after a build or test command (its BUILD pattern) it asks git which looks the branch
+  // changed and whether each has a passing report (rev-parse, diff, log, show: a child each): 0/132 ms p50/p95 over 23
+  // calls in collider on 2026-11-25, after commands that themselves take seconds to minutes (KWB-228)
+  'look-gate': { p50: 10, p95: 200 },
   // each reads every statement of a whole new file at Pre Write: 7 ms for 155 lines at rest, 12 to 13 ms at p50 under a task's load
   // (supernova2_monitor stage 5, after the per-line and digitless-line savings, KWB-next); a new file must be read whole
   // runs every installed lesson's patterns over the written text at Pre Write: 12 ms p50 over 23 writes of whole new files in
