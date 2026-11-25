@@ -54,6 +54,21 @@ test('a green and a red-gate run give their verdicts from the command given afte
   assert.match(wrong.stdout, /RED_GATE_FAILED/);
 });
 
+test('--red with no -R and no command runs only the named tests, never the whole suite (supernova2_monitor WB-165)', () => {
+  const dir = scratchDir('test-verdict-');
+  const seen = join(dir, 'ran.args');
+  put(join(dir, '.claude', 'layout.json'),
+    JSON.stringify({ folders: {}, concepts: {}, commands: { test: `sh -c 'echo "$*" > ${seen}' sh` } }));
+  run(dir, '--red', 'Unit.gate_a,Unit.gate_b');
+  assert.equal(existsSync(seen), true, 'the test command never ran');
+  const args = spawnSync('cat', [seen], { encoding: 'utf8' }).stdout.trim();
+  assert.equal(args, '-R ^(Unit\\.gate_a|Unit\\.gate_b)$');
+  // the planted case: a red run that names no test still runs the command as given (nothing to narrow to)
+  const plain = run(dir, '--red', '');
+  assert.notEqual(plain.status, null);
+  assert.equal(spawnSync('cat', [seen], { encoding: 'utf8' }).stdout.trim(), '');
+});
+
 test('parseCtest reads the totals and the failed tests, and null when ctest said nothing', () => {
   const p = parseCtest('50% tests passed, 1 tests failed out of 2\n\nThe following tests FAILED:\n\t  2 - svf_stable_under_fm (Failed)\n');
   assert.deepEqual(p, { total: 2, failed: [{ name: 'svf_stable_under_fm', why: 'Failed' }] });

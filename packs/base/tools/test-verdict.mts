@@ -38,12 +38,20 @@ function detail(out: string, name: string): string {
   return at < 0 ? '' : out.slice(at, at + 1200).split('\n').slice(0, 15).join('\n');
 }
 
-function command(args: readonly string[], root: string): string {
+/** A ctest -R pattern that matches exactly the named tests, each escaped. */
+function namesPattern(names: readonly string[]): string {
+  return `^(${names.map((n) => n.replace(/[.*+?^${}()|[\]\\']/g, '\\$&')).join('|')})$`;
+}
+
+function command(args: readonly string[], root: string, red: readonly string[] | null): string {
   const dash = args.indexOf('--');
   if (dash >= 0) return args.slice(dash + 1).join(' ');
   const base = readLayout(root).commands?.test ?? 'ctest --test-dir build --output-on-failure';
   const r = args.indexOf('-R');
-  return r >= 0 ? `${base} -R '${args[r + 1] ?? ''}'` : base;
+  if (r >= 0) return `${base} -R '${args[r + 1] ?? ''}'`;
+  // a red gate names its tests: run those, never the whole suite (supernova2_monitor WB-165: --red with no -R ran
+  // every test for 9 minutes, unasked, twice in two days)
+  return red?.length ? `${base} -R '${namesPattern(red)}'` : base;
 }
 
 /** Runs the command in `root` and prints the verdict; the exit code. `--help` prints the usage and runs nothing. */
@@ -53,7 +61,7 @@ export function main(args: readonly string[], root: string, log: (line: string) 
     return 0;
   }
   const red = args.includes('--red') ? (args[args.indexOf('--red') + 1] ?? '').split(',').filter(Boolean) : null;
-  const cmd = command(args, root);
+  const cmd = command(args, root, red);
   const run = spawnSync('bash', ['-c', cmd], { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
   const out = `${run.stdout ?? ''}${run.stderr ?? ''}`;
   ensureDir(join(root, '.claude', 'state'));
