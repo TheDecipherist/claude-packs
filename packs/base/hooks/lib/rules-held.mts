@@ -1,30 +1,20 @@
-// rules-held: the rules a session holds now, for rules-reach-the-shell, read from the project's rule log as it grows (only the
-// bytes added since the last call are read). A compaction drops what path loads gave, so a `compact` load that follows any other
-// line starts the session's set again (KWB-228). The rules it was given before its last compaction are kept apart: given again,
-// such a rule needs only its law, not its whole file (KWB-231: the whole file again cost +318 % on a session of 7 compactions).
+// rules-held: the rules a session holds, for rules-reach-the-shell, read from the project's rule log as it grows (only the bytes
+// added since the last call are read). A rule once given is not given again in that session, a compaction included: giving it
+// again after a compaction (KWB-228's second part) cost +318 % rule tokens on a session of 7 compactions, and its law alone
+// (KWB-231) +285 %, for 3 laws missed of 142 refusals that their hooks refused anyway; both backed out (KWB-232, measured by
+// supernova2_monitor's tools/hook-ab.mjs, its docs/token-cost.md {#verdict-231}).
 import { closeSync, openSync, readSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseJson } from './json.mts';
 import { RULES } from './usage-log.mts';
 
-/** What a session holds now, and every rule it has been given in an earlier stretch between compactions. */
-export interface Held { rules: Set<string>; before: Set<string>; offset: number; lastWhy: string }
+/** The rules a session has been given, and how far into the log they were read. */
+export interface Held { rules: Set<string>; offset: number }
 const heldBySession = new Map<string, Held>();
 
-const empty = (): Held => ({ rules: new Set(), before: new Set(), offset: 0, lastWhy: '' });
+const empty = (): Held => ({ rules: new Set(), offset: 0 });
 
-/** One log line read into the session's state. */
-function take(held: Held, e: { rule?: string; why?: string }): void {
-  if (!e.rule) return;
-  if (e.why === 'compact' && held.lastWhy !== 'compact') {
-    for (const r of held.rules) held.before.add(r);
-    held.rules = new Set();
-  }
-  held.lastWhy = e.why ?? '';
-  held.rules.add(e.rule);
-}
-
-/** The rules this session holds since its last compaction, and those it held before it; `key` names project and session. */
+/** The rules this session holds, whatever loaded them; `key` names project and session. */
 export function heldNow(projectDir: string, session: string | undefined, key: string): Held {
   if (!session) return empty();
   const path = join(projectDir, RULES);
@@ -38,17 +28,11 @@ export function heldNow(projectDir: string, session: string | undefined, key: st
     try { readSync(fd, buf, 0, buf.length, held.offset); } finally { closeSync(fd); }
     const whole = buf.subarray(0, buf.lastIndexOf(0x0a) + 1);
     for (const l of whole.toString('utf8').split('\n')) {
-      const e = parseJson<{ session?: string; rule?: string; why?: string }>(l);
-      if (e?.session === session) take(held, e);
+      const e = parseJson<{ session?: string; rule?: string }>(l);
+      if (e?.session === session && e.rule) held.rules.add(e.rule);
     }
     held.offset += whole.length;
   }
   heldBySession.set(key, held);
   return held;
-}
-
-/** A rule's law alone: its `<constraints>` blocks, or the whole body when it has none. */
-export function lawOf(body: string): string {
-  const blocks = body.match(/<constraints>[\s\S]*?<\/constraints>/g);
-  return blocks ? blocks.join('\n\n') : body;
 }

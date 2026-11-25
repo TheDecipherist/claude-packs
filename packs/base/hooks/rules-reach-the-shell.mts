@@ -13,7 +13,7 @@ import { matchesAny } from './lib/glob.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { toJson } from './lib/json.mts';
 import { insideProject } from './lib/project.mts';
-import { heldNow, lawOf } from './lib/rules-held.mts';
+import { heldNow } from './lib/rules-held.mts';
 import { bashOf, put, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { cutHeredocs, lex, splitCommand } from './lib/shell-lex.mts';
@@ -132,10 +132,7 @@ export function withinBudget(todo: readonly Match[], text: (m: Match) => string,
   return { give, rest: [] };
 }
 
-/** A rule as given: whole the first time, its law alone when the session held it before a compaction (KWB-231). */
-const contentsOf = (before: ReadonlySet<string>) => ({ rule, trigger }: Match): string => (before.has(rule.name)
-  ? `The law of ${rule.file} again, after a compaction (its paths match ${trigger}; the whole file: Read it):\n\n${lawOf(rule.body)}`
-  : `Contents of ${rule.file} (its paths match ${trigger}, which this command touches):\n\n${rule.body}`);
+const contents = ({ rule, trigger }: Match): string => `Contents of ${rule.file} (its paths match ${trigger}, which this command touches):\n\n${rule.body}`;
 
 export const hook: Hook = (event, ctx) => {
   const command = event.tool_input?.command;
@@ -152,9 +149,7 @@ export const hook: Hook = (event, ctx) => {
   }) : [];
   const all = [...pending, ...matched.filter((m) => !pending.some((p) => p.rule.name === m.rule.name))];
   if (!all.length) return pass;
-  const state = heldNow(ctx.projectDir, event.session_id, key);
-  const held = state.rules;
-  const contents = contentsOf(state.before);
+  const held = heldNow(ctx.projectDir, event.session_id, key).rules;
   const { give, rest } = withinBudget(all.filter(({ rule }) => !held.has(rule.name)), contents);
   if (event.session_id) pendingBySession.set(key, rest);
   for (const { rule, trigger } of give) {
@@ -218,10 +213,10 @@ export function selftest(): number {
     ['a script run, or a count of lines, is no read of the file', scriptRun.stdout, ''],
     ['a session given a rule', /Plan and logs/.test(before.stdout) ? 1 : 0, 1],
     ['is not given it again before a compaction', heldStill.stdout, ''],
-    ['and is given it again after one', /Plan and logs/.test(afterCompact.stdout) ? 1 : 0, 1],
-    ['a rule given the first time comes whole', /Why it exists[\s\S]*Keep the law/.test(lawFirst.stdout) ? 1 : 0, 1],
-    ['given again after a compaction, its law alone', /The law of[\s\S]*Keep the law/.test(lawAgain.stdout) && !/Why it exists/.test(lawAgain.stdout) ? 1 : 0, 1],
-    ['each giving is one log line', logged().filter((l) => l.includes('shell_path_match')).length, 8],
+    ['nor after a compaction (KWB-232: giving it again cost +285 % or more)', afterCompact.stdout, ''],
+    ['a rule given once comes whole', /Why it exists[\s\S]*Keep the law/.test(lawFirst.stdout) ? 1 : 0, 1],
+    ['and is not given again after a compaction either', lawAgain.stdout, ''],
+    ['each giving is one log line', logged().filter((l) => l.includes('shell_path_match')).length, 6],
     ['three long rules: the output stays within the budget', budgeted.stdout.length <= GIVE_BUDGET + 600 ? 1 : 0, 1],
     ['and the one held back is named, not given', /Long two/.test(budgeted.stdout) && !/# Long three/.test(budgeted.stdout) && /1 more rule\(s\).*l3/.test(budgeted.stdout) ? 1 : 0, 1],
     ['only the rules given are logged', bigLogged.length, 2],
