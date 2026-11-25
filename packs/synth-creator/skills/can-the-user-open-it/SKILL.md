@@ -15,6 +15,7 @@ Always do:
 4. An asset or marker "not inside the launched file" means the build did not link it: delete the generated binary-data folder, reconfigure and rebuild.
 5. When the user's running copy was opened before the build time the tool prints, say so and ask for a relaunch. A copy that is still open runs the old bytes.
 6. Report the verdict in the words it gives: exit 0 is "the launched file holds the change"; anything else is "written and committed; not in a binary the user can open yet".
+7. When exit 0 is for a plugin's standalone, put it on the owner's rack with the `join-the-rack` skill, in the same turn, unasked (the owner, 2026-11-25).
 
 Never do:
 - Call a visible change done from a compile, a test of the library or a picture of the spec.

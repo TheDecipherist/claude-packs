@@ -3,16 +3,39 @@
   "version": "1.0.0",
   "description": "Instruments: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit.",
   "type": "stock",
-  "fits": ["synth-creator"],
+  "fits": [
+    "synth-creator"
+  ],
   "requires": [],
   "tests": {
-    "tools/lib/route-judge.mts": ["test/tools/instrument-shell/route-table.test.mts"],
-    "tools/lib/route-mermaid.mts": ["test/tools/instrument-shell/route-table.test.mts"],
-    "tools/lib/route-plants.mts": ["test/tools/instrument-shell/route-table.test.mts"],
-    "tools/route-table.mts": ["test/tools/instrument-shell/route-table.test.mts"]
+    "tools/lib/route-judge.mts": [
+      "test/tools/instrument-shell/route-table.test.mts"
+    ],
+    "tools/lib/route-mermaid.mts": [
+      "test/tools/instrument-shell/route-table.test.mts"
+    ],
+    "tools/lib/route-plants.mts": [
+      "test/tools/instrument-shell/route-table.test.mts"
+    ],
+    "tools/route-table.mts": [
+      "test/tools/instrument-shell/route-table.test.mts"
+    ],
+    "tools/rack-join.mts": [
+      "test/tools/instrument-shell/rack-join.test.mts"
+    ]
   },
   "concepts": {
-    "engine-source": ["**/*.cpp", "**/*.cc", "**/*.h", "**/*.hpp", "**/*.mm", "**/*.py", "**/*.ts", "**/*.js", "**/*.mjs"]
+    "engine-source": [
+      "**/*.cpp",
+      "**/*.cc",
+      "**/*.h",
+      "**/*.hpp",
+      "**/*.mm",
+      "**/*.py",
+      "**/*.ts",
+      "**/*.js",
+      "**/*.mjs"
+    ]
   },
   "folders": {},
   "hooks": {},

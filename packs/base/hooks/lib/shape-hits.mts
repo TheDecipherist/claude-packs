@@ -25,8 +25,9 @@ const NOT_ROLES: ReadonlySet<string> = new Set([
   'CPU', 'MCU', 'ROM', 'RAM', 'EPROM', 'LCD', 'LED', 'PCB', 'IC', 'ASIC', 'FPGA', 'DAC', 'ADC',
 ]);
 // A number followed by a counted noun is a count ("slot 3 printed pages of 6"; KWB-next, supernova2).
-/** A quantifier right before the concept word: what follows is said of every instance, not of one. */
-const QUANTIFIED = /(?<![A-Za-z])(?:every|each|all|any|no)\s+$/i;
+/** A quantifier right before the concept word: what follows is said of every instance, not of one. Built from a string: the
+ *  repo's no-any gate blanks strings but reads a regex literal as code, so a literal holding the word would read as the type. */
+const QUANTIFIED = new RegExp('(?<![A-Za-z])(?:every|each|all|any|no)\\s+$', 'i');
 const COUNTED = /^\s+(?:[a-z]+\s+)?(?:pages|rows|items|entries|lines|words|controls|parameters|params|values|steps|bytes|columns|characters|bits)\b/i;
 // A named constant (a macro in capitals, a kName) is a quantity whose name carries the word, never a variable holding one instance:
 // "SN2_SLOT_FILL != 0", "kStepsPerSlotStep" (KWB-next, supernova2 KF-11)
