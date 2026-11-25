@@ -62,7 +62,9 @@ test('KF-33: a write once-only already judged is not judged again at Stop; a she
   const stopAfter = (name: string, input: Record<string, unknown>) => {
     const transcript = join(dir, 'turn.jsonl');
     put(transcript, line({ type: 'user', message: { role: 'user', content: 'go' } }) + line({ type: 'assistant', cwd: dir, message: { role: 'assistant', content: [{ type: 'tool_use', id: 't1', name, input }] } }));
-    return hookRun(dir, 'making-check.mjs', { hook_event_name: 'Stop', session_id: `s${Math.random()}`, cwd: dir, transcript_path: transcript }).status;
+    const r = hookRun(dir, 'making-check.mjs', { hook_event_name: 'Stop', session_id: `s${Math.random()}`, cwd: dir, transcript_path: transcript });
+    assert.notEqual(r.status, 2, 'making-check reports, it never holds the turn (KWB-234)');
+    return /making-check found/.test(r.stdout) ? 2 : r.status;   // a finding reads as before
   };
   assert.equal(stopAfter('Write', { file_path: join(dir, 'src/b.cpp'), content: cppFunction('second') }), 0);
   assert.equal(stopAfter('Bash', { command: 'cp src/a.cpp src/b.cpp' }), 2);

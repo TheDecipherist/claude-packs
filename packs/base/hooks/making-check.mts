@@ -1,6 +1,6 @@
 // making-check: a turn ends only when what it wrote is what it said it was making (claude-packs 0.9.0 item 7; KWB-1).
 // A Stop hook. It reads the turn from the transcript (lib/turn.mjs: every file written by Write, Edit, MultiEdit,
-// NotebookEdit or the shell, refused calls left out) and sends the turn back (exit 2) naming what is missing when:
+// NotebookEdit or the shell, refused calls left out) and says what is missing, never holding the turn (KWB-234), when:
 //   - the turn wrote code or docs that touch a concept of design/shape.json and build.md's In progress entry for this
 //     step has no `making:` line, or the line does not name that concept;
 //   - the making line names a concept that has no row in design/shape.json, or the turn wrote source with no manifest;
@@ -10,26 +10,24 @@
 //     and a law file (design/shape.json, docs/*-spec.md, docs/laws.md) says Y: do Y, log the brief as the bug, cite the
 //     line. No law covers it: ask; overnight, decide and write it under Decisions, and cite that entry. There is no
 //     third case where Claude's own judgement overrides an instruction.
-// After three send-backs with the same findings the turn ends and the findings go to the user (no endless loop).
+// It once sent the turn back (exit 2), and 62 of 92 send-backs were wrong (KWB-224); it now reports, and its recorder keeps the findings.
 // A judge on the hook contract (W4): it writes nothing. The send-back counter it once kept as it judged is the recorder
 // making-check-count's; this hook only reads it (lib/send-backs.mts). What it finds is lib/making-check-turn.mts.
 //   node making-check.mjs --selftest
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { check } from './lib/making-check-turn.mts';
 import { selftest as selftestOf } from './lib/making-check-selftest.mts';
-import { MAX_SENDS, endsTheTurn, sendBackFile } from './lib/send-backs.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook } from './lib/types.d.mts';
-import { pass, refuse, say } from './lib/verdict.mts';
+import { pass, say } from './lib/verdict.mts';
 
 export const hook: Hook = (event, ctx) => {
   if (event.hook_event_name && !['Stop', 'SubagentStop'].includes(event.hook_event_name)) return pass;
   const problems = check(event, ctx);
   if (!problems.length) return pass;
-  if (endsTheTurn(sendBackFile(ctx.env, event.session_id), problems)) {
-    return say({ systemMessage: `making-check sent this turn back ${MAX_SENDS} times with the same findings; it ends here for you to decide:\n- ${problems.join('\n- ')}` });
-  }
-  return refuse(`making-check sent this turn back:\n- ${problems.join('\n- ')}`);
+  // a recorder, not a judge that holds the turn (KWB-234): 62 of its 92 send-backs in supernova2_monitor were wrong, each a turn
+  // spent; what it finds is said and kept by making-check-count, for the supervisor's turn check
+  return say({ systemMessage: `making-check found (reported, the turn not held; KWB-234):\n- ${problems.join('\n- ')}` });
 };
 
 const SHAPE = JSON.stringify({ concepts: { slot: { shape: 'many', count: 4, generator: 'slotId(i, field)', words: ['slot', 'slots'] } }, exclude: [] });
@@ -54,7 +52,7 @@ export const worktreeCase: WorktreeCase = {
   },
   steps: [
     { label: 'the worktree has its manifest and its making line', event: stop('{wt}', '{wt}/t-in-wt.jsonl', 'wtc-a'), want: 0 },
-    { label: 'main has neither', event: stop('{here}', '{here}/t-in-here.jsonl', 'wtc-b'), want: 2 },
+    { label: 'main has neither: found and reported, the turn not held (KWB-234)', event: stop('{here}', '{here}/t-in-here.jsonl', 'wtc-b'), want: 0 },
     { label: 'a write into the worktree, from the main checkout, is judged by the worktree', event: stop('{here}', '{here}/t-into-wt.jsonl', 'wtc-c'), want: 0 },
   ],
 };

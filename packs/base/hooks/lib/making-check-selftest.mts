@@ -35,6 +35,7 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
   const hook = fileURLToPath(hookUrl);
   const recorder = fileURLToPath(recorderUrl);
   const trapped: string[] = [];
+  let held = 0;
   if (!findJscpd(process.env, [process.cwd()])) { console.error('making-check selftest FAILED: jscpd not found (once-only\'s detector)'); return 1; }
   const dir = scratchProject({ 'design/shape.json': toJson(SHAPE), 'src/slot/filter.cpp': `#include "filter.h"\n\n${FN('slotFilter')}`, 'build.md': BUILD('') });
   const git = (...args: string[]): void => { gitRun(args, { cwd: dir, env: process.env, identity: IDENTITY }); };
@@ -62,7 +63,9 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
     writeFileSync(T, [user('build the slot filter'), ...entries.flat()].map((e) => toJson(e)).join('\n'));
     const stop = { hook_event_name: 'Stop', transcript_path: T, cwd: dir, session_id: named, stop_hook_active: active, last_assistant_message: last };
     const before = snapshot(dir);   // the judge's own run: it must leave the project as it is (the fixtures above are in place)
-    const status = runHook(hook, dir, stop).status;
+    const r = runHook(hook, dir, stop);
+    if (r.status === 2) held += 1;   // KWB-234: it reports, it never holds the turn
+    const status = r.status === 0 && /making-check found/.test(r.stdout) ? 2 : r.status;   // a finding reads as before
     trapped.push(...writtenSince(dir, before).filter((f) => !f.startsWith('.git/')));   // git's own index refresh is no write of the project
     runHook(recorder, dir, stop);   // the recorder counts the send-back after the judge, as the runner orders a Stop's hooks
     return status;
@@ -130,16 +133,11 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
     ['an override citing docs/laws.md and logging the brief as the bug', turn([W('src/slot/gain.cpp', slotCode), W('bugs.md', '| B-9 | the brief named slot 2 |\n')], { last: OVERRIDE_CITED }), 0],
     ['an override citing design/shape.json without logging the brief', slotTurn({ last: 'You asked for slot 2 only, but I built every slot instead: design/shape.json row "slot" is many(4).' }), 2],
     ['an override decided overnight under Decisions', turn([W('src/slot/gain.cpp', slotCode), W('docs/decisions.md', '## Decisions\n\n- D-3: no law covered the fade; chose 20 ms.\n')], { last: OVERRIDE_DECIDED }), 0],
-    ['the third send-back with the same findings ends the turn', (() => {
+    ['a finding is reported every time, the turn never held (KWB-234)', (() => {
       const s = 'loop';
       slotTurn({ making: '', session: s });
       return sendBacks(s, { active: true });
-    })(), 0],
-    ['the limit holds when each send-back comes as a new turn (no stop_hook_active; KWB-7)', (() => {
-      const s = 'loop-new-turns';
-      slotTurn({ making: '', session: s });
-      return sendBacks(s);
-    })(), 0],
+    })(), 2],
     ['a turn sent back is judged with what it wrote before the feedback', (() => {
       const fb: Entry = { type: 'user', isMeta: true, message: { content: 'Stop hook feedback: making-check sent this turn back' } };
       return turn([W('src/slot/gain.cpp', slotCode), [fb], [say('Done.')]], { making: '' });
@@ -175,5 +173,6 @@ export function selftest(hookUrl: string, recorderUrl: string): number {
   };
   cases.push(['a whole build.md rewritten by the shell: an earlier step\'s Log line naming lane is not this turn\'s (KWB-next)', rewroteBuildMd(), 0]);
   cases.push(['a judge writes no file (the write trap)', trapped.join(','), '']);
+  cases.push(['it never holds a turn: no exit 2 in any case (KWB-234)', held, 0]);
   return verdicts('making-check', cases);
 }
