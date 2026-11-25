@@ -18,6 +18,7 @@ Always do:
 7. Say in the turn's report that the unit is on the rack, with the commit.
 
 Never do:
+- Edit or commit `tools/synths.py` while it holds another session's uncommitted change (`git -C <rack> status --short tools/synths.py`, then its diff): a commit by name would carry their row. Say the rack step waits for it, and do it in the next turn once the file is clean (seen in: supernova2_monitor, 2026-11-25, a Collider row in progress on the rack's branch).
 - Edit `synths.html` by hand: the generator owns it.
 - Put a unit on the rack whose standalone does not open, or leave a blurb that claims more than the project measured.
 - Change another unit's row, or the generator's code, to fit this one: a fault in the generator is logged in the rack repository's own workflow bug log.
