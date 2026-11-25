@@ -100,17 +100,53 @@ export function loadChecks(root: string): Check[] {
 
 // What a check reads: one blanking per kind. strings: comments blanked, strings kept.
 const BLANKING = { prose: blankProse, code: blankCode, strings: (text: string): string => blankCode(text, true) } as const;
+
+// One write is judged by dozens of checks, most with the same blanking: each blanked text is made once per kind and
+// kept for the texts of the write in hand (the two last, before and after), so a 250-line file is blanked a few times,
+// not once per check (KWB-226: doctor's budget was broken by the blanking repeated per check).
+const KEPT_TEXTS = 2;
+const blanked = new Map<string, Map<string, string>>();
+function blankedOnce(key: string, text: string, blank: () => string): string {
+  let byKind = blanked.get(text);
+  if (!byKind) {
+    if (blanked.size >= KEPT_TEXTS) blanked.delete(blanked.keys().next().value as string);
+    byKind = new Map();
+    blanked.set(text, byKind);
+  }
+  let subject = byKind.get(key);
+  if (subject === undefined) {
+    subject = blank();
+    byKind.set(key, subject);
+  }
+  return subject;
+}
+
 function subjectOf(c: Check, text: string): string {
   const row = c.language ? languageNamed(c.language) : null;
-  if (row) return c.notInTests && row.withoutTests ? row.withoutTests(row.blank(text)) : row.blank(text);
+  if (row) {
+    const key = `${c.language}${c.notInTests ? ':no-tests' : ''}`;
+    return blankedOnce(key, text, () => (c.notInTests && row.withoutTests ? row.withoutTests(row.blank(text)) : row.blank(text)));
+  }
   const kind = (['prose', 'code', 'strings'] as const).find((k) => c[k]);
-  return kind ? BLANKING[kind](text) : text;
+  return kind ? blankedOnce(kind, text, () => BLANKING[kind](text)) : text;
+}
+
+// Each check's pattern compiled once (a check is read from its file and does not change while the process runs).
+const compiled = new WeakMap<Check, RegExp>();
+function patternOf(check: Check): RegExp {
+  let re = compiled.get(check);
+  if (!re) {
+    re = new RegExp(check.pattern, `${(check.flags ?? '').replace('g', '')}g`);
+    compiled.set(check, re);
+  }
+  re.lastIndex = 0;
+  return re;
 }
 
 // Every match: its line number and that line's text.
 function matchLines(check: Check, text: string): Hit[] {
   const subject = subjectOf(check, text);
-  const re = new RegExp(check.pattern, `${(check.flags ?? '').replace('g', '')}g`);
+  const re = patternOf(check);
   const lines = text.split('\n');
   const found: Hit[] = [];
   let m: RegExpExecArray | null;
@@ -141,7 +177,13 @@ interface Mode {
 const MODES: Readonly<Record<string, Mode>> = {
   forbid: {
     violates: (c, text) => matchedTexts(c, text).length > 0,
-    added: (c, before, after) => { if (c.newFilesOnly && before !== '') return []; const had = new Set(matchedTexts(c, before)); return matchedTexts(c, after).filter((t) => !had.has(t)); },
+    added: (c, before, after) => {
+      if (c.newFilesOnly && before !== '') return [];
+      const now = matchedTexts(c, after);
+      if (now.length === 0) return [];  // nothing in the new text: nothing added, and the old text need not be read
+      const had = new Set(matchedTexts(c, before));
+      return now.filter((t) => !had.has(t));
+    },
   },
   require: {
     violates: (c, text) => matchedTexts(c, text).length === 0,
