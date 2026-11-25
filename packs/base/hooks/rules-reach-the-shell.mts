@@ -5,14 +5,15 @@
 // For each project file a Bash command reads through a content reader (cat, head, sed ...) or writes, outside .claude/, every rule whose globs match it and that this session has not loaded yet is
 // given to the model whole, as the call's additional context, and logged in rules.jsonl with why "shell_path_match", as rule-log logs
 // a harness load. Refuses nothing.
-import { appendFileSync, closeSync, existsSync, openSync, readdirSync, readSync, statSync } from 'node:fs';
+import { appendFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mts';
 import { matchesAny } from './lib/glob.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
-import { parseJson, toJson } from './lib/json.mts';
+import { toJson } from './lib/json.mts';
 import { insideProject } from './lib/project.mts';
+import { heldNow, lawOf } from './lib/rules-held.mts';
 import { bashOf, put, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { cutHeredocs, lex, splitCommand } from './lib/shell-lex.mts';
@@ -110,38 +111,6 @@ export function filesTouched(command: string, cwd: string, projectDir: string, w
   return [...found].map((p) => relative(projectDir, p)).filter((r) => r && !r.startsWith('..') && !r.startsWith('.claude/'));
 }
 
-// The rules each session holds now, read from the rule log as it grows: only the bytes added since the last call are read. A
-// compaction drops what path loads gave, so a `compact` load that follows any other line starts the session's set again
-// (KWB-228: a rule given before a compaction was never given after it).
-interface Held { rules: Set<string>; offset: number; lastWhy: string }
-const heldBySession = new Map<string, Held>();
-
-/** The rules this session holds since its last compaction, whatever loaded them. */
-function heldNow(projectDir: string, session: string | undefined, key: string): Set<string> {
-  if (!session) return new Set();
-  const path = join(projectDir, RULES);
-  let size = 0;
-  try { size = statSync(path).size; } catch { /* no log yet */ }
-  let held = heldBySession.get(key);
-  if (!held || size < held.offset) held = { rules: new Set(), offset: 0, lastWhy: '' };
-  if (size > held.offset) {
-    const buf = Buffer.alloc(size - held.offset);
-    const fd = openSync(path, 'r');
-    try { readSync(fd, buf, 0, buf.length, held.offset); } finally { closeSync(fd); }
-    const whole = buf.subarray(0, buf.lastIndexOf(0x0a) + 1);
-    for (const l of whole.toString('utf8').split('\n')) {
-      const e = parseJson<{ session?: string; rule?: string; why?: string }>(l);
-      if (e?.session !== session || !e.rule) continue;
-      if (e.why === 'compact' && held.lastWhy !== 'compact') held.rules = new Set();
-      held.lastWhy = e.why ?? '';
-      held.rules.add(e.rule);
-    }
-    held.offset += whole.length;
-  }
-  heldBySession.set(key, held);
-  return held.rules;
-}
-
 /** The most this hook gives in one call. Claude Code cuts a hook event's output at 10,000 characters, and the runner merges every
  *  hook's context under that one cut: a rule past it is lost though logged as given (55,113 characters were cut once). */
 export const GIVE_BUDGET = 6000;
@@ -163,7 +132,10 @@ export function withinBudget(todo: readonly Match[], text: (m: Match) => string,
   return { give, rest: [] };
 }
 
-const contents = ({ rule, trigger }: Match): string => `Contents of ${rule.file} (its paths match ${trigger}, which this command touches):\n\n${rule.body}`;
+/** A rule as given: whole the first time, its law alone when the session held it before a compaction (KWB-231). */
+const contentsOf = (before: ReadonlySet<string>) => ({ rule, trigger }: Match): string => (before.has(rule.name)
+  ? `The law of ${rule.file} again, after a compaction (its paths match ${trigger}; the whole file: Read it):\n\n${lawOf(rule.body)}`
+  : `Contents of ${rule.file} (its paths match ${trigger}, which this command touches):\n\n${rule.body}`);
 
 export const hook: Hook = (event, ctx) => {
   const command = event.tool_input?.command;
@@ -180,7 +152,9 @@ export const hook: Hook = (event, ctx) => {
   }) : [];
   const all = [...pending, ...matched.filter((m) => !pending.some((p) => p.rule.name === m.rule.name))];
   if (!all.length) return pass;
-  const held = heldNow(ctx.projectDir, event.session_id, key);
+  const state = heldNow(ctx.projectDir, event.session_id, key);
+  const held = state.rules;
+  const contents = contentsOf(state.before);
   const { give, rest } = withinBudget(all.filter(({ rule }) => !held.has(rule.name)), contents);
   if (event.session_id) pendingBySession.set(key, rest);
   for (const { rule, trigger } of give) {
@@ -221,6 +195,11 @@ export function selftest(): number {
   const heldStill = sh('tail -1 build.md', 's8');
   appendFileSync(join(dir, RULES), `${toJson({ session: 's8', rule: 'always', why: 'compact' })}\n`);
   const afterCompact = sh('sed -n 1p build.md', 's8');
+  put(join(dir, '.claude/rules/law.md'), '---\npaths:\n  - "law/**"\n---\n\n# Law\n\nWhy it exists, at length.\n\n<constraints>\nAlways do:\n- Keep the law.\n</constraints>\n');
+  put(join(dir, 'law/a.md'), '# a\n');
+  const lawFirst = sh('cat law/a.md', 's9');
+  appendFileSync(join(dir, RULES), `${toJson({ session: 's9', rule: 'always', why: 'compact' })}\n`);
+  const lawAgain = sh('head -1 law/a.md', 's9');
   const long = (n: string): string => `---\npaths:\n  - "notes/**"\n---\n\n# Long ${n}\n\n${'Keep it. '.repeat(280)}\n`;
   const big = scratchProject({ '.claude/rules/l1.md': long('one'), '.claude/rules/l2.md': long('two'), '.claude/rules/l3.md': long('three'), 'notes/n.md': '# n\n' });
   const budgeted = runHook(hookFile, big, { ...bashOf('cat notes/n.md', big), hook_event_name: 'PreToolUse', session_id: 'b1' });
@@ -240,7 +219,9 @@ export function selftest(): number {
     ['a session given a rule', /Plan and logs/.test(before.stdout) ? 1 : 0, 1],
     ['is not given it again before a compaction', heldStill.stdout, ''],
     ['and is given it again after one', /Plan and logs/.test(afterCompact.stdout) ? 1 : 0, 1],
-    ['each giving is one log line', logged().filter((l) => l.includes('shell_path_match')).length, 6],
+    ['a rule given the first time comes whole', /Why it exists[\s\S]*Keep the law/.test(lawFirst.stdout) ? 1 : 0, 1],
+    ['given again after a compaction, its law alone', /The law of[\s\S]*Keep the law/.test(lawAgain.stdout) && !/Why it exists/.test(lawAgain.stdout) ? 1 : 0, 1],
+    ['each giving is one log line', logged().filter((l) => l.includes('shell_path_match')).length, 8],
     ['three long rules: the output stays within the budget', budgeted.stdout.length <= GIVE_BUDGET + 600 ? 1 : 0, 1],
     ['and the one held back is named, not given', /Long two/.test(budgeted.stdout) && !/# Long three/.test(budgeted.stdout) && /1 more rule\(s\).*l3/.test(budgeted.stdout) ? 1 : 0, 1],
     ['only the rules given are logged', bigLogged.length, 2],
