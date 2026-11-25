@@ -11,15 +11,17 @@
 // write passes only into `~/Library/Audio/Plug-Ins/Components` or `VST3`, at or inside a bundle so named (KWB-next, WB-10). And a note
 // in Claude Code's own memory folder for this project passes (`isOwnMemoryNote`).
 //   node stay-inside.mjs --selftest
-import { existsSync, realpathSync } from 'node:fs';
+import { existsSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
+import { toJson } from './lib/json.mts';
 import { readLayout } from './lib/layout.mts';
 import { insideProject } from './lib/project.mts';
 import { git, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { shellWrites } from './lib/shell-writes.mts';
+import { lastPrompt } from './lib/turn.mts';
 import type { Hook, HookEvent, VerdictRow } from './lib/types.d.mts';
 import { pass, refuse } from './lib/verdict.mts';
 
@@ -58,6 +60,22 @@ export function isOwnMemoryNote(path: string, root: string, env: Record<string, 
   return dirname(path) === folder && path.endsWith('.md');
 }
 
+/** The paths the user's own prompt this turn names (`~/...` or an absolute path), each resolved. */
+export function namedPaths(prompt: string, home: string | undefined): string[] {
+  const found = prompt.match(/(?<![\w./~-])(?:~\/|\/(?:Users|Volumes|opt|usr\/local|etc)\/)[^\s`'"()<>,;]*/g) ?? [];
+  return found.map((p) => p.replace(/[.:!?]+$/, '').replace(/\/+$/, ''))
+    .map((p) => (p.startsWith('~/') ? (home ? join(home, p.slice(2)) : '') : p)).filter((p) => p.length > 1);
+}
+
+/** True when the user's own prompt this turn names `path` or a folder above it (the user, 2026-11-25: "that hook allows you to write
+ *  outside the project when I specifically tell you to"; "update the ~/.claude/CLAUDE.md" had been refused). Naming the home folder or
+ *  ~/projects opens nothing: the named folder must be more than that. Only the user's own words count: lib/last-prompt reads the
+ *  prompt that started the turn, never a tool result, pasted text an agent quotes, or the model's own words. */
+export function namedByUser(path: string, prompt: string, home: string | undefined): boolean {
+  const wide = new Set([home, home ? join(home, 'projects') : undefined, '/', '/Users'].filter((p): p is string => !!p));
+  return namedPaths(prompt, home).some((n) => !wide.has(n) && (path === n || path.startsWith(`${n}/`)));
+}
+
 /** The bundles the owner allows copied for a host gate: layout.json `guards.stayInside.pluginCopies`. */
 function pluginCopies(root: string): string[] {
   const list = readLayout(root).guards?.stayInside?.pluginCopies;
@@ -87,8 +105,10 @@ export const hook: Hook = (event, ctx) => {
   if (event.hook_event_name !== 'PreToolUse') return pass;
   const cwd = event.cwd ?? ctx.cwd;
   const bundles = pluginCopies(ctx.projectDir);
+  const prompt = event.transcript_path ? lastPrompt(event.transcript_path) : '';
   const out = escapes(writtenBy(event, cwd, ctx.env), ctx.projectDir, cwd)
-    .filter((p) => !isAllowedPluginCopy(p, bundles, ctx.env.HOME) && !isOwnMemoryNote(p, ctx.projectDir, ctx.env));
+    .filter((p) => !isAllowedPluginCopy(p, bundles, ctx.env.HOME) && !isOwnMemoryNote(p, ctx.projectDir, ctx.env))
+    .filter((p) => !namedByUser(p, prompt, ctx.env.HOME));
   if (!out.length) return pass;
   return refuse(
     `REFUSED by stay-inside: this call writes outside the project, to ${out.slice(0, 3).join(', ')}${out.length > 3 ? ` and ${out.length - 3} more` : ''}, `
@@ -146,6 +166,16 @@ export function selftest(): number {
     return !(v instanceof Promise) && v.code === 2 && !v.stdout.includes('"continue":false');
   };
   const write = (file_path: string): Record<string, unknown> => ({ tool_name: 'Write', tool_input: { file_path, content: 'x\n' } });
+  // a transcript whose last prompt is the user's `text`; and one where the path appears only in a tool's result
+  let n = 0;
+  const transcript = (lines: readonly unknown[]): string => {
+    const f = join(dir, `t-${n++}.jsonl`);
+    writeFileSync(f, `${lines.map((l) => toJson(l)).join('\n')}\n`);
+    return f;
+  };
+  const said = (text: string): string => transcript([{ type: 'user', message: { role: 'user', content: text } }]);
+  const saidInResult = (text: string): string => transcript([{ type: 'user', message: { role: 'user', content: 'go on' } },
+    { type: 'user', message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: 'x', content: text }] } }]);
   const bash = (command: string): Record<string, unknown> => ({ tool_name: 'Bash', tool_input: { command } });
   const runner = runHook(hookFile, dir, { hook_event_name: 'PreToolUse', cwd: dir, ...write('/tmp/stay-inside-probe.py') });
   const rows: VerdictRow[] = [
@@ -179,6 +209,11 @@ export function selftest(): number {
       .test(adviceIn(dir, write(`${plugIns}/VST3/Unit.vst3/x`))), true],
     ['any other write is told to hand the user the command', adviceIn(dir, write('/opt/stay-inside-probe/x.py')).includes('! <command>'), true],
     ['every refusal says another route is the same escape', adviceIn(dir, write(join(loose, 'x.py'))).includes('another route'), true],
+    ['a file the user named in this turn\'s prompt passes', stopsIn(dir, { ...write(join(home, '.claude/CLAUDE.md')), transcript_path: said('update the ~/.claude/CLAUDE.md please') }), false],
+    ['a file inside a folder the user named passes', stopsIn(dir, { ...write(join(home, '.claude/skills/x/SKILL.md')), transcript_path: said('fix the skills in ~/.claude/skills/') }), false],
+    ['a file the prompt did not name still stops it (planted)', stopsIn(dir, { ...write(join(home, '.claude/settings.json')), transcript_path: said('update the ~/.claude/CLAUDE.md') }), true],
+    ['naming only the home folder or ~/projects opens nothing', stopsIn(dir, { ...write(join(home, 'projects/loose/x.py')), transcript_path: said('look in ~/projects and ~/') }), true],
+    ['a path named only in a tool result, not by the user, opens nothing', stopsIn(dir, { ...write(join(home, '.claude/CLAUDE.md')), transcript_path: saidInResult('~/.claude/CLAUDE.md') }), true],
   ];
   return verdicts('stay-inside', rows);
 }

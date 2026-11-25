@@ -1,5 +1,6 @@
-// stay-inside: a write outside the project stops the session (`continue: false`); a write into another project passes. On by
-// default in base (the user, 2026-11-14: "hard-stop is not an opt in").
+// stay-inside: a write outside the project is refused (exit 2, the session goes on: KWB-223, 47ce4ba3, which left these tests
+// expecting the old `continue: false` stop); a write into another project passes. On by default in base (the user, 2026-11-14:
+// "hard-stop is not an opt in").
 import { join } from 'node:path';
 import { assert, fresh, hookRun, readFileSync, test, writeFileSync } from '../../kit-cli.mts';
 import { git } from '../../fixtures/installs.mts';
@@ -7,9 +8,9 @@ import { fixture, holdsTheContract } from '../hook-rig.mts';
 
 const dir = (): string => fixture('base');
 const write = (file_path: string): Record<string, unknown> => ({ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path, content: 'x\n' } });
-const stopped = (r: { status: number | null; stdout: string }): boolean => r.status === 0 && r.stdout.includes('"continue":false');
+const stopped = (r: { status: number | null; stdout: string }): boolean => r.status === 2 && !r.stdout.includes('"continue":false');
 
-holdsTheContract({ hook: 'stay-inside.mjs', dir, same: () => ({ payload: write('/tmp/stay-inside-contract.py'), status: 0 }) });
+holdsTheContract({ hook: 'stay-inside.mjs', dir, same: () => ({ payload: write('/tmp/stay-inside-contract.py'), status: 2 }) });
 
 test('stay-inside: a write or a shell redirect to /tmp stops the session; one inside the project does not', () => {
   const project = dir();
