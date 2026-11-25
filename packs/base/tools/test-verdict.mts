@@ -25,7 +25,8 @@ export const USAGE = `usage: test-verdict [-R <regex>]                    run th
 Exit 0: the verdict as required. Exit 1: failures (or a --red test passing). Exit 2: the runner itself broke.`;
 
 export function parseCtest(out: string): CtestResult | null {
-  const total = out.match(/(\d+)% tests passed, (\d+) tests? failed out of (\d+)/);
+  // an all-green run says "100% tests passed out of 22", with no failed clause (KWB-236, supernova2_monitor WB-166)
+  const total = out.match(/(\d+)% tests passed(?:, (\d+) tests? failed)? out of (\d+)/);
   const failed: CtestFailure[] = [];
   const block = out.split(/The following tests FAILED:/)[1] ?? '';
   for (const m of block.matchAll(/^\s*\d+\s+-\s+(\S+)\s+\(([^)]+)\)/gm)) failed.push({ name: m[1] ?? '', why: m[2] ?? '' });
@@ -89,7 +90,7 @@ export function main(args: readonly string[], root: string, log: (line: string) 
 export function selftest(log: (line: string) => void = console.log): number {
   const sample = '50% tests passed, 1 tests failed out of 2\n\nThe following tests FAILED:\n\t  2 - svf_stable_under_fm (Failed)\nErrors while running CTest\n';
   const p = parseCtest(sample);
-  const ok = p?.total === 2 && p.failed[0]?.name === 'svf_stable_under_fm' && parseCtest('100% tests passed, 0 tests failed out of 9')?.failed.length === 0 && parseCtest('No tests were found!!!') === null;
+  const ok = p?.total === 2 && p.failed[0]?.name === 'svf_stable_under_fm' && parseCtest('100% tests passed, 0 tests failed out of 9')?.failed.length === 0 && parseCtest('100% tests passed out of 22')?.total === 22 && parseCtest('No tests were found!!!') === null;
   log(ok ? 'test-verdict selftest: OK (3 cases)' : 'test-verdict selftest FAILED');
   return ok ? 0 : 1;
 }
