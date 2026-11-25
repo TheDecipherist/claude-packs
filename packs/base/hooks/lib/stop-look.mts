@@ -95,11 +95,15 @@ const PUSH_WAIT_MS = 5_000;
 
 /** A command the hook let through that commits or pushes (either, or both: `git commit && git push`): the kept looks are taken again, detached,
  *  once the refs have moved. A push by URL moves no local ref, so what was kept is dropped first. */
-export function landedLater(self: string, command: string, root: string, env: GitEnv): void {
+export function landedLater(self: string, command: string, root: string, env: GitEnv, pushedIn: readonly string[] = []): void {
   const body = blankQuotes(dropHeredocs(command));
   const push = /\bgit\b[^|;&\n]*?\bpush\b/.test(body);
   if (!push && !/\bgit\b[^|;&\n]*?\bcommit\b/.test(body)) return;
-  if (push) { forget(root); pushSeen(root, env); }
+  if (push) {
+    forget(root);
+    // marked where the push ran too: a push from another repo marked only the project's (KWB-233)
+    for (const dir of new Set([root, ...pushedIn])) pushSeen(dir, env);
+  }
   refreshLater(self, root, env, push && !/\bcommit\b/.test(body) ? PUSH_WAIT_MS : COMMIT_WAIT_MS, push, push);
 }
 

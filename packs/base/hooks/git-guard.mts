@@ -28,13 +28,12 @@
 // On the hook contract (typescript order W4): `hook(event, ctx)` returns its Verdict. `problem` (the token law) and `house`
 // (the house laws) are exported for the selftest and for stage-guard, which calls the same law. Its state is kept out of the
 // project: GitHub's last look in the git dir, a session's Stop memory in the caller's TMPDIR (lib/remote-heads.mts, stop-verdict.mts).
-import { homedir } from 'node:os';
-import { normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bareWords } from './lib/command-prefix.mts';
 import { NEW_INSTALL_GIT, ghLaw, loggedInAs, pushLaw } from './lib/git-auth.mts';
 import type { HouseEnv } from './lib/git-guard-selftest.mts';
 import { gitConfigRead } from './lib/git-config.mts';
+import { baseName, gitParts, pushDirs } from './lib/git-parts.mts';
 import { gitLines, gitOut, gitRun } from './lib/git-run.mts';
 import { headRead } from './lib/git-state.mts';
 import { escapeRegExp } from './lib/glob.mts';
@@ -42,7 +41,6 @@ import { contextOf, isMain, runAsHook } from './lib/hook-log.mts';
 import { isRecord, toJson } from './lib/json.mts';
 import { forRepo, ownerPushes, stopVerdict, unpushed, unpushedMessage } from './lib/pushed.mts';
 import { failed } from './lib/remote-heads.mts';
-import { blankQuotes, dropHeredocs } from './lib/shell-lex.mts';
 import type { GitEnv, GitGuards } from './lib/remote-heads.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { landedLater, refreshLater, refreshStop } from './lib/stop-look.mts';
@@ -136,8 +134,6 @@ function subOf(w: readonly string[]): string | undefined {
 const neverRx = (entry: string): RegExp => (entry.startsWith('~/')
   ? new RegExp(`(~|\\$HOME|/Users/[^/\\s]+|/home/[^/\\s]+)/${escapeRegExp(entry.slice(2))}`)
   : new RegExp(escapeRegExp(entry.replace(/^\/+/, ''))));
-const expand = (p: string): string => p.replace(/^\$HOME(?=\/|$)/, '~').replace(/^~(?=\/|$)/, homedir());
-const baseName = (word: string | undefined): string => (word ?? '').split('/').pop() ?? '';
 
 const STAGE_ALL = 'Stage by explicit path: `git add <paths>` and `git commit -- <paths>`. `add -A`, `add .` and `commit -a` sweep in other work.';
 const NO_VERIFY = 'Never --no-verify (or -n): the pre-commit hook is the gate. When it refuses, fix what it names; if a commit must hold something that fails the gates (a planted fault for a test), do not commit it: work on an uncommitted copy.';
@@ -172,15 +168,8 @@ export function house(cmd: string, cwd: string, env: HouseEnv, cfg: HouseCfg = {
   const c: HouseCfg = { ...DEFAULTS, ...cfg };
   const owner = c.owner;
   const tok = c.tokenVar ?? 'PERSONAL_GITHUB_TOKEN';
-  const body = blankQuotes(dropHeredocs(cmd));
-  let here = cwd;
   let pushedBefore = false;
-  for (const part of body.split(/&&|\|\||;|\||\n|\(|\)|\x60|\$\(/)) {
-    let w = part.trim().split(/\s+/).filter(Boolean);
-    if (w.length >= 2 && w[0] === 'cd' && w[1] !== "''") { here = normalize(resolve(here, expand(w[1] ?? ''))); continue; }
-    if (w.length >= 3 && baseName(w[0]) === 'git' && w[1] === '-C' && w[2] !== "''") here = normalize(resolve(here, expand(w[2] ?? '')));
-    while (w.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(w[0] ?? '') || ['env', 'command', 'time', 'nohup', 'exec'].includes(w[0] ?? ''))) w = w.slice(1);
-    if (!w.length || !['git', 'gh'].includes(baseName(w[0]))) continue;
+  for (const { here, w } of gitParts(cmd, cwd)) {
     const p = w.join(' ');
     const sub = baseName(w[0]) === 'git' ? subOf(w) : undefined; // the subcommand, never a word in an argument: `git rev-parse x^{commit}` commits nothing
     const dryRun = sub === 'add' && /\s(-n|--dry-run)(\s|$)/.test(p); // KF-10: it stages nothing
@@ -255,7 +244,7 @@ export const hook: Hook = (event, ctx) => {
     warn: (m) => warnings.push(m),
   };
   const reason = house(command, event.cwd ?? ctx.cwd, env, cfg);
-  if (!reason && (cfg.stopCacheMs ?? 1) > 0) landedLater(SELF, command, ctx.projectDir, ctx.env);
+  if (!reason && (cfg.stopCacheMs ?? 1) > 0) landedLater(SELF, command, ctx.projectDir, ctx.env, pushDirs(command, event.cwd ?? ctx.cwd));
   const stdout = warnings.length ? toJson({ systemMessage: warnings.join('\n') }) : '';
   return reason ? { ...refuse(`git-guard: ${reason}\n`), stdout } : { ...pass, stdout };
 };
