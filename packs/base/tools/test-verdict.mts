@@ -62,6 +62,13 @@ export function main(args: readonly string[], root: string, log: (line: string) 
     return 0;
   }
   const red = args.includes('--red') ? (args[args.indexOf('--red') + 1] ?? '').split(',').filter(Boolean) : null;
+  // --red takes the tests' plain names: `--red -R <regex>` read "-R" as a test (RED_GATE_FAILED), and a regex as a name was
+  // wrapped again and found nothing (RUNNER_BROKEN); two runs of an 88 s gate lost (KWB-237, supernova2_monitor WB-234)
+  const badName = red?.find((n) => n.startsWith('-') || /[\^$*()|\\[\]]/.test(n));
+  if (red && badName !== undefined) {   // an empty --red still runs the command as given (WB-165's planted case)
+    log(`test-verdict: --red takes the tests' plain names, comma-separated, never a flag or a regex (got "${badName ?? ''}").\n${USAGE}`);
+    return 2;
+  }
   const cmd = command(args, root, red);
   const run = spawnSync('bash', ['-c', cmd], { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
   const out = `${run.stdout ?? ''}${run.stderr ?? ''}`;
@@ -91,8 +98,12 @@ export function selftest(log: (line: string) => void = console.log): number {
   const sample = '50% tests passed, 1 tests failed out of 2\n\nThe following tests FAILED:\n\t  2 - svf_stable_under_fm (Failed)\nErrors while running CTest\n';
   const p = parseCtest(sample);
   const ok = p?.total === 2 && p.failed[0]?.name === 'svf_stable_under_fm' && parseCtest('100% tests passed, 0 tests failed out of 9')?.failed.length === 0 && parseCtest('100% tests passed out of 22')?.total === 22 && parseCtest('No tests were found!!!') === null;
-  log(ok ? 'test-verdict selftest: OK (3 cases)' : 'test-verdict selftest FAILED');
-  return ok ? 0 : 1;
+  const said: string[] = [];
+  const refusesFlag = main(['--red', '-R', '^x$'], '/nonexistent-root', (l) => said.push(l)) === 2 && /plain names/.test(said.join(''));
+  const refusesRegex = main(['--red', '^SN2Monitor.x$'], '/nonexistent-root', () => undefined) === 2;
+  const all = ok && refusesFlag && refusesRegex;
+  log(all ? 'test-verdict selftest: OK (5 cases)' : `test-verdict selftest FAILED${refusesFlag && refusesRegex ? '' : ': --red took a flag or a regex as a test name'}`);
+  return all ? 0 : 1;
 }
 
 if (isMain(import.meta.url)) {
