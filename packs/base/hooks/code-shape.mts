@@ -36,7 +36,7 @@ const PACKED_WHY = 'One statement a line: a diff, a breakpoint and a coverage li
 // Every line at fault at once: one a refusal cost a whole resend for each, the largest cost the kit added on the MPX 500 (37 of its 132 refusals).
 function lineFaults(lang: Language, text: string, added: readonly number[], off: ReadonlySet<number>, limits: Limits): string[] {
   const code = lang.blank(text).split('\n');
-  const perLine = statementsOf(text, lang).reduce((m, s) => m.set(s.line, (m.get(s.line) ?? 0) + 1), new Map<number, number>());
+  const perLine = statementsOf(text, lang, { valueBraces: true }).reduce((m, s) => m.set(s.line, (m.get(s.line) ?? 0) + 1), new Map<number, number>());
   const faults: string[] = [];
   for (const n of added.filter((x) => !off.has(x))) {
     const width = code[n - 1]?.trimEnd().length ?? 0;

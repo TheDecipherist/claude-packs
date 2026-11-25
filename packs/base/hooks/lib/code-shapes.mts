@@ -46,7 +46,10 @@ const lineAt = (starts: readonly number[], offset: number): number => {
 const blank = (m: string): string => m.replace(/[^\n]/g, ' ');
 
 /** Every statement that does something: it calls or assigns, or in shell runs a command. A row of a table does neither. */
-export function statementsOf(text: string, lang: Language): Statement[] {
+/** `valueBraces`: read a brace inside an expression as part of its statement (code-shape's count, KWB-238). The copy detectors
+ *  keep every brace a boundary: merging a braced initializer into its statement shortened real copies below their run (four
+ *  right template-law refusals lost in supernova2_monitor's replay), so they read statements as before. */
+export function statementsOf(text: string, lang: Language, { valueBraces = false }: { valueBraces?: boolean } = {}): Statement[] {
   const code = (lang.structure ?? lang.blank)(text).replace(lang.notCode ?? /^$^/gm, blank).replace(TEXT_BLOCK, blank);
   const starts = [0];
   for (let i = code.indexOf('\n'); i !== -1; i = code.indexOf('\n', i + 1)) starts.push(i + 1);
@@ -76,7 +79,7 @@ export function statementsOf(text: string, lang: Language): Statement[] {
     last = at + t.length;
     const dataBrace = lang.braces === false && (t === '{' || t === '}'); // a Python set or dict is one value, not a block (KF-14)
     const before = prev?.t ?? '';
-    const exprOpen = t === '{' && !dataBrace && !BLOCK_BEFORE.test(before) && (depth > 0 || EXPR_BEFORE.test(before));
+    const exprOpen = valueBraces && t === '{' && !dataBrace && !BLOCK_BEFORE.test(before) && (depth > 0 || EXPR_BEFORE.test(before));
     const exprClose = t === '}' && !dataBrace && braces.pop() === true;
     if (t === '{' && !dataBrace) braces.push(exprOpen);
     if (t === '(' || t === '[' || (dataBrace && t === '{') || exprOpen) depth += 1;
