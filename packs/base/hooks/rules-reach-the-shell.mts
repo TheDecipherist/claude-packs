@@ -2,19 +2,20 @@
 // Claude Code loads a path-scoped rule when a tool touches a matching file, and for Bash only when its own reading of the command
 // happens to match: supernova2_monitor's W0.2 task did all 21 calls in Bash (cat build.md, python heredoc edits, cat >> docs/versions.md)
 // and plan-and-logs and commit-says-why never loaded, while the supervisor's `cat .../workorder.md` loaded 51 (KWB-next, 2026-11-14).
-// For each project file a Bash command names or writes, every rule whose globs match it and that this session has not loaded yet is
+// For each project file a Bash command reads through a content reader (cat, head, sed ...) or writes, outside .claude/, every rule whose globs match it and that this session has not loaded yet is
 // given to the model whole, as the call's additional context, and logged in rules.jsonl with why "shell_path_match", as rule-log logs
 // a harness load. Refuses nothing.
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { appendFileSync, closeSync, existsSync, openSync, readdirSync, readSync, statSync } from 'node:fs';
 import { basename, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readText } from './lib/files.mts';
 import { matchesAny } from './lib/glob.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
-import { parseJson } from './lib/json.mts';
+import { parseJson, toJson } from './lib/json.mts';
 import { insideProject } from './lib/project.mts';
 import { bashOf, put, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
+import { cutHeredocs, lex, splitCommand } from './lib/shell-lex.mts';
 import type { Hook } from './lib/types.d.mts';
 import { RULES, logUsage } from './lib/usage-log.mts';
 import { pass, say } from './lib/verdict.mts';
@@ -68,29 +69,77 @@ export function pathRules(projectDir: string): PathRule[] {
 
 const isFile = (p: string): boolean => { try { return statSync(p).isFile(); } catch { return false; } };
 
-/** The project files a command names (any word that resolves to a file, from the call's folder, the project or a `cd` target) or
- *  writes (as the write hooks read it), relative to the project. A heredoc body is searched too: a program's paths are in it. */
-export function filesTouched(command: string, cwd: string, projectDir: string, written: readonly string[]): string[] {
-  const bases = [cwd, projectDir, ...[...command.matchAll(/\bcd\s+["']?([^\s"';&|]+)/g)].map((m) => resolve(cwd, m[1] ?? '.'))];
-  const named = [...command.matchAll(/[A-Za-z0-9_.~/+-]*[./][A-Za-z0-9_.~/+-]*/g)].map((m) => m[0]).filter((w) => w.length > 1 && !w.startsWith('~'));
-  const found = new Set<string>();
-  for (const w of named) for (const b of bases) { const p = resolve(b, w); if (isFile(p) && insideProject(projectDir, p, cwd)) found.add(p); }
-  for (const p of written) if (insideProject(projectDir, p, cwd)) found.add(p);
-  // a file under .claude/ counts like any other: a rule's own globs say whether it is theirs (hooks-and-gates names .claude/hooks/**)
-  return [...found].map((p) => relative(projectDir, p)).filter((r) => r && !r.startsWith('..'));
+/** The programs that print a file's text, so a file given to one enters the context. A script run (`node tools/x.mjs`,
+ *  `bash run.sh`) is none of them: the script's own text never reaches the model (KWB-228: supernova2_monitor's supervisor was
+ *  given 23 pack rules for `head tools/run-task.sh` and 38 more for `node tools/fired.mjs`, none of them about either file). */
+export const READERS: ReadonlySet<string> = new Set(['cat', 'head', 'tail', 'sed', 'awk', 'grep', 'egrep', 'fgrep', 'rg', 'nl',
+  'less', 'more', 'bat', 'tac', 'cut', 'sort', 'uniq', 'diff', 'jq', 'column', 'paste']);
+
+/** The words a command gives its readers as files: in each simple command led by a reader (past `VAR=x` and `sudo`, `env`,
+ *  `command`, `time`), each word that is no option and no redirect's target. A heredoc's body is never a reader's argument. */
+export function readerArgs(command: string): string[] {
+  const args: string[] = [];
+  for (const part of splitCommand(cutHeredocs(command).text, { newline: true, subshell: true })) {
+    const toks = lex(part);
+    let i = 0;
+    while (i < toks.length) {
+      const t = toks[i];
+      if (!t || !('w' in t) || !(/^\w+=/.test(t.w) || ['sudo', 'env', 'command', 'time'].includes(t.w))) break;
+      i += 1;
+    }
+    const lead = toks[i];
+    if (!lead || !('w' in lead) || !READERS.has(basename(lead.w))) continue;
+    for (let j = i + 1; j < toks.length; j += 1) {
+      const t = toks[j];
+      if (!t) continue;
+      if (!('w' in t)) { j += 1; continue; }
+      if (!t.w.startsWith('-') && !t.w.startsWith('~')) args.push(t.w);
+    }
+  }
+  return args;
 }
 
-// The rules each session is known to hold. A rule once loaded stays in the context, so the set only grows: the log is read again
-// only when a matching rule is not in it yet (key: project and session).
-const heldBySession = new Map<string, Set<string>>();
+/** The project files a command reads through a reader (each argument resolved from the call's folder, the project or a `cd`
+ *  target) or writes (as the write hooks read it, an inline program's writes among them), relative to the project. Nothing under
+ *  `.claude/` counts: the kit's own files, its logs and the installed rules are no rule's subject in the project. */
+export function filesTouched(command: string, cwd: string, projectDir: string, written: readonly string[]): string[] {
+  const bases = [cwd, projectDir, ...[...command.matchAll(/\bcd\s+["']?([^\s"';&|]+)/g)].map((m) => resolve(cwd, m[1] ?? '.'))];
+  const found = new Set<string>();
+  for (const w of readerArgs(command)) for (const b of bases) { const p = resolve(b, w); if (isFile(p) && insideProject(projectDir, p, cwd)) found.add(p); }
+  for (const p of written) if (insideProject(projectDir, p, cwd)) found.add(p);
+  return [...found].map((p) => relative(projectDir, p)).filter((r) => r && !r.startsWith('..') && !r.startsWith('.claude/'));
+}
 
-/** The rules this session already holds: every rules.jsonl line of this session, whatever loaded it. */
-function loadedIn(projectDir: string, session: string | undefined): Set<string> {
+// The rules each session holds now, read from the rule log as it grows: only the bytes added since the last call are read. A
+// compaction drops what path loads gave, so a `compact` load that follows any other line starts the session's set again
+// (KWB-228: a rule given before a compaction was never given after it).
+interface Held { rules: Set<string>; offset: number; lastWhy: string }
+const heldBySession = new Map<string, Held>();
+
+/** The rules this session holds since its last compaction, whatever loaded them. */
+function heldNow(projectDir: string, session: string | undefined, key: string): Set<string> {
   if (!session) return new Set();
-  return new Set((readText(join(projectDir, RULES)) ?? '').split('\n').flatMap((l) => {
-    const e = parseJson<{ session?: string; rule?: string }>(l);
-    return e?.session === session && e.rule ? [e.rule] : [];
-  }));
+  const path = join(projectDir, RULES);
+  let size = 0;
+  try { size = statSync(path).size; } catch { /* no log yet */ }
+  let held = heldBySession.get(key);
+  if (!held || size < held.offset) held = { rules: new Set(), offset: 0, lastWhy: '' };
+  if (size > held.offset) {
+    const buf = Buffer.alloc(size - held.offset);
+    const fd = openSync(path, 'r');
+    try { readSync(fd, buf, 0, buf.length, held.offset); } finally { closeSync(fd); }
+    const whole = buf.subarray(0, buf.lastIndexOf(0x0a) + 1);
+    for (const l of whole.toString('utf8').split('\n')) {
+      const e = parseJson<{ session?: string; rule?: string; why?: string }>(l);
+      if (e?.session !== session || !e.rule) continue;
+      if (e.why === 'compact' && held.lastWhy !== 'compact') held.rules = new Set();
+      held.lastWhy = e.why ?? '';
+      held.rules.add(e.rule);
+    }
+    held.offset += whole.length;
+  }
+  heldBySession.set(key, held);
+  return held.rules;
 }
 
 /** The most this hook gives in one call. Claude Code cuts a hook event's output at 10,000 characters, and the runner merges every
@@ -131,9 +180,7 @@ export const hook: Hook = (event, ctx) => {
   }) : [];
   const all = [...pending, ...matched.filter((m) => !pending.some((p) => p.rule.name === m.rule.name))];
   if (!all.length) return pass;
-  let held = heldBySession.get(key) ?? new Set<string>();
-  if (all.some(({ rule }) => !held.has(rule.name))) held = new Set([...held, ...loadedIn(ctx.projectDir, event.session_id)]);
-  if (event.session_id) heldBySession.set(key, held);
+  const held = heldNow(ctx.projectDir, event.session_id, key);
   const { give, rest } = withinBudget(all.filter(({ rule }) => !held.has(rule.name)), contents);
   if (event.session_id) pendingBySession.set(key, rest);
   for (const { rule, trigger } of give) {
@@ -168,7 +215,12 @@ export function selftest(): number {
   const cdRel = sh('cd docs && cat x/v.md', 's5');
   put(join(dir, '.claude/rules/hooks.md'), '---\npaths:\n  - ".claude/hooks/**"\n---\n\n# Hooks are seen red\n');
   put(join(dir, '.claude/hooks/guard.mjs'), '// a guard\n');
-  const ownHooks = sh('node .claude/hooks/guard.mjs --selftest', 's6');
+  const ownHooks = sh('cat .claude/hooks/guard.mjs', 's6');
+  const scriptRun = sh('node docs/x/v.md --selftest && wc -l build.md', 's7');
+  const before = sh('head -3 build.md', 's8');
+  const heldStill = sh('tail -1 build.md', 's8');
+  appendFileSync(join(dir, RULES), `${toJson({ session: 's8', rule: 'always', why: 'compact' })}\n`);
+  const afterCompact = sh('sed -n 1p build.md', 's8');
   const long = (n: string): string => `---\npaths:\n  - "notes/**"\n---\n\n# Long ${n}\n\n${'Keep it. '.repeat(280)}\n`;
   const big = scratchProject({ '.claude/rules/l1.md': long('one'), '.claude/rules/l2.md': long('two'), '.claude/rules/l3.md': long('three'), 'notes/n.md': '# n\n' });
   const budgeted = runHook(hookFile, big, { ...bashOf('cat notes/n.md', big), hook_event_name: 'PreToolUse', session_id: 'b1' });
@@ -183,8 +235,12 @@ export function selftest(): number {
     ['a path inside a heredoc program reaches its rule', /Plan and logs/.test(heredoc.stdout) ? 1 : 0, 1],
     ['a new file appended through a redirect reaches its rule', /Plan and logs/.test(appended.stdout) ? 1 : 0, 1],
     ['a path relative to a cd target reaches its rule', /Plan and logs/.test(cdRel.stdout) ? 1 : 0, 1],
-    ['a rule whose paths name .claude/hooks/** reaches a selftest run of a hook', /Hooks are seen red/.test(ownHooks.stdout) ? 1 : 0, 1],
-    ['each giving is one log line', logged().length, 5],
+    ['a file under .claude/ reaches no rule, whatever its globs', /Hooks are seen red/.test(ownHooks.stdout) ? 1 : 0, 0],
+    ['a script run, or a count of lines, is no read of the file', scriptRun.stdout, ''],
+    ['a session given a rule', /Plan and logs/.test(before.stdout) ? 1 : 0, 1],
+    ['is not given it again before a compaction', heldStill.stdout, ''],
+    ['and is given it again after one', /Plan and logs/.test(afterCompact.stdout) ? 1 : 0, 1],
+    ['each giving is one log line', logged().filter((l) => l.includes('shell_path_match')).length, 6],
     ['three long rules: the output stays within the budget', budgeted.stdout.length <= GIVE_BUDGET + 600 ? 1 : 0, 1],
     ['and the one held back is named, not given', /Long two/.test(budgeted.stdout) && !/# Long three/.test(budgeted.stdout) && /1 more rule\(s\).*l3/.test(budgeted.stdout) ? 1 : 0, 1],
     ['only the rules given are logged', bigLogged.length, 2],
