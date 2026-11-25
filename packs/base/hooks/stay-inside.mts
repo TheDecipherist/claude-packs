@@ -1,9 +1,10 @@
-// stay-inside: a write outside the project stops the session. The kit's laws judge only what is inside the project, so a write
+// stay-inside: a write outside the project is refused, with what to do instead (2026-11-25; it used to stop the session, which
+// taught nothing and left the user to restart the work). The kit's laws judge only what is inside the project, so a write
 // anywhere else is work that left them: supernova2's overnight run wrote 260 times under /tmp (scripts, lists, results), judged by
 // nothing (KWB-next, 2026-11-14). The user: "a write outside the project means that claude decided it didnt want to follow our rules
 // and somehow escaped". A write into another project (a folder inside another git repository: the kit, the reference library, the
 // machine catalog) is updating that project and passes; inside-the-project judges another checkout of this same repository. Anything
-// else, /tmp included, halts: Claude Code stops the session and hands it to the user (`continue: false`), and the call never runs.
+// else, /tmp included, is refused (exit 2): the call never runs, and the reason names what to do instead (`insteadOf`).
 // Writes are a write tool's path, and every file a shell command writes (lib/shell-writes.mts: redirects, heredocs, cp, mv, tee, rm,
 // touch, sed -i ...). /dev/* is no file. One more place passes, only with the owner's yes written in the layout: the build's own
 // plugin copy for a host gate (auval finds only an installed component), `guards.stayInside.pluginCopies` naming each bundle, and a
@@ -20,7 +21,7 @@ import { git, runHook, scratchProject, verdicts } from './lib/selftest.mts';
 import type { WorktreeCase } from './lib/selftest.mts';
 import { shellWrites } from './lib/shell-writes.mts';
 import type { Hook, HookEvent, VerdictRow } from './lib/types.d.mts';
-import { halt, pass } from './lib/verdict.mts';
+import { pass, refuse } from './lib/verdict.mts';
 
 const WRITERS: ReadonlySet<string> = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 const real = (p: string): string => { try { return realpathSync(p); } catch { return resolve(p); } };
@@ -89,12 +90,29 @@ export const hook: Hook = (event, ctx) => {
   const out = escapes(writtenBy(event, cwd, ctx.env), ctx.projectDir, cwd)
     .filter((p) => !isAllowedPluginCopy(p, bundles, ctx.env.HOME) && !isOwnMemoryNote(p, ctx.projectDir, ctx.env));
   if (!out.length) return pass;
-  return halt(
-    `STOPPED by stay-inside: this call writes outside the project, to ${out.slice(0, 3).join(', ')}${out.length > 3 ? ` and ${out.length - 3} more` : ''}, `
-    + 'which is no other project. Every law of the kit judges only what is inside the project, so a write elsewhere is work that left them. '
-    + 'The session stops here for the user. Scratch work belongs inside the project (an ignored folder such as scratch/), where every hook sees it.',
+  return refuse(
+    `REFUSED by stay-inside: this call writes outside the project, to ${out.slice(0, 3).join(', ')}${out.length > 3 ? ` and ${out.length - 3} more` : ''}, `
+    + 'which is no other project. Every law of the kit judges only what is inside the project, so the call did not run. '
+    + `${insteadOf(out, ctx.env)} Do not write it by another route (another command, a script, a link): that is the same escape.`,
   );
 };
+
+const TEMP = /^\/(?:private\/)?(?:tmp|var\/folders)\//;
+
+/** What to do instead, by where the write was going. The refusal teaches and the session goes on: halting it taught nothing and
+ *  left the user to restart the work (the user, 2026-11-25: "You need to receive a message that tells you what you are doing
+ *  wrong", after a plug-in install stopped the collider session). */
+export function insteadOf(paths: readonly string[], env: Record<string, string | undefined>): string {
+  if (env.HOME && paths.some((p) => PLUGIN_FOLDERS.some((f) => p.startsWith(`${join(env.HOME ?? '', f)}/`)))) {
+    return 'Installing a plug-in is the owner\'s: give the user the copy command to run as `! <command>`, or, with their yes, name each '
+      + 'bundle in .claude/layout.json `guards.stayInside.pluginCopies` and copy again.';
+  }
+  const tmp = env.TMPDIR ? resolve(env.TMPDIR) : null;
+  if (paths.some((p) => TEMP.test(p) || (tmp !== null && p.startsWith(`${tmp}/`)))) {
+    return 'Scratch files go inside the project, in an ignored folder: use out/scratch/ (or the layout\'s scratch folder) and run the same command there.';
+  }
+  return 'A file outside every project is the user\'s to write: give them the command to run as `! <command>`, and go on with the rest of the work.';
+}
 
 /** A write in the worktree, and one in the main checkout, pass: both are inside the project. */
 export const worktreeCase: WorktreeCase = {
@@ -115,13 +133,17 @@ export function selftest(): number {
   const yes = scratchProject({ '.claude/layout.json': JSON.stringify({ folders: {}, concepts: {}, ...allowed }) });
   const stopsIn = (root: string, ev: Record<string, unknown>): boolean => {
     const v = hook({ hook_event_name: 'PreToolUse', cwd: root, ...ev }, contextOf({ projectDir: root, cwd: root, env: { CLAUDE_PROJECT_DIR: root, HOME: home } }));
-    return !(v instanceof Promise) && v.code === 0 && v.stdout.includes('"continue":false');
+    return !(v instanceof Promise) && v.code === 2 && !v.stdout.includes('"continue":false');
+  };
+  const adviceIn = (root: string, ev: Record<string, unknown>): string => {
+    const v = hook({ hook_event_name: 'PreToolUse', cwd: root, ...ev }, contextOf({ projectDir: root, cwd: root, env: { CLAUDE_PROJECT_DIR: root, HOME: home } }));
+    return v instanceof Promise ? '' : v.stderr;
   };
   const plugIns = join(home, 'Library/Audio/Plug-Ins');
   const memoryOf = (h: string, root: string): string => join(h, '.claude/projects', root.replace(/[^A-Za-z0-9]/g, '-'), 'memory');
   const stops = (ev: Record<string, unknown>): boolean => {
     const v = hook({ hook_event_name: 'PreToolUse', cwd: dir, ...ev }, contextOf({ projectDir: dir, cwd: dir, env: { CLAUDE_PROJECT_DIR: dir } }));
-    return !(v instanceof Promise) && v.code === 0 && v.stdout.includes('"continue":false');
+    return !(v instanceof Promise) && v.code === 2 && !v.stdout.includes('"continue":false');
   };
   const write = (file_path: string): Record<string, unknown> => ({ tool_name: 'Write', tool_input: { file_path, content: 'x\n' } });
   const bash = (command: string): Record<string, unknown> => ({ tool_name: 'Bash', tool_input: { command } });
@@ -150,7 +172,13 @@ export function selftest(): number {
     ['a file there that is no note stops it', stopsIn(dir, write(join(memoryOf(home, dir), 'run.sh'))), true],
     ['a folder inside the memory folder stops it', stopsIn(dir, write(join(memoryOf(home, dir), 'deep/a-note.md'))), true],
     ['the rest of ~/.claude stops it', stopsIn(dir, write(join(home, '.claude/settings.json'))), true],
-    ['the runner gets the halt as JSON on exit 0', runner.status === 0 && runner.stdout.includes('"continue":false'), true],
+    ['the runner gets a refusal on exit 2, and the session goes on', runner.status === 2 && runner.stderr.includes('REFUSED by stay-inside')
+      && !runner.stdout.includes('"continue":false'), true],
+    ['a scratch write is told to use out/scratch/', adviceIn(dir, write('/tmp/stay-inside-probe.py')).includes('out/scratch/'), true],
+    ['a plug-in copy is told the owner\'s two ways', /pluginCopies[\s\S]*! <command>|! <command>[\s\S]*pluginCopies/
+      .test(adviceIn(dir, write(`${plugIns}/VST3/Unit.vst3/x`))), true],
+    ['any other write is told to hand the user the command', adviceIn(dir, write('/opt/stay-inside-probe/x.py')).includes('! <command>'), true],
+    ['every refusal says another route is the same escape', adviceIn(dir, write(join(loose, 'x.py'))).includes('another route'), true],
   ];
   return verdicts('stay-inside', rows);
 }
