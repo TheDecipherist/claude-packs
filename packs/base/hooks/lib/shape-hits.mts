@@ -25,6 +25,8 @@ const NOT_ROLES: ReadonlySet<string> = new Set([
   'CPU', 'MCU', 'ROM', 'RAM', 'EPROM', 'LCD', 'LED', 'PCB', 'IC', 'ASIC', 'FPGA', 'DAC', 'ADC',
 ]);
 // A number followed by a counted noun is a count ("slot 3 printed pages of 6"; KWB-next, supernova2).
+/** A quantifier right before the concept word: what follows is said of every instance, not of one. */
+const QUANTIFIED = /(?<![A-Za-z])(?:every|each|all|any|no)\s+$/i;
 const COUNTED = /^\s+(?:[a-z]+\s+)?(?:pages|rows|items|entries|lines|words|controls|parameters|params|values|steps|bytes|columns|characters|bits)\b/i;
 // A named constant (a macro in capitals, a kName) is a quantity whose name carries the word, never a variable holding one instance:
 // "SN2_SLOT_FILL != 0", "kStepsPerSlotStep" (KWB-next, supernova2 KF-11)
@@ -70,6 +72,8 @@ function byNumber(line: string, words: string, c: ShapeConceptData, add: Add): v
     // "rows 48" in prose: the plural with one number is a count (KWB-next); a caps label ("SLOTS 2") still names one (KWB-22)
     if (word !== word.toUpperCase() && c.plural.has(word.toLowerCase()) && !range) continue;
     if (COUNTED.test(words.slice((m.index ?? 0) + whole.length))) continue; // "3 printed pages": a count of something else
+    // "every program 0": a value every instance holds, said of all of them, names none (supernova2_monitor WB-167)
+    if (QUANTIFIED.test(words.slice(0, m.index ?? 0))) continue;
     if (range && c.count !== null) {
       const [a, b] = [Number(first), Number(last)];
       if ((a === 0 && b === c.count - 1) || (a === 1 && b === c.count)) continue; // the whole range: every instance

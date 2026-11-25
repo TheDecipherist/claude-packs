@@ -81,6 +81,12 @@ test('KF-13, KF-20: a hex address and arithmetic are not instances; the bare for
   for (const [text, want] of rows) assert.equal(shapeWrite(dir, 'src/a.cpp', text), want, text);
 });
 
+test('WB-167: a value said of every instance ("every program 0") names none; the bare form still does', () => {
+  const dir = unit();
+  const rows: readonly (readonly [string, number])[] = [['// byte 318: every program 0, the range 1..99\n', 0], ['// each program 2 or 3 in the corpus\n', 0], ['// program 3 is the loud one\n', 2], ['// then load program 2 first\n', 2]];
+  for (const [text, want] of rows) assert.equal(shapeWrite(dir, 'src/a.cpp', text), want, text);
+});
+
 test('KF-17: a sentence in a string is text; a short key is not', () => {
   const dir = unit();
   assert.equal(shapeWrite(dir, 'tests/a.cpp', 'expect (done, "and on that bank\'s first program");\n'), 0);
