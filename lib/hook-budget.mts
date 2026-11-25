@@ -29,15 +29,18 @@ export const HOOK_BUDGET: Budget = { p50: 10, p95: 50 };
 // remote's heads), 84 to 164 and 50 to 93 ms measured in supernova2_monitor on 2026-11-14, a session that commits after every step. Their
 // p50 stays the base budget; the p95 is the git child's own cost. Making the look incremental is the way to remove the rows (KWB-next).
 export const HOOK_OVERRIDES: Readonly<Record<string, Budget>> = {
-  'reuse-hint': { p50: 80, p95: 200 },
+  // every user prompt comes minutes after the last, so every call finds its worker retired and reads the index cold:
+  // 83/484 ms p50/p95 over 6 prompts in collider at load 13 on 2026-11-25 (KWB-229); the daemon-side lookup removes it
+  'reuse-hint': { p50: 100, p95: 500, worst: 1000 },
   // a push asks GitHub for its branch heads (git ls-remote): one network round trip, 400 to 550 ms (supernova2_monitor, KWB-next)
   'git-guard': { p50: 10, p95: 200, worst: 1500 },
   // its git child reads every staged path: a commit of many files took 255 ms in supernova2_monitor's W2.1 rerun (KWB-next)
   'firmware-out-of-git': { p50: 10, p95: 200, worst: 1000 },
   // 0 ms on every other call; after a build or test command (its BUILD pattern) it asks git which looks the branch
   // changed and whether each has a passing report (rev-parse, diff, log, show: a child each): 0/132 ms p50/p95 over 23
-  // calls in collider on 2026-11-25, after commands that themselves take seconds to minutes (KWB-228)
-  'look-gate': { p50: 10, p95: 200 },
+  // calls in collider on 2026-11-25, after commands that themselves take seconds to minutes (KWB-228); its worst, the
+  // same git children at load 10 to 13, 244 ms over 100 calls (KWB-229), so its worst is firmware-out-of-git's
+  'look-gate': { p50: 10, p95: 200, worst: 1000 },
   // each reads every statement of a whole new file at Pre Write: 7 ms for 155 lines at rest, 12 to 13 ms at p50 under a task's load
   // (supernova2_monitor stage 5, after the per-line and digitless-line savings, KWB-next); a new file must be read whole
   // runs every installed lesson's patterns over the written text at Pre Write: 12 ms p50 over 23 writes of whole new files in
