@@ -13,11 +13,22 @@ const C_FAMILY = /\.(?:h|hh|hpp|hxx|c|cc|cpp|cxx|mm|m|inl|ipp)$/i;
 /** One line that declares a member overriding a virtual, with no body: `void paint (juce::Graphics& g) override;`. A
     component's mouseDown, mouseDrag, mouseUp and mouseWheelMove are the toolkit's interface, declared alike in every
     class that takes the mouse; read as code they were a "copy" no function could hold (KWB-243). */
-const OVERRIDE_DECLARATION = /^[ \t]*[^\n;{}]*\)[^\n;{}()]*\boverride\b[^\n;{}()]*;[ \t]*$/gm;
+// One line's tail, from its last `)`: anything but `;{}()` around the word `override`, then `;` (KWB-248: the first form
+// ran over every line of a file from its start, 163 ms in three judges of one source file; the line is now tested only
+// where it holds the word, and the pattern anchored at its last `)`)
+const OVERRIDE_TAIL = /^\)[^;{}()]*\boverride\b[^;{}()]*;[ \t]*$/;
+
+/** Whether `line` declares a member overriding a virtual with no body. */
+function overrideDeclaration(line: string): boolean {
+  if (!line.includes('override') || line.includes('{') || line.includes('}')) return false;
+  const close = line.lastIndexOf(')');
+  return close >= 0 && !line.slice(0, close).includes(';') && OVERRIDE_TAIL.test(line.slice(close));
+}
 
 /** `text` with each override declaration's line emptied, its newline kept, so every other token keeps its line. */
 function withoutOverrideDeclarations(text: string, path: string): string {
-  return C_FAMILY.test(path) ? text.replace(OVERRIDE_DECLARATION, '') : text;
+  if (!C_FAMILY.test(path) || !text.includes('override')) return text;
+  return text.split('\n').map((line) => (overrideDeclaration(line) ? '' : line)).join('\n');
 }
 
 /** The text's tokens (comments and, in C and C++, override declarations left out) and the line each is on. */
