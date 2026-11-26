@@ -214,7 +214,10 @@ test('a halt from one hook wins over a refusal from another: exit 0, continue fa
   const dir = fixture('base');
   const refuser = join(dir, '.claude/hooks/planted-refuser.mjs');
   put(refuser, "export function hook() { return { code: 2, stdout: '', stderr: 'BLOCKED by planted-refuser\\n' }; }\n");
-  const r = spawnSync('node', [join(dir, '.claude/hooks/run-hooks.mjs'), refuser, '.claude/hooks/stay-inside.mjs'],
+  // a planted halter: stay-inside refuses and no longer halts (KWB-223), so the halt this law is about is planted too
+  const halter = join(dir, '.claude/hooks/planted-halter.mjs');
+  put(halter, "export function hook() { return { code: 0, stdout: JSON.stringify({ continue: false, stopReason: 'planted halt' }), stderr: '' }; }\n");
+  const r = spawnSync('node', [join(dir, '.claude/hooks/run-hooks.mjs'), refuser, halter],
     { input: toJson(entry(dir, '/tmp/stay-inside-runner.py')), env: { ...process.env, CLAUDE_PROJECT_DIR: dir }, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(parseJson<Record<string, unknown>>(r.stdout)?.['continue'], false);

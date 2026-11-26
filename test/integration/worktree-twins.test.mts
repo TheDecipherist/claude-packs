@@ -32,7 +32,7 @@ test('making-check judges each worktree\'s writes against its own checkout: the 
   const t = join(wt, 'transcript.jsonl');
   writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, ...turn].map((e) => toJson(e)).join('\n'));
   const r = fireAs(here, 'making-check.mjs', { hook_event_name: 'Stop', transcript_path: t, cwd: wt, session_id: `twins-${process.pid}` });
-  assert.doesNotMatch(r.stderr, /did not pass once-only/, r.stderr);
+  assert.doesNotMatch(r.stderr + r.stdout, /did not pass once-only/, r.stderr);
   assert.equal(r.status, 0, r.stderr);
   // the law still holds inside one checkout: the same function twice in one worktree is a copy
   const copy = join(wt2, 'src/dsp/SvfAgain.cpp');
@@ -40,5 +40,7 @@ test('making-check judges each worktree\'s writes against its own checkout: the 
   writeFileSync(t, [{ type: 'user', message: { content: 'go' } }, { type: 'assistant', cwd: wt2, message: { content: [bashWrite('w9', copy)] } }]
     .map((e) => toJson(e)).join('\n'));
   const again = fireAs(here, 'making-check.mjs', { hook_event_name: 'Stop', transcript_path: t, cwd: wt2, session_id: `twins-b-${process.pid}` });
-  assert.match(again.stderr, /did not pass once-only/, 'a copy inside one worktree is still refused');
+  // making-check reports and never holds a turn (KWB-234): the finding is in its report, and the exit is not 2
+  assert.match(again.stdout, /did not pass once-only/, 'a copy inside one worktree is still found');
+  assert.notEqual(again.status, 2, 'making-check never holds the turn (KWB-234)');
 });
