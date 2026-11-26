@@ -205,6 +205,17 @@ test('an event the pool made wait while the machine was past the governor\'s cei
   assert.match(said(dir).problems.join('\n'), /pool is full at Pre Bash/, 'the same waits on a machine with room are');
 });
 
+// supernova2_monitor before W10 turn 208: the log rotated inside a busy window, its busy-start gone, and doctor charged the
+// writes made at load 15 to 18 to once-only and shape-law, refusing the turn (KWB-246)
+test('a busy window whose start the log rotated away still excuses the calls before its end; the calls after it are judged (KWB-246)', () => {
+  const dir = project();
+  lines(dir, 16, { event: 'PreToolUse', tool: 'Write', hook: 'rotated-fake', ms: 178, code: 0 });
+  logHook(dir, { event: 'Load', hook: BUSY_END, ms: 0, code: 0, tool: 'machine' });
+  assert.deepEqual(said(dir).problems, [], 'calls inside a window whose start was rotated away are the machine\'s');
+  lines(dir, 16, { event: 'PreToolUse', tool: 'Write', hook: 'rotated-fake', ms: 178, code: 0 });
+  assert.match(said(dir).problems.join('\n'), /rotated-fake at Pre Write/, 'the same calls after the window are the hook\'s');
+});
+
 // supernova2_monitor after W2.8: one push's ls-remote (539 ms) turned doctor red on git-guard's worst
 test('git-guard\'s worst allows one network round trip (a push asks GitHub for its heads); a hook with no row is held to 200 ms (KWB-next)', () => {
   const dir = project();

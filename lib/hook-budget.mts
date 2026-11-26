@@ -96,7 +96,14 @@ export function outsideBuilds(entries: readonly HookLogEntry[]): { kept: HookLog
     const at = Date.parse(e.time);
     // a build's window, keyed by its pid, and a busy machine's (KWB-next: another project held the cores), keyed `machine`
     if (e.hook === BUILD_START || e.hook === BUSY_START) { open.set(e.tool, at); continue; }
-    if (e.hook === BUILD_END || e.hook === BUSY_END) { open.delete(e.tool); continue; }
+    if (e.hook === BUILD_END || e.hook === BUSY_END) {
+      // an end whose start the log rotated away (KWB-246): the calls before it, within a window's length, were inside it
+      if (!open.has(e.tool)) {
+        while (kept.length > 0 && at - Date.parse(kept[kept.length - 1]?.time ?? '') <= BUILD_WINDOW_MS) { kept.pop(); during += 1; }
+      }
+      open.delete(e.tool);
+      continue;
+    }
     for (const [pid, from] of open) if (at - from > BUILD_WINDOW_MS) open.delete(pid);
     if (open.size > 0) { during += 1; continue; }
     kept.push(e);
