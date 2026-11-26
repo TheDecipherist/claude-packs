@@ -17,6 +17,25 @@ test('tokenize leaves comments out and keeps each token\'s line', () => {
   assert.deepEqual(tokenize('# gone\nx', 'x.py').t, ['x']);
 });
 
+test('KWB-243: a C++ declaration that overrides a virtual is the interface, not a copy; a copied body still is', () => {
+  const overrides = [
+    '    void paint (juce::Graphics& g) override;',
+    '    void mouseDown (const juce::MouseEvent& e) override;',
+    '    void mouseDrag (const juce::MouseEvent& e) override;',
+    '    void mouseUp (const juce::MouseEvent& e) override;',
+    '    void mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override;',
+    '    [[nodiscard]] bool keyPressed (const juce::KeyPress& key) const noexcept override;',
+  ].join('\n');
+  const declared = tokenize(`class A : public juce::Component\n{\npublic:\n${overrides}\n};\n`, 'src/A.h');
+  assert.equal(declared.t.includes('mouseWheelMove'), false, 'an override declaration leaves no tokens');
+  assert.deepEqual(declared.t.slice(0, 3), ['class', 'A', ':'], 'the rest of the header is read');
+  // the class line, its brace, public:, six declarations: the closing brace stands on line 10
+  assert.equal(declared.l[declared.t.indexOf('}')], 10, 'the lines after it keep their numbers');
+  const defined = tokenize('void A::mouseUp (const juce::MouseEvent& e) override { held = false; }\n', 'src/A.h');
+  assert.ok(defined.t.includes('held'), 'an override with a body is code, and read');
+  assert.ok(tokenize('    void paint (Graphics& g) override;\n', 'src/a.ts').t.includes('paint'), 'only C and C++ files');
+});
+
 test('windows: one hash per start, none for fewer tokens than a window', () => {
   assert.equal(windows(['a', 'b']).length, 0);
   assert.equal(windows(Array.from({ length: WINDOW + 2 }, () => 'a')).length, 3);

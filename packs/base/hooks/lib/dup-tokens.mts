@@ -8,8 +8,21 @@ const PY = /#[^\n]*|"""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^
 
 export interface Tokens { t: string[]; l: number[] }
 
-/** The text's tokens (comments left out) and the line each is on. */
-export function tokenize(text: string, path: string): Tokens {
+/** C and C++ sources, whose override declarations are left out (KWB-243). */
+const C_FAMILY = /\.(?:h|hh|hpp|hxx|c|cc|cpp|cxx|mm|m|inl|ipp)$/i;
+/** One line that declares a member overriding a virtual, with no body: `void paint (juce::Graphics& g) override;`. A
+    component's mouseDown, mouseDrag, mouseUp and mouseWheelMove are the toolkit's interface, declared alike in every
+    class that takes the mouse; read as code they were a "copy" no function could hold (KWB-243). */
+const OVERRIDE_DECLARATION = /^[ \t]*[^\n;{}]*\)[^\n;{}()]*\boverride\b[^\n;{}()]*;[ \t]*$/gm;
+
+/** `text` with each override declaration's line emptied, its newline kept, so every other token keeps its line. */
+function withoutOverrideDeclarations(text: string, path: string): string {
+  return C_FAMILY.test(path) ? text.replace(OVERRIDE_DECLARATION, '') : text;
+}
+
+/** The text's tokens (comments and, in C and C++, override declarations left out) and the line each is on. */
+export function tokenize(source: string, path: string): Tokens {
+  const text = withoutOverrideDeclarations(source, path);
   const python = /\.py$/i.test(path);
   const re = new RegExp((python ? PY : C_LIKE).source, 'g');
   const t: string[] = [];
