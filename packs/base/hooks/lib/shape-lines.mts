@@ -33,7 +33,18 @@ export function isExampleLine(line: string): boolean {
   return OPENS.test(rest) || EXAMPLE_CELL.test(line);
 }
 
-export const named = (line: string, name: string): boolean => new RegExp(`(?<![\\w])${escapeRegExp(name)}(?![\\w])`).test(line);
+/** Each name's whole-word pattern, compiled once: named runs for every line, every name and every concept, and building the
+ *  pattern each time was the finder's largest cost (KWB-249: 43 ms of a 50 ms scan of four files). The names are a manifest's
+ *  few hundred, so the map stays small. */
+const NAME_PATTERNS = new Map<string, RegExp>();
+export const named = (line: string, name: string): boolean => {
+  let pattern = NAME_PATTERNS.get(name);
+  if (!pattern) {
+    pattern = new RegExp(`(?<![\\w])${escapeRegExp(name)}(?![\\w])`);
+    NAME_PATTERNS.set(name, pattern);
+  }
+  return pattern.test(line);
+};
 
 export function classify(line: string, concept: string | ShapeConceptData | null | undefined, shape: ConceptsOf | null | undefined): LineClass | null {
   const c = typeof concept === 'string' ? shape?.concepts?.[concept] : concept;

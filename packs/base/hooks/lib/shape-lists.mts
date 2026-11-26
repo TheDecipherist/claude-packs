@@ -11,7 +11,22 @@ export interface InstanceFinding { line: number; text: string; concept: string; 
 interface Template { tpl: string; v: number }
 
 /** A line's sentences: each ends at . ! or ? followed by a space (`a.b` in code is no end). A line with none is one sentence. */
-const SENTENCES = (line: string): string[] => line.split(/(?<=[.!?])\s+/);
+const sentencesRead = (line: string): string[] => line.split(/(?<=[.!?])\s+/);
+
+/** A line's answers that do not depend on the concept, read once a line: handLists asks them again for every concept of the
+ *  manifest (KWB-249). Bounded, emptied when full. */
+const LINE_MEMO = 20000;
+const lineMemo = new Map<string, { sentences: string[]; example: boolean }>();
+function lineOf(line: string): { sentences: string[]; example: boolean } {
+  const hit = lineMemo.get(line);
+  if (hit) return hit;
+  if (lineMemo.size >= LINE_MEMO) lineMemo.clear();
+  const read = { sentences: sentencesRead(line), example: isExampleLine(line) };
+  lineMemo.set(line, read);
+  return read;
+}
+const SENTENCES = (line: string): string[] => lineOf(line).sentences;
+const exampleLine = (line: string): boolean => lineOf(line).example;
 
 const templatesOf = (t: string): Template[] => [...t.matchAll(/(?<![\w.])\d+(?![\w.])/g)].map((m) => ({ tpl: t.slice(0, m.index) + '#' + t.slice(m.index + m[0].length), v: Number(m[0]) }));
 
@@ -36,7 +51,7 @@ export function handLists(lines: readonly string[], c: ShapeConceptData, out: In
     out.push({ line: lineNo + 1, text: (lines[lineNo] ?? '').trim(), concept: c.name, instance: 'each', why: `a hand-listed set, one line per ${c.name}: write one loop over every ${c.name}, or the generator` });
   }
   lines.forEach((l, i) => {
-    if (seen.has(`${i}|${c.name}`) || isExampleLine(l) || classify(l, c, null)) return;
+    if (seen.has(`${i}|${c.name}`) || exampleLine(l) || classify(l, c, null)) return;
     // the pieces and the concept's mention are read in one sentence: a line of code is one statement, a line of prose a paragraph,
     // and an lfo named in one sentence made a list of measured boxes in another one piece per lfo (supernova2_monitor, KWB-next)
     const run = SENTENCES(l).some((sentence) => {
