@@ -30,7 +30,8 @@ import type { Hook, HookContext, HookEvent, Look } from './lib/types.d.mts';
 import { pass, refuse, say } from './lib/verdict.mts';
 
 const TRUNKS: readonly string[] = ['main', 'master'];
-const BUILD = /\b(?:buildq|cmake\s+--build|ninja|make|npm\s+run\s+build|cargo\s+build|vite\s+build)\b/;
+// The build commands themselves: the queue (buildq) runs test runs too, and a test run changes no look (KWB-247)
+const BUILD = /\b(?:cmake\s+--build|ninja|make|npm\s+run\s+build|cargo\s+build|vite\s+build)\b/;
 const MERGE = /(?:^|[;&|\n]\s*)git\s+(?:-C\s+(\S+)\s+)?merge\s+((?:-\S+\s+)*)([\w./-]+)\s*(?=$|[;&|\n])/g;
 
 /** A look with its report path settled. */
@@ -63,13 +64,17 @@ const pathspecs = (globs: readonly string[]): string[] => globs.map((g) => `:(gl
 const looksOf = (root: string, ctx: Pick<HookContext, 'projectDir' | 'cwd'>): DeclaredLook[] =>
   (readLayout(claudeRoot(ctx.projectDir, join(root, 'x'), ctx.cwd)).looks ?? []).map((l) => ({ ...l, report: l.report ?? `build/evidence/looks/${l.name}.json` }));
 
-// The looks whose code changed between two commits.
-const touched = (root: string, env: Env, looks: readonly DeclaredLook[], from: string, to: string): DeclaredLook[] =>
-  looks.filter((l) => (git(root, env, 'diff', '--name-only', `${from}...${to}`, '--', ...pathspecs(l.code ?? [])) ?? '') !== '');
+// The looks whose code changed between two commits: one diff of every changed path, matched against each look's globs
+// (KWB-247: a diff a look cost a git call each, ten looks ten calls after every build)
+const touched = (root: string, env: Env, looks: readonly DeclaredLook[], from: string, to: string): DeclaredLook[] => {
+  const changed = (git(root, env, 'diff', '--name-only', `${from}...${to}`) ?? '').split('\n').filter(Boolean);
+  return looks.filter((l) => changed.some((path) => matchesAny(path, l.code ?? [])));
+};
 
-/** The key of a look's drawing code at `ref`: a hash of each file's mode, blob and path, so it moves only when that code does. */
-export function codeKey(root: string, env: Env, look: Look, ref: string): string {
-  const rows = (git(root, env, 'ls-tree', '-r', ref) ?? '').split('\n').filter((r) => matchesAny(r.slice(r.indexOf('\t') + 1), look.code ?? []));
+/** The key of a look's drawing code at `ref`: a hash of each file's mode, blob and path, so it moves only when that code does.
+ *  `tree` is the ref's `ls-tree -r` when the caller has it (one read serves every look: KWB-247). */
+export function codeKey(root: string, env: Env, look: Look, ref: string, tree?: string): string {
+  const rows = (tree ?? git(root, env, 'ls-tree', '-r', ref) ?? '').split('\n').filter((r) => matchesAny(r.slice(r.indexOf('\t') + 1), look.code ?? []));
   return sha256(rows.join('\n'), 16);
 }
 

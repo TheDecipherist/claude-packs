@@ -47,6 +47,8 @@ export function selftest(hook: string): number {
   git(dir, 'update-ref', 'refs/remotes/origin/main', 'main');
   const due = saidAfter('node .claude/tools/buildq.mjs ninja -C out');
   const quiet = saidAfter('git status');
+  // KWB-247: a test run through the queue is no build; the look's code did not change, and the hook's 20 git calls cost a second
+  const tested = saidAfter('node .claude/tools/quiet-test.mjs node .claude/tools/buildq.mjs ctest --preset dev -R x');
   git(dir, 'switch', '-q', 'main');
   return verdicts('look-gate', [
     ['a branch that changed look code and has no report', land('work/ui'), 2],
@@ -61,5 +63,6 @@ export function selftest(hook: string): number {
     ['merging the trunk itself is no landing', land('origin/main'), 0],
     ['after a build, the due look is named', /look-gate: this branch changed the code that draws home/.test(due) ? 1 : 0, 1],
     ['a command that is no build says nothing', quiet === '' ? 1 : 0, 1],
+    ['a test run through the build queue is no build, and says nothing (KWB-247)', tested === '' ? 1 : 0, 1],
   ]);
 }
