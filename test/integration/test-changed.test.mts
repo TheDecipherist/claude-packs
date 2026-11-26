@@ -10,7 +10,7 @@ import { basename, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { coreBudget } from '../../packs/base/hooks/lib/core-budget.mts';
-import { choose, graph } from '../../scripts/test-changed.mts';
+import { choose, graph, selftestsOf } from '../../scripts/test-changed.mts';
 import { git } from '../kit-cli.mts';
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/test-changed.mjs', import.meta.url));
@@ -183,4 +183,12 @@ const [r] = await proveHooks(process.argv[1], ['packs/base/hooks/once-only.mjs']
 console.log(r.code, r.out.split('\\n').pop());`;
   const r = spawnSync(process.execPath, ['--input-type=module', '-e', prove, KIT], { cwd: tmpdir(), env, encoding: 'utf8' });
   assert.match(r.stdout, /^0 once-only selftest: OK/, r.stdout + r.stderr);
+});
+
+// KWB-242: with a hook's .mts and its emitted .mjs both changed, the gate proved the same .mjs twice at once in one folder, and the
+// twins raced on its git index and its kept look (look-gate and git-guard failed only in the gate, each passing alone)
+test('a hook changed in both forms is proved once, by its source', () => {
+  const root = fileURLToPath(new URL('../..', import.meta.url));
+  const both = ['packs/base/hooks/git-guard.mjs', 'packs/base/hooks/git-guard.mts', 'packs/base/hooks/look-gate.mts'];
+  assert.deepEqual(selftestsOf(root, both, { importers: new Map() } as never), ['packs/base/hooks/git-guard.mts', 'packs/base/hooks/look-gate.mts']);
 });

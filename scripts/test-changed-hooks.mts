@@ -14,7 +14,15 @@ export function selftestsOf(root: string, changed: readonly string[], g: Graph =
   const isHook = (f: string): boolean => HOOK.test(f);
   const hooks = new Set(changed.filter(isHook));
   for (const c of changed.filter((f) => /^packs\/[\w-]+\/hooks\/lib\//.test(f))) for (const m of importersOf(c, g.importers)) if (isHook(m)) hooks.add(m);
-  return [...hooks].filter((h) => existsSync(join(root, h))).sort();
+  // one proof a hook: a converted hook's .mts is proved through its emitted .mjs, so the two were the same file run twice at
+  // once in one folder, and the twins raced on its git index and kept look (KWB-242: look-gate's and git-guard's selftests
+  // failed only in the gate, each passing alone)
+  const byFile = new Map<string, string>();
+  for (const h of [...hooks].filter((f) => existsSync(join(root, f))).sort()) {
+    const proved = h.replace(/\.mts$/, '.mjs');
+    if (!byFile.has(proved) || h.endsWith('.mts')) byFile.set(proved, h);
+  }
+  return [...byFile.values()].sort();
 }
 
 /** One hook's selftest: its code and what it printed. */
