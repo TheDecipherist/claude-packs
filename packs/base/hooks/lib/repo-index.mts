@@ -44,6 +44,13 @@ export const holdsNoDefs = (rel: string): boolean => HOLDS_NO_DEFS.test(rel);
 /** The keys the daemon's index is asked by: a statement's hash is its own key, an element shape's id and a definition's name are prefixed. */
 export const shapeKey = (id: string): string => `shape:${id}`;
 export const defKey = (name: string): string => `def:${name}`;
+/** A word's stem, as reuse-hint reads a prompt and a definition's name alike. */
+export const stemOf = (w: string): string => w.toLowerCase().replace(/(?:ing|ers|er|es|ed|s)$/, '');
+/** A definition name's pieces (camel case and separators split, 3 letters or more), each stemmed. */
+export const namePieces = (name: string): string[] =>
+  name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/[\s_-]+/).filter((w) => w.length >= 3).map(stemOf);
+/** The key a definition is also asked by for each piece of its name: reuse-hint asks by a prompt's stems (KWB-239). */
+export const pieceKey = (piece: string): string => `piece:${piece}`;
 
 // What a text holds, with its marked one-offs left out: all the law ever compares.
 export function shapesOfText(text: string, rel: string): TextShapes {

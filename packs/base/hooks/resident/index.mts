@@ -6,7 +6,7 @@
 // another worker, see the first. A key is looked up in a map built with the index, not found by a walk of every file per question (KWB-201).
 import { Worker } from 'node:worker_threads';
 import { dupWindows } from './dup-windows.mts';
-import { defKey, repoIndex, shapeKey, type RepoIndex } from '../lib/repo-index.mts';
+import { defKey, namePieces, pieceKey, repoIndex, shapeKey, type RepoIndex } from '../lib/repo-index.mts';
 import type { FileStatements } from '../lib/near-copies.mts';
 import type { WarmData } from './warm.mts';
 import type { Layout } from '../lib/types.d.mts';
@@ -34,7 +34,9 @@ export const mayHaveWritten = (tool: string | undefined): boolean => tool !== un
 function keysOf(index: RepoIndex): Map<string, string[]> {
   const by = new Map<string, string[]>();
   for (const [file, entry] of Object.entries(index)) {
-    const mine = new Set<string>([...entry.st.map(([h]) => h), ...entry.shapes.map(([id]) => shapeKey(id)), ...entry.defs.map(([name]) => defKey(name))]);
+    const pieces = entry.defs.flatMap(([name]) => namePieces(name).map(pieceKey));
+    const mine = new Set<string>([...entry.st.map(([h]) => h), ...entry.shapes.map(([id]) => shapeKey(id)),
+      ...entry.defs.map(([name]) => defKey(name)), ...pieces]);
     for (const key of mine) { const files = by.get(key); if (files) files.push(file); else by.set(key, [file]); }
   }
   return by;

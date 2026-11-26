@@ -6,6 +6,9 @@ import { fingerprint } from '../../../packs/base/hooks/lib/near-copies.mts';
 import { tmpKeyed } from '../../../packs/base/hooks/lib/hash.mts';
 import { put, scratchDir } from '../../../packs/base/hooks/lib/files.mts';
 import { decodeReply, encodeRequest, PROTOCOL } from '../../../packs/base/hooks/lib/proxy-wire.mts';
+import { pieceKey } from '../../../packs/base/hooks/lib/repo-index.mts';
+import type { HookContext } from '../../../packs/base/hooks/lib/types.d.mts';
+import { hook as reuseHint } from '../../../packs/base/hooks/reuse-hint.mts';
 import { residentIndex, mayHaveWritten } from '../../../packs/base/hooks/resident/index.mts';
 import { daemonLog, takeStartLock, releaseStartLock, watch } from '../../../packs/base/hooks/resident/lifecycle.mts';
 import { startPool } from '../../../packs/base/hooks/resident/pool.mts';
@@ -156,6 +159,24 @@ test('the index: built on the first query, the files holding a statement, stale 
   assert.deepEqual(index.candidates(hashes).map((f) => f.file).sort(), ['src/a.ts', 'src/b.ts']);
   assert.deepEqual(index.candidates(['nothing']), []);
   assert.deepEqual(['Write', 'Edit', 'Bash', 'Read'].map(mayHaveWritten), [true, true, true, false]);
+});
+
+test('the index answers a definition by each piece of its name, and reuse-hint asks it by the prompt\'s stems (KWB-239)', async () => {
+  const dir = scratchDir('resident-pieces-');
+  put(join(dir, 'src/dates.ts'), 'export function formatDateRange(a, b) {\n  return a;\n}\n');
+  put(join(dir, 'src/price.ts'), 'export function parsePriceTable(t) {\n  return t;\n}\n');
+  const index = residentIndex(dir, () => ({ folders: {}, concepts: {} }));
+  assert.deepEqual(index.candidates([pieceKey('range')]).map((f) => f.file), ['src/dates.ts']);
+  assert.deepEqual(index.candidates([pieceKey('price')]).map((f) => f.file), ['src/price.ts']);
+  const asked: string[][] = [];
+  const ctx = {
+    projectDir: dir, cwd: dir, env: {}, sessionPid: 0, now: 0, layout: { folders: {}, concepts: {} }, log: () => {},
+    candidates: async (keys: readonly string[]) => { asked.push([...keys]); return index.candidates(keys); },
+  } as unknown as HookContext;
+  const said = await reuseHint({ hook_event_name: 'UserPromptSubmit', prompt: 'format the date range', cwd: dir }, ctx);
+  assert.match(said.stdout, /formatDateRange \(src\/dates\.ts:1\)/);
+  assert.doesNotMatch(said.stdout, /parsePriceTable/);
+  assert.ok(asked.length === 1 && asked[0]?.includes(pieceKey('format')), `asked by the prompt's stems: ${JSON.stringify(asked)}`);
 });
 
 test('the index warms in a worker thread of its own: the main thread is free meanwhile, and the kept index is there when it ends', async () => {

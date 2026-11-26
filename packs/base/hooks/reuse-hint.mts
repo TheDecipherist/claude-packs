@@ -8,7 +8,8 @@ import { TESTS, skippedBy } from './lib/elements.mts';
 import { isMain, runAsHook } from './lib/hook-log.mts';
 import { readLayout } from './lib/layout.mts';
 import { checkoutRoot, claudeRoot } from './lib/project.mts';
-import { repoIndex } from './lib/repo-index.mts';
+import { indexOfKeys, without } from './lib/asked-index.mts';
+import { namePieces, pieceKey, repoIndex, stemOf } from './lib/repo-index.mts';
 import type { RepoIndex } from './lib/repo-index.mts';
 import { runHook, scratchProject, snapshot, verdicts, writtenSince } from './lib/selftest.mts';
 import type { Hook } from './lib/types.d.mts';
@@ -19,8 +20,6 @@ const COMMON: ReadonlySet<string> = new Set(`this that with from have make need 
   some just like been were does each every code file files function method class value data line test tests work works using used change update write read
   please thing things sure right added adding`.split(/\s+/));
 
-const stem = (w: string): string => w.toLowerCase().replace(/(?:ing|ers|er|es|ed|s)$/, '');
-const piecesOf = (name: string): string[] => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/[\s_-]+/).filter((w) => w.length >= 3).map(stem);
 const NEAR = 5;   // the pieces of a name lie within this many words of each other: scattered over a long prompt they are chance
 const LONG = 150; // words: past this a prompt is a document, and any name can be spelled out of it
 
@@ -29,7 +28,7 @@ function placesOf(prompt: string): Map<string, number[]> {
   const places = new Map<string, number[]>();
   (prompt.match(/[A-Za-z]+/g) ?? []).forEach((w, i) => {
     if (w.length < 4 || COMMON.has(w.toLowerCase())) return;
-    const k = stem(w);
+    const k = stemOf(w);
     places.set(k, [...(places.get(k) ?? []), i]);
   });
   return places;
@@ -48,17 +47,28 @@ export function matches(prompt: string, index: RepoIndex): Match[] {
   const out: Match[] = [];
   for (const [file, e] of Object.entries(index)) {
     for (const [name, line] of e.defs) {
-      const pieces = piecesOf(name);
+      const pieces = namePieces(name);
       if (pieces.length >= 2 && closeTogether(pieces, places)) out.push({ name, at: `${file}:${line}`, size: pieces.length });
     }
   }
   return out.sort((a, b) => b.size - a.size).slice(0, SHOWN);
 }
 
-export const hook: Hook = (event, ctx) => {
+// The resident runner answers by each stem of the prompt (a name's pieces are its keys too): the files whose names could match, never the whole
+// index read cold on each prompt (83/484 ms at load 13 in collider, KWB-239). A prompt in a worktree, or with no daemon, reads the checkout's own.
+async function indexFor(prompt: string, root: string, skip: readonly string[], layout: ReturnType<typeof readLayout>,
+  ctx: Parameters<Hook>[1]): Promise<RepoIndex> {
+  const daemonTree = root === checkoutRoot(ctx.projectDir, null, ctx.cwd);
+  const asked = daemonTree ? await indexOfKeys(ctx, [...placesOf(prompt).keys()].map(pieceKey)) : null;
+  return asked ? without(asked, skip) : repoIndex(root, skip, layout, ctx.env);
+}
+
+export const hook: Hook = async (event, ctx) => {
   const at = `${event.cwd ?? ctx.cwd}/x`;
   const layout = readLayout(claudeRoot(ctx.projectDir, at, ctx.cwd));
-  const found = matches(event.prompt ?? '', repoIndex(checkoutRoot(ctx.projectDir, at, ctx.cwd), [...TESTS, ...skippedBy(layout)], layout, ctx.env));
+  const prompt = event.prompt ?? '';
+  const root = checkoutRoot(ctx.projectDir, at, ctx.cwd);
+  const found = matches(prompt, await indexFor(prompt, root, [...TESTS, ...skippedBy(layout)], layout, ctx));
   return found.length ? say(`Already in this repo, call it rather than write it again:\n${found.map((f) => `- ${f.name} (${f.at})`).join('\n')}\n`) : pass;
 };
 

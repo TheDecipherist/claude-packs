@@ -32,8 +32,14 @@ export async function askedIndex(event: HookEvent, ctx: HookContext): Promise<Re
   if (!ctx.candidates) return null;
   const keys = keysOfWrites(event, ctx);
   if (keys === null) return null;
+  return indexOfKeys(ctx, [...keys]);
+}
+
+/** The daemon's answer for these keys, as an index of the files that hold one; null with no daemon to ask (the one-shot runner). */
+export async function indexOfKeys(ctx: HookContext, keys: readonly string[]): Promise<RepoIndex | null> {
+  if (!ctx.candidates) return null;
   const index: RepoIndex = {};
-  if (keys.size === 0) return index;
+  if (keys.length === 0) return index;
   for (const f of await ctx.candidates([...keys])) {
     index[f.file] = {
       m: 0, s: 0, st: [...f.st],
