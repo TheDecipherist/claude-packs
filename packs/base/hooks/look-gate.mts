@@ -79,8 +79,8 @@ export function codeKey(root: string, env: Env, look: Look, ref: string, tree?: 
 }
 
 // Why a look may not land on `ref`, or null: its report must be on the branch, pass, and judge the code's last change.
-function verdictOf(root: string, env: Env, look: DeclaredLook, ref: string): string | null {
-  const last = git(root, env, 'log', '-1', '--format=%H', ref, '--', ...pathspecs(look.code ?? []));
+// `tree` is the ref's `ls-tree -r`, read once for every look (KWB-250: three git children a look after every build).
+function verdictOf(root: string, env: Env, look: DeclaredLook, ref: string, tree?: string): string | null {
   const text = git(root, env, 'show', `${ref}:${look.report}`);
   if (text === null) return `no look report at ${look.report} on ${ref}`;
   const report = parseJson<Report>(text);
@@ -89,9 +89,11 @@ function verdictOf(root: string, env: Env, look: DeclaredLook, ref: string): str
   const held = heldOutFault(report.held_out, look.heldOutMax ?? HELD_OUT_MAX);
   if (held) return `${look.report} passes only by holding rows out: ${held}`;
   if (report.code !== undefined) {
-    const key = codeKey(root, env, look, ref);
+    const key = codeKey(root, env, look, ref, tree);
     return report.code === key ? null : `${look.report} judged code ${String(report.code).slice(0, 8)}, but the look's code on ${ref} is ${key.slice(0, 8)}`;
   }
+  // only a report in the old form (a commit, no code key) asks git when the look's code last changed
+  const last = git(root, env, 'log', '-1', '--format=%H', ref, '--', ...pathspecs(look.code ?? []));
   if (!report.commit || git(root, env, 'merge-base', '--is-ancestor', last ?? '', String(report.commit)) === null) {
     return `${look.report} judged ${String(report.commit ?? 'no commit').slice(0, 8)}, before the look's code last changed in ${String(last).slice(0, 8)}`;
   }
@@ -120,7 +122,9 @@ function afterBuild(event: HookEvent, ctx: HookContext): ReturnType<Hook> {
   const root = checkoutRoot(ctx.projectDir, join(event.cwd ?? ctx.cwd, 'x'), ctx.cwd);
   const trunk = TRUNKS.map((t) => `origin/${t}`).find((t) => refExistsIn(root, ctx.env, t));
   if (!trunk) return pass;
-  const due = touched(root, ctx.env, looksOf(root, ctx), trunk, 'HEAD').filter((l) => verdictOf(root, ctx.env, l, 'HEAD') !== null);
+  const changed = touched(root, ctx.env, looksOf(root, ctx), trunk, 'HEAD');
+  const tree = changed.length ? git(root, ctx.env, 'ls-tree', '-r', 'HEAD') ?? undefined : undefined;
+  const due = changed.filter((l) => verdictOf(root, ctx.env, l, 'HEAD', tree) !== null);
   if (!due.length) return pass;
   const names = due.map((l) => `${l.name} (${l.reference})`).join(', ');
   return say({ hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext:
