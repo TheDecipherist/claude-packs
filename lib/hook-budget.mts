@@ -85,6 +85,8 @@ export function warmCalls(entries: readonly HookLogEntry[]): HookLogEntry[] {
 
 /** A build that never logged its end (killed) holds its window this long at most. */
 export const BUILD_WINDOW_MS = 60 * 60_000;
+/** The key of the machine's busy window (resident/event busyMark writes its lines with this tool). */
+const MACHINE = 'machine';
 
 /** The entries made while no build of buildq ran (its build-start and build-end lines, keyed by the build's pid), and how many
  *  were left out: a build that holds the cores slows every hook beside it, which says nothing of the hook's own work. */
@@ -104,7 +106,10 @@ export function outsideBuilds(entries: readonly HookLogEntry[]): { kept: HookLog
       open.delete(e.tool);
       continue;
     }
-    for (const [pid, from] of open) if (at - from > BUILD_WINDOW_MS) open.delete(pid);
+    // a new daemon has no busy state: it marks the window again if the machine is still past its budget (resident/event busyMark)
+    if (e.hook === DAEMON_START) open.delete(MACHINE);
+    // a killed build's window ends after an hour; the machine's holds until its end (KWB-251: a busy evening outlasts an hour)
+    for (const [pid, from] of open) if (pid !== MACHINE && at - from > BUILD_WINDOW_MS) open.delete(pid);
     if (open.size > 0) { during += 1; continue; }
     kept.push(e);
   }
