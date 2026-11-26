@@ -1,14 +1,7 @@
 ---
+# concepts: engine
 paths:
-  - "**/*.cpp"
-  - "**/*.cc"
-  - "**/*.h"
-  - "**/*.hpp"
-  - "**/*.mm"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.js"
-  - "**/*.mjs"
+  - "placeholder"
 ---
 
 # What cannot be reached is said, never clamped

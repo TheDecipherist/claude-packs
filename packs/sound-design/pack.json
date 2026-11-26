@@ -3,21 +3,68 @@
   "version": "1.0.0",
   "description": "Sound that is proved by measuring audio: algorithms are data, neutral is exact, the meter is suspected before the engine, and tests sit off the easy point.",
   "type": "stock",
-  "fits": ["cpp", "synth-creator"],
+  "fits": [
+    "cpp",
+    "synth-creator"
+  ],
   "tests": {
-    "tools/bank-coverage.mts": ["test/tools/sound-design/bank-coverage.test.mts"],
-    "tools/lib/bank-measures.mts": ["test/tools/sound-design/prove-a-bank.test.mts"],
-    "tools/prove-a-bank.mts": ["test/tools/sound-design/prove-a-bank.test.mts"],
-    "tools/reset-census.mts": ["test/tools/sound-design/reset-census.test.mts"],
-    "tools/vst3host/build.sh": ["test/hooks/sound-design/sound-design-pack.test.mts"],
-    "tools/vst3host/host_events.h": ["test/hooks/sound-design/sound-design-pack.test.mts"],
-    "tools/vst3host/options.h": ["test/hooks/sound-design/sound-design-pack.test.mts"],
-    "tools/vst3host/render.cpp": ["test/hooks/sound-design/sound-design-pack.test.mts", "test/tools/sound-design/prove-a-bank.test.mts"],
-    "tools/vst3host/session.h": ["test/hooks/sound-design/sound-design-pack.test.mts"]
+    "tools/bank-coverage.mts": [
+      "test/tools/sound-design/bank-coverage.test.mts"
+    ],
+    "tools/lib/bank-measures.mts": [
+      "test/tools/sound-design/prove-a-bank.test.mts"
+    ],
+    "tools/prove-a-bank.mts": [
+      "test/tools/sound-design/prove-a-bank.test.mts"
+    ],
+    "tools/reset-census.mts": [
+      "test/tools/sound-design/reset-census.test.mts"
+    ],
+    "tools/vst3host/build.sh": [
+      "test/hooks/sound-design/sound-design-pack.test.mts"
+    ],
+    "tools/vst3host/host_events.h": [
+      "test/hooks/sound-design/sound-design-pack.test.mts"
+    ],
+    "tools/vst3host/options.h": [
+      "test/hooks/sound-design/sound-design-pack.test.mts"
+    ],
+    "tools/vst3host/render.cpp": [
+      "test/hooks/sound-design/sound-design-pack.test.mts",
+      "test/tools/sound-design/prove-a-bank.test.mts"
+    ],
+    "tools/vst3host/session.h": [
+      "test/hooks/sound-design/sound-design-pack.test.mts"
+    ]
   },
   "concepts": {
-    "engine-source": ["**/*.cpp", "**/*.cc", "**/*.h", "**/*.hpp", "**/*.mm", "**/*.py", "**/*.ts", "**/*.js", "**/*.mjs"],
-    "preset-files": ["data/factory.csv", "data/params.csv", "presets/**", "banks/**", "**/*[Pp]reset*", "**/*[Bb]ank*"]
+    "engine-source": [
+      "**/*.cpp",
+      "**/*.cc",
+      "**/*.h",
+      "**/*.hpp",
+      "**/*.mm",
+      "**/*.py",
+      "**/*.ts",
+      "**/*.js",
+      "**/*.mjs"
+    ],
+    "preset-files": [
+      "data/factory.csv",
+      "data/params.csv",
+      "presets/**",
+      "banks/**",
+      "**/*[Pp]reset*",
+      "**/*[Bb]ank*"
+    ],
+    "engine": [
+      "audio",
+      "dsp",
+      "engines",
+      "params",
+      "app",
+      "tests"
+    ]
   },
   "folders": {},
   "hooks": {},
@@ -35,7 +82,9 @@
     "dsp",
     "sound-design"
   ],
-  "requires": ["audio-core"],
+  "requires": [
+    "audio-core"
+  ],
   "engines": {
     "claude-packs": ">=0.28.0"
   }

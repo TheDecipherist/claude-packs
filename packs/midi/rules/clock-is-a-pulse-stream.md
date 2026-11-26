@@ -1,14 +1,7 @@
 ---
+# concepts: engine
 paths:
-  - "**/*.cpp"
-  - "**/*.cc"
-  - "**/*.h"
-  - "**/*.hpp"
-  - "**/*.mm"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.js"
-  - "**/*.mjs"
+  - "placeholder"
 ---
 
 # MIDI clock is a pulse stream with no channel and no tempo message
@@ -28,3 +21,6 @@ Never do:
 - Believe a factor of two at once. Suspect the meter first, then a duplicate clock or a pre-MIDI rate, then the divisions.
 - Assume a rate from a brand. Read the machine's manual, and its jack: a pulse count and a step trigger need different models.
 </constraints>
+
+## Check
+Lesson checks for this rule: `active-sensing-no-pulse`, `midi-realtime-first`, `sysex-survives-realtime`.

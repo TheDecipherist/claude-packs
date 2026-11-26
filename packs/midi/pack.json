@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. Nine units once shipped deaf to the transport with every test green.",
   "type": "stock",
-  "fits": ["cpp", "synth-creator"],
+  "fits": [
+    "cpp",
+    "synth-creator"
+  ],
   "requires": [],
   "tests": {
     "tools/open-default-probe.mts": [
@@ -11,7 +14,25 @@
     ]
   },
   "concepts": {
-    "engine-source": ["**/*.cpp", "**/*.cc", "**/*.h", "**/*.hpp", "**/*.mm", "**/*.py", "**/*.ts", "**/*.js", "**/*.mjs"]
+    "engine-source": [
+      "**/*.cpp",
+      "**/*.cc",
+      "**/*.h",
+      "**/*.hpp",
+      "**/*.mm",
+      "**/*.py",
+      "**/*.ts",
+      "**/*.js",
+      "**/*.mjs"
+    ],
+    "engine": [
+      "audio",
+      "dsp",
+      "engines",
+      "params",
+      "app",
+      "tests"
+    ]
   },
   "folders": {},
   "hooks": {},
