@@ -1,6 +1,6 @@
 ---
 name: join-the-rack
-description: Use when a plugin's standalone has built and is ready for the owner to open or test, when can-the-user-open-it passes, or when a unit's row on the owner's rack page is missing, out of date or opens the wrong app.
+description: Use when a plugin's standalone is built and ready for the owner to open, when can-the-user-open-it passes, or when a unit's rack row is missing, out of date or opens the wrong app.
 ---
 
 # Put the ready standalone on the owner's rack (one job: the rack opens what the user would launch, described truly)
