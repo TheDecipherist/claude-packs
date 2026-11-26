@@ -16,6 +16,22 @@ test('two modules that share only their imports are no copy (KWB-176)', () => {
   assert.deepEqual(repoClones(dir, { env: process.env }).clones, []);
 });
 
+test('two C++ headers that share only the toolkit\'s override declarations are no copy for the repo scan (KWB-245)', () => {
+  const dir = scratchDir('dup-');
+  const overrides = [
+    '    void paint (juce::Graphics& g) override;',
+    '    void mouseDown (const juce::MouseEvent& e) override;',
+    '    void mouseDrag (const juce::MouseEvent& e) override;',
+    '    void mouseUp (const juce::MouseEvent& e) override;',
+    '    void mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override;',
+  ].join('\n');
+  const header = (name: string, member: string): string =>
+    `#pragma once\nclass ${name} final : public juce::Component\n{\npublic:\n${overrides}\n\nprivate:\n    int ${member} = 0;\n};\n`;
+  put(join(dir, 'Grid.h'), header('Grid', 'chosen'));
+  put(join(dir, 'Curve.h'), header('Curve', 'held'));
+  assert.deepEqual(repoClones(dir, { env: process.env }).clones, []);
+});
+
 test('two modules that share a function body are still a copy', () => {
   const dir = scratchDir('dup-');
   put(join(dir, 'a.mjs'), `export function one(values, weights, offsets) {\n  let total = 0;\n${BODY}  return total;\n}\n`);

@@ -56,9 +56,12 @@ export const LIMITS = { tokens: 50, lines: 6, gap: 2 };
 export const SOURCE: RegExp = extPattern('c', 'cpp', 'objc', 'python', 'js', 'ts', 'rust');
 const FORMATS = 'c,c-header,cpp,cpp-header,objectivec,python,javascript,jsx,typescript,tsx,rust';
 // Import statements are never a copy: they cannot be made one function (KWB-176; languages.mjs's notCode leaves them out too).
+// Nor is a C++ declaration that overrides a virtual with no body: every component that takes the mouse declares the
+// toolkit's same five (KWB-245; dup-tokens.mts leaves them out of once-only's index the same way, KWB-243).
 // jscpd takes the patterns comma-separated, so none holds a comma.
 const IMPORT_LINES = [String.raw`import\s[^;]*;`, String.raw`export\s[^;]*\sfrom\s[^;]*;`, String.raw`#include\s.*`,
-  String.raw`(from\s+\S+\s+)?import\s.*`, String.raw`use\s[^;]*;`].join(',');
+  String.raw`(from\s+\S+\s+)?import\s.*`, String.raw`use\s[^;]*;`,
+  String.raw`[^;{}()\n]*\([^;{}\n]*\)[^;{}()\n]*\boverride\s*;`].join(',');
 // A header and a source are one language: a function copied from a .cpp into a .h is a copy (jscpd compares within a format otherwise).
 const CROSS = 'c,c-header,cpp,cpp-header,objectivec;javascript,jsx,typescript,tsx';
 // Generated files, resources and vendored or built code are never judged (and never a match).
