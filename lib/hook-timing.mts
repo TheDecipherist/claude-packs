@@ -6,7 +6,7 @@
 // The runner's own line (run-hooks: one process for a settings entry, node's start-up included) is judged the same way.
 import { statSync } from 'node:fs';
 import { join } from 'node:path';
-import { BUILD_END, BUILD_START, BUSY_END, BUSY_START, DAEMON_START, readHookLog } from '../packs/base/hooks/lib/hook-log.mts';
+import { BUILD_END, BUILD_START, BUSY_END, BUSY_START, DAEMON_START, readHookLog, type HookLogEntry } from '../packs/base/hooks/lib/hook-log.mts';
 import { readJson } from '../packs/base/hooks/lib/json.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 
@@ -36,7 +36,9 @@ export function hookTimes(projectDir: string, last: number = LAST, since = 0): H
   const by = new Map<string, number[]>();
   // the daemon's start and buildq's build window lines mark times, they are no hook (a build-end once read "13/1022" here)
   const MARKS = new Set([DAEMON_START, BUILD_START, BUILD_END, BUSY_START, BUSY_END]);
-  const calls = readHookLog(projectDir).filter((x) => !MARKS.has(x.hook));
+  // a call inside a build's or a busy machine's window says nothing of the hook's own cost: left out, as the event budgets do
+  // (KWB-254: making-check ran 611 and 578 ms while a build held the cores, and this check alone turned doctor red)
+  const calls = outsideBuilds(readHookLog(projectDir)).kept.filter((x) => !MARKS.has(x.hook));
   for (const r of calls.filter((x) => since === 0 || Date.parse(x.time) >= since)) {
     const list = by.get(r.hook) ?? [];
     list.push(r.ms);
@@ -61,4 +63,37 @@ export function timingProblems(projectDir: string, log: Logger = console.log): s
   return times.filter((t) => t.calls >= MIN_CALLS && t.median > SLOW_MS).map((t) =>
     `${t.hook}: median ${t.median} ms over its last ${t.calls} calls (worst ${t.worst} ms), over ${SLOW_MS} ms: find what it does on every call ` +
     '(a scan of the repo, a child process, a whole transcript read) and make it incremental');
+}
+
+/** A build that never logged its end (killed) holds its window this long at most. */
+export const BUILD_WINDOW_MS = 60 * 60_000;
+/** The key of the machine's busy window (resident/event busyMark writes its lines with this tool). */
+const MACHINE = 'machine';
+
+/** The entries made while no build of buildq ran (its build-start and build-end lines, keyed by the build's pid), and how many
+ *  were left out: a build that holds the cores slows every hook beside it, which says nothing of the hook's own work. */
+export function outsideBuilds(entries: readonly HookLogEntry[]): { kept: HookLogEntry[]; during: number } {
+  const open = new Map<string, number>();
+  const kept: HookLogEntry[] = [];
+  let during = 0;
+  for (const e of entries) {
+    const at = Date.parse(e.time);
+    // a build's window, keyed by its pid, and a busy machine's (KWB-next: another project held the cores), keyed `machine`
+    if (e.hook === BUILD_START || e.hook === BUSY_START) { open.set(e.tool, at); continue; }
+    if (e.hook === BUILD_END || e.hook === BUSY_END) {
+      // an end whose start the log rotated away (KWB-246): the calls before it, within a window's length, were inside it
+      if (!open.has(e.tool)) {
+        while (kept.length > 0 && at - Date.parse(kept[kept.length - 1]?.time ?? '') <= BUILD_WINDOW_MS) { kept.pop(); during += 1; }
+      }
+      open.delete(e.tool);
+      continue;
+    }
+    // a new daemon has no busy state: it marks the window again if the machine is still past its budget (resident/event busyMark)
+    if (e.hook === DAEMON_START) open.delete(MACHINE);
+    // a killed build's window ends after an hour; the machine's holds until its end (KWB-251: a busy evening outlasts an hour)
+    for (const [pid, from] of open) if (pid !== MACHINE && at - from > BUILD_WINDOW_MS) open.delete(pid);
+    if (open.size > 0) { during += 1; continue; }
+    kept.push(e);
+  }
+  return { kept, during };
 }

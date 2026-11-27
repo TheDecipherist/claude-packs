@@ -52,3 +52,15 @@ test('timingProblems judges only the calls since the current install: a hook mad
   put(join(dir, '.claude/hooks.log'), [...old, ...slowAgain].join('\n'));
   assert.match(timingProblems(dir, () => undefined)[0] ?? '', /^judge: median 950 ms over its last 3 calls/);
 });
+
+// supernova2_monitor, 2026-11-27: the machine went busy (a build beside a task) and stayed so; making-check's two Stop calls in
+// that window ran 611 and 578 ms, and doctor's median check turned red and stopped the next task, though the event budgets left
+// the same calls out (KWB-251). A busy window, or a build's, says nothing of a hook's own cost (KWB-254).
+test('hookTimes leaves out the calls made inside a build\'s or a busy machine\'s window, as the event budgets do (KWB-254)', () => {
+  const dir = scratchDir('timing-busy-');
+  const at = (s: number, hook: string, ms: number, tool = 'Write'): string =>
+    `2026-01-01T00:00:${String(s).padStart(2, '0')}Z\tStop\t${hook}\t${ms}\t0\t${tool}`;
+  put(join(dir, '.claude/hooks.log'), [at(1, 'mc', 290), '2026-01-01T00:00:02Z\tLoad\tbusy-start\t0\t0\tmachine',
+    at(3, 'mc', 611), at(4, 'mc', 578), '2026-01-01T00:00:05Z\tLoad\tbusy-end\t0\t0\tmachine', at(6, 'mc', 293)].join('\n'));
+  assert.deepEqual(hookTimes(dir, 5), [{ hook: 'mc', calls: 2, median: 292, worst: 293 }]);
+});

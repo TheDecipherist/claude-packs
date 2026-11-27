@@ -8,7 +8,7 @@ import { BUILD_END, BUILD_START, BUSY_END, BUSY_START, DAEMON_START, readHookLog
 import { readHookTable } from '../packs/base/hooks/lib/hook-table.mts';
 import type { Logger } from '../packs/base/hooks/lib/types.d.mts';
 import { SPREAD } from '../packs/base/hooks/resident/options.mts';
-import { installedAt, median } from './hook-timing.mts';
+import { installedAt, median, outsideBuilds } from './hook-timing.mts';
 
 export const EVENT_CLASSES = ['Pre Bash', 'Pre Write', 'Post', 'Prompt', 'SessionStart', 'Stop'] as const;
 export type EventClass = (typeof EVENT_CLASSES)[number];
@@ -83,38 +83,7 @@ export function warmCalls(entries: readonly HookLogEntry[]): HookLogEntry[] {
   return warm;
 }
 
-/** A build that never logged its end (killed) holds its window this long at most. */
-export const BUILD_WINDOW_MS = 60 * 60_000;
-/** The key of the machine's busy window (resident/event busyMark writes its lines with this tool). */
-const MACHINE = 'machine';
-
-/** The entries made while no build of buildq ran (its build-start and build-end lines, keyed by the build's pid), and how many
- *  were left out: a build that holds the cores slows every hook beside it, which says nothing of the hook's own work. */
-export function outsideBuilds(entries: readonly HookLogEntry[]): { kept: HookLogEntry[]; during: number } {
-  const open = new Map<string, number>();
-  const kept: HookLogEntry[] = [];
-  let during = 0;
-  for (const e of entries) {
-    const at = Date.parse(e.time);
-    // a build's window, keyed by its pid, and a busy machine's (KWB-next: another project held the cores), keyed `machine`
-    if (e.hook === BUILD_START || e.hook === BUSY_START) { open.set(e.tool, at); continue; }
-    if (e.hook === BUILD_END || e.hook === BUSY_END) {
-      // an end whose start the log rotated away (KWB-246): the calls before it, within a window's length, were inside it
-      if (!open.has(e.tool)) {
-        while (kept.length > 0 && at - Date.parse(kept[kept.length - 1]?.time ?? '') <= BUILD_WINDOW_MS) { kept.pop(); during += 1; }
-      }
-      open.delete(e.tool);
-      continue;
-    }
-    // a new daemon has no busy state: it marks the window again if the machine is still past its budget (resident/event busyMark)
-    if (e.hook === DAEMON_START) open.delete(MACHINE);
-    // a killed build's window ends after an hour; the machine's holds until its end (KWB-251: a busy evening outlasts an hour)
-    for (const [pid, from] of open) if (pid !== MACHINE && at - from > BUILD_WINDOW_MS) open.delete(pid);
-    if (open.size > 0) { during += 1; continue; }
-    kept.push(e);
-  }
-  return { kept, during };
-}
+export { BUILD_WINDOW_MS, outsideBuilds } from './hook-timing.mts';
 
 const WRITES = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 const NOT_HOOKS = new Set(['event', 'proxy', 'run-hooks']);
