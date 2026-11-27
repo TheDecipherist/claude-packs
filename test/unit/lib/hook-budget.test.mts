@@ -230,6 +230,18 @@ test('a busy machine\'s window holds past an hour until its end or a daemon star
   assert.match(said(dir).problems.join('\n'), /^slow-fake at Pre Bash/, 'a daemon start forgets the window: the new daemon marks it again if the machine is still busy');
 });
 
+// supernova2_monitor before W10 turn 221: busy-start at 00:19:52 UTC, the live log rotated at 00:43 and the window still open at 01:09;
+// doctor read the live log alone and charged once-only, shape-law and template-law for the task's writes inside it (KWB-252)
+test('a busy window whose start went to a rotated log, still open, excuses the live log\'s calls (KWB-252)', () => {
+  const dir = project();
+  const at = (msAgo: number): string => new Date(Date.now() - msAgo).toISOString();
+  const row = (time: string, event: string, hook: string, ms: number, tool: string): string => `${time}\t${event}\t${hook}\t${ms}\t0\t${tool}\n`;
+  ensureDir(join(dir, '.claude', 'logs'));
+  writeFileSync(join(dir, '.claude', 'logs', 'hooks-2026-11-27T00-43-05.log'), row(at(3_600_000), 'Load', BUSY_START, 0, 'machine'));
+  writeFileSync(join(dir, '.claude', 'hooks.log'), Array.from({ length: 20 }, () => row(at(1000), 'PreToolUse', 'slow-fake', 300, 'Bash')).join(''));
+  assert.deepEqual(said(dir).problems, [], 'the window opened in the rotated log is still open');
+});
+
 // supernova2_monitor after W2.8: one push's ls-remote (539 ms) turned doctor red on git-guard's worst
 test('git-guard\'s worst allows one network round trip (a push asks GitHub for its heads); a hook with no row is held to 200 ms (KWB-next)', () => {
   const dir = project();

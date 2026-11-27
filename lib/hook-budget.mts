@@ -262,7 +262,7 @@ export function budgetProblems(projectDir: string, log: Logger = console.log): s
   const named = table === null ? null : new Set(table.filter((r) => !r.async && !r.asyncRewake).map((r) => r.hook));
   // the calls since the current install only: an update changes the hooks, and the calls before it were another install's (KWB-196)
   const since = installedAt(projectDir);
-  const current = readHookLog(projectDir).filter((e) => Date.parse(e.time) >= since);
+  const current = readHookLog(projectDir, { since }).filter((e) => Date.parse(e.time) >= since);
   const { kept, during } = outsideBuilds(current);
   if (during > 0) log(`  note: ${during} hook line(s) made while a build ran are not judged (buildq's build-start and build-end)`);
   const times = classTimes(warmCalls(kept).filter((e) => named === null || NOT_HOOKS.has(e.hook) || named.has(e.hook)));

@@ -117,10 +117,22 @@ function rotatedHookLogs(root: string): string[] {
   try { return readdirSync(join(root, LOGS)).filter((f) => /^hooks-.*\.log$/.test(f)).sort().map((f) => join(root, LOGS, f)); } catch { return []; }
 }
 
+/** The rotated logs' texts, oldest first, back to the newest one that begins before `since`: a window opened in a log that rotated is
+ *  still open in the live one (KWB-252), and the logs before the install are never read (a project keeps about 100 MB of them). */
+function rotatedSince(root: string, since: number): string[] {
+  const texts: string[] = [];
+  for (const file of rotatedHookLogs(root).reverse()) {
+    const text = readOrEmpty(file);
+    texts.unshift(text);
+    if (Date.parse(text.slice(0, text.indexOf('\t'))) < since) break;
+  }
+  return texts;
+}
+
 /** The live log, or with `{ rotated: true }` every line it ever held (doctor's crash report: a crash is not over because its line moved). */
-export function readHookLog(root: string, { rotated = false }: { rotated?: boolean } = {}): HookLogEntry[] {
-  const old = rotated ? rotatedHookLogs(root) : [];
-  const text = [...old, join(root, LOG)].map(readOrEmpty).join('\n');
+export function readHookLog(root: string, { rotated = false, since }: { rotated?: boolean; since?: number } = {}): HookLogEntry[] {
+  const old = rotated ? rotatedHookLogs(root).map(readOrEmpty) : since === undefined ? [] : rotatedSince(root, since);
+  const text = [...old, readOrEmpty(join(root, LOG))].join('\n');
   const entries: HookLogEntry[] = [];
   for (const line of text.split('\n')) {
     const c = line.split('\t');
