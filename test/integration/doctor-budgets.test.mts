@@ -71,3 +71,21 @@ test('only init, add and update fetch custom packs: doctor on a project whose lo
   assert.notEqual(update.status, 0);
   assert.match(update.stdout + update.stderr, /custom pack acme could not be fetched from \/nonexistent\/acme-packs\.git/);
 });
+
+// supernova2_monitor, 2026-11-27: four times in one day doctor's timing checks refused the next task (KWB-251, 252, 254, 258) on hook
+// calls a loaded machine had slowed, and once more on template-law at 22 ms against 20. A slow hook is worth knowing, never a reason
+// to stop the work: the order check takes doctor's timing as warnings; doctor on its own stays red on them (KWB-261).
+test('with timingWarns the hook budgets are warnings, said, and doctor is green on them; without, red (KWB-261)', async () => {
+  const { doctor } = await import('../../lib/doctor.mts');
+  const dir = fixture('base');
+  plant(dir, 'sleeper', 300, 6);
+  inTable(dir, 'sleeper', 'Bash');
+  const red: string[] = [];
+  assert.equal(await doctor(dir, (l) => red.push(String(l)), { strict: true }), 1);
+  assert.ok(red.some((l) => /PROBLEM: sleeper at Pre Bash/.test(l)), red.join('\n'));
+  const warned: string[] = [];
+  const status = await doctor(dir, (l) => warned.push(String(l)), { strict: true, timingWarns: true });
+  assert.ok(warned.some((l) => /TIMING: sleeper at Pre Bash/.test(l)), warned.join('\n'));
+  assert.ok(!warned.some((l) => /PROBLEM: sleeper/.test(l)), warned.join('\n'));
+  assert.equal(status, warned.some((l) => /PROBLEM:/.test(l)) ? 1 : 0);
+});

@@ -33,6 +33,8 @@ import { wallProblem } from './wall-budget.mts';
 
 export interface DoctorOptions {
   strict?: boolean;
+  /** The hook budgets and timings said as TIMING lines and not counted as problems (the order check; KWB-261). */
+  timingWarns?: boolean;
   fresh?: boolean;
   installing?: boolean;
   /** The environment the selftests and the detector run under; the process's own by default. */
@@ -136,7 +138,7 @@ function skillProblems(projectDir: string, managed: readonly string[]): string[]
 
 // installing: doctor run at the end of an install. What the project has yet to do (a rule's test, a parameter lock) is a note there: an install on
 // a project with code has not failed. The `doctor` command is red for it.
-export async function doctor(projectDir: string, log: Logger = console.log, { strict = false, fresh = false, installing = false, env = process.env }: DoctorOptions = {}): Promise<number> {
+export async function doctor(projectDir: string, log: Logger = console.log, { strict = false, fresh = false, installing = false, timingWarns = false, env = process.env }: DoctorOptions = {}): Promise<number> {
   const began = Date.now();
   const claudeDir = join(projectDir, '.claude');
   const lock = readLock(claudeDir);
@@ -187,9 +189,14 @@ export async function doctor(projectDir: string, log: Logger = console.log, { st
   problems.push(...tokenProblems(projectDir, layout.siblings ?? []));
   problems.push(...shapeProblems(projectDir, packs)); // the shape law: a synth has design/shape.json, and its rows keep the contract
   problems.push(...onceOnlyDoctor(projectDir, log, env)); // making's cost per turn, the duplicate count (0.9.0)
-  problems.push(...budgetProblems(projectDir, log)); // each event and each hook at it held to the budget table; a full pool named, not a hook (W8.4)
+  // each event and each hook at it held to the budget table, a full pool named, not a hook (W8.4); each hook's median and worst from
+  // .claude/hooks.log, a median over 500 ms (KWB-24). With timingWarns (the order check) they are said, never a reason to stop the work:
+  // a machine another project loads slows every hook beside it (KWB-261, five refusals of the next task in one day)
+  const timing = budgetProblems(projectDir, log);
   daemonNotes(projectDir, env, log); // a daemon serving the hooks of an older lock is said, with both hashes (review-2-go 6.4)
-  problems.push(...timingProblems(projectDir, log)); // each hook's median and worst from .claude/hooks.log; a median over 500 ms is red (KWB-24)
+  timing.push(...timingProblems(projectDir, log));
+  if (timingWarns) timing.forEach((t) => log(`  TIMING: ${t}`));
+  else problems.push(...timing);
 
   const cov = await coverage(projectDir, sourceFilesOf(projectDir, packs), env); // the configuration says what is source (KWB-32)
   const ruleTests = ruleTestProblems(projectDir, layout, cov); // a rule's own test can be missing for a whole build (KF-31)

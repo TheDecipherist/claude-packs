@@ -115,13 +115,16 @@ export async function checkWorkorder(dir: string, name: string, { withDoctor = t
   const toolchain = block?.processors.length ? toolchainRefusals(block.processors, readText(join(dir, 'docs', 'workorders', name, 'toolchain.md')), name) : [];
   const refusals = [...placeholders(lines), ...doneWhens(lines), ...missingSkills(dir, lines), ...ghidraRefusals(wanted, env ?? process.env), ...toolchain,
     ...reproductionOrderRefusals(dir, text)]; // a reproduction's engine from its firmware, never its manual and guesses (the user: "ironclad")
+  const timingSaid: string[] = [];
   if (withDoctor) {
     const said: string[] = [];
-    if (await doctor(dir, (l) => said.push(String(l)), { strict: true, ...(env ? { env } : {}) }) !== 0) {
+    // a hook's timing is said, never a reason to stop the next task (KWB-261): the machine's load is not the order's fault
+    if (await doctor(dir, (l) => said.push(String(l)), { strict: true, timingWarns: true, ...(env ? { env } : {}) }) !== 0) {
       refusals.push(`doctor --strict is red: ${said.filter((l) => /PROBLEM/.test(l)).map((l) => l.trim()).join('; ') || said.at(-1)}`);
     }
+    timingSaid.push(...said.filter((l) => /TIMING:/.test(l)).map((l) => l.trim().replace(/^TIMING: /, 'hook timing (not refused): ')));
   }
-  const warnings = hasInstallBlock(text) ? [] : ['no install block (a ```claude-packs fence): the run cannot install from the order'];
+  const warnings = [...(hasInstallBlock(text) ? [] : ['no install block (a ```claude-packs fence): the run cannot install from the order']), ...timingSaid];
   return { refusals, warnings };
 }
 
