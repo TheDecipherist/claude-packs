@@ -165,6 +165,7 @@ export interface Layout {
   paramIds?: ParamIdSettings;
   guards?: LayoutGuards;
   skillInvocation?: 'user';   // every skill installed user-invocable only (lib/skill-render.mts)
+  modelSkills?: string[];     // with skillInvocation "user": the skills installed as shipped, the model may load them (KWB-253)
   [key: string]: unknown;
 }
 
