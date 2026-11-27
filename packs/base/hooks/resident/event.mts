@@ -36,6 +36,11 @@ export interface BusyState { busy: boolean; calmSince: number | null }
  *  closed the window while the 5-minute load was near 30, and the pool waits of the next five minutes were charged to the pool (KWB-next). */
 export const BUSY_CALM_MS = 5 * 60_000;
 
+/** The load past which the machine is busy for doctor: half the governor's slots. At 7 to 8 on 18 cores (slots 10) other projects'
+ *  runs slowed shape-law's finder from 37.3 to 48.8 ms on the same files and doctor charged it to the hooks (KWB-251). */
+export const BUSY_SHARE = 0.5;
+export const busyLine = (slots: number): number => slots * BUSY_SHARE;
+
 /** The next busy state: past the budget opens (or holds) the window and ends any calm; under it, an open window closes only once the
  *  calm has lasted BUSY_CALM_MS. */
 export function busyNext(prev: BusyState, load: number, slots: number, now: number): BusyState {
@@ -52,7 +57,7 @@ export function busyNext(prev: BusyState, load: number, slots: number, now: numb
 function busyMark(root: string, env: Env): string {
   const host = machineHost(env);
   const prev = BUSY.get(root) ?? { busy: false, calmSince: null };
-  const next = busyNext(prev, host.load(), budgetOf(host).slots, host.now());
+  const next = busyNext(prev, host.load(), busyLine(budgetOf(host).slots), host.now());
   BUSY.set(root, next);
   if (next.busy === prev.busy) return '';
   return hookLogLine({ event: 'Load', hook: next.busy ? BUSY_START : BUSY_END, ms: 0, code: 0, tool: 'machine' });
