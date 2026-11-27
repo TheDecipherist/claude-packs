@@ -87,6 +87,15 @@ test('WB-167: a value said of every instance ("every program 0") names none; the
   for (const [text, want] of rows) assert.equal(shapeWrite(dir, 'src/a.cpp', text), want, text);
 });
 
+// supernova2_monitor turn 225 (WB-262): a level measured on the user's program, "program 26.0 to 41.5 dB", was refused as naming a
+// program by number, by shape-law and brief-guard both; a figure with a decimal fraction or a unit after it is a measure (KWB-255)
+test('KWB-255: a measured figure after the noun (a decimal fraction, a unit) names no instance; the bare number still does', () => {
+  const dir = unit();
+  const rows: readonly (readonly [string, number])[] = [['// the program 26.0 to 41.5 dB apart\n', 0], ['// program 3 dB louder\n', 0],
+    ['// the program 12 ms later\n', 0], ['// program 3 is the loud one\n', 2], ['// program 3.\n', 2]];
+  for (const [text, want] of rows) assert.equal(shapeWrite(dir, 'src/a.cpp', text), want, text);
+});
+
 test('KF-17: a sentence in a string is text; a short key is not', () => {
   const dir = unit();
   assert.equal(shapeWrite(dir, 'tests/a.cpp', 'expect (done, "and on that bank\'s first program");\n'), 0);

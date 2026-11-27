@@ -57,6 +57,8 @@ function regsOf(c: ShapeConceptData): ConceptRegs {
   REGS.set(c, made);
   return made;
 }
+// a decimal fraction, or a unit of measure, right after the number: the number is a measure
+const MEASURE = /^(?:\.\d|\s*(?:dBFS|dB|kHz|Hz|ms|s|%|cents?|semitones?|mm|px)(?![A-Za-z]))/;
 const COMPARE_RIGHT = new RegExp(`(${EXPR})\\s*(?:===?|!==?)\\s*(\\d+)(?![\\w.])`, 'g');
 const COMPARE_LEFT = new RegExp(`(?<![\\w.])(\\d+)\\s*(?:===?|!==?)\\s*(${EXPR})`, 'g');
 
@@ -73,6 +75,8 @@ function byNumber(line: string, words: string, c: ShapeConceptData, add: Add): v
     // "rows 48" in prose: the plural with one number is a count (KWB-next); a caps label ("SLOTS 2") still names one (KWB-22)
     if (word !== word.toUpperCase() && c.plural.has(word.toLowerCase()) && !range) continue;
     if (COUNTED.test(words.slice((m.index ?? 0) + whole.length))) continue; // "3 printed pages": a count of something else
+    // "program 26.0 to 41.5 dB", "program 3 dB louder": a measured figure, not an instance (KWB-255, supernova2_monitor WB-262)
+    if (MEASURE.test(words.slice((m.index ?? 0) + whole.length))) continue;
     // "every program 0": a value every instance holds, said of all of them, names none (supernova2_monitor WB-167)
     if (QUANTIFIED.test(words.slice(0, m.index ?? 0))) continue;
     if (range && c.count !== null) {
