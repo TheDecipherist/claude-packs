@@ -3,8 +3,8 @@
 // again after a compaction (KWB-228's second part) cost +318 % rule tokens on a session of 7 compactions, and its law alone
 // (KWB-231) +285 %, for 3 laws missed of 142 refusals that their hooks refused anyway; both backed out (KWB-232, measured by
 // supernova2_monitor's tools/hook-ab.mjs, its docs/token-cost.md {#verdict-231}).
-import { closeSync, openSync, readSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { closeSync, openSync, readdirSync, readFileSync, readSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { parseJson } from './json.mts';
 import { RULES } from './usage-log.mts';
 
@@ -14,6 +14,27 @@ const heldBySession = new Map<string, Held>();
 
 const empty = (): Held => ({ rules: new Set(), offset: 0 });
 
+// A session outlives the live log: it rotates at 1 MB, and the daemon restarts on an update. Starting over, the session's rules are
+// read from the rotated logs too, newest first, back to the first one that holds none of its rows: the session began after it
+// (KWB-259: a session held all day was given every matching rule again after each rotation).
+function fromRotated(projectDir: string, session: string): Held {
+  const held = empty();
+  const dir = join(projectDir, dirname(RULES));
+  let files: string[] = [];
+  try { files = readdirSync(dir).filter((f) => /^rules-.*\.jsonl$/.test(f)).sort().reverse(); } catch { return held; }
+  for (const f of files) {
+    let found = false;
+    let text = '';
+    try { text = readFileSync(join(dir, f), 'utf8'); } catch { continue; }
+    for (const l of text.split('\n')) {
+      const e = parseJson<{ session?: string; rule?: string }>(l);
+      if (e?.session === session && e.rule) { held.rules.add(e.rule); found = true; }
+    }
+    if (!found) break;
+  }
+  return held;
+}
+
 /** The rules this session holds, whatever loaded them; `key` names project and session. */
 export function heldNow(projectDir: string, session: string | undefined, key: string): Held {
   if (!session) return empty();
@@ -21,7 +42,7 @@ export function heldNow(projectDir: string, session: string | undefined, key: st
   let size = 0;
   try { size = statSync(path).size; } catch { /* no log yet */ }
   let held = heldBySession.get(key);
-  if (!held || size < held.offset) held = empty();
+  if (!held || size < held.offset) held = fromRotated(projectDir, session);
   if (size > held.offset) {
     const buf = Buffer.alloc(size - held.offset);
     const fd = openSync(path, 'r');
