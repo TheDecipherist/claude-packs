@@ -60,7 +60,20 @@ test('hookTimes leaves out the calls made inside a build\'s or a busy machine\'s
   const dir = scratchDir('timing-busy-');
   const at = (s: number, hook: string, ms: number, tool = 'Write'): string =>
     `2026-01-01T00:00:${String(s).padStart(2, '0')}Z\tStop\t${hook}\t${ms}\t0\t${tool}`;
-  put(join(dir, '.claude/hooks.log'), [at(1, 'mc', 290), '2026-01-01T00:00:02Z\tLoad\tbusy-start\t0\t0\tmachine',
+  // the quiet call sits more than the load average's minute before the window, which reaches back that far (KWB-258)
+  put(join(dir, '.claude/hooks.log'), ['2025-12-31T23:58:00Z\tStop\tmc\t290\t0\tWrite', '2026-01-01T00:00:02Z\tLoad\tbusy-start\t0\t0\tmachine',
     at(3, 'mc', 611), at(4, 'mc', 578), '2026-01-01T00:00:05Z\tLoad\tbusy-end\t0\t0\tmachine', at(6, 'mc', 293)].join('\n'));
   assert.deepEqual(hookTimes(dir, 5), [{ hook: 'mc', calls: 2, median: 292, worst: 293 }]);
+});
+
+// supernova2_monitor, 2026-11-27: the busy mark reads the 1-minute load average, so it opens up to a minute after the load does;
+// look-gate's 444 ms call came 35 s before a busy-start and was judged as a quiet machine's, and doctor refused the next task. A
+// busy window reaches back by the load average's own window (KWB-258).
+test('a busy window reaches back by the load average\'s minute: a call 35 s before busy-start is inside it (KWB-258)', () => {
+  const dir = scratchDir('timing-lag-');
+  const at = (t: string, hook: string, ms: number): string => `2026-01-01T00:${t}Z\tPostToolUse\t${hook}\t${ms}\t0\tBash`;
+  put(join(dir, '.claude/hooks.log'), [at('00:10', 'lg', 3), at('01:00', 'lg', 444), at('01:20', 'lg', 4),
+    '2026-01-01T00:01:35Z\tLoad\tbusy-start\t0\t0\tmachine', at('02:00', 'lg', 900),
+    '2026-01-01T00:03:00Z\tLoad\tbusy-end\t0\t0\tmachine', at('03:30', 'lg', 5)].join('\n'));
+  assert.deepEqual(hookTimes(dir, 9), [{ hook: 'lg', calls: 2, median: 4, worst: 5 }]);
 });

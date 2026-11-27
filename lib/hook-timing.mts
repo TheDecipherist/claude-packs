@@ -69,6 +69,8 @@ export function timingProblems(projectDir: string, log: Logger = console.log): s
 export const BUILD_WINDOW_MS = 60 * 60_000;
 /** The key of the machine's busy window (resident/event busyMark writes its lines with this tool). */
 const MACHINE = 'machine';
+/** The load average the busy mark reads is the 1-minute one (resident/event busyNext): its window, in ms. */
+export const LOAD_WINDOW_MS = 60_000;
 
 /** The entries made while no build of buildq ran (its build-start and build-end lines, keyed by the build's pid), and how many
  *  were left out: a build that holds the cores slows every hook beside it, which says nothing of the hook's own work. */
@@ -79,6 +81,11 @@ export function outsideBuilds(entries: readonly HookLogEntry[]): { kept: HookLog
   for (const e of entries) {
     const at = Date.parse(e.time);
     // a build's window, keyed by its pid, and a busy machine's (KWB-next: another project held the cores), keyed `machine`
+    // the machine's mark reads the 1-minute load average, which trails the load by up to its window: the calls in that minute
+    // before the mark ran on the loaded machine too (KWB-258: look-gate 444 ms, 35 s before a busy-start, judged as quiet)
+    if (e.hook === BUSY_START && e.tool === MACHINE) {
+      while (kept.length > 0 && at - Date.parse(kept[kept.length - 1]?.time ?? '') <= LOAD_WINDOW_MS) { kept.pop(); during += 1; }
+    }
     if (e.hook === BUILD_START || e.hook === BUSY_START) { open.set(e.tool, at); continue; }
     if (e.hook === BUILD_END || e.hook === BUSY_END) {
       // an end whose start the log rotated away (KWB-246): the calls before it, within a window's length, were inside it
