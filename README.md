@@ -428,7 +428,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 |---|---|---|---|---|---|
 | `admiral` | Driving a Claude Code session on another machine through AdmiralMCP: the channel set up and proved, one instruction per message, its events read as data, both sessions kept in step. | 0 | 0 | 0 | 1 |
 | `ai` | Code that calls a model: SHA-256 boundaries on untrusted input, explicit keys, model ids from config. | 2 | 4 | 0 | 0 |
-| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 74 | 12 | 4 | 11 |
+| `audio-core` | Any JUCE synth or effect: realtime safety, DSP quality, state, parameters, performance. | 75 | 12 | 5 | 12 |
 | `base` | Universal engineering every configuration gets: the git laws, the line limit, the folder and placement laws, the shape law (shape-law, brief-guard, making, making-check), once-only, lesson checks, secrets-guard and the untrusted-content boundary. | 36 | 9 | 39 | 19 |
 | `ci` | CI: every language in the repo is built and tested, actions and tools are pinned, and permissions are stated. | 2 | 2 | 0 | 0 |
 | `content-site` | Sites that publish: blogs, docs and marketing pages. | 4 | 3 | 0 | 1 |
@@ -443,7 +443,7 @@ Anything used more than once is one template, and it is tested once. `test-the-t
 | `host-agent` | Software that runs as root on machines it does not own: updates are verified, secrets stay off the command line, system files are replaced atomically, and generated config is escaped. | 1 | 7 | 0 | 0 |
 | `html-ui` | Server-rendered HTML (template strings, views): every value escaped, no inline style or script, safe links. | 2 | 5 | 0 | 0 |
 | `http-api` | Any HTTP server, in any framework: every route ties a record to its caller, guards fail closed, input is validated, secrets are compared and stored safely, and what a route returns gives nothing away. | 9 | 31 | 0 | 2 |
-| `instrument-shell` | Instruments: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit. | 14 | 1 | 0 | 3 |
+| `instrument-shell` | Instruments: quiet states explain themselves, sessions stay loadable, a collapsed panel keeps every route, and what is painted is what is hit. | 14 | 1 | 0 | 4 |
 | `js-ts` | JavaScript and TypeScript: strict types, no any, errors never swallowed, every promise handled, process lifecycle, schemas as the one source of truth, JSON only through one helper. | 28 | 36 | 0 | 0 |
 | `midi` | MIDI that is right on the wire and in the audio: clock is a pulse stream, sync is a mode, and a program can be several sysex records that round-trip byte for byte. | 7 | 9 | 0 | 5 |
 | `mongo` | MongoDB with the native driver: one client, one gateway, aggregation reads, bulkWrite writes, safe deletes. | 6 | 18 | 0 | 0 |

@@ -29,10 +29,11 @@ import type { WorktreeCase } from './lib/selftest.mts';
 import type { Hook, HookContext, HookEvent, Look } from './lib/types.d.mts';
 import { pass, refuse, say } from './lib/verdict.mts';
 
-const TRUNKS: readonly string[] = ['main', 'master'];
+export const TRUNKS: readonly string[] = ['main', 'master'];
 // The build commands themselves: the queue (buildq) runs test runs too, and a test run changes no look (KWB-247)
 const BUILD = /\b(?:cmake\s+--build|ninja|make|npm\s+run\s+build|cargo\s+build|vite\s+build)\b/;
-const MERGE = /(?:^|[;&|\n]\s*)git\s+(?:-C\s+(\S+)\s+)?merge\s+((?:-\S+\s+)*)([\w./-]+)\s*(?=$|[;&|\n])/g;
+/** A landing: `git merge <branch>`, its -C folder in group 1 and its branch in group 3 (cpu-gate reads it too). */
+export const MERGE = /(?:^|[;&|\n]\s*)git\s+(?:-C\s+(\S+)\s+)?merge\s+((?:-\S+\s+)*)([\w./-]+)\s*(?=$|[;&|\n])/g;
 
 /** A look with its report path settled. */
 export type DeclaredLook = Look & { report: string };

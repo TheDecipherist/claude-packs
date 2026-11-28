@@ -3,7 +3,7 @@ name: synth-cost
 description: Use when asking whether a synth design is too heavy, how many voices a machine can run, what an oscillator, filter, unison or effect costs, or whether effects should be per oscillator or global.
 ---
 
-# What a synth design costs, before it is built
+# What a synth design costs, before it is built (one job: a running total of units against the budget, on one core)
 
 One job: keep a running total of a design's CPU cost in units, against the budget, and say plainly when it will not run on most machines. The table of units, the voice counts and the thresholds are in `cost-ledger.md` beside this file: read it before the first figure.
 
@@ -21,6 +21,7 @@ Always do:
 7. Ask the voice count together with the per-voice cost, never alone; a physical model is played at 16 to 32 voices.
 8. Put the ledger in the order (its position paragraph) as an estimate, and make W0 measure the real unit: one INIT voice, worst block, at 44.1 kHz and 128 samples, then at 48 kHz. The measurement replaces the estimate, the ledger is re-scaled, and the CPU gate holds the measured figure for the rest of the build.
 9. In a build, measure a repeated part's cost once on its template and multiply (`prove-instances-identical`), never once per instance.
+10. Count units on one core, which is what a plugin gets unless it starts threads of its own. A part translated from a machine's own DSP program (an instruction-exact port) has no row: it costs what the chip's program does, often 10 to 100 units a chip, so measure one chip at W0 before any total is quoted, and plan the worker pool when the chips times their cost passes the budget.
 
 Never do:
 - Refuse a big design. The person may want it; the number goes next to it.
@@ -33,5 +34,5 @@ Never do:
 
 - **The position:** the ledger, estimated; the budget as a number; which machine is the reference.
 - **W0, Done when:** the unit measured at 44.1 kHz and 48 kHz; the ledger re-scaled; the heaviest planned patch x the voice count within the budget, or the decision that it is not, and why.
-- **Each engine step, Done when:** its measured cost added to the ledger; the total never past the budget without a decision.
+- **Each engine step, Done when:** its measured cost added to the ledger, and the CPU report written again for `cpu-gate`; the total never past the budget on the threads it has. Over it on one thread, the next step is the worker pool (`spread-voices-over-cores`).
 - **The presets step:** the heaviest preset measured at full polyphony; the report quotes that figure.

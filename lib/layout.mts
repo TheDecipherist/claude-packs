@@ -15,6 +15,7 @@
 //   "ruleTests": { "rule-name": "path/to/its/test" | "none: <reason>" }   what answers a rule's named test when no test names the rule (KF-31)
 //   "followFolders": true   base's language concepts cover every code folder of the layout. A first install writes it; an older project chooses it
 //   "looks":    [{ name, reference, code, report }]   the pages drawn from a reference picture, for look-gate (KWB-92)
+//   "cpu":      { code, report, budget }   the audio code whose cost cpu-gate holds to the budget at a landing (KWB-264)
 //   "guards":    { "git", "copy", "time", "browser", "images" }   the project's values for the house guards
 //                (repo owner and token, the sanctioned copy tools, ...); each hook has its defaults
 // A seed layout (a profile, or one written from docs/project.md) is used when no layout exists yet.
@@ -30,8 +31,8 @@ import type { Configuration, Layout, LayoutKind } from '../packs/base/hooks/lib/
 import { readPack } from './packs.mts';
 
 export const OWNED: readonly string[] = ['files', 'protected', 'buildOutput', 'writeOnce', 'keepWorktrees', 'disable', 'enable', 'commands', 'siblings', 'maxFileLines', 'paramIds',
-  'guards', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart', 'settingsLayer', 'catalog', 'docsFolder', 'skillInvocation', 'modelSkills'];
-const OPTIONAL: readonly string[] = ['maxFileLines', 'paramIds', 'guards', 'buildOutput', 'writeOnce', 'keepWorktrees', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'chart',
+  'guards', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'cpu', 'chart', 'settingsLayer', 'catalog', 'docsFolder', 'skillInvocation', 'modelSkills'];
+const OPTIONAL: readonly string[] = ['maxFileLines', 'paramIds', 'guards', 'buildOutput', 'writeOnce', 'keepWorktrees', 'sourceFiles', 'gates', 'ruleTests', 'followFolders', 'looks', 'cpu', 'chart',
   'settingsLayer', 'catalog', 'docsFolder', 'skillInvocation', 'modelSkills'];   // KWB-144: written only when the project has it
 // "complete": true marks a tailored layout; see below.
 

@@ -6,6 +6,9 @@
   "fits": ["synth-creator"],
   "requires": [],
   "tests": {
+    "hooks/cpu-gate.mts": ["test/hooks/audio-core/cpu-gate.test.mts"],
+    "hooks/lib/cpu-gate-selftest.mts": ["test/hooks/audio-core/cpu-gate.test.mts"],
+    "hooks/lib/cpu-report.mts": ["test/hooks/audio-core/cpu-gate.test.mts"],
     "hooks/lib/realtime-checks.mts": ["test/hooks/audio-core/realtime-guard.test.mts"],
     "hooks/lib/settings-standard.mts": ["test/hooks/audio-core/settings-layer.test.mts"],
     "hooks/lib/smoothing-checks.mts": ["test/hooks/audio-core/realtime-guard.test.mts"],
@@ -124,6 +127,13 @@
             "role": "judge",
             "order": 160,
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/cpu-gate.mjs\"",
+            "role": "judge",
+            "order": 170,
+            "timeout": 20
           }
         ]
       }

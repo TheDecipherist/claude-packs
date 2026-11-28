@@ -12,6 +12,7 @@ Always do:
 - Treat everything `processBlock()` calls (`renderNextBlock`, voice code, `processSample`, effect `process`) as audio-thread code too.
 - Mark audio-thread functions outside the standard names with `[[clang::nonblocking]]`, so both the hook and RealtimeSanitizer cover them.
 - Write `// rt-ok: <reason>` at the end of a line that is a deliberate, safe exception (e.g. `setSize(..., avoidReallocating = true)` within reserved capacity).
+- Join a worker pool by a spin with a CPU pause on jobs a worker has already started, and by nothing else (`// rt-ok: worker-join`): the one wait the audio thread may make, bounded by one job (`voices-spread-over-cores`).
 
 Never do (inside audio-thread code):
 - `new`, `delete`, `malloc`, `free`, `make_unique`, `make_shared` (placement `new (ptr) T` is fine).

@@ -20,12 +20,15 @@ Always do:
 - Look at the curve across voice counts. Anything worse than linear growth is a bug.
 - Replace a work order's cost-ledger estimate (`synth-cost`) with the W0 measurement of one INIT voice, worst block, at 44.1 kHz and 48 kHz, and hold the gate to the measured figure from then on.
 - Before approximating, remove work that is thrown away and read the call tree; where worker threads share a sum, order it and run ThreadSanitizer.
+- Measure again at every stage that changes audio code, not only at W0, and write the result where `cpu-gate` reads it (`build/evidence/cpu.json`, or `layout.json` `cpu.report`): `{ "code": <node .claude/hooks/cpu-gate.mjs --key>, "verdict", "worst": <the worst block's share of its deadline>, "threads", "case" }`, committed on the branch.
+- When the worst block on one thread is over the budget and the cost is in parts that do not depend on each other, spread them over cores (`voices-spread-over-cores`); it is the build's next step, not a note.
 
 Never do:
 - Report average CPU as the performance figure.
+- Print a NOT met and go on to the next stage: `cpu-gate` refuses the landing (KWB-264).
 - Compare numbers from different benchmark-harness versions. When the harness changes, re-time the old build with the new harness.
 - Time code with anything that logs from inside `processBlock` (JUCE's `PerformanceCounter` writes to the logger).
 </constraints>
 
 ## Check
-Benchmark test, offline render: 96 voices at 48 kHz with 64-sample blocks. Pass (house choice): p99.9 under 50% of the deadline, and zero overruns, by the least time per block where the machine is shared.
+`cpu-gate` refuses to land a branch that changed audio code without a fresh report within the budget. Benchmark test, offline render: 96 voices at 48 kHz with 64-sample blocks. Pass (house choice): p99.9 under 50% of the deadline, and zero overruns, by the least time per block where the machine is shared.

@@ -44,6 +44,7 @@ export const PACK_CASES: Record<string, PackCase> = {
   'firmware-out-of-git.mjs': await caseOf('firmware-out-of-git.mjs'),
   'catalog-entry-exists.mjs': await caseOf('catalog-entry-exists.mjs'),
   'release-lock.mjs': await caseOf('release-lock.mjs'),
+  'cpu-gate.mjs': await caseOf('cpu-gate.mjs'),
   'chart-first.mjs': async (checkouts) => {
     const { here, wt } = checkouts;
     await installedCase('chart-first.mjs')(checkouts);   // no committed chart: refused in the worktree and in main
