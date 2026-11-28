@@ -37,6 +37,12 @@ test('a type named for a concept, a listed value type, a table, a literal size o
   assert.deepEqual(findUnknownTypes('struct Cell {\n  int index = 0;\n};\n', 'a.cpp', shape), []);
   assert.deepEqual(findUnknownTypes('struct Voice { int gain; };\nVoice table[kRows] = { {1} };\n', 'a.cpp', shape), []);
   assert.deepEqual(findUnknownTypes('struct Voice { int gain; };\nVoice voices[4];\n', 'a.cpp', shape), []);
+  // KWB-265: a fixed-capacity queue of records is a capacity, not instances: its count is named k...Max / ...Capacity / ...Depth, or the
+  // array is a queue, ring, fifo or pending list. A count named for what it counts (kMaxVoices) is still instances.
+  assert.deepEqual(findUnknownTypes('struct Pending { int word; };\nstd::array<Pending, kPendingMax> pending {};\n', 'a.cpp', shape), []);
+  assert.deepEqual(findUnknownTypes('struct Job { int at; };\nJob jobs[kQueueCapacity];\n', 'a.cpp', shape), []);
+  assert.deepEqual(findUnknownTypes('struct Job { int at; };\nstd::array<Job, kJobs> ring {};\n', 'a.cpp', shape), []);
+  assert.equal(findUnknownTypes('struct Voice { int gain; };\nstd::array<Voice, kMaxVoices> voices {};\n', 'a.cpp', shape).length, 1);
   assert.deepEqual(findUnknownTypes('const s = "struct Voice {\\n int index = 0;\\n};";\n', 'a.js', shape), []);
   assert.deepEqual(findUnknownTypes('struct Voice {\n  int index = 0;\n};\n', 'a.txt', shape), []);
   assert.deepEqual(findUnknownTypes('struct Voice {\n  int index = 0;\n};\n', 'a.cpp', null), []);

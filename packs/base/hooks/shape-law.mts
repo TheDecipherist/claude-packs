@@ -194,6 +194,8 @@ export function selftest(): number {
     ['an edit adding a second copy of a literal already there (KWB-23)', edit('// PLACE', 'void h() { if (slot == 2) g(); }'), 2],
     ['allowed: a literal already there, untouched', edit('// PLACE', '// nothing'), 0],
     ['allowed: the type of a camelCase concept, made a count of times (KWB-93)', w('src/world/Bank.h', 'struct PadBank { int bankIndex; };\nstd::array<PadBank, kBanks> banks {};\n'), 0],
+    ['allowed: a fixed-capacity queue of records, its count named k...Max (KWB-265)', w('src/audio/Queue.h', 'struct Pending { int word; };\nstd::array<Pending, kPendingMax> pending {};\n'), 0],
+    ['an array of records counted by what it counts is still instances (KWB-265)', w('src/audio/Pool.h', 'struct Item { int gain; };\nstd::array<Item, kMaxItems> items {};\n'), 2],
     ['a selector of a camelCase concept not listed (KWB-93)', w('src/world/Pick.cpp', 'int pickPadBank(int pad) {\n  return pad % 4;\n}\n'), 2],
     ['allowed: a type inside a string is a fixture, not a type (KWB-94)', w('src/ui/fixtures.mjs', "export const RAIL = 'struct Rail { int index; float gain; };';\n"), 0],
     // KWB-127: a page for a person outside the project, about the real machine's own named controls

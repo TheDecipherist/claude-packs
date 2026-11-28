@@ -108,6 +108,11 @@ const INDEX_MEMBER: readonly RegExp[] = [
 // The type is made N times, N a named count: an array of it (std::array, T name[N], a vector of N, Array.from, a list comprehension). An
 // array whose name or count holds a known concept word is that concept's (Box slot[4] is per slot, known); a table with a
 // filled-in initializer is data, not instances.
+// KWB-265: a count named for a limit (kPendingMax, kQueueCapacity, kRingDepth), or an array that is a queue, a ring, a fifo or a pending
+// list, holds records up to a capacity: no concept's instances. A count named for what it counts (kMaxVoices) stays instances.
+const CAPACITY_COUNT = /(?:Max|Capacity|Cap|Depth)$/;
+const CAPACITY_ARRAY = /(?:queue|ring|fifo|pending|backlog)/i;
+
 function madeN(text: string, name: string, shape: LoadedShape): boolean {
   const N = '([A-Za-z_]\\w*|\\d+)';
   const res = [
@@ -122,6 +127,7 @@ function madeN(text: string, name: string, shape: LoadedShape): boolean {
       const [count, arr, init] = at === 0 ? [m[1], m[2], m[3]] : [m[2], m[1], m[3]];
       if (count === undefined || /^\d+$/.test(count)) continue; // a literal size is a capacity or a fixed table; instances are counted by a named count
       if (init && /\{\s*[^}\s]/.test(init)) continue; // a table of values
+      if (CAPACITY_COUNT.test(count) || CAPACITY_ARRAY.test(arr ?? '')) continue; // a fixed-capacity queue of records, not instances (KWB-265)
       if (conceptOfName(arr ?? '', shape) || conceptOfName(count, shape)) continue;
       return true;
     }
